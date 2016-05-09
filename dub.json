@@ -3,7 +3,9 @@
     "description": "A web framework based on Collie .",
     "authors": ["putao.com Dlang team."],
     "license": "BSD" ,
+    "stringImportPaths": [ "./resources/views"],
 	"dependencies": {
 		"collie": "~>0.2.0"
 	}
+
 }
