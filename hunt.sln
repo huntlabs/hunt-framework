@@ -1,21 +1,21 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{7EF39841-FDCC-4472-AFD8-BAB0584E6C2D}") = "hunt", "hunt.visualdproj", "{AA3A7264-3B3C-492A-BAAC-D7B8AC55BB92}"
+Project("{19BFB7B0-B415-42A7-8359-110915F4F52A}") = "hunt", "hunt.visualdproj", "{70ABED4B-B57D-4CF0-A907-A4AD85F82795}"
 	ProjectSection(ProjectDependencies) = postProject
-		{A5143E9D-C40F-487B-8CF0-86D90411E59A} = {A5143E9D-C40F-487B-8CF0-86D90411E59A}
+		{022E055A-FEA8-43CA-B80D-1453884F809E} = {022E055A-FEA8-43CA-B80D-1453884F809E}
 	EndProjectSection
 EndProject
-Project("{7EF39841-FDCC-4472-AFD8-BAB0584E6C2D}") = "collie", "collie.visualdproj", "{A5143E9D-C40F-487B-8CF0-86D90411E59A}"
+Project("{19BFB7B0-B415-42A7-8359-110915F4F52A}") = "collie", "collie.visualdproj", "{022E055A-FEA8-43CA-B80D-1453884F809E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		debug|Win32 = debug|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A5143E9D-C40F-487B-8CF0-86D90411E59A}.debug|Win32.ActiveCfg = debug|Win32
-		{A5143E9D-C40F-487B-8CF0-86D90411E59A}.debug|Win32.Build.0 = debug|Win32
-		{AA3A7264-3B3C-492A-BAAC-D7B8AC55BB92}.debug|Win32.ActiveCfg = debug|Win32
-		{AA3A7264-3B3C-492A-BAAC-D7B8AC55BB92}.debug|Win32.Build.0 = debug|Win32
+		{022E055A-FEA8-43CA-B80D-1453884F809E}.debug|Win32.ActiveCfg = debug|Win32
+		{022E055A-FEA8-43CA-B80D-1453884F809E}.debug|Win32.Build.0 = debug|Win32
+		{70ABED4B-B57D-4CF0-A907-A4AD85F82795}.debug|Win32.ActiveCfg = debug|Win32
+		{70ABED4B-B57D-4CF0-A907-A4AD85F82795}.debug|Win32.Build.0 = debug|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
