@@ -211,7 +211,7 @@ public:
         private import vibe.stream.wrapper : StreamOutputRange;
 
 		void render(vibe.core.stream.OutputStream os, TempleContext tc = null) {
-            static assert(isOutputRange!(vibe.stream.wrapper.StreamOutputRange, string));
+            static assert(isOutputRange!(vibe.core.stream.OutputStream, string));
 
             auto sor = StreamOutputRange(os);
             this.render(sor, tc);
