@@ -76,10 +76,10 @@ string toString(in Delim d)
 	{
 		case OpenShort:     return "%";
 		case OpenShortStr:  return "%=";
-		case Open:          return "<%";
-		case OpenStr:       return "<%=";
+		case Open:          return "{%";
+		case OpenStr:       return "{%=";
 		case CloseShort:    return "\n";
-		case Close:         return "%>";
+		case Close:         return "%}";
 	}
 }
 

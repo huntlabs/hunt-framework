@@ -19,14 +19,14 @@
 
 module hunt.view;
 
-private import
+public import
 	hunt.view.util,
 	hunt.view.delims,
 	hunt.view.func_string_gen;
-private import std.array : appender, Appender;
-private import std.range : isOutputRange;
-private import std.typecons : scoped;
-
+public import std.array : appender, Appender;
+public import std.range : isOutputRange;
+public import std.typecons : scoped;
+public import std.stdio;
 public {
     import hunt.view.temple_context : TempleContext;
 	import hunt.view.output_stream  : TempleOutputStream, TempleInputStream;
@@ -46,7 +46,7 @@ auto Temple(ARGS...)() {
     return .compile_temple!(ARGS)();
 }
 
-private
+public
 CompiledTemple compile_temple(
 	string __TempleString,
 	string __TempleName,
@@ -72,9 +72,8 @@ CompiledTemple compile_temple(
 
 	//pragma(msg, __TempleFuncStr);
 
-	#line 1 "TempleFunc"
 	mixin(__TempleFuncStr);
-	#line 75 "src/temple/temple.d"
+	//pragma(msg, "TempleFunc ", __TempleFuncStr, "...");
 
 	static if(__TempleHasFP) {
 		alias temple_func = TempleFunc!__Filter;
@@ -164,6 +163,7 @@ public:
     void render(void function(string) sink, TempleContext tc = null) const {
     	auto oc = TempleOutputStream(sink);
     	this.render(oc, tc); }
+    import std.stdio;
     void render(ref std.stdio.File f, TempleContext tc = null) const {
         auto oc = TempleOutputStream(f);
         this.render(oc, tc);
