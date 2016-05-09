@@ -1,12 +1,12 @@
 <DProject>
-  <ProjectGuid>{AA3A7264-3B3C-492A-BAAC-D7B8AC55BB92}</ProjectGuid>
+  <ProjectGuid>{70ABED4B-B57D-4CF0-A907-A4AD85F82795}</ProjectGuid>
   <Config name="debug" platform="Win32">
     <symdebug>1</symdebug>
     <optimize>0</optimize>
     <useInline>0</useInline>
     <release>0</release>
     <lib>0</lib>
-    <exefile>d:\workspace\dlang\hunt\hunt.exe</exefile>
+    <exefile>d:\workspace\dlang\hunter-donglei\hunt.exe</exefile>
     <imppath>"source" "C:\Users\developer\AppData\Roaming\dub\packages\collie-0.2.0\source" "C:\Users\developer\AppData\Roaming\dub\packages\openssl-1.1.4_1.0.1g"</imppath>
     <fileImppath></fileImppath>
     <program>$(DMDInstallDir)windows\bin\dmd.exe</program>
@@ -52,7 +52,7 @@
     <ignoreUnsupportedPragmas>0</ignoreUnsupportedPragmas>
     <compiler>0</compiler>
     <otherDMD>0</otherDMD>
-    <outdir>d:\workspace\dlang\hunt\</outdir>
+    <outdir>d:\workspace\dlang\hunter-donglei\</outdir>
     <objdir>.dub/obj/debug/hunt</objdir>
     <objname />
     <libname />
@@ -95,6 +95,16 @@
   <Folder name="hunt">
     <Folder name="hunt">
     <Folder name="source">
+    <Folder name="hunt">
+    <Folder name="http">
+      <File path="source\hunt\http\cookie.d" />
+      <File path="source\hunt\http\request.d" />
+      <File path="source\hunt\http\response.d" />
+      <File path="source\hunt\http\session.d" />
+      <File path="source\hunt\http\webfrom.d" />
+    </Folder>
+      <File path="source\hunt\webapplication.d" />
+    </Folder>
       <File path="source\app.d" />
     </Folder>
       <File tool="None" path="dub.json" />
