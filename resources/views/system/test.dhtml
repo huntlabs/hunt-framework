@@ -1,0 +1,6 @@
+sdjfksajdkfjdsflk
+sdflksjadkfjlkd
+
+
+
+{%= display!("system/hello.dhtml",["name":"testdddd","sex":"man"]) %}
