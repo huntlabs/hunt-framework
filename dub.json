@@ -1,6 +1,6 @@
 {
     "name": "hunt",
-    "description": "A minimal D application.",
+    "description": "A web framework based on Collie .",
     "authors": ["putao.com Dlang team."],
     "license": "BSD" ,
 	"dependencies": {
