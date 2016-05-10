@@ -1,0 +1,9 @@
+{
+    "name": "hunt",
+    "description": "A minimal D application.",
+    "authors": ["putao.com Dlang team."],
+    "license": "BSD" ,
+	"dependencies": {
+		"collie": "~>0.2.0"
+	}
+}
