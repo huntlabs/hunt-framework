@@ -111,9 +111,7 @@ public:
 
 	TempleInputStream yield() @property
 	{
-		auto noop = TempleInputStream(delegate(ref TempleOutputStream) {
-			//debug debug_writeln("yielded input stream called (was a noop)");
-		});
+		auto noop = TempleInputStream(delegate(ref TempleOutputStream) {});
 
 		if(partial !is null)
 		{

@@ -96,6 +96,25 @@ CompiledTemple compile_temple_file(string template_file, Filter = void)()
 	return compile_temple!(import(template_file), template_file, Filter);
 }
 
+string display(string template_file)()
+{
+	auto temple = compile_temple!(import(template_file), template_file);
+    auto context = new TempleContext();
+    context.name = "owner";
+    return temple.toString(context);
+}
+
+string display(string template_file,string[string] params)()
+{
+	auto temple = compile_temple!(import(template_file), template_file);
+    auto context = new TempleContext();
+    foreach(key,value;params){
+        context.opIndexAssign(key,value);
+    }
+    //context.name = "owner";
+    return temple.toString(context);
+}
+
 deprecated("Please use compile_temple_file")
 auto TempleFile(ARGS...)() {
     return .compile_temple_file!(ARGS)();
@@ -148,21 +167,23 @@ public:
     }
 
     // render using an arbitrary output range
-    void render(T)(ref T os, TempleContext tc = null) const
-    if(	isOutputRange!(T, string) &&
-    	!is(T == TempleOutputStream))
-    {
-    	auto oc = TempleOutputStream(os);
-    	return render(oc, tc);
+    void render(T)(ref T os, TempleContext tc = null) const {
+        if(	isOutputRange!(T, string) && !is(T == TempleOutputStream))
+        {
+            auto oc = TempleOutputStream(os);
+            return render(oc, tc);
+        }
     }
 
     // render using a sink function (DMD can't seem to cast a function to a delegate)
     void render(void delegate(string) sink, TempleContext tc = null) const {
     	auto oc = TempleOutputStream(sink);
-    	this.render(oc, tc); }
+    	this.render(oc, tc); 
+    }
     void render(void function(string) sink, TempleContext tc = null) const {
     	auto oc = TempleOutputStream(sink);
-    	this.render(oc, tc); }
+    	this.render(oc, tc); 
+    }
     import std.stdio;
     void render(ref std.stdio.File f, TempleContext tc = null) const {
         auto oc = TempleOutputStream(f);
@@ -202,19 +223,6 @@ public:
         // else, call this render function directly
         else {
             this.render_func(tc);
-        }
-    }
-
-    // render using a vibe.d OutputStream
-    version(Have_vibe_d) {
-        private import vibe.core.stream : OutputStream;
-        private import vibe.stream.wrapper : StreamOutputRange;
-
-		void render(vibe.core.stream.OutputStream os, TempleContext tc = null) {
-            static assert(isOutputRange!(vibe.core.stream.OutputStream, string));
-
-            auto sor = StreamOutputRange(os);
-            this.render(sor, tc);
         }
     }
 
