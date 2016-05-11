@@ -42,6 +42,7 @@ final class PipelineImpl(REQ, RES)
     
     void append(Pipeline pipeline)
     {
+        if(pipeline is null) return;
         if(pipeline.empty()) return;
         Context frist = pipeline._first._next;
         while(frist !is null)
@@ -63,9 +64,18 @@ final class PipelineImpl(REQ, RES)
 	else
             return false;
     }
+    
+    @property _matchData(){return _matchData;}
+    
+    void addMatch(string key, string value)
+    {
+        _matchData[key] = value;
+    }
+    
 private:
     Context _first = null;
     Context _last = null;
+    string[string] _matchData;
 }
 
 
