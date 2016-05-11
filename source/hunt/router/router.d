@@ -6,7 +6,7 @@ import hunt.router.middleware;
 import hunt.router.utils;
 
 
-class Router(REQ, RES)
+final shared class Router(REQ, RES)
 {
     alias HandleDelegate = void delegate(REQ, RES);
     alias Pipeline = PipelineImpl!(REQ, RES);
@@ -18,7 +18,7 @@ class Router(REQ, RES)
     void setGlobalAfterPipelineFactory(PipelineFactory after){_gafter = after;}
     
     RouterElement addRouter(string method, string path, HandleDelegate handle, 
-                            PipelineFactory before = null, PipelineFactory after = null)
+                            shared PipelineFactory before = null, shared PipelineFactory after = null)
     {
         if(condigDone) return null;
         auto map = _map.get(method,null);
@@ -30,7 +30,7 @@ class Router(REQ, RES)
         map.add(path,handle,before,after);
     }
     
-    Pipeline match(string method,string path) 
+    Pipeline match(string method,string path)  
     {
         if(!condigDone) return null;
         auto map = _map.get(method,null);
@@ -38,13 +38,13 @@ class Router(REQ, RES)
         return map.match(path);
     }
     
-    Pipeline getGlobalBrforeMiddleware()
+    Pipeline getGlobalBrforeMiddleware()  
     {
         if(_gbefore) return _gbefore.newPipeline();
         else return null;
     }
     
-    Pipeline getGlobalAfterMiddleware()
+    Pipeline getGlobalAfterMiddleware()  
     {
         if(_gafter) return _gafter.newPipeline();
         else return null;
@@ -62,7 +62,7 @@ private:
 }
 
 
-class PathElement(REQ, RES)
+shared class PathElement(REQ, RES)
 {
     alias HandleDelegate = void delegate(REQ, RES);
     alias Pipeline = PipelineImpl!(REQ, RES);
@@ -83,19 +83,19 @@ class PathElement(REQ, RES)
     final Pipeline getBeforeMiddleware()  {if(_before) return _before.newPipeline(); else return null;}
     final Pipeline getAfterMiddleware()  {if(_after) return _after.newPipeline(); else return null;}
     
-    final void setBeforePipelineFactory(PipelineFactory before){_before = before;}
-    final void setAfterPipelineFactory(PipelineFactory after){_after = after;}
+    final void setBeforePipelineFactory(shared PipelineFactory before){_before = before;}
+    final void setAfterPipelineFactory(shared PipelineFactory after){_after = after;}
     
 private:
     string _path;
     HandleDelegate _handler = null;
-    PipelineFactory _before = null;
-    PipelineFactory _after = null;
+    shared PipelineFactory _before = null;
+    shared PipelineFactory _after = null;
 }
 
 private:
 
-class RegexElement(REQ, RES) : PathElement!(REQ,RES)
+final shared class RegexElement(REQ, RES) : PathElement!(REQ,RES)
 {
     this(string path)
     {
@@ -129,7 +129,7 @@ private:
 }
 
 
-final class RegexMap(REQ, RES) 
+final shared  class RegexMap(REQ, RES) 
 {
     alias RElement = RegexElement!(REQ, RES);
     alias PElement = PathElement!(REQ, RES);
