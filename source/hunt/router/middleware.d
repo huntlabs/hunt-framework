@@ -26,7 +26,7 @@ final class PipelineImpl(REQ, RES)
         _last = null;
     }
     
-    void  addHander(MiddleWare hander)
+    void  addHandler(MiddleWare hander)
     in{assert(hander);}
     body{
 	Context cxt = new Context(hander);

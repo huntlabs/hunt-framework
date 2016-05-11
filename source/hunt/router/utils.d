@@ -5,8 +5,9 @@ string buildRegex(string reglist)
 {}
 
 /// 判断URL中是否是正则表达式的 (是否有{字符)
-string isHaveRegex(string path)
-{}
+bool isHaveRegex(string path)
+{
+}
 
 
 /// 取出来地一个path： 例如： /file/ddd/f ; reurn = file,  lpath= /ddd/f;
