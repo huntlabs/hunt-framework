@@ -2,9 +2,9 @@ module hunt.router.router;
 
 
 
-class Router(REQUEST,RESPONSE)
+class Router(REQ, RES)
 {
-    alias HandleDelegate = void delegate(REQUEST,RESPONSE);
+    alias HandleDelegate = void delegate(REQ, RES);
     
     bool addRouter(string path,HandleDelegate handle)
 }
