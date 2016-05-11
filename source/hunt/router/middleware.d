@@ -1,14 +1,14 @@
 module hunt.router.middleware;
 
-class Request{};
-class Response{};
+class REQ{};
+class RES{};
 
-interface IMiddleWare
+interface IMiddleWare(REQ, RES)
 {
-    void handle(Context ctx, Request req, Response res);
+    void handle(Context ctx, REQ req, RES res);
 }
 
-final class Context()
+final class Context(REQ, RES)
 {
     this(Pipeline pipe, IMiddleWare middleWare){_pipe = pipe; _middleWare = middleWare;}
     private:
@@ -16,7 +16,7 @@ final class Context()
     Pipeline _pipe;
     public:
     Context _next = null;
-    void next(Request req, Response res)
+    void next(REQ req, RES res)
     {
 	if(_next)
 	    _next.handle(req,res);
@@ -24,7 +24,7 @@ final class Context()
 	    _pipe.onOver(req,res);
     }
     private:
-    void handle(Request req,  Response res)
+    void handle(REQ req,  RES res)
     {
 	_middleWare.handle(this,req,res);
     }
@@ -50,7 +50,7 @@ final class Pipeline
 	    _last = cxt;
 	}
     }
-    void onOver(Request req, Response res)
+    void onOver(REQ req, RES res)
     {
 	
     }
