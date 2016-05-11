@@ -1,7 +1,5 @@
 module hunt.router.middleware;
 
-class REQ{};
-class RES{};
 
 interface IMiddleWare(REQ, RES)
 {
