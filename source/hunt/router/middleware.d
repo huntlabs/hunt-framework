@@ -1,63 +1,125 @@
 module hunt.router.middleware;
 
+import std.functional;
 
 interface IMiddleWare(REQ, RES)
 {
+    alias Context = ContextImpl!(REQ, RES);
     void handle(Context ctx, REQ req, RES res);
 }
 
-final class Context(REQ, RES)
+final class PipelineImpl(REQ, RES)
 {
-    this(Pipeline pipe, IMiddleWare middleWare){_pipe = pipe; _middleWare = middleWare;}
-    private:
-    IMiddleWare _middleWare;
-    Pipeline _pipe;
-    public:
-    Context _next = null;
-    void next(REQ req, RES res)
-    {
-	if(_next)
-	    _next.handle(req,res);
-	else
-	    _pipe.onOver(req,res);
-    }
-    private:
-    void handle(REQ req,  RES res)
-    {
-	_middleWare.handle(this,req,res);
-    }
-}
-final class Pipeline
-{
+    alias MiddleWare = IMiddleWare!(REQ, RES);
+    alias Context = ContextImpl!(REQ, RES);
+    alias HandleDelegate = void delegate(REQ, RES);
+    alias Pipeline = PipelineImpl!(REQ, RES);
+    
     this()
     {
-	_first = new Context(this, null);
-	_last = _first;
+        _first = new Context();
+        _last = frist;
     }
-    void  addHander(IMiddleWare hander)
+    ~this()
     {
-	Context cxt = new Context(this, hander);
-	if(_first._next is null)
-	{
-	    _first._next = cxt;
-	    _last = cxt;
-	}
+        _first.destroy;
+        _last = null;
+    }
+    
+    void  addHander(MiddleWare hander)
+    in{assert(hander);}
+    body{
+	Context cxt = new Context(hander);
+        _last._next = cxt;
+    }
+    
+    void addHandler(HandleDelegate handler)
+    in{assert(hander);}
+    body{
+        Context cxt = new Context(new DelegateMiddleWare(handler));
+        _last._next = cxt;
+    }
+    
+    void append(Pipeline pipeline)
+    {
+        if(pipeline is null) return;
+        if(pipeline.empty()) return;
+        Context frist = pipeline._first._next;
+        while(frist !is null)
+        {
+            _last._next = frist;
+            frist = frist._next;
+        }
+    }
+    
+    void handleActive(REQ req, RES res)
+    {
+        _first.next(forward!(req,res));
+    }
+
+    @property bool empty()
+    {
+	if(_first == _last)
+	    return true;
 	else
-	{
-	    _last._next = cxt;
-	    _last = cxt;
-	}
+            return false;
     }
-    void onOver(REQ req, RES res)
+    
+    @property _matchData(){return _matchData;}
+    
+    void addMatch(string key, string value)
     {
-	
+        _matchData[key] = value;
     }
-    Context _first, _last;
-    int len=0;
-    bool isEmpty()
-    {
-	if(len)
-	    return false;
-	return true;
-    }
+    
+private:
+    Context _first = null;
+    Context _last = null;
+    string[string] _matchData;
 }
+
+
+final class ContextImpl(REQ, RES)
+{
+    alias MiddleWare = IMiddleWare!(REQ, RES);
+    alias Context = ContextImpl!(REQ, RES);
+
+    this(){}
+    this(MiddleWare handler){_middleWare = handler;}
+    ~this(){_next = null;_middleWare = null;}
+    
+    void next(REQ req, RES res)
+    {
+        if(_next)
+            _next.handle(forward!(req,res));
+    }
+private:
+    void handle(REQ req, RES res)
+    {
+        if(_middleWare)
+            _middleWare.handle(this,req,res);
+    }
+    
+    MiddleWare  _middleWare = null;
+    Context _next = null;
+}
+
+private:
+    final class DelegateMiddleWare(REQ,RES) :  IMiddleWare!(REQ,RES)
+    {
+        alias HandleDelegate = void delegate(REQ, RES);
+        
+        this(HandleDelegate handle)
+        {
+            _handler = handle;
+        }
+        
+        override void handle(Context ctx, REQ req, RES res)
+        {
+            _handler(req,res);
+            ctx.next(forward!(req,res));
+        }
+        
+    private:
+        HandleDelegate _handler;
+    }
