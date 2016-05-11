@@ -10,7 +10,7 @@ class Router(REQ, RES)
 {
     alias HandleDelegate = void delegate(REQ, RES);
     alias Pipeline = PipelineImpl!(REQ, RES);
-    alias PipelineFactory = Pipeline delegate();
+    alias PipelineFactory = IPipelineFactory!(REQ, RES);
     alias RouterElement = PathElement!(REQ, RES);
     alias RouterMap = ElementMap!(REQ, RES);
     
@@ -40,13 +40,13 @@ class Router(REQ, RES)
     
     Pipeline getGlobalBrforeMiddleware()
     {
-        if(_gbefore) return _gbefore();
+        if(_gbefore) return _gbefore.newPipeline();
         else return null;
     }
     
     Pipeline getGlobalAfterMiddleware()
     {
-        if(_gafter) return _gafter();
+        if(_gafter) return _gafter.newPipeline();
         else return null;
     }
     
@@ -80,8 +80,8 @@ class PathElement(REQ, RES)
     final @property handler() const {return _handler;}
     final @property handler(HandleDelegate handle){ _handler = handle ;}
     
-    final Pipeline getBeforeMiddleware()  {if(_before) return _before(); else return null;}
-    final Pipeline getAfterMiddleware()  {if(_after) return _after(); else return null;}
+    final Pipeline getBeforeMiddleware()  {if(_before) return _before.newPipeline(); else return null;}
+    final Pipeline getAfterMiddleware()  {if(_after) return _after.newPipeline(); else return null;}
     
     final void setBeforePipelineFactory(PipelineFactory before){_before = before;}
     final void setAfterPipelineFactory(PipelineFactory after){_after = after;}

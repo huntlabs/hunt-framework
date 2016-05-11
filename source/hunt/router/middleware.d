@@ -8,6 +8,12 @@ interface IMiddleWare(REQ, RES)
     void handle(Context ctx, REQ req, RES res);
 }
 
+interface IPipelineFactory(REQ, RES)
+{
+    alias Pipeline = PipelineImpl!(REQ, RES);
+    Pipeline newPipeline();
+}
+
 final class PipelineImpl(REQ, RES)
 {
     alias MiddleWare = IMiddleWare!(REQ, RES);
