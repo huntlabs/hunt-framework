@@ -29,7 +29,7 @@ class Router(REQ, RES)
         map.add(path,handle,before,after);
     }
     
-    Pipeline match(string method,string path)
+    Pipeline match(string method,string path) 
     {
         if(!condigDone) return null;
         auto map = _map.get(method,null);
@@ -69,18 +69,18 @@ class PathElement(REQ, RES)
 
     this(string path){_path = path;}
     
-    PathElement!(REQ, RES) macth(string path,Pipeline pipe)
+    PathElement!(REQ, RES) macth(string path,Pipeline pipe) 
     {
         return this;
     }
 
-    final @property path(){return _path;}
+    final @property path() const {return _path;} 
     
-    final @property handler(){return _handler;}
+    final @property handler() const {return _handler;}
     final @property handler(HandleDelegate handle){ _handler = handle ;}
     
-    final Pipeline getBeforeMiddleware(){if(_before) return _before(); else return null;}
-    final Pipeline getAfterMiddleware(){if(_after) return _after(); else return null;}
+    final Pipeline getBeforeMiddleware()  {if(_before) return _before(); else return null;}
+    final Pipeline getAfterMiddleware()  {if(_after) return _after(); else return null;}
     
     final void setBeforePipelineFactory(PipelineFactory before){_before = before;}
     final void setAfterPipelineFactory(PipelineFactory after){_after = after;}
@@ -101,7 +101,7 @@ class RegexElement(REQ, RES) : PathElement!(REQ,RES)
         super(path);
     }
     
-    override PathElement!(REQ, RES) macth(string path,Pipeline pipe)
+    override PathElement!(REQ, RES) macth(string path,Pipeline pipe) 
     {
         auto rg = regex(compiledRoute.regex, "s");
         auto mt = matchFirst(path, _reg);
@@ -125,7 +125,7 @@ private:
 }
 
 
-final class RegexMap(REQ, RES) //: PathElement!(REQ,RES)
+final class RegexMap(REQ, RES) 
 {
     alias RElement = RegexElement!(REQ, RES);
     alias PElement = PathElement(REQ, RES);
@@ -172,11 +172,13 @@ final class RegexMap(REQ, RES) //: PathElement!(REQ,RES)
         }
     }
     
-    PElement macth(string path,Pipeline pipe)
+    PElement macth(string path,Pipeline pipe) 
     {
+        if(path.length == 0) return null;
         string lpath;
         string frist = getFristPath(path,lpath);
-        RElementMap map = _map.get(str,null);
+        if(frist.length == 0) return null;
+        RElementMap map = _map.get(frist,null);
         if(map)
         {
             return map.macth(lpath,pipe);
