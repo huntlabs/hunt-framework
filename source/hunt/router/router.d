@@ -11,13 +11,14 @@ class Router(REQ, RES)
     alias HandleDelegate = void delegate(REQ, RES);
     alias Pipeline = PipelineImpl!(REQ, RES);
     alias PipelineFactory = Pipeline delegate();
-    alias RouterElement = PathElement(REQ, RES);
+    alias RouterElement = PathElement!(REQ, RES);
     alias RouterMap = ElementMap!(REQ, RES);
     
     void setGlobalBeforePipelineFactory(PipelineFactory before){_gbefore = before;}
     void setGlobalAfterPipelineFactory(PipelineFactory after){_gafter = after;}
     
-    RouterElement addRouter(string method,string path,HandleDelegate handle,PipelineFactory before = null; PipelineFactory after = null)
+    RouterElement addRouter(string method, string path, HandleDelegate handle, 
+                            PipelineFactory before = null, PipelineFactory after = null)
     {
         if(condigDone) return null;
         auto map = _map.get(method,null);
@@ -117,9 +118,12 @@ class RegexElement(REQ, RES) : PathElement!(REQ,RES)
     }
     
 private:
-    void setRegex(string regex)
+    bool setRegex(string regex)
     {
+        if(regex.length == 0) return false;
         _reg = buildRegex(regex);
+        if(_reg.length == 0) return false;
+        return true;
     }
     string _reg;
 }
@@ -128,7 +132,7 @@ private:
 final class RegexMap(REQ, RES) 
 {
     alias RElement = RegexElement!(REQ, RES);
-    alias PElement = PathElement(REQ, RES);
+    alias PElement = PathElement!(REQ, RES);
     alias RElementMap = RegexMap!(REQ, RES);
     alias Pipeline = PipelineImpl!(REQ, RES);
     
@@ -140,11 +144,17 @@ final class RegexMap(REQ, RES)
     PElement add(RElement ele, string preg)
     {
         string rege;
-        string str = getFristPath(ele.path, rege);
-        if(str.length == 0 || isHaveRegex(str))
+        string str = getFristPath(preg, rege);
+        if(str.length == 0)
         {
+            ele.destroy;
+            return null;
+        }
+        if(isHaveRegex(str))
+        {
+            if(!ele.setRegex(preg)) return null;
+            
             bool isHas = false;
-            ele.setRegex(preg);
             for(int i = 0; i < _list.length; ++i) //添加的时候去重
             {
                 if(_list[i].path == ele.path)
@@ -206,14 +216,13 @@ private:
 final class ElementMap(REQ, RES)
 {
     alias RElement = RegexElement!(REQ, RES);
-    alias PElement = PathElement(REQ, RES);
+    alias PElement = PathElement!(REQ, RES);
     alias RElementMap = RegexMap!(REQ, RES);
     alias Pipeline = PipelineImpl!(REQ, RES);
-    alias Route =  Router(REQ, RES);
+    alias Route =  Router!(REQ, RES);
     alias HandleDelegate = void delegate(REQ, RES);
     alias Pipeline = PipelineImpl!(REQ, RES);
     alias PipelineFactory = Pipeline delegate();
-    alias RouterElement = PathElement(REQ, RES);
     
     this(Route router)
     {
@@ -221,7 +230,7 @@ final class ElementMap(REQ, RES)
         _regexMap = new RElementMap("/");
     }
     
-    PElement add(string path,HandleDelegate handle,PipelineFactory before; PipelineFactory after)
+    PElement add(string path,HandleDelegate handle,PipelineFactory before,PipelineFactory after)
     {
         if(isHaveRegex(path))
         {
@@ -255,7 +264,7 @@ final class ElementMap(REQ, RES)
         if(element)
         {
             pipe.append(_router.getGlobalBrforeMiddleware());
-            pipe.append(element.getBeforeMiddleware())
+            pipe.append(element.getBeforeMiddleware());
             pipe.addHander(element.handler);
             pipe.append(element.getAfterMiddleware());
             pipe.append(_router.getGlobalAfterMiddleware());
