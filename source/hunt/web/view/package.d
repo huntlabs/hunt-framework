@@ -7,10 +7,7 @@
  *
  * Licensed under the BSD License.
  *
- */
-/*
- * template parsing is based on dymk/temple 
- * github: https://github.com/dymk/temple
+ * template parsing is based on dymk/temple source from https://github.com/dymk/temple
  */
 module hunt.web.view;
 
