@@ -1,6 +1,4 @@
-sdjfksajdkfjdsflk
-sdflksjadkfjlkd
-
-
-
-{{ display!("system/hello.dhtml",["name":"testdddd","sex":"man"]) }}
+hello world
+{{ var.name }}
+hello world
+{{ display }}
