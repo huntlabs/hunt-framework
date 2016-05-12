@@ -11,11 +11,15 @@ void main()
     auto tlate = compile_temple!"foo, bar,{%  auto fuck = 1;   %}{{  fuck   }} baz";
     writeln(tlate.toString()); // Prints "foo, bar, baz"
 
-/*
     auto dhtml = compile_temple_file!"system/hello.dhtml";
     auto res = new TempleContext();
     res.name = "viile";
     writeln(dhtml.toString(res));
+
+    writeln("\n-------------------------------------------------\n");
+    auto thtml = compile_temple_file!"system/test.dhtml";
+    writeln(thtml.toString());
+    writeln("\n-------------------------------------------------\n");
 
     display!"system/hello.dhtml";
 
@@ -34,18 +38,17 @@ void main()
     string filename = "system/hello.dhtml";
     auto basic = compile_temple!`
         {% auto t = compile_temple!"########";writeln(t.toString()); %}
-        ---  {%= yield %} ---
+        ---  {{ yield }} ---
     `;
-    auto parent = compile_temple!"before ---{%= yield %}--- after";
+    auto parent = compile_temple!"before ---{{ yield }}--- after";
     auto child  = compile_temple!`
-        {%= display!"system/hello.dhtml" %}
-        {%= display!("system/hello.dhtml",["name":"testdddd","sex":"man"]) %}
+        {{ display!"system/hello.dhtml" }}
+        {{ display!("system/hello.dhtml",["name":"testdddd","sex":"man"]) }}
     `;
 
     auto composed = parent.layout(&child);
     auto finout = basic.layout(&composed);
     finout.render(stdout);
-    */
 }
 
 void abc(T,F)(T va,F[string] vb)
