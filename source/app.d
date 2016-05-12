@@ -8,18 +8,10 @@ void main()
     writeln("Edit source/app.d to start your project.");
  
     //abasic();
-    auto tlate = compile_temple!"foo, bar, baz";
+    auto tlate = compile_temple!"foo, bar,{%  auto fuck = 1;   %}{{  fuck   }} baz";
     writeln(tlate.toString()); // Prints "foo, bar, baz"
 
-    auto test = compile_temple!`
-        Hello, {%=var.name %}
-        {% auto a = 3; %}
-        {%= a %}
-    `;
-    auto context = new TempleContext();
-    context.name = "owner";
-    writeln(test.toString(context));
-
+/*
     auto dhtml = compile_temple_file!"system/hello.dhtml";
     auto res = new TempleContext();
     res.name = "viile";
@@ -53,6 +45,7 @@ void main()
     auto composed = parent.layout(&child);
     auto finout = basic.layout(&composed);
     finout.render(stdout);
+    */
 }
 
 void abc(T,F)(T va,F[string] vb)
