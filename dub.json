@@ -5,6 +5,6 @@
     "license": "BSD" ,
 	"stringImportPaths":  [ "./resources/views"],
 	"dependencies": {
-		"collie": "~>0.2.0"
+		"collie":"~>0.3.0"
 	}
 }

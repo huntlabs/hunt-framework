@@ -8,7 +8,7 @@ interface IMiddleWare(REQ, RES)
     void handle(Context ctx, REQ req, RES res);
 }
 
-shared class IPipelineFactory(REQ, RES)
+abstract shared class IPipelineFactory(REQ, RES)
 {
     alias Pipeline = PipelineImpl!(REQ, RES);
     Pipeline newPipeline();
@@ -24,7 +24,7 @@ final class PipelineImpl(REQ, RES)
     this()
     {
         _first = new Context();
-        _last = frist;
+        _last = _first;
     }
 
     ~this()
@@ -42,17 +42,19 @@ final class PipelineImpl(REQ, RES)
     {
         Context cxt = new Context(hander);
         _last._next = cxt;
+        _last = cxt;
     }
 
     void addHandler(HandleDelegate handler)
     in
     {
-        assert(hander);
+        assert(handler);
     }
     body
     {
-        Context cxt = new Context(new DelegateMiddleWare(handler));
+        Context cxt = new Context(new DelegateMiddleWare!(REQ,RES)(handler));
         _last._next = cxt;
+        _last = cxt;
     }
 
     void append(Pipeline pipeline)
@@ -65,6 +67,7 @@ final class PipelineImpl(REQ, RES)
         while (frist !is null)
         {
             _last._next = frist;
+            _last = frist;
             frist = frist._next;
         }
     }
@@ -82,7 +85,7 @@ final class PipelineImpl(REQ, RES)
             return false;
     }
 
-    @property _matchData()
+    @property matchData()
     {
         return _matchData;
     }
@@ -97,6 +100,7 @@ private:
     Context _last = null;
     string[string] _matchData;
 }
+
 
 final class ContextImpl(REQ, RES)
 {
@@ -153,4 +157,77 @@ final class DelegateMiddleWare(REQ, RES) : IMiddleWare!(REQ, RES)
 
 private:
     HandleDelegate _handler;
+}
+
+
+unittest
+{
+    import std.functional;
+    import std.stdio;
+
+    class Test
+    {
+        int gtest  = 0;
+    }
+
+
+    class TestMiddleWare : IMiddleWare!(Test,int)
+    {
+        override void handle(Context ctx, Test a, int b)
+        {
+            a.gtest += 1;
+            writeln("IMiddleWare handle : a.gtest : ",a.gtest);
+            ctx.next(a,b);
+        }
+    }
+
+    void testFun(Test a, int b)
+    {
+        ++ a.gtest;
+    }
+
+    alias Pipeline = PipelineImpl!(Test,int);
+
+    Pipeline pip = new Pipeline();
+    pip.addHandler(new TestMiddleWare());
+    pip.addHandler(new TestMiddleWare());
+    pip.addHandler(new TestMiddleWare());
+    pip.addHandler(toDelegate(&testFun));
+    pip.addHandler(new TestMiddleWare());
+    pip.addHandler(new TestMiddleWare());
+
+    Test t = new Test();
+    pip.handleActive(t,0);
+
+    writeln("t.gtest is :", t.gtest);
+    assert(t.gtest == 6);
+
+    class TestMiddleWare2 : IMiddleWare!(Test,int)
+    {
+        override void handle(Context ctx, Test a, int b)
+        {
+            a.gtest -= 1;
+            writeln("IMiddleWare2 handle : a.gtest : ",a.gtest);
+            ctx.next(a,b);
+        }
+    }
+
+    void testFun2(Test a, int b)
+    {
+        a.gtest -= 1;
+    }
+
+    Pipeline pip2 = new Pipeline();
+    pip2.addHandler(new TestMiddleWare2());
+    pip2.addHandler(new TestMiddleWare2());
+    pip2.addHandler(new TestMiddleWare2());
+    pip2.addHandler(toDelegate(&testFun2));
+    pip2.addHandler(new TestMiddleWare2());
+    pip2.addHandler(new TestMiddleWare2());
+
+    pip.append(pip2);
+
+    pip.handleActive(t,0);
+
+    assert(t.gtest == 6);
 }
