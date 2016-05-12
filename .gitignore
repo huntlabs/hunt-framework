@@ -3,3 +3,13 @@ docs.json
 __dummy.html
 *.o
 *.obj
+.lumenconfig
+*.cmake
+CMakeLists.txt
+/hunt
+.directory
+*.kdev4
+dub.selections.json
+.idea
+/hunt.iml
+__test__library__
