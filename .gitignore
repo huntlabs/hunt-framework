@@ -12,3 +12,4 @@ CMakeLists.txt
 dub.selections.json
 .idea
 /hunt.iml
+__test__library__

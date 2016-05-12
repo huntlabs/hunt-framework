@@ -28,9 +28,9 @@ string buildRegex(string reglist)
     
     bool regexBuild(string str)
     {
-        regexd ~= r"\/";
         if(str.length == 0)
             return true;
+        regexd ~= r"\/";
         auto frist = indexOf(str,'{');
         auto last = lastIndexOf(str,"}");
         if(frist < 0 || last < 0) return false;
@@ -57,7 +57,7 @@ unittest
     writeln("\n\n the regex is  : ", reg);
     auto r = regex(reg);
     writeln("this regex is : ", !r.empty);
-    assert(r.empty == false);
+    assert(reg.length > 0);
     
     reglist = "/{abc:[0-9a-z]{1}}/{imagename:\\w+\\.\\w+}";
     reg  = buildRegex(reglist);
@@ -65,7 +65,7 @@ unittest
     writeln("\n\n the regex is  : ", reg);
     r = regex(reg);
     writeln("this regex is : ", !r.empty);
-    assert(r.empty == false);
+    assert(reg.length > 0);
     
      reglist = "/{[0-9a-z]{1}}/{imagename:\\w+\\.\\w+}";
     reg  = buildRegex(reglist);
@@ -73,7 +73,7 @@ unittest
     writeln("\n\n the regex is  : ", reg);
     r = regex(reg);
     writeln("this regex is : ", !r.empty);
-    assert(reg == "");
+    assert(reg.length == 0);
     
     reglist = "/serew{:[0-9a-z]{1}}/{imagename:\\w+\\.\\w+}444";
     reg  = buildRegex(reglist);
@@ -81,7 +81,7 @@ unittest
     writeln("\n\n the regex is  : ", reg);
     r = regex(reg);
     writeln("this regex is : ", !r.empty);
-    assert(r.empty == false);
+    assert(reg.length > 0);
 }
 
 
