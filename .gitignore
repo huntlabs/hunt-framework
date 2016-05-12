@@ -10,3 +10,5 @@ CMakeLists.txt
 .directory
 *.kdev4
 dub.selections.json
+.idea
+/hunt.iml
