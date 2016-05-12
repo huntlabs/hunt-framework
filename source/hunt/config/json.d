@@ -1,0 +1,1 @@
+module hunt.config.json;
