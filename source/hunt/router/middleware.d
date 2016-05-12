@@ -8,7 +8,7 @@ interface IMiddleWare(REQ, RES)
     void handle(Context ctx, REQ req, RES res);
 }
 
-shared class IPipelineFactory(REQ, RES)
+abstract shared class IPipelineFactory(REQ, RES)
 {
     alias Pipeline = PipelineImpl!(REQ, RES);
     Pipeline newPipeline();
@@ -100,6 +100,7 @@ private:
     Context _last = null;
     string[string] _matchData;
 }
+
 
 final class ContextImpl(REQ, RES)
 {

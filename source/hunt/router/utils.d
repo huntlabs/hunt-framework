@@ -28,9 +28,9 @@ string buildRegex(string reglist)
     
     bool regexBuild(string str)
     {
-        regexd ~= r"\/";
         if(str.length == 0)
             return true;
+        regexd ~= r"\/";
         auto frist = indexOf(str,'{');
         auto last = lastIndexOf(str,"}");
         if(frist < 0 || last < 0) return false;
