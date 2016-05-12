@@ -3,4 +3,4 @@ sdflksjadkfjlkd
 
 
 
-{%= display!("system/hello.dhtml",["name":"testdddd","sex":"man"]) %}
+{{ display!("system/hello.dhtml",["name":"testdddd","sex":"man"]) }}
