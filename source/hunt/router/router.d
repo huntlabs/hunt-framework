@@ -174,8 +174,9 @@ private:
         if (regex.length == 0)
             return false;
         _reg = buildRegex(regex);
-        if (_reg.length == 0)
-            return false;
+        if(_reg.length == 0) return false;
+        auto r = regex(_reg);
+        if(!r.empty) return false;
         return true;
     }
 
