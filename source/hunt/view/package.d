@@ -95,27 +95,20 @@ CompiledTemple compile_temple_file(string template_file, Filter = void)()
     return compile_temple!(import(template_file), template_file, Filter);
 }
 
-CompiledTemple display(string template_file)()
+
+CompiledTemple display(string template_file, Filter = void)()
 {
-    return compile_temple!(import(template_file), template_file);
+    auto temple =  compile_temple!(import(template_file), template_file, Filter);
+
+	//temple.render(stdout);
+	return temple;
 }
 
 /*
-string display(string template_file)()
+string display(string template_file,Object res)()
 {
-	auto temple = compile_temple!(import(template_file), template_file);
-    auto context = new TempleContext();
-    context.name = "owner";
-    return temple.toString();
-}
-string display(string template_file,string[string] params)()
-{
-	auto temple = compile_temple!(import(template_file), template_file);
-    auto context = new TempleContext();
-    foreach(key,value;params){
-        context.opIndexAssign(key,value);
-    }
-    return temple.toString(context);
+    auto temple =  compile_temple!(import(template_file), template_file, Filter);
+
 }
 */
 
@@ -257,7 +250,7 @@ public:
     }
     body
     {
-        writeln(this.render_func, '\n', partial);
+        writeln("\n into layout function : ",this.render_func, "-", partial);
         return CompiledTemple(this.render_func, partial);
     }
 
