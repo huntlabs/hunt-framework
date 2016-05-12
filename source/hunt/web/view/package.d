@@ -8,6 +8,10 @@
  * Licensed under the BSD License.
  *
  */
+/*
+ * template parsing is based on dymk/temple 
+ * github: https://github.com/dymk/temple
+ */
 module hunt.web.view;
 
 public import hunt.web.view.util, hunt.web.view.delims, hunt.web.view.func_string_gen;
