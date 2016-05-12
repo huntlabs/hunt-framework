@@ -4,8 +4,6 @@
     "authors": ["putao.com Dlang team."],
     "license": "BSD" ,
 	"dependencies": {
-		"collie":{
-                    "path":"../collie/"
-		}
+		"collie":"~>0.3.0"
 	}
 }
