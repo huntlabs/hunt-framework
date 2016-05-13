@@ -287,12 +287,14 @@ package string __temple_gen_temple_func_string(string temple_str,
                         }
                     }
                 }
+				/*
 				else if(oDelim.isIncludeStr())
 				{
 					push_linenumanno("compile_temple_file!" ~ inbetween_delims);
 					//TODO parsing includ template
                     //auto inTemple = import(inbetween_delims);
 				}
+				*/
                 else
                 {
                     // It's just raw code, push it into the function body
