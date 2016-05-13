@@ -1,2 +1,1 @@
-here is {% display!"new.dhtml";  %}
-thanks
+new.dhtml is --> {!new.dhtml!}

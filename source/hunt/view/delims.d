@@ -37,8 +37,8 @@ enum Delim
     CloseShort,
     Close,
     CloseStr,
-	OpenInclude,
-	CloseInclude
+	//OpenInclude,
+	//CloseInclude
 }
 
 enum Delims = [EnumMembers!Delim];
@@ -50,7 +50,7 @@ enum OpenDelim : Delim
     Open = Delim.Open,
     OpenShortStr = Delim.OpenShortStr,
     OpenStr = Delim.OpenStr,
-    OpenInclude = Delim.OpenInclude,
+//    OpenInclude = Delim.OpenInclude,
 }
 
 enum OpenDelims = [EnumMembers!OpenDelim];
@@ -61,7 +61,7 @@ enum CloseDelim : Delim
     CloseShort = Delim.CloseShort,
     Close = Delim.Close,
     CloseStr = Delim.CloseStr,
-    CloseInclude = Delim.CloseInclude,
+//    CloseInclude = Delim.CloseInclude,
 }
 
 enum CloseDelims = [EnumMembers!CloseDelim];
@@ -73,7 +73,7 @@ enum OpenToClose = [
 		OpenDelim.OpenShortStr : CloseDelim.CloseShort,
         OpenDelim.Open : CloseDelim.Close,
 		OpenDelim.OpenStr : CloseDelim.CloseStr,
-		OpenDelim.OpenInclude : CloseDelim.CloseInclude,
+	//	OpenDelim.OpenInclude : CloseDelim.CloseInclude,
     ];
 
 string toString(in Delim d)
@@ -94,10 +94,10 @@ string toString(in Delim d)
         return "%}";
     case CloseStr:
         return "}}";
-	case OpenInclude:
-		return "{!";
-	case CloseInclude:
-		return "!}";
+	//case OpenInclude:
+	//	return "{!";
+	//case CloseInclude:
+	//	return "!}";
     }
 }
 
@@ -134,7 +134,7 @@ bool isStr(in Delim d)
         return false;
     }
 }
-
+/*
 bool isIncludeStr(in Delim d)
 {
 	switch (d) with (Delim)
@@ -145,7 +145,7 @@ bool isIncludeStr(in Delim d)
 			return false;
 	}
 }
-
+*/
 unittest
 {
     static assert(Delim.OpenShort.isStr() == false);
