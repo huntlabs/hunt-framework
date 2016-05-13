@@ -1,7 +1,0 @@
-<html>
-<body>
-<p>Hello, from the 'a' template!</p>
-{{ var.name }}
-{{ render!"system/b.dhtml"() }}
-<body>
-</html>
