@@ -1,10 +1,20 @@
 {
     "name": "hunt",
     "description": "A web framework based on Collie .",
+<<<<<<< HEAD
     "authors": [ "putao.com Dlang team." ],
     "license": "BSD",
     "stringImportPaths": [ "./resources/views" ],
     "dependencies": {
         "collie": "~>0.3.0"
     }
+=======
+    "authors": ["putao.com Dlang team."],
+    "license": "BSD" ,
+	"stringImportPaths":  [ "./resources/views"],
+	"dependencies": {
+		"collie":"~>0.3.0"
+	}
+
+>>>>>>> fc83e2379933ac3ef3853c25e471de794b1fd584
 }
