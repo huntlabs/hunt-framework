@@ -19,7 +19,6 @@ class Request
 		return new WebForm(_req);
 	}
 
-	alias httpRequest  this;
 
 	@property httpRequest()
 	{
