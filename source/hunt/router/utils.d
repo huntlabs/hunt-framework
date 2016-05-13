@@ -1,8 +1,60 @@
 module hunt.router.utils;
 
-import std.stdio;
 import std.string;
 import std.regex;
+import std.traits;
+
+
+void controllerHelper(string FUN,T , REQ,RES)(string str,REQ req,RES res)
+                        if((is(T == class) || is(T == interface)) && hasMember!(T,FUN))
+{
+    import std.experimental.logger;
+    auto index = lastIndexOf(str,'.');
+    if(index < 0 || index == (str.length - 1)){
+        error("can not find function!, the str is  : ",str);
+        return;
+    }
+
+    string objName = str[0..index];
+    string funName = str[(index + 1)..$];
+
+    auto obj = Object.factory(objName);
+    if(!obj) {
+        error("Object.factory erro!, the obj Name is : ", objName);
+        return;
+    }
+    auto a = cast(T)obj;
+    if(!a){
+        error("cast(T)obj; erro!");
+        return;
+    }
+
+    mixin("a." ~ FUN ~ "(funName,req,res);");
+}
+
+version(unittest)
+{
+    import std.stdio;
+    interface A
+    {
+         void show(string str,int i, int b);
+    }
+
+    class AA : A
+    {
+        override void show(string str,int i, int b)
+        {
+            writeln("the function name is : ", str);
+            writeln("i = ", i, "  b = ",b);
+        }
+    }
+}
+
+unittest
+{
+     controllerHelper!("show",A,int , int)("hunt.router.utils.AA.show",1,4);
+     controllerHelper!("show",AA,int , int)("hunt.router.utils.AA.show",2,8);
+}
 
 /// 构造正则表达式，类似上个版本的，把配置里的单独的表达式，构建成一个
 string buildRegex(string reglist)
@@ -51,6 +103,7 @@ string buildRegex(string reglist)
 
 unittest
 {
+    import std.stdio;
     string reglist = "/{:[0-9a-z]{1}}/{d2:[0-9a-z]{2}}/{imagename:\\w+\\.\\w+}";
     string reg  = buildRegex(reglist);
     
