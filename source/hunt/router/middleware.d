@@ -139,6 +139,43 @@ private:
     Context _next = null;
 }
 
+
+final shared class AutoMiddleWarePipelineFactory(REQ, RES) : IPipelineFactory!(REQ, RES)
+{
+    import std.experimental.logger;
+    alias MiddleWare = IMiddleWare!(REQ,RES);
+    this(string[] middle)
+    {
+        this(cast(shared string[])middle);
+    }
+
+    this(shared string[] middle){ _middleList = middle;}
+
+    override Pipeline newPipeline()
+    {
+        if(_middleList.length == 0) return null;
+        Pipeline pipe = new Pipeline();
+        foreach(ref str; _middleList)
+        {
+            auto obj = Object.factory(str);
+            if(!obj) {
+                error("Object.factory erro!, the obj Name is : ", str);
+                continue;
+            }
+            auto a = cast(MiddleWare)obj;
+            if(!a){
+                error("cast(MiddleWare)obj; erro!");
+                continue;
+            }
+            pipe.addHandler(a);
+        }
+        return pipe;
+    }
+
+private:
+    string[] _middleList;
+}
+
 private:
 final class DelegateMiddleWare(REQ, RES) : IMiddleWare!(REQ, RES)
 {
@@ -160,11 +197,10 @@ private:
 }
 
 
-unittest
-{
-    import std.functional;
-    import std.stdio;
 
+version(unittest)
+{
+    import std.stdio;
     class Test
     {
         int gtest  = 0;
@@ -181,9 +217,31 @@ unittest
         }
     }
 
+    class TestMiddleWare2 : IMiddleWare!(Test,int)
+    {
+        override void handle(Context ctx, Test a, int b)
+        {
+            a.gtest -= 1;
+            writeln("IMiddleWare2 handle : a.gtest : ",a.gtest);
+            ctx.next(a,b);
+        }
+    }
+}
+
+unittest
+{
+    import std.functional;
+    import std.stdio;
+
     void testFun(Test a, int b)
     {
         ++ a.gtest;
+    }
+
+
+    void testFun2(Test a, int b)
+    {
+        a.gtest -= 1;
     }
 
     alias Pipeline = PipelineImpl!(Test,int);
@@ -202,21 +260,6 @@ unittest
     writeln("t.gtest is :", t.gtest);
     assert(t.gtest == 6);
 
-    class TestMiddleWare2 : IMiddleWare!(Test,int)
-    {
-        override void handle(Context ctx, Test a, int b)
-        {
-            a.gtest -= 1;
-            writeln("IMiddleWare2 handle : a.gtest : ",a.gtest);
-            ctx.next(a,b);
-        }
-    }
-
-    void testFun2(Test a, int b)
-    {
-        a.gtest -= 1;
-    }
-
     Pipeline pip2 = new Pipeline();
     pip2.addHandler(new TestMiddleWare2());
     pip2.addHandler(new TestMiddleWare2());
@@ -230,4 +273,16 @@ unittest
     pip.handleActive(t,0);
 
     assert(t.gtest == 6);
+
+
+    string[] list = ["hunt.router.middleware.TestMiddleWare",
+                    "hunt.router.middleware.TestMiddleWare",
+                    "hunt.router.middleware.TestMiddleWare",
+                    "hunt.router.middleware.TestMiddleWare"];
+    auto pipefactor = new shared AutoMiddleWarePipelineFactory!(Test,int)(list);
+    auto pipe3  = pipefactor.newPipeline();
+    t.gtest = 0;
+    pipe3.handleActive(t,0);
+    writeln("t.gtest is :", t.gtest);
+    assert(t.gtest == 4);
 }
