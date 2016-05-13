@@ -1,0 +1,2 @@
+<p>this is the 'b' template!</p>
+<p> {{ var.name }} </p>
