@@ -51,6 +51,8 @@ deprecated("Please use compile_temple") auto Temple(ARGS...)()
 
 public CompiledTemple compile_temple(string __TempleString, string __TempleName, __Filter = void)()
 {
+	writeln("__TempleString:",__TempleString);
+	writeln("__TempleName:",__TempleName);
     // __TempleString: The template string to compile
     // __TempleName: The template's file name, or 'InlineTemplate'
     // __Filter: FP for the rendered template
@@ -67,7 +69,7 @@ public CompiledTemple compile_temple(string __TempleString, string __TempleName,
     const __TempleFuncStr = __temple_gen_temple_func_string(__TempleString,
             __TempleName, __TempleFilterIdent);
 
-    //pragma(msg, __TempleFuncStr);
+    pragma(msg, __TempleFuncStr);
 
     mixin(__TempleFuncStr);
     //pragma(msg, "TempleFunc ", __TempleFuncStr, "...");
