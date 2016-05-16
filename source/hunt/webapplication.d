@@ -1,21 +1,21 @@
 module hunt.webapplication;
 
-import std.socket;
+public import std.socket;
+public import std.experimental.logger;
 
 import collie.bootstrap.server;
 import collie.bootstrap.serversslconfig;
 import collie.socket.eventloop;
 import collie.socket.eventloopgroup;
-import collie.channel;
+public import collie.channel;
+public import collie.codec.http.config;
 import collie.codec.http;
 
-import hunt.router;
-import hunt.http.request;
-import hunt.http.response;
-import hunt.http.controller;
+public import hunt.router;
+public import hunt.http.request;
+public import hunt.http.response;
+public import hunt.http.controller;
 
-import hunt.router.router;
-import hunt.router.middleware;
 
 alias HTTPPipeline = Pipeline!(ubyte[], HTTPResponse);
 alias HTTPRouter = Router!(Request, Response);
@@ -37,34 +37,36 @@ final class WebApplication
         _404 = &default404;
         _server = new ServerBootstrap!HTTPPipeline(loop);
         _server.childPipeline(new shared HTTPPipelineFactory(this));
+        _config = new HTTPConfig();
     }
     
-    auto setRouterConfig(RouterConfig config)
+    WebApplication setRouterConfig(RouterConfig config)
     {
         setRouterConfigHelper!("__CALLACTION__",IController,Request, Response)
                                 (_router,config);
+        return this;
     }
     
-    auto addRouter(string method, string path, DOHandler handle,
+    WebApplication addRouter(string method, string path, DOHandler handle,
         shared RouterPipelineFactory before = null, shared RouterPipelineFactory after = null)
     {
         router.addRouter(method,path,handle,before,after);
         return this;
     }
     
-    auto setGlobalBeforePipelineFactory(shared RouterPipelineFactory before)
+    WebApplication setGlobalBeforePipelineFactory(shared RouterPipelineFactory before)
     {
         router.setGlobalBeforePipelineFactory(before);
         return this;
     }
 
-    auto setGlobalAfterPipelineFactory(shared RouterPipelineFactory after)
+    WebApplication setGlobalAfterPipelineFactory(shared RouterPipelineFactory after)
     {
         router.setGlobalAfterPipelineFactory(after);
         return this;
     }
 
-    auto setNoFoundHandler(DOHandler nofound)
+    WebApplication setNoFoundHandler(DOHandler nofound)
     in
     {
         assert(nofound !is null);
@@ -80,44 +82,82 @@ final class WebApplication
         return _router;
     }
     
-    auto setSSLConfig(ServerSSLConfig config) 
+    WebApplication setSSLConfig(ServerSSLConfig config) 
     {
         _server.setSSLConfig(config);
         return this;
     } 
     
-    auto group(EventLoopGroup group)
+    WebApplication group(EventLoopGroup group)
     {
         _server.group(group);
         return this;
     }
     
-    auto pipeline(shared AcceptPipelineFactory factory)
+    WebApplication pipeline(shared AcceptPipelineFactory factory)
     {
         _server.pipeline(factory);
         return this;
     }
     
-    auto bind(Address addr)
+    WebApplication bind(Address addr)
     {
         _server.bind(addr);
         return this;
     }
 
-    auto bind(ushort port)
+    WebApplication bind(ushort port)
     {
         _server.bind(port);
         return this;
     }
 
-    auto bind(string ip, ushort port)
+    WebApplication bind(string ip, ushort port)
     {
         _server.bind(ip,port);
         return this;
     }
     
+    @property httpConfig(HTTPConfig config)
+    {
+        _config = config;
+    }
+    
+    @property httpConfig(){return _config;}
+    
+    WebApplication maxBodySize(uint size)
+    {
+        _config.maxBodySize = size;
+        return this;
+    }
+    
+    WebApplication maxHeaderSize(uint size)
+    {
+        _config.maxHeaderSize = size;
+        return this;
+    }
+    
+    WebApplication headerStectionSize(uint size)
+    {
+        _config.headerStectionSize = size;
+        return this;
+    }
+    
+    WebApplication requestBodyStectionSize(uint size)
+    {
+        _config.requestBodyStectionSize = size;
+        return this;
+    }
+    
+    WebApplication responseBodyStectionSize(uint size)
+    {
+        _config.responseBodyStectionSize = size;
+        return this;
+    }
+    
     void run()
     {
+        router.done();
         _server.waitForStop();
     }
     
@@ -129,6 +169,7 @@ final class WebApplication
 private:
     static void doHandle(WebApplication app,Request req, Response res)
     {
+        trace("macth router : method: ", req.Header.methodString, "   path : ",req.Header.path);
         RouterPipeline pipe = app.router.match(req.Header.methodString, req.Header.path);
         if (pipe is null)
         {
@@ -136,6 +177,10 @@ private:
         }
         else
         {
+            if(pipe.matchData().length > 0)
+            {
+                pipe.swapMatchData(req.materef());
+            }
             pipe.handleActive(req, res);
         }
     }
@@ -143,7 +188,7 @@ private:
     void default404(Request req, Response res)
     {
         res.Header.statusCode = 404;
-        res.setContext("Mo Found");
+        res.setContext("No Found");
         res.done();
     }
 
@@ -151,6 +196,7 @@ private:
     HTTPRouter _router;
     DOHandler _404;
     ServerBootstrap!HTTPPipeline _server;
+    HTTPConfig _config;
 }
 
 private:
@@ -173,6 +219,11 @@ class HttpServer : HTTPHandler
     {
         return null;
     }
+    
+    override @property HTTPConfig config()
+    {
+        return cast(HTTPConfig)(_app._config);
+    }
 
 private:
     shared WebApplication _app;
@@ -194,7 +245,6 @@ class HTTPPipelineFactory : PipelineFactory!HTTPPipeline
         pipeline.finalize();
         return pipeline;
     }
-
 private:
     WebApplication _app;
 }

@@ -7,6 +7,6 @@
     "versions": [ "USE_FileSessionStorage"],
     "dependencies": {
         "collie": "~>0.3.0",
-		"libmemcached4d": "~master"
+	"libmemcached4d": "~master"
     }
 }
