@@ -1,8 +1,18 @@
 module hunt.webapplication;
 
+import std.socket;
+
+import collie.bootstrap.server;
+import collie.bootstrap.serversslconfig;
+import collie.socket.eventloop;
+import collie.socket.eventloopgroup;
+import collie.channel;
+import collie.codec.http;
+
 import hunt.router;
 import hunt.http.request;
 import hunt.http.response;
+import hunt.http.controller;
 
 import hunt.router.router;
 import hunt.router.middleware;
@@ -12,18 +22,49 @@ alias HTTPRouter = Router!(Request, Response);
 alias RouterPipeline = PipelineImpl!(Request, Response);
 alias RouterPipelineFactory = IPipelineFactory!(Request, Response);
 alias MiddleWare = IMiddleWare!(Request, Response);
-
 alias DOHandler = void delegate(Request, Response);
 
 final class WebApplication
 {
     this()
     {
-        _router = new HTTPRouter();
+        this(new EventLoop());
+    }
+    
+    this(EventLoop loop)
+    {
+       _router = new HTTPRouter();
         _404 = &default404;
+        _server = new ServerBootstrap!HTTPPipeline(loop);
+        _server.childPipeline(new shared HTTPPipelineFactory(this));
+    }
+    
+    auto setRouterConfig(RouterConfig config)
+    {
+        setRouterConfigHelper!("__CALLACTION__",IController,Request, Response)
+                                (_router,config);
+    }
+    
+    auto addRouter(string method, string path, DOHandler handle,
+        shared RouterPipelineFactory before = null, shared RouterPipelineFactory after = null)
+    {
+        router.addRouter(method,path,handle,before,after);
+        return this;
+    }
+    
+    auto setGlobalBeforePipelineFactory(shared RouterPipelineFactory before)
+    {
+        router.setGlobalBeforePipelineFactory(before);
+        return this;
     }
 
-    void setNoFoundHandler(DOHandler nofound)
+    auto setGlobalAfterPipelineFactory(shared RouterPipelineFactory after)
+    {
+        router.setGlobalAfterPipelineFactory(after);
+        return this;
+    }
+
+    auto setNoFoundHandler(DOHandler nofound)
     in
     {
         assert(nofound !is null);
@@ -31,20 +72,67 @@ final class WebApplication
     body
     {
         _404 = nofound;
+        return this;
     }
 
     @property router()
     {
         return _router;
     }
+    
+    auto setSSLConfig(ServerSSLConfig config) 
+    {
+        _server.setSSLConfig(config);
+        return this;
+    } 
+    
+    auto group(EventLoopGroup group)
+    {
+        _server.group(group);
+        return this;
+    }
+    
+    auto pipeline(shared AcceptPipelineFactory factory)
+    {
+        _server.pipeline(factory);
+        return this;
+    }
+    
+    auto bind(Address addr)
+    {
+        _server.bind(addr);
+        return this;
+    }
+
+    auto bind(ushort port)
+    {
+        _server.bind(port);
+        return this;
+    }
+
+    auto bind(string ip, ushort port)
+    {
+        _server.bind(ip,port);
+        return this;
+    }
+    
+    void run()
+    {
+        _server.waitForStop();
+    }
+    
+    void stop()
+    {
+        _server.stop();
+    }
 
 private:
-    void doHandle(Request req, Response res)
+    static void doHandle(WebApplication app,Request req, Response res)
     {
-        RouterPipeline pipe = _app.router.match(req.Header.methodString, req.Header.path);
+        RouterPipeline pipe = app.router.match(req.Header.methodString, req.Header.path);
         if (pipe is null)
         {
-            _404(req, res);
+            app._404(req, res);
         }
         else
         {
@@ -62,14 +150,14 @@ private:
 private:
     HTTPRouter _router;
     DOHandler _404;
-
+    ServerBootstrap!HTTPPipeline _server;
 }
 
 private:
 
 class HttpServer : HTTPHandler
 {
-    this(WebApplication app)
+    this(shared WebApplication app)
     {
         _app = app;
     }
@@ -78,7 +166,7 @@ class HttpServer : HTTPHandler
     {
         auto request = new Request(req);
         auto response = new Response(rep);
-        _app.doHandle(request, response);
+        _app.doHandle(cast(WebApplication)_app,request, response);
     }
 
     override WebSocket newWebSocket(const HTTPHeader header)
@@ -87,14 +175,15 @@ class HttpServer : HTTPHandler
     }
 
 private:
-    WebApplication _app;
+    shared WebApplication _app;
 }
 
 class HTTPPipelineFactory : PipelineFactory!HTTPPipeline
 {
+    import collie.socket.tcpsocket;
     this(WebApplication app)
     {
-        _app = app;
+        _app = cast(shared WebApplication)app;
     }
 
     override HTTPPipeline newPipeline(TCPSocket sock)
