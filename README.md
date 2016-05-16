@@ -14,12 +14,12 @@ config/routes/default.conf
 ```conf
 GET     /               module/controller/action 
 POST    /user/add       account/user/add    before:GlobalMiddleware,CheckMiddleware;after:EndMiddleware
-GET     /user/view/{:id}  account/user/view
+GET     /user/view/{id:[0-9]{6}}  account/user/view
 ```
 config/routes/admin.conf
 ```conf
 GET     /               module/controller/action
 POST    /user/add       account/user/add
-GET     /user/view/{:id}  account/user/view
+GET     /user/view/{id:[0-9]{6}}  account/user/view
 ```
 
