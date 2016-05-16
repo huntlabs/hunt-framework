@@ -184,7 +184,7 @@ private:
 
 unittest
 {
-    ConfigParse new_parse = new ConfigParse("router.conf");
+    ConfigParse new_parse = new ConfigParse("./config/router.conf");
     //new_parse.setFilePath("router.conf");
     RouterContext[] test_router_context = new_parse.doParse();
     foreach (item; test_router_context)
