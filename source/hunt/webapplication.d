@@ -7,15 +7,15 @@ import hunt.http.response;
 import hunt.router.router;
 import hunt.router.middleware;
 
-alias Pipeline!(ubyte[], HTTPResponse) HTTPPipeline;
-alias HTTPRouter = Router!(Request,Response);
-alias RouterPipeline = PipelineImpl!(Request,Response);
-alias RouterPipelineFactory = IPipelineFactory!(Request,Response);
-alias MiddleWare = IMiddleWare!(Request,Response);
+alias HTTPPipeline = Pipeline!(ubyte[], HTTPResponse);
+alias HTTPRouter = Router!(Request, Response);
+alias RouterPipeline = PipelineImpl!(Request, Response);
+alias RouterPipelineFactory = IPipelineFactory!(Request, Response);
+alias MiddleWare = IMiddleWare!(Request, Response);
 
-alias DOHandler = void delegate(Request,Response);
+alias DOHandler = void delegate(Request, Response);
 
-final  class WebApplication
+final class WebApplication
 {
     this()
     {
@@ -24,30 +24,35 @@ final  class WebApplication
     }
 
     void setNoFoundHandler(DOHandler nofound)
-    in{
+    in
+    {
         assert(nofound !is null);
-    }body{
+    }
+    body
+    {
         _404 = nofound;
     }
 
-
-
-    @property router(){return _router;}
-private:
-    void doHandle(Request req,Response res)
+    @property router()
     {
-        RouterPipeline pipe =  _app.router.match(req.Header.methodString,req.Header.path);
-        if(pipe is null)
-       {
-          _404(req,res);
-       }
-       else
-       {
-          pipe.handleActive(req,res);
-       }
+        return _router;
     }
 
-    void default404(Request req,Response res)
+private:
+    void doHandle(Request req, Response res)
+    {
+        RouterPipeline pipe = _app.router.match(req.Header.methodString, req.Header.path);
+        if (pipe is null)
+        {
+            _404(req, res);
+        }
+        else
+        {
+            pipe.handleActive(req, res);
+        }
+    }
+
+    void default404(Request req, Response res)
     {
         res.Header.statusCode = 404;
         res.setContext("Mo Found");
@@ -71,9 +76,9 @@ class HttpServer : HTTPHandler
 
     override void requestHandle(HTTPRequest req, HTTPResponse rep)
     {
-       auto request = new Request(req);
-       auto response = new Response(rep);
-       _app.doHandle(request,response);
+        auto request = new Request(req);
+        auto response = new Response(rep);
+        _app.doHandle(request, response);
     }
 
     override WebSocket newWebSocket(const HTTPHeader header)
@@ -104,7 +109,6 @@ class HTTPPipelineFactory : PipelineFactory!HTTPPipeline
 private:
     WebApplication _app;
 }
-
 
 /*class EchoWebSocket : WebSocket
 {

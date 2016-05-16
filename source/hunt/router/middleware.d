@@ -52,7 +52,7 @@ final class PipelineImpl(REQ, RES)
     }
     body
     {
-        Context cxt = new Context(new DelegateMiddleWare!(REQ,RES)(handler));
+        Context cxt = new Context(new DelegateMiddleWare!(REQ, RES)(handler));
         _last._next = cxt;
         _last = cxt;
     }
@@ -101,7 +101,6 @@ private:
     string[string] _matchData;
 }
 
-
 final class ContextImpl(REQ, RES)
 {
     alias MiddleWare = IMiddleWare!(REQ, RES);
@@ -139,31 +138,38 @@ private:
     Context _next = null;
 }
 
-
-final shared class AutoMiddleWarePipelineFactory(REQ, RES) : IPipelineFactory!(REQ, RES)
+final shared class AutoMiddleWarePipelineFactory(REQ, RES) : IPipelineFactory!(REQ,
+    RES)
 {
     import std.experimental.logger;
-    alias MiddleWare = IMiddleWare!(REQ,RES);
+
+    alias MiddleWare = IMiddleWare!(REQ, RES);
     this(string[] middle)
     {
-        this(cast(shared string[])middle);
+        this(cast(shared string[]) middle);
     }
 
-    this(shared string[] middle){ _middleList = middle;}
+    this(shared string[] middle)
+    {
+        _middleList = middle;
+    }
 
     override Pipeline newPipeline()
     {
-        if(_middleList.length == 0) return null;
+        if (_middleList.length == 0)
+            return null;
         Pipeline pipe = new Pipeline();
-        foreach(ref str; _middleList)
+        foreach (ref str; _middleList)
         {
             auto obj = Object.factory(str);
-            if(!obj) {
+            if (!obj)
+            {
                 error("Object.factory erro!, the obj Name is : ", str);
                 continue;
             }
-            auto a = cast(MiddleWare)obj;
-            if(!a){
+            auto a = cast(MiddleWare) obj;
+            if (!a)
+            {
                 error("cast(MiddleWare)obj; erro!");
                 continue;
             }
@@ -196,34 +202,32 @@ private:
     HandleDelegate _handler;
 }
 
-
-
-version(unittest)
+version (unittest)
 {
     import std.stdio;
+
     class Test
     {
-        int gtest  = 0;
+        int gtest = 0;
     }
 
-
-    class TestMiddleWare : IMiddleWare!(Test,int)
+    class TestMiddleWare : IMiddleWare!(Test, int)
     {
         override void handle(Context ctx, Test a, int b)
         {
             a.gtest += 1;
-            writeln("IMiddleWare handle : a.gtest : ",a.gtest);
-            ctx.next(a,b);
+            writeln("IMiddleWare handle : a.gtest : ", a.gtest);
+            ctx.next(a, b);
         }
     }
 
-    class TestMiddleWare2 : IMiddleWare!(Test,int)
+    class TestMiddleWare2 : IMiddleWare!(Test, int)
     {
         override void handle(Context ctx, Test a, int b)
         {
             a.gtest -= 1;
-            writeln("IMiddleWare2 handle : a.gtest : ",a.gtest);
-            ctx.next(a,b);
+            writeln("IMiddleWare2 handle : a.gtest : ", a.gtest);
+            ctx.next(a, b);
         }
     }
 }
@@ -235,16 +239,15 @@ unittest
 
     void testFun(Test a, int b)
     {
-        ++ a.gtest;
+        ++a.gtest;
     }
-
 
     void testFun2(Test a, int b)
     {
         a.gtest -= 1;
     }
 
-    alias Pipeline = PipelineImpl!(Test,int);
+    alias Pipeline = PipelineImpl!(Test, int);
 
     Pipeline pip = new Pipeline();
     pip.addHandler(new TestMiddleWare());
@@ -255,7 +258,7 @@ unittest
     pip.addHandler(new TestMiddleWare());
 
     Test t = new Test();
-    pip.handleActive(t,0);
+    pip.handleActive(t, 0);
 
     writeln("t.gtest is :", t.gtest);
     assert(t.gtest == 6);
@@ -270,19 +273,19 @@ unittest
 
     pip.append(pip2);
 
-    pip.handleActive(t,0);
+    pip.handleActive(t, 0);
 
     assert(t.gtest == 6);
 
-
-    string[] list = ["hunt.router.middleware.TestMiddleWare",
-                    "hunt.router.middleware.TestMiddleWare",
-                    "hunt.router.middleware.TestMiddleWare",
-                    "hunt.router.middleware.TestMiddleWare"];
-    auto pipefactor = new shared AutoMiddleWarePipelineFactory!(Test,int)(list);
-    auto pipe3  = pipefactor.newPipeline();
+    string[] list = [
+        "hunt.router.middleware.TestMiddleWare",
+        "hunt.router.middleware.TestMiddleWare",
+        "hunt.router.middleware.TestMiddleWare", "hunt.router.middleware.TestMiddleWare"
+    ];
+    auto pipefactor = new shared AutoMiddleWarePipelineFactory!(Test, int)(list);
+    auto pipe3 = pipefactor.newPipeline();
     t.gtest = 0;
-    pipe3.handleActive(t,0);
+    pipe3.handleActive(t, 0);
     writeln("t.gtest is :", t.gtest);
     assert(t.gtest == 4);
 }
