@@ -6,22 +6,43 @@ import hunt.http.webfrom;
 
 class Request
 {
-
-    private HTTPRequest _req;
-
     this(HTTPRequest req)
     {
         assert(req);
         _req = req;
     }
 
-    WebForm postForm()
+    @property WebForm postForm()
     {
-        return new WebForm(_req);
+        if (_form is null)
+            _form = new WebForm(_req);
+        return _form;
     }
+
+    alias httpRequest this;
 
     @property httpRequest()
     {
         return _req;
     }
+
+    @property mate()
+    {
+        return _mate;
+    }
+
+    string getMate(string key)
+    {
+        return _mate.get(key, "");
+    }
+
+    void addMate(string key, string value)
+    {
+        _mate[key] = value;
+    }
+
+private:
+    HTTPRequest _req;
+    WebForm _form = null;
+    string[string] _mate;
 }
