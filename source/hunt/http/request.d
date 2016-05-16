@@ -6,7 +6,6 @@ import hunt.http.webfrom;
 
 class Request
 {
-
     this(HTTPRequest req)
     {
         assert(req);
@@ -27,7 +26,7 @@ class Request
         return _req;
     }
 
-    @property meat()
+    @property mate()
     {
         return _mate;
     }

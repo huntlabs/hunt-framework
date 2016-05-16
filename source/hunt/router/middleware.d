@@ -1,3 +1,4 @@
+
 module hunt.router.middleware;
 
 import std.functional;
