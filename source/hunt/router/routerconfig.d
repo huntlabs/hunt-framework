@@ -17,9 +17,9 @@ struct RouterContext
     string[] middleWareAfter;
 }
 
-class RouterConfig
+abstract class RouterConfig
 {
-    this(string filePath, string prefix)
+    this(string filePath, string prefix = "application.controllers.")
     in
     {
         assert(exists(filePath), "Error file path!");
@@ -28,6 +28,9 @@ class RouterConfig
     {
         _filePath = filePath;
         _prefix = prefix;
+        if(_prefix.length > 0 && _prefix[_prefix.length - 1] != '.'){
+            _prefix ~= ".";
+        }
     }
 
     ~this()
@@ -45,7 +48,7 @@ class RouterConfig
         this._filePath = filePath;
     }
 
-    void set_prefix(string prefix)
+    void setPrefix(string prefix)
     {
         this._prefix = prefix;
     }
@@ -58,7 +61,8 @@ protected:
 
 class ConfigParse : RouterConfig
 {
-    this(string filePath, string prefix = string.init)
+    import std.experimental.logger;
+    this(string filePath, string prefix = "application.controllers.")
     {
         super(filePath, prefix);
     }
@@ -92,7 +96,7 @@ public:
                 else
                     tmpRoute.method = toUpper(tmpSplites[0]);
                 tmpRoute.path = tmpSplites[1];
-                tmpRoute.hander = parseToFullControll(tmpSplites[2]);
+                tmpRoute.hander = parseToFullController(tmpSplites[2]);
                 if (tmpSplites.length == 4)
                     parseMiddleware(tmpSplites[3], tmpRoute.middleWareBefore,
                         tmpRoute.middleWareAfter);
@@ -118,24 +122,14 @@ public:
     }
 
 private:
-    string parseToFullControll(string inBuff)
+    string parseToFullController(string inBuff)
     {
         string[] spritArr = split(inBuff, '/');
         assert(spritArr.length > 1, "whitout /");
         string output;
-        if (_prefix)
-        {
-            assert(spritArr.length == 4, "Wrong controller config!");
-            output ~= spritArr[0] ~ "." ~ spritArr[1] ~ "." ~ to!string(spritArr[2].asCapitalized) ~ _controllerPrefix ~ "." ~ spritArr[
-                3];
-        }
-        else
-        {
-            assert(spritArr.length == 3, "Wrong controller config!");
-            output ~= "application" ~ "." ~ spritArr[0] ~ "." ~ to!string(spritArr[1].asCapitalized) ~ _controllerPrefix ~ "." ~ spritArr[
-                2];
-        }
-
+        spritArr[spritArr.length - 2] = to!string(spritArr[spritArr.length - 2].asCapitalized) ~ _controllerPrefix;
+        output ~= _prefix;
+        output ~= spritArr.join(".");
         return output;
     }
 
@@ -159,7 +153,7 @@ private:
         semicolonPos = toParse.indexOf(";");
         assert(beforePos <= afterPos, "after position and before position worry");
         //assert(beforePos 
-        writeln("toParse: ", toParse, " beforePos: ", beforePos);
+        trace("toParse: ", toParse, " beforePos: ", beforePos);
         if (beforePos < 0)
             beforePos = toParse.length - 1;
         else
@@ -173,7 +167,7 @@ private:
         if (beforePos < semicolonPos)
             beforeMiddleware = split(toParse[beforePos .. semicolonPos], ',');
         afterMiddleware = split(toParse[afterPos .. $], ',');
-        writeln("beforeMiddleware: ", beforeMiddleware, " afterMiddleware: ", afterMiddleware);
+        trace("beforeMiddleware: ", beforeMiddleware, " afterMiddleware: ", afterMiddleware);
     }
 
 private:
