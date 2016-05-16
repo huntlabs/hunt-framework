@@ -1,3 +1,4 @@
+
 /**
  * Temple (C) Dylan Knutson, 2013, distributed under the:
  * Boost Software License - Version 1.0 - August 17th, 2003
@@ -93,7 +94,7 @@ private struct FuncPart
  * a temple file.
  */
 package string __temple_gen_temple_func_string(string temple_str,
-        in string temple_name, in string filter_ident = "")
+    in string temple_name, in string filter_ident = "")
 {
     // Output function string being composed
     FuncPart[] func_parts;
@@ -129,7 +130,7 @@ package string __temple_gen_temple_func_string(string temple_str,
     void push_linenum()
     {
         func_parts ~= FuncPart(FuncPart.Type.Line,
-                `#line %d "%s"`.format(line_number + 1, temple_name) ~ "\n", indent_level);
+            `#line %d "%s"`.format(line_number + 1, temple_name) ~ "\n", indent_level);
     }
     /* ----------------------------------------- */
 
@@ -334,8 +335,8 @@ string build_function_head(string filter_ident)
 
     string function_type_params = filter_ident.length ? "(%s)".format(filter_ident) : "";
 
-    ret ~= (`static void TempleFunc%s(TempleContext __temple_context) {`.format(
-            function_type_params));
+    ret ~= (
+        `static void TempleFunc%s(TempleContext __temple_context) {`.format(function_type_params));
 
     // This isn't just an overload of __temple_buff_filtered_put because D doesn't allow
     // overloading of nested functions
@@ -406,7 +407,8 @@ string build_function_head(string filter_ident)
 			nested.render(s, tc);
 		});
 	}
-	`.replace("__fp__", filter_ident);
+	`
+            .replace("__fp__", filter_ident);
     }
     else
     {
@@ -469,7 +471,8 @@ string buildFromParts(in FuncPart[] parts)
 
                 // if the previous and next parts are statements, and this part is all
                 // whitespace, skip inserting it into the template
-                if (prev_type == FuncPart.Type.Stmt && next_type == FuncPart.Type.Stmt
+                if (prev_type == FuncPart.Type.Stmt
+                        && next_type == FuncPart.Type.Stmt
                         && part.value.all!((chr) => chr.isWhite()))
                 {
                     break;
@@ -477,7 +480,7 @@ string buildFromParts(in FuncPart[] parts)
             }
 
             func_str ~= `__temple_context.put("` ~ part.value.replace("\n",
-                    "\\n").escapeQuotes() ~ "\");\n";
+                "\\n").escapeQuotes() ~ "\");\n";
             break;
         }
     }

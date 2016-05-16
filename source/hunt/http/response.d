@@ -51,6 +51,9 @@ class Response
         this.setHeader("set-cookie", cookie.output(""));
     }
 
+
+    alias httpResponse this;
+
     @property httpResponse()
     {
         return _rep;
