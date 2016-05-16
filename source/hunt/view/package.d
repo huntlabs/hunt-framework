@@ -1,3 +1,4 @@
+
 /**
  * Temple (C) Dylan Knutson, 2014, distributed under the:
  * Boost Software License - Version 1.0 - August 17th, 2003
@@ -36,12 +37,12 @@ public
  * Main template for generating Temple functions
  */
 CompiledTemple compile_temple(string __TempleString, __Filter = void,
-        uint line = __LINE__, string file = __FILE__)()
+    uint line = __LINE__, string file = __FILE__)()
 {
     import std.conv : to;
 
     return compile_temple!(__TempleString, file ~ ":" ~ line.to!string ~ ": InlineTemplate",
-            __Filter);
+        __Filter);
 }
 
 deprecated("Please use compile_temple") auto Temple(ARGS...)()
@@ -65,7 +66,7 @@ public CompiledTemple compile_temple(string __TempleString, string __TempleName,
     // Generates the actual function string, with the function name being
     // `TempleFunc`.
     const __TempleFuncStr = __temple_gen_temple_func_string(__TempleString,
-            __TempleName, __TempleFilterIdent);
+        __TempleName, __TempleFilterIdent);
 
     //pragma(msg, __TempleFuncStr);
 
