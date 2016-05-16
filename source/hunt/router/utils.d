@@ -5,7 +5,7 @@ import std.regex;
 import std.traits;
 
 
-void controllerHelper(string FUN,T , REQ,RES)(string str,REQ req,RES res)
+void controllerHelper(string FUN, T , REQ,RES)(string str,REQ req,RES res)
                         if((is(T == class) || is(T == interface)) && hasMember!(T,FUN))
 {
     import std.experimental.logger;
