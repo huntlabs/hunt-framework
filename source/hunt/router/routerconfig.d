@@ -16,7 +16,8 @@ struct RouterContext
     string[] middleWareBefore;
     string[] middleWareAfter;
 }
-class ConfigImpl
+
+class RouterConfig
 {
     this(string file_path, string prefix)
     in
@@ -25,7 +26,7 @@ class ConfigImpl
     }
     body
     {
-	_file_path = file_path;
+	_filePath = file_path;
 	_prefix = prefix;
     }
     
@@ -50,7 +51,8 @@ protected:
     string _prefix;
     string _file_path;//文件路径
 }
-class ConfigParse : ConfigImpl
+
+class ConfigParse : RouterConfig
 {
     this(string file_path, string prefix=string.init)
     {
@@ -90,7 +92,7 @@ public:
 	}
 	return _routerContext;
     }
-    void set_controller_prefix(string controller_prefix)
+    void setControllerPrefix(string controller_prefix)
     {
 	_controller_prefix = controller_prefix;
     }

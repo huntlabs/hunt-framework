@@ -47,6 +47,8 @@ class Response
 		//_rep.setCookie(cookie.output);
 	}
 
+    alias httpResponse this;
+
 	@property httpResponse(){return _rep;}
 
 private :
