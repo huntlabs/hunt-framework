@@ -17,7 +17,7 @@ class Response
 		_rep = resp;
 	}
 
-	void setHeader(T)(string key,T value){
+	void setHeader(T = string)(string key,T value){
 		_rep.Header.setHeaderValue(key,value);
 	}
 
@@ -44,9 +44,9 @@ class Response
 	{
 		auto cookie = new Cookie(name, value, ["path":path, "domain":domain, "expires":printDate(cast(DateTime) Clock.currTime(UTC()) + dur!"seconds"(expires))]);
 		///TODO set into base
-		//_rep.setCookie(cookie.output);
+		this.setHeader("set-cookie", cookie.output(""));
 	}
-
+	
 	@property httpResponse(){return _rep;}
 
 private :
