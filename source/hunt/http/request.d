@@ -41,6 +41,7 @@ class Request
         _mate[key] = value;
     }
 
+    @property ref string[string] materef() {return _mate;}
 private:
     HTTPRequest _req;
     WebForm _form = null;

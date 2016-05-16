@@ -96,6 +96,11 @@ final class PipelineImpl(REQ, RES)
         _matchData[key] = value;
     }
 
+    void swapMatchData(ref string[string] to)
+    {
+        import std.algorithm.mutation : swap;
+        swap(to,_matchData);
+    }
 private:
     Context _first = null;
     Context _last = null;
