@@ -14,21 +14,12 @@ void hello(Request, Response res)
 
 void main()
 {
-	testIni();
-	WebApplication app = new WebApplication();
-	app.addRouter("GET","/test",toDelegate(&hello));
-	app.addRouter("GET","/",toDelegate(&hello));
-	app.bind(8080);
-	app.run();
+    WebApplication app = new WebApplication();
+    app.setRouterConfig(new ConfigParse("config/router.conf"));
+    app.addRouter("GET","/test",toDelegate(&hello));
+    app.addRouter("GET","/ttt",toDelegate(&hello));
+    app.bind(8080);
+    app.run();
 }
 
 
-
-void testIni()
-{
-	import hunt.config;
-	import std.path;
-	import std.experimental.logger;
-	auto ini = new Ini(buildPath(huntConfigPath , "./config/http.conf"));
-	log(ini.value("server", "port") );
-}
