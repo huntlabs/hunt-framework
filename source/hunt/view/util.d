@@ -86,7 +86,7 @@ unittest
 /// or null
 DelimPos!(D)* nextDelim(D)(string haystack, const(D)[] delims) if (is(D : Delim))
 {
-    alias Tuple!(Delim, "delim", string, "str") DelimStrPair;
+    alias DelimStrPair = Tuple!(Delim, "delim", string, "str");
 
     /// The foreach is there to get around some DMD bugs
     /// Preferrably, one of the next two lines would be used instead
@@ -155,8 +155,9 @@ unittest
 unittest
 {
     const haystack = "Я%";
-    static assert(*(haystack.nextDelim([Delim.OpenShort])) == DelimPos!Delim(
-            codeLength!char('Я'), Delim.OpenShort));
+    static assert(
+        *(haystack.nextDelim([Delim.OpenShort])) == DelimPos!Delim(
+        codeLength!char('Я'), Delim.OpenShort));
 }
 
 unittest

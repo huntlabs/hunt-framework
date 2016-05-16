@@ -65,7 +65,8 @@ enum CloseDelims = [EnumMembers!CloseDelim];
 /// Maps an open delimer to its matching closing delimer
 /// Formally, an onto function
 enum OpenToClose = [
-        OpenDelim.OpenShort : CloseDelim.CloseShort, OpenDelim.OpenShortStr : CloseDelim.CloseShort,
+        OpenDelim.OpenShort : CloseDelim.CloseShort,
+        OpenDelim.OpenShortStr : CloseDelim.CloseShort,
         OpenDelim.Open : CloseDelim.Close, OpenDelim.OpenStr : CloseDelim.CloseStr
     ];
 
