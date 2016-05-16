@@ -153,7 +153,7 @@ private:
 
     void parseMiddleware(string toParse, out string[] beforeMiddleware, out string[] afterMiddleware)
     {
-        int beforePos, afterPos, semicolonPos;
+        size_t beforePos, afterPos, semicolonPos;
         beforePos = toParse.indexOf(_beforeFlag);
         afterPos = toParse.indexOf(_afterFlag);
         semicolonPos = toParse.indexOf(";");
