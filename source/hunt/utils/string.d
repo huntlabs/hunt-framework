@@ -1,3 +1,4 @@
+
 module hunt.utils.string;
 
 import std.datetime;

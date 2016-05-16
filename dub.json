@@ -4,6 +4,7 @@
     "authors": [ "putao.com Dlang team." ],
     "license": "BSD",
     "stringImportPaths": [ "./resources/views" ],
+    "versions": [ "USE_FileSessionStorage"],
     "dependencies": {
         "collie": "~>0.3.0"
     }
