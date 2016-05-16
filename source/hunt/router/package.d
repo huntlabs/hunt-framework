@@ -7,24 +7,26 @@ public import hunt.router.middleware;
 
 import collie.utils.functional;
 
-
-
-void setRouterConfigHelper(string FUN, T ,REQ,RES)(Router!(REQ,RES) router, RouterConfig config)
-                                    if((is(T == class) || is(T == interface)) && hasMember!(T,FUN))
+void setRouterConfigHelper(string FUN, T, REQ, RES)(Router!(REQ, RES) router, RouterConfig config) if (
+        (is(T == class) || is(T == interface)) && hasMember!(T, FUN))
 {
     import std.string;
     import std.array;
-    alias doFun = controllerHelper!(FUN,T,REQ,RES);
-    alias MiddleWareFactory = AutoMiddleWarePipelineFactory!(REQ,RES);
+
+    alias doFun = controllerHelper!(FUN, T, REQ, RES);
+    alias MiddleWareFactory = AutoMiddleWarePipelineFactory!(REQ, RES);
 
     RouterContext[] routeList = new_parse.do_parse();
-    foreach(ref item; routeList)
+    foreach (ref item; routeList)
     {
-        auto list = split(item.method,',');
-        foreach(ref str; list)
+        auto list = split(item.method, ',');
+        foreach (ref str; list)
         {
-            if(str.length == 0) continue;
-            router.addRouter(str,item.path,bind(&doFun,item.hander),new shared MiddleWareFactory(item.middleWareBefore), new shared MiddleWareFactory(item.middleWareAfter));
+            if (str.length == 0)
+                continue;
+            router.addRouter(str, item.path, bind(&doFun, item.hander),
+                new shared MiddleWareFactory(item.middleWareBefore),
+                new shared MiddleWareFactory(item.middleWareAfter));
         }
     }
 }
