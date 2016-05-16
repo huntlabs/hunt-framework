@@ -16,7 +16,7 @@ void setRouterConfigHelper(string FUN, T, REQ, RES)(Router!(REQ, RES) router, Ro
     alias doFun = controllerHelper!(FUN, T, REQ, RES);
     alias MiddleWareFactory = AutoMiddleWarePipelineFactory!(REQ, RES);
 
-    RouterContext[] routeList = new_parse.do_parse();
+    RouterContext[] routeList = config.doParse();
     foreach (ref item; routeList)
     {
         auto list = split(item.method, ',');
