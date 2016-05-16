@@ -12,14 +12,14 @@ A web framework based on [Collie](https://github.com/putao-dev/collie/), written
 
 config/routes/default.conf
 ```conf
-GET     /               module/controller/action
-POST    /user/add       account/user/add
-GET     /user/view/:id  account/user/view
+GET     /               module/controller/action 
+POST    /user/add       account/user/add    before:GlobalMiddleware,CheckMiddleware;after:EndMiddleware
+GET     /user/view/{:id}  account/user/view
 ```
 config/routes/admin.conf
 ```conf
 GET     /               module/controller/action
 POST    /user/add       account/user/add
-GET     /user/view/:id  account/user/view
+GET     /user/view/{:id}  account/user/view
 ```
 
