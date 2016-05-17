@@ -17,7 +17,7 @@
  * a source language processor.
  */
 
-module hunt.view.delims;
+module hunt.web.view.delims;
 
 import std.traits, std.typecons;
 
