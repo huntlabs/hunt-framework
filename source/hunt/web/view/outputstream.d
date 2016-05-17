@@ -17,7 +17,7 @@
  * a source language processor.
  */
 
-module hunt.view.output_stream;
+module hunt.web.view.output_stream;
 
 private
 {
