@@ -1,8 +1,8 @@
-module hunt.http.request;
+module hunt.web.http.request;
 
 import collie.codec.http;
 
-import hunt.http.webfrom;
+import hunt.web.http.webfrom;
 
 class Request
 {
