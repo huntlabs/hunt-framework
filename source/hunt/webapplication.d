@@ -30,6 +30,7 @@ final class WebApplication
         _server = new ServerBootstrap!HTTPPipeline(loop);
         _server.childPipeline(new shared HTTPPipelineFactory(this));
         _config = new HTTPConfig();
+        _server.setReusePort(true);
     }
     
     WebApplication setRouterConfig(RouterConfig config)
