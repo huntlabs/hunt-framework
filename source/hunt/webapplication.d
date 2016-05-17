@@ -169,6 +169,7 @@ private:
         }
         else
         {
+            scope(exit) pipe.destroy;
             if(pipe.matchData().length > 0)
             {
                 pipe.swapMatchData(req.materef());
