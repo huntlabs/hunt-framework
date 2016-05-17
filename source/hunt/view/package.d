@@ -25,6 +25,8 @@ public import std.array : appender, Appender;
 public import std.range : isOutputRange;
 public import std.typecons : scoped;
 public import std.stdio;
+public import std.regex;
+public import std.file;
 
 public
 {
@@ -52,6 +54,8 @@ deprecated("Please use compile_temple") auto Temple(ARGS...)()
 
 public CompiledTemple compile_temple(string __TempleString, string __TempleName, __Filter = void)()
 {
+	writeln("__TempleString:",template_parsing(__TempleString));
+	//writeln("__TempleName:",__TempleName);
     // __TempleString: The template string to compile
     // __TempleName: The template's file name, or 'InlineTemplate'
     // __Filter: FP for the rendered template
@@ -65,10 +69,11 @@ public CompiledTemple compile_temple(string __TempleString, string __TempleName,
 
     // Generates the actual function string, with the function name being
     // `TempleFunc`.
+    //const string str = template_parsing!__TempleString;
     const __TempleFuncStr = __temple_gen_temple_func_string(__TempleString,
         __TempleName, __TempleFilterIdent);
 
-    //pragma(msg, __TempleFuncStr);
+    pragma(msg, __TempleFuncStr);
 
     mixin(__TempleFuncStr);
     //pragma(msg, "TempleFunc ", __TempleFuncStr, "...");
@@ -95,30 +100,41 @@ CompiledTemple compile_temple_file(string template_file, Filter = void)()
     pragma(msg, "Compiling ", template_file, "...");
     return compile_temple!(import(template_file), template_file, Filter);
 }
-
-CompiledTemple display(string template_file)()
-{
-    return compile_temple!(import(template_file), template_file);
-}
-
 /*
-string display(string template_file)()
+string display(string template_file,TempleContext res)
 {
-	auto temple = compile_temple!(import(template_file), template_file);
-    auto context = new TempleContext();
-    context.name = "owner";
-    return temple.toString();
-}
-string display(string template_file,string[string] params)()
-{
-	auto temple = compile_temple!(import(template_file), template_file);
-    auto context = new TempleContext();
-    foreach(key,value;params){
-        context.opIndexAssign(key,value);
-    }
-    return temple.toString(context);
+    auto template_string = readText("../hunt/resources/views/"~template_file);
+    auto template_string_parsing = template_parsing(template_string);
+    auto temple = compile_temple!template_string_parsing;
+    return temple.toString(res);
 }
 */
+
+string template_parsing(string template_string)
+{
+    auto re = regex(r"\{!.*!\}","mg");
+    auto temple_match = matchFirst(template_string,re);
+    if(!temple_match)
+    {
+        return template_string;
+    }
+    else
+    {
+        writeln(temple_match);
+        auto template_file = temple_match[0][2 .. $ - 2];
+        auto template_file_string = readText("../hunt/resources/views/"~template_file);
+        const string new_template_string = replaceFirst(template_string,re,template_file_string);
+        //const string new_template_string = template_string.replace(temple_match[0], template_file_string);
+        if(!matchAll(new_template_string,re))
+        {
+            return new_template_string;
+        }
+        else
+        {
+            return template_parsing(new_template_string);
+        }
+    }
+}
 
 deprecated("Please use compile_temple_file") auto TempleFile(ARGS...)()
 {
@@ -258,7 +274,7 @@ public:
     }
     body
     {
-        writeln(this.render_func, '\n', partial);
+        writeln("\n into layout function : ",this.render_func, "-", partial);
         return CompiledTemple(this.render_func, partial);
     }
 

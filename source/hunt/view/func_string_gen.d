@@ -20,7 +20,7 @@
 
 module hunt.view.func_string_gen;
 
-private import hunt.view, hunt.view.util, hunt.view.delims, std.conv,
+public import hunt.view, hunt.view.util, hunt.view.delims, std.conv,
     std.string, std.array, std.exception, std.uni, std.algorithm;
 
 /**
@@ -132,6 +132,12 @@ package string __temple_gen_temple_func_string(string temple_str,
         func_parts ~= FuncPart(FuncPart.Type.Line,
             `#line %d "%s"`.format(line_number + 1, temple_name) ~ "\n", indent_level);
     }
+
+    void push_linenumanno(string anno)
+    {
+        func_parts ~= FuncPart(FuncPart.Type.Line,
+                `#line %d "%s-------%s"`.format(line_number + 1, temple_name,anno) ~ "\n", indent_level);
+    }
     /* ----------------------------------------- */
 
     void indent()
@@ -175,7 +181,7 @@ package string __temple_gen_temple_func_string(string temple_str,
     // Keeps infinite loops from outright crashing the compiler
     // The limit should be set to some arbitrary large number
     uint safeswitch = 0;
-
+	
     while (temple_str.length)
     {
         // This imposes the limiatation of a max of 10_000 delimers parsed for
@@ -188,6 +194,8 @@ package string __temple_gen_temple_func_string(string temple_str,
 
         DelimPos!(OpenDelim)* oDelimPos = temple_str.nextDelim(OpenDelims);
 
+
+		pragma(msg,"context parsing..............................................");
         if (oDelimPos is null)
         {
             //No more delims; append the rest as a string
@@ -200,8 +208,10 @@ package string __temple_gen_temple_func_string(string temple_str,
             immutable OpenDelim oDelim = oDelimPos.delim;
             immutable CloseDelim cDelim = OpenToClose[oDelim];
 
+			pragma(msg,"delim check........................");
             if (oDelimPos.pos == 0)
             {
+				//-------------give it
                 if (oDelim.isShort())
                 {
                     if (!prev_temple_str.validBeforeShort())
@@ -214,6 +224,7 @@ package string __temple_gen_temple_func_string(string temple_str,
                         continue;
                     }
                 }
+				//------------give it end
 
                 // If we made it this far, we've got valid open/close delims
                 DelimPos!(CloseDelim)* cDelimPos = temple_str.nextDelim([cDelim]);
@@ -277,6 +288,14 @@ package string __temple_gen_temple_func_string(string temple_str,
                         }
                     }
                 }
+				/*
+				else if(oDelim.isIncludeStr())
+				{
+					push_linenumanno("compile_temple_file!" ~ inbetween_delims);
+					//TODO parsing includ template
+                    //auto inTemple = import(inbetween_delims);
+				}
+				*/
                 else
                 {
                     // It's just raw code, push it into the function body
