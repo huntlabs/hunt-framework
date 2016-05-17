@@ -1,4 +1,4 @@
-module hunt.web.webapplication;
+module hunt.web.application;
 
 public import std.socket;
 public import std.experimental.logger;
