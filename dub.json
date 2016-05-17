@@ -6,6 +6,7 @@
     "stringImportPaths": [ "./resources/views" ],
     "versions": [ "USE_FileSessionStorage"],
     "dependencies": {
-        "collie": "~>0.4.0"
+        "collie": "~>0.3.0",
+	"libmemcached4d": "~master"
     }
 }
