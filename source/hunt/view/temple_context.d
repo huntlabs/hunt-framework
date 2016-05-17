@@ -1,3 +1,4 @@
+
 /**
  * Temple (C) Dylan Knutson, 2013, distributed under the:
  * Boost Software License - Version 1.0 - August 17th, 2003
@@ -37,8 +38,7 @@ package:
 
     /// package
     // TODO: This needs to be marked as a "safe" string
-    static Appender!string __templeRenderWith(in CompiledTemple temple, TempleContext ctx)
-    body
+    static Appender!string __templeRenderWith(in CompiledTemple temple, TempleContext ctx)body
     {
         // Allocate a buffer and call the render func with it
         auto buff = appender!string;
@@ -99,7 +99,9 @@ public:
     }
 
     Variant opDispatch(string op)() @property if (op != "__ctor") // seems a scoped!T bug requires this
-    
+
+        
+
     in
     {
         assert(op in vars, "variant does not have key: " ~ op);
