@@ -1,4 +1,4 @@
-module hunt.http.sessionstorage;
+module hunt.web.http.sessionstorage;
 
 /**
 * StorageInterface.

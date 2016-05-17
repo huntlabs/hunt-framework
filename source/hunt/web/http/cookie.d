@@ -1,4 +1,4 @@
-module hunt.http.cookie;
+module hunt.web.http.cookie;
 
 import std.regex : regex, Regex;
 import std.string;

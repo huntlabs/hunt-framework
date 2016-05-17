@@ -17,12 +17,12 @@
  * a source language processor.
  */
 
-module hunt.view.util;
+module hunt.web.view.util;
 
 private import std.algorithm, std.typecons, std.array, std.uni, std.conv,
     std.utf;
 
-private import hunt.view.delims;
+private import hunt.web.view.delims;
 
 package:
 

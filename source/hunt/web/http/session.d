@@ -1,6 +1,6 @@
-module hunt.http.session;
+module hunt.web.http.session;
 
-import hunt.http.sessionstorage;
+import hunt.web.http.sessionstorage;
 
 /**
 * Interface for the session.

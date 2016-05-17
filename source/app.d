@@ -2,9 +2,9 @@ import std.stdio;
 import std.functional;
 import std.experimental.logger;
 
-import hunt.http.cookie;
+import hunt.web.http.cookie;
 
-import hunt.webapplication;
+import hunt.web.webapplication;
 import application.middleware;
 
 void hello(Request, Response res)
@@ -15,6 +15,7 @@ void hello(Request, Response res)
 
 void main()
 {
+    writeln("hello world");
     globalLogLevel(LogLevel.error);
     WebApplication app = new WebApplication();
     app.setRouterConfig(new ConfigParse("config/router.conf"));

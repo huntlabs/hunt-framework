@@ -1,4 +1,4 @@
-module hunt.webapplication;
+module hunt.web.webapplication;
 
 public import std.socket;
 public import std.experimental.logger;
@@ -11,8 +11,8 @@ public import collie.channel;
 public import collie.codec.http.config;
 import collie.codec.http;
 
-public import hunt.router;
-public import hunt.http;
+public import hunt.web.router;
+public import hunt.web.http;
 
 alias HTTPPipeline = Pipeline!(ubyte[], HTTPResponse);
 

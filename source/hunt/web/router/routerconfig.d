@@ -1,4 +1,4 @@
-module hunt.router.routerconfig;
+module hunt.web.router.routerconfig;
 
 import std.file;
 import std.string;
