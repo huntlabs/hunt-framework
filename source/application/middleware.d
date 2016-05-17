@@ -2,9 +2,9 @@ module application.middleware;
 
 import std.functional;
 
-import hunt.http;
-import hunt.http.request;
-import hunt.http.response;
+import hunt.web.http;
+import hunt.web.http.request;
+import hunt.web.http.response;
 
 class BMiddleWare : MiddleWare
 {

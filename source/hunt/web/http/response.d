@@ -1,11 +1,11 @@
-module hunt.http.response;
+module hunt.web.http.response;
 
 import std.datetime;
 
 import collie.codec.http;
 
-import hunt.http.cookie;
-import hunt.http.webfrom;
+import hunt.web.http.cookie;
+import hunt.web.http.webfrom;
 import hunt.utils.string;
 
 class Response

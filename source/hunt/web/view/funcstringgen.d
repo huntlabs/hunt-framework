@@ -18,9 +18,9 @@
  * a source language processor.
  */
 
-module hunt.view.func_string_gen;
+module hunt.web.view.func_string_gen;
 
-public import hunt.view, hunt.view.util, hunt.view.delims, std.conv,
+public import hunt.web.view, hunt.web.view.util, hunt.web.view.delims, std.conv,
     std.string, std.array, std.exception, std.uni, std.algorithm;
 
 /**
