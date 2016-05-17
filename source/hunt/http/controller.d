@@ -15,6 +15,8 @@ mixin template HuntDynamicCallFun()
 
 string  getListStr(T)()
 {
+    import std.traits;
+    import std.typecons;
     string str = "override bool __CALLACTION__(string funName,Request req,  Response res) {";
     str ~= "switch(funName){";
     foreach(memberName; __traits(allMembers, T))
