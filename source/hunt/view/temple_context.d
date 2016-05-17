@@ -130,21 +130,6 @@ public:
         return noop;
     }
 
-    TempleInputStream display() @property
-    {
-        pragma(msg, "Compiling ...", partial.stringof);
-        auto noop = TempleInputStream(delegate(ref TempleOutputStream) {  });
-
-        if (partial !is null)
-        {
-            return TempleInputStream(delegate(ref TempleOutputStream os) {
-                partial.render(os, this);
-            });
-        }
-
-        return noop;
-    }
-
 }
 
 private struct VarDispatcher
