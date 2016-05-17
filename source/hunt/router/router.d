@@ -1,3 +1,4 @@
+
 module hunt.router.router;
 
 import std.regex;
@@ -149,7 +150,7 @@ private:
 
 private:
 
-final  class RegexElement(REQ, RES) : PathElement!(REQ, RES)
+final class RegexElement(REQ, RES) : PathElement!(REQ, RES)
 {
     this(string path)
     {
@@ -178,14 +179,15 @@ private:
         if (reg.length == 0)
             return false;
         _reg = buildRegex(reg);
-        if(_reg.length == 0) return false;
+        if (_reg.length == 0)
+            return false;
         return true;
     }
 
     string _reg;
 }
 
-final  class RegexMap(REQ, RES)
+final class RegexMap(REQ, RES)
 {
     alias RElement = RegexElement!(REQ, RES);
     alias PElement = PathElement!(REQ, RES);
@@ -202,7 +204,7 @@ final  class RegexMap(REQ, RES)
         string rege;
         string str = getFristPath(preg, rege);
         //writeln("RegexMap add : path = ", ele.path, " \n\tpreg = ", preg, "\n\t str = ", str,
-         //       "\n\t rege = ", rege, "\n");
+        //       "\n\t rege = ", rege, "\n");
         if (str.length == 0)
         {
             ele.destroy;
@@ -210,7 +212,7 @@ final  class RegexMap(REQ, RES)
         }
         if (isHaveRegex(str))
         {
-          //  writeln("set regex is  : ", preg);
+            //  writeln("set regex is  : ", preg);
             if (!ele.setRegex(preg))
                 return null;
 
@@ -245,7 +247,7 @@ final  class RegexMap(REQ, RES)
 
     PElement match(string path, Pipeline pipe)
     {
-       // writeln(" \t\tREGEX macth path:  ", path);
+        // writeln(" \t\tREGEX macth path:  ", path);
         if (path.length == 0)
             return null;
         string lpath;
@@ -293,7 +295,8 @@ final class ElementMap(REQ, RES)
         _regexMap = new RElementMap("/");
     }
 
-    PElement add(string path, HandleDelegate handle, shared PipelineFactory before, shared PipelineFactory after)
+    PElement add(string path, HandleDelegate handle, shared PipelineFactory before,
+        shared PipelineFactory after)
     {
         if (isHaveRegex(path))
         {
@@ -348,7 +351,6 @@ private:
     RElementMap _regexMap;
 }
 
-
 unittest
 {
     import std.functional;
@@ -356,26 +358,26 @@ unittest
 
     class Test
     {
-        int gtest  = 0;
+        int gtest = 0;
     }
 
-    alias Route = Router!(Test,int);
-    class TestMiddleWare : IMiddleWare!(Test,int)
+    alias Route = Router!(Test, int);
+    class TestMiddleWare : IMiddleWare!(Test, int)
     {
         override void handle(Context ctx, Test a, int b)
         {
             a.gtest += 1;
-            writeln("\tIMiddleWare handle : a.gtest : ",a.gtest);
-            ctx.next(a,b);
+            writeln("\tIMiddleWare handle : a.gtest : ", a.gtest);
+            ctx.next(a, b);
         }
     }
 
     void testFun(Test a, int b)
     {
-        ++ a.gtest;
+        ++a.gtest;
     }
 
-    shared class Factor : IPipelineFactory!(Test , int)
+    shared class Factor : IPipelineFactory!(Test, int)
     {
         alias Pipeline = PipelineImpl!(Test, int);
         override Pipeline newPipeline()
@@ -394,37 +396,41 @@ unittest
     router.setGlobalBeforePipelineFactory(new shared Factor());
     router.setGlobalAfterPipelineFactory(new shared Factor());
 
-    auto ele = router.addRouter("get","/file",toDelegate(&testFun), new shared Factor(),new shared Factor());
+    auto ele = router.addRouter("get", "/file", toDelegate(&testFun),
+        new shared Factor(), new shared Factor());
     assert(ele !is null);
-    ele = router.addRouter("get","/file/{:[0-9a-z]{1}}/{d2:[0-9a-z]{2}}/{imagename:\\w+\\.\\w+}",toDelegate(&testFun), new shared Factor(),new shared Factor());
+    ele = router.addRouter("get",
+        "/file/{:[0-9a-z]{1}}/{d2:[0-9a-z]{2}}/{imagename:\\w+\\.\\w+}",
+        toDelegate(&testFun), new shared Factor(), new shared Factor());
     assert(ele !is null);
-    ele = router.addRouter("post","/file/{d1:[0-9a-z]{1}}/{d2:[0-9a-z]{2}}/{imagename:\\w+\\.\\w+}",toDelegate(&testFun));
+    ele = router.addRouter("post",
+        "/file/{d1:[0-9a-z]{1}}/{d2:[0-9a-z]{2}}/{imagename:\\w+\\.\\w+}", toDelegate(&testFun));
     assert(ele !is null);
     router.done();
 
-    auto pipe = router.match("post","/file");
+    auto pipe = router.match("post", "/file");
     assert(pipe is null);
-    pipe = router.match("post","/");
+    pipe = router.match("post", "/");
     assert(pipe is null);
 
-    pipe = router.match("get","/file");
-     assert(pipe !is null);
+    pipe = router.match("get", "/file");
+    assert(pipe !is null);
     a.gtest = 0;
-    pipe.handleActive(a,0);
+    pipe.handleActive(a, 0);
     assert(a.gtest == 9);
 
-    pipe = router.match("post","/file/2/34/ddd.jpg");
+    pipe = router.match("post", "/file/2/34/ddd.jpg");
     assert(pipe !is null);
     assert(pipe.matchData.length == 3);
     a.gtest = 0;
-    pipe.handleActive(a,0);
+    pipe.handleActive(a, 0);
     assert(a.gtest == 5);
 
-    pipe = router.match("get","/file/2/34/ddd.jpg");
+    pipe = router.match("get", "/file/2/34/ddd.jpg");
     assert(pipe !is null);
     assert(pipe.matchData.length == 2);
     a.gtest = 0;
-    pipe.handleActive(a,0);
+    pipe.handleActive(a, 0);
     assert(a.gtest == 9);
 
 }
