@@ -18,10 +18,10 @@
  * a source language processor.
  */
 
-module hunt.view.temple_context;
+module hunt.web.view.temple_context;
 
-import hunt.view;
-import hunt.view.output_stream;
+import hunt.web.view;
+import hunt.web.view.output_stream;
 
 public import std.variant : Variant;
 
@@ -118,21 +118,6 @@ public:
 
     TempleInputStream yield() @property
     {
-        auto noop = TempleInputStream(delegate(ref TempleOutputStream) {  });
-
-        if (partial !is null)
-        {
-            return TempleInputStream(delegate(ref TempleOutputStream os) {
-                partial.render(os, this);
-            });
-        }
-
-        return noop;
-    }
-
-    TempleInputStream display() @property
-    {
-        pragma(msg, "Compiling ...", partial.stringof);
         auto noop = TempleInputStream(delegate(ref TempleOutputStream) {  });
 
         if (partial !is null)
