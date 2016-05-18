@@ -1,11 +1,11 @@
 
-module hunt.router.router;
+module hunt.web.router.router;
 
 import std.regex;
 import std.stdio;
 
-import hunt.router.middleware;
-import hunt.router.utils;
+import hunt.web.router.middleware;
+import hunt.web.router.utils;
 
 final class Router(REQ, RES)
 {

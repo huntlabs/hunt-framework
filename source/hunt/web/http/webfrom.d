@@ -1,4 +1,4 @@
-module hunt.http.webfrom;
+module hunt.web.http.webfrom;
 
 import collie.codec.http;
 import collie.buffer;
