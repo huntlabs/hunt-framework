@@ -1,6 +1,6 @@
 module application.controllers.index;
 
-import hunt.http;
+import hunt.web.http;
 
 class IndexController : IController
 {

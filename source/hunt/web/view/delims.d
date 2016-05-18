@@ -17,7 +17,7 @@
  * a source language processor.
  */
 
-module hunt.view.delims;
+module hunt.web.view.delims;
 
 import std.traits, std.typecons;
 
@@ -36,7 +36,9 @@ enum Delim
     OpenStr,
     CloseShort,
     Close,
-    CloseStr
+    CloseStr,
+	//OpenInclude,
+	//CloseInclude
 }
 
 enum Delims = [EnumMembers!Delim];
@@ -47,7 +49,8 @@ enum OpenDelim : Delim
     OpenShort = Delim.OpenShort,
     Open = Delim.Open,
     OpenShortStr = Delim.OpenShortStr,
-    OpenStr = Delim.OpenStr
+    OpenStr = Delim.OpenStr,
+//    OpenInclude = Delim.OpenInclude,
 }
 
 enum OpenDelims = [EnumMembers!OpenDelim];
@@ -57,7 +60,8 @@ enum CloseDelim : Delim
 {
     CloseShort = Delim.CloseShort,
     Close = Delim.Close,
-    CloseStr = Delim.CloseStr
+    CloseStr = Delim.CloseStr,
+//    CloseInclude = Delim.CloseInclude,
 }
 
 enum CloseDelims = [EnumMembers!CloseDelim];
@@ -66,8 +70,10 @@ enum CloseDelims = [EnumMembers!CloseDelim];
 /// Formally, an onto function
 enum OpenToClose = [
         OpenDelim.OpenShort : CloseDelim.CloseShort,
-        OpenDelim.OpenShortStr : CloseDelim.CloseShort,
-        OpenDelim.Open : CloseDelim.Close, OpenDelim.OpenStr : CloseDelim.CloseStr
+		OpenDelim.OpenShortStr : CloseDelim.CloseShort,
+        OpenDelim.Open : CloseDelim.Close,
+		OpenDelim.OpenStr : CloseDelim.CloseStr,
+	//	OpenDelim.OpenInclude : CloseDelim.CloseInclude,
     ];
 
 string toString(in Delim d)
@@ -88,6 +94,10 @@ string toString(in Delim d)
         return "%}";
     case CloseStr:
         return "}}";
+	//case OpenInclude:
+	//	return "{!";
+	//case CloseInclude:
+	//	return "!}";
     }
 }
 
@@ -124,7 +134,18 @@ bool isStr(in Delim d)
         return false;
     }
 }
-
+/*
+bool isIncludeStr(in Delim d)
+{
+	switch (d) with (Delim)
+	{
+		case OpenInclude:
+			return true;
+		default:
+			return false;
+	}
+}
+*/
 unittest
 {
     static assert(Delim.OpenShort.isStr() == false);
