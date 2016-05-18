@@ -1,5 +1,5 @@
 
-module hunt.router.utils;
+module hunt.web.router.utils;
 
 import std.string;
 import std.regex;
@@ -57,8 +57,8 @@ version (unittest)
 
 unittest
 {
-    controllerHelper!("show", A, int, int)("hunt.router.utils.AA.show", 1, 4);
-    controllerHelper!("show", AA, int, int)("hunt.router.utils.AA.show", 2, 8);
+    controllerHelper!("show", A, int, int)("hunt.web.router.utils.AA.show", 1, 4);
+    controllerHelper!("show", AA, int, int)("hunt.web.router.utils.AA.show", 2, 8);
 }
 
 /// 构造正则表达式，类似上个版本的，把配置里的单独的表达式，构建成一个

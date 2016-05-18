@@ -1,7 +1,7 @@
-module hunt.http.controller;
+module hunt.web.http.controller;
 
-public import hunt.http.response;
-public import hunt.http.request;
+public import hunt.web.http.response;
+public import hunt.web.http.request;
 
 interface IController
 {

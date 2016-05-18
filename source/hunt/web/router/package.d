@@ -1,9 +1,9 @@
-module hunt.router;
+module hunt.web.router;
 
-public import hunt.router.router;
-public import hunt.router.routerconfig;
-public import hunt.router.utils;
-public import hunt.router.middleware;
+public import hunt.web.router.router;
+public import hunt.web.router.routerconfig;
+public import hunt.web.router.utils;
+public import hunt.web.router.middleware;
 
 import collie.utils.functional;
 
