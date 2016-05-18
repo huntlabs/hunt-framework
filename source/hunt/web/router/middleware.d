@@ -1,5 +1,5 @@
 
-module hunt.router.middleware;
+module hunt.web.router.middleware;
 
 import std.functional;
 
@@ -284,9 +284,9 @@ unittest
     assert(t.gtest == 6);
 
     string[] list = [
-        "hunt.router.middleware.TestMiddleWare",
-        "hunt.router.middleware.TestMiddleWare",
-        "hunt.router.middleware.TestMiddleWare", "hunt.router.middleware.TestMiddleWare"
+        "hunt.web.router.middleware.TestMiddleWare",
+        "hunt.web.router.middleware.TestMiddleWare",
+        "hunt.web.router.middleware.TestMiddleWare", "hunt.web.router.middleware.TestMiddleWare"
     ];
     auto pipefactor = new shared AutoMiddleWarePipelineFactory!(Test, int)(list);
     auto pipe3 = pipefactor.newPipeline();
