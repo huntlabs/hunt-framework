@@ -1,0 +1,8 @@
+/*
+ * Hunt - a web framework based on Collie using Dlang development
+ *
+ * Copyright (C) 2015-2016  Shanghai Putao Technology Co., Ltd Dlang team
+ *
+ * Licensed under the BSD License.
+ *
+ */
