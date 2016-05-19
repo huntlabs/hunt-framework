@@ -20,7 +20,7 @@ void show()
     auto ctx = new TempleContext;
     ctx.name = "viile";
 
-    layouts_main.layout(&hello).render(function(str) {
+    hunt.web.view.display.layouts_main.layout(&hunt.web.view.display.hello).render(function(str) {
         write(str);
     }, ctx);
 
