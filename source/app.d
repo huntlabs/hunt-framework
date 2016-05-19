@@ -11,16 +11,17 @@ void hello(Request, Response res)
 {
     res.setContext("hello world");
     res.setHeader("content-type","text/html;charset=UTF-8");
+    res.done();
 }
 
 void show()
 {
     import hunt.web.view;
-    import hunt.web.view.display;
+    import display = hunt.web.view.display;
     auto ctx = new TempleContext;
     ctx.name = "viile";
 
-    layouts_main.layout(&hello).render(function(str) {
+    display.layouts_main.layout(&display.hello).render(function(str) {
         write(str);
     }, ctx);
 
@@ -28,7 +29,7 @@ void show()
 void main()
 {
     writeln("hello world");
-    //globalLogLevel(LogLevej.error);
+    //globalLogLevel(LogLevel.error);
     WebApplication app = new WebApplication();
     app.setGroupRouterConfig(new ConfigParse("config/router.conf", "config/application.conf"));
     //app.addRouter("GET","/test",toDelegate(&hello)).addRouter("GET","/ttt",toDelegate(&hello));
