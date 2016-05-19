@@ -1,0 +1,3 @@
+<span>
+    main content! passed in name: {{ var.name }}
+<span>
