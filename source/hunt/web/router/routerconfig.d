@@ -8,7 +8,7 @@ import std.array;
 import std.uni;
 import std.conv;
 
-import hunt.web.router.ini;
+import hunt.config.ini;
 
 struct RouterContext
 {
@@ -33,7 +33,7 @@ abstract class RouterConfig
     this(string filePath, string prefix = "application.controllers.")
     in
     {
-        assert(exists(filePath), "Error file path!");
+        assert(exists(filePath), filePath~" Error file path!");
     }
     body
     {
@@ -73,15 +73,16 @@ protected:
 class ConfigParse : RouterConfig
 {
     import std.experimental.logger;
-    this(string filePath, string prefix = "application.controllers.", string routerGroupPath=string.init)
+    this(string filePath, string routerGroupPath=string.init, string prefix = "application.controllers.")
     {
-        super(filePath, prefix);
 	if(routerGroupPath != string.init)
 	{
 	    assert(exists(routerGroupPath), "Without file!");
 	    this._useRouterGroup = true;
 	    this._routerGroupPath = routerGroupPath;
+	    prefix = "application.";
 	}
+        super(filePath, prefix);
     }
 
 public:
@@ -113,6 +114,7 @@ public:
                 else
                     tmpRoute.method = toUpper(tmpSplites[0]);
                 tmpRoute.path = tmpSplites[1];
+		//writeln("_useRouterGroup: ",_useRouterGroup);
 		if(!_useRouterGroup)
 		    tmpRoute.hander = parseToFullControllerWithDefault(tmpSplites[2]);
 		else
@@ -160,10 +162,13 @@ private:
     {
 	/// admin/user.admin.show
         string[] spritArr = split(inBuff, '/');
+	//size_t spliterPos = inBuff.lastIndexOf("/");
+	//assert(spliterPos != -1, "Without /");
         assert(spritArr.length == 2, "Style of group router error! Usage: admin/aa.bb.cc");
 	///get groupName
 	string groupType = ini.value("RouterGroup",spritArr[0]~".type");
 	string groupItemValue = ini.value("RouterGroup", spritArr[0]~".value");
+	writeln("groupType: ", groupType, " groupItemValue: ", groupItemValue);
 	if(groupType == "domain")
 	{
 	    outRouterContext.routerType = RouterType.DOMAIN;
@@ -185,7 +190,7 @@ private:
         spritClass[spritClass.length - 2] = to!string(spritClass[spritClass.length - 2].asCapitalized) ~ _controllerPrefix;
         output ~= _prefix;
         output ~= spritClass.join(".");
-	trace("++++++output: ", output);
+	writeln("++++++output: ", output);
 	outRouterContext.hander = output;
 	return;
     }
@@ -201,7 +206,8 @@ private:
             output ~= cast(string) s.hit;
         return output;
     }
-
+    
+    
     void parseMiddleware(string toParse, out string[] beforeMiddleware, out string[] afterMiddleware)
     {
         size_t beforePos, afterPos, semicolonPos;
@@ -210,7 +216,7 @@ private:
         semicolonPos = toParse.indexOf(";");
         assert(beforePos <= afterPos, "after position and before position worry");
         //assert(beforePos 
-        trace("toParse: ", toParse, " beforePos: ", beforePos);
+        //trace("toParse: ", toParse, " beforePos: ", beforePos);
         if (beforePos < 0)
             beforePos = toParse.length - 1;
         else
@@ -224,7 +230,7 @@ private:
         if (beforePos < semicolonPos)
             beforeMiddleware = split(toParse[beforePos .. semicolonPos], ',');
         afterMiddleware = split(toParse[afterPos .. $], ',');
-        trace("beforeMiddleware: ", beforeMiddleware, " afterMiddleware: ", afterMiddleware);
+        //trace("beforeMiddleware: ", beforeMiddleware, " afterMiddleware: ", afterMiddleware);
     }
 
 private:
@@ -234,17 +240,4 @@ private:
     string _afterFlag = "after:";
     bool   _useRouterGroup=false;
     string _routerGroupPath;
-}
-
-void main()
-{
-    ConfigParse new_parse = new ConfigParse("router.conf", "routerGroup.ini");
-    //new_parse.setFilePath("router.conf");
-    RouterContext[] test_router_context = new_parse.doParse();
-    foreach (item; test_router_context)
-    {
-        writeln("method: ", item.method, " path: ", item.path, " hander: ",
-            item.hander, " middleWareAfter: ", item.middleWareAfter,
-            " middleWareBefore: ", item.middleWareBefore);
-    }
 }

@@ -159,7 +159,7 @@ bool isHaveRegex(string path)
 
 /// file
 /// 取出来地一个path： 例如： /file/ddd/f ; reurn = file,  lpath= /ddd/f;
-string getFristPath(string fpath, out string lpath)
+string getFirstPath(string fpath, out string lpath)
 {
     if (fpath.length == 0)
         return "";
