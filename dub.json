@@ -1,7 +1,7 @@
 {
     "name": "hunt",
-    "description": "A web framework based on Collie .",
-    "authors": [ "putao.com Dlang team." ],
+    "description": "A framework for web and console application based on collie using dlang development.",
+    "authors": [ "putao.com dlang team." ],
     "license": "BSD",
     "stringImportPaths": [ "./resources/views" ],
     "libs" : ["jemalloc"],
