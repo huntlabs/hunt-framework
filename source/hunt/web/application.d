@@ -177,7 +177,7 @@ private:
     {
         trace("macth router : method: ", req.Header.methodString, "   path : ",req.Header.path, " host: ", req.Header.host);
         RouterPipeline pipe = null;
-	std.stdio.writeln("app.router.usingGroupRouter: ",app.router.usingGroupRouter);
+	trace("app.router.usingGroupRouter: ",app.router.usingGroupRouter);
 	if(app.router.usingGroupRouter)
 	    pipe = app.router.groupMatch(req.Header.host, req.Header.methodString, req.Header.path);
 	else
