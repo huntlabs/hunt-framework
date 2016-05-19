@@ -73,7 +73,7 @@ public CompiledTemple compile_temple(string __TempleString, string __TempleName,
     const __TempleFuncStr = __temple_gen_temple_func_string(__TempleString,
         __TempleName, __TempleFilterIdent);
 
-    pragma(msg, __TempleFuncStr);
+    //pragma(msg, __TempleFuncStr);
 
     mixin(__TempleFuncStr);
     //pragma(msg, "TempleFunc ", __TempleFuncStr, "...");
