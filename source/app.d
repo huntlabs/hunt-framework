@@ -4,7 +4,7 @@ import std.experimental.logger;
 
 import hunt.web.http.cookie;
 
-import hunt.web.webapplication;
+import hunt.web.application;
 import application.middleware;
 
 void hello(Request, Response res)
