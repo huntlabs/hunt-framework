@@ -54,7 +54,7 @@ deprecated("Please use compile_temple") auto Temple(ARGS...)()
 
 public CompiledTemple compile_temple(string __TempleString, string __TempleName, __Filter = void)()
 {
-	writeln("__TempleString:",template_parsing(__TempleString));
+	//writeln("__TempleString:",template_parsing(__TempleString));
 	//writeln("__TempleName:",__TempleName);
     // __TempleString: The template string to compile
     // __TempleName: The template's file name, or 'InlineTemplate'
@@ -100,15 +100,14 @@ CompiledTemple compile_temple_file(string template_file, Filter = void)()
     pragma(msg, "Compiling ", template_file, "...");
     return compile_temple!(import(template_file), template_file, Filter);
 }
-/*
-string display(string template_file,TempleContext res)
+
+CompiledTemple display(string template_file)()
 {
-    auto template_string = readText("../hunt/resources/views/"~template_file);
+    auto template_string = import(template_file);
     auto template_string_parsing = template_parsing(template_string);
-    auto temple = compile_temple!template_string_parsing;
-    return temple.toString(res);
+    return compile_temple!template_string_parsing;
 }
-*/
+
 
 string template_parsing(string template_string)
 {
@@ -274,7 +273,7 @@ public:
     }
     body
     {
-        writeln("\n into layout function : ",this.render_func, "-", partial);
+        //writeln("\n into layout function : ",this.render_func, "-", partial);
         return CompiledTemple(this.render_func, partial);
     }
 
