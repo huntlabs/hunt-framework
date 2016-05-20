@@ -44,6 +44,7 @@ void setGroupRouterConfigHelper(string FUN, T, REQ, RES)(Router!(REQ, RES) route
     foreach (ref item; routeList)
     {
         auto list = split(item.method, ',');
+	std.stdio.writeln("item.hander: ", item.hander);
         foreach (ref str; list)
         {
             if (str.length == 0)
