@@ -1,11 +1,13 @@
-
 module hunt.web.router.router;
 
 import std.regex;
 import std.stdio;
+import std.string;
+import std.experimental.logger;
 
 import hunt.web.router.middleware;
 import hunt.web.router.utils;
+
 
 final class Router(REQ, RES)
 {
@@ -38,7 +40,43 @@ final class Router(REQ, RES)
         }
         return map.add(path, handle, before, after);
     }
+ 
+    ///group router is domain, groupName fill domain
+    RouterElement addGroupRouter(string groupName, string method, string path, HandleDelegate handle,
+	    shared PipelineFactory before = null, shared PipelineFactory after = null)
+    {
+        if (condigDone)
+            return null;
+	_useGroupRouter = true;
+	if(groupName !in _groupMap)
+	    _groupMap[groupName][method] = new RouterMap(this);
+	if(groupName in _groupMap && !_groupMap[groupName].get(method,null))
+	    _groupMap[groupName][method] = new RouterMap(this);
+	trace("groupName: ", groupName, " method: ", method, " path: ", path);
+	return _groupMap[groupName][method].add(path, handle, before, after);
+    }
 
+    Pipeline groupMatch(string host, string method, string path)
+    {
+	trace("function: ", __FUNCTION__);
+	if(!condigDone)
+	    return null;
+	trace("host: ",host, " method: ", method, " path: ", path);
+	if(host in _groupMap && _groupMap[host].get(method,null))
+	    return _groupMap[host][method].match(path);
+	if(host !in _groupMap)
+	{
+	    string groupName;
+	    string usingPath;
+	    groupName = getFirstPath(path, usingPath);
+	    trace("groupName: ", groupName, " usingPath: ", usingPath);
+	    
+	    trace("usingPath: ", usingPath);
+	    if(groupName in _groupMap && _groupMap[groupName].get(method,null))
+		return _groupMap[groupName][method].match(usingPath);
+	}
+	return null;
+    }
     Pipeline match(string method, string path)
     {
         Pipeline pipe = null;
@@ -71,6 +109,11 @@ final class Router(REQ, RES)
     {
         return _configDone;
     }
+    
+    @property bool usingGroupRouter()
+    {
+	return _useGroupRouter;
+    }
 
     void done()
     {
@@ -81,7 +124,9 @@ private:
     shared PipelineFactory _gbefore = null;
     shared PipelineFactory _gafter = null;
     RouterMap[string] _map;
+    RouterMap[string][string]  _groupMap;
     bool _configDone = false;
+    bool _useGroupRouter = false;
 }
 
 class PathElement(REQ, RES)
@@ -202,7 +247,7 @@ final class RegexMap(REQ, RES)
     PElement add(RElement ele, string preg)
     {
         string rege;
-        string str = getFristPath(preg, rege);
+        string str = getFirstPath(preg, rege);
         //writeln("RegexMap add : path = ", ele.path, " \n\tpreg = ", preg, "\n\t str = ", str,
         //       "\n\t rege = ", rege, "\n");
         if (str.length == 0)
@@ -251,7 +296,7 @@ final class RegexMap(REQ, RES)
         if (path.length == 0)
             return null;
         string lpath;
-        string frist = getFristPath(path, lpath);
+        string frist = getFirstPath(path, lpath);
         if (frist.length == 0)
             return null;
         RElementMap map = _map.get(frist, null);
