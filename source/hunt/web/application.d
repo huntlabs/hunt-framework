@@ -30,6 +30,7 @@ final class WebApplication
         _server = new ServerBootstrap!HTTPPipeline(loop);
         _server.childPipeline(new shared HTTPPipelineFactory(this));
         _config = new HTTPConfig();
+        _server.setReusePort(true);
     }
     
     WebApplication setRouterConfig(RouterConfig config)
@@ -39,6 +40,20 @@ final class WebApplication
         return this;
     }
     
+    WebApplication setGroupRouterConfig(RouterConfig config)
+    {
+        setGroupRouterConfigHelper!("__CALLACTION__",IController,Request, Response)
+                                (_router,config);
+        return this;
+    }
+   
+    WebApplication addGroupRouter(string groupName, string method, string path, DOHandler handle,
+        shared RouterPipelineFactory before = null, shared RouterPipelineFactory after = null)
+    {
+        router.addGroupRouter(groupName,method,path,handle,before,after);
+        return this;
+    }
+
     WebApplication addRouter(string method, string path, DOHandler handle,
         shared RouterPipelineFactory before = null, shared RouterPipelineFactory after = null)
     {
@@ -161,8 +176,14 @@ final class WebApplication
 private:
     static void doHandle(WebApplication app,Request req, Response res)
     {
-        trace("macth router : method: ", req.Header.methodString, "   path : ",req.Header.path);
-        RouterPipeline pipe = app.router.match(req.Header.methodString, req.Header.path);
+        trace("macth router : method: ", req.Header.methodString, "   path : ",req.Header.path, " host: ", req.Header.host);
+        RouterPipeline pipe = null;
+	trace("app.router.usingGroupRouter: ",app.router.usingGroupRouter);
+	if(app.router.usingGroupRouter)
+	    pipe = app.router.groupMatch(req.Header.host, req.Header.methodString, req.Header.path);
+	else
+	    pipe = app.router.match(req.Header.methodString, req.Header.path);
+
         if (pipe is null)
         {
             app._404(req, res);
