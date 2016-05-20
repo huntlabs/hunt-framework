@@ -197,7 +197,7 @@ private:
         string output;
 	string[] spritClass = split(spritArr[1], '.');
 	spritClass[0] = spritClass[0]~"."~_controllerPathName;
-        spritClass[spritClass.length - 2] = to!string(spritClass[spritClass.length - 2].asCapitalized) ~ _controllerPrefix;
+        spritClass[spritClass.length - 2] = spritClass[spritClass.length - 2] ~"."~ to!string(spritClass[spritClass.length - 2].asCapitalized) ~ _controllerPrefix;
         output ~= _prefix;
         output ~= spritClass.join(".");
 	writeln("++++++output: ", output);
