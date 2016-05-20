@@ -1,3 +1,13 @@
+/*
+ * Hunt - a framework for web and console application based on Collie using Dlang development
+ *
+ * Copyright (C) 2015-2016  Shanghai Putao Technology Co., Ltd 
+ *
+ * Developer: putao's Dlang team
+ *
+ * Licensed under the BSD License.
+ *
+ */
 module hunt.web.router.routerconfig;
 
 import std.file;
@@ -187,7 +197,7 @@ private:
         string output;
 	string[] spritClass = split(spritArr[1], '.');
 	spritClass[0] = spritClass[0]~"."~_controllerPathName;
-        spritClass[spritClass.length - 2] = to!string(spritClass[spritClass.length - 2].asCapitalized) ~ _controllerPrefix;
+        spritClass[spritClass.length - 2] = spritClass[spritClass.length - 2] ~"."~ to!string(spritClass[spritClass.length - 2].asCapitalized) ~ _controllerPrefix;
         output ~= _prefix;
         output ~= spritClass.join(".");
 	writeln("++++++output: ", output);
