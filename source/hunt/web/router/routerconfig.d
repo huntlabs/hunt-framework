@@ -25,7 +25,7 @@ struct RouterContext
     string method;
     string path;
     string hander;
-    RouterType routerType;
+    RouterType routerType = RouterType.DEFAULT;
     string host;
     string dir;
     string[] middleWareBefore;
@@ -33,6 +33,7 @@ struct RouterContext
 }
 enum RouterType
 {
+    DOMAIN_DIR,
     DOMAIN,
     DIR,
     DEFAULT,
