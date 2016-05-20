@@ -26,6 +26,9 @@ final class Router(REQ, RES)
     alias PipelineFactory = IPipelineFactory!(REQ, RES);
     alias RouterElement = PathElement!(REQ, RES);
     alias RouterMap = ElementMap!(REQ, RES);
+    
+    alias Request = REQ;
+    alias Response = RES;
 
     void setGlobalBeforePipelineFactory(shared PipelineFactory before)
     {
@@ -51,42 +54,6 @@ final class Router(REQ, RES)
         return map.add(path, handle, before, after);
     }
  
-    ///group router is domain, groupName fill domain
-    RouterElement addGroupRouter(string groupName, string method, string path, HandleDelegate handle,
-	    shared PipelineFactory before = null, shared PipelineFactory after = null)
-    {
-        if (condigDone)
-            return null;
-	_useGroupRouter = true;
-	if(groupName !in _groupMap)
-	    _groupMap[groupName][method] = new RouterMap(this);
-	if(groupName in _groupMap && !_groupMap[groupName].get(method,null))
-	    _groupMap[groupName][method] = new RouterMap(this);
-	trace("groupName: ", groupName, " method: ", method, " path: ", path);
-	return _groupMap[groupName][method].add(path, handle, before, after);
-    }
-
-    Pipeline groupMatch(string host, string method, string path)
-    {
-	trace("function: ", __FUNCTION__);
-	if(!condigDone)
-	    return null;
-	trace("host: ",host, " method: ", method, " path: ", path);
-	if(host in _groupMap && _groupMap[host].get(method,null))
-	    return _groupMap[host][method].match(path);
-	if(host !in _groupMap)
-	{
-	    string groupName;
-	    string usingPath;
-	    groupName = getFirstPath(path, usingPath);
-	    trace("groupName: ", groupName, " usingPath: ", usingPath);
-	    
-	    trace("usingPath: ", usingPath);
-	    if(groupName in _groupMap && _groupMap[groupName].get(method,null))
-		return _groupMap[groupName][method].match(usingPath);
-	}
-	return null;
-    }
     Pipeline match(string method, string path)
     {
         Pipeline pipe = null;
@@ -119,11 +86,6 @@ final class Router(REQ, RES)
     {
         return _configDone;
     }
-    
-    @property bool usingGroupRouter()
-    {
-	return _useGroupRouter;
-    }
 
     void done()
     {
@@ -134,9 +96,7 @@ private:
     shared PipelineFactory _gbefore = null;
     shared PipelineFactory _gafter = null;
     RouterMap[string] _map;
-    RouterMap[string][string]  _groupMap;
     bool _configDone = false;
-    bool _useGroupRouter = false;
 }
 
 class PathElement(REQ, RES)
@@ -363,6 +323,7 @@ final class ElementMap(REQ, RES)
         }
         else
         {
+	    trace("add function: ", path, " handle: ", handle.ptr);
             auto ele = new PElement(path);
             ele.setAfterPipelineFactory(after);
             ele.setBeforePipelineFactory(before);
@@ -377,6 +338,7 @@ final class ElementMap(REQ, RES)
         Pipeline pipe = new Pipeline();
 
         PElement element = _pathMap.get(path, null);
+	writeln("element: ", element);
 
         if (!element)
         {
