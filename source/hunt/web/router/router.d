@@ -1,3 +1,13 @@
+/*
+ * Hunt - a framework for web and console application based on Collie using Dlang development
+ *
+ * Copyright (C) 2015-2016  Shanghai Putao Technology Co., Ltd 
+ *
+ * Developer: putao's Dlang team
+ *
+ * Licensed under the BSD License.
+ *
+ */
 module hunt.web.router.router;
 
 import std.regex;
@@ -353,6 +363,7 @@ final class ElementMap(REQ, RES)
         }
         else
         {
+	    trace("add function: ", path, " handle: ", handle.ptr);
             auto ele = new PElement(path);
             ele.setAfterPipelineFactory(after);
             ele.setBeforePipelineFactory(before);
@@ -367,6 +378,7 @@ final class ElementMap(REQ, RES)
         Pipeline pipe = new Pipeline();
 
         PElement element = _pathMap.get(path, null);
+	writeln("element: ", element);
 
         if (!element)
         {

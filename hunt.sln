@@ -1,21 +1,26 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{19BFB7B0-B415-42A7-8359-110915F4F52A}") = "hunt", "hunt.visualdproj", "{70ABED4B-B57D-4CF0-A907-A4AD85F82795}"
+Project("{559EC4B5-3BD3-45A6-AB9A-7660DFDFDE6F}") = "hunt", "hunt.visualdproj", "{FF536F57-75E2-4E55-A7CD-782C7E84BF54}"
 	ProjectSection(ProjectDependencies) = postProject
-		{022E055A-FEA8-43CA-B80D-1453884F809E} = {022E055A-FEA8-43CA-B80D-1453884F809E}
+		{F26EE328-F8AF-4D5D-BE14-2B4559D4B53F} = {F26EE328-F8AF-4D5D-BE14-2B4559D4B53F}
+		{2C3F7DDD-DB5B-4F87-B9A1-DDE2D31E5C14} = {2C3F7DDD-DB5B-4F87-B9A1-DDE2D31E5C14}
 	EndProjectSection
 EndProject
-Project("{19BFB7B0-B415-42A7-8359-110915F4F52A}") = "collie", "collie.visualdproj", "{022E055A-FEA8-43CA-B80D-1453884F809E}"
+Project("{559EC4B5-3BD3-45A6-AB9A-7660DFDFDE6F}") = "collie", "collie.visualdproj", "{F26EE328-F8AF-4D5D-BE14-2B4559D4B53F}"
+EndProject
+Project("{559EC4B5-3BD3-45A6-AB9A-7660DFDFDE6F}") = "libmemcached4d", "libmemcached4d.visualdproj", "{2C3F7DDD-DB5B-4F87-B9A1-DDE2D31E5C14}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		debug|Win32 = debug|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{022E055A-FEA8-43CA-B80D-1453884F809E}.debug|Win32.ActiveCfg = debug|Win32
-		{022E055A-FEA8-43CA-B80D-1453884F809E}.debug|Win32.Build.0 = debug|Win32
-		{70ABED4B-B57D-4CF0-A907-A4AD85F82795}.debug|Win32.ActiveCfg = debug|Win32
-		{70ABED4B-B57D-4CF0-A907-A4AD85F82795}.debug|Win32.Build.0 = debug|Win32
+		{F26EE328-F8AF-4D5D-BE14-2B4559D4B53F}.debug|Win32.ActiveCfg = debug|Win32
+		{F26EE328-F8AF-4D5D-BE14-2B4559D4B53F}.debug|Win32.Build.0 = debug|Win32
+		{2C3F7DDD-DB5B-4F87-B9A1-DDE2D31E5C14}.debug|Win32.ActiveCfg = debug|Win32
+		{2C3F7DDD-DB5B-4F87-B9A1-DDE2D31E5C14}.debug|Win32.Build.0 = debug|Win32
+		{FF536F57-75E2-4E55-A7CD-782C7E84BF54}.debug|Win32.ActiveCfg = debug|Win32
+		{FF536F57-75E2-4E55-A7CD-782C7E84BF54}.debug|Win32.Build.0 = debug|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
