@@ -189,7 +189,13 @@ private:
         }
         else
         {
-            scope(exit) pipe.destroy;
+            
+            scope(exit)
+            {
+                import core.memory;
+                pipe.destroy;
+                GC.free(cast(void *)pipe);
+            }
             if(pipe.matchData().length > 0)
             {
                 pipe.swapMatchData(req.materef());
