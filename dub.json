@@ -4,11 +4,11 @@
     "authors": [ "putao.com dlang team." ],
     "license": "BSD",
     "stringImportPaths": [ "./resources/views" ],
-    "libs" : ["jemalloc"],
+    "libs" : [],
     "versions": [ "USE_FileSessionStorage"],
     "dependencies": {
         "collie": {
-            "path" : "../collie/"
+	    "version": "~>0.5.1"
         } ,
 	"libmemcached4d": "~master"
     }
