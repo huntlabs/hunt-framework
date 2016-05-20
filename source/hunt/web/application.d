@@ -35,7 +35,7 @@ final class WebApplication
     
     this(EventLoop loop)
     {
-       _router = new HTTPRouter();
+       _router = new HTTPRouterGroup();
         _404 = &default404;
         _server = new ServerBootstrap!HTTPPipeline(loop);
         _server.childPipeline(new shared HTTPPipelineFactory(this));
@@ -45,22 +45,15 @@ final class WebApplication
     
     WebApplication setRouterConfig(RouterConfig config)
     {
-        setRouterConfigHelper!("__CALLACTION__",IController,Request, Response)
-                                (_router,config);
-        return this;
-    }
-    
-    WebApplication setGroupRouterConfig(RouterConfig config)
-    {
-        setGroupRouterConfigHelper!("__CALLACTION__",IController,Request, Response)
+        setRouterConfigHelper!("__CALLACTION__",IController,HTTPRouterGroup)
                                 (_router,config);
         return this;
     }
    
-    WebApplication addGroupRouter(string groupName, string method, string path, DOHandler handle,
+    WebApplication addRouter(string domain, string method, string path, DOHandler handle,
         shared RouterPipelineFactory before = null, shared RouterPipelineFactory after = null)
     {
-        router.addGroupRouter(groupName,method,path,handle,before,after);
+        router.addRouter(domain,method,path,handle,before,after);
         return this;
     }
 
@@ -188,11 +181,7 @@ private:
     {
         trace("macth router : method: ", req.Header.methodString, "   path : ",req.Header.path, " host: ", req.Header.host);
         RouterPipeline pipe = null;
-	trace("app.router.usingGroupRouter: ",app.router.usingGroupRouter);
-	if(app.router.usingGroupRouter)
-	    pipe = app.router.groupMatch(req.Header.host, req.Header.methodString, req.Header.path);
-	else
-	    pipe = app.router.match(req.Header.methodString, req.Header.path);
+	pipe = app.router.match(req.Header.host,req.Header.methodString, req.Header.path);
 
         if (pipe is null)
         {
@@ -200,7 +189,13 @@ private:
         }
         else
         {
-            scope(exit) pipe.destroy;
+            
+            scope(exit)
+            {
+                import core.memory;
+                pipe.destroy;
+                GC.free(cast(void *)pipe);
+            }
             if(pipe.matchData().length > 0)
             {
                 pipe.swapMatchData(req.materef());
@@ -217,7 +212,7 @@ private:
     }
 
 private:
-    HTTPRouter _router;
+    HTTPRouterGroup _router;
     DOHandler _404;
     ServerBootstrap!HTTPPipeline _server;
     HTTPConfig _config;
