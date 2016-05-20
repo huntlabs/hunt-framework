@@ -1,7 +1,7 @@
 hunt
 =======
 
-A web framework based on [Collie](https://github.com/putao-dev/collie/), written in [dlang](http://dlang.org/).
+A framework for web and console application based on [Collie](https://github.com/putao-dev/collie/) using [dlang](http://dlang.org/) development.
 
 ## 建议
 
