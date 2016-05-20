@@ -25,7 +25,7 @@ struct RouterContext
     string method;
     string path;
     string hander;
-    RouterType routerType;
+    RouterType routerType = RouterType.DEFAULT;
     string host;
     string dir;
     string[] middleWareBefore;
@@ -33,6 +33,7 @@ struct RouterContext
 }
 enum RouterType
 {
+    DOMAIN_DIR,
     DOMAIN,
     DIR,
     DEFAULT,
@@ -197,7 +198,7 @@ private:
         string output;
 	string[] spritClass = split(spritArr[1], '.');
 	spritClass[0] = spritClass[0]~"."~_controllerPathName;
-        spritClass[spritClass.length - 2] = to!string(spritClass[spritClass.length - 2].asCapitalized) ~ _controllerPrefix;
+        spritClass[spritClass.length - 2] = spritClass[spritClass.length - 2] ~"."~ to!string(spritClass[spritClass.length - 2].asCapitalized) ~ _controllerPrefix;
         output ~= _prefix;
         output ~= spritClass.join(".");
 	writeln("++++++output: ", output);

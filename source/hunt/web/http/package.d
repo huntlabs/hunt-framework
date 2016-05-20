@@ -24,3 +24,4 @@ alias RouterPipeline = PipelineImpl!(Request, Response);
 alias RouterPipelineFactory = IPipelineFactory!(Request, Response);
 alias MiddleWare = IMiddleWare!(Request, Response);
 alias DOHandler = void delegate(Request, Response);
+alias HTTPRouterGroup = RouterGroup!(Request, Response);

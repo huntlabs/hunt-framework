@@ -42,9 +42,9 @@ void main()
     //globalLogLevel(LogLevel.error);
     WebApplication app = new WebApplication();
 
-    app.setGroupRouterConfig(new ConfigParse("config/router.conf", "config/application.conf"));
+    app.setRouterConfig(new ConfigParse("config/router.conf", "config/application.conf"));
     //app.addRouter("GET","/test",toDelegate(&hello)).addRouter("GET","/ttt",toDelegate(&hello));
-    app.setGlobalAfterPipelineFactory(new GAMFactory).setGlobalBeforePipelineFactory(new GBMFactory);
+    //app.setGlobalAfterPipelineFactory(new GAMFactory).setGlobalBeforePipelineFactory(new GBMFactory);
     app.group(new EventLoopGroup(1)).bind(8080);
 
     app.run();
