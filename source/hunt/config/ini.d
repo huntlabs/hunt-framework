@@ -17,6 +17,7 @@ import std.string;
 import std.experimental.logger;
 import core.stdc.stdlib;
 import hunt.config.exception;
+import std.exception;
 
 private class IniLine
 {
@@ -278,7 +279,7 @@ protected:
 
         void ungetc()
         {
-            assert(i > 0);
+			enforce!HuntConfigException(i>0, "i lt 0");
             i--;
         }
 
