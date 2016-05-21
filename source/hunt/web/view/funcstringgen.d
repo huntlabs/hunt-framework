@@ -9,7 +9,7 @@
  *
  * template parsing is based on dymk/temple source from https://github.com/dymk/temple
  */
-module hunt.web.view.func_string_gen;
+module hunt.web.view.funcstringgen;
 
 public import hunt.web.view, hunt.web.view.util, hunt.web.view.delims, std.conv,
     std.string, std.array, std.exception, std.uni, std.algorithm;

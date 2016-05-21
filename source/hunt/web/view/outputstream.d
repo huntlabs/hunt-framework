@@ -9,7 +9,7 @@
  *
  * template parsing is based on dymk/temple source from https://github.com/dymk/temple 
  */
-module hunt.web.view.output_stream;
+module hunt.web.view.outputstream;
 
 private
 {
