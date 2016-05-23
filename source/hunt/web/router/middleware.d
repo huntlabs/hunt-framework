@@ -12,18 +12,29 @@ module hunt.web.router.middleware;
 
 import std.functional;
 
+/**
+    The MiddleWare interface.
+*/
 interface IMiddleWare(REQ, RES)
 {
     alias Context = ContextImpl!(REQ, RES);
+    /// the handle will be call in the pipeline handler.
     void handle(Context ctx, REQ req, RES res);
 }
 
+/**
+    This class is create a Pipeline.
+*/
 abstract shared class IPipelineFactory(REQ, RES)
 {
     alias Pipeline = PipelineImpl!(REQ, RES);
+    /// return a Pipeline.
     Pipeline newPipeline();
 }
 
+/**
+    The pipeline like a list. it call the MiddleWare form frist to last.
+*/
 final class PipelineImpl(REQ, RES)
 {
     alias MiddleWare = IMiddleWare!(REQ, RES);
@@ -43,6 +54,7 @@ final class PipelineImpl(REQ, RES)
         _last = null;
     }
 
+    /// add a MiddleWare
     void addHandler(MiddleWare hander)
     in
     {
@@ -55,6 +67,7 @@ final class PipelineImpl(REQ, RES)
         _last = cxt;
     }
 
+    /// add a delegate and it auto create a MiddleWare.
     void addHandler(HandleDelegate handler)
     in
     {
@@ -67,6 +80,7 @@ final class PipelineImpl(REQ, RES)
         _last = cxt;
     }
 
+    /// append a pipeline to the last.
     void append(Pipeline pipeline)
     {
         if (pipeline is null)
@@ -82,11 +96,13 @@ final class PipelineImpl(REQ, RES)
         }
     }
 
+    /// start handle the MiddleWare, from frist to last.
     void handleActive(REQ req, RES res)
     {
         _first.next(forward!(req, res));
     }
 
+    /// Does this pipeline have any MiddleWare.
     @property bool empty()
     {
         if (_first == _last)
@@ -95,16 +111,19 @@ final class PipelineImpl(REQ, RES)
             return false;
     }
 
+    /// get the match data. data is in path.
     @property matchData()
     {
         return _matchData;
     }
 
+    /// add a match data.
     void addMatch(string key, string value)
     {
         _matchData[key] = value;
     }
 
+    /// swap the match data.
     void swapMatchData(ref string[string] to)
     {
         import std.algorithm.mutation : swap;
@@ -116,6 +135,9 @@ private:
     string[string] _matchData;
 }
 
+/**
+    The Context Class.
+*/
 final class ContextImpl(REQ, RES)
 {
     alias MiddleWare = IMiddleWare!(REQ, RES);
@@ -136,6 +158,9 @@ final class ContextImpl(REQ, RES)
         _middleWare = null;
     }
 
+    /**
+        call the next handle.
+    */
     void next(REQ req, RES res)
     {
         if (_next)
