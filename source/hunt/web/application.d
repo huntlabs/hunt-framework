@@ -53,13 +53,13 @@ final class WebApplication
         _config = new HTTPConfig();
         _server.setReusePort(true);
     }
-    
+
     /**
         Config the Apolication's Router .
         Params:
             config = the Config Class.
     */
-    WebApplication setRouterConfig(RouterConfig config)
+    WebApplication setRouterConfig(RouterConfigBase config)
     {
         setRouterConfigHelper!("__CALLACTION__",IController,HTTPRouterGroup)
                                 (_router,config);

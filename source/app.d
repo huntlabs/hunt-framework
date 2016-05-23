@@ -46,7 +46,7 @@ void main()
     
     WebApplication app = new WebApplication(loop);
 
-    app.setRouterConfig(new ConfigParse("config/router.conf", "config/application.conf"));
+    app.setRouterConfig(new ConfigMultipleModule("config/router.conf", "config/application.conf"));
     //app.addRouter("GET","/test",toDelegate(&hello)).addRouter("GET","/ttt",toDelegate(&hello));
     //app.setGlobalAfterPipelineFactory(new GAMFactory).setGlobalBeforePipelineFactory(new GBMFactory);
 //    app.group(new EventLoopGroup(1));
