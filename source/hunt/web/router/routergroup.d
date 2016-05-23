@@ -4,7 +4,9 @@ import hunt.web.router.router;
 import hunt.web.router.middleware;
 import hunt.web.router.utils;
 
-
+/**
+    the router group.
+*/
 final class RouterGroup(REQ,RES)
 {
     alias Route                 = Router!(REQ,RES);
