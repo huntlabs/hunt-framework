@@ -43,7 +43,7 @@ final class WebApplication
         _server.setReusePort(true);
     }
     
-    WebApplication setRouterConfig(RouterConfig config)
+    WebApplication setRouterConfig(RouterConfigBase config)
     {
         setRouterConfigHelper!("__CALLACTION__",IController,HTTPRouterGroup)
                                 (_router,config);
