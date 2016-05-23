@@ -8,7 +8,7 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.web.router.routerconfig;
+module hunt.web.router.ConfigSignalModule;
 
 import std.file;
 import std.string;
@@ -18,81 +18,13 @@ import std.array;
 import std.uni;
 import std.conv;
 
-import hunt.config.ini;
+import hunt.web.router.RouterConfigBase;
 
-struct RouterContext
-{
-    string method;
-    string path;
-    string hander;
-    RouterType routerType = RouterType.DEFAULT;
-    string host;
-    string dir;
-    string[] middleWareBefore;
-    string[] middleWareAfter;
-}
-enum RouterType
-{
-    DOMAIN_DIR,
-    DOMAIN,
-    DIR,
-    DEFAULT,
-}
-
-abstract class RouterConfig
-{
-    this(string filePath, string prefix = "application.controllers.")
-    in
-    {
-        assert(exists(filePath), filePath~" Error file path!");
-    }
-    body
-    {
-        _filePath = filePath;
-        _prefix = prefix;
-        if(_prefix.length > 0 && _prefix[_prefix.length - 1] != '.'){
-            _prefix ~= ".";
-        }
-    }
-
-    ~this()
-    {
-
-    }
-
-    RouterContext[] doParse()
-    {
-        return this._routerContext;
-    }
-
-    void setFilePath(string filePath)
-    {
-        this._filePath = filePath;
-    }
-
-    void setPrefix(string prefix)
-    {
-        this._prefix = prefix;
-    }
-
-protected:
-    RouterContext[] _routerContext;
-    string _prefix;
-    string _filePath; //文件路径
-}
-
-class ConfigParse : RouterConfig
+class ConfigSignalModule : RouterConfigBase
 {
     import std.experimental.logger;
-    this(string filePath, string routerGroupPath=string.init, string prefix = "application.controllers.")
+    this(string filePath, string prefix = "application.controllers.")
     {
-	if(routerGroupPath != string.init)
-	{
-	    assert(exists(routerGroupPath), "Without file!");
-	    this._useRouterGroup = true;
-	    this._routerGroupPath = routerGroupPath;
-	    prefix = "application.";
-	}
         super(filePath, prefix);
     }
 
@@ -110,7 +42,7 @@ public:
         }
         catch (Exception ex)
         {
-            //assert("Read router config file error!);
+            assert("Read router config file error!");
             throw ex;
         }
         string[] lineBuffers = splitLines(readBuff);
@@ -125,15 +57,10 @@ public:
                 else
                     tmpRoute.method = toUpper(tmpSplites[0]);
                 tmpRoute.path = tmpSplites[1];
-		//writeln("_useRouterGroup: ",_useRouterGroup);
-		if(!_useRouterGroup)
-		    tmpRoute.hander = parseToFullControllerWithDefault(tmpSplites[2]);
-		else
-		{
-		    Ini ini = new Ini(_routerGroupPath);
-		    parseToFullControllerWithGroup(tmpSplites[2], ini, tmpRoute);
-		}
-                if (tmpSplites.length == 4)
+		tmpRoute.hander = parseToFullController(tmpSplites[2]);
+		tmpRoute.routerType = RouterType.DEFAULT;
+                
+		if (tmpSplites.length == 4)
                     parseMiddleware(tmpSplites[3], tmpRoute.middleWareBefore,
                         tmpRoute.middleWareAfter);
                 _routerContext ~= tmpRoute;
@@ -158,7 +85,7 @@ public:
     }
 
 private:
-    string parseToFullControllerWithDefault(string inBuff)
+    string parseToFullController(string inBuff)
     {
         string[] spritArr = split(inBuff, '/');
         assert(spritArr.length > 1, "whitout /");
@@ -167,43 +94,6 @@ private:
         output ~= _prefix;
         output ~= spritArr.join(".");
         return output;
-    }
-
-    void parseToFullControllerWithGroup(string inBuff,Ini ini, ref RouterContext outRouterContext)
-    {
-	/// admin/user.admin.show
-        string[] spritArr = split(inBuff, '/');
-	//size_t spliterPos = inBuff.lastIndexOf("/");
-	//assert(spliterPos != -1, "Without /");
-        assert(spritArr.length == 2, "Style of group router error! Usage: admin/aa.bb.cc");
-	///get groupName
-	string groupType = ini.value("RouterGroup",spritArr[0]~".type");
-	string groupItemValue = ini.value("RouterGroup", spritArr[0]~".value");
-	writeln("groupType: ", groupType, " groupItemValue: ", groupItemValue);
-	if(groupType == "domain")
-	{
-	    outRouterContext.routerType = RouterType.DOMAIN;
-	    outRouterContext.host = groupItemValue;
-	}
-	else if(groupType == "dir")
-	{
-	    outRouterContext.routerType = RouterType.DIR;
-	    outRouterContext.dir = groupItemValue;
-	}
-	else
-	{
-	    outRouterContext.routerType = RouterType.DOMAIN;
-	    outRouterContext.host = groupItemValue;
-	}
-        string output;
-	string[] spritClass = split(spritArr[1], '.');
-	spritClass[0] = spritClass[0]~"."~_controllerPathName;
-        spritClass[spritClass.length - 2] = spritClass[spritClass.length - 2] ~"."~ to!string(spritClass[spritClass.length - 2].asCapitalized) ~ _controllerPrefix;
-        output ~= _prefix;
-        output ~= spritClass.join(".");
-	writeln("++++++output: ", output);
-	outRouterContext.hander = output;
-	return;
     }
 
     string[] spliteBySpace(string inBuff)
@@ -226,8 +116,6 @@ private:
         afterPos = toParse.indexOf(_afterFlag);
         semicolonPos = toParse.indexOf(";");
         assert(beforePos <= afterPos, "after position and before position worry");
-        //assert(beforePos 
-        //trace("toParse: ", toParse, " beforePos: ", beforePos);
         if (beforePos < 0)
             beforePos = toParse.length - 1;
         else
@@ -241,14 +129,10 @@ private:
         if (beforePos < semicolonPos)
             beforeMiddleware = split(toParse[beforePos .. semicolonPos], ',');
         afterMiddleware = split(toParse[afterPos .. $], ',');
-        //trace("beforeMiddleware: ", beforeMiddleware, " afterMiddleware: ", afterMiddleware);
     }
 
 private:
     string _controllerPrefix = "Controller";
-    string _controllerPathName = "controller";
     string _beforeFlag = "before:";
     string _afterFlag = "after:";
-    bool   _useRouterGroup=false;
-    string _routerGroupPath;
 }
