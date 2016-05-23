@@ -11,14 +11,15 @@
 module hunt.web.router.router;
 
 import std.regex;
-import std.stdio;
 import std.string;
 import std.experimental.logger;
 
 import hunt.web.router.middleware;
 import hunt.web.router.utils;
 
-
+/**
+    The Router Class, Save and Macth the rule, and generte the Pipeline.
+*/
 final class Router(REQ, RES)
 {
     alias HandleDelegate = void delegate(REQ, RES);
@@ -30,16 +31,31 @@ final class Router(REQ, RES)
     alias Request = REQ;
     alias Response = RES;
 
+    /**
+        Set The PipelineFactory that create the middleware list for all router rules, before  the router rule's handled execute.
+    */
     void setGlobalBeforePipelineFactory(shared PipelineFactory before)
     {
         _gbefore = before;
     }
-
+    /**
+        Set The PipelineFactory that create the middleware list for all router rules, after  the router rule's handled execute.
+    */
     void setGlobalAfterPipelineFactory(shared PipelineFactory after)
     {
         _gafter = after;
     }
 
+    /**
+        Add a Router rule. if config is done, will always erro.
+        Params:
+            method =  the HTTP method. 
+            path   =  the request path.
+            handle =  the delegate that handle the request.
+            before =  The PipelineFactory that create the middleware list for the router rules, before  the router rule's handled execute.
+            after  =  The PipelineFactory that create the middleware list for the router rules, after  the router rule's handled execute.
+        Returns: the rule's element class. if can not add the rule will return null.
+    */
     RouterElement addRouter(string method, string path, HandleDelegate handle,
         shared PipelineFactory before = null, shared PipelineFactory after = null)
     {
@@ -54,6 +70,16 @@ final class Router(REQ, RES)
         return map.add(path, handle, before, after);
     }
  
+    /**
+        Match the rule.if config is not done, will always erro.
+        Params:
+            method = the method group.
+            path   = the path to match.
+        Returns: 
+            the pipeline has the Global MiddleWare ,Rule MiddleWare, Rule handler .
+            the list is : Before Global MiddleWare -> Before Rule MiddleWare -> Rule handler -> After Rule MiddleWare -> After Global MiddleWare
+            if don't match will  return null.
+    */
     Pipeline match(string method, string path)
     {
         Pipeline pipe = null;
@@ -66,6 +92,9 @@ final class Router(REQ, RES)
         return pipe;
     }
 
+    /**
+        Get PipelineFactory that create the middleware list for all router rules.
+    */
     Pipeline getGlobalBrforeMiddleware()
     {
         if (_gbefore)
@@ -74,6 +103,9 @@ final class Router(REQ, RES)
             return null;
     }
 
+    /**
+        Get The PipelineFactory that create the middleware list for all router rules.
+    */
     Pipeline getGlobalAfterMiddleware()
     {
         if (_gafter)
@@ -82,11 +114,17 @@ final class Router(REQ, RES)
             return null;
     }
 
+    /**
+        get config is done.
+        if config is done, the add rule will erro.
+        else math rule will erro.
+    */
     @property bool condigDone()
     {
         return _configDone;
     }
 
+    /// set config done.
     void done()
     {
         _configDone = true;
@@ -99,37 +137,43 @@ private:
     bool _configDone = false;
 }
 
+
+/**
+    A rule elment class.
+*/
 class PathElement(REQ, RES)
 {
     alias HandleDelegate = void delegate(REQ, RES);
     alias Pipeline = PipelineImpl!(REQ, RES);
     alias PipelineFactory = IPipelineFactory!(REQ, RES);
 
+    /**
+        Constructor and set the path.
+    */
     this(string path)
     {
         _path = path;
     }
 
-    PathElement!(REQ, RES) macth(string path, Pipeline pipe)
-    {
-        return this;
-    }
-
+    /// get the path
     final @property path() const
     {
         return _path;
     }
 
+    /// get the handle.
     final @property handler() const
     {
         return _handler;
     }
 
+    /// set the handle
     final @property handler(HandleDelegate handle)
     {
         _handler = handle;
     }
 
+    /// get the befor pipeline.
     final Pipeline getBeforeMiddleware()
     {
         if (_before)
@@ -138,6 +182,7 @@ class PathElement(REQ, RES)
             return null;
     }
 
+    /// get the after pipeline.
     final Pipeline getAfterMiddleware()
     {
         if (_after)
@@ -146,14 +191,25 @@ class PathElement(REQ, RES)
             return null;
     }
 
+    /**
+        Set The PipelineFactory that create the middleware list for this rules, before  the router rule's handled execute.
+    */
     final void setBeforePipelineFactory(shared PipelineFactory before)
     {
         _before = before;
     }
 
+    /**
+        Set The PipelineFactory that create the middleware list for this rules, after  the router rule's handled execute.
+    */
     final void setAfterPipelineFactory(shared PipelineFactory after)
     {
         _after = after;
+    }
+    
+    PathElement!(REQ, RES) macth(string path, Pipeline pipe)
+    {
+        return this;
     }
 
 private:
@@ -338,8 +394,7 @@ final class ElementMap(REQ, RES)
         Pipeline pipe = new Pipeline();
 
         PElement element = _pathMap.get(path, null);
-	writeln("element: ", element);
-
+        
         if (!element)
         {
             element = _regexMap.match(path, pipe);

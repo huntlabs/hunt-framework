@@ -17,6 +17,8 @@ import hunt.web.http.cookie;
 import hunt.web.application;
 import application.middleware;
 
+import collie.socket;
+
 void hello(Request, Response res)
 {
     res.setContext("hello world");
@@ -39,13 +41,25 @@ void show()
 void main()
 {
     writeln("hello world");
-    //globalLogLevel(LogLevel.error);
-    WebApplication app = new WebApplication();
+    globalLogLevel(LogLevel.error);
+    EventLoop loop = new EventLoop();
+    
+    WebApplication app = new WebApplication(loop);
 
     app.setRouterConfig(new ConfigParse("config/router.conf", "config/application.conf"));
     //app.addRouter("GET","/test",toDelegate(&hello)).addRouter("GET","/ttt",toDelegate(&hello));
     //app.setGlobalAfterPipelineFactory(new GAMFactory).setGlobalBeforePipelineFactory(new GBMFactory);
-    app.group(new EventLoopGroup(1)).bind(8080);
+//    app.group(new EventLoopGroup(1));
+    app.bind(8080);
 
+    debug {
+        Timer tm = new Timer(loop);
+        tm.setCallBack(delegate(){
+                writeln("close time out : ");
+                tm.stop();
+                app.stop();
+            });
+        tm.start(30 * 1000);
+    }
     app.run();
 }
