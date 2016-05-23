@@ -11,6 +11,7 @@
 module hunt.web.http.response;
 
 import std.datetime;
+import std.json;
 
 import collie.codec.http;
 
@@ -45,11 +46,18 @@ class Response
         _rep.Body.write(data);
     }
 
+	///set http status code eg. 404 200
     void setHttpStatusCode(int code)
     {
         _rep.Header.statusCode(code);
     }
 
+	///return json value
+	void writeJson(JSONValue json)
+	{
+		setHeader("Content-Type", "application/json;charset=UTF-8");
+		setContext(json.toString());
+	}
     /**
 	* 设置Session Cookie
 	*/
