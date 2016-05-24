@@ -8,7 +8,7 @@
     "versions": [ "USE_FileSessionStorage"],
     "dependencies": {
         "collie": {
-	    "version": "~>0.5.1"
+	    "path": "../collie/"
         } ,
 	"libmemcached4d": "~master"
     }
