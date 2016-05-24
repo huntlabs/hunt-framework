@@ -20,7 +20,10 @@ import std.conv;
 import std.experimental.logger;
 
 import hunt.web.router.configbase;
-
+/**
+ * example: *     /show      index.show
+ * toParse: [GET,POST...]  /show   application.controllers.index.IndexController.show
+ */
 final class ConfigSignalModule : ConfigLine
 {
     /*
