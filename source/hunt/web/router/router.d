@@ -67,6 +67,7 @@ final class Router(REQ, RES)
             map = new RouterMap(this);
             _map[method] = map;
         }
+        trace("add Router method: ", method);
         return map.add(path, handle, before, after);
     }
  
@@ -379,7 +380,7 @@ final class ElementMap(REQ, RES)
         }
         else
         {
-	    trace("add function: ", path, " handle: ", handle.ptr);
+	    trace("add function: ", path);
             auto ele = new PElement(path);
             ele.setAfterPipelineFactory(after);
             ele.setBeforePipelineFactory(before);

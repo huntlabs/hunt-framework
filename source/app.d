@@ -50,7 +50,7 @@ void main()
    //app.setRouterConfig(new ConfigSignalModule("config/router.api.conf"));
     //app.addRouter("GET","/test",toDelegate(&hello)).addRouter("GET","/ttt",toDelegate(&hello));
     //app.setGlobalAfterPipelineFactory(new GAMFactory).setGlobalBeforePipelineFactory(new GBMFactory);
-//    app.group(new EventLoopGroup(1));
+    app.group(new EventLoopGroup());
     app.bind(8080);
 
     debug {
