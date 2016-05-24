@@ -1,22 +1,19 @@
-/*
- * Hunt - a framework for web and console application based on Collie using Dlang development
- *
- * Copyright (C) 2015-2016  Shanghai Putao Technology Co., Ltd 
- *
- * Developer: putao's Dlang team
- *
- * Licensed under the BSD License.
- *
- */
-module hunt.view.examples.usage;
+import std.stdio;
+import std.stdlib;
+import hunt.web.view;
 
-import 
-  hunt.view,
-  std.stdio,
-  std.string;
-
-void abasic()
+void show()
 {
-    auto tlate = compile_temple!"foo, bar, baz";
-    writeln(tlate.toString()); // Prints "foo, bar, baz"
+    const CompiledTemple layouts_main;
+    const CompiledTemple hello;
+
+    layouts_main = compile_temple_file!"layouts/main.dhtml";
+    hello = compile_temple_file!"hello.dhtml";
+
+    auto context = new TempleContext();
+    context.name = "viile";
+
+    layouts_main.layout(&hello).render(function(str) {
+            write(str);
+    }, content);
 }

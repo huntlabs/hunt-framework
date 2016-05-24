@@ -9,7 +9,7 @@
  *
  * template parsing is based on dymk/temple source from https://github.com/dymk/temple
  */
-module hunt.web.view.func_string_gen;
+module hunt.web.view.funcstringgen;
 
 public import hunt.web.view, hunt.web.view.util, hunt.web.view.delims, std.conv,
     std.string, std.array, std.exception, std.uni, std.algorithm;
@@ -490,9 +490,8 @@ string buildFromParts(in FuncPart[] parts)
                 }
             }
 
-            func_str ~= `__temple_context.put("` ~ part.value.replace("\n",
-                "\\n").escapeQuotes() ~ "\");\n";
-            break;
+            func_str ~= `__temple_context.put("` ~ part.value.replace("\r\n", "\\r\\n").escapeQuotes() ~ "\");\n";
+			 break;
         }
     }
 
