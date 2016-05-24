@@ -20,15 +20,12 @@ import std.conv;
 
 import hunt.web.router.configbase;
 import hunt.config.ini;
-
+/**
+ * example: * /show  admin/user.admin.show
+ * toParse: [GET,POST...] /show application.user.admin.AdminController.show
+ */
 final class ConfigMultipleModule : ConfigLine
 {
-    /***********************************
-     *
-     *
-     *
-     *
-     **********************************/
     this(string filePath, string routerGroupPath, string prefix = "application.")
     {
 	assert(exists(routerGroupPath), "Without file!");
