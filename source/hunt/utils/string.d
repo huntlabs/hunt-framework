@@ -14,6 +14,7 @@ import std.datetime;
 import std.conv;
 import std.string;
 
+pragma(inline)
 string printDate(DateTime date)
 {
     return format("%.3s, %02d %.3s %d %02d:%02d:%02d GMT", // could be UTC too
