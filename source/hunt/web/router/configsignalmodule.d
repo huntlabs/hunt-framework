@@ -17,11 +17,16 @@ import std.stdio;
 import std.array;
 import std.uni;
 import std.conv;
+import std.experimental.logger;
 
 import hunt.web.router.configbase;
 
 final class ConfigSignalModule : ConfigLine
 {
+    /*
+     * @Param filePath - path of file
+     * @Param prefix - prefix of module's full path, use "application.controllers" for default
+     */
     this(string filePath, string prefix = "application.controllers.")
     {
         super(filePath, prefix);
@@ -61,12 +66,13 @@ public:
 private:
     string parseToFullController(string inBuff)
     {
-        string[] spritArr = split(inBuff, '/');
-        assert(spritArr.length > 1, "whitout /");
+        string[] spritArr = split(inBuff, '.');
+        assert(spritArr.length > 1, "whitout .");
         string output;
-        spritArr[spritArr.length - 2] = to!string(spritArr[spritArr.length - 2].asCapitalized) ~ controllerPrefix;
+        spritArr[spritArr.length - 2] = spritArr[spritArr.length - 2] ~"."~ to!string(spritArr[spritArr.length - 2].asCapitalized) ~ controllerPrefix;
         output ~= prefix;
         output ~= spritArr.join(".");
-        return output;
+	trace("output: ", output);
+	return output;
     }
 }

@@ -46,21 +46,13 @@ void main()
     
     WebApplication app = new WebApplication(loop);
 
-    app.setRouterConfig(new ConfigMultipleModule("config/router.conf", "config/application.conf"));
+    app.setRouterConfig(new ConfigSignalModule("config/router.conf"));
    //app.setRouterConfig(new ConfigSignalModule("config/router.api.conf"));
     //app.addRouter("GET","/test",toDelegate(&hello)).addRouter("GET","/ttt",toDelegate(&hello));
     //app.setGlobalAfterPipelineFactory(new GAMFactory).setGlobalBeforePipelineFactory(new GBMFactory);
 //    app.group(new EventLoopGroup(1));
     app.bind(8080);
 
-    debug {
-        Timer tm = new Timer(loop);
-        tm.setCallBack(delegate(){
-                writeln("close time out : ");
-                tm.stop();
-                app.stop();
-            });
-        tm.start(30 * 1000);
-    }
+    
     app.run();
 }
