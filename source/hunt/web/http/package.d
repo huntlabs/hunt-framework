@@ -18,10 +18,8 @@ public import hunt.web.http.controller;
 public import hunt.web.http.session;
 public import hunt.web.http.sessionstorage;
 public import hunt.web.http.webfrom;
+public import hunt.web.http.middleware;
 
 alias HTTPRouter = Router!(Request, Response);
-alias RouterPipeline = PipelineImpl!(Request, Response);
-alias RouterPipelineFactory = IPipelineFactory!(Request, Response);
-alias MiddleWare = IMiddleWare!(Request, Response);
 alias DOHandler = void delegate(Request, Response);
 alias HTTPRouterGroup = RouterGroup!(Request, Response);
