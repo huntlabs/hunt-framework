@@ -26,18 +26,6 @@ void hello(Request, Response res)
     res.done();
 }
 
-void show()
-{
-    import hunt.web.view;
-    import display = hunt.web.view.display;
-    auto ctx = new TempleContext;
-    ctx.name = "viile";
-
-    display.layouts_main.layout(&display.hello).render(function(str) {
-        write(str);
-    }, ctx);
-
-}
 void main()
 {
     writeln("hello world");
