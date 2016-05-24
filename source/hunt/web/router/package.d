@@ -12,9 +12,9 @@ module hunt.web.router;
 
 public import hunt.web.router.router;
 public import hunt.web.router.routergroup;
-public import hunt.web.router.RouterConfigBase;
-public import hunt.web.router.ConfigSignalModule;
-public import hunt.web.router.ConfigMultipleModule;
+public import hunt.web.router.configbase;
+public import hunt.web.router.configsignalmodule;
+public import hunt.web.router.configmultiplemodule;
 public import hunt.web.router.utils;
 public import hunt.web.router.middleware;
 
