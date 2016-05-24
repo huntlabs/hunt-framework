@@ -23,12 +23,16 @@ import hunt.config.ini;
 
 final class ConfigMultipleModule : ConfigLine
 {
-    import std.experimental.logger;
-    this(string filePath, string routerGroupPath, string prefix = "application.controllers.")
+    /***********************************
+     *
+     *
+     *
+     *
+     **********************************/
+    this(string filePath, string routerGroupPath, string prefix = "application.")
     {
 	assert(exists(routerGroupPath), "Without file!");
 	this._routerGroupPath = routerGroupPath;
-	prefix = "application.";
         super(filePath, prefix);
     }
 
@@ -91,7 +95,7 @@ protected:
         string output;
 	string[] spritClass = split(spritArr[1], '.');
 	spritClass[0] = spritClass[0]~"."~_controllerPathName;
-        spritClass[spritClass.length - 2] = spritClass[spritClass.length - 2] ~"."~ to!string(spritClass[spritClass.length - 2].asCapitalized) ~ controllerPrefix;
+        spritClass[spritClass.length - 2] = spritArr[0] ~ "." ~ spritClass[spritClass.length - 2] ~"."~ to!string(spritClass[spritClass.length - 2].asCapitalized) ~ controllerPrefix;
         output ~= prefix;
         output ~= spritClass.join(".");
 	outRouterContext.hander = output;
