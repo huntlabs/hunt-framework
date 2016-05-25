@@ -24,16 +24,18 @@ public import collie.channel;
 public import hunt.console.context;
 public import hunt.console.fieldframe;
 public import hunt.console.messagecoder;
-public import hunt.console.middleware;
 import hunt.web.router;
 
 alias ConsolePipeLine = Pipeline!(ubyte[],Message);
-alias ConsoleRouter = Router!(Message, ConsoleContext);
-alias ConsoleHandler = void delegate(Message, ConsoleContext);
 
-
-final class ConsoleApplication(bool litteEndian = false)
+final class ServerApplication(bool litteEndian = false)
 {
+    alias Contex = ConsoleContext!(ServerApplication!litteEndian);
+    alias ConsoleRouter = Router!(Message, Contex);
+    alias ConsoleHandler = void delegate(Message, Contex);
+    alias MiddleWare = IMiddleWare!(Message, Contex);
+    alias RouterPipeline = PipelineImpl!(Message, Contex);
+    alias RouterPipelineFactory = IPipelineFactory!(Message, Contex);
     /// default Constructor
     this()
     {
@@ -50,9 +52,10 @@ final class ConsoleApplication(bool litteEndian = false)
        _router = new ConsoleRouter();
         _404 = &default404;
         _server = new ServerBootstrap!ConsolePipeLine(loop);
-        _server.childPipeline(new shared ConsolePipeLineFactory!litteEndian(this));
+        _server.childPipeline(new shared ConsolePipeLineFactory!(ServerApplication!litteEndian,litteEndian)(this));
         _server.setReusePort(true);
         _crypt =  new NoCrypt();
+        _timeOut = &timeOut;
     }
 
     /**
@@ -60,13 +63,14 @@ final class ConsoleApplication(bool litteEndian = false)
         Params:
             config = the Config Class.
     */
-    ConsoleApplication setRouterConfig(RouterConfigBase config)
+ /*   auto setRouterConfig(RouterConfigBase config)
     {
-        setRouterConfigHelper!("__CALLACTION__",IController,HTTPRouterGroup)
+        import hunt.web.http.controller;
+        setRouterConfigHelper!("__CALLACTION__",IController,ConsoleRouter)
                                 (_router,config);
         return this;
     }
-   
+   */
     /**
         Add a Router rule
         Params:
@@ -77,10 +81,9 @@ final class ConsoleApplication(bool litteEndian = false)
             before =  The PipelineFactory that create the middleware list for the router rules, before  the router rule's handled execute.
             after  =  The PipelineFactory that create the middleware list for the router rules, after  the router rule's handled execute.
     */
-    ConsoleApplication addRouter(ushort type, ConsoleHandler handle,
+    auto addRouter(ushort type, ConsoleHandler handle,
         shared RouterPipelineFactory before = null, shared RouterPipelineFactory after = null)
     {
-        method = toUpper(method);
         router.addRouter("RPC",to!string(type),handle,before,after);
         return this;
     }
@@ -88,7 +91,7 @@ final class ConsoleApplication(bool litteEndian = false)
     /**
         Set The PipelineFactory that create the middleware list for all router rules, before  the router rule's handled execute.
     */
-    ConsoleApplication setGlobalBeforePipelineFactory(shared RouterPipelineFactory before)
+    auto setGlobalBeforePipelineFactory(shared RouterPipelineFactory before)
     {
         router.setGlobalBeforePipelineFactory(before);
         return this;
@@ -97,7 +100,7 @@ final class ConsoleApplication(bool litteEndian = false)
     /**
         Set The PipelineFactory that create the middleware list for all router rules, after  the router rule's handled execute.
     */
-    ConsoleApplication setGlobalAfterPipelineFactory(shared RouterPipelineFactory after)
+    auto setGlobalAfterPipelineFactory(shared RouterPipelineFactory after)
     {
         router.setGlobalAfterPipelineFactory(after);
         return this;
@@ -106,7 +109,7 @@ final class ConsoleApplication(bool litteEndian = false)
     /**
         Set The delegate that handle 404,when the router don't math the rule.
     */
-    ConsoleApplication setNoFoundHandler(ConsoleHandler nofound)
+    auto setNoFoundHandler(ConsoleHandler nofound)
     in
     {
         assert(nofound !is null);
@@ -127,7 +130,7 @@ final class ConsoleApplication(bool litteEndian = false)
         set the ssl config.
         if you set and the config is not null, the Application will used https.
     */
-    ConsoleApplication setSSLConfig(ServerSSLConfig config) 
+    auto setSSLConfig(ServerSSLConfig config) 
     {
         _server.setSSLConfig(config);
         return this;
@@ -136,7 +139,7 @@ final class ConsoleApplication(bool litteEndian = false)
     /**
         Set the EventLoopGroup to used the multi-thread.
     */
-    ConsoleApplication group(EventLoopGroup group)
+    auto group(EventLoopGroup group)
     {
         _server.group(group);
         return this;
@@ -147,7 +150,7 @@ final class ConsoleApplication(bool litteEndian = false)
         See_Also:
             collie.bootstrap.server.ServerBootstrap pipeline
     */
-    ConsoleApplication pipeline(shared AcceptPipelineFactory factory)
+    auto pipeline(shared AcceptPipelineFactory factory)
     {
         _server.pipeline(factory);
         return this;
@@ -156,7 +159,7 @@ final class ConsoleApplication(bool litteEndian = false)
     /**
         Set the bind address.
     */
-    ConsoleApplication bind(Address addr)
+    auto bind(Address addr)
     {
         _server.bind(addr);
         return this;
@@ -165,7 +168,7 @@ final class ConsoleApplication(bool litteEndian = false)
     /**
         Set the bind port, the ip address will be all.
     */
-    ConsoleApplication bind(ushort port)
+    auto bind(ushort port)
     {
         _server.bind(port);
         return this;
@@ -174,38 +177,58 @@ final class ConsoleApplication(bool litteEndian = false)
     /**
         Set the bind address.
     */
-    ConsoleApplication bind(string ip, ushort port)
+    auto bind(string ip, ushort port)
     {
         _server.bind(ip,port);
         return this;
     }
     
-    ConsoleApplication setMaxPackSize(uint size)
+    auto heartbeatTimeOut(uint second)
+    {
+        _server.heartbeatTimeOut(second);
+        return this;
+    }
+    
+    auto timeOutHandler(void delegate(Contex) handler)
+    {
+        _timeOut = handler;
+        return this;
+    }
+    
+    auto setMaxPackSize(uint size)
     {
         _maxPackSize = size;
+        return this;
     }
     
-    ConsoleApplication setCompressType(CompressType type)
+    auto setCompressType(CompressType type)
     {
-        _contype = type;
+        _comType = type;
+        return this;
     }
     
-    ConsoleApplication setCompressLevel(uint lev)
+    auto setCompressLevel(uint lev)
     {
         _comLevel = lev;
+        return this;
     }
    
-    ConsoleApplication setCryptHandler(CryptHandler crypt)
-    {
+    auto setCryptHandler(CryptHandler crypt)
+    in{
+        assert(crypt);
+    }body{
         _crypt = crypt;
+        return this;
     }
    
-    @property maxPackSize() const {return _maxPackSize;}
-    @property compressType() const {return _comType;}
-    @property compressLevel() const {return _comLevel;}
-    @property cryptHandler() const {return _crypt;}
+    @property maxPackSize() const shared {return _maxPackSize;}
+    @property compressType() const shared {return _comType;}
+    @property compressLevel() const shared {return _comLevel;}
+    @property cryptHandler() const shared {return _crypt;}
     
-    @property cryptCopy() const {return _crypt.copy();}
+    @property CryptHandler cryptCopy() const shared {return cast(CryptHandler)(_crypt.copy());}
+    
+    
     /**
         Start the ConsoleApplication server , and block current thread.
     */
@@ -223,21 +246,23 @@ final class ConsoleApplication(bool litteEndian = false)
         _server.stop();
     }
 
-private:
+package:
     /// the default handle when the router rule don't match.
-    void default404(Request req, Response res)
+    void default404(Message msg, Contex contx)
     {
-        res.Header.statusCode = 404;
-        res.setContext("No Found");
-        res.done();
+        contx.close();
+    }
+    
+    void timeOut(Contex contx)
+    {
+        contx.close();
     }
 
+    ConsoleHandler _404;
+    void delegate(Contex) _timeOut;
 private:
     ConsoleRouter _router;
-    ConsoleHandler _404;
-    ServerBootstrap!HTTPPipeline _server;
-    HTTPConfig _config;
-    
+    ServerBootstrap!ConsolePipeLine _server;
 private:
     uint _maxPackSize = 16 * 1024;
     CompressType _comType = CompressType.NONE;
@@ -247,46 +272,7 @@ private:
 
 private:
 
-final class ConsoleServer(bool litteEndian) : ContexHandler
-{
-    this(shared ConsoleApplication!litteEndian app)
-    {
-        _app = app;
-    }
-
-protected:
-    override void messageHandle(Message msg,ConsoleContext ctx)
-    {
-        ConsoleApplication app = cast(ConsoleApplication)_app;
-        RouterPipeline pipe = null;
-        TypeMessage tmsg = cast(TypeMessage)msg;
-        if(!tmsg)
-        {
-            app._404(msg, ctx);
-            return;
-        }
-        pipe = app.router.match("RPC",to!string(tmsg.type));
-        if (pipe is null)
-        {
-            app._404(msg, ctx);
-        }
-        else
-        {
-            
-            scope(exit)
-            {
-                import core.memory;
-                pipe.destroy;
-                GC.free(cast(void *)pipe);
-            }
-            pipe.handleActive(tmsg, ctx);
-        }
-    }
-private:
-    shared ConsoleApplication!litteEndian _app;
-}
-
-class ConsolePipeLineFactory(bool litteEndian) : PipelineFactory!ConsolePipeLine
+class ConsolePipeLineFactory(ConsoleApplication,bool litteEndian) : PipelineFactory!ConsolePipeLine
 {
     import collie.socket.tcpsocket;
     this(ConsoleApplication app)
@@ -294,13 +280,13 @@ class ConsolePipeLineFactory(bool litteEndian) : PipelineFactory!ConsolePipeLine
         _app = cast(shared ConsoleApplication)app;
     }
 
-    override HTTPPipeline newPipeline(TCPSocket sock)
+    override ConsolePipeLine newPipeline(TCPSocket sock)
     {
-        auto pipeline = HTTPPipeline.create();
+        auto pipeline = ConsolePipeLine.create();
         pipeline.addBack(new TCPSocketHandler(sock));
         pipeline.addBack(new FieldFrame!litteEndian(_app.maxPackSize(),_app.compressType(),_app.compressLevel()));
         pipeline.addBack(new MessageCoder!litteEndian(_app.cryptCopy()));
-        pipeline.addBack(new ConsoleServer!litteEndian(_app));
+        pipeline.addBack(new ContexHandler!ConsoleApplication(_app));
         pipeline.finalize();
         return pipeline;
     }

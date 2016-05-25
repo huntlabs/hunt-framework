@@ -17,8 +17,9 @@ import collie.channel.handlercontext;
 import collie.channel.pipeline;
 
 import hunt.console.messagecoder;
+import hunt.web.router;
 
-final class ConsoleContext
+final class ConsoleContext(ConsoleApplication)
 {
     pragma(inline)
     void write(ushort type,ubyte[] data)
@@ -38,6 +39,11 @@ final class ConsoleContext
         _header.context().fireWrite(msg,cback);
     }
     
+    pragma(inline)
+    void close()
+    {
+        _header.context().fireClose();
+    }
 protected:
     void deleteMsg(Message msg, uint len)
     {
@@ -49,32 +55,55 @@ protected:
         }
     }
 private:
-    this(ContexHandler hander){_header = hander;}
-    ContexHandler _header;
+    this(ContexHandler!ConsoleApplication hander){_header = hander;}
+    ContexHandler!ConsoleApplication _header;
 }
 
-
-abstract class ContexHandler : HandlerAdapter!(Message)
+class ContexHandler(ConsoleApplication) : HandlerAdapter!(Message)
 {
-    this()
+    this(shared ConsoleApplication app)
     {
-        _cctx = new ConsoleContext(this);
+        _cctx = new ConsoleContext!ConsoleApplication(this);
+        _app = app;
     }
     
     final override void read(Context ctx, Message msg)
     {
-       messageHandle(msg,_cctx);
+        import std.conv;
+        ConsoleApplication app = cast(ConsoleApplication)_app;
+      //  ConsoleApplication.RouterPipeline pipe = null;
+        TypeMessage tmsg = cast(TypeMessage)msg;
+        if(!tmsg)
+        {
+            app._404(msg, _cctx);
+            return;
+        }
+        auto pipe = app.router.match("RPC",to!string(tmsg.type));
+        if (pipe is null)
+        {
+            app._404(msg, _cctx);
+        }
+        else
+        {
+            
+            scope(exit)
+            {
+                import core.memory;
+                pipe.destroy;
+                GC.free(cast(void *)pipe);
+            }
+            pipe.handleActive(tmsg, _cctx);
+        }
     }
     
     final override void timeOut(Context ctx)
     {
-        import std.experimental.logger;
-        info("time out!");
-        close(ctx);
+        ConsoleApplication app = cast(ConsoleApplication)_app;
+        _app._timeOut(_cctx);
     }
-protected:
-    void messageHandle(Message msg,ConsoleContext ctx);
+
 private:
-    ConsoleContext _cctx;
+    ConsoleContext!ConsoleApplication _cctx;
+    shared ConsoleApplication _app;
 }
 
