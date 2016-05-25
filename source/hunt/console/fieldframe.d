@@ -67,7 +67,7 @@ protected:
         switch(type)
         {
             case CompressType.ZIP :
-                data = uncompress(data);
+                data = cast(ubyte[])uncompress(data);
                 break;
             case CompressType.LZMA :
                 data = lzmaUnCompress(data);
@@ -81,7 +81,6 @@ protected:
             throw new Exception("compress ERRO!");
         }
         
-        return data;
         return data;
     }
 

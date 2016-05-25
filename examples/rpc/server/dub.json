@@ -1,0 +1,12 @@
+{
+	"name": "server",
+	"description": "A minimal D application.",
+	"copyright": "Copyright © 2016, dsby",
+	"authors": ["dsby"],
+	"sourcePaths":["source","../common"],
+	"dependencies": {
+            "hunt" : {
+                "path" : "../../../"
+            }
+	}
+}

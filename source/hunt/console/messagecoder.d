@@ -21,7 +21,7 @@ interface Message
 {
 
     string getType();
-    ubyte[] encodeMeassage(bool litteEndian)();
+    ubyte[] encodeMeassage(bool litteEndian);
 }
 
 interface CryptHandler
@@ -29,12 +29,13 @@ interface CryptHandler
     ubyte[] encrypt(ubyte[]);
     ubyte[] decrypt(ubyte[]);
     
-    CryptHandler copy() const;
+    CryptHandler copy() const shared;
 }
 
 
 final class TypeMessage : Message
 {
+    this(){}
     this(ushort type, ubyte[] data)
     {
         this.type = type;
@@ -46,35 +47,28 @@ final class TypeMessage : Message
 
     override string getType(){return TypeMessage.stringof;}
     
-    override ubyte[] encodeMeassage(bool litteEndian)()  
+    override ubyte[] encodeMeassage(bool litteEndian) 
     {
-        ubyte[] data = new ubyte[msg.data.length + 2];
-        static if (littleEndian)
-        {
-            ubyte[2] type = nativeToLittleEndian(msg.type); 
-        }
+        ubyte[] data = new ubyte[data.length + 2];
+        ubyte[2] tdata;
+        if (litteEndian)
+            tdata = nativeToLittleEndian(type); 
         else
-        {
-            ubyte[2] type = nativeToBigEndian(msg.type); 
-        }
-        data[0..2] = type[];
-        data[2..$] = msg.data[];
+            tdata = nativeToBigEndian(type); 
+        data[0..2] = tdata[];
+        data[2..$] = data[];
         return data;
     }
     
-    static Message decodeMeassage(bool litteEndian, bool copy = false)(ubyte[] data)
+    static TypeMessage decodeMeassage(bool litteEndian, bool copy = false)(ubyte[] data)
     {
         if(data.length < 2) return null;
-        Message msg = new Message();
+        TypeMessage msg = new TypeMessage();
         ubyte[2] type = data[0..2];
-        static if (littleEndian)
-        {
+        static if (litteEndian)
             msg.type = littleEndianToNative!ushort(type); //littleEndianToNative
-        }
         else
-        {
-            msg.type = bigEndianToNative!ushort(type); //
-        }
+            msg.type = bigEndianToNative!ushort(type); 
         static if(copy)
             msg.data = data[2..$].dup;   
         else
@@ -89,7 +83,7 @@ final class NoCrypt : CryptHandler
     override ubyte[] encrypt(ubyte[] data){return data;}
     override ubyte[] decrypt(ubyte[] data){return data;}
     
-    override CryptHandler copy() const
+    override CryptHandler copy() const shared
     {
         return new NoCrypt;
     }
@@ -106,14 +100,14 @@ class MessageCoder(bool litteEndian = false) : Handler!(ubyte[], Message, Messag
     {
         auto data = _crypt.decrypt(msg);
         if(data.ptr is null) return;
-        auto mesg =  Message.decodeMeassage!(litteEndian,false)(msg);
+        auto mesg =  TypeMessage.decodeMeassage!(litteEndian,false)(msg);
         if(mesg)
             ctx.fireRead(mesg);
     }
     
     override void write(Context ctx, Message msg, TheCallBack cback = null)
     {
-        auto data = msg.encodeMeassage!(litteEndian)();
+        auto data = msg.encodeMeassage(litteEndian);
         data = _crypt.encrypt(data);
         if(data.ptr is null && cback) cback(msg,0);
         ctx.fireWrite(data,&callBack);
