@@ -12,7 +12,8 @@
         } ,
 	"libmemcached4d": "~master",
 	"liblzma" : {
-            "path"      : "3rdparty/liblzma/",
+            "version"      : "~>0.0.1",
+            "optional"     : true
 	}
     },
     "subConfigurations": {
