@@ -30,6 +30,7 @@ ubyte[] lzmaCompress(ubyte[] data, uint level)
         ubyte[1024] out_buf;
         strm.next_in = data.ptr;
         strm.avail_in = data.length;
+        size_t out_len;
         
         Vector!(ubyte) rdata;
         
@@ -81,6 +82,7 @@ ubyte[] lzmaUnCompress(ubyte[] data)
         ubyte[1024] out_buf;
         strm.next_in = data.ptr;
         strm.avail_in = data.length;
+        size_t out_len;
         
         Vector!(ubyte) rdata;
         
@@ -113,4 +115,22 @@ ubyte[] lzmaUnCompress(ubyte[] data)
     {
         return data;
     }
+}
+
+
+unittest
+{
+version(LZMA_COMPRESS):
+    import std.stdio;
+
+    ubyte[] data = cast(ubyte[])(q{"44444444444444444444444444555555555555555556666666666666
+                                        6666666666465854saqewddddddddddddd46555555555555555514546541
+                                        6546516546sadfcdzsretgdrftggggggggggggggggggggggggg4
+                                        tgubyhijokpl[;fyvbughijopk[l;]'ftyguijopk[-l;]"});
+    writeln("the data length: ", data.length);
+    ubyte[] cdata = lzmaCompress(data);
+    writeln("after compress data length : ", cdata.length);
+    ubyte[] udata = lzmaUnCompress(cdata);
+    writeln("after uncompress data length: ", udata.length);
+    assert(data == udata);
 }
