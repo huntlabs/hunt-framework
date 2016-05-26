@@ -19,23 +19,14 @@ import collie.channel.pipeline;
 import hunt.console.messagecoder;
 import hunt.web.router;
 
+alias ConsolePipeLine = Pipeline!(ubyte[],Message);
+
 final class ConsoleContext(ConsoleApplication)
-{
+{    
     pragma(inline)
-    void write(ushort type,ubyte[] data)
+    void write(Message msg,void delegate(Message,uint) cback = null)
     {
-        _header.context().fireWrite(new TypeMessage(type,data),&deleteMsg);
-    }
-    
-    pragma(inline)
-    void write(Message msg)
-    {
-        _header.context().fireWrite(msg,null);
-    }
-    
-    pragma(inline)
-    void write(Message msg, void delegate(Message,uint) cback)
-    {
+        if(msg is null) return;
         _header.context().fireWrite(msg,cback);
     }
     
@@ -43,16 +34,6 @@ final class ConsoleContext(ConsoleApplication)
     void close()
     {
         _header.context().fireClose();
-    }
-protected:
-    void deleteMsg(Message msg, uint len)
-    {
-        import collie.utils.memory;
-        gcFree(msg);
-        if(len == 0)
-        {
-            _header.context().fireClose();
-        }
     }
 private:
     this(ContexHandler!ConsoleApplication hander){_header = hander;}
@@ -71,17 +52,16 @@ class ContexHandler(ConsoleApplication) : HandlerAdapter!(Message)
     {
         import std.conv;
         ConsoleApplication app = cast(ConsoleApplication)_app;
-      //  ConsoleApplication.RouterPipeline pipe = null;
-        TypeMessage tmsg = cast(TypeMessage)msg;
-        if(!tmsg)
+        if(msg is null)
         {
-            app._404(msg, _cctx);
+            app._404(_cctx,msg);
             return;
         }
-        auto pipe = app.router.match("RPC",to!string(tmsg.type));
+        
+        auto pipe = app.router.match("RPC",msg.type());
         if (pipe is null)
         {
-            app._404(msg, _cctx);
+            app._404(_cctx,msg);
         }
         else
         {
@@ -92,7 +72,7 @@ class ContexHandler(ConsoleApplication) : HandlerAdapter!(Message)
                 pipe.destroy;
                 GC.free(cast(void *)pipe);
             }
-            pipe.handleActive(tmsg, _cctx);
+            pipe.handleActive( _cctx,msg);
         }
     }
     
