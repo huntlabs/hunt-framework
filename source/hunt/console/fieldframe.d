@@ -86,7 +86,8 @@ protected:
 
     override void callBack(ubyte[] data,uint size)
     {
-        trace("write data len = ", size);
+       // trace("write data len = ", size, " data is : ", cast(string)data);
+        
         import core.memory;
         GC.free(data.ptr);
     }

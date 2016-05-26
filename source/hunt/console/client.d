@@ -8,17 +8,15 @@ import collie.bootstrap.client;
 public import collie.socket.eventloop;
 public import collie.channel;
 
+import hunt.console.context : ConsolePipeLine;
 public import hunt.console.fieldframe;
 public import hunt.console.messagecoder;
 
-class ClientApplicatin(bool litteEndian = false) :  HandlerAdapter!(Message)
+abstract class ClientApplicatin(bool litteEndian = false) :  HandlerAdapter!(Message)
 {
     this(EventLoop loop)
     {
-       _router = new ConsoleRouter();
-        _404 = &default404;
-        _server = new ClientBootstrap!ConsolePipeLine(loop);
-        _crypt =  new NoCrypt();
+        _client = new ClientBootstrap!ConsolePipeLine(loop);   
     }
     
     final auto heartbeatTimeOut(uint second)
@@ -29,13 +27,15 @@ class ClientApplicatin(bool litteEndian = false) :  HandlerAdapter!(Message)
     
     final void connect(string ip, ushort port)
     {
+        assert(decoder);
         _client.setPipelineFactory(pipelineFactroy);
         _client.connect(ip,port);
     }
     
     final void connect(Address to)
     {
-        _client.setPipelineFactory(pipelineFactroy);
+        assert(decoder);
+        _client.setPipelineFactory(pipelineFactroy); 
         _client.connect(to);
     }
     
@@ -65,61 +65,72 @@ class ClientApplicatin(bool litteEndian = false) :  HandlerAdapter!(Message)
         return this;
     }
    
+    auto setMessageDcoder(shared MessageDecode dcode)
+    in{
+        assert(dcode);
+    }body{
+        pipelineFactroy.setMessageDcoder(dcode);
+        return this;
+    }
    
-    final @property maxPackSize() const {return pipelineFactroy.maxPackSize;}
-    final @property compressType() const {return pipelineFactroy.comType;}
-    final @property compressLevel() const {return pipelineFactroy.comLevel;}
-    final @property cryptHandler() const {return pipelineFactroy.crypt;}
-    
-    final void run()
-    {
-        _client.waitForStop();
-    }
+    final @property maxPackSize()  {return pipelineFactroy.maxPackSize;}
+    final @property compressType()  {return pipelineFactroy.compressType;}
+    final @property compressLevel()  {return pipelineFactroy.compressLevel;}
+    final @property cryptHandler()  {return pipelineFactroy.cryptHandler;}
+    @property decoder() {return pipelineFactroy.decoder;}
     
     pragma(inline)
-    final void write(ushort type,ubyte[] data)
-    {
-        context().fireWrite(new TypeMessage(type,data),&deleteMsg);
-    }
-    
-    pragma(inline)
-    final void write(Message msg)
-    {
-        context().fireWrite(msg,null);
-    }
-    
-    pragma(inline)
-    final void write(Message msg, void delegate(Message,uint) cback)
+    final void doWrite(Message msg, void delegate(Message,uint) cback = null)
     {
         context().fireWrite(msg,cback);
     }
     
     pragma(inline)
-    final void close()
+    final void doClose()
     {
         context().fireClose();
     }
     
+    @property EventLoop eventLoop(){return _client.eventLoop();}
 protected:
     void onRead(Message msg);
-    void timeOut();
-    void active();
-    void unactive();
-private:
-    final override void transportActive(Context ctx){active();}
-    final override void transportInActive(Context ctx){unactive();}
-    final override void timeOut(Context ctx){timeOut();}
-    final override void read(Context ctx, Rin msg){onRead(msg);}
+    void onTimeOut();
+    void onActive();
+    void onUnactive();
+    
+    final void deleteMsg(Message msg, uint len)
+    {
+        import collie.utils.memory;
+        gcFree(msg);
+        if(len == 0)
+        {
+            context().fireClose();
+        }
+    }
+public:
+    final override void transportActive(Context ctx){
+        trace("transportActive");
+        onActive();
+    }
+    final override void transportInactive(Context ctx){
+        trace("transportInactive");
+        onUnactive();
+    }
+    final override void timeOut(Context ctx){
+        trace("timeOut");
+        onTimeOut();
+    }
+    final override void read(Context ctx, Message msg){trace("read");onRead(msg);}
 private:
    final @property pipelineFactroy(){
         if(!_pipelineFactroy) {
-            _pipelineFactroy = new ClientPipeLineFactory!litteEndian(this);
+            _pipelineFactroy = new shared ClientPipeLineFactory!litteEndian(this);
         }
         return _pipelineFactroy;
    }
 
    ClientBootstrap!ConsolePipeLine _client; 
-   ClientPipeLineFactory!litteEndian _pipelineFactroy;   
+   shared ClientPipeLineFactory!litteEndian _pipelineFactroy;   
 }
 
 private:
@@ -128,7 +139,8 @@ class ClientPipeLineFactory(bool litteEndian) : PipelineFactory!ConsolePipeLine
     import collie.socket.tcpsocket;
     this(HandlerAdapter!Message handler)
     {
-        _app = cast(shared ConsoleApplication)app;
+        _handler = cast(shared HandlerAdapter!Message)handler;
+        _crypt =  new NoCrypt();
     }
     
     auto setMaxPackSize(uint size)
@@ -138,7 +150,7 @@ class ClientPipeLineFactory(bool litteEndian) : PipelineFactory!ConsolePipeLine
     
     auto setCompressType(CompressType type)
     {
-        _contype = type;
+        _comType = type;
     }
     
     auto setCompressLevel(uint lev)
@@ -150,7 +162,12 @@ class ClientPipeLineFactory(bool litteEndian) : PipelineFactory!ConsolePipeLine
     in{
         assert(crypt);
     }body{
-        _crypt = crypt;
+        _crypt = cast(shared CryptHandler)crypt;
+    }
+    
+    auto setMessageDcoder(shared MessageDecode dcode)
+    {
+        _dcoder = dcode;
     }
    
    
@@ -159,14 +176,16 @@ class ClientPipeLineFactory(bool litteEndian) : PipelineFactory!ConsolePipeLine
     @property compressLevel() const {return _comLevel;}
     @property cryptHandler() const {return _crypt;}
     @property cryptCopy() const {return _crypt.copy();}
+    @property decoder() shared{return _dcoder;}
 
-    override HTTPPipeline newPipeline(TCPSocket sock)
+    override ConsolePipeLine newPipeline(TCPSocket sock)
     {
-        auto pipeline = HTTPPipeline.create();
+        trace("New client : newPipeline");
+        auto pipeline = ConsolePipeLine.create();
         pipeline.addBack(new TCPSocketHandler(sock));
         pipeline.addBack(new FieldFrame!litteEndian(maxPackSize(),compressType(),compressLevel()));
-        pipeline.addBack(new MessageCoder!litteEndian(cryptCopy()));
-        pipeline.addBack(_handler);
+        pipeline.addBack(new MessageCoder(_dcoder,cryptCopy()));
+        pipeline.addBack(cast(HandlerAdapter!Message)_handler);
         pipeline.finalize();
         return pipeline;
     }
@@ -177,4 +196,6 @@ private:
     CompressType _comType = CompressType.NONE;
     uint _comLevel = 6;
     CryptHandler _crypt;
+    
+    shared MessageDecode _dcoder;
 }
