@@ -1,0 +1,3 @@
+[submodule "3rdparty/liblzma"]
+	path = 3rdparty/liblzma
+	url = https://github.com/putao-dev/liblzma.git
