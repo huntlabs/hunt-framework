@@ -26,16 +26,16 @@ public import hunt.console.fieldframe;
 public import hunt.console.messagecoder;
 import hunt.web.router;
 
-alias ConsolePipeLine = Pipeline!(ubyte[],Message);
-
-final class ServerApplication(bool litteEndian = false)
+final class ServerApplication(bool litteEndian)
 {
     alias Contex = ConsoleContext!(ServerApplication!litteEndian);
-    alias ConsoleRouter = Router!(Message, Contex);
-    alias ConsoleHandler = void delegate(Message, Contex);
-    alias MiddleWare = IMiddleWare!(Message, Contex);
-    alias RouterPipeline = PipelineImpl!(Message, Contex);
-    alias RouterPipelineFactory = IPipelineFactory!(Message, Contex);
+    alias ConsoleRouter = Router!(Contex,Message);
+    alias ConsoleHandler = void delegate(Contex,Message);
+    alias MiddleWare = IMiddleWare!(Contex,Message);
+    alias RouterPipeline = PipelineImpl!(Contex,Message);
+    alias RouterPipelineFactory = IPipelineFactory!(Contex,Message);
+    
+    enum LittleEndian = litteEndian;
     /// default Constructor
     this()
     {
@@ -52,7 +52,7 @@ final class ServerApplication(bool litteEndian = false)
        _router = new ConsoleRouter();
         _404 = &default404;
         _server = new ServerBootstrap!ConsolePipeLine(loop);
-        _server.childPipeline(new shared ConsolePipeLineFactory!(ServerApplication!litteEndian,litteEndian)(this));
+        _server.childPipeline(new shared ConsolePipeLineFactory!(ServerApplication!litteEndian)(this));
         _server.setReusePort(true);
         _crypt =  new NoCrypt();
         _timeOut = &timeOut;
@@ -81,10 +81,10 @@ final class ServerApplication(bool litteEndian = false)
             before =  The PipelineFactory that create the middleware list for the router rules, before  the router rule's handled execute.
             after  =  The PipelineFactory that create the middleware list for the router rules, after  the router rule's handled execute.
     */
-    auto addRouter(ushort type, ConsoleHandler handle,
+    auto addRouter(string type, ConsoleHandler handle,
         shared RouterPipelineFactory before = null, shared RouterPipelineFactory after = null)
     {
-        router.addRouter("RPC",to!string(type),handle,before,after);
+        router.addRouter("RPC",type,handle,before,after);
         return this;
     }
     
@@ -213,6 +213,14 @@ final class ServerApplication(bool litteEndian = false)
         return this;
     }
    
+    auto setMessageDcoder(shared MessageDecode dcode)
+    in{
+        assert(dcode);
+    }body{
+        _dcoder = dcode;
+        return this;
+    }
+   
     auto setCryptHandler(CryptHandler crypt)
     in{
         assert(crypt);
@@ -225,6 +233,7 @@ final class ServerApplication(bool litteEndian = false)
     @property compressType() const shared {return _comType;}
     @property compressLevel() const shared {return _comLevel;}
     @property cryptHandler() const shared {return _crypt;}
+    @property decoder() shared{return _dcoder;}
     
     @property CryptHandler cryptCopy() const shared {return cast(CryptHandler)(_crypt.copy());}
     
@@ -234,6 +243,7 @@ final class ServerApplication(bool litteEndian = false)
     */
     void run()
     {
+        assert(_dcoder);
         router.done();
         _server.waitForStop();
     }
@@ -246,15 +256,16 @@ final class ServerApplication(bool litteEndian = false)
         _server.stop();
     }
 
-package:
+package :
     /// the default handle when the router rule don't match.
-    void default404(Message msg, Contex contx)
+    final void default404(Contex contx, Message msg)
     {
         contx.close();
     }
     
-    void timeOut(Contex contx)
+    final void timeOut(Contex contx)
     {
+        trace("connect time out");
         contx.close();
     }
 
@@ -268,12 +279,15 @@ private:
     CompressType _comType = CompressType.NONE;
     uint _comLevel = 6;
     CryptHandler _crypt;
+    
+    shared MessageDecode _dcoder;
 }
 
 private:
 
-class ConsolePipeLineFactory(ConsoleApplication,bool litteEndian) : PipelineFactory!ConsolePipeLine
+class ConsolePipeLineFactory(ConsoleApplication) : PipelineFactory!ConsolePipeLine
 {
+    enum LittleEndian = ConsoleApplication.LittleEndian;
     import collie.socket.tcpsocket;
     this(ConsoleApplication app)
     {
@@ -284,8 +298,8 @@ class ConsolePipeLineFactory(ConsoleApplication,bool litteEndian) : PipelineFact
     {
         auto pipeline = ConsolePipeLine.create();
         pipeline.addBack(new TCPSocketHandler(sock));
-        pipeline.addBack(new FieldFrame!litteEndian(_app.maxPackSize(),_app.compressType(),_app.compressLevel()));
-        pipeline.addBack(new MessageCoder!litteEndian(_app.cryptCopy()));
+        pipeline.addBack(new FieldFrame!LittleEndian(_app.maxPackSize(),_app.compressType(),_app.compressLevel()));
+        pipeline.addBack(new MessageCoder(_app.decoder(),_app.cryptCopy()));
         pipeline.addBack(new ContexHandler!ConsoleApplication(_app));
         pipeline.finalize();
         return pipeline;

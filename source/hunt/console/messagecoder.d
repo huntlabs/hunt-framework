@@ -12,6 +12,7 @@
 module hunt.console.messagecoder;
 
 import std.bitmanip;
+import std.experimental.logger;
 
 //import collie.channel;
 import collie.channel.handler;
@@ -19,9 +20,8 @@ import collie.channel.handlercontext;
 
 interface Message
 {
-
-    string getType();
-    ubyte[] encodeMeassage(bool litteEndian);
+    string type();
+    ubyte[] encodeMeassage();
 }
 
 interface CryptHandler
@@ -32,51 +32,10 @@ interface CryptHandler
     CryptHandler copy() const shared;
 }
 
-
-final class TypeMessage : Message
+interface MessageDecode
 {
-    this(){}
-    this(ushort type, ubyte[] data)
-    {
-        this.type = type;
-        this.data = data;
-    }
-    
-    ushort type;
-    ubyte[] data;
-
-    override string getType(){return TypeMessage.stringof;}
-    
-    override ubyte[] encodeMeassage(bool litteEndian) 
-    {
-        ubyte[] data = new ubyte[data.length + 2];
-        ubyte[2] tdata;
-        if (litteEndian)
-            tdata = nativeToLittleEndian(type); 
-        else
-            tdata = nativeToBigEndian(type); 
-        data[0..2] = tdata[];
-        data[2..$] = data[];
-        return data;
-    }
-    
-    static TypeMessage decodeMeassage(bool litteEndian, bool copy = false)(ubyte[] data)
-    {
-        if(data.length < 2) return null;
-        TypeMessage msg = new TypeMessage();
-        ubyte[2] type = data[0..2];
-        static if (litteEndian)
-            msg.type = littleEndianToNative!ushort(type); //littleEndianToNative
-        else
-            msg.type = bigEndianToNative!ushort(type); 
-        static if(copy)
-            msg.data = data[2..$].dup;   
-        else
-            msg.data = data[2..$];
-        return msg;
-    }
+    Message decode(ubyte[]) shared;
 }
-
 
 final class NoCrypt : CryptHandler
 {
@@ -89,32 +48,39 @@ final class NoCrypt : CryptHandler
     }
 }
 
-class MessageCoder(bool litteEndian = false) : Handler!(ubyte[], Message, Message, ubyte[])
+class MessageCoder : Handler!(ubyte[], Message, Message, ubyte[])
 {
-    this(CryptHandler crypt = new NoCrypt())
+    this(shared MessageDecode decoder,CryptHandler crypt = new NoCrypt())
     {
         _crypt = crypt;
+        _dcoder = decoder;
     }
     
     override void read(Context ctx, ubyte[] msg)
     {
         auto data = _crypt.decrypt(msg);
-        if(data.ptr is null) return;
-        auto mesg =  TypeMessage.decodeMeassage!(litteEndian,false)(msg);
-        if(mesg)
-            ctx.fireRead(mesg);
+        if(data.ptr is null){
+            error("decrypt Meassage erro!");
+            ctx.fireRead(null);
+            return;
+        }
+        auto mesg =  _dcoder.decode(data);
+        ctx.fireRead(mesg);
     }
     
     override void write(Context ctx, Message msg, TheCallBack cback = null)
     {
-        auto data = msg.encodeMeassage(litteEndian);
+        auto data = msg.encodeMeassage();
         data = _crypt.encrypt(data);
-        if(data.ptr is null && cback) cback(msg,0);
+        if(data.ptr is null && cback)
+        {
+            cback(msg,0);
+            error("encrypt Meassage erro!");
+            return;
+        }
         ctx.fireWrite(data,&callBack);
         if(cback) cback(msg,cast(uint)(data.length));
     }
-    
-    //override void timeOut(Context ctx) {}
     
 protected:
     void callBack(ubyte[] data, uint len)
@@ -124,4 +90,5 @@ protected:
     }
 private:
     CryptHandler _crypt;
+    shared MessageDecode _dcoder;
 }

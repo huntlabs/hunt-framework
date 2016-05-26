@@ -6,7 +6,7 @@
 	"sourcePaths":["source","../common"],
 	"dependencies": {
             "hunt" : {
-                "path" : "../../"
+                "path" : "../../../"
             }
 	}
 }

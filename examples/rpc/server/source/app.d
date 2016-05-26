@@ -9,19 +9,15 @@ import message;
 
 alias RPCContext = ServerApplication!(false).Contex;
 
-enum MSGType :ushort
-{
-    BEAT,
-    DATA
-}
 
 void main()
 {
 	writeln("Edit source/app.d to start your project.");
 	ServerApplication!false  server = new ServerApplication!false ();
-	server.addRouter(MSGType.BEAT,toDelegate(&handleBeat));
-	server.addRouter(MSGType.DATA,toDelegate(&handleData),new MiddlewareFactroy());
-	server.heartbeatTimeOut(120).bind(9002);
+	server.addRouter(MSGType.BEAT.stringof,toDelegate(&handleBeat));
+	server.addRouter(MSGType.DATA.stringof,toDelegate(&handleData),new MiddlewareFactroy());
+	server.heartbeatTimeOut(120).bind(8094);
+	server.setMessageDcoder(new MyDecode());
 	server.group(new EventLoopGroup());
 	server.run();
 }
@@ -39,52 +35,54 @@ class MiddlewareFactroy : ServerApplication!(false).RouterPipelineFactory
 
 class Middleware : ServerApplication!(false).MiddleWare
 {
-    override void handle(Context ctx, Message req, RPCContext res)
+    override void handle(Context ctx, RPCContext res,Message req)
     {
-        TypeMessage msg = cast(TypeMessage)req;
-        if(msg is null) return;
-        MyMessage mmsg = MyMessage.decodeMeassage!false(msg.data);
-        if(mmsg)
-            ctx.next(mmsg,res);
-        else
-            writeln("data erro!");
+        writeln("\t\tMiddleware : ServerApplication!(false).MiddleWare");
+        ctx.next(res,req);
     }
 }
 
-
-void handleData(Message msg , RPCContext ctx)
+void handleData(RPCContext ctx,Message msg )
 {
-    MyMessage mmsg = cast(MyMessage)msg;
+    DataMessage mmsg = cast(DataMessage)msg;
     if(mmsg is null)
     {
         writeln("data erro close");
         ctx.close();
     }
+    write(" \t\tMyMessage IS : ", mmsg.fvalue);
     switch (mmsg.commod)
     {
         case 0:
             mmsg.value = mmsg.fvalue + mmsg.svalue;
+            write(" + ");
             break;
         case 1:
             mmsg.value = mmsg.fvalue - mmsg.svalue;
+            write(" - ");
             break;
         case 2:
             mmsg.value = mmsg.fvalue * mmsg.svalue;
+            write(" * ");
             break;
         case 3:
             mmsg.value = mmsg.fvalue / mmsg.svalue;
+            write(" / ");
             break;
         default:
             mmsg.value = mmsg.fvalue;
+            write(" ? ");
             break;
     }
+    writeln(mmsg.svalue, "  =  ", mmsg.value);
     ctx.write(mmsg);
 }
 
-void handleBeat(Message msg , RPCContext ctx)
+void handleBeat(RPCContext ctx,Message msg)
 {
-    TypeMessage mmsg = cast(TypeMessage)msg;
-    writeln("Heatbeat: data : " , cast(string)mmsg.data);
-    ctx.write(MSGType.BEAT, cast(ubyte[])"server");
+    BeatMessage mmsg = cast(BeatMessage)msg;
+    writeln("\nHeatbeat: data : " , cast(string)mmsg.data);
+    mmsg.data = cast(ubyte[])"server";
+    ctx.write(mmsg);
 }
 
