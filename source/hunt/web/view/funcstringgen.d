@@ -490,9 +490,8 @@ string buildFromParts(in FuncPart[] parts)
                 }
             }
 
-            func_str ~= `__temple_context.put("` ~ part.value.replace("\n",
-                "\\n").escapeQuotes() ~ "\");\n";
-            break;
+            func_str ~= `__temple_context.put("` ~ part.value.replace("\r\n", "\\r\\n").escapeQuotes() ~ "\");\n";
+			 break;
         }
     }
 
