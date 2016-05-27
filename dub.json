@@ -7,9 +7,14 @@
     "libs" : [],
     "versions": [ "USE_FileSessionStorage"],
     "dependencies": {
-        "collie": {
-	    "path": "../collie/"
-        } ,
-	"libmemcached4d": "~master"
+		"collie": "~>0.5.2" ,
+		"libmemcached4d": "~master",
+		"liblzma" : {
+				"version"      : "~>0.0.1",
+				"optional"     : true
+		}
+    },
+    "subConfigurations": {
+	"liblzma": "library"
     }
 }

@@ -1,0 +1,9 @@
+<html>
+    <body>
+        {{ render!"shared/header.dhtml" }}
+        <div class="content">
+            {{ yield }}
+        </div>
+        {{ render!"shared/footer.dhtml" }}
+    </body>
+<html>
