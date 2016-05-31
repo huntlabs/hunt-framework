@@ -3,7 +3,6 @@
     "description": "A framework for web and console application based on collie using dlang development.",
     "authors": [ "putao.com dlang team." ],
     "license": "BSD",
-    "stringImportPaths": [ "./resources/views" ],
     "libs" : [],
     "versions": [ "USE_FileSessionStorage"],
     "dependencies": {
