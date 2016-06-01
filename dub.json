@@ -3,18 +3,15 @@
     "description": "A framework for web and console application based on collie using dlang development.",
     "authors": [ "putao.com dlang team." ],
     "license": "BSD",
-    "stringImportPaths": [ "./resources/views" ],
     "libs" : [],
     "versions": [ "USE_FileSessionStorage"],
     "dependencies": {
-        "collie": {
-	    "path" : "../collie/"
-        } ,
-	"libmemcached4d": "~master",
-	"liblzma" : {
-            "version"      : "~>0.0.1",
-            "optional"     : true
-	}
+		"collie": "~>0.5.2" ,
+		"libmemcached": "~master",
+		"liblzma" : {
+				"version"      : "~>0.0.1",
+				"optional"     : true
+		}
     },
     "subConfigurations": {
 	"liblzma": "library"
