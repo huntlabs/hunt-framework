@@ -395,7 +395,6 @@ final class ElementMap(REQ, RES)
         Pipeline pipe = new Pipeline();
 
         PElement element = _pathMap.get(path, null);
-        
         if (!element)
         {
             element = _regexMap.match(path, pipe);

@@ -13,6 +13,9 @@ module hunt.web.http.request;
 import collie.codec.http;
 
 import hunt.web.http.webfrom;
+import hunt.web.http.session;
+import hunt.web.http.sessionstorage;
+import hunt.web.http.cookie;
 
 class Request
 {
@@ -51,9 +54,29 @@ class Request
         _mate[key] = value;
     }
 
+	SessionInterface getSession( S = Session)(string sessionName = "hunt_session", SessionStorageInterface t =  newStorage()) //if()
+	{
+		auto co = getCookie(sessionName);
+		if (co is null) return new S(t);
+		return new S(co.value, t);
+	}
+
+	Cookie getCookie(string key)
+	{
+		if(cookies.length == 0)
+		{
+			string cookie = this._req.Header.getHeaderValue("cookie");
+			cookies = parseCookie(cookie);
+		}
+		return cookies.get(key,null);
+	}
+
+	
     @property ref string[string] materef() {return _mate;}
 private:
     HTTPRequest _req;
     WebForm _form = null;
     string[string] _mate;
+	SessionInterface session;
+	Cookie[string] cookies;
 }
