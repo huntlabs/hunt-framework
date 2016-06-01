@@ -338,7 +338,6 @@ final class ElementMap(REQ, RES)
         Pipeline pipe = new Pipeline();
 
         PElement element = _pathMap.get(path, null);
-	writeln("element: ", element);
 
         if (!element)
         {
