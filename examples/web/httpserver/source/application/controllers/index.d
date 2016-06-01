@@ -22,5 +22,7 @@ class IndexController : IController
        // writeln("do show!");
         res.setContext("hello world<br/>");
         res.setHeader("content-type","text/html;charset=UTF-8");
+	res.done();
     }
+    
 }

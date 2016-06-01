@@ -11,7 +11,7 @@
  */
 module hunt.web.view;
 
-public import hunt.web.view.util, hunt.web.view.delims, hunt.web.view.func_string_gen;
+public import hunt.web.view.util, hunt.web.view.delims, hunt.web.view.funcstringgen;
 public import std.array : appender, Appender;
 public import std.range : isOutputRange;
 public import std.typecons : scoped;
@@ -21,8 +21,8 @@ public import std.file;
 
 public
 {
-    import hunt.web.view.temple_context : TempleContext;
-    import hunt.web.view.output_stream : TempleOutputStream, TempleInputStream;
+    import hunt.web.view.templecontext : TempleContext;
+    import hunt.web.view.outputstream : TempleOutputStream, TempleInputStream;
 }
 
 /**

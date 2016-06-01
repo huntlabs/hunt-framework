@@ -17,6 +17,8 @@ import hunt.web.http.cookie;
 import hunt.web.application;
 import application.middleware;
 
+import collie.socket;
+
 void hello(Request, Response res)
 {
     res.setContext("hello world");
@@ -24,28 +26,26 @@ void hello(Request, Response res)
     res.done();
 }
 
-void show()
+void test(Request, Response res)
 {
-    import hunt.web.view;
-    import display = hunt.web.view.display;
-    auto ctx = new TempleContext;
-    ctx.name = "viile";
-
-    display.layouts_main.layout(&display.hello).render(function(str) {
-        write(str);
-    }, ctx);
-
+    res.redirect("hello");
 }
+
 void main()
 {
     writeln("hello world");
-    //globalLogLevel(LogLevel.error);
-    WebApplication app = new WebApplication();
+   // globalLogLevel(LogLevel.error);
+    EventLoop loop = new EventLoop();
+    
+    WebApplication app = new WebApplication(loop);
 
-    app.setRouterConfig(new ConfigParse("config/router.conf", "config/application.conf"));
-    //app.addRouter("GET","/test",toDelegate(&hello)).addRouter("GET","/ttt",toDelegate(&hello));
+    app.setRouterConfig(new ConfigSignalModule("config/router.conf"));
+   //app.setRouterConfig(new ConfigSignalModule("config/router.api.conf"));
+    app.addRouter("GET","/test",toDelegate(&test)).addRouter("GET","/hello",toDelegate(&hello));
     //app.setGlobalAfterPipelineFactory(new GAMFactory).setGlobalBeforePipelineFactory(new GBMFactory);
-    app.group(new EventLoopGroup(1)).bind(8080);
+    app.group(new EventLoopGroup());
+    app.bind(8080);
 
+    
     app.run();
 }
