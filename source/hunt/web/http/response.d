@@ -63,8 +63,9 @@ class Response
 	*/
     void setCookie(string name, string value, int expires, string path = "/", string domain = null)
     {
-        auto cookie = new Cookie(name, value, ["path" : path, "domain" : domain,
-            "expires" : printDate(cast(DateTime) Clock.currTime(UTC()) + dur!"seconds"(expires))]);
+        import std.typecons;
+        auto cookie = scoped!Cookie(name, value, ["path" : path, "domain" : domain,
+            "expires" : printDate(cast(DateTime) Clock.currTime(UTC()) + dur!"seconds"(expires))]); //栈中优化
         ///TODO set into base
         this.setHeader("set-cookie", cookie.output(""));
     }
@@ -79,7 +80,8 @@ class Response
     
     void redirect(string url, bool is301 = false)
     {
-        httpResponse.Header.statusCode((is301 ? 301 : 202));
+        
+        httpResponse.Header.statusCode((is301 ? 301 : 302));
         httpResponse.Header.setHeaderValue("Location",url);
         httpResponse.done();
     }
