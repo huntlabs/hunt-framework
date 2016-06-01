@@ -4,10 +4,8 @@
     "authors": [ "putao.com dlang team." ],
     "license": "BSD",
     "libs" : [],
-    "versions": [ "USE_FileSessionStorage"],
     "dependencies": {
 		"collie": "~>0.6.1",
-		"libmemcached": "~>1.0.0",
 		"liblzma" : {
                     "version"      : "~>0.0.1",
                     "optional"     : true
