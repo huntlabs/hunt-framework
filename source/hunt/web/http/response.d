@@ -52,12 +52,12 @@ class Response
         _rep.Header.statusCode(code);
     }
 
-	///return json value
-	void writeJson(JSONValue json)
-	{
-		setHeader("Content-Type", "application/json;charset=UTF-8");
-		setContext(json.toString());
-	}
+    ///return json value
+    void writeJson(JSONValue json)
+    {
+            setHeader("Content-Type", "application/json;charset=UTF-8");
+            setContext(json.toString());
+    }
     /**
 	* 设置Session Cookie
 	*/
@@ -75,6 +75,13 @@ class Response
     @property httpResponse()
     {
         return _rep;
+    }
+    
+    void redirect(string url, bool is301 = false)
+    {
+        httpResponse.Header.statusCode((is301 ? 301 : 202));
+        httpResponse.Header.setHeaderValue("Location",url);
+        httpResponse.done();
     }
 
 private:
