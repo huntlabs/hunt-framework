@@ -52,8 +52,14 @@ final class WebApplication
         _server.childPipeline(new shared HTTPPipelineFactory(this));
         _config = new HTTPConfig();
         _server.setReusePort(true);
+        _server.heartbeatTimeOut(30);
     }
 
+    auto keepAliveTimeOut(uint second)
+    {
+        _server.heartbeatTimeOut(second);
+        return this;
+    }
     /**
         Config the Apolication's Router .
         Params:
