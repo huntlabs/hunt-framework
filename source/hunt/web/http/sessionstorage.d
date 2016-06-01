@@ -10,12 +10,26 @@
  */
 module hunt.web.http.sessionstorage;
 
+
+__gshared SessionStorageInterface delegate()   newStorage;
+
+SessionStorageInterface defaultDtorage()
+{
+	return new FileSessionStorage();
+}
+
+shared static  this()
+{
+	import std.functional;
+	newStorage = toDelegate(&defaultDtorage);
+}
 /**
 * StorageInterface.
-* donglei xiaosan@outlook.com
 *
 * @api
 */
+
+
 interface SessionStorageInterface
 {
     public string getId();
