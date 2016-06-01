@@ -26,6 +26,11 @@ void hello(Request, Response res)
     res.done();
 }
 
+void test(Request, Response res)
+{
+    res.redirect("hello");
+}
+
 void main()
 {
     writeln("hello world");
@@ -36,7 +41,7 @@ void main()
 
     app.setRouterConfig(new ConfigSignalModule("config/router.conf"));
    //app.setRouterConfig(new ConfigSignalModule("config/router.api.conf"));
-    //app.addRouter("GET","/test",toDelegate(&hello)).addRouter("GET","/ttt",toDelegate(&hello));
+    app.addRouter("GET","/test",toDelegate(&test)).addRouter("GET","/hello",toDelegate(&hello));
     //app.setGlobalAfterPipelineFactory(new GAMFactory).setGlobalBeforePipelineFactory(new GBMFactory);
     app.group(new EventLoopGroup());
     app.bind(8080);
