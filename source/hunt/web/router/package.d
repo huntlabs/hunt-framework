@@ -12,13 +12,15 @@ module hunt.web.router;
 
 public import hunt.web.router.router;
 public import hunt.web.router.routergroup;
-public import hunt.web.router.routerconfig;
+public import hunt.web.router.configbase;
+public import hunt.web.router.configsignalmodule;
+public import hunt.web.router.configmultiplemodule;
 public import hunt.web.router.utils;
 public import hunt.web.router.middleware;
 
 import collie.utils.functional;
 
-void setRouterConfigHelper(string FUN, T, TRouter)(TRouter router, RouterConfig config) if (
+void setRouterConfigHelper(string FUN, T, TRouter)(TRouter router, RouterConfigBase config) if (
         (is(T == class) || is(T == interface)) && hasMember!(T, FUN) && hasMember!(TRouter, "addRouter"))
 {
     import std.string;
@@ -97,7 +99,4 @@ static if(hasMember!(TRouter,"getRouter"))
         }
     }
 }
-
-
-
 

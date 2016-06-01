@@ -20,10 +20,10 @@ interface IController
 
 mixin template HuntDynamicCallFun()
 {
-    mixin(getListStr!(typeof(this)));
+    mixin(_createCallActionFun!(typeof(this)));
 }
 
-string  getListStr(T)()
+string  _createCallActionFun(T)()
 {
     import std.traits;
     import std.typecons;
