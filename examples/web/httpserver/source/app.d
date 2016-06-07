@@ -14,7 +14,7 @@ import std.experimental.logger;
 
 import hunt.web;
 
-import hunt.server.web;
+import hunt.server.http;
 import application.middleware;
 
 import collie.socket;
@@ -37,7 +37,7 @@ void main()
    // globalLogLevel(LogLevel.error);
     EventLoop loop = new EventLoop();
     
-    WebServer app = new WebServer(loop);
+    HTTPServer app = new HTTPServer(loop);
 
     app.setRouterConfig(new ConfigSignalModule("config/router.conf"));
    //app.setRouterConfig(new ConfigSignalModule("config/router.api.conf"));
