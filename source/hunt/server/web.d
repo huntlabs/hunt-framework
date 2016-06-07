@@ -8,7 +8,7 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.web.application;
+module hunt.server.web;
 
 public import std.socket;
 public import std.experimental.logger;
@@ -22,8 +22,7 @@ public import collie.channel;
 public import collie.codec.http.config;
 import collie.codec.http;
 
-public import hunt.web.router;
-public import hunt.web.http;
+public import hunt.web;
 
 alias HTTPPipeline = Pipeline!(ubyte[], HTTPResponse);
 
@@ -31,7 +30,7 @@ alias HTTPPipeline = Pipeline!(ubyte[], HTTPResponse);
     
 */
 
-final class WebApplication
+final class WebServer
 {
     /// default Constructor
     this()
@@ -65,7 +64,7 @@ final class WebApplication
         Params:
             config = the Config Class.
     */
-    WebApplication setRouterConfig(RouterConfigBase config)
+    WebServer setRouterConfig(RouterConfigBase config)
     {
         setRouterConfigHelper!("__CALLACTION__",IController,HTTPRouterGroup)
                                 (_router,config);
@@ -82,7 +81,7 @@ final class WebApplication
             before =  The PipelineFactory that create the middleware list for the router rules, before  the router rule's handled execute.
             after  =  The PipelineFactory that create the middleware list for the router rules, after  the router rule's handled execute.
     */
-    WebApplication addRouter(string domain, string method, string path, DOHandler handle,
+    WebServer addRouter(string domain, string method, string path, DOHandler handle,
         shared RouterPipelineFactory before = null, shared RouterPipelineFactory after = null)
     {
         method = toUpper(method);
@@ -99,7 +98,7 @@ final class WebApplication
             before =  The PipelineFactory that create the middleware list for the router rules, before  the router rule's handled execute.
             after  =  The PipelineFactory that create the middleware list for the router rules, after  the router rule's handled execute.
     */
-    WebApplication addRouter(string method, string path, DOHandler handle,
+    WebServer addRouter(string method, string path, DOHandler handle,
         shared RouterPipelineFactory before = null, shared RouterPipelineFactory after = null)
     {
         method = toUpper(method);
@@ -110,7 +109,7 @@ final class WebApplication
     /**
         Set The PipelineFactory that create the middleware list for all router rules, before  the router rule's handled execute.
     */
-    WebApplication setGlobalBeforePipelineFactory(shared RouterPipelineFactory before)
+    WebServer setGlobalBeforePipelineFactory(shared RouterPipelineFactory before)
     {
         router.setGlobalBeforePipelineFactory(before);
         return this;
@@ -119,7 +118,7 @@ final class WebApplication
     /**
         Set The PipelineFactory that create the middleware list for all router rules, after  the router rule's handled execute.
     */
-    WebApplication setGlobalAfterPipelineFactory(shared RouterPipelineFactory after)
+    WebServer setGlobalAfterPipelineFactory(shared RouterPipelineFactory after)
     {
         router.setGlobalAfterPipelineFactory(after);
         return this;
@@ -128,7 +127,7 @@ final class WebApplication
     /**
         Set The delegate that handle 404,when the router don't math the rule.
     */
-    WebApplication setNoFoundHandler(DOHandler nofound)
+    WebServer setNoFoundHandler(DOHandler nofound)
     in
     {
         assert(nofound !is null);
@@ -149,7 +148,7 @@ final class WebApplication
         set the ssl config.
         if you set and the config is not null, the Application will used https.
     */
-    WebApplication setSSLConfig(ServerSSLConfig config) 
+    WebServer setSSLConfig(ServerSSLConfig config) 
     {
         _server.setSSLConfig(config);
         return this;
@@ -158,7 +157,7 @@ final class WebApplication
     /**
         Set the EventLoopGroup to used the multi-thread.
     */
-    WebApplication group(EventLoopGroup group)
+    WebServer group(EventLoopGroup group)
     {
         _server.group(group);
         return this;
@@ -169,7 +168,7 @@ final class WebApplication
         See_Also:
             collie.bootstrap.server.ServerBootstrap pipeline
     */
-    WebApplication pipeline(shared AcceptPipelineFactory factory)
+    WebServer pipeline(shared AcceptPipelineFactory factory)
     {
         _server.pipeline(factory);
         return this;
@@ -178,7 +177,7 @@ final class WebApplication
     /**
         Set the bind address.
     */
-    WebApplication bind(Address addr)
+    WebServer bind(Address addr)
     {
         _server.bind(addr);
         return this;
@@ -187,7 +186,7 @@ final class WebApplication
     /**
         Set the bind port, the ip address will be all.
     */
-    WebApplication bind(ushort port)
+    WebServer bind(ushort port)
     {
         _server.bind(port);
         return this;
@@ -196,7 +195,7 @@ final class WebApplication
     /**
         Set the bind address.
     */
-    WebApplication bind(string ip, ushort port)
+    WebServer bind(string ip, ushort port)
     {
         _server.bind(ip,port);
         return this;
@@ -216,38 +215,38 @@ final class WebApplication
     @property httpConfig(){return _config;}
     
     /// set the HTTPConfig maxBodySize.
-    WebApplication maxBodySize(uint size)
+    WebServer maxBodySize(uint size)
     {
         _config.maxBodySize = size;
         return this;
     }
     /// set the HTTPConfig maxHeaderSize.
-    WebApplication maxHeaderSize(uint size)
+    WebServer maxHeaderSize(uint size)
     {
         _config.maxHeaderSize = size;
         return this;
     }
     /// set the HTTPConfig headerStectionSize.
-    WebApplication headerStectionSize(uint size)
+    WebServer headerStectionSize(uint size)
     {
         _config.headerStectionSize = size;
         return this;
     }
     /// set the HTTPConfig requestBodyStectionSize.
-    WebApplication requestBodyStectionSize(uint size)
+    WebServer requestBodyStectionSize(uint size)
     {
         _config.requestBodyStectionSize = size;
         return this;
     }
     /// set the HTTPConfig responseBodyStectionSize.
-    WebApplication responseBodyStectionSize(uint size)
+    WebServer responseBodyStectionSize(uint size)
     {
         _config.responseBodyStectionSize = size;
         return this;
     }
     
     /**
-        Start the WebApplication server , and block current thread.
+        Start the WebServer server , and block current thread.
     */
     void run()
     {
@@ -265,7 +264,7 @@ final class WebApplication
 
 private:
     /// math the router and start handle the middleware and handle.
-    static void doHandle(WebApplication app,Request req, Response res)
+    static void doHandle(WebServer app,Request req, Response res)
     {
         trace("macth router : method: ", req.Header.methodString, "   path : ",req.Header.path, " host: ", req.Header.host);
         RouterPipeline pipe = null;
@@ -311,7 +310,7 @@ private:
 
 class HttpServer : HTTPHandler
 {
-    this(shared WebApplication app)
+    this(shared WebServer app)
     {
         _app = app;
     }
@@ -320,7 +319,7 @@ class HttpServer : HTTPHandler
     {
         auto request = new Request(req);
         auto response = new Response(rep);
-        _app.doHandle(cast(WebApplication)_app,request, response);
+        _app.doHandle(cast(WebServer)_app,request, response);
     }
 
     override WebSocket newWebSocket(const HTTPHeader header)
@@ -334,15 +333,15 @@ class HttpServer : HTTPHandler
     }
 
 private:
-    shared WebApplication _app;
+    shared WebServer _app;
 }
 
 class HTTPPipelineFactory : PipelineFactory!HTTPPipeline
 {
     import collie.socket.tcpsocket;
-    this(WebApplication app)
+    this(WebServer app)
     {
-        _app = cast(shared WebApplication)app;
+        _app = cast(shared WebServer)app;
     }
 
     override HTTPPipeline newPipeline(TCPSocket sock)
@@ -354,7 +353,7 @@ class HTTPPipelineFactory : PipelineFactory!HTTPPipeline
         return pipeline;
     }
 private:
-    WebApplication _app;
+    WebServer _app;
 }
 
 /*class EchoWebSocket : WebSocket

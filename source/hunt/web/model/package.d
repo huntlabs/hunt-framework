@@ -1,0 +1,1 @@
+module hunt.web.model;

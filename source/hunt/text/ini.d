@@ -8,7 +8,7 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.config.ini;
+module hunt.text.ini;
 
 import std.stdio;
 import core.stdc.stdarg;
@@ -16,7 +16,6 @@ import std.file;
 import std.string;
 import std.experimental.logger;
 import core.stdc.stdlib;
-import hunt.config.exception;
 import std.exception;
 
 private class IniLine
@@ -279,7 +278,7 @@ protected:
 
         void ungetc()
         {
-			enforce!HuntConfigException(i>0, "i lt 0");
+			enforce(i>0, "i lt 0");
             i--;
         }
 
@@ -698,7 +697,7 @@ public:
                 p = cast(char*) alloca(psize);
             }
             else
-                throw new HuntConfigException("unsupported platform");
+                throw new Exception("unsupported platform");
         }
         std.file.append(_file, p[0 .. count]);
         return count;
@@ -801,6 +800,6 @@ unittest
     import std.experimental.logger;
     import std.path;
 
-    auto ini = new Ini(buildPath(huntConfigPath, "./config/http.conf"));
+    auto ini = new Ini("./config/http.conf");
     assert(ini.value("server", "port") == "8081");
 }

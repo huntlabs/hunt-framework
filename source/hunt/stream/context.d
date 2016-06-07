@@ -9,15 +9,15 @@
  *
  */
 
-module hunt.console.context;
+module hunt.stream.context;
 
 
 import collie.channel.handler;
 import collie.channel.handlercontext;
 import collie.channel.pipeline;
 
-import hunt.console.messagecoder;
-import hunt.web.router;
+import hunt.stream.messagecoder;
+import hunt.routing;
 
 alias ConsolePipeLine = Pipeline!(ubyte[],Message);
 
@@ -54,14 +54,14 @@ class ContexHandler(ConsoleApplication) : HandlerAdapter!(Message)
         ConsoleApplication app = cast(ConsoleApplication)_app;
         if(msg is null)
         {
-            app._404(_cctx,msg);
+            app.do404(_cctx,msg);
             return;
         }
         
         auto pipe = app.router.match("RPC",msg.type());
         if (pipe is null)
         {
-            app._404(_cctx,msg);
+            app.do404(_cctx,msg);
         }
         else
         {
@@ -79,7 +79,7 @@ class ContexHandler(ConsoleApplication) : HandlerAdapter!(Message)
     final override void timeOut(Context ctx)
     {
         ConsoleApplication app = cast(ConsoleApplication)_app;
-        _app._timeOut(_cctx);
+        app.doTimeOut(_cctx);
     }
 
 private:

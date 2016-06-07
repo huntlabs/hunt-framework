@@ -1,6 +1,6 @@
 module message;
 
-import hunt.console.messagecoder;
+import hunt.stream.messagecoder;
 
 import std.bitmanip;
 import std.stdio;

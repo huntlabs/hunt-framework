@@ -1,4 +1,4 @@
-module hunt.console.client;
+module hunt.stream.client;
 
 public import std.socket;
 public import std.experimental.logger;
@@ -8,11 +8,11 @@ import collie.bootstrap.client;
 public import collie.socket.eventloop;
 public import collie.channel;
 
-import hunt.console.context : ConsolePipeLine;
-public import hunt.console.fieldframe;
-public import hunt.console.messagecoder;
+import hunt.stream.context : ConsolePipeLine;
+public import hunt.stream.fieldframe;
+public import hunt.stream.messagecoder;
 
-abstract class ClientApplicatin(bool litteEndian = false) :  HandlerAdapter!(Message)
+abstract class StreamClient(bool litteEndian = false) :  HandlerAdapter!(Message)
 {
     this(EventLoop loop)
     {

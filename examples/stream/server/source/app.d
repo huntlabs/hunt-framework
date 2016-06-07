@@ -2,18 +2,18 @@ import std.stdio;
 import std.functional;
 
 import collie.socket.eventloopgroup;
-import hunt.console.application;
-import hunt.console.messagecoder;
+import hunt.server.stream;
+import hunt.stream.messagecoder;
 import message;
 
 
-alias RPCContext = ServerApplication!(false).Contex;
+alias RPCContext = StreamServer!(false).Contex;
 
 
 void main()
 {
 	writeln("Edit source/app.d to start your project.");
-	ServerApplication!false  server = new ServerApplication!false ();
+	StreamServer!false  server = new StreamServer!false ();
 	server.addRouter(MSGType.BEAT.stringof,toDelegate(&handleBeat));
 	server.addRouter(MSGType.DATA.stringof,toDelegate(&handleData),new MiddlewareFactroy());
 	server.heartbeatTimeOut(120).bind(8094);
@@ -23,21 +23,21 @@ void main()
 }
 
 
-class MiddlewareFactroy : ServerApplication!(false).RouterPipelineFactory
+class MiddlewareFactroy : StreamServer!(false).RouterPipelineFactory
 {
-    override ServerApplication!(false).RouterPipeline newPipeline()
+    override StreamServer!(false).RouterPipeline newPipeline()
     {
-        auto pipe  =  new ServerApplication!(false).RouterPipeline;
+        auto pipe  =  new StreamServer!(false).RouterPipeline;
         pipe.addHandler(new Middleware());
         return pipe;
     }
 }
 
-class Middleware : ServerApplication!(false).MiddleWare
+class Middleware : StreamServer!(false).MiddleWare
 {
     override void handle(Context ctx, RPCContext res,Message req)
     {
-        writeln("\t\tMiddleware : ServerApplication!(false).MiddleWare");
+        writeln("\t\tMiddleware : StreamServer!(false).MiddleWare");
         ctx.next(res,req);
     }
 }

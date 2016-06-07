@@ -12,9 +12,9 @@ import std.stdio;
 import std.functional;
 import std.experimental.logger;
 
-import hunt.web.http.cookie;
+import hunt.web;
 
-import hunt.web.application;
+import hunt.server.web;
 import application.middleware;
 
 import collie.socket;
@@ -37,7 +37,7 @@ void main()
    // globalLogLevel(LogLevel.error);
     EventLoop loop = new EventLoop();
     
-    WebApplication app = new WebApplication(loop);
+    WebServer app = new WebServer(loop);
 
     app.setRouterConfig(new ConfigSignalModule("config/router.conf"));
    //app.setRouterConfig(new ConfigSignalModule("config/router.api.conf"));
