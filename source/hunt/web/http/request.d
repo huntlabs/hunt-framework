@@ -71,7 +71,49 @@ class Request
 		return cookies.get(key,null);
 	}
 
-	
+    ///get queries
+    @property string[string] queries()
+    {
+        if(_queries is null)
+        {
+            _queries = req.Header.queryMap();
+        }
+        return _queries;
+    }
+	/// get a query
+    T get(T = string)(string key, T v = T.init)
+    {
+        import std.conv;
+        auto tmp = this.queries;
+        if(tmp is null)
+        {
+            return v;   
+        }
+        auto _v = tmp.get(key, "");
+        if(_v.length)
+        {
+            return to!T(_v);
+        }
+        return v;
+    }
+
+    /// get a post
+    T post(T = string)(string key, T v = T.init)
+    {
+        import std.conv;
+        auto tmp = this.queries;
+        if(tmp is null)
+        {
+            return v;   
+        }
+        auto _v = tmp.get(key, "");
+        if(_v.length)
+        {
+            return to!T(_v);
+        }
+        return v;
+    }
+
     @property ref string[string] materef() {return _mate;}
 private:
     HTTPRequest _req;
@@ -79,4 +121,5 @@ private:
     string[string] _mate;
 	SessionInterface session;
 	Cookie[string] cookies;
+    string[string] _queries;
 }
