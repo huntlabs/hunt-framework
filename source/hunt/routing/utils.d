@@ -190,19 +190,19 @@ unittest
 {
     string path = "/s/d/fwww/";
     string lpath;
-    path = getFristPath(path, lpath);
+    path = getFirstPath(path, lpath);
     assert(path == "s");
     assert(lpath == "/d/fwww/");
 
-    path = getFristPath(lpath, lpath);
+    path = getFirstPath(lpath, lpath);
     assert(path == "d");
     assert(lpath == "/fwww/");
 
-    path = getFristPath(lpath, lpath);
+    path = getFirstPath(lpath, lpath);
     assert(path == "fwww");
     assert(lpath == "/");
 
-    path = getFristPath(lpath, lpath);
+    path = getFirstPath(lpath, lpath);
     assert(path == "");
     assert(lpath == "");
 }
