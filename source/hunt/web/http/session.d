@@ -12,6 +12,8 @@ module hunt.web.http.session;
 
 import hunt.web.http.sessionstorage;
 
+
+
 /**
 * Interface for the session.
 *
@@ -46,6 +48,7 @@ interface SessionInterface
     bool has(string key);
 
     bool del();
+
 }
 
 /**
@@ -62,13 +65,13 @@ class Session : SessionInterface
         SessionStorageInterface storge;
     }
 
-    this(string sessionId)
+    this(string sessionId,SessionStorageInterface storg = newStorage())
     {
-        this();
+        this(storg);
         setId(sessionId);
     }
 
-    this()
+    this(SessionStorageInterface storg = newStorage())
     {
         version (USE_FileSessionStorage)
         {
