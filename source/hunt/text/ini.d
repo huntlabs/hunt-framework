@@ -8,7 +8,7 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.config.ini;
+module hunt.text.ini;
 
 import std.stdio;
 import core.stdc.stdarg;
@@ -16,7 +16,7 @@ import std.file;
 import std.string;
 import std.experimental.logger;
 import core.stdc.stdlib;
-import hunt.config.exception;
+import hunt.text.exception;
 import std.exception;
 
 private class IniLine

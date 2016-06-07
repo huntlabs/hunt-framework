@@ -12,7 +12,7 @@ module hunt.web.http.middleware;
 
 import std.concurrency;
 
-import hunt.web.router.middleware;
+import hunt.routing.middleware;
 import hunt.web.http.request;
 import hunt.web.http.response;
 

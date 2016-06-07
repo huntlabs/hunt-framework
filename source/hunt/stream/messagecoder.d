@@ -9,7 +9,7 @@
  *
  */
  
-module hunt.console.messagecoder;
+module hunt.stream.messagecoder;
 
 import std.bitmanip;
 import std.experimental.logger;

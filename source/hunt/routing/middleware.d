@@ -8,7 +8,7 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.web.router.middleware;
+module hunt.routing.middleware;
 
 import std.functional;
 

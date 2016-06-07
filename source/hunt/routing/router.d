@@ -8,14 +8,14 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.web.router.router;
+module hunt.routing.router;
 
 import std.regex;
 import std.string;
 import std.experimental.logger;
 
-import hunt.web.router.middleware;
-import hunt.web.router.utils;
+import hunt.routing.middleware;
+import hunt.routing.utils;
 
 /**
     The Router Class, Save and Macth the rule, and generte the Pipeline.

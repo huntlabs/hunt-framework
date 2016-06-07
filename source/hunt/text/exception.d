@@ -8,7 +8,7 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.config.exception;
+module hunt.text.exception;
 
 /**
 * Exception thrown during config parser errors

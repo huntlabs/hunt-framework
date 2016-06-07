@@ -8,4 +8,4 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.config.yaml;
+module hunt.text.yaml;
