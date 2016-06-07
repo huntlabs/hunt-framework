@@ -19,7 +19,7 @@ import std.uni;
 import std.conv;
 import std.experimental.logger;
 
-import hunt.web.router.configbase;
+import hunt.routing.configbase;
 /**
  * example: *     /show      index.show
  * toParse: [GET,POST...]  /show   application.controllers.index.IndexController.show

@@ -19,7 +19,5 @@ public import hunt.web.http.session;
 public import hunt.web.http.sessionstorage;
 public import hunt.web.http.webfrom;
 public import hunt.web.http.middleware;
+public import collie.codec.http;
 
-alias HTTPRouter = Router!(Request, Response);
-alias DOHandler = void delegate(Request, Response);
-alias HTTPRouterGroup = RouterGroup!(Request, Response);

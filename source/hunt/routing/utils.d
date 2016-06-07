@@ -8,7 +8,7 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.web.router.utils;
+module hunt.routing.utils;
 
 import std.string;
 import std.regex;
@@ -66,8 +66,8 @@ version (unittest)
 
 unittest
 {
-    controllerHelper!("show", A, int, int)("hunt.web.router.utils.AA.show", 1, 4);
-    controllerHelper!("show", AA, int, int)("hunt.web.router.utils.AA.show", 2, 8);
+    controllerHelper!("show", A, int, int)("hunt.routing.utils.AA.show", 1, 4);
+    controllerHelper!("show", AA, int, int)("hunt.routing.utils.AA.show", 2, 8);
 }
 
 /// 构造正则表达式，类似上个版本的，把配置里的单独的表达式，构建成一个
@@ -190,19 +190,19 @@ unittest
 {
     string path = "/s/d/fwww/";
     string lpath;
-    path = getFristPath(path, lpath);
+    path = getFirstPath(path, lpath);
     assert(path == "s");
     assert(lpath == "/d/fwww/");
 
-    path = getFristPath(lpath, lpath);
+    path = getFirstPath(lpath, lpath);
     assert(path == "d");
     assert(lpath == "/fwww/");
 
-    path = getFristPath(lpath, lpath);
+    path = getFirstPath(lpath, lpath);
     assert(path == "fwww");
     assert(lpath == "/");
 
-    path = getFristPath(lpath, lpath);
+    path = getFirstPath(lpath, lpath);
     assert(path == "");
     assert(lpath == "");
 }

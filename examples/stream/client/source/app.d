@@ -1,8 +1,8 @@
 import stdo = std.stdio;
 import std.datetime;
-import hunt.console.client;
+import hunt.client.stream;
 import collie.socket;
-import hunt.console.messagecoder;
+import hunt.stream.messagecoder;
 import message;
 
 void main()
@@ -18,7 +18,7 @@ void main()
     loop.run();
 }
 
-class MyClient : ClientApplicatin!false
+class MyClient : StreamClient!false
 {
     this(EventLoop loop)
     {

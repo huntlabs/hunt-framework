@@ -120,7 +120,7 @@ ubyte[] lzmaUnCompress(ubyte[] data)
 
 unittest
 {
-version(LZMA_COMPRESS):
+version(LZMA_COMPRESS) {
     import std.stdio;
 
     ubyte[] data = cast(ubyte[])(q{"44444444444444444444444444555555555555555556666666666666
@@ -133,4 +133,5 @@ version(LZMA_COMPRESS):
     ubyte[] udata = lzmaUnCompress(cdata);
     writeln("after uncompress data length: ", udata.length);
     assert(data == udata);
+}
 }
