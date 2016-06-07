@@ -8,4 +8,11 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.config.xml;
+module hunt.routing;
+
+public import hunt.routing.router;
+public import hunt.routing.routergroup;
+public import hunt.routing.configbase;
+public import hunt.routing.utils;
+public import hunt.routing.middleware;
+

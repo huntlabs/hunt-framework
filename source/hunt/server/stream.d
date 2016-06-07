@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.console.application;
+module hunt.server.stream;
 
 public import std.socket;
 public import std.experimental.logger;
@@ -21,14 +21,14 @@ public import collie.socket.eventloop;
 public import collie.socket.eventloopgroup;
 public import collie.channel;
 
-public import hunt.console.context;
-public import hunt.console.fieldframe;
-public import hunt.console.messagecoder;
+public import hunt.stream.context;
+public import hunt.stream.fieldframe;
+public import hunt.stream.messagecoder;
 import hunt.web.router;
 
-final class ServerApplication(bool litteEndian)
+final class StreamServer(bool litteEndian)
 {
-    alias Contex = ConsoleContext!(ServerApplication!litteEndian);
+    alias Contex = ConsoleContext!(StreamServer!litteEndian);
     alias ConsoleRouter = Router!(Contex,Message);
     alias ConsoleHandler = void delegate(Contex,Message);
     alias MiddleWare = IMiddleWare!(Contex,Message);
@@ -52,7 +52,7 @@ final class ServerApplication(bool litteEndian)
        _router = new ConsoleRouter();
         _404 = &default404;
         _server = new ServerBootstrap!ConsolePipeLine(loop);
-        _server.childPipeline(new shared ConsolePipeLineFactory!(ServerApplication!litteEndian)(this));
+        _server.childPipeline(new shared ConsolePipeLineFactory!(StreamServer!litteEndian)(this));
         _server.setReusePort(true);
         _crypt =  new NoCrypt();
         _timeOut = &timeOut;
@@ -239,7 +239,7 @@ final class ServerApplication(bool litteEndian)
     
     
     /**
-        Start the ConsoleApplication server , and block current thread.
+        Start the ConsoleServer server , and block current thread.
     */
     void run()
     {
@@ -256,7 +256,18 @@ final class ServerApplication(bool litteEndian)
         _server.stop();
     }
 
-package :
+    pragma(inline)
+    void do404(Contex contx, Message msg)
+    {
+	_404(contx,msg);
+    }
+    
+    pragma(inline)
+    void doTimeOut(Contex contx)
+    {
+	_timeOut(contx);
+    }
+protected :
     /// the default handle when the router rule don't match.
     final void default404(Contex contx, Message msg)
     {
@@ -285,13 +296,13 @@ private:
 
 private:
 
-class ConsolePipeLineFactory(ConsoleApplication) : PipelineFactory!ConsolePipeLine
+class ConsolePipeLineFactory(ConsoleServer) : PipelineFactory!ConsolePipeLine
 {
-    enum LittleEndian = ConsoleApplication.LittleEndian;
+    enum LittleEndian = ConsoleServer.LittleEndian;
     import collie.socket.tcpsocket;
-    this(ConsoleApplication app)
+    this(ConsoleServer app)
     {
-        _app = cast(shared ConsoleApplication)app;
+        _app = cast(shared ConsoleServer)app;
     }
 
     override ConsolePipeLine newPipeline(TCPSocket sock)
@@ -300,10 +311,10 @@ class ConsolePipeLineFactory(ConsoleApplication) : PipelineFactory!ConsolePipeLi
         pipeline.addBack(new TCPSocketHandler(sock));
         pipeline.addBack(new FieldFrame!LittleEndian(_app.maxPackSize(),_app.compressType(),_app.compressLevel()));
         pipeline.addBack(new MessageCoder(_app.decoder(),_app.cryptCopy()));
-        pipeline.addBack(new ContexHandler!ConsoleApplication(_app));
+        pipeline.addBack(new ContexHandler!ConsoleServer(_app));
         pipeline.finalize();
         return pipeline;
     }
 private:
-    ConsoleApplication _app;
+    ConsoleServer _app;
 }

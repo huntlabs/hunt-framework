@@ -8,4 +8,8 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.config.json;
+module hunt.config;
+
+public import hunt.text.ini;
+public import hunt.text.yaml;
+public import std.json;

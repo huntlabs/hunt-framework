@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.console.fieldframe;
+module hunt.stream.fieldframe;
 
 import std.zlib;
 import std.experimental.logger;

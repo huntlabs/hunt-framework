@@ -8,7 +8,7 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.web.router.configbase;
+module hunt.routing.configbase;
 
 import std.file;
 import std.string;
@@ -17,8 +17,6 @@ import std.stdio;
 import std.array;
 import std.uni;
 import std.conv;
-
-import hunt.config.ini;
 
 /**
     Save the rule info.

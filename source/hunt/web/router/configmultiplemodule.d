@@ -18,8 +18,8 @@ import std.array;
 import std.uni;
 import std.conv;
 
-import hunt.web.router.configbase;
-import hunt.config.ini;
+import hunt.routing.configbase;
+import hunt.text.ini;
 /**
  * example: * /show  admin/user.admin.show
  * toParse: [GET,POST...] /show application.user.admin.AdminController.show

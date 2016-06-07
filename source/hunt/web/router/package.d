@@ -1,24 +1,16 @@
-/*
- * Hunt - a framework for web and console application based on Collie using Dlang development
- *
- * Copyright (C) 2015-2016  Shanghai Putao Technology Co., Ltd 
- *
- * Developer: putao's Dlang team
- *
- * Licensed under the BSD License.
- *
- */
 module hunt.web.router;
 
-public import hunt.web.router.router;
-public import hunt.web.router.routergroup;
-public import hunt.web.router.configbase;
+public import hunt.routing;
 public import hunt.web.router.configsignalmodule;
 public import hunt.web.router.configmultiplemodule;
-public import hunt.web.router.utils;
-public import hunt.web.router.middleware;
-
 import collie.utils.functional;
+
+public import hunt.web.http.request;
+public import hunt.web.http.response;
+
+alias HTTPRouter = Router!(Request, Response);
+alias DOHandler = void delegate(Request, Response);
+alias HTTPRouterGroup = RouterGroup!(Request, Response);
 
 void setRouterConfigHelper(string FUN, T, TRouter)(TRouter router, RouterConfigBase config) if (
         (is(T == class) || is(T == interface)) && hasMember!(T, FUN) && hasMember!(TRouter, "addRouter"))
@@ -100,3 +92,4 @@ static if(hasMember!(TRouter,"getRouter"))
     }
 }
 
+ 

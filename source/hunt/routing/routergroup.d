@@ -1,8 +1,8 @@
-module hunt.web.router.routergroup;
+module hunt.routing.routergroup;
 
-import hunt.web.router.router;
-import hunt.web.router.middleware;
-import hunt.web.router.utils;
+import hunt.routing.router;
+import hunt.routing.middleware;
+import hunt.routing.utils;
 
 /**
     the router group.
