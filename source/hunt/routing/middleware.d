@@ -318,9 +318,9 @@ unittest
     assert(t.gtest == 6);
 
     string[] list = [
-        "hunt.web.router.middleware.TestMiddleWare",
-        "hunt.web.router.middleware.TestMiddleWare",
-        "hunt.web.router.middleware.TestMiddleWare", "hunt.web.router.middleware.TestMiddleWare"
+        "hunt.routing.middleware.TestMiddleWare",
+        "hunt.routing.middleware.TestMiddleWare",
+        "hunt.routing.middleware.TestMiddleWare", "hunt.routing.middleware.TestMiddleWare"
     ];
     auto pipefactor = new shared AutoMiddleWarePipelineFactory!(Test, int)(list);
     auto pipe3 = pipefactor.newPipeline();

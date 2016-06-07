@@ -800,6 +800,6 @@ unittest
     import std.experimental.logger;
     import std.path;
 
-    auto ini = new Ini(buildPath(huntConfigPath, "./config/http.conf"));
+    auto ini = new Ini("./config/http.conf");
     assert(ini.value("server", "port") == "8081");
 }
