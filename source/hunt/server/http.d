@@ -8,7 +8,7 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.server.web;
+module hunt.server.http;
 
 public import std.socket;
 public import std.experimental.logger;
@@ -30,7 +30,7 @@ alias HTTPPipeline = Pipeline!(ubyte[], HTTPResponse);
     
 */
 
-final class WebServer
+final class HTTPServer
 {
     /// default Constructor
     this()
@@ -339,9 +339,9 @@ private:
 class HTTPPipelineFactory : PipelineFactory!HTTPPipeline
 {
     import collie.socket.tcpsocket;
-    this(WebServer app)
+    this(HTTPServer app)
     {
-        _app = cast(shared WebServer)app;
+        _app = cast(shared HTTPServer)app;
     }
 
     override HTTPPipeline newPipeline(TCPSocket sock)
@@ -353,7 +353,7 @@ class HTTPPipelineFactory : PipelineFactory!HTTPPipeline
         return pipeline;
     }
 private:
-    WebServer _app;
+    HTTPServer _app;
 }
 
 /*class EchoWebSocket : WebSocket
