@@ -16,7 +16,6 @@ import std.file;
 import std.string;
 import std.experimental.logger;
 import core.stdc.stdlib;
-import hunt.text.exception;
 import std.exception;
 
 private class IniLine
@@ -279,7 +278,7 @@ protected:
 
         void ungetc()
         {
-			enforce!HuntConfigException(i>0, "i lt 0");
+			enforce(i>0, "i lt 0");
             i--;
         }
 
@@ -698,7 +697,7 @@ public:
                 p = cast(char*) alloca(psize);
             }
             else
-                throw new HuntConfigException("unsupported platform");
+                throw new Exception("unsupported platform");
         }
         std.file.append(_file, p[0 .. count]);
         return count;
