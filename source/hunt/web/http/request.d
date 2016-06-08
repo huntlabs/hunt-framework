@@ -76,7 +76,7 @@ class Request
     {
         if(_queries is null)
         {
-            _queries = req.Header.queryMap();
+            _queries = _req.Header.queryMap();
         }
         return _queries;
     }
