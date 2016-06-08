@@ -64,7 +64,7 @@ final class HTTPServer
         Params:
             config = the Config Class.
     */
-    WebServer setRouterConfig(RouterConfigBase config)
+    HTTPServer setRouterConfig(RouterConfigBase config)
     {
         setRouterConfigHelper!("__CALLACTION__",IController,HTTPRouterGroup)
                                 (_router,config);
@@ -81,7 +81,7 @@ final class HTTPServer
             before =  The PipelineFactory that create the middleware list for the router rules, before  the router rule's handled execute.
             after  =  The PipelineFactory that create the middleware list for the router rules, after  the router rule's handled execute.
     */
-    WebServer addRouter(string domain, string method, string path, DOHandler handle,
+    HTTPServer addRouter(string domain, string method, string path, DOHandler handle,
         shared RouterPipelineFactory before = null, shared RouterPipelineFactory after = null)
     {
         method = toUpper(method);
@@ -98,7 +98,7 @@ final class HTTPServer
             before =  The PipelineFactory that create the middleware list for the router rules, before  the router rule's handled execute.
             after  =  The PipelineFactory that create the middleware list for the router rules, after  the router rule's handled execute.
     */
-    WebServer addRouter(string method, string path, DOHandler handle,
+    HTTPServer addRouter(string method, string path, DOHandler handle,
         shared RouterPipelineFactory before = null, shared RouterPipelineFactory after = null)
     {
         method = toUpper(method);
@@ -109,7 +109,7 @@ final class HTTPServer
     /**
         Set The PipelineFactory that create the middleware list for all router rules, before  the router rule's handled execute.
     */
-    WebServer setGlobalBeforePipelineFactory(shared RouterPipelineFactory before)
+    HTTPServer setGlobalBeforePipelineFactory(shared RouterPipelineFactory before)
     {
         router.setGlobalBeforePipelineFactory(before);
         return this;
@@ -118,7 +118,7 @@ final class HTTPServer
     /**
         Set The PipelineFactory that create the middleware list for all router rules, after  the router rule's handled execute.
     */
-    WebServer setGlobalAfterPipelineFactory(shared RouterPipelineFactory after)
+    HTTPServer setGlobalAfterPipelineFactory(shared RouterPipelineFactory after)
     {
         router.setGlobalAfterPipelineFactory(after);
         return this;
@@ -127,7 +127,7 @@ final class HTTPServer
     /**
         Set The delegate that handle 404,when the router don't math the rule.
     */
-    WebServer setNoFoundHandler(DOHandler nofound)
+    HTTPServer setNoFoundHandler(DOHandler nofound)
     in
     {
         assert(nofound !is null);
@@ -148,7 +148,7 @@ final class HTTPServer
         set the ssl config.
         if you set and the config is not null, the Application will used https.
     */
-    WebServer setSSLConfig(ServerSSLConfig config) 
+    HTTPServer setSSLConfig(ServerSSLConfig config) 
     {
         _server.setSSLConfig(config);
         return this;
@@ -157,7 +157,7 @@ final class HTTPServer
     /**
         Set the EventLoopGroup to used the multi-thread.
     */
-    WebServer group(EventLoopGroup group)
+    HTTPServer group(EventLoopGroup group)
     {
         _server.group(group);
         return this;
@@ -168,7 +168,7 @@ final class HTTPServer
         See_Also:
             collie.bootstrap.server.ServerBootstrap pipeline
     */
-    WebServer pipeline(shared AcceptPipelineFactory factory)
+    HTTPServer pipeline(shared AcceptPipelineFactory factory)
     {
         _server.pipeline(factory);
         return this;
@@ -177,7 +177,7 @@ final class HTTPServer
     /**
         Set the bind address.
     */
-    WebServer bind(Address addr)
+    HTTPServer bind(Address addr)
     {
         _server.bind(addr);
         return this;
@@ -186,7 +186,7 @@ final class HTTPServer
     /**
         Set the bind port, the ip address will be all.
     */
-    WebServer bind(ushort port)
+    HTTPServer bind(ushort port)
     {
         _server.bind(port);
         return this;
@@ -195,7 +195,7 @@ final class HTTPServer
     /**
         Set the bind address.
     */
-    WebServer bind(string ip, ushort port)
+    HTTPServer bind(string ip, ushort port)
     {
         _server.bind(ip,port);
         return this;
@@ -215,38 +215,38 @@ final class HTTPServer
     @property httpConfig(){return _config;}
     
     /// set the HTTPConfig maxBodySize.
-    WebServer maxBodySize(uint size)
+    HTTPServer maxBodySize(uint size)
     {
         _config.maxBodySize = size;
         return this;
     }
     /// set the HTTPConfig maxHeaderSize.
-    WebServer maxHeaderSize(uint size)
+    HTTPServer maxHeaderSize(uint size)
     {
         _config.maxHeaderSize = size;
         return this;
     }
     /// set the HTTPConfig headerStectionSize.
-    WebServer headerStectionSize(uint size)
+    HTTPServer headerStectionSize(uint size)
     {
         _config.headerStectionSize = size;
         return this;
     }
     /// set the HTTPConfig requestBodyStectionSize.
-    WebServer requestBodyStectionSize(uint size)
+    HTTPServer requestBodyStectionSize(uint size)
     {
         _config.requestBodyStectionSize = size;
         return this;
     }
     /// set the HTTPConfig responseBodyStectionSize.
-    WebServer responseBodyStectionSize(uint size)
+    HTTPServer responseBodyStectionSize(uint size)
     {
         _config.responseBodyStectionSize = size;
         return this;
     }
     
     /**
-        Start the WebServer server , and block current thread.
+        Start the HTTPServer server , and block current thread.
     */
     void run()
     {
@@ -264,7 +264,7 @@ final class HTTPServer
 
 private:
     /// math the router and start handle the middleware and handle.
-    static void doHandle(WebServer app,Request req, Response res)
+    static void doHandle(HTTPServer app,Request req, Response res)
     {
         trace("macth router : method: ", req.Header.methodString, "   path : ",req.Header.path, " host: ", req.Header.host);
         RouterPipeline pipe = null;
@@ -310,7 +310,7 @@ private:
 
 class HttpServer : HTTPHandler
 {
-    this(shared WebServer app)
+    this(shared HTTPServer app)
     {
         _app = app;
     }
@@ -319,7 +319,7 @@ class HttpServer : HTTPHandler
     {
         auto request = new Request(req);
         auto response = new Response(rep);
-        _app.doHandle(cast(WebServer)_app,request, response);
+        _app.doHandle(cast(HTTPServer)_app,request, response);
     }
 
     override WebSocket newWebSocket(const HTTPHeader header)
@@ -333,7 +333,7 @@ class HttpServer : HTTPHandler
     }
 
 private:
-    shared WebServer _app;
+    shared HTTPServer _app;
 }
 
 class HTTPPipelineFactory : PipelineFactory!HTTPPipeline
