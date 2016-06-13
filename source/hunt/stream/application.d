@@ -26,9 +26,9 @@ public import hunt.stream.fieldframe;
 public import hunt.stream.messagecoder;
 import hunt.web.router;
 
-final class StreamServer(bool litteEndian)
+final class StreamApplication(bool litteEndian)
 {
-    alias Contex = ConsoleContext!(StreamServer!litteEndian);
+    alias Contex = ConsoleContext!(StreamApplication!litteEndian);
     alias ConsoleRouter = Router!(Contex,Message);
     alias ConsoleHandler = void delegate(Contex,Message);
     alias MiddleWare = IMiddleWare!(Contex,Message);
@@ -52,7 +52,7 @@ final class StreamServer(bool litteEndian)
         _router = new ConsoleRouter();
         _404 = &default404;
         _server = new ServerBootstrap!ConsolePipeLine(loop);
-        _server.childPipeline(new shared ConsolePipeLineFactory!(StreamServer!litteEndian)(this));
+        _server.childPipeline(new shared ConsolePipeLineFactory!(StreamApplication!litteEndian)(this));
         _server.setReusePort(true);
         _crypt =  new NoCrypt();
         _timeOut = &timeOut;
