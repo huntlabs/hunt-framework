@@ -8,13 +8,13 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.server.http;
+module hunt.application.http;
 
 public import std.socket;
 public import std.experimental.logger;
 import std.uni;
 
-import collie.bootstrap.server;
+//import collie.bootstrap.server;
 import collie.bootstrap.serversslconfig;
 public import collie.socket.eventloop;
 public import collie.socket.eventloopgroup;
@@ -24,39 +24,25 @@ import collie.codec.http;
 
 public import hunt.web;
 
-alias HTTPPipeline = Pipeline!(ubyte[], HTTPResponse);
-
 /**
     
 */
 
-final class HTTPServer
+final class WebApplication
 {
     /// default Constructor
     this()
     {
-        this(new EventLoop());
+       _mainLoop = new EventLoop();
+       _server = new HTTPServer(_mainLoop);
+       _router = new HTTPRouterGroup();
+       _server.setCallBack(&doHandle);
     }
     
-    /**
-        Constructor, Set the default EventLoop.
-        Params:
-            loop = the default EventLoop
-    */
-    this(EventLoop loop)
-    {
-       _router = new HTTPRouterGroup();
-        _404 = &default404;
-        _server = new ServerBootstrap!HTTPPipeline(loop);
-        _server.childPipeline(new shared HTTPPipelineFactory(this));
-        _config = new HTTPConfig();
-        _server.setReusePort(true);
-        _server.heartbeatTimeOut(30);
-    }
 
     auto keepAliveTimeOut(uint second)
     {
-        _server.heartbeatTimeOut(second);
+        _server.keepAliveTimeOut(second);
         return this;
     }
     /**
@@ -64,7 +50,7 @@ final class HTTPServer
         Params:
             config = the Config Class.
     */
-    HTTPServer setRouterConfig(RouterConfigBase config)
+    auto setRouterConfig(RouterConfigBase config)
     {
         setRouterConfigHelper!("__CALLACTION__",IController,HTTPRouterGroup)
                                 (_router,config);
@@ -81,7 +67,7 @@ final class HTTPServer
             before =  The PipelineFactory that create the middleware list for the router rules, before  the router rule's handled execute.
             after  =  The PipelineFactory that create the middleware list for the router rules, after  the router rule's handled execute.
     */
-    HTTPServer addRouter(string domain, string method, string path, DOHandler handle,
+    auto addRouter(string domain, string method, string path, DOHandler handle,
         shared RouterPipelineFactory before = null, shared RouterPipelineFactory after = null)
     {
         method = toUpper(method);
@@ -98,7 +84,7 @@ final class HTTPServer
             before =  The PipelineFactory that create the middleware list for the router rules, before  the router rule's handled execute.
             after  =  The PipelineFactory that create the middleware list for the router rules, after  the router rule's handled execute.
     */
-    HTTPServer addRouter(string method, string path, DOHandler handle,
+    auto addRouter(string method, string path, DOHandler handle,
         shared RouterPipelineFactory before = null, shared RouterPipelineFactory after = null)
     {
         method = toUpper(method);
@@ -109,7 +95,7 @@ final class HTTPServer
     /**
         Set The PipelineFactory that create the middleware list for all router rules, before  the router rule's handled execute.
     */
-    HTTPServer setGlobalBeforePipelineFactory(shared RouterPipelineFactory before)
+    auto setGlobalBeforePipelineFactory(shared RouterPipelineFactory before)
     {
         router.setGlobalBeforePipelineFactory(before);
         return this;
@@ -118,7 +104,7 @@ final class HTTPServer
     /**
         Set The PipelineFactory that create the middleware list for all router rules, after  the router rule's handled execute.
     */
-    HTTPServer setGlobalAfterPipelineFactory(shared RouterPipelineFactory after)
+    auto setGlobalAfterPipelineFactory(shared RouterPipelineFactory after)
     {
         router.setGlobalAfterPipelineFactory(after);
         return this;
@@ -127,7 +113,7 @@ final class HTTPServer
     /**
         Set The delegate that handle 404,when the router don't math the rule.
     */
-    HTTPServer setNoFoundHandler(DOHandler nofound)
+    auto setNoFoundHandler(DOHandler nofound)
     in
     {
         assert(nofound !is null);
@@ -144,11 +130,17 @@ final class HTTPServer
         return _router;
     }
     
+    @property server(){return _server;}
+    
+    @property mainLoop(){return _mainLoop;}
+    
+    @property loopGroup(){return _group;}
+    
     /**
         set the ssl config.
         if you set and the config is not null, the Application will used https.
     */
-    HTTPServer setSSLConfig(ServerSSLConfig config) 
+    auto setSSLConfig(ServerSSLConfig config) 
     {
         _server.setSSLConfig(config);
         return this;
@@ -157,27 +149,22 @@ final class HTTPServer
     /**
         Set the EventLoopGroup to used the multi-thread.
     */
-    HTTPServer group(EventLoopGroup group)
+    auto setThreadSize(uint size)
     {
-        _server.group(group);
-        return this;
-    }
-    
-    /**
-        Set the accept Pipeline.
-        See_Also:
-            collie.bootstrap.server.ServerBootstrap pipeline
-    */
-    HTTPServer pipeline(shared AcceptPipelineFactory factory)
-    {
-        _server.pipeline(factory);
+        auto ts = size - 1;
+        if(ts > 0)
+        {
+            _group = new EventLoopGroup(ts);
+            _server.group(_group);
+
+        } 
         return this;
     }
     
     /**
         Set the bind address.
     */
-    HTTPServer bind(Address addr)
+    auto bind(Address addr)
     {
         _server.bind(addr);
         return this;
@@ -186,7 +173,7 @@ final class HTTPServer
     /**
         Set the bind port, the ip address will be all.
     */
-    HTTPServer bind(ushort port)
+    auto bind(ushort port)
     {
         _server.bind(port);
         return this;
@@ -195,53 +182,9 @@ final class HTTPServer
     /**
         Set the bind address.
     */
-    HTTPServer bind(string ip, ushort port)
+    auto bind(string ip, ushort port)
     {
         _server.bind(ip,port);
-        return this;
-    }
-    
-    /**
-        Set the Http config.
-        See_Also:
-            collie.codec.http.config.HTTPConfig
-    */
-    
-    @property httpConfig(HTTPConfig config)
-    {
-        _config = config;
-    }
-    /// get the http config.
-    @property httpConfig(){return _config;}
-    
-    /// set the HTTPConfig maxBodySize.
-    HTTPServer maxBodySize(uint size)
-    {
-        _config.maxBodySize = size;
-        return this;
-    }
-    /// set the HTTPConfig maxHeaderSize.
-    HTTPServer maxHeaderSize(uint size)
-    {
-        _config.maxHeaderSize = size;
-        return this;
-    }
-    /// set the HTTPConfig headerStectionSize.
-    HTTPServer headerStectionSize(uint size)
-    {
-        _config.headerStectionSize = size;
-        return this;
-    }
-    /// set the HTTPConfig requestBodyStectionSize.
-    HTTPServer requestBodyStectionSize(uint size)
-    {
-        _config.requestBodyStectionSize = size;
-        return this;
-    }
-    /// set the HTTPConfig responseBodyStectionSize.
-    HTTPServer responseBodyStectionSize(uint size)
-    {
-        _config.responseBodyStectionSize = size;
         return this;
     }
     
@@ -251,7 +194,7 @@ final class HTTPServer
     void run()
     {
         router.done();
-        _server.waitForStop();
+        _server.run();
     }
     
     /**
@@ -262,9 +205,15 @@ final class HTTPServer
         _server.stop();
     }
 
+    
+    auto setWebsocketFactory(WEBSocketFactory cback)
+    {
+        _server.setWebsocketFactory(cback);
+        return this;
+    }
 private:
     /// math the router and start handle the middleware and handle.
-    static void doHandle(HTTPServer app,Request req, Response res)
+    void doHandle(Request req, Response res)
     {
         trace("macth router : method: ", req.Header.methodString, "   path : ",req.Header.path, " host: ", req.Header.host);
         RouterPipeline pipe = null;
@@ -302,83 +251,8 @@ private:
 private:
     HTTPRouterGroup _router;
     DOHandler _404;
-    ServerBootstrap!HTTPPipeline _server;
-    HTTPConfig _config;
+//    ServerBootstrap!HTTPPipeline _server;
+    HTTPServer _server;
+    EventLoop _mainLoop;
+    EventLoopGroup _group;
 }
-
-private:
-
-class HttpServer : HTTPHandler
-{
-    this(shared HTTPServer app)
-    {
-        _app = app;
-    }
-
-    override void requestHandle(HTTPRequest req, HTTPResponse rep)
-    {
-        auto request = new Request(req);
-        auto response = new Response(rep);
-        _app.doHandle(cast(HTTPServer)_app,request, response);
-    }
-
-    override WebSocket newWebSocket(const HTTPHeader header)
-    {
-        return null;
-    }
-    
-    override @property HTTPConfig config()
-    {
-        return cast(HTTPConfig)(_app._config);
-    }
-
-private:
-    shared HTTPServer _app;
-}
-
-class HTTPPipelineFactory : PipelineFactory!HTTPPipeline
-{
-    import collie.socket.tcpsocket;
-    this(HTTPServer app)
-    {
-        _app = cast(shared HTTPServer)app;
-    }
-
-    override HTTPPipeline newPipeline(TCPSocket sock)
-    {
-        auto pipeline = HTTPPipeline.create();
-        pipeline.addBack(new TCPSocketHandler(sock));
-        pipeline.addBack(new HttpServer(_app));
-        pipeline.finalize();
-        return pipeline;
-    }
-private:
-    HTTPServer _app;
-}
-
-/*class EchoWebSocket : WebSocket
-{
-    override void onClose()
-    {
-            writeln("websocket closed");
-    }
-
-    override void onTextFrame(Frame frame)
-    {
-            writeln("get a text frame, is finna : ", frame.isFinalFrame, "  data is :", cast(string)frame.data);
-            sendText("456789");
-    //      sendBinary(cast(ubyte[])"456123");
-    //      ping(cast(ubyte[])"123");
-    }
-
-    override void onPongFrame(Frame frame)
-    {
-            writeln("get a text frame, is finna : ", frame.isFinalFrame, "  data is :", cast(string)frame.data);
-    }
-
-    override void onBinaryFrame(Frame frame)
-    {
-            writeln("get a text frame, is finna : ", frame.isFinalFrame, "  data is :", cast(string)frame.data);
-    }
-}
-*/

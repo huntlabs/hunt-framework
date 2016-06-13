@@ -119,7 +119,7 @@ private:
     HTTPRequest _req;
     WebForm _form = null;
     string[string] _mate;
-	SessionInterface session;
-	Cookie[string] cookies;
+    SessionInterface session;
+    Cookie[string] cookies;
     string[string] _queries;
 }
