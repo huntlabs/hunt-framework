@@ -31,21 +31,10 @@ void test(Request, Response res)
     res.redirect("hello");
 }
 
-void main()
+static this()
 {
-    writeln("hello world");
-   // globalLogLevel(LogLevel.error);
-    EventLoop loop = new EventLoop();
-    
-    HTTPServer app = new HTTPServer(loop);
-
-    app.setRouterConfig(new ConfigSignalModule("config/router.conf"));
-   //app.setRouterConfig(new ConfigSignalModule("config/router.api.conf"));
+    WebApplication.setConfig(new WebConfig());
+    auto app = WebApplication.app();
     app.addRouter("GET","/test",toDelegate(&test)).addRouter("GET","/hello",toDelegate(&hello));
-    //app.setGlobalAfterPipelineFactory(new GAMFactory).setGlobalBeforePipelineFactory(new GBMFactory);
-    app.group(new EventLoopGroup());
-    app.bind(8080);
-
-    
-    app.run();
 }
+
