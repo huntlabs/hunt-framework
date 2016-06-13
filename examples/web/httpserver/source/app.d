@@ -14,7 +14,7 @@ import std.experimental.logger;
 
 import hunt.web;
 
-import hunt.server.http;
+import hunt.application.web;
 import application.middleware;
 
 import collie.socket;

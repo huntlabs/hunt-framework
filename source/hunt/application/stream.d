@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.server.stream;
+module hunt.application.stream;
 
 public import std.socket;
 public import std.experimental.logger;
