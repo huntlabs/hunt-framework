@@ -202,11 +202,11 @@ private:
         _wfactory = _config.webSocketFactory();
         if(_wfactory is null)
         {
-            _server.setWebsocketFactory(&_wfactory.newWebSocket);
+            _server.setWebsocketFactory(null);  
         }
         else
         {
-            _server.setWebsocketFactory(null);
+            _server.setWebsocketFactory(&_wfactory.newWebSocket);
         }
     }
     
@@ -217,6 +217,7 @@ private:
        _server = new HTTPServer(_mainLoop);
        _router = new HTTPRouterGroup();
        _server.setCallBack(&doHandle);
+       _404 = &default404;
     }
 
     __gshared static WebApplication _app;

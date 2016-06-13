@@ -49,7 +49,7 @@ final class StreamServer(bool litteEndian)
     */
     this(EventLoop loop)
     {
-       _router = new ConsoleRouter();
+        _router = new ConsoleRouter();
         _404 = &default404;
         _server = new ServerBootstrap!ConsolePipeLine(loop);
         _server.childPipeline(new shared ConsolePipeLineFactory!(StreamServer!litteEndian)(this));
