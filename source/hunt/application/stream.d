@@ -29,7 +29,11 @@ import hunt.web.router;
 final class StreamServer(bool litteEndian)
 {
     alias Contex = ConsoleContext!(StreamServer!litteEndian);
-    alias StreamCallBack = void delegate(Contex,Message);
+    alias ConsoleRouter = Router!(Contex,Message);
+    alias ConsoleHandler = void delegate(Contex,Message);
+    alias MiddleWare = IMiddleWare!(Contex,Message);
+    alias RouterPipeline = PipelineImpl!(Contex,Message);
+    alias RouterPipelineFactory = IPipelineFactory!(Contex,Message);
     
     enum LittleEndian = litteEndian;
     /// default Constructor
@@ -52,6 +56,74 @@ final class StreamServer(bool litteEndian)
         _server.setReusePort(true);
         _crypt =  new NoCrypt();
         _timeOut = &timeOut;
+    }
+
+    /**
+        Config the Apolication's Router .
+        Params:
+            config = the Config Class.
+    */
+ /*   auto setRouterConfig(RouterConfigBase config)
+    {
+        import hunt.web.http.controller;
+        setRouterConfigHelper!("__CALLACTION__",IController,ConsoleRouter)
+                                (_router,config);
+        return this;
+    }
+   */
+    /**
+        Add a Router rule
+        Params:
+            domain =  the rule's domain group.
+            method =  the HTTP method. 
+            path   =  the request path.
+            handle =  the delegate that handle the request.
+            before =  The PipelineFactory that create the middleware list for the router rules, before  the router rule's handled execute.
+            after  =  The PipelineFactory that create the middleware list for the router rules, after  the router rule's handled execute.
+    */
+    auto addRouter(string type, ConsoleHandler handle,
+        shared RouterPipelineFactory before = null, shared RouterPipelineFactory after = null)
+    {
+        router.addRouter("RPC",type,handle,before,after);
+        return this;
+    }
+    
+    /**
+        Set The PipelineFactory that create the middleware list for all router rules, before  the router rule's handled execute.
+    */
+    auto setGlobalBeforePipelineFactory(shared RouterPipelineFactory before)
+    {
+        router.setGlobalBeforePipelineFactory(before);
+        return this;
+    }
+
+    /**
+        Set The PipelineFactory that create the middleware list for all router rules, after  the router rule's handled execute.
+    */
+    auto setGlobalAfterPipelineFactory(shared RouterPipelineFactory after)
+    {
+        router.setGlobalAfterPipelineFactory(after);
+        return this;
+    }
+
+    /**
+        Set The delegate that handle 404,when the router don't math the rule.
+    */
+    auto setNoFoundHandler(ConsoleHandler nofound)
+    in
+    {
+        assert(nofound !is null);
+    }
+    body
+    {
+        _404 = nofound;
+        return this;
+    }
+
+    /// get the router.
+    @property router()
+    {
+        return _router;
     }
     
     /**
@@ -156,14 +228,6 @@ final class StreamServer(bool litteEndian)
         _crypt = crypt;
         return this;
     }
-    
-    auto setCallBack(StreamCallBack cback)
-    {
-	_callBack = cback;
-	return this;
-    }
-    
-    @property streamCallBack(){return _callBack;}
    
     @property maxPackSize() const shared {return _maxPackSize;}
     @property compressType() const shared {return _comType;}
@@ -180,7 +244,7 @@ final class StreamServer(bool litteEndian)
     void run()
     {
         assert(_dcoder);
-        assert(_callBack);
+        router.done();
         _server.waitForStop();
     }
     
@@ -191,9 +255,35 @@ final class StreamServer(bool litteEndian)
     {
         _server.stop();
     }
+
+    pragma(inline)
+    void do404(Contex contx, Message msg)
+    {
+	_404(contx,msg);
+    }
     
+    pragma(inline)
+    void doTimeOut(Contex contx)
+    {
+	_timeOut(contx);
+    }
+protected :
+    /// the default handle when the router rule don't match.
+    final void default404(Contex contx, Message msg)
+    {
+        contx.close();
+    }
+    
+    final void timeOut(Contex contx)
+    {
+        trace("connect time out");
+        contx.close();
+    }
+
+    ConsoleHandler _404;
+    void delegate(Contex) _timeOut;
 private:
-    StreamCallBack _callBack;
+    ConsoleRouter _router;
     ServerBootstrap!ConsolePipeLine _server;
 private:
     uint _maxPackSize = 16 * 1024;
