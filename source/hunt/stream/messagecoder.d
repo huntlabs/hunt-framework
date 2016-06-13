@@ -24,6 +24,24 @@ interface Message
     ubyte[] encodeMeassage();
 }
 
+final class TimeOutMessage : Message
+{
+    override string type() {return "Time Out";}
+    override ubyte[] encodeMeassage() {return null;}
+}
+
+final class TransportActiveMessage : Message
+{
+    override string type() {return "Transport Active";}
+    override ubyte[] encodeMeassage() {return null;}
+}
+
+final class TransportInActiveMessage : Message
+{
+    override string type() {return "Transport InActive";}
+    override ubyte[] encodeMeassage() {return null;}
+}
+
 interface CryptHandler
 {
     ubyte[] encrypt(ubyte[]);

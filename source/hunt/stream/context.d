@@ -11,6 +11,7 @@
 
 module hunt.stream.context;
 
+import std.variant;
 
 import collie.channel.handler;
 import collie.channel.handlercontext;
@@ -35,9 +36,15 @@ final class ConsoleContext(ConsoleApplication)
     {
         _header.context().fireClose();
     }
+    
+    pragma(inline)
+    void setData(Variant value) {_data = value;}
+    pragma(inline)
+    @property data() {return _data;}
 private:
     this(ContexHandler!ConsoleApplication hander){_header = hander;}
     ContexHandler!ConsoleApplication _header;
+    Variant _data;
 }
 
 class ContexHandler(ConsoleApplication) : HandlerAdapter!(Message)
@@ -50,8 +57,10 @@ class ContexHandler(ConsoleApplication) : HandlerAdapter!(Message)
     
     final override void read(Context ctx, Message msg)
     {
-        import std.conv;
+       // import std.conv;
         ConsoleApplication app = cast(ConsoleApplication)_app;
+        auto cback = app.streamCallBack();
+ /*       cback(_cctx,msg);
         if(msg is null)
         {
             app.do404(_cctx,msg);
@@ -74,16 +83,27 @@ class ContexHandler(ConsoleApplication) : HandlerAdapter!(Message)
             }
             pipe.handleActive( _cctx,msg);
         }
+        */
     }
     
     final override void timeOut(Context ctx)
     {
-        ConsoleApplication app = cast(ConsoleApplication)_app;
-        app.doTimeOut(_cctx);
+	this.read(ctx,new TimeOutMessage());
+    }
+    
+    final override void transportInactive(Context ctx)
+    {
+	this.read(ctx,new TransportActiveMessage());
+    }
+    
+    final override void transportActive(Context ctx)
+    {
+	this.read(ctx,new TransportInActiveMessage());
     }
 
 private:
     ConsoleContext!ConsoleApplication _cctx;
     shared ConsoleApplication _app;
+
 }
 
