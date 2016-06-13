@@ -8,7 +8,10 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.application.web.application;
+module hunt.web.application;
+
+
+
 
 public import std.socket;
 public import std.experimental.logger;
@@ -22,8 +25,8 @@ public import collie.channel;
 public import collie.codec.http.config;
 import collie.codec.http;
 
-public import hunt.web;
-import hunt.application.web.config;
+import hunt.web;
+public import hunt.web.application.config;
 /**
     
 */
@@ -152,7 +155,7 @@ private:
     {
         trace("macth router : method: ", req.Header.methodString, "   path : ",req.Header.path, " host: ", req.Header.host);
         RouterPipeline pipe = null;
-	pipe = _router.match(req.Header.host,req.Header.methodString, req.Header.path);
+        pipe = _router.match(req.Header.host,req.Header.methodString, req.Header.path);
 
         if (pipe is null)
         {
