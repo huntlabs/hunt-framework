@@ -13,8 +13,6 @@ import std.functional;
 import std.experimental.logger;
 
 import hunt.web;
-
-import hunt.application.web;
 import application.middleware;
 
 import collie.socket;
