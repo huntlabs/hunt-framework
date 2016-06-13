@@ -8,7 +8,7 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.application.http;
+module hunt.application.web.application;
 
 public import std.socket;
 public import std.experimental.logger;
@@ -23,40 +23,26 @@ public import collie.codec.http.config;
 import collie.codec.http;
 
 public import hunt.web;
-
+import hunt.application.web.config;
 /**
     
 */
 
 final class WebApplication
 {
-    /// default Constructor
-    this()
+    static setConfig(WebConfig config)
     {
-       _mainLoop = new EventLoop();
-       _server = new HTTPServer(_mainLoop);
-       _router = new HTTPRouterGroup();
-       _server.setCallBack(&doHandle);
+        assert(config);
+        if(_app is null)
+        {
+            _app = new WebApplication;
+        }
+        _app._config = config;
+        _app.upConfig();
     }
     
+    static @property app(){return _app;}
 
-    auto keepAliveTimeOut(uint second)
-    {
-        _server.keepAliveTimeOut(second);
-        return this;
-    }
-    /**
-        Config the Apolication's Router .
-        Params:
-            config = the Config Class.
-    */
-    auto setRouterConfig(RouterConfigBase config)
-    {
-        setRouterConfigHelper!("__CALLACTION__",IController,HTTPRouterGroup)
-                                (_router,config);
-        return this;
-    }
-   
     /**
         Add a Router rule
         Params:
@@ -136,63 +122,18 @@ final class WebApplication
     
     @property loopGroup(){return _group;}
     
-    /**
-        set the ssl config.
-        if you set and the config is not null, the Application will used https.
-    */
-    auto setSSLConfig(ServerSSLConfig config) 
-    {
-        _server.setSSLConfig(config);
-        return this;
-    } 
+    @property appConfig(){return _config;}
     
-    /**
-        Set the EventLoopGroup to used the multi-thread.
-    */
-    auto setThreadSize(uint size)
-    {
-        auto ts = size - 1;
-        if(ts > 0)
-        {
-            _group = new EventLoopGroup(ts);
-            _server.group(_group);
-
-        } 
-        return this;
-    }
-    
-    /**
-        Set the bind address.
-    */
-    auto bind(Address addr)
-    {
-        _server.bind(addr);
-        return this;
-    }
-
-    /**
-        Set the bind port, the ip address will be all.
-    */
-    auto bind(ushort port)
-    {
-        _server.bind(port);
-        return this;
-    }
-
-    /**
-        Set the bind address.
-    */
-    auto bind(string ip, ushort port)
-    {
-        _server.bind(ip,port);
-        return this;
-    }
     
     /**
         Start the HTTPServer server , and block current thread.
     */
     void run()
     {
+        auto config = _config.routerConfig();
+        if(config !is null)
+            setRouterConfigHelper!("__CALLACTION__",IController,HTTPRouterGroup)
+                            (_router,config);
         router.done();
         _server.run();
     }
@@ -205,19 +146,13 @@ final class WebApplication
         _server.stop();
     }
 
-    
-    auto setWebsocketFactory(WEBSocketFactory cback)
-    {
-        _server.setWebsocketFactory(cback);
-        return this;
-    }
 private:
     /// math the router and start handle the middleware and handle.
     void doHandle(Request req, Response res)
     {
         trace("macth router : method: ", req.Header.methodString, "   path : ",req.Header.path, " host: ", req.Header.host);
         RouterPipeline pipe = null;
-	pipe = app.router.match(req.Header.host,req.Header.methodString, req.Header.path);
+	pipe = _router.match(req.Header.host,req.Header.methodString, req.Header.path);
 
         if (pipe is null)
         {
@@ -247,7 +182,44 @@ private:
         res.setContext("No Found");
         res.done();
     }
+    
+    void upConfig()
+    {
+        _server.bind(_config.bindAddress());
+        _server.setSSLConfig(_config.sslConfig());
+        auto ts = _config.threadSize() - 1;
+        if(ts > 0)
+        {
+            _group = new EventLoopGroup(ts);
+            _server.group(_group);
+        } 
+        _server.keepAliveTimeOut(_config.keepAliveTimeOut());
+        _server.maxBodySize(_config.httpMaxBodySize());
+        _server.maxHeaderSize(_config.httpMaxHeaderSize());
+        _server.headerStectionSize(_config.httpHeaderStectionSize());
+        _server.requestBodyStectionSize(_config.httpRequestBodyStectionSize());
+        _server.responseBodyStectionSize(_config.httpResponseBodyStectionSize());
+        _wfactory = _config.webSocketFactory();
+        if(_wfactory is null)
+        {
+            _server.setWebsocketFactory(&_wfactory.newWebSocket);
+        }
+        else
+        {
+            _server.setWebsocketFactory(null);
+        }
+    }
+    
+    /// default Constructor
+    this()
+    {
+       _mainLoop = new EventLoop();
+       _server = new HTTPServer(_mainLoop);
+       _router = new HTTPRouterGroup();
+       _server.setCallBack(&doHandle);
+    }
 
+    __gshared static WebApplication _app;
 private:
     HTTPRouterGroup _router;
     DOHandler _404;
@@ -255,4 +227,7 @@ private:
     HTTPServer _server;
     EventLoop _mainLoop;
     EventLoopGroup _group;
+    WebSocketFactory _wfactory;
+    WebConfig _config;
 }
+
