@@ -8,14 +8,14 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.web.http.request;
+module hunt.http.request;
 
 import collie.codec.http;
 
-import hunt.web.http.webfrom;
-import hunt.web.http.session;
-import hunt.web.http.sessionstorage;
-import hunt.web.http.cookie;
+import hunt.http.webfrom;
+import hunt.http.session;
+import hunt.http.sessionstorage;
+import hunt.http.cookie;
 
 class Request
 {

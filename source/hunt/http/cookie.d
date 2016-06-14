@@ -8,7 +8,7 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.web.http.cookie;
+module hunt.http.cookie;
 
 import std.regex : regex, Regex;
 import std.string;

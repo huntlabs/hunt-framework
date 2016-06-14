@@ -12,12 +12,13 @@
 module hunt.web.router;
 
 public import hunt.routing;
+public import hunt.web.router.middleware;
 public import hunt.web.router.configsignalmodule;
 public import hunt.web.router.configmultiplemodule;
 import collie.utils.functional;
 
-public import hunt.web.http.request;
-public import hunt.web.http.response;
+public import hunt.http.request;
+public import hunt.http.response;
 
 alias HTTPRouter = Router!(Request, Response);
 alias DOHandler = void delegate(Request, Response);

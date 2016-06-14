@@ -8,9 +8,9 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.web.http.session;
+module hunt.http.session;
 
-import hunt.web.http.sessionstorage;
+import hunt.http.sessionstorage;
 
 
 
