@@ -15,6 +15,7 @@ public import hunt.routing;
 public import hunt.web.router.middleware;
 public import hunt.web.router.configsignalmodule;
 public import hunt.web.router.configmultiplemodule;
+public import hunt.web.router.config;
 import collie.utils.functional;
 
 public import hunt.http.request;
