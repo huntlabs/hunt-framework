@@ -88,7 +88,7 @@ protected:
             auto len = str.length -1;
             if(str[0] == '[' && str[len] == ']')
             {
-                string section = str[1..len];
+                string section = str[1..len].strip;
                 string[] list = split(section,'.');
                 ele = getElement(list);
                 continue;

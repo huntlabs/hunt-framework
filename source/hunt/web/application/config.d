@@ -52,23 +52,23 @@ class WebConfig
     }
 }
 
-import hunt.text.ini;
+import hunt.text.conf;
 import std.conv;
 
 class IniWebConfig : WebConfig
 {
     this(string file)
     {
-        _ini = new Ini(file);
+        _ini = new Conf(file);
     }
     
     override Address bindAddress()
     {
-        auto value = _ini.value("server","port");
+        auto value = _ini.get("server.port");
         if(value.length == 0) 
             throw new Exception("The Port Config can not be empty!");
         ushort port = to!ushort(value);
-        value = _ini.value("server","host");
+        value = _ini.get("server.host");
         if(value.length == 0)
         {
             return new InternetAddress(port);
@@ -76,7 +76,7 @@ class IniWebConfig : WebConfig
         else
         {
             auto ip = value;
-            value = _ini.value("server","isipv6");
+            value = _ini.get("server.isipv6");
             if(value.length == 0)
             {
                 return new InternetAddress(ip,port);
@@ -92,7 +92,7 @@ class IniWebConfig : WebConfig
     
     override uint threadSize()
     {
-        auto value = _ini.value("server","threadsize");
+        auto value = _ini.get("server.threadsize");
         if(value.length == 0)
             return super.threadSize();
         return to!uint(value);
@@ -100,5 +100,5 @@ class IniWebConfig : WebConfig
     
     
 private:
-    Ini _ini;
+    Conf _ini;
 }
