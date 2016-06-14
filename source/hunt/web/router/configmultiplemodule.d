@@ -43,7 +43,8 @@ public:
         while(!file.eof())
         {
             string line = file.readln();
-            if (line != string.init && (line.indexOf('#') < 0))
+            line = line.strip;
+            if (line.length > 0 && line[0] == '#')
             {
                 string[] tmpSplites = spliteBySpace(line);
                 if(tmpSplites.length == 0) continue;

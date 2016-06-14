@@ -31,7 +31,7 @@ void test(Request, Response res)
 
 static this()
 {
-    WebApplication.setConfig(new WebConfig());
+    WebApplication.setConfig(new IniWebConfig("config/http.conf"));
     auto app = WebApplication.app();
     app.addRouter("GET","/test",toDelegate(&test)).addRouter("GET","/hello",toDelegate(&hello));
 }

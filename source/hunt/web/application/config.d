@@ -47,8 +47,8 @@ class WebConfig
     
     RouterConfigBase routerConfig()
     {
-        import hunt.web.router.configsignalmodule;
-        return new ConfigSignalModule("config/router.conf");
+        import hunt.web.router.config;
+        return new RouterConfig("config/router.conf");
     }
 }
 
@@ -151,8 +151,8 @@ class IniWebConfig : WebConfig
     override RouterConfigBase routerConfig()
     {
         auto value = _ini.get("router.configpath");
-        import hunt.web.router.configsignalmodule;
-        return new ConfigSignalModule(value);
+        import hunt.web.router.config;
+        return new RouterConfig(value);
     }
     
 private:
