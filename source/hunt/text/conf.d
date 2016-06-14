@@ -91,7 +91,6 @@ protected:
                 string section = str[1..len];
                 string[] list = split(section,'.');
                 ele = getElement(list);
-                ele.path = section;
                 continue;
             }
             auto site = str.indexOf("=");
@@ -115,13 +114,16 @@ protected:
     Element getElement(in string[] list)
     {
         Element ele = _element;
+        size_t num = 1;
         foreach (ref str ; list)
         {
+            scope(exit) num += 1;
             if(str.length == 0) continue;
             auto tele = ele.elements.get(str, null);
             if(tele is null)
             {
                 tele = new Element;
+                tele.path = list[0..num].join('.');
                 ele.elements[str] = tele;
             }
             ele = tele;
@@ -204,5 +206,6 @@ unittest
     assert(host == "hujjokp");
     host = conf.get("upload_tmp_path.tempath");
     assert(host == "./storage/tmp");
+    conf.set("aa.bb.cc.dd", 500);
     assert(conf.saveAs("tmp.saveas.conf"));
 }
