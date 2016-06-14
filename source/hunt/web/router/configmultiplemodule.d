@@ -39,7 +39,7 @@ public:
         RouterContext[] routerContext;
         
         File file = File(filePath, "r");
-
+        Conf ini = new Conf(_routerGroupPath);
         while(!file.eof())
         {
             string line = file.readln();
@@ -53,7 +53,6 @@ public:
                 else
                     tmpRoute.method = toUpper(tmpSplites[0]);
                 tmpRoute.path = tmpSplites[1];
-                Conf ini = new Conf(_routerGroupPath);
                 parseToFullController(tmpSplites[2], ini, tmpRoute);
                 if (tmpSplites.length == 4)
                     parseMiddleware(tmpSplites[3], tmpRoute.middleWareBefore,
