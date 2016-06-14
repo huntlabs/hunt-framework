@@ -12,7 +12,6 @@
 module hunt.text.conf;
 
 import std.array;
-//import std.file;
 import std.stdio;
 import std.string;
 
@@ -21,13 +20,56 @@ class Conf
     this()
     {}
     
-    this(string file){_fileName = file;}
+    this(string file)
+    {
+        setConfigFile(file);
+    }
     
+    pragma(inline, true)
+    void setConfigFile(string file)
+    {
+        _fileName = file;
+        readConf();
+    }
+    
+    auto get(T = string)(string path, T def = T.init)
+    {
+        import std.conv;
+        string str = _element.getValue(path);
+        if(str.length == 0)
+            return def;
+        else
+            return to!T(str);
+    }
+    
+    bool set(T)(string path, T value)
+    {
+        import std.conv;
+        if(path.length == 0) return false;
+        string[] list = split(path,'.');
+        size_t len = list.length - 1;
+        auto ele  = getElement(list[0..len]);
+        string key = list[len];
+        if(key.length == 0) return false;
+        ele.values[key] = to!string(value);
+        return true;
+    }
+    
+    pragma(inline, true)
+    bool save()
+    {
+        return saveToFile(_fileName);
+    }
+    
+    pragma(inline, true)
+    bool saveAs(string fileName)
+    {
+        return saveToFile(fileName);
+    }
     
 protected:
     void readConf()
     {
-        import std.format;
         auto f = File(_fileName,"r");
         if(_element)
         {
@@ -36,7 +78,6 @@ protected:
         _element = new Element();
         Element ele = _element;
         int line = 1;
-        uint level = 0;
         while(!f.eof())
         {
             scope(exit) line += 1;
@@ -47,14 +88,26 @@ protected:
             auto len = str.length -1;
             if(str[0] == '[' && str[len] == ']')
             {
-                string[] list = split(str[1..len],'.');
+                string section = str[1..len];
+                string[] list = split(section,'.');
                 ele = getElement(list);
+                ele.path = section;
                 continue;
             }
             auto site = str.indexOf("=");
             if(site == -1)
+            {
+                import std.format;
                 throw new Exception(format("the format is erro in file %s, in line %d",_fileName,line));
-            
+            }
+            string key = str[0..site].strip;
+            if(key.length == 0)
+            {
+                import std.format;
+                throw new Exception(format("the Key is empty in file %s, in line %d",_fileName,line));
+            }
+            string value  = str[site+2..$].strip;
+            ele.values[key] = value;
         }
     }
     
@@ -65,9 +118,45 @@ protected:
         foreach (ref str ; list)
         {
             if(str.length == 0) continue;
+            auto tele = ele.elements.get(str, null);
+            if(tele is null)
+            {
+                tele = new Element;
+                ele.elements[str] = tele;
+            }
+            ele = tele;
         }
         return ele;
     }
+    
+    bool saveToFile(string file)
+    {
+        if(file.length == 0) return false;
+        auto f = File(file,"w");
+        if(!f.isOpen()) return false;
+        writeElement(&f,_element);
+        return true;
+    }
+    
+    void writeElement(File * file, Element ele)
+    {
+        if(ele.path.length > 0)
+        {
+            file.writeln(format(";The section = %s",ele.path));
+            file.writefln("[%s]",ele.path);
+        }
+        
+        foreach(key,value; ele.values)
+        {
+            file.writefln("%s = %s",key,value);
+        }
+        file.writeln("");
+        foreach(_,value; ele.elements)
+        {
+            writeElement(file,value);
+        }
+    }
+    
 private:
     string _fileName;
     Element _element; 
@@ -96,4 +185,24 @@ final class Element
         }
         return ele.values.get(list[len], string.init);
     }
+} 
+
+unittest
+{
+    string tbody = "[server] \nhost = 0.0.0.0 \nport = 8081 \n\n[upload_tmp_path]\ntempath = ./storage/tmp\n\n";
+    tbody ~= "[route] \npath = ./config/router.conf \n\n[log]  \nname = error,fatal,info\n\n[file_path]\nfilesDir = ./uploads\n;huioiujopp\n#guijj\n\n";
+    tbody ~= "[route.tmp]\npath = hujjokp\n\n";
+    auto f = File("tmp.conf","w");
+    f.write(tbody);
+    f.close();
+    Conf conf = new Conf("tmp.conf");
+    string host = conf.get("server.host");
+    assert(host == "0.0.0.0");
+    ushort us = conf.get!ushort("server.port");
+    assert(us == cast(ushort)8081);
+    host = conf.get("route.tmp.path");
+    assert(host == "hujjokp");
+    host = conf.get("upload_tmp_path.tempath");
+    assert(host == "./storage/tmp");
+    assert(conf.saveAs("tmp.saveas.conf"));
 }
