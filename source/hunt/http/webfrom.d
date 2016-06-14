@@ -8,7 +8,7 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.web.http.webfrom;
+module hunt.http.webfrom;
 
 import collie.codec.http;
 import collie.buffer;

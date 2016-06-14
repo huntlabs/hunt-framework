@@ -8,13 +8,13 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.web.http.middleware;
+module hunt.web.router.middleware;
 
 import std.concurrency;
 
 import hunt.routing.middleware;
-import hunt.web.http.request;
-import hunt.web.http.response;
+import hunt.http.request;
+import hunt.http.response;
 
 alias MiddleWare = IMiddleWare!(Request, Response);
 alias RouterPipeline = PipelineImpl!(Request, Response);

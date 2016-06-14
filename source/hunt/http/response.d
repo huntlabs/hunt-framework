@@ -8,15 +8,15 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.web.http.response;
+module hunt.http.response;
 
 import std.datetime;
 import std.json;
 
 import collie.codec.http;
 
-import hunt.web.http.cookie;
-import hunt.web.http.webfrom;
+import hunt.http.cookie;
+import hunt.http.webfrom;
 import hunt.utils.string;
 
 class Response

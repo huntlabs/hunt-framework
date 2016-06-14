@@ -8,7 +8,7 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.web.http.sessionstorage;
+module hunt.http.sessionstorage;
 
 
 __gshared SessionStorageInterface delegate()   newStorage;

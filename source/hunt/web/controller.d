@@ -8,10 +8,10 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.web.http.controller;
+module hunt.web.controller;
 
-public import hunt.web.http.response;
-public import hunt.web.http.request;
+public import hunt.http.response;
+public import hunt.http.request;
 
 interface IController
 {
