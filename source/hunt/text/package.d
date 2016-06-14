@@ -10,6 +10,6 @@
  */
 module hunt.config;
 
-public import hunt.text.ini;
+public import hunt.text.conf;
 public import hunt.text.yaml;
 public import std.json;
