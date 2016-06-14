@@ -65,7 +65,7 @@ final class StreamApplication(bool litteEndian)
     */
  /*   auto setRouterConfig(RouterConfigBase config)
     {
-        import hunt.web.http.controller;
+        import hunt.http.controller;
         setRouterConfigHelper!("__CALLACTION__",IController,ConsoleRouter)
                                 (_router,config);
         return this;

@@ -8,7 +8,7 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.web.http.server;
+module hunt.http.server;
 
 public import std.socket;
 public import std.experimental.logger;

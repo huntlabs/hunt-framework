@@ -1,6 +1,6 @@
 module application.user.controller.admin.admin;
 
-import hunt.web.http;
+import hunt.web;
 
 class AdminController : IController
 {
