@@ -19,7 +19,7 @@ import std.uni;
 import std.conv;
 
 import hunt.routing.configbase;
-import hunt.text.ini;
+import hunt.text.conf;
 /**
  * example: * /show  admin/user.admin.show
  * toParse: [GET,POST...] /show application.user.admin.AdminController.show
@@ -53,7 +53,7 @@ public:
                 else
                     tmpRoute.method = toUpper(tmpSplites[0]);
                 tmpRoute.path = tmpSplites[1];
-                Ini ini = new Ini(_routerGroupPath);
+                Conf ini = new Conf(_routerGroupPath);
                 parseToFullController(tmpSplites[2], ini, tmpRoute);
                 if (tmpSplites.length == 4)
                     parseMiddleware(tmpSplites[3], tmpRoute.middleWareBefore,
@@ -64,7 +64,7 @@ public:
         return routerContext;
     }
 protected:
-    void parseToFullController(string inBuff,Ini ini, ref RouterContext outRouterContext)
+    void parseToFullController(string inBuff,Conf ini, ref RouterContext outRouterContext)
     {
 	/// admin/user.admin.show
         string[] spritArr = split(inBuff, '/');
@@ -72,8 +72,8 @@ protected:
 	//assert(spliterPos != -1, "Without /");
         assert(spritArr.length == 2, "Style of group router error! Usage: admin/aa.bb.cc");
 	///get groupName
-	string groupType = ini.value("RouterGroup",spritArr[0]~".type");
-	string groupItemValue = ini.value("RouterGroup", spritArr[0]~".value");
+	string groupType = ini.get("RouterGroup."~spritArr[0]~".type");
+	string groupItemValue = ini.get("RouterGroup."~spritArr[0]~".value");
 	if(groupType == "domain")
 	{
 	    outRouterContext.routerType = RouterType.DOMAIN;
