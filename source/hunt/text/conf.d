@@ -105,7 +105,7 @@ protected:
                 import std.format;
                 throw new Exception(format("the Key is empty in file %s, in line %d",_fileName,line));
             }
-            string value  = str[site+2..$].strip;
+            string value  = str[site + 1..$].strip;
             ele.values[key] = value;
         }
     }
