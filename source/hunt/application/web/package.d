@@ -8,7 +8,7 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.web.application;
+module hunt.application.web;
 
 
 
@@ -26,25 +26,20 @@ public import collie.codec.http.config;
 import collie.codec.http;
 
 import hunt.web;
-public import hunt.web.application.config;
+public import hunt.application.web.config;
 /**
     
 */
 
 final class WebApplication
 {
-    static setConfig(WebConfig config)
-    {
-        assert(config);
+    static @property app(){
         if(_app is null)
         {
-            _app = new WebApplication;
+            _app = new WebApplication();
         }
-        _app._config = config;
-        _app.upConfig();
+        return _app;
     }
-    
-    static @property app(){return _app;}
 
     /**
         Add a Router rule
@@ -127,12 +122,17 @@ final class WebApplication
     
     @property appConfig(){return _config;}
     
-    
+    auto setConfigPath(string path)
+    {
+        _config = new WebConfig(path);
+        return this;
+    }
     /**
         Start the HTTPServer server , and block current thread.
     */
     void run()
     {
+        upConfig();
         auto config = _config.routerConfig();
         if(config !is null)
             setRouterConfigHelper!("__CALLACTION__",IController,HTTPRouterGroup)
@@ -188,21 +188,21 @@ private:
     
     void upConfig()
     {
-        _server.bind(_config.bindAddress());
-        _server.setSSLConfig(_config.sslConfig());
-        auto ts = _config.threadSize() - 1;
+        _server.bind(_config.httpConfig.bindAddress());
+        _server.setSSLConfig(_config.httpConfig.sslConfig());
+        auto ts = _config.httpConfig.threadSize() - 1;
         if(ts > 0)
         {
             _group = new EventLoopGroup(ts);
             _server.group(_group);
         } 
-        _server.keepAliveTimeOut(_config.keepAliveTimeOut());
-        _server.maxBodySize(_config.httpMaxBodySize());
-        _server.maxHeaderSize(_config.httpMaxHeaderSize());
-        _server.headerStectionSize(_config.httpHeaderStectionSize());
-        _server.requestBodyStectionSize(_config.httpRequestBodyStectionSize());
-        _server.responseBodyStectionSize(_config.httpResponseBodyStectionSize());
-        _wfactory = _config.webSocketFactory();
+        _server.keepAliveTimeOut(_config.httpConfig.keepAliveTimeOut());
+        _server.maxBodySize(_config.httpConfig.httpMaxBodySize());
+        _server.maxHeaderSize(_config.httpConfig.httpMaxHeaderSize());
+        _server.headerStectionSize(_config.httpConfig.httpHeaderStectionSize());
+        _server.requestBodyStectionSize(_config.httpConfig.httpRequestBodyStectionSize());
+        _server.responseBodyStectionSize(_config.httpConfig.httpResponseBodyStectionSize());
+        _wfactory = _config.httpConfig.webSocketFactory();
         if(_wfactory is null)
         {
             _server.setWebsocketFactory(null);  
@@ -221,6 +221,7 @@ private:
        _router = new HTTPRouterGroup();
        _server.setCallBack(&doHandle);
        _404 = &default404;
+       _config = new WebConfig();
     }
 
     __gshared static WebApplication _app;

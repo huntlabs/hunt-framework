@@ -1,3 +1,4 @@
+
 /*
  * Hunt - a framework for web and console application based on Collie using Dlang development
  *
@@ -8,14 +9,15 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.web.application.config;
+module hunt.application.web.config.http;
 
+import std.conv;
 import std.socket;
 import std.parallelism;
 
 import collie.bootstrap.serversslconfig;
 
-import hunt.routing.configbase;
+import hunt.text.conf;
 
 abstract class WebSocketFactory
 {
@@ -23,46 +25,15 @@ abstract class WebSocketFactory
     WebSocket newWebSocket(const HTTPHeader header);
 }
 
-class WebConfig
-{
-    Address bindAddress(){return new InternetAddress(8080);}
-    
-    uint threadSize(){return totalCPUs;}
-    
-    WebSocketFactory webSocketFactory(){return null;}
-    
-    uint keepAliveTimeOut(){return 30;}
-    
-    uint httpMaxBodySize(){return 8 * 1024 * 1024;}
-    
-    uint httpMaxHeaderSize(){return 4 * 1024;}
-    
-    uint httpHeaderStectionSize(){return 2048;}
-    
-    uint httpRequestBodyStectionSize(){return 16 * 1024;}
-    
-    uint httpResponseBodyStectionSize(){return 16 * 1024;}
-    
-    ServerSSLConfig sslConfig(){return null;}
-    
-    RouterConfigBase routerConfig()
-    {
-        import hunt.web.router.config;
-        return new RouterConfig("config/router.conf");
-    }
-}
 
-import hunt.text.conf;
-import std.conv;
-
-class IniWebConfig : WebConfig
+class HTTPConfig
 {
     this(string file)
     {
         _ini = new Conf(file);
     }
     
-    override Address bindAddress()
+    Address bindAddress()
     {
         auto value = _ini.get("server.port");
         if(value.length == 0) 
@@ -83,13 +54,13 @@ class IniWebConfig : WebConfig
         }
     }
     
-    override uint threadSize()
+    uint threadSize()
     {
         return _ini.get!uint("server.threadsize",totalCPUs);
     }
     
     
-    override WebSocketFactory webSocketFactory()
+    WebSocketFactory webSocketFactory()
     {
         auto value = _ini.get("server.websocket");
         WebSocketFactory socket = null;
@@ -101,22 +72,22 @@ class IniWebConfig : WebConfig
         return socket;
     }
     
-    override uint keepAliveTimeOut()
+    uint keepAliveTimeOut()
     {
         return _ini.get!uint("server.timeout",30);
     }
     
-    override uint httpMaxBodySize(){return _ini.get!uint("http.maxbody",8 * 1024 * 1024);}
+    uint httpMaxBodySize(){return _ini.get!uint("http.maxbody",8 * 1024 * 1024);}
     
-    override uint httpMaxHeaderSize(){return _ini.get!uint("http.maxheader",4 * 1024);}
+    uint httpMaxHeaderSize(){return _ini.get!uint("http.maxheader",4 * 1024);}
     
-    override uint httpHeaderStectionSize(){return _ini.get!uint("http.headersection",2048);}
+    uint httpHeaderStectionSize(){return _ini.get!uint("http.headersection",2048);}
     
-    override uint httpRequestBodyStectionSize(){return _ini.get!uint("http.requestsection", 16 * 1024);}
+    uint httpRequestBodyStectionSize(){return _ini.get!uint("http.requestsection", 16 * 1024);}
     
-    override uint httpResponseBodyStectionSize(){return _ini.get!uint("http.responsesection", 16 * 1024);}
+    uint httpResponseBodyStectionSize(){return _ini.get!uint("http.responsesection", 16 * 1024);}
     
-    override ServerSSLConfig sslConfig()
+    ServerSSLConfig sslConfig()
     {
         import std.string;
         auto mode = _ini.get("server.ssl.mode");
@@ -143,18 +114,10 @@ class IniWebConfig : WebConfig
         ServerSSLConfig ssl = new ServerSSLConfig(md);
         ssl.certificateFile(_ini.get("server.ssl.certificate"));
         ssl.privateKeyFile(_ini.get("server.ssl.privatekey"));
-     //   ssl.cipherList(_ini.get("server.ssl.cipher"));
         
         return ssl;
     }
-    
-    override RouterConfigBase routerConfig()
-    {
-        auto value = _ini.get("router.configpath");
-        import hunt.web.router.config;
-        return new RouterConfig(value);
-    }
-    
+      
 private:
     Conf _ini;
 }
