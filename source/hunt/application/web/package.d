@@ -10,9 +10,6 @@
  */
 module hunt.application.web;
 
-
-
-
 public import std.socket;
 public import std.experimental.logger;
 import std.uni;
