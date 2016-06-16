@@ -1,21 +1,35 @@
 import std.stdio;
 import std.functional;
+import std.datetime;
+import std.variant;
 
 import collie.socket.eventloopgroup;
-import hunt.server.stream;
+import hunt.application.stream;
 import hunt.stream.messagecoder;
 import message;
 
 
-alias RPCContext = StreamServer!(false).Contex;
-
+alias RPCContext = StreamApplication!(false).Contex;
 
 void main()
 {
 	writeln("Edit source/app.d to start your project.");
-	StreamServer!false  server = new StreamServer!false ();
+	StreamApplication!false  server = new StreamApplication!false ();
 	server.addRouter(MSGType.BEAT.stringof,toDelegate(&handleBeat));
 	server.addRouter(MSGType.DATA.stringof,toDelegate(&handleData),new MiddlewareFactroy());
+	server.addRouter("TimeOut",delegate(RPCContext ctx,Message){
+            writeln("Time out !@!!");
+            ctx.close();
+	});
+	server.addRouter("TransportActive",delegate(RPCContext ctx,Message){
+            writeln("new connect start.");
+            Variant tmp = Clock.currTime();
+            ctx.setData(tmp);
+        });
+        server.addRouter("TransportInActive",delegate(RPCContext ctx,Message){
+            auto date = ctx.data.get!SysTime();
+            writeln("connect closed!, the connect time is : ",date);
+        });
 	server.heartbeatTimeOut(120).bind(8094);
 	server.setMessageDcoder(new MyDecode());
 	server.group(new EventLoopGroup());
@@ -23,21 +37,21 @@ void main()
 }
 
 
-class MiddlewareFactroy : StreamServer!(false).RouterPipelineFactory
+class MiddlewareFactroy : StreamApplication!(false).RouterPipelineFactory
 {
-    override StreamServer!(false).RouterPipeline newPipeline()
+    override StreamApplication!(false).RouterPipeline newPipeline()
     {
-        auto pipe  =  new StreamServer!(false).RouterPipeline;
+        auto pipe  =  new StreamApplication!(false).RouterPipeline;
         pipe.addHandler(new Middleware());
         return pipe;
     }
 }
 
-class Middleware : StreamServer!(false).MiddleWare
+class Middleware : StreamApplication!(false).MiddleWare
 {
     override void handle(Context ctx, RPCContext res,Message req)
     {
-        writeln("\t\tMiddleware : StreamServer!(false).MiddleWare");
+        writeln("\t\tMiddleware : StreamApplication!(false).MiddleWare");
         ctx.next(res,req);
     }
 }

@@ -26,19 +26,19 @@ interface Message
 
 final class TimeOutMessage : Message
 {
-    override string type() {return "Time Out";}
+    override string type() {return "TimeOut";}
     override ubyte[] encodeMeassage() {return null;}
 }
 
 final class TransportActiveMessage : Message
 {
-    override string type() {return "Transport Active";}
+    override string type() {return "TransportActive";}
     override ubyte[] encodeMeassage() {return null;}
 }
 
 final class TransportInActiveMessage : Message
 {
-    override string type() {return "Transport InActive";}
+    override string type() {return "TransportInActive";}
     override ubyte[] encodeMeassage() {return null;}
 }
 

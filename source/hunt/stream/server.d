@@ -45,13 +45,10 @@ final class StreamServer(bool litteEndian)
     */
     this(EventLoop loop)
     {
-       _router = new ConsoleRouter();
-        _404 = &default404;
         _server = new ServerBootstrap!ConsolePipeLine(loop);
         _server.childPipeline(new shared ConsolePipeLineFactory!(StreamServer!litteEndian)(this));
         _server.setReusePort(true);
         _crypt =  new NoCrypt();
-        _timeOut = &timeOut;
     }
     
     /**
@@ -114,12 +111,6 @@ final class StreamServer(bool litteEndian)
     auto heartbeatTimeOut(uint second)
     {
         _server.heartbeatTimeOut(second);
-        return this;
-    }
-    
-    auto timeOutHandler(void delegate(Contex) handler)
-    {
-        _timeOut = handler;
         return this;
     }
     
