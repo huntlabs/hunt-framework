@@ -1,3 +1,0 @@
-[submodule "source/arsd"]
-	path = source/arsd
-	url = git@github.com:adamdruppe/arsd.git
