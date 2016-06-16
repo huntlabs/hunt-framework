@@ -57,33 +57,9 @@ class ContexHandler(ConsoleApplication) : HandlerAdapter!(Message)
     
     final override void read(Context ctx, Message msg)
     {
-       // import std.conv;
         ConsoleApplication app = cast(ConsoleApplication)_app;
         auto cback = app.streamCallBack();
- /*       cback(_cctx,msg);
-        if(msg is null)
-        {
-            app.do404(_cctx,msg);
-            return;
-        }
-        
-        auto pipe = app.router.match("RPC",msg.type());
-        if (pipe is null)
-        {
-            app.do404(_cctx,msg);
-        }
-        else
-        {
-            
-            scope(exit)
-            {
-                import core.memory;
-                pipe.destroy;
-                GC.free(cast(void *)pipe);
-            }
-            pipe.handleActive( _cctx,msg);
-        }
-        */
+        cback(_cctx,msg);
     }
     
     final override void timeOut(Context ctx)
@@ -93,12 +69,12 @@ class ContexHandler(ConsoleApplication) : HandlerAdapter!(Message)
     
     final override void transportInactive(Context ctx)
     {
-	this.read(ctx,new TransportActiveMessage());
+	this.read(ctx,new TransportInActiveMessage());
     }
     
     final override void transportActive(Context ctx)
     {
-	this.read(ctx,new TransportInActiveMessage());
+	this.read(ctx,new TransportActiveMessage());
     }
 
 private:

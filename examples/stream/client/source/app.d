@@ -1,6 +1,6 @@
 import stdo = std.stdio;
 import std.datetime;
-import hunt.client.stream;
+import hunt.stream.client;
 import collie.socket;
 import hunt.stream.messagecoder;
 import message;
