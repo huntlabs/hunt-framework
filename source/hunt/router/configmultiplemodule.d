@@ -17,6 +17,7 @@ import std.stdio;
 import std.array;
 import std.uni;
 import std.conv;
+import std.experimental.logger;
 
 import hunt.routing.configbase;
 import hunt.text.conf;
@@ -44,9 +45,10 @@ public:
         {
             string line = file.readln();
             line = line.strip;
-            if (line.length > 0 && line[0] == '#')
+            if (line.length > 0 && line[0] != '#')
             {
                 string[] tmpSplites = spliteBySpace(line);
+                trace("spliteBySpace : ", tmpSplites);
                 if(tmpSplites.length == 0) continue;
                 RouterContext tmpRoute;
                 if (tmpSplites[0] == "*")
