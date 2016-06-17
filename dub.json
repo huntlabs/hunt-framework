@@ -8,10 +8,6 @@
 		"collie": {
 		    "version"      : "~>0.6.4",
 		},
-		"liblzma" : {
-                    "version"      : "~>0.0.1",
-                    "optional"     : true
-		}
     },
     "subConfigurations": {
 	"liblzma": "library"
