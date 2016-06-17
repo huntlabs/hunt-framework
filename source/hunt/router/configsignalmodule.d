@@ -46,7 +46,7 @@ public:
         {
             string line = file.readln();
             line = line.strip;
-            if (line.length > 0 && line[0] == '#')
+            if (line.length > 0 && line[0] != '#')
             {
                 string[] tmpSplites = spliteBySpace(line);
                 if(tmpSplites.length == 0) continue;
