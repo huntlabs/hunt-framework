@@ -10,7 +10,7 @@
  */
 module application.user.controller.api.index;
 
-import hunt.web;
+import hunt.application;
 
 class IndexController : IController
 {

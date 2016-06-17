@@ -9,7 +9,7 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.application.web.config.http;
+module hunt.application.config.http;
 
 import std.conv;
 import std.socket;
@@ -26,7 +26,7 @@ abstract class WebSocketFactory
 }
 
 
-class HTTPConfig
+final class HTTPConfig
 {
     this(string file)
     {
@@ -117,7 +117,8 @@ class HTTPConfig
         
         return ssl;
     }
-      
+    
+    Conf getConfig(){return _ini;}
 private:
     Conf _ini;
 }

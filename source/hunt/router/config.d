@@ -9,7 +9,7 @@
  *
  */
  
-module hunt.web.router.config;
+module hunt.router.config;
 
 import std.string;
 import std.regex;

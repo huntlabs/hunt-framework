@@ -8,7 +8,7 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.application.web;
+module hunt.application;
 
 public import std.socket;
 public import std.experimental.logger;
@@ -22,8 +22,11 @@ public import collie.channel;
 public import collie.codec.http.config;
 import collie.codec.http;
 
-import hunt.web;
-public import hunt.application.web.config;
+import hunt.router;
+public import hunt.http;
+public import hunt.view;
+public import hunt.application.controller;
+public import hunt.application.config;
 /**
     
 */
@@ -124,6 +127,11 @@ final class WebApplication
         _config = new WebConfig(path);
         return this;
     }
+    
+    auto setConfig(IWebConfig conf)
+    {
+        _config = conf;
+    }
     /**
         Start the HTTPServer server , and block current thread.
     */
@@ -137,6 +145,7 @@ final class WebApplication
         router.done();
         _server.run();
     }
+    
     
     /**
         Stop the server.
@@ -230,6 +239,6 @@ private:
     EventLoop _mainLoop;
     EventLoopGroup _group;
     WebSocketFactory _wfactory;
-    WebConfig _config;
+    IWebConfig _config;
 }
 

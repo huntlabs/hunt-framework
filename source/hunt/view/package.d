@@ -9,9 +9,9 @@
  *
  * template parsing is based on dymk/temple source from https://github.com/dymk/temple
  */
-module hunt.web.view;
+module hunt.view;
 
-public import hunt.web.view.util, hunt.web.view.delims, hunt.web.view.funcstringgen;
+public import hunt.view.util, hunt.view.delims, hunt.view.funcstringgen;
 public import std.array : appender, Appender;
 public import std.range : isOutputRange;
 public import std.typecons : scoped;
@@ -21,8 +21,8 @@ public import std.file;
 
 public
 {
-    import hunt.web.view.templecontext : TempleContext;
-    import hunt.web.view.outputstream : TempleOutputStream, TempleInputStream;
+    import hunt.view.templecontext : TempleContext;
+    import hunt.view.outputstream : TempleOutputStream, TempleInputStream;
 }
 
 /**
