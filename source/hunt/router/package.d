@@ -9,13 +9,13 @@
  *
  */
  
-module hunt.web.router;
+module hunt.router;
 
 public import hunt.routing;
-public import hunt.web.router.middleware;
-public import hunt.web.router.configsignalmodule;
-public import hunt.web.router.configmultiplemodule;
-public import hunt.web.router.config;
+public import hunt.router.middleware;
+public import hunt.router.configsignalmodule;
+public import hunt.router.configmultiplemodule;
+public import hunt.router.config;
 import collie.utils.functional;
 
 public import hunt.http.request;

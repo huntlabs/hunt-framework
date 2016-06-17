@@ -12,7 +12,8 @@ module application.middleware;
 
 import std.functional;
 
-import hunt.web;
+import hunt.application;
+import hunt.router;
 
 class BMiddleWare : MiddleWare
 {

@@ -8,7 +8,7 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.web.router.configmultiplemodule;
+module hunt.router.configmultiplemodule;
 
 import std.file;
 import std.string;

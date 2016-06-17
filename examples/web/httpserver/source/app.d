@@ -12,8 +12,7 @@ import std.stdio;
 import std.functional;
 import std.experimental.logger;
 
-import hunt.application.web;
-import hunt.web;
+import hunt.application;
 import application.middleware;
 
 import collie.socket;

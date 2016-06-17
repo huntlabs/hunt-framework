@@ -8,7 +8,7 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.web.controller;
+module hunt.application.controller;
 
 public import hunt.http.response;
 public import hunt.http.request;

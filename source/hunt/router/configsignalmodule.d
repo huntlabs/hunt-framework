@@ -8,7 +8,7 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.web.router.configsignalmodule;
+module hunt.router.configsignalmodule;
 
 import std.file;
 import std.string;

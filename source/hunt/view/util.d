@@ -9,12 +9,12 @@
  *
  * template parsing is based on dymk/temple source from https://github.com/dymk/temple
  */
-module hunt.web.view.util;
+module hunt.view.util;
 
 private import std.algorithm, std.typecons, std.array, std.uni, std.conv,
     std.utf;
 
-private import hunt.web.view.delims;
+private import hunt.view.delims;
 
 package:
 

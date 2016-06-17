@@ -8,18 +8,24 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.application.web.config;
+module hunt.application.config;
 
 import std.string;
 
 import hunt.routing.configbase;
-public import hunt.application.web.config.http;
+public import hunt.application.config.http;
 
-class WebConfig
+interface IWebConfig
+{
+    @property HTTPConfig httpConfig();
+    @property RouterConfigBase routerConfig();
+}
+
+class WebConfig : IWebConfig
 {
     this(string path)
     {
-        import hunt.web.router.config;
+        import hunt.router.config;
         if(!endsWith(path,"/"))
             path ~= "/";
         _http = new HTTPConfig(path ~ "http.conf");
@@ -32,8 +38,8 @@ class WebConfig
     }
     
     
-    @property httpConfig(){return _http;}
-    @property routerConfig(){return _router;}
+    override @property HTTPConfig httpConfig(){return _http;}
+    override @property RouterConfigBase routerConfig(){return _router;}
 private:
     HTTPConfig _http;
     RouterConfigBase _router;
