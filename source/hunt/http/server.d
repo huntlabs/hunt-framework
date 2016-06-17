@@ -22,7 +22,8 @@ public import collie.channel;
 public import collie.codec.http.config;
 import collie.codec.http;
 
-public import hunt.web;
+import hunt.http.response;
+import hunt.http.request;
 
 alias HTTPPipeline = Pipeline!(ubyte[], HTTPResponse);
 

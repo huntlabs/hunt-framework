@@ -9,10 +9,10 @@
  *
  * template parsing is based on dymk/temple source from https://github.com/dymk/temple
  */
-module hunt.web.view.templecontext;
+module hunt.view.templecontext;
 
-import hunt.web.view;
-import hunt.web.view.outputstream;
+import hunt.view;
+import hunt.view.outputstream;
 
 public import std.variant : Variant;
 

@@ -8,11 +8,11 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.application.web.app;
+module hunt.application.app;
 
 version(USE_DEFAULT_WEB_MAIN):
 
-import hunt.application.web;
+import hunt.application;
 
 void main()
 {
