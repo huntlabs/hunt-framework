@@ -6,7 +6,7 @@
     "libs" : [],
     "dependencies": {
 		"collie": {
-		    "version"      : "~>0.6.3",
+		    "version"      : "~>0.6.4",
 		},
 		"liblzma" : {
                     "version"      : "~>0.0.1",
