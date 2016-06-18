@@ -1,7 +1,7 @@
 hunt
 =======
 
-A framework for web application based on [collie](https://github.com/putao-dev/collie/) using [dlang](http://dlang.org/) development.
+A high performance web framework based on [collie](https://github.com/putao-dev/collie/) using [dlang](http://dlang.org/) development.
 
 ## Suggest
 
