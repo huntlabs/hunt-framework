@@ -101,7 +101,7 @@ class Request
     T post(T = string)(string key, T v = T.init)
     {
         import std.conv;
-        auto tmp = this.queries;
+        string tmp = this.postForm.getFormValue;
         if(tmp is null)
         {
             return v;   
