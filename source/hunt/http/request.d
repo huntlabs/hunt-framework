@@ -70,6 +70,16 @@ class Request
 		}
 		return cookies.get(key,null);
 	}
+	
+	string getCookieValue(string key)
+     	{
+	         auto cookie = this.getCookie(key);
+	         if(cookie is null)
+	         {
+	             return ""; 
+	         }
+	         return cookie.value;
+     	}
 
     ///get queries
     @property string[string] queries()
