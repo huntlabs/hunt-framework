@@ -1,15 +1,12 @@
 hunt
 =======
-
-A high performance web framework based on [collie](https://github.com/putao-dev/collie/) using [dlang](http://dlang.org/) development.
+Hunt is a high-level [dlang](http://dlang.org/) Web framework that encourages rapid development and clean, pragmatic design. It lets you build high-performance Web applications quickly and easily.
 
 ## Suggest
-
 - view files save [./resources/views], custom view directory config in dub.json "stringImportPaths":  [ "./resources/views"]
 - format code command: dfmt --inplace --tab_width=4 --brace_style=allman *.d
 
 ## Router
-
 config/routes.conf
 ```conf
 #
