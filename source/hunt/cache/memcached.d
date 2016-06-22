@@ -11,7 +11,7 @@
 module hunt.cache.memcached;
 
 import hunt.storage.memcached;
-import hunt.cache;
+import hunt.cache.base;
 
 class MemcachedCache : Cache
 {
