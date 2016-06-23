@@ -8,6 +8,9 @@
 		"collie": {
 		    "version"      : "~>0.6.4",
 		},
+		"libmemcached": {
+			"path" : "../libmemcached/"
+		}
     },
     "subConfigurations": {
 	"liblzma": "library"
