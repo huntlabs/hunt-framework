@@ -17,3 +17,4 @@ core
 *.a
 *.so
 *.kate-swp
+dub.userprefs
