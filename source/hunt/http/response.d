@@ -19,6 +19,10 @@ import hunt.http.cookie;
 import hunt.http.webfrom;
 import hunt.utils.string;
 
+import hunt.versions;
+
+enum XPoweredBy = "Hunt " ~ HUNT_VERSION;
+
 class Response
 {
     this(HTTPResponse resp)
@@ -91,18 +95,21 @@ class Response
 	pragma(inline)
 	final bool done()
 	{
+		setHeader("XPoweredBy",XPoweredBy);
 		return _rep.done(null, 0);
 	}
 	
 	pragma(inline)
 	final bool done(string file)
 	{
+		setHeader("XPoweredBy",XPoweredBy);
 		return _rep.done(file, 0);
 	}
 
 	pragma(inline)
 	final bool done(string file, ulong begin)
 	{
+		setHeader("XPoweredBy",XPoweredBy);
 		return _rep.done(file, begin);
 	}
 	
