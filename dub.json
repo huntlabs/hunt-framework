@@ -1,18 +1,17 @@
 {
     "name": "hunt",
-    "description": "A framework for web and console application based on collie using dlang development.",
+    "description": "A high performance full-stack Web framework.",
+    "copyright": "Copyright (C) 2015-2016 Shanghai Putao Technology Co., Ltd",
     "authors": [ "putao.com dlang team." ],
-    "license": "BSD",
+    "license": "Apache-2.0",
     "libs" : [],
     "dependencies": {
-		"collie": {
-		    "version"      : "~>0.6.4",
-		},
-		"libmemcached": {
-			"path" : "../libmemcached/"
-		}
+        "collie": {
+            "version": "~>0.7.0",
+        },
+        "libmemcached": "~>1.0.2"
     },
     "subConfigurations": {
-	"liblzma": "library"
+        "liblzma": "library"
     }
 }
