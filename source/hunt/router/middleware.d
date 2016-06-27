@@ -19,6 +19,7 @@ import hunt.http.response;
 alias MiddleWare = IMiddleWare!(Request, Response);
 alias RouterPipeline = PipelineImpl!(Request, Response);
 alias RouterPipelineFactory = IPipelineFactory!(Request, Response);
+alias RouterContex = RouterPipeline.Context;
 
 class MiddleWareDone : MiddleWare
 {
