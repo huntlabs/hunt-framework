@@ -24,6 +24,8 @@ class WebForm
         string contentType;
         ulong startSize = 0;
         ulong length = 0;
+	private : 
+		this(){}
     }
 
     this(HTTPRequest req)

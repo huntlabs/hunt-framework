@@ -55,8 +55,8 @@ class Response
     ///return json value
     void writeJson(JSONValue json)
     {
-            setHeader("Content-Type", "application/json;charset=UTF-8");
-            setContext(json.toString());
+        setHeader("Content-Type", "application/json;charset=UTF-8");
+        setContext(json.toString());
     }
     /**
 	* 设置Session Cookie
@@ -71,19 +71,53 @@ class Response
     }
 
 
-    alias httpResponse this;
+	pragma(inline,true)
+	final @property Header()
+	{
+		return _rep.Header();
+	}
+	
+	pragma(inline,true)
+	final @property Body()
+	{
+		return _rep.Body();
+	}
+	
+	final bool append(ubyte[] data)
+	{
+		return _rep.append(data);
+	}
+	
+	pragma(inline)
+	final bool done()
+	{
+		return _rep.done(null, 0);
+	}
+	
+	pragma(inline)
+	final bool done(string file)
+	{
+		return _rep.done(file, 0);
+	}
 
-    @property httpResponse()
-    {
-        return _rep;
-    }
+	pragma(inline)
+	final bool done(string file, ulong begin)
+	{
+		return _rep.done(file, begin);
+	}
+	
+	pragma(inline)
+	final void close()
+	{
+		_rep.close();
+	}
     
     void redirect(string url, bool is301 = false)
     {
         
-        httpResponse.Header.statusCode((is301 ? 301 : 302));
-        httpResponse.Header.setHeaderValue("Location",url);
-        httpResponse.done();
+		_rep.Header.statusCode((is301 ? 301 : 302));
+		_rep.Header.setHeaderValue("Location",url);
+		_rep.done();
     }
 
 private:
