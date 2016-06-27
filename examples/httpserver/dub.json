@@ -7,7 +7,7 @@
 	"versions" : ["USE_DEFAULT_WEB_MAIN"],
 	"dependencies": {
             "hunt" : {
-                "path" : "../../../"
+                "path" : "../../"
             }
 	}
 }
