@@ -34,17 +34,29 @@ class Request
         return _form;
     }
 
-    alias httpRequest this;
+	@property Header(){return _req.Header();}
 
-    @property httpRequest()
-    {
-        return _req;
-    }
+	@property Body(){return _req.Body();}
 
-    @property mate()
-    {
-        return _mate;
-    }
+    @property mate(){return _mate;}
+
+	@property path(){return _req.Header().path();}
+
+	@property method(){return _req.Header().method();}
+
+	@property GET(){return queries();}
+
+	@property POST(){return postForm().formMap();}
+
+	@property FILES(){return postForm().fileMap();}
+
+	@property rawPostData(){return _req.Body();}
+
+	size_t readFile(WebForm.FormFile file,void delegate(in ubyte[]) cback)
+	{
+		_req.Body().rest(cast(size_t)file.startSize);
+		return _req.Body().read(cast(size_t)file.length,cback);
+	}
 
     string getMate(string key)
     {
@@ -74,14 +86,14 @@ class Request
 	}
 	
 	string getCookieValue(string key)
-     	{
-	         auto cookie = this.getCookie(key);
-	         if(cookie is null)
-	         {
-	             return ""; 
-	         }
-	         return cookie.value;
-     	}
+ 	{
+         auto cookie = this.getCookie(key);
+         if(cookie is null)
+         {
+             return ""; 
+         }
+         return cookie.value;
+ 	}
 
     ///get queries
     @property string[string] queries()
@@ -122,8 +134,10 @@ class Request
         {
             return XRealIP;
         }
-        return this.clientAddress.toAddrString();
+        return clientAddress.toAddrString();
     }
+
+	@property clientAddress(){return _req.clientAddress();}
 
     /// get a post
     T post(T = string)(string key, T v = T.init)
