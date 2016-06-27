@@ -11,36 +11,38 @@
 module hunt.routing.middleware;
 
 import std.functional;
+public import std.variant;
 
 /**
     The MiddleWare interface.
 */
-interface IMiddleWare(REQ, RES)
+interface IMiddleWare(ARGS...)
 {
-    alias Context = ContextImpl!(REQ, RES);
-    /// the handle will be call in the pipeline handler.
-    void handle(Context ctx, REQ req, RES res);
+	alias Context = ContextImpl!(ARGS);
+	/// the handle will be call in the pipeline handler.
+	void handle(Context ctx, ARGS args);
 }
 
 /**
     This class is create a Pipeline.
 */
-abstract shared class IPipelineFactory(REQ, RES)
+abstract shared class IPipelineFactory(ARGS...)
 {
-    alias Pipeline = PipelineImpl!(REQ, RES);
-    /// return a Pipeline.
+	alias Pipeline = PipelineImpl!(ARGS);
+	/// return a Pipeline.
     Pipeline newPipeline();
 }
 
 /**
     The pipeline like a list. it call the MiddleWare form frist to last.
 */
-final class PipelineImpl(REQ, RES)
+final class PipelineImpl(ARGS...)
 {
-    alias MiddleWare = IMiddleWare!(REQ, RES);
-    alias Context = ContextImpl!(REQ, RES);
-    alias HandleDelegate = void delegate(REQ, RES);
-    alias Pipeline = PipelineImpl!(REQ, RES);
+	alias MiddleWare = IMiddleWare!(ARGS);
+	alias Context = ContextImpl!(ARGS);
+	alias HandleDelegate = void delegate(ARGS);
+	alias Pipeline = PipelineImpl!(ARGS);
+	alias ContextDelegate = void delegate(Context,ARGS);
 
     this()
     {
@@ -75,13 +77,26 @@ final class PipelineImpl(REQ, RES)
     }
     body
     {
-        Context cxt = new Context(new DelegateMiddleWare!(REQ, RES)(handler));
+		Context cxt = new Context(new DelegateMiddleWare!(ARGS)(handler));
         _last._next = cxt;
         _last = cxt;
     }
 
-    /// append a pipeline to the last.
-    void append(Pipeline pipeline)
+	/// add a delegate and it auto create a MiddleWare.
+	void addHandler(ContextDelegate handler)
+	in
+	{
+		assert(handler);
+	}
+	body
+	{
+		Context cxt = new Context(new ContextMiddleWare!(ARGS)(handler));
+		_last._next = cxt;
+		_last = cxt;
+	}
+	
+	/// append a pipeline to the last.
+	void append(Pipeline pipeline)
     {
         if (pipeline is null)
             return;
@@ -97,10 +112,10 @@ final class PipelineImpl(REQ, RES)
     }
 
     /// start handle the MiddleWare, from frist to last.
-    void handleActive(REQ req, RES res)
-    {
-        _first.next(forward!(req, res));
-    }
+	void handleActive(ARGS args)
+	{
+		_first.next(forward!(args));
+	}
 
     /// Does this pipeline have any MiddleWare.
     @property bool empty()
@@ -138,10 +153,10 @@ private:
 /**
     The Context Class.
 */
-final class ContextImpl(REQ, RES)
+final class ContextImpl(ARGS...)
 {
-    alias MiddleWare = IMiddleWare!(REQ, RES);
-    alias Context = ContextImpl!(REQ, RES);
+	alias MiddleWare = IMiddleWare!(ARGS);
+	alias Context = ContextImpl!(ARGS);
 
     this()
     {
@@ -161,30 +176,35 @@ final class ContextImpl(REQ, RES)
     /**
         call the next handle.
     */
-    void next(REQ req, RES res)
-    {
+	void next(ARGS args)
+	{
         if (_next)
-            _next.handle(forward!(req, res));
-    }
+			_next.handle(this,forward!(args));
+	}
+
+	Variant data;
 
 private:
-    void handle(REQ req, RES res)
-    {
+	void handle(Context last,ARGS args)
+	{
+		import std.algorithm.mutation;
+		swap(last.data,this.data);
         if (_middleWare)
-            _middleWare.handle(this, req, res);
-    }
-
-    MiddleWare _middleWare = null;
+			_middleWare.handle(this, args);
+		//import collie.utils.memory;
+		//gcFree(last);
+	}
+	
+	MiddleWare _middleWare = null;
     Context _next = null;
 }
 
-final shared class AutoMiddleWarePipelineFactory(REQ, RES) : IPipelineFactory!(REQ,
-    RES)
+final shared class AutoMiddleWarePipelineFactory(ARGS...): IPipelineFactory!(ARGS)
 {
     import std.experimental.logger;
 
-    alias MiddleWare = IMiddleWare!(REQ, RES);
-    this(string[] middle)
+	alias MiddleWare = IMiddleWare!(ARGS);
+	this(string[] middle)
     {
         this(cast(shared string[]) middle);
     }
@@ -223,23 +243,42 @@ private:
 }
 
 private:
-final class DelegateMiddleWare(REQ, RES) : IMiddleWare!(REQ, RES)
+final class DelegateMiddleWare(ARGS...) : IMiddleWare!(ARGS)
 {
-    alias HandleDelegate = void delegate(REQ, RES);
-
+	alias HandleDelegate = void delegate(ARGS);
+	
     this(HandleDelegate handle)
     {
         _handler = handle;
     }
 
-    override void handle(Context ctx, REQ req, RES res)
-    {
-        _handler(req, res);
-        ctx.next(forward!(req, res));
+	override void handle(Context ctx, ARGS args)
+	{
+		_handler(args);
+	//	ctx.next(forward!(args));
     }
 
 private:
     HandleDelegate _handler;
+}
+
+
+final class ContextMiddleWare(ARGS...) : IMiddleWare!(ARGS)
+{
+	alias ContextDelegate = void delegate(Context,ARGS);
+	
+	this(ContextDelegate handle)
+	{
+		_handler = handle;
+	}
+	
+	override void handle(Context ctx, ARGS args)
+	{
+		_handler(ctx,args);
+	}
+	
+private:
+	ContextDelegate _handler;
 }
 
 version (unittest)

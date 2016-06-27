@@ -12,10 +12,11 @@ module hunt.application.controller;
 
 public import hunt.http.response;
 public import hunt.http.request;
+public import hunt.router.middleware;
 
 interface IController
 {
-    bool __CALLACTION__(string method, Request req,  Response res);
+	bool __CALLACTION__(string method,RouterContex contex, Request req,  Response res);
 }
 
 mixin template HuntDynamicCallFun()
@@ -27,7 +28,7 @@ string  _createCallActionFun(T)()
 {
     import std.traits;
     import std.typecons;
-    string str = "override bool __CALLACTION__(string funName,Request req,  Response res) {";
+	string str = "override bool __CALLACTION__(string funName,RouterContex contex,Request req,  Response res) {";
     str ~= "switch(funName){";
     foreach(memberName; __traits(allMembers, T))
     {
@@ -41,8 +42,16 @@ string  _createCallActionFun(T)()
                     str ~= "case \"";
                     str ~= memberName;
                     str ~= "\":";
-                    str = str ~  memberName ~ "(req,res); return true;";
+					str = str ~  memberName ~ "(req,res); contex.next(req,res);return true;";
                 }
+				static if(functionArguments.length == 3 && is(typeof(functionArguments[0]) == RouterContex)
+					is(typeof(functionArguments[1]) == Request) && is(typeof(functionArguments[0]) == Response))
+				{
+					str ~= "case \"";
+					str ~= memberName;
+					str ~= "\":";
+					str = str ~  memberName ~ "(contex,req,res);return true;";
+				}
             }
         }
     }

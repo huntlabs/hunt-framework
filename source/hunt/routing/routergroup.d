@@ -7,17 +7,16 @@ import hunt.routing.utils;
 /**
     the router group.
 */
-final class RouterGroup(REQ,RES)
+final class RouterGroup(ARGS...)
 {
-    alias Route                 = Router!(REQ,RES);
+	alias Route                 = Router!(ARGS);
     alias RouterElement         = Route.RouterElement;
     alias HandleDelegate        = Route.HandleDelegate;
     alias Pipeline              = Route.Pipeline;
     alias PipelineFactory       = Route.PipelineFactory;
-    
-    alias Request               = REQ;
-    alias Response              = RES;
-    
+	alias Context = Pipeline.Context;
+	alias ContextDelegate = void delegate(Context,ARGS);
+
     this()
     {
        _router = new  Route();
@@ -96,6 +95,51 @@ final class RouterGroup(REQ,RES)
         return _router.addRouter(method,path,handle,before,after);
     }
     
+	/**
+        Add a Router rule. if config is done, will always erro.
+        Params:
+            domain =  the domain group.
+            method =  the HTTP method. 
+            path   =  the request path.
+            handle =  the delegate that handle the request.
+            before =  The PipelineFactory that create the middleware list for the router rules, before  the router rule's handled execute.
+            after  =  The PipelineFactory that create the middleware list for the router rules, after  the router rule's handled execute.
+        Returns: the rule's element class. if can not add the rule will return null.
+    */
+	RouterElement addRouter(string domain, string method,string path, ContextDelegate handle,
+		shared PipelineFactory before = null, shared PipelineFactory after = null)
+	{
+		if(domain.length == 0)
+		{
+			return _router.addRouter(method,path,handle,before,after);
+		} 
+		
+		
+		auto router = _routerList.get(domain,null);
+		if(router is null)
+		{
+			router = new Route();
+			_routerList[domain] = router;
+		}
+		
+		return router.addRouter(method,path,handle,before,after);
+	}
+	
+	/**
+        Add a Router rule. if config is done, will always erro. this will add to the default router.
+        Params:
+            method =  the HTTP method. 
+            path   =  the request path.
+            handle =  the delegate that handle the request.
+            before =  The PipelineFactory that create the middleware list for the router rules, before  the router rule's handled execute.
+            after  =  The PipelineFactory that create the middleware list for the router rules, after  the router rule's handled execute.
+        Returns: the rule's element class. if can not add the rule will return null.
+    */
+	RouterElement addRouter(string method, string path, ContextDelegate handle,
+		shared PipelineFactory before = null, shared PipelineFactory after = null)
+	{
+		return _router.addRouter(method,path,handle,before,after);
+	}
   
     /**
         Match the rule.if config is not done, will always erro.

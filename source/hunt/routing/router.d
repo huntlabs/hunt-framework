@@ -20,16 +20,15 @@ import hunt.routing.utils;
 /**
     The Router Class, Save and Macth the rule, and generte the Pipeline.
 */
-final class Router(REQ, RES)
+final class Router(ARGS...)
 {
-    alias HandleDelegate = void delegate(REQ, RES);
-    alias Pipeline = PipelineImpl!(REQ, RES);
-    alias PipelineFactory = IPipelineFactory!(REQ, RES);
-    alias RouterElement = PathElement!(REQ, RES);
-    alias RouterMap = ElementMap!(REQ, RES);
-    
-    alias Request = REQ;
-    alias Response = RES;
+	alias HandleDelegate = void delegate(ARGS);
+	alias Pipeline = PipelineImpl!(ARGS);
+	alias PipelineFactory = IPipelineFactory!(ARGS);
+	alias RouterElement = PathElement!(ARGS);
+	alias RouterMap = ElementMap!(ARGS);
+	alias Context = Pipeline.Context;
+	alias ContextDelegate = void delegate(Context,ARGS);
 
     /**
         Set The PipelineFactory that create the middleware list for all router rules, before  the router rule's handled execute.
@@ -56,7 +55,7 @@ final class Router(REQ, RES)
             after  =  The PipelineFactory that create the middleware list for the router rules, after  the router rule's handled execute.
         Returns: the rule's element class. if can not add the rule will return null.
     */
-    RouterElement addRouter(string method, string path, HandleDelegate handle,
+	RouterElement addRouter(string method, string path, ContextDelegate handle,
         shared PipelineFactory before = null, shared PipelineFactory after = null)
     {
         if (condigDone)
@@ -70,6 +69,22 @@ final class Router(REQ, RES)
         trace("add Router method: ", method);
         return map.add(path, handle, before, after);
     }
+
+
+	RouterElement addRouter(string method, string path, HandleDelegate handle,
+		shared PipelineFactory before = null, shared PipelineFactory after = null)
+	{
+		if (condigDone)
+			return null;
+		RouterMap map = _map.get(method, null);
+		if (!map)
+		{
+			map = new RouterMap(this);
+			_map[method] = map;
+		}
+		trace("add Router method: ", method);
+		return map.add(path, handle, before, after);
+	}
  
     /**
         Match the rule.if config is not done, will always erro.
@@ -142,12 +157,13 @@ private:
 /**
     A rule elment class.
 */
-class PathElement(REQ, RES)
+class PathElement(ARGS...)
 {
-    alias HandleDelegate = void delegate(REQ, RES);
-    alias Pipeline = PipelineImpl!(REQ, RES);
-    alias PipelineFactory = IPipelineFactory!(REQ, RES);
-
+	alias HandleDelegate = void delegate(ARGS);
+	alias Pipeline = PipelineImpl!(ARGS);
+	alias PipelineFactory = IPipelineFactory!(ARGS);
+	alias Context = Pipeline.Context;
+	alias ContextDelegate = void delegate(Context,ARGS);
     /**
         Constructor and set the path.
     */
@@ -168,11 +184,23 @@ class PathElement(REQ, RES)
         return _handler;
     }
 
+	/// get the handle.
+	final @property contexhandler() const
+	{
+		return _chandle;
+	}
+
     /// set the handle
     final @property handler(HandleDelegate handle)
     {
         _handler = handle;
     }
+
+	/// set the handle
+	final @property contexhandler(ContextDelegate handle)
+	{
+		_chandle = handle;
+	}
 
     /// get the befor pipeline.
     final Pipeline getBeforeMiddleware()
@@ -208,7 +236,7 @@ class PathElement(REQ, RES)
         _after = after;
     }
     
-    PathElement!(REQ, RES) macth(string path, Pipeline pipe)
+	PathElement!(ARGS) macth(string path, Pipeline pipe)
     {
         return this;
     }
@@ -216,20 +244,21 @@ class PathElement(REQ, RES)
 private:
     string _path;
     HandleDelegate _handler = null;
+	ContextDelegate _chandle = null;
     shared PipelineFactory _before = null;
     shared PipelineFactory _after = null;
 }
 
 private:
 
-final class RegexElement(REQ, RES) : PathElement!(REQ, RES)
+final class RegexElement(ARGS...) : PathElement!(ARGS)
 {
     this(string path)
     {
         super(path);
     }
 
-    override PathElement!(REQ, RES) macth(string path, Pipeline pipe)
+	override PathElement!(ARGS) macth(string path, Pipeline pipe)
     {
         //writeln("the path is : ", path, "  \t\t regex is : ", _reg);
         auto rg = regex(_reg, "s");
@@ -259,12 +288,12 @@ private:
     string _reg;
 }
 
-final class RegexMap(REQ, RES)
+final class RegexMap(ARGS...)
 {
-    alias RElement = RegexElement!(REQ, RES);
-    alias PElement = PathElement!(REQ, RES);
-    alias RElementMap = RegexMap!(REQ, RES);
-    alias Pipeline = PipelineImpl!(REQ, RES);
+	alias RElement = RegexElement!(ARGS);
+	alias PElement = PathElement!(ARGS);
+	alias RElementMap = RegexMap!(ARGS);
+	alias Pipeline = PipelineImpl!(ARGS);
 
     this(string path)
     {
@@ -351,15 +380,17 @@ private:
     string _path;
 }
 
-final class ElementMap(REQ, RES)
+final class ElementMap(ARGS...)
 {
-    alias RElement = RegexElement!(REQ, RES);
-    alias PElement = PathElement!(REQ, RES);
-    alias RElementMap = RegexMap!(REQ, RES);
-    alias Pipeline = PipelineImpl!(REQ, RES);
-    alias Route = Router!(REQ, RES);
-    alias HandleDelegate = void delegate(REQ, RES);
-    alias PipelineFactory = IPipelineFactory!(REQ, RES);
+	alias RElement = RegexElement!(ARGS);
+	alias PElement = PathElement!(ARGS);
+	alias RElementMap = RegexMap!(ARGS);
+	alias Pipeline = PipelineImpl!(ARGS);
+	alias Route = Router!(ARGS);
+	alias HandleDelegate = void delegate(ARGS);
+	alias PipelineFactory = IPipelineFactory!(ARGS);
+	alias Context = Pipeline.Context;
+	alias ContextDelegate = void delegate(Context,ARGS);
 
     this(Route router)
     {
@@ -390,6 +421,29 @@ final class ElementMap(REQ, RES)
         }
     }
 
+	PElement add(string path, ContextDelegate handle, shared PipelineFactory before,
+		shared PipelineFactory after)
+	{
+		if (isHaveRegex(path))
+		{
+			auto ele = new RElement(path);
+			ele.setAfterPipelineFactory(after);
+			ele.setBeforePipelineFactory(before);
+			ele.contexhandler = handle;
+			return _regexMap.add(ele, path);
+		}
+		else
+		{
+			trace("add function: ", path);
+			auto ele = new PElement(path);
+			ele.setAfterPipelineFactory(after);
+			ele.setBeforePipelineFactory(before);
+			ele.contexhandler = handle;
+			_pathMap[path] = ele;
+			return ele;
+		}
+	}
+
     Pipeline match(string path)
     {
         Pipeline pipe = new Pipeline();
@@ -404,7 +458,10 @@ final class ElementMap(REQ, RES)
         {
             pipe.append(_router.getGlobalBrforeMiddleware());
             pipe.append(element.getBeforeMiddleware());
-            pipe.addHandler(element.handler);
+			if(element.handler)
+            	pipe.addHandler(element.handler);
+			else
+				pipe.addHandler(element.contexhandler);
             pipe.append(element.getAfterMiddleware());
             pipe.append(_router.getGlobalAfterMiddleware());
 

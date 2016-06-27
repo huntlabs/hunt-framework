@@ -14,7 +14,7 @@ import std.string;
 import std.regex;
 import std.traits;
 
-void controllerHelper(string FUN, T, REQ, RES)(string str, REQ req, RES res) if (
+void controllerHelper(string FUN, T, ARGS...)(string str, ARGS args) if (
         (is(T == class) || is(T == interface)) && hasMember!(T, FUN))
 {
     import std.experimental.logger;
@@ -42,7 +42,7 @@ void controllerHelper(string FUN, T, REQ, RES)(string str, REQ req, RES res) if 
         return;
     }
 
-    mixin("a." ~ FUN ~ "(funName,req,res);");
+	mixin("a." ~ FUN ~ "(funName,args);");
 }
 
 version (unittest)
