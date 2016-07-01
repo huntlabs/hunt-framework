@@ -18,6 +18,7 @@ import std.exception;
 
 class WebForm
 {
+	alias StringArray = string[];
     final class FormFile
     {
         string fileName;
@@ -55,7 +56,7 @@ class WebForm
         return _vaild;
     }
 
-    @property string[string] formMap()
+	@property StringArray[string] formMap()
     {
         return _forms;
     }
@@ -65,10 +66,21 @@ class WebForm
         return _files;
     }
 
-    string getFromValue(string key) const
+    string getFromValue(string key)
     {
-        return _forms.get(key, "");
+		StringArray aty;
+		aty = _forms.get(key, aty);
+		if(aty.length == 0)
+			return "";
+		else
+			return aty[0];
     }
+
+	StringArray getFromValueArray(string key)
+	{
+		StringArray aty;
+		return _forms.get(key, aty);
+	}
 
     auto getFileValue(string key) const
     {
@@ -80,7 +92,7 @@ protected:
     {
         ubyte[] buf = new ubyte[buffer.length];
         buffer.read(buf);
-        _forms = parseKeyValues(cast(string) buf);
+        parseFromKeyValues(cast(string) buf);
     }
 
     void readMultiFrom(string brand, SectionBuffer buffer)
@@ -151,7 +163,7 @@ protected:
             buffer.readUtil(boundary, delegate(in ubyte[] rdata) {
                 value ~= cast(string) rdata;
             });
-            _forms[name] = value;
+            _forms[name] ~= value;
         }
         ubyte[2] ub;
         buffer.read(ub);
@@ -163,8 +175,31 @@ protected:
         return true;
     }
 
+	void parseFromKeyValues(string raw, string split1 = "&", string spilt2 = "=")
+	{
+		if (raw.length == 0)
+			return ;
+		string[] pairs = raw.strip.split(split1);
+		foreach (string pair; pairs)
+		{
+			string[] parts = pair.split(spilt2);
+			
+			// Accept formats a=b/a=b=c=d/a
+			if (parts.length == 1)
+			{
+				string key = parts[0];
+				_forms[key] ~= "";
+			}
+			else if (parts.length > 1)
+			{
+				string key = parts[0];
+				string value = pair[parts[0].length + 1 .. $];
+				_forms[key] ~= value;
+			}
+		}
+	}
 private:
     bool _vaild = true;
-    string[string] _forms;
+	StringArray[string] _forms;
     FormFile[string] _files;
 }

@@ -546,20 +546,21 @@ unittest
     assert(pipe !is null);
     a.gtest = 0;
     pipe.handleActive(a, 0);
-    assert(a.gtest == 9);
+	writeln(a.gtest);
+    assert(a.gtest == 5);
 
     pipe = router.match("post", "/file/2/34/ddd.jpg");
     assert(pipe !is null);
     assert(pipe.matchData.length == 3);
     a.gtest = 0;
     pipe.handleActive(a, 0);
-    assert(a.gtest == 5);
+    assert(a.gtest == 3);
 
     pipe = router.match("get", "/file/2/34/ddd.jpg");
     assert(pipe !is null);
     assert(pipe.matchData.length == 2);
     a.gtest = 0;
     pipe.handleActive(a, 0);
-    assert(a.gtest == 9);
+    assert(a.gtest == 5);
 
 }
