@@ -143,12 +143,7 @@ class Request
     T post(T = string)(string key, T v = T.init)
     {
         import std.conv;
-        auto tmp = this.postForm.formMap();
-        if(tmp is null)
-        {
-            return v;   
-        }
-        auto _v = tmp.get(key, "");
+		auto _v = postForm.getFromValue(key);
         if(_v.length)
         {
             return to!T(_v);

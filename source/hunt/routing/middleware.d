@@ -340,7 +340,7 @@ unittest
     pip.handleActive(t, 0);
 
     writeln("t.gtest is :", t.gtest);
-    assert(t.gtest == 6);
+    assert(t.gtest == 4);
 
     Pipeline pip2 = new Pipeline();
     pip2.addHandler(new TestMiddleWare2());
@@ -354,7 +354,7 @@ unittest
 
     pip.handleActive(t, 0);
 
-    assert(t.gtest == 6);
+    assert(t.gtest == 8);
 
     string[] list = [
         "hunt.routing.middleware.TestMiddleWare",
