@@ -16,19 +16,36 @@ public import hunt.router.middleware;
 
 interface IController
 {
-	bool __CALLACTION__(string method,RouterContex contex, Request req,  Response res);
+	bool __CALLACTION__(string method,RouterPipelineContext contex, Request req,  Response res);
+}
+
+class Controller : IController
+{
+	protected
+	{
+		Request request;
+		Response response;
+		RouterPipelineContext context;
+	}
+	bool __CALLACTION__(string method,RouterPipelineContext contex, Request req,  Response res)
+	{
+		return false;
+	}
 }
 
 mixin template HuntDynamicCallFun()
 {
-    mixin(_createCallActionFun!(typeof(this)));
+	mixin(_createCallActionFun!(typeof(this)));
 }
 
 string  _createCallActionFun(T)()
 {
     import std.traits;
     import std.typecons;
-	string str = "override bool __CALLACTION__(string funName,RouterContex contex,Request req,  Response res) {";
+	string str = "override bool __CALLACTION__(string funName,RouterPipelineContext context,Request req,  Response res) {";
+	str ~= "import std.experimental.logger;";
+	str ~= "trace(\"call function \", funName);";
+	str ~= "this.request = req; this.response = res; this.context = context;";
     str ~= "switch(funName){";
     foreach(memberName; __traits(allMembers, T))
     {
@@ -36,22 +53,34 @@ string  _createCallActionFun(T)()
         {
             foreach (t;__traits(getOverloads,T,memberName)) 
             {
-                Parameters!(t) functionArguments;
+				static if(memberName == "toString" || memberName == "toHash" || 
+					memberName == "opCmp" ||memberName == "opEquals" ||memberName == "factory")
+				{
+					continue;
+				}
+				else
+				{
+					str ~= "case \"";
+					str ~= memberName;
+					str ~= "\":";
+					str = str ~  memberName ~ "(); return true;";
+				}
+                /*Parameters!(t) functionArguments;
                 static if(functionArguments.length == 2 && is(typeof(functionArguments[0]) == Request) && is(typeof(functionArguments[1]) == Response))
                 {
                     str ~= "case \"";
                     str ~= memberName;
                     str ~= "\":";
-					str = str ~  memberName ~ "(req,res); contex.next(req,res);return true;";
+					str = str ~  memberName ~ "(); context.next(req,res);return true;";
                 }
-				static if(functionArguments.length == 3 && is(typeof(functionArguments[0]) == RouterContex)
+				static if(functionArguments.length == 3 && is(typeof(functionArguments[0]) == RouterPipelineContext)
 					is(typeof(functionArguments[1]) == Request) && is(typeof(functionArguments[0]) == Response))
 				{
 					str ~= "case \"";
 					str ~= memberName;
 					str ~= "\":";
-					str = str ~  memberName ~ "(contex,req,res);return true;";
-				}
+					str = str ~  memberName ~ "();return true;";
+				}*/
             }
         }
     }

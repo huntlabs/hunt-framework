@@ -12,12 +12,13 @@ module application.user.controller.api.index;
 
 import hunt.application;
 
-class IndexController : IController
+class IndexController : Controller
 {
     mixin HuntDynamicCallFun;
     
-    void show(Request req, Response res)
+    void show()
     {
+    	alias res = this.response;
         import std.stdio;
         res.setContext("hello world<br/>");
         res.setHeader("content-type","text/html;charset=UTF-8");
