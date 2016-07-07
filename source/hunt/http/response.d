@@ -95,21 +95,21 @@ class Response
 	pragma(inline)
 	final bool done()
 	{
-		setHeader("XPoweredBy",XPoweredBy);
+		setHeader("X-Powered-By",XPoweredBy);
 		return _rep.done(null, 0);
 	}
 	
 	pragma(inline)
 	final bool done(string file)
 	{
-		setHeader("XPoweredBy",XPoweredBy);
+		setHeader("X-Powered-By",XPoweredBy);
 		return _rep.done(file, 0);
 	}
 
 	pragma(inline)
 	final bool done(string file, ulong begin)
 	{
-		setHeader("XPoweredBy",XPoweredBy);
+		setHeader("X-Powered-By",XPoweredBy);
 		return _rep.done(file, begin);
 	}
 	
