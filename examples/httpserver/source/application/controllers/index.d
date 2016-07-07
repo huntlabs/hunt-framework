@@ -12,17 +12,18 @@ module application.controllers.index;
 
 import hunt.application;
 
-class IndexController : IController
+class IndexController : Controller
 {
     mixin HuntDynamicCallFun;
     
-    void show(Request req, Response res)
+    //void show(Request req, Response res)
+    void show()
     {
         import std.stdio;
-       // writeln("do show!");
-        res.setContext("hello world<br/>");
-        res.setHeader("content-type","text/html;charset=UTF-8");
-	res.done();
+        writeln("do show!");
+        this.response.setContext("hello world<br/>");
+        this.response.setHeader("content-type","text/html;charset=UTF-8");
+		this.response.done();
     }
     
 }

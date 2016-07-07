@@ -162,10 +162,9 @@ private:
         trace("macth router : method: ", req.Header.methodString, "   path : ",req.Header.path, " host: ", req.Header.host);
         RouterPipeline pipe = null;
         pipe = _router.match(req.Header.host,req.Header.methodString, req.Header.path);
-
         if (pipe is null)
         {
-            app._404(req, res);
+			app._404(req, res);
         }
         else
         {
@@ -176,6 +175,7 @@ private:
                 pipe.destroy;
                 GC.free(cast(void *)pipe);
             }
+
             if(pipe.matchData().length > 0)
             {
                 pipe.swapMatchData(req.materef());

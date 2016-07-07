@@ -7,7 +7,7 @@
     "libs" : [],
     "dependencies": {
         "collie": {
-            "version": "~>0.7.0",
+            "path":"../collie",
         },
         "libmemcached": "~>1.0.2"
     },

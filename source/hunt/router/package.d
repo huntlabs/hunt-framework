@@ -31,7 +31,7 @@ void setRouterConfigHelper(string FUN, T, TRouter)(TRouter router, RouterConfigB
     import std.string;
     import std.array;
 
-	alias doFun = controllerHelper!(FUN, T,RouterContex, Request, Response);
+	alias doFun = controllerHelper!(FUN, T,RouterPipelineContext, Request, Response);
 	alias MiddleWareFactory = AutoMiddleWarePipelineFactory!(Request, Response);
     
     
