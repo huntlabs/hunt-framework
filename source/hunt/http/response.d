@@ -30,48 +30,55 @@ class Response
         _rep = resp;
     }
 
-    void setHeader(T = string)(string key, T value)
+    auto setHeader(T = string)(string key, T value)
     {
         _rep.Header.setHeaderValue(key, value);
+		return this;
     }
 
-    void write(ubyte[] data)
+    auto write(ubyte[] data)
     {
         _rep.Body.write(data);
+		return this;
     }
 
-    void setContext(string str)
+    auto setContext(string str)
     {
         _rep.Body.write(cast(ubyte[]) str);
+		return this;
     }
 
-    void setContext(ubyte[] data)
+    auto setContext(ubyte[] data)
     {
         _rep.Body.write(data);
+		return this;
     }
 
 	///set http status code eg. 404 200
-    void setHttpStatusCode(int code)
+    auto setHttpStatusCode(int code)
     {
         _rep.Header.statusCode(code);
+		return this;
     }
 
     ///return json value
-    void writeJson(JSONValue json)
+    auto writeJson(JSONValue json)
     {
         setHeader("Content-Type", "application/json;charset=UTF-8");
         setContext(json.toString());
+		return this;
     }
     /**
 	* 设置Session Cookie
 	*/
-    void setCookie(string name, string value, int expires, string path = "/", string domain = null)
+    auto setCookie(string name, string value, int expires, string path = "/", string domain = null)
     {
         import std.typecons;
         auto cookie = scoped!Cookie(name, value, ["path" : path, "domain" : domain,
             "expires" : printDate(cast(DateTime) Clock.currTime(UTC()) + dur!"seconds"(expires))]); //栈中优化
         ///TODO set into base
         this.setHeader("set-cookie", cookie.output(""));
+		return this;
     }
 
 
