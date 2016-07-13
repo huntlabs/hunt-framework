@@ -15,6 +15,7 @@ import std.functional;
 import hunt.application;
 import hunt.router;
 
+
 class BMiddleWare : MiddleWare
 {
     override void handle(Context ctx, Request req, Response res)
@@ -89,5 +90,34 @@ class GAMFactory : RouterPipelineFactory
         pipe.addHandler(toDelegate(&GAMiddleWareFun));
         pipe.addHandler(new EndMiddleWare);
         return pipe;
+    }
+}
+
+class WidgetFactory : IWidgetFactory
+{
+    override Widget[] getWidgets()
+    {
+        Widget[] _list;
+        _list ~= new OneWidget();
+        _list ~= new TwoWidget();
+       return _list;
+    }
+}
+
+class OneWidget : Widget
+{
+    override bool handle(Request req, Response res)
+    {
+        res.setContext("<H1>One....</H1> <br/>");
+        return true;
+    }
+}
+
+class TwoWidget : Widget
+{
+    override bool handle(Request req, Response res)
+    {
+        res.setContext("<H1>Two....</H1> <br/>");
+        return true;
     }
 }

@@ -19,9 +19,9 @@ import collie.socket;
 
 void hello(Request, Response res)
 {
-    res.setContext("hello world");
-    res.setHeader("content-type","text/html;charset=UTF-8");
+    res.html("hello world");
     res.done();
+    
 }
 
 void test(Request, Response res)
@@ -31,7 +31,8 @@ void test(Request, Response res)
 
 static this()
 {
-    auto app = WebApplication.app();
-    app.addRouter("GET","/test",toDelegate(&test)).addRouter("GET","/hello",toDelegate(&hello));
+    auto app = Application.app();
+    app.addRouter("GET","/test",toDelegate(&test)).addRouter("GET","/hello",toDelegate(&hello))
+    .setWidgetFactory(new WidgetFactory());
 }
 
