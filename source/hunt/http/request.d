@@ -34,15 +34,19 @@ class Request
         return _form;
     }
 
-	@property Header(){return _req.Header();}
+	private @property Header(){return _req.Header();}
 
-	@property Body(){return _req.Body();}
+	private @property Body(){return _req.Body();}
 
     @property mate(){return _mate;}
 
 	@property path(){return _req.Header().path();}
 
-	@property method(){return _req.Header().method();}
+	@property method(){return _req.Header().methodString();}
+	
+	@property host(){return _req.Header().host();}
+
+
 
 	@property GET(){return queries();}
 
@@ -75,7 +79,7 @@ class Request
 		return new S(co.value, t);
 	}
 
-	Cookie getCookie(string key)
+	private Cookie getCookie(string key)
 	{
 		if(cookies.length == 0)
 		{
