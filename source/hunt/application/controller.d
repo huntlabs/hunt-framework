@@ -54,6 +54,8 @@ class Controller : IController
 	}
 }
 
+alias ControllerInCompileTime = HuntDynamicCallFun;
+
 mixin template HuntDynamicCallFun()
 {
 	import std.traits;
