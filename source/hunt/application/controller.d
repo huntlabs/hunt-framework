@@ -14,14 +14,14 @@ public import hunt.http.response;
 public import hunt.http.request;
 public import hunt.router.middleware;
 
-struct Action{}
+struct action{}
 
 bool isDynamicallyAvailable(alias member)()
 {
 	bool state = false;
 	foreach(annotation; __traits(getAttributes, member))
 	{
-		static if(is(annotation == Action))
+		static if(is(annotation == action))
 		{
 			state = true;
 			break;
