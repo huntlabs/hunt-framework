@@ -21,6 +21,16 @@ alias RouterPipeline = PipelineImpl!(Request, Response);
 alias RouterPipelineFactory = IPipelineFactory!(Request, Response);
 alias RouterPipelineContext = RouterPipeline.Context;
 
+interface Widget
+{
+	bool handle(Request req, Response res);
+}
+
+abstract shared class IWidgetFactory
+{
+	Widget[] getWidgets();
+}
+
 class MiddleWareDone : MiddleWare
 {
     override void handle(Context ctx, Request req, Response res)

@@ -31,12 +31,12 @@ public import hunt.application.config;
     
 */
 
-final class WebApplication
+final class Application
 {
     static @property app(){
         if(_app is null)
         {
-            _app = new WebApplication();
+            _app = new Application();
         }
         return _app;
     }
@@ -93,6 +93,19 @@ final class WebApplication
         router.setGlobalAfterPipelineFactory(after);
         return this;
     }
+
+	///
+	auto setWidgetFactory(shared IWidgetFactory mfactory)
+	{
+		_widgetFactory = mfactory;
+		return this;
+	}
+
+	@property auto middleWareFactory()
+	{
+		return _widgetFactory;
+	}
+
 
     /**
         Set The delegate that handle 404,when the router don't math the rule.
@@ -159,9 +172,9 @@ private:
     /// math the router and start handle the middleware and handle.
     void doHandle(Request req, Response res)
     {
-        trace("macth router : method: ", req.Header.methodString, "   path : ",req.Header.path, " host: ", req.Header.host);
+        trace("macth router : method: ", req.method, "   path : ",req.path, " host: ", req.host);
         RouterPipeline pipe = null;
-        pipe = _router.match(req.Header.host,req.Header.methodString, req.Header.path);
+        pipe = _router.match(req.host,req.method, req.path);
         if (pipe is null)
         {
 			app._404(req, res);
@@ -230,7 +243,7 @@ private:
        _config = new WebConfig();
     }
 
-    __gshared static WebApplication _app;
+    __gshared static Application _app;
 private:
     HTTPRouterGroup _router;
     DOHandler _404;
@@ -240,5 +253,7 @@ private:
     EventLoopGroup _group;
     WebSocketFactory _wfactory;
     IWebConfig _config;
+
+	shared IWidgetFactory _widgetFactory;
 }
 

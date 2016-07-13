@@ -12,18 +12,38 @@ module application.controllers.index;
 
 import hunt.application;
 
+
 class IndexController : Controller
 {
-    mixin HuntDynamicCallFun;
+    mixin ControllerInCompileTime;
     
-    //void show(Request req, Response res)
+    @action
     void show()
     {
-        import std.stdio;
-        writeln("do show!");
-        this.response.setContext("hello world<br/>");
-        this.response.setHeader("content-type","text/html;charset=UTF-8");
-		this.response.done();
+        this.response.html("hello world 董磊<br/>")
+        //.setHeader("content-type","text/html;charset=UTF-8")
+        .setCookie("name", "value", 10000)
+        .setCookie("name1", "value", 10000, "/path")
+        .setCookie("name2", "value", 10000);
     }
-    
+
+    @action
+    string list()
+    {
+    	return "list";
+    }
+    @action
+    void index()
+    {
+        writeln("do index!");
+    	return ;
+    }
+  
+    @action
+    auto showbool()
+    {
+    	writeln("show bool");
+    	return true;
+    }
+  
 }
