@@ -33,6 +33,7 @@ abstract shared class IPipelineFactory(ARGS...)
     Pipeline newPipeline();
 }
 
+
 /**
     The pipeline like a list. it call the MiddleWare form frist to last.
 */
