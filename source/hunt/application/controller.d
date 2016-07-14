@@ -60,6 +60,7 @@ class Controller : IController
 	{
 		return false;
 	}
+
 }
 
 alias ControllerInCompileTime = HuntDynamicCallFun;
