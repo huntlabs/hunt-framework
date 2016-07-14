@@ -9,7 +9,10 @@
         "collie": {
             "path":"../collie",
         },
-        "libmemcached": "~>1.0.2"
+        "libmemcached": "~>1.0.2",
+		"entity" : {
+			"path" : "../entity"
+		}
     },
     "subConfigurations": {
         "liblzma": "library"
