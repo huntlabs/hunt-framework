@@ -17,11 +17,11 @@ import application.model.index;
 
 class IndexController : Controller
 {
-    
+
     mixin MakeController;
     
     @action
-    @widget(BeforeWidget.stringof, AfterWidget.stringof)
+    @middleware(BeforeWidget.stringof, AfterWidget.stringof)
     void show()
     {
         this.response.html("hello world 董磊<br/>")
@@ -34,7 +34,7 @@ class IndexController : Controller
     }
 
     @action
-    @widget("", OneWidget.stringof)
+    @middleware("", OneWidget.stringof)
     void list()
     {
         this.response.html("list");
