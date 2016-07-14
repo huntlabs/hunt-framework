@@ -11,6 +11,7 @@
 module application.controllers.index;
 
 import hunt.application;
+import application.middleware;
 
 
 class IndexController : Controller
@@ -18,6 +19,7 @@ class IndexController : Controller
     mixin ControllerInCompileTime;
     
     @action
+    @widget(BeforeWidget.stringof, AfterWidget.stringof)
     void show()
     {
         this.response.html("hello world 董磊<br/>")
@@ -28,6 +30,7 @@ class IndexController : Controller
     }
 
     @action
+    @widget("", OneWidget.stringof)
     string list()
     {
     	return "list";
