@@ -26,6 +26,7 @@ import hunt.router;
 public import hunt.http;
 public import hunt.view;
 public import hunt.application.controller;
+public import hunt.application.model;
 public import hunt.application.config;
 /**
     
@@ -156,6 +157,11 @@ final class Application
             setRouterConfigHelper!("__CALLACTION__",IController,HTTPRouterGroup)
                             (_router,config);
         router.done();
+
+		auto _db = _config.dbConfig();
+		if(_db && _db.isVaild())
+			initDb(_db.getUrl());
+
         _server.run();
     }
     
