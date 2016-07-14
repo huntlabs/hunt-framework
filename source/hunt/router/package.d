@@ -11,6 +11,10 @@
  
 module hunt.router;
 
+import std.string;
+import std.regex;
+import std.traits;
+
 public import hunt.routing;
 public import hunt.router.middleware;
 public import hunt.router.configsignalmodule;
@@ -20,10 +24,66 @@ import collie.utils.functional;
 
 public import hunt.http.request;
 public import hunt.http.response;
+public import hunt.application;
 
 alias HTTPRouter = Router!(Request, Response);
 alias DOHandler = void delegate(Request, Response);
 alias HTTPRouterGroup = RouterGroup!(Request, Response);
+
+void initControllerCall(string FUN, T, ARGS...)(string str, ARGS args) if (
+	(is(T == class) || is(T == interface)) && hasMember!(T, FUN))
+{
+	///dowidget
+	auto app = Application.app();
+	auto widgets = app.widgetFactory.getWidgets();
+	if(widgets !is null)
+	{
+		foreach(w; widgets)
+		{
+			///arg0:context
+			///arg1 req
+			///arg2 res
+			if(!w.handle(args[1], args[2]))
+			{
+				args[2].done();
+				return;
+			}
+		}
+	}
+
+	import std.experimental.logger;
+	
+	auto index = lastIndexOf(str, '.');
+	if (index < 0 || index == (str.length - 1))
+	{
+		error("can not find function!, the str is  : ", str);
+		return;
+	}
+	
+	string objName = str[0 .. index];
+	string funName = str[(index + 1) .. $];
+	
+	auto obj = Object.factory(objName);
+	if (!obj)
+	{
+		error("Object.factory erro!, the obj Name is : ", objName);
+		return;
+	}
+	auto a = cast(T) obj;
+	if (!a)
+	{
+		error("cast(T)obj; erro!");
+		return;
+	}
+	
+	mixin("bool ret = a." ~ FUN ~ "(funName,args);" ~ q{
+			if(!ret)
+			{
+				args[2].done();
+				return;
+			}
+		});
+}
 
 void setRouterConfigHelper(string FUN, T, TRouter)(TRouter router, RouterConfigBase config) if (
         (is(T == class) || is(T == interface)) && hasMember!(T, FUN) && hasMember!(TRouter, "addRouter"))
@@ -31,7 +91,7 @@ void setRouterConfigHelper(string FUN, T, TRouter)(TRouter router, RouterConfigB
     import std.string;
     import std.array;
 
-	alias doFun = controllerHelper!(FUN, T,RouterPipelineContext, Request, Response);
+	alias doFun = initControllerCall!(FUN, T,RouterPipelineContext, Request, Response);
 	alias MiddleWareFactory = AutoMiddleWarePipelineFactory!(Request, Response);
     
     

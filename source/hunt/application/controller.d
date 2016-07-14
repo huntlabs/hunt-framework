@@ -89,7 +89,7 @@ string  _createCallActionFun(T)()
 					str ~= "case \"";
 					str ~= memberName;
 					str ~= "\":";
-					str ~= memberName ~ "(); res.done();break;";
+					str ~= memberName ~ "(); break;";
 				}
                 /*Parameters!(t) functionArguments;
                 static if(functionArguments.length == 2 && is(typeof(functionArguments[0]) == Request) && is(typeof(functionArguments[1]) == Response))
@@ -112,7 +112,7 @@ string  _createCallActionFun(T)()
     }
 	str ~= "default : break;}";
 
-	str ~= "return true;";
+	str ~= "return false;";
     str ~= "}";
     return str;
 }
