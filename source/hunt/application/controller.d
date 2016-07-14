@@ -13,22 +13,30 @@ module hunt.application.controller;
 public import hunt.http.response;
 public import hunt.http.request;
 public import hunt.router.middleware;
+public import hunt.router.middleware;
+import std.traits;
 
 struct action{}
 
-bool isDynamicallyAvailable(alias member)()
-{
-	bool state = false;
-	foreach(annotation; __traits(getAttributes, member))
-	{
-		static if(is(annotation == action))
-		{
-			state = true;
-			break;
-		}
-	}
-	return state;
+struct widget{
+	string before;
+	string after;
 }
+/**
+ * Checks if a member is has widget, and returns the widget .
+ **/
+static widget getWidget(alias member)() {
+	enum ws = getUDAs!(member, widget);
+	static if(ws.length)
+	{
+		return ws[0];
+	}
+	else
+	{
+		return cast(widget)null;
+	}
+}
+
 
 T instanceOf (T) (Object value)
 {
@@ -68,7 +76,7 @@ mixin template HuntDynamicCallFun()
 string  _createCallActionFun(T)()
 {
     import std.traits;
-    import std.typecons;
+	import std.format;
 	string str = "override bool __CALLACTION__(string funName,RouterPipelineContext context,Request req,  Response res) {";
 	str ~= "import std.experimental.logger;import std.variant;import std.conv;";
 	str ~= "trace(\"call function \", funName);";
@@ -80,7 +88,7 @@ string  _createCallActionFun(T)()
         {
             foreach (t;__traits(getOverloads,T,memberName)) 
             {
-				static if(!isDynamicallyAvailable!t)
+				static if(!hasUDA!(t, action))
 				{
 					continue;
 				}
@@ -89,7 +97,25 @@ string  _createCallActionFun(T)()
 					str ~= "case \"";
 					str ~= memberName;
 					str ~= "\":";
-					str ~= memberName ~ "(); break;";
+					enum w = getWidget!t ;
+					static if(w.before !is null && w.before != "")
+					{
+						str ~= format(q{ 
+							auto wb_%s = new %s();
+							auto wretb_%s = wb_%s.handle(this.request, this.response);
+							if(!wretb_%s){return false;}
+							}, memberName, w.before, memberName, memberName, memberName);
+					}
+					str ~= memberName ~ "();";
+					static if( w.after !is null && w.after != "")
+					{
+						str ~= format(q{
+							auto waf_%s = new %s();
+							auto wretf_%s = waf_%s.handle(this.request, this.response);
+							if(!wretf_%s){return false;}
+							},memberName, w.after, memberName, memberName, memberName);
+					}
+					str ~= "break;";
 				}
                 /*Parameters!(t) functionArguments;
                 static if(functionArguments.length == 2 && is(typeof(functionArguments[0]) == Request) && is(typeof(functionArguments[1]) == Response))
