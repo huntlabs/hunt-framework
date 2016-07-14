@@ -13,7 +13,7 @@ module hunt.application.config;
 import std.string;
 
 import hunt.routing.configbase;
-public import hunt.application.config.db;
+public import hunt.application.config.database;
 public import hunt.application.config.http;
 
 interface IWebConfig
@@ -32,7 +32,7 @@ class WebConfig : IWebConfig
             path ~= "/";
 		_http = new HTTPConfig(path ~ "application.conf");
         _router = new RouterConfig(path ~ "routes.conf");
-		_db = new DBConf(path ~ "db.conf");
+		_db = new DBConf(path ~ "database.conf");
     }
     
     this()
