@@ -13,7 +13,6 @@ module hunt.application.controller;
 public import hunt.http.response;
 public import hunt.http.request;
 public import hunt.router.middleware;
-public import hunt.router.middleware;
 import std.traits;
 
 struct action{}
@@ -63,7 +62,7 @@ class Controller : IController
 
 }
 
-alias ControllerInCompileTime = HuntDynamicCallFun;
+alias MakeController = HuntDynamicCallFun;
 
 mixin template HuntDynamicCallFun()
 {
