@@ -101,7 +101,7 @@ final class Application
 		return this;
 	}
 
-	@property auto middleWareFactory()
+	@property auto widgetFactory()
 	{
 		return _widgetFactory;
 	}
