@@ -2,6 +2,7 @@
 
 import hunt.text.conf;
 import std.file;
+import std.experimental.logger;
 
 class DBConf
 {
@@ -23,9 +24,10 @@ class DBConf
 			port  = _ini.get("db.username");
 			if(port.length > 0)
 				_url ~= "?username=" ~ port;
-			port  = _ini.get("db.username");
+			port  = _ini.get("db.password");
 			if(port.length > 0)
 				_url ~= "&password=" ~ port;
+			trace(_url);
 		}
 	}
 
