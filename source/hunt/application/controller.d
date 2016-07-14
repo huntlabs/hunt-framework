@@ -17,22 +17,22 @@ import std.traits;
 
 struct action{}
 
-struct widget{
+struct middleware{
 	string before;
 	string after;
 }
 /**
  * Checks if a member is has widget, and returns the widget .
  **/
-static widget getWidget(alias member)() {
-	enum ws = getUDAs!(member, widget);
+static middleware getMiddleware(alias member)() {
+	enum ws = getUDAs!(member, middleware);
 	static if(ws.length)
 	{
 		return ws[0];
 	}
 	else
 	{
-		return cast(widget)null;
+		return cast(middleware)null;
 	}
 }
 
@@ -97,12 +97,12 @@ string  _createCallActionFun(T)()
 					str ~= "case \"";
 					str ~= memberName;
 					str ~= "\":";
-					enum w = getWidget!t ;
+					enum w = getMiddleware!t ;
 					static if(w.before !is null && w.before != "")
 					{
 						str ~= format(q{ 
 							auto wb_%s = new %s();
-							auto wretb_%s = wb_%s.handle(this.request, this.response);
+								auto wretb_%s = wb_%s.onProcess(this.request, this.response);
 							if(!wretb_%s){return false;}
 							}, memberName, w.before, memberName, memberName, memberName);
 					}
@@ -111,7 +111,7 @@ string  _createCallActionFun(T)()
 					{
 						str ~= format(q{
 							auto waf_%s = new %s();
-							auto wretf_%s = waf_%s.handle(this.request, this.response);
+								auto wretf_%s = waf_%s.onProcess(this.request, this.response);
 							if(!wretf_%s){return false;}
 							},memberName, w.after, memberName, memberName, memberName);
 					}

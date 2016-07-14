@@ -16,29 +16,29 @@ import hunt.application;
 import hunt.router;
 
 
-class WidgetFactory : IWidgetFactory
+class MiddlewareFactory : AbstractMiddlewareFactory
 {
-    override Widget[] getWidgets()
+    override IMiddleware[] getMiddlewares()
     {
-        Widget[] _list;
+        IMiddleware[] _list;
         _list ~= new OneWidget();
         _list ~= new TwoWidget();
        return _list;
     }
 }
 
-class OneWidget : Widget
+class OneWidget : IMiddleware
 {
-    override bool handle(Request req, Response res)
+    override bool onProcess(Request req, Response res)
     {
         res.setContext("<H1>One....</H1> <br/>");
         return true;
     }
 }
 
-class TwoWidget : Widget
+class TwoWidget : IMiddleware
 {
-    override bool handle(Request req, Response res)
+    override bool onProcess(Request req, Response res)
     {
         res.setContext("<H1>Two....</H1> <br/>");
         return true;
@@ -46,18 +46,18 @@ class TwoWidget : Widget
 }
 
 
-class BeforeWidget : Widget
+class BeforeWidget : IMiddleware
 {
-    override bool handle(Request req, Response res)
+    override bool onProcess(Request req, Response res)
     {
         res.setContext("<H1>BeforeWidget....</H1> <br/>");
         return true;
     }
 }
 
-class AfterWidget : Widget
+class AfterWidget : IMiddleware
 {
-    override bool handle(Request req, Response res)
+    override bool onProcess(Request req, Response res)
     {
         res.setContext("<H1>AfterWidget....</H1> <br/>");
         return true;

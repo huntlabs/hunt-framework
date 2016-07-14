@@ -17,6 +17,8 @@ import hunt.router;
 public import hunt.http;
 public import hunt.view;
 
+public import hunt.application.middleware;
+
 final class Application
 {
 	static @property app(){
@@ -81,15 +83,15 @@ final class Application
 	}
 	
 	///
-	auto setWidgetFactory(shared IWidgetFactory mfactory)
+	auto setMiddlewareFactory(shared AbstractMiddlewareFactory mfactory)
 	{
-		_widgetFactory = mfactory;
+		_middlewareFactory = mfactory;
 		return this;
 	}
 	
-	@property auto widgetFactory()
+	@property auto middlewareFactory()
 	{
-		return _widgetFactory;
+		return _middlewareFactory;
 	}
 	
 	
@@ -245,5 +247,5 @@ private:
 	WebSocketFactory _wfactory;
 	IWebConfig _config;
 	
-	shared IWidgetFactory _widgetFactory;
+	shared AbstractMiddlewareFactory _middlewareFactory;
 }
