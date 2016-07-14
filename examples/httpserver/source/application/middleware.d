@@ -16,83 +16,6 @@ import hunt.application;
 import hunt.router;
 
 
-class BMiddleWare : MiddleWare
-{
-    override void handle(Context ctx, Request req, Response res)
-    {
-        res.setContext("<H3>befor MiddleWare BMiddleWare</H3> <br/>");
-        ctx.next(req,res);
-    }
-}
-
-class AMiddleWare : MiddleWare
-{
-    override void handle(Context ctx, Request req, Response res)
-    {
-        res.setContext("<H3>after MiddleWare BMiddleWare</H3> <br/>");
-        ctx.next(req,res);
-    }
-}
-
-class GBMiddleWare : MiddleWare
-{
-    override void handle(Context ctx, Request req, Response res)
-    {
-        res.setContext("<H1>Global befor MiddleWare BMiddleWare</H1> <br/>");
-        ctx.next(req,res);
-    }
-}
-
-class GAMiddleWare : MiddleWare
-{
-    override void handle(Context ctx, Request req, Response res)
-    {
-        res.setContext("<H1>Global after MiddleWare BMiddleWare</H1> <br/>");
-        ctx.next(req,res);
-    }
-}
-
-class EndMiddleWare : MiddleWare
-{
-    override void handle(Context ctx, Request req, Response res)
-    {
-        res.done();
-    }
-}
-
-void GBMiddleWareFun(Request req, Response res)
-{
-    res.setContext("<H2>Global befor MiddleWare MiddleWareFunction</H2> <br/>");
-}
-
-void GAMiddleWareFun(Request req, Response res)
-{
-    res.setContext("<H2>Global after MiddleWare MiddleWareFunction</H2> <br/>");
-}
-
-class GBMFactory : RouterPipelineFactory
-{
-    override RouterPipeline newPipeline()
-    {
-        RouterPipeline pipe = new RouterPipeline();
-        pipe.addHandler(new GBMiddleWare);
-        pipe.addHandler(toDelegate(&GBMiddleWareFun));
-        return pipe;
-    }
-}
-
-class GAMFactory : RouterPipelineFactory
-{
-    override RouterPipeline newPipeline()
-    {
-        RouterPipeline pipe = new RouterPipeline();
-        pipe.addHandler(new GAMiddleWare);
-        pipe.addHandler(toDelegate(&GAMiddleWareFun));
-        pipe.addHandler(new EndMiddleWare);
-        return pipe;
-    }
-}
-
 class WidgetFactory : IWidgetFactory
 {
     override Widget[] getWidgets()
@@ -118,6 +41,25 @@ class TwoWidget : Widget
     override bool handle(Request req, Response res)
     {
         res.setContext("<H1>Two....</H1> <br/>");
+        return true;
+    }
+}
+
+
+class BeforeWidget : Widget
+{
+    override bool handle(Request req, Response res)
+    {
+        res.setContext("<H1>BeforeWidget....</H1> <br/>");
+        return true;
+    }
+}
+
+class AfterWidget : Widget
+{
+    override bool handle(Request req, Response res)
+    {
+        res.setContext("<H1>AfterWidget....</H1> <br/>");
         return true;
     }
 }
