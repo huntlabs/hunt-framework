@@ -14,7 +14,7 @@ import hunt.application;
 
 class IndexController : Controller
 {
-    mixin ControllerInCompileTime;
+    mixin MakeController;
     @action
     void show()
     {

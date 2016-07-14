@@ -4,7 +4,7 @@ import hunt.application;
 
 class AdminController : Controller
 {
-    mixin ControllerInCompileTime;
+    mixin MakeController;
     
     @action
     void show()

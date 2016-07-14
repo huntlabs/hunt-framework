@@ -17,7 +17,8 @@ import application.model.index;
 
 class IndexController : Controller
 {
-    mixin ControllerInCompileTime;
+    
+    mixin MakeController;
     
     @action
     @widget(BeforeWidget.stringof, AfterWidget.stringof)
