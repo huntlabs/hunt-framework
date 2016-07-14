@@ -14,4 +14,4 @@ public import hunt.application.controller;
 public import hunt.application.model;
 public import hunt.application.config;
 public import hunt.application.application;
-
+public import hunt.application.middleware;
