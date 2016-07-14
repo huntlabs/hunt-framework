@@ -28,28 +28,26 @@ class IndexController : Controller
         .setCookie("name", "value", 10000)
         .setCookie("name1", "value", 10000, "/path")
         .setCookie("name2", "value", 10000);
-        auto model = new IndexModel();
-        model.showTest2();
+      //  auto model = new IndexModel();
+        //model.showTest2();
     }
 
     @action
     @widget("", OneWidget.stringof)
-    string list()
+    void list()
     {
-    	return "list";
+        this.response.html("list");
     }
     @action
     void index()
     {
-        writeln("do index!");
-    	return ;
+        this.response.html("list");
     }
   
     @action
-    auto showbool()
+    void showbool()
     {
-    	writeln("show bool");
-    	return true;
+        this.response.html("list");
     }
   
 }
