@@ -14,14 +14,13 @@ import hunt.application;
 
 class IndexController : Controller
 {
-    mixin HuntDynamicCallFun;
+    mixin ControllerInCompileTime;
     
+    @action
     void show()
     {
     	alias res = this.response;
         import std.stdio;
-        res.setContext("hello world<br/>");
-        res.setHeader("content-type","text/html;charset=UTF-8");
-	res.done();
+        res.html("hello world<br/>"~__FUNCTION__);
     }
 }
