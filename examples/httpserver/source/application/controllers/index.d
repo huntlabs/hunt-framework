@@ -11,6 +11,7 @@
 module application.controllers.index;
 
 import hunt.application;
+import application.model.index;;
 
 
 class IndexController : Controller
@@ -25,6 +26,8 @@ class IndexController : Controller
         .setCookie("name", "value", 10000)
         .setCookie("name1", "value", 10000, "/path")
         .setCookie("name2", "value", 10000);
+        auto model = new IndexModel();
+        model.showTest2();
     }
 
     @action
