@@ -13,12 +13,14 @@ module hunt.application.config;
 import std.string;
 
 import hunt.routing.configbase;
+public import hunt.application.config.db;
 public import hunt.application.config.http;
 
 interface IWebConfig
 {
     @property HTTPConfig httpConfig();
     @property RouterConfigBase routerConfig();
+	@property DBConf dbConfig(); 
 }
 
 class WebConfig : IWebConfig
@@ -28,8 +30,9 @@ class WebConfig : IWebConfig
         import hunt.router.config;
         if(!endsWith(path,"/"))
             path ~= "/";
-        _http = new HTTPConfig(path ~ "http.conf");
+		_http = new HTTPConfig(path ~ "application.conf");
         _router = new RouterConfig(path ~ "routes.conf");
+		_db = new DBConf(path ~ "db.conf");
     }
     
     this()
@@ -40,8 +43,10 @@ class WebConfig : IWebConfig
     
     override @property HTTPConfig httpConfig(){return _http;}
     override @property RouterConfigBase routerConfig(){return _router;}
+	override @property DBConf dbConfig(){return _db;}
 private:
     HTTPConfig _http;
     RouterConfigBase _router;
+	DBConf _db;
 }
 
