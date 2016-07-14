@@ -47,6 +47,24 @@ class Request
 	@property host(){return _req.Header().host();}
 
 
+	@property string clientIp()
+	{
+		string XFF = this._req.Header.getHeaderValue("X-Forwarded-For");
+		string[] xff_arr = split(XFF,", ");
+		if(xff_arr.length > 0)
+		{
+			return xff_arr[0];
+		}
+		string XRealIP = this._req.Header.getHeaderValue("X-Real-IP");
+		if(XRealIP.length > 0)
+		{
+			return XRealIP;
+		}
+		return clientAddress.toAddrString();
+	}
+	
+	@property clientAddress(){return _req.clientAddress();}
+
 
 	@property GET(){return queries();}
 
@@ -125,23 +143,6 @@ class Request
         return v;
     }
 
-    @property string clientIp()
-    {
-        string XFF = this._req.Header.getHeaderValue("X-Forwarded-For");
-        string[] xff_arr = split(XFF,", ");
-        if(xff_arr.length > 0)
-        {
-            return xff_arr[0];
-        }
-        string XRealIP = this._req.Header.getHeaderValue("X-Real-IP");
-        if(XRealIP.length > 0)
-        {
-            return XRealIP;
-        }
-        return clientAddress.toAddrString();
-    }
-
-	@property clientAddress(){return _req.clientAddress();}
 
     /// get a post
     T post(T = string)(string key, T v = T.init)
