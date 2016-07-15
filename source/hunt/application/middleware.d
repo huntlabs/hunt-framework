@@ -6,6 +6,7 @@ import hunt.http.response;
 
 interface IMiddleware
 {
+	///return true is continue, false is finish
 	bool onProcess(Request req, Response res);
 }
 
