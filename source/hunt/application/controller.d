@@ -57,10 +57,18 @@ class Controller : IController
 	bool after(){return true;}
 
 	///add middleware
-	auto addMiddleware(IMiddleware midw)
+	///return true is ok, the named middleware is already exist return false
+	bool addMiddleware(IMiddleware midw)
 	{
+		foreach(tmp; this.middlewares)
+		{
+			if(tmp.name == midw.name)
+			{
+				return false;
+			}
+		}
 		this.middlewares ~= midw;
-		return this;
+		return true;
 	}
 	///add middleware
 	IMiddleware[] getMiddleware()
