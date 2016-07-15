@@ -2,7 +2,7 @@
 
 import entity;
 
-DataBase getDB()
+@property DataBase DB()
 {
 	if(_db is null)
 	{
@@ -14,15 +14,15 @@ DataBase getDB()
 	return _db;
 }
 
-auto getQuery(T)()
+@property auto DBQuery(T)()
 {
-	return new Query!T(getDB());
+	return new Query!T(DB);
 }
 
 void initDb(string str)
 {
 	_conStr = str;
-	getDB();
+	DB();
 }
 
 private:

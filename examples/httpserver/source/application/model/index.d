@@ -36,22 +36,22 @@ class IndexModel
 {
     void showTest2()
     {
-        auto quer = getQuery!Test();
-        auto iter = quer.Select();
-	if(iter !is null)
-            while(!iter.empty)
+        auto query = DBQuery!Test();
+
+		auto iterator = query.Select();
+
+		if(iterator !is null)
+			foreach(tp; iterator)
             {
-                    Test tp = iter.front();
-                    iter.popFront();
-                    writeln("float is  : ", tp.fcol);
-                    writeln("the string is : ", tp.stringcol);
-                    writeln("the ubyte is : ", cast(string)tp.ubytecol);
+                writeln("float is  : ", tp.fcol);
+                writeln("the string is : ", tp.stringcol);
+                writeln("the ubyte is : ", cast(string)tp.ubytecol);
             }
     }
     
     void insertNew(Test t)
     {
-        auto quer = getQuery!Test();
-        quer.Insert(t);
+		auto query = DBQuery!Test();
+		query.Insert(t);
     }
 }
