@@ -35,15 +35,15 @@ void initControllerCall(string FUN, T, ARGS...)(string str, ARGS args) if (
 {
 	///dowidget
 	auto app = Application.app();
-	auto widgets = app.widgetFactory.getWidgets();
-	if(widgets !is null)
+	auto middlewares = app.middlewareFactory.getMiddlewares();
+	if(middlewares !is null)
 	{
-		foreach(w; widgets)
+		foreach(w; middlewares)
 		{
 			///arg0:context
 			///arg1 req
 			///arg2 res
-			if(!w.handle(args[1], args[2]))
+			if(!w.onProcess(args[1], args[2]))
 			{
 				args[2].done();
 				return;
@@ -74,6 +74,23 @@ void initControllerCall(string FUN, T, ARGS...)(string str, ARGS args) if (
 	{
 		error("cast(T)obj; erro!");
 		return;
+	}
+
+	auto ms_in_controller = a.getMiddleware();
+
+	if(ms_in_controller.length)
+	{
+		foreach(w; ms_in_controller)
+		{
+			///arg0:context
+			///arg1 req
+			///arg2 res
+			if(!w.onProcess(args[1], args[2]))
+			{
+				args[2].done();
+				return;
+			}
+		}
 	}
 	
 	mixin("bool ret = a." ~ FUN ~ "(funName,args);" ~ q{
