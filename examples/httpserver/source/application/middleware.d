@@ -29,6 +29,10 @@ class MiddlewareFactory : AbstractMiddlewareFactory
 
 class OneMiddleware : IMiddleware
 {
+    override string name()
+    {
+        return OneMiddleware.stringof;
+    }
     override bool onProcess(Request req, Response res)
     {
         res.setContext("<H1>One....</H1> <br/>");
@@ -38,6 +42,11 @@ class OneMiddleware : IMiddleware
 
 class TwoMiddleware : IMiddleware
 {
+    override string name()
+    {
+        return TwoMiddleware.stringof;
+    }
+
     override bool onProcess(Request req, Response res)
     {
         res.setContext("<H1>Two....</H1> <br/>");
@@ -48,6 +57,10 @@ class TwoMiddleware : IMiddleware
 
 class BeforeMiddleware : IMiddleware
 {
+    override string name()
+    {
+        return BeforeMiddleware.stringof;
+    }
     override bool onProcess(Request req, Response res)
     {
         res.setContext("<H1>BeforeMiddleware....</H1> <br/>");
@@ -57,6 +70,10 @@ class BeforeMiddleware : IMiddleware
 
 class AfterMiddleware : IMiddleware
 {
+    override string name()
+    {
+        return AfterMiddleware.stringof;
+    }
     override bool onProcess(Request req, Response res)
     {
         res.setContext("<H1>AfterMiddleware....</H1> <br/>");
