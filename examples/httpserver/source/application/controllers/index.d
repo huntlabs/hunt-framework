@@ -21,7 +21,6 @@ class IndexController : Controller
     this()
     {
         this.addMiddleware(new BeforeMiddleware());
-        this.addMiddleware(new BeforeMiddleware());
     }
 
     override bool before()
