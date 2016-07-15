@@ -13,30 +13,16 @@ module hunt.application.controller;
 public import hunt.http.response;
 public import hunt.http.request;
 public import hunt.router.middleware;
-public import hunt.router.middleware;
+
+public import hunt.application.middleware;
+
 import std.traits;
 
 struct action{}
 
-struct widget{
-	string before;
-	string after;
+struct middleware{
+	string className;
 }
-/**
- * Checks if a member is has widget, and returns the widget .
- **/
-static widget getWidget(alias member)() {
-	enum ws = getUDAs!(member, widget);
-	static if(ws.length)
-	{
-		return ws[0];
-	}
-	else
-	{
-		return cast(widget)null;
-	}
-}
-
 
 T instanceOf (T) (Object value)
 {
@@ -46,6 +32,8 @@ T instanceOf (T) (Object value)
 interface IController
 {
 	bool __CALLACTION__(string method,RouterPipelineContext contex, Request req,  Response res);
+
+	IMiddleware[] getMiddleware();
 }
 
 class Controller : IController
@@ -55,15 +43,33 @@ class Controller : IController
 		Request request;
 		Response response;
 		RouterPipelineContext context;
+		///called before all actions
+		IMiddleware[] middlewares;
+
 	}
 	bool __CALLACTION__(string method,RouterPipelineContext contex, Request req,  Response res)
 	{
 		return false;
 	}
+	/// called before action  return true is continue false is finish
+	bool before(){return true;}
+	/// called after action  return true is continue false is finish
+	bool after(){return true;}
 
+	///add middleware
+	auto addMiddleware(IMiddleware midw)
+	{
+		this.middlewares ~= midw;
+		return this;
+	}
+	///add middleware
+	IMiddleware[] getMiddleware()
+	{
+		return this.middlewares;
+	}
 }
 
-alias ControllerInCompileTime = HuntDynamicCallFun;
+alias MakeController = HuntDynamicCallFun;
 
 mixin template HuntDynamicCallFun()
 {
@@ -98,42 +104,32 @@ string  _createCallActionFun(T)()
 					str ~= "case \"";
 					str ~= memberName;
 					str ~= "\":";
-					enum w = getWidget!t ;
-					static if(w.before !is null && w.before != "")
+					enum ws = getUDAs!(t, middleware);
+					static if(ws.length)
 					{
-						str ~= format(q{ 
-							auto wb_%s = new %s();
-							auto wretb_%s = wb_%s.handle(this.request, this.response);
-							if(!wretb_%s){return false;}
-							}, memberName, w.before, memberName, memberName, memberName);
+						foreach(i,w; ws)
+						{
+							str ~= format(q{ 
+									auto wb_%s_%s = new %s();
+									if(!wb_%s_%s.onProcess(this.request, this.response)){return false;}
+								}, i,memberName, w.className, i, memberName);
+						}
+
 					}
+
+					//before
+					str ~= q{
+						if(!this.before()){return false;}
+					};
+					//action
 					str ~= memberName ~ "();";
-					static if( w.after !is null && w.after != "")
-					{
-						str ~= format(q{
-							auto waf_%s = new %s();
-							auto wretf_%s = waf_%s.handle(this.request, this.response);
-							if(!wretf_%s){return false;}
-							},memberName, w.after, memberName, memberName, memberName);
-					}
+					//after
+					str ~= q{
+						if(!this.after()){return false;}
+					};
 					str ~= "break;";
 				}
-                /*Parameters!(t) functionArguments;
-                static if(functionArguments.length == 2 && is(typeof(functionArguments[0]) == Request) && is(typeof(functionArguments[1]) == Response))
-                {
-                    str ~= "case \"";
-                    str ~= memberName;
-                    str ~= "\":";
-					str = str ~  memberName ~ "(); context.next(req,res);return true;";
-                }
-				static if(functionArguments.length == 3 && is(typeof(functionArguments[0]) == RouterPipelineContext)
-					is(typeof(functionArguments[1]) == Request) && is(typeof(functionArguments[0]) == Response))
-				{
-					str ~= "case \"";
-					str ~= memberName;
-					str ~= "\":";
-					str = str ~  memberName ~ "();return true;";
-				}*/
+               
             }
         }
     }
