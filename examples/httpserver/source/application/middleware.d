@@ -16,29 +16,29 @@ import hunt.application;
 import hunt.router;
 
 
-class WidgetFactory : IWidgetFactory
+class MiddlewareFactory : AbstractMiddlewareFactory
 {
-    override Widget[] getWidgets()
+    override IMiddleware[] getMiddlewares()
     {
-        Widget[] _list;
-        _list ~= new OneWidget();
-        _list ~= new TwoWidget();
+        IMiddleware[] _list;
+        _list ~= new OneMiddleware();
+        _list ~= new TwoMiddleware();
        return _list;
     }
 }
 
-class OneWidget : Widget
+class OneMiddleware : IMiddleware
 {
-    override bool handle(Request req, Response res)
+    override bool onProcess(Request req, Response res)
     {
         res.setContext("<H1>One....</H1> <br/>");
         return true;
     }
 }
 
-class TwoWidget : Widget
+class TwoMiddleware : IMiddleware
 {
-    override bool handle(Request req, Response res)
+    override bool onProcess(Request req, Response res)
     {
         res.setContext("<H1>Two....</H1> <br/>");
         return true;
@@ -46,20 +46,20 @@ class TwoWidget : Widget
 }
 
 
-class BeforeWidget : Widget
+class BeforeMiddleware : IMiddleware
 {
-    override bool handle(Request req, Response res)
+    override bool onProcess(Request req, Response res)
     {
-        res.setContext("<H1>BeforeWidget....</H1> <br/>");
+        res.setContext("<H1>BeforeMiddleware....</H1> <br/>");
         return true;
     }
 }
 
-class AfterWidget : Widget
+class AfterMiddleware : IMiddleware
 {
-    override bool handle(Request req, Response res)
+    override bool onProcess(Request req, Response res)
     {
-        res.setContext("<H1>AfterWidget....</H1> <br/>");
+        res.setContext("<H1>AfterMiddleware....</H1> <br/>");
         return true;
     }
 }

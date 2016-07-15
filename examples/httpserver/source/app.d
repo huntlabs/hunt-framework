@@ -33,6 +33,6 @@ static this()
 {
     auto app = Application.app();
     app.addRouter("GET","/test",toDelegate(&test)).addRouter("GET","/hello",toDelegate(&hello))
-    .setWidgetFactory(new WidgetFactory());
+    .setMiddlewareFactory(new MiddlewareFactory());
 }
 
