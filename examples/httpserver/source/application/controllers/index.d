@@ -17,13 +17,32 @@ import application.model.index;
 
 class IndexController : Controller
 {
-    mixin ControllerInCompileTime;
+
+    this()
+    {
+        this.addMiddleware(new BeforeMiddleware());
+        this.addMiddleware(new BeforeMiddleware());
+    }
+
+    override bool before()
+    {
+        this.response.html("<h3>before...</h3>");
+        return true;
+    }
+    override bool after()
+    {
+        this.response.html("<h3>after...</h3>");
+        return true;
+    }
+
+    mixin MakeController;
     
     @action
-    @widget(BeforeWidget.stringof, AfterWidget.stringof)
+    @middleware(BeforeMiddleware.stringof)
+    @middleware(AfterMiddleware.stringof)
     void show()
     {
-        this.response.html("hello world 董磊<br/>")
+        this.response.html("hello world<br/>")
         //.setHeader("content-type","text/html;charset=UTF-8")
         .setCookie("name", "value", 10000)
         .setCookie("name1", "value", 10000, "/path")
@@ -33,7 +52,7 @@ class IndexController : Controller
     }
 
     @action
-    @widget("", OneWidget.stringof)
+    @middleware(OneMiddleware.stringof)
     void list()
     {
         this.response.html("list");
