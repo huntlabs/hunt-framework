@@ -21,13 +21,13 @@ class MiddlewareFactory : AbstractMiddlewareFactory
     override IMiddleware[] getMiddlewares()
     {
         IMiddleware[] _list;
-        _list ~= new OneWidget();
-        _list ~= new TwoWidget();
+        _list ~= new OneMiddleware();
+        _list ~= new TwoMiddleware();
        return _list;
     }
 }
 
-class OneWidget : IMiddleware
+class OneMiddleware : IMiddleware
 {
     override bool onProcess(Request req, Response res)
     {
@@ -36,7 +36,7 @@ class OneWidget : IMiddleware
     }
 }
 
-class TwoWidget : IMiddleware
+class TwoMiddleware : IMiddleware
 {
     override bool onProcess(Request req, Response res)
     {
@@ -46,20 +46,20 @@ class TwoWidget : IMiddleware
 }
 
 
-class BeforeWidget : IMiddleware
+class BeforeMiddleware : IMiddleware
 {
     override bool onProcess(Request req, Response res)
     {
-        res.setContext("<H1>BeforeWidget....</H1> <br/>");
+        res.setContext("<H1>BeforeMiddleware....</H1> <br/>");
         return true;
     }
 }
 
-class AfterWidget : IMiddleware
+class AfterMiddleware : IMiddleware
 {
     override bool onProcess(Request req, Response res)
     {
-        res.setContext("<H1>AfterWidget....</H1> <br/>");
+        res.setContext("<H1>AfterMiddleware....</H1> <br/>");
         return true;
     }
 }
