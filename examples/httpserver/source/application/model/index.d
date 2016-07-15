@@ -4,31 +4,31 @@ import hunt.application;
 public import entity;
 
 
-@TABLE("test2")
+@Table("test2")
 struct Test
 {
-	@PRIMARYKEY()
+	@Primarykey()
 	int id;
 
-	@COLUMN("floatcol")
+	@Field ("floatcol")
 	float fcol;
 
-	@COLUMN("doublecol")
+	@Field("doublecol")
 	double dcol;
 
-	@COLUMN("datecol")
+	@Field("datecol")
 	Date date;
 
-	@COLUMN("datetimecol")
+	@Field("datetimecol")
 	DateTime dt;
 
-	@COLUMN("timecol")
+	@Field("timecol")
 	Time time;
 
-	@COLUMN()
+	@Field()
 	string stringcol;
 
-	@COLUMN()
+	@Field()
 	ubyte[] ubytecol;
 } 
 
