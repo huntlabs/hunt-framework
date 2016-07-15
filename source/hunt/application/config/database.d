@@ -10,21 +10,21 @@ class DBConf
 	{
 		if(!exists(file)) return;
 		_ini = new Conf(file);
-		string type = _ini.get("database.driver");
-		string host = _ini.get("database.host");
+		string type = _ini.get("default.driver");
+		string host = _ini.get("default.host");
 		if(type.length > 0 && host.length > 0)
 		{
 			_url ~= type ~ "://" ~ host;
-			string port = _ini.get("database.port");
+			string port = _ini.get("default.port");
 			if(port.length > 0)
 				_url ~= ":" ~ port;
-			port  = _ini.get("database.dbname");
+			port  = _ini.get("default.dbname");
 			if(port.length > 0)
 				_url ~= "/" ~ port;
-			port  = _ini.get("database.username");
+			port  = _ini.get("default.username");
 			if(port.length > 0)
 				_url ~= "?username=" ~ port;
-			port  = _ini.get("database.password");
+			port  = _ini.get("default.password");
 			if(port.length > 0)
 				_url ~= "&password=" ~ port;
 			trace(_url);
@@ -44,13 +44,14 @@ class DBConf
 
 	string getValue(string str)
 	{
-		string key = "database." ~ str;
 		if(_ini)
-			return _ini.get(key);
+			return _ini.get(str);
 
 		return string.init;
 	}
 
+	Conf getConfig(){return _ini;}
+	
 private:
 	string _url;
 	Conf _ini;
