@@ -32,13 +32,11 @@ struct Test
 	ubyte[] ubytecol;
 } 
 
-class IndexModel
+class IndexModel : Model!Test
 {
     void showTest2()
     {
-        auto query = DBQuery!Test();
-
-		auto iterator = query.Select();
+		auto iterator = Select();
 
 		if(iterator !is null)
 			foreach(tp; iterator)
@@ -51,7 +49,6 @@ class IndexModel
     
     void insertNew(Test t)
     {
-		auto query = DBQuery!Test();
-		query.Insert(t);
+		Insert(t);
     }
 }
