@@ -8,7 +8,7 @@
  * Licensed under the BSD License.
  *
  */
-
-module hunt.versions;
-
-enum HUNT_VERSION = "";
+ 
+module hunt;
+ 
+public import hunt.application;
