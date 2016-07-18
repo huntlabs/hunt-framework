@@ -8,20 +8,20 @@
  * Licensed under the BSD License.
  *
  */
+ 
 import std.stdio;
 import std.functional;
 import std.experimental.logger;
 
-import hunt.application;
-import application.middleware;
+/* use hunt framework */
+import hunt;
 
-import collie.socket;
+import application.middleware;
 
 void hello(Request, Response res)
 {
     res.html("hello world");
     res.done();
-    
 }
 
 void test(Request, Response res)
