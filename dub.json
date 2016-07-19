@@ -6,13 +6,9 @@
     "license": "Apache-2.0",
     "libs" : [],
     "dependencies": {
-        "collie": {
-            "path":"../collie",
-        },
+        "collie": "~>0.7.4",
         "libmemcached": "~>1.0.2",
-		"entity" : {
-			"path" : "../entity"
-		}
+	"entity" : "~>0.0.5"
     },
     "subConfigurations": {
         "liblzma": "library"
