@@ -23,6 +23,7 @@ shared static  this()
 	import std.functional;
 	newStorage = toDelegate(&defaultDtorage);
 }
+
 /**
 * StorageInterface.
 *
