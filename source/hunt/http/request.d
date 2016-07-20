@@ -34,9 +34,9 @@ class Request
         return _form;
     }
 
-	private @property Header(){return _req.Header();}
+	@property Header(){return _req.Header();}
 
-	private @property Body(){return _req.Body();}
+	@property Body(){return _req.Body();}
 
     @property mate(){return _mate;}
 
@@ -155,6 +155,7 @@ class Request
         }
         return v;
     }
+//	alias _req this;
 
     @property ref string[string] materef() {return _mate;}
 private:
