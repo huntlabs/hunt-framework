@@ -11,7 +11,7 @@ import std.string;
 alias StrStr = string[string];
 alias StrStrStr = string[string][string];
 
-enum I18N_DEFAULT_LOCAL = "zh-cn";
+enum I18N_DEFAULT_LOCALE = "zh-cn";
 
 ///国际化
 class I18n
@@ -19,11 +19,12 @@ class I18n
 	private{
 		StrStrStr _res;
 		__gshared I18n _instance;
+		string _default;
 	}
 	
 	this()
 	{
-		// Constructor code
+		_default = I18N_DEFAULT_LOCALE;
 	}
 	
 	static auto instance()
@@ -34,7 +35,9 @@ class I18n
 		}
 		return _instance;
 	}
-	
+
+
+
 	
 	///加载资源文件
 	bool loadLangResources(string path, lazy string ext = "res")
@@ -59,6 +62,17 @@ class I18n
 	@property StrStrStr resources()
 	{
 		return this._res;
+	}
+
+	///设置默认
+	@property defaultLocale(string loc)
+	{
+		this._default = loc;
+	}
+
+	@property string defaultLocale()
+	{
+		return this._default;
 	}
 	
 	///解析文件
@@ -112,14 +126,14 @@ class I18n
 ///设置本地化
 private string _local;
 
-private @property string getLocal(){
+private @property string getLocale(){
 	if(_local)
 		return _local;
-	return I18N_DEFAULT_LOCAL;
+	return I18n.instance().defaultLocale;
 }
 
 ///设置本地化
-@property setLocal(string _l)
+@property setLocale(string _l)
 { 
 	_local = toLower(_l);
 }
@@ -127,21 +141,21 @@ private @property string getLocal(){
 ///key is [filename.key]
 string getText(string key, lazy string default_value = string.init)
 { 
-	auto p = getLocal in I18n.instance.resources;
+	auto p = getLocale in I18n.instance.resources;
 	if(p !is null)
 	{
 		return p.get(key, default_value);
 	}
-	log("not support local ", getLocal, " change for ", I18N_DEFAULT_LOCAL);
+	log("not support local ", getLocale, " change for ", I18n.instance().defaultLocale);
 	
-	p = I18N_DEFAULT_LOCAL in I18n.instance.resources;
+	p = I18n.instance().defaultLocale in I18n.instance.resources;
 	
 	if(p !is null)
 	{
 		return p.get(key, default_value);
 	}
 	
-	log("not support local ", I18N_DEFAULT_LOCAL );
+	log("not support local ", I18n.instance().defaultLocale );
 	
 	return default_value;
 }
@@ -152,18 +166,19 @@ unittest{
 	
 	I18n i18n = I18n.instance();
 	i18n.loadLangResources("./resources/lang");
+	i18n.defaultLocale = "en-us";
 	writeln(i18n.resources);
 	
 	
 	///
-	setLocal("en-br");
+	setLocale("en-br");
 	assert( getText("message.hello-world", "empty") == "你好，世界");
 	
 	///
-	setLocal("zh-cn");
+	setLocale("zh-cn");
 	assert( getText("email.subject", "empty") == "收件人");
 	
 	
-	setLocal("en-us");
+	setLocale("en-us");
 	assert( getText("email.subject", "empty") == "empty");
 }

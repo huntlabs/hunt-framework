@@ -34,23 +34,21 @@ static this()
 {
     auto app = Application.app();
     app.addRouter("GET","/test",toDelegate(&test)).addRouter("GET","/hello",toDelegate(&hello))
-    .setMiddlewareFactory(new MiddlewareFactory());
+    	.setMiddlewareFactory(new MiddlewareFactory())
+    	.enableLocale();
 
-    ///初始化资源
-	I18n i18n = I18n.instance();
-	i18n.loadLangResources("./resources/lang");
-	
+    
 	
 	///设置语言
-	setLocal("en-br");
-	writeln( getText("message.hello-world", "empty"));
+	setLocale("en-br");
+	writeln( getText("message.hello-world"));
 	
 	///设置语言
-	setLocal("zh-cn");
-	writeln( getText("email.subject", "empty"));
+	setLocale("zh-cn");
+	writeln( getText("email.subject"));
 	
 	///设置语言
-	setLocal("en-us");
+	setLocale("en-us");
 	writeln( getText("email.subject", "empty"));
 }
 
