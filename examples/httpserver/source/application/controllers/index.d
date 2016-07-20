@@ -9,20 +9,15 @@
  *
  */
 module application.controllers.index;
-
 import hunt.application;
 import application.middleware;
 import application.model.index;
-
-
 class IndexController : Controller
 {
-
     this()
     {
         this.addMiddleware(new BeforeMiddleware());
     }
-
     override bool before()
     {
         this.response.html("<h3>before...</h3>");
@@ -33,9 +28,7 @@ class IndexController : Controller
         this.response.html("<h3>after...</h3>");
         return true;
     }
-
     mixin MakeController;
-    
     @action
     @middleware(BeforeMiddleware.stringof)
     @middleware(AfterMiddleware.stringof)
@@ -49,23 +42,25 @@ class IndexController : Controller
       //  auto model = new IndexModel();
         //model.showTest2();
     }
-
     @action
     @middleware(OneMiddleware.stringof)
     void list()
     {
-        this.response.html("list");
+		this.view.setLayout!"layouts/main.dhtml"();	
+		this.view.test = "viile";
+		this.view.username = "viile";
+		this.view.header = "donglei header";
+		this.view.footer = "footer";
+		this.render!"content.dhtml"();
     }
     @action
     void index()
     {
         this.response.html("list");
     }
-  
     @action
     void showbool()
     {
         this.response.html("list");
     }
-  
 }

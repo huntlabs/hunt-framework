@@ -1,1 +1,5 @@
-it's header
+it's header  {{ var.header }}
+<hr>
+{{ var.username }}
+{{ var.test }}
+<br>
