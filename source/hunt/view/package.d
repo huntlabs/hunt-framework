@@ -21,6 +21,7 @@ public import std.file;
 
 public
 {
+	import hunt.view.templerender;
     import hunt.view.templecontext : TempleContext;
     import hunt.view.outputstream : TempleOutputStream, TempleInputStream;
 }

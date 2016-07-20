@@ -4,6 +4,7 @@
 	"copyright": "Copyright © 2016, dsby",
 	"authors": ["dsby"],
 	"sourcePaths":["source"],
+	"stringImportPaths": [ "./resources/views" ],
 	"versions" : ["USE_DEFAULT_WEB_MAIN"],
 	"dependencies": {
             "hunt" : {
