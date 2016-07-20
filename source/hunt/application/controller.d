@@ -10,6 +10,7 @@
  */
 module hunt.application.controller;
 
+public import hunt.view;
 public import hunt.http.response;
 public import hunt.http.request;
 public import hunt.router.middleware;
@@ -45,6 +46,7 @@ class Controller : IController
 		RouterPipelineContext context;
 		///called before all actions
 		IMiddleware[] middlewares;
+		View _view;
 
 	}
 	bool __CALLACTION__(string method,RouterPipelineContext contex, Request req,  Response res)
@@ -74,6 +76,21 @@ class Controller : IController
 	IMiddleware[] getMiddleware()
 	{
 		return this.middlewares;
+	}
+
+	//view render
+	@property View view()
+	{
+		if(_view is null)
+		{
+			_view = new View();
+		}
+		return _view;
+	}
+
+	void render(string filename = null)()
+	{
+		this.response.html(this.view.render!filename());
 	}
 }
 
