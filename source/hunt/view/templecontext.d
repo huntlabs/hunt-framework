@@ -84,6 +84,14 @@ public:
         vars[name] = val;
     }
 
+    void setContent(T)(string name, T val)
+    {
+        if (name !in vars)
+            vars[name] = Variant();
+
+        vars[name] = val;
+	}
+
     VarDispatcher var()
     {
         return VarDispatcher(this);
@@ -105,6 +113,7 @@ public:
     void opDispatch(string op, T)(T other) @property
     {
         vars[op] = other;
+		//writefln(vars);
     }
 
     TempleInputStream yield() @property
@@ -120,7 +129,6 @@ public:
 
         return noop;
     }
-
 }
 
 private struct VarDispatcher

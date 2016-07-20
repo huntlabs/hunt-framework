@@ -1,2 +1,0 @@
-new is {{ var.name }}
-old.html --> {!old.dhtml!}
