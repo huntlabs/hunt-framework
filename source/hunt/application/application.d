@@ -25,6 +25,9 @@ import std.uni;
 import hunt.router;
 public import hunt.http;
 public import hunt.view;
+public import hunt.i18n;
+public import std.file;
+public import hunt.utils.path;
 
 public import hunt.application.middleware;
 
@@ -97,10 +100,19 @@ final class Application
 		_middlewareFactory = mfactory;
 		return this;
 	}
-	
+
 	@property auto middlewareFactory()
 	{
 		return _middlewareFactory;
+	}
+
+	///启用国际化
+	auto enableLocale(string resPath = buildPath(theExecutorPath, "./resources/lang"), string defaultLocale = "zh-cn")
+	{
+		auto i18n = I18n.instance();
+		i18n.loadLangResources(resPath);
+		i18n.defaultLocale = defaultLocale;
+		return this;
 	}
 	
 	
