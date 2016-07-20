@@ -34,23 +34,25 @@ void initControllerCall(string FUN, T, ARGS...)(string str, ARGS args) if (
 	(is(T == class) || is(T == interface)) && hasMember!(T, FUN))
 {
 	///dowidget
-	auto app = Application.app();
-	auto middlewares = app.middlewareFactory.getMiddlewares();
-	if(middlewares !is null)
+	auto app_m = Application.app().middlewareFactory;
+	if(app_m !is null)
 	{
-		foreach(w; middlewares)
+		auto middlewares = app_m.getMiddlewares();
+		if(middlewares !is null)
 		{
-			///arg0:context
-			///arg1 req
-			///arg2 res
-			if(!w.onProcess(args[1], args[2]))
+			foreach(w; middlewares)
 			{
-				args[2].done();
-				return;
+				///arg0:context
+				///arg1 req
+				///arg2 res
+				if(!w.onProcess(args[1], args[2]))
+				{
+					args[2].done();
+					return;
+				}
 			}
 		}
 	}
-
 	import std.experimental.logger;
 	
 	auto index = lastIndexOf(str, '.');
