@@ -1,4 +1,4 @@
-module application.user.controller.api.admin;
+module app.user.controller.api.admin;
 
 import hunt.application;
 

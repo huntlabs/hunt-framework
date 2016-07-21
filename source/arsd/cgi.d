@@ -1609,7 +1609,7 @@ class Cgi {
 	/// the user's credentials are sent in plain text on every request.
 	///
 	/// If you are using Apache, the HTTP_AUTHORIZATION variable may not be sent to the
-	/// application. Either use Apache's built in methods for basic authentication, or add
+	/// app. Either use Apache's built in methods for basic authentication, or add
 	/// something along these lines to your server configuration:
 	///
 	///      RewriteEngine On 
