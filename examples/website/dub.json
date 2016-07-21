@@ -1,11 +1,10 @@
 {
 	"name": "server",
 	"description": "A minimal D application.",
-	"copyright": "Copyright © 2016, dsby",
-	"authors": ["dsby"],
-	"sourcePaths":["source"],
+	"copyright": "Copyright © 2016, huntframework.com",
 	"stringImportPaths": [ "./resources/views" ],
 	"versions" : ["USE_DEFAULT_WEB_MAIN"],
+	"mainSourceFile": "source/bootstrap.d",
 	"dependencies": {
             "hunt" : {
                 "path" : "../../"

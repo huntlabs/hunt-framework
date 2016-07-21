@@ -1,4 +1,4 @@
-module application.model.index;
+module app.model.index;
 
 import hunt.application;
 public import entity;

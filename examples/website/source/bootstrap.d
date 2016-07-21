@@ -16,7 +16,7 @@ import std.experimental.logger;
 /* use hunt framework */
 import hunt;
 
-import application.middleware;
+import app.middleware;
 import hunt.i18n;
 
 void hello(Request, Response res)

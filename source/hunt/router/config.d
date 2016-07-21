@@ -28,7 +28,7 @@ class RouterConfig : ConfigLine
      * @Param filePath - path of file
      * @Param prefix - prefix of module's full path, use "application.controllers" for default
      */
-    this(string filePath, string prefix = "application.controllers.")
+    this(string filePath, string prefix = "app.controller.")
     {
         super(filePath, prefix);
     }

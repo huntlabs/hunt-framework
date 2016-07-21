@@ -8,7 +8,7 @@
  * Licensed under the BSD License.
  *
  */
-module application.middleware;
+module app.middleware;
 
 import std.functional;
 
