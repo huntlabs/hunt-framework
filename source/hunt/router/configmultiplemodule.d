@@ -23,7 +23,7 @@ import hunt.routing.configbase;
 import hunt.text.conf;
 /**
  * example: * /show  admin/user.admin.show
- * toParse: [GET,POST...] /show application.user.admin.AdminController.show
+ * toParse: [GET,POST...] /show app.user.admin.AdminController.show
  */
 final class ConfigMultipleModule : ConfigLine
 {

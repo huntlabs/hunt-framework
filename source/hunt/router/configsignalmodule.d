@@ -22,15 +22,15 @@ import std.experimental.logger;
 import hunt.routing.configbase;
 /**
  * example: *     /show      index.show
- * toParse: [GET,POST...]  /show   application.controllers.index.IndexController.show
+ * toParse: [GET,POST...]  /show   app.controller.index.IndexController.show
  */
 final class ConfigSignalModule : ConfigLine
 {
     /*
      * @Param filePath - path of file
-     * @Param prefix - prefix of module's full path, use "application.controllers" for default
+     * @Param prefix - prefix of module's full path, use "app.controller" for default
      */
-    this(string filePath, string prefix = "application.controllers.")
+    this(string filePath, string prefix = "app.controller.")
     {
         super(filePath, prefix);
     }
