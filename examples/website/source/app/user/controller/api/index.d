@@ -8,19 +8,18 @@
  * Licensed under the BSD License.
  *
  */
-module application.user.controller.admin.index;
+module app.user.controller.api.index;
 
 import hunt.application;
 
 class IndexController : Controller
 {
     mixin MakeController;
-    
     @action
     void show()
     {
     	alias res = this.response;
         import std.stdio;
-        res.html("hello world<br/>"~__FUNCTION__);
+        res.html("hello world<br/>");
     }
 }

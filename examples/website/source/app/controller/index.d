@@ -8,10 +8,10 @@
  * Licensed under the BSD License.
  *
  */
-module application.controllers.index;
+module app.controller.index;
 import hunt.application;
-import application.middleware;
-import application.model.index;
+import app.middleware;
+import app.model.index;
 class IndexController : Controller
 {
     this()
