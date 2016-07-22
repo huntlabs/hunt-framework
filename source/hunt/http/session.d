@@ -41,9 +41,9 @@ interface SessionInterface
     public void init();
 
     /// Gets a typed field from the session.
-    const(T) get(T)(string key, lazy T def_value = T.init);
+	string get(string key, lazy string def_value = string.init);
     ///Sets a typed field to the session.
-    void set(T)(string key, T value);
+    void set(string key, string value);
     ///Queries the session for the existence of a particular key.
     bool has(string key);
 
@@ -73,22 +73,7 @@ class Session : SessionInterface
 
     this(SessionStorageInterface storg = newStorage())
     {
-        version (USE_FileSessionStorage)
-        {
-            storge = new FileSessionStorage();
-        }
-        else version (USE_MemcacheSessionStorage)
-        {
-            storge = new MemcacheSessionStorage();
-        }
-        else version (USE_RedisSessionStorage)
-        {
-            storge = new RedisSessionStorage();
-        }
-        else
-        {
-            storge = new FileSessionStorage();
-        }
+		storge = storg;
     }
 
     /**
@@ -135,24 +120,20 @@ class Session : SessionInterface
     }
 
     /// Gets a typed field from the session.
-    T get(T = string)(string key, lazy T def_value = T.init)
+    string get(string key, lazy string def_value = string.init)
     {
         string tmp = this.storge.get(key);
         if (tmp is string.init)
         {
             return def_value;
         }
-        /*import std.conv:parse;
-		return parse!T(tmp);*/
-        import std.conv : to;
-
-        return to!T(tmp);
+		return tmp;
     }
     ///Sets a typed field to the session.
-    void set(T)(string key, T value)
+    void set(string key, string value)
     {
 		import std.conv:to;
-        this.storge.set(key, to!string(value));
+        this.storge.set(key, value);
     }
     ///Queries the session for the existence of a particular key.
     bool has(string key)
