@@ -5,6 +5,6 @@
  *
  * Developer: putao's Dlang team
  *
- * Licensed under the BSD License.
+ * Licensed under the Apache License.
  *
  */
