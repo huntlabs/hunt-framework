@@ -29,7 +29,7 @@ class MemcachedCache : Cache
 		_mcache = memcahe;
 	}
 
-	override T getByKey(T = string)(string master_key,string key, lazy T v= T.init)
+	final override T getByKey(T = string)(string master_key,string key, lazy T v= T.init)
 	{
 		if(master_key.length > 0)
 		{
