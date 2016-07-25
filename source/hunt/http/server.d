@@ -68,13 +68,8 @@ final class HTTPServer
     */
     auto setSSLConfig(ServerSSLConfig config) 
     {
-    	version (Windows)
-    	{}
-    	else
-    	{
-        	_server.setSSLConfig(config);
-        	return this;
-        }
+        _server.setSSLConfig(config);
+        return this;
     } 
     
     /**
