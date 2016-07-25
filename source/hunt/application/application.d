@@ -186,7 +186,6 @@ private:
 	/// math the router and start handle the middleware and handle.
 	void doHandle(Request req, Response res)
 	{
-		trace("macth router : method: ", req.method, "   path : ",req.path, " host: ", req.host);
 		RouterPipeline pipe = null;
 		pipe = _router.match(req.host,req.method, req.path);
 		if (pipe is null)
