@@ -24,7 +24,7 @@ abstract class Cache
 		return getByKey!T(_prefix,key,v);
 	}
 
-	T getByKey(T = string)(string master_key,string key, lazy T v= T.init);
+	final T getByKey(T = string)(string master_key,string key, lazy T v= T.init){return v;}
 	
 	///add a cache  expired after expires seconeds
 	final bool set(string key, string value, int expires = 0)

@@ -270,3 +270,161 @@ class FileSessionStorage : SessionStorageInterface
                 _session_Id[2 .. 4], _session_Id);
     }
 }
+
+import hunt.cache.memcached;
+import std.experimental.logger;
+import hunt.storage.memcached;
+
+class MemcacheSessionStorage :SessionStorageInterface{
+	private{
+		string _session_Id;
+		string _name;
+		string _prefix;
+	}
+
+	public void setPrefix(string _p)
+	{
+		_prefix = _p;
+	}
+
+	public string getId()
+	{
+		if(_session_Id is null)
+		{
+			_session_Id  = generateSessionId();
+		}
+		return this._session_Id;
+	}
+	
+	public void init()
+	{
+		this.getId();
+		//this.set("__Init", "1");
+	}
+	
+	public void setId(string id){
+		if(id !is null)
+			_session_Id = id;
+		//this.set("__Init", "1");
+	}
+	public bool del()
+	{
+		try{
+			theMemcache.del(getSavedKey());
+			_session_Id = null;
+			return true;
+		}
+		catch(Exception ex){
+			log("remove session from memcached error:", ex.msg);
+		}
+		return false;
+	}
+	
+	/**
+		* Returns the session name.
+		*
+		* @return mixed The session name.
+		*
+		* @api
+		*/
+	public string getName(){
+		if(_name is null)
+		{
+			_name = "ithox_session";
+		}
+		return _name;
+	}
+	
+	///获取存储key
+	private string getSavedKey()
+	{
+		return _prefix ~ _session_Id;
+	}
+	/**
+		* Sets the session name.
+		*
+		* @param string $name
+		*
+		* @api
+		*/
+	public void setName(string name){
+		assert(name !is null);
+		_name = name;
+	}
+	//生成sessionid
+	public string generateSessionId()
+	{
+		import std.digest.sha;
+		import std.format;
+		import std.datetime;
+		import std.random;
+		import core.cpuid;
+		import std.string;
+		
+		return toHexString(sha1Of(format("%s--%s--%s", Clock.currTime().toISOExtString, uniform(long.min, long.max), processor()))).toLower;
+	}
+	
+	///Sets a typed field to the session.
+	void set(string key, string value){
+		//assert(_session_Id !is null);
+		if(_session_Id is null)
+		{
+			_session_Id  = generateSessionId();
+		}
+		string savedData = theMemcache.get(getSavedKey());
+		
+		if(savedData.length == 0)
+		{
+			import core.stdc.time;
+			JSONValue json = [ key: value ];
+			theMemcache.set(getSavedKey(), json.toString(), SESSION_MAX_VAILD);
+		}
+		else
+		{
+			JSONValue j = parseJSON(savedData);
+			import core.stdc.time;
+			j[key] = value;
+			theMemcache.set(getSavedKey(), j.toString(),SESSION_MAX_VAILD);
+		}
+	}
+	
+	string get(string key){
+		string savedData = theMemcache.get(getSavedKey());
+		if(savedData.length == 0)
+		{
+			return string.init;
+		}
+		else
+		{
+			JSONValue j = parseJSON(savedData);
+			
+			if(key in j)
+			{
+				if(j[key].type() == JSON_TYPE.INTEGER)
+				{
+					import std.conv;
+					return to!(string)(j[key].integer);
+				}
+				return j[key].str;
+			}
+			else
+				return string.init;
+		}
+	}
+	
+	///session 是否过期
+	bool isExpired()
+	{
+		string savedData = theMemcache.get(getSavedKey());
+		if(savedData.length == 0)
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	@property string seesionPath()
+	{
+		return string.init;
+	}
+}
