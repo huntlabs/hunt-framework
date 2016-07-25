@@ -111,7 +111,7 @@ string  _createCallActionFun(T)()
 	import std.format;
 	string str = "override bool __CALLACTION__(string funName,RouterPipelineContext context,Request req,  Response res) {";
 	str ~= "import std.experimental.logger;import std.variant;import std.conv;";
-	str ~= "trace(\"call function \", funName);";
+	// str ~= "trace(\"call function \", funName);";
 	str ~= "this.request = req; this.response = res; this.context = context;";
     str ~= "switch(funName){";
     foreach(memberName; __traits(allMembers, T))
