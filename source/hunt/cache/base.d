@@ -9,6 +9,7 @@
  *
  */
 module hunt.cache.base;
+import std.conv;
 
 abstract class Cache
 {
@@ -21,10 +22,15 @@ abstract class Cache
 	///fetch a cache value by key, if empty value return default value v
 	final T get(T = string)(string key, lazy T v= T.init)
 	{
-		return getByKey!T(_prefix,key,v);
+		 auto tmp = getByKey(_prefix,key,v);
+		if(tmp == string.init)
+		{
+			return v;
+		}
+		return to!T(tmp);
 	}
 
-	T getByKey(T = string)(string master_key,string key, lazy T v= T.init);
+	 string getByKey(string master_key,string key, lazy string v= string.init);
 	
 	///add a cache  expired after expires seconeds
 	final bool set(string key, string value, int expires = 0)
