@@ -29,15 +29,15 @@ class MemcachedCache : Cache
 		_mcache = memcahe;
 	}
 
-	T getByKey(T = string)(string master_key,string key, lazy T v= T.init)
+	override string getByKey(string master_key,string key, lazy string v= string.init)
 	{
 		if(master_key.length > 0)
 		{
-			return _mcache.getByKey!T(master_key,key,v);
+			return _mcache.getByKey!string(master_key,key,v);
 		}
 		else
 		{
-			return _mcache.get!T(key,v);
+			return _mcache.get!string(key,v);
 		}
 	}
 	///add a cache  expired after expires seconeds
