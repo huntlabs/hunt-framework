@@ -110,7 +110,8 @@ class Session : SessionInterface
         version (USE_MemcacheSessionStorage)
         {
         }
-        else
+
+		version(USE_FileSessionStorage)
         {
             if (this.storge.isExpired())
             {
