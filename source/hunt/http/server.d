@@ -66,12 +66,13 @@ final class HTTPServer
         set the ssl config.
         if you set and the config is not null, the Application will used https.
     */
-    auto setSSLConfig(ServerSSLConfig config) 
+    auto setSSLConfig(ServerSSLConfig config)
     {
 		version(Windows)
 		{}
 		else
 		{
+		_SSLEnabled = true;
         	_server.setSSLConfig(config);
 		}
         return this;
@@ -177,6 +178,16 @@ final class HTTPServer
     {
 	if(_newReq is null)
 	    throw new Exception("the http callbacl is null!");
+
+        import std.conv;
+        import std.stdio;
+        
+        ushort default_http_port = 80;
+
+        writeln("××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××\n");
+	writeln("  Please open " ~ (_SSLEnabled ? "https" : "http") ~ "://127.0.0.1" ~ (_port == default_http_port ? "" : ":" ~ to!string(_port)) ~ "/ in your browser.");
+        writeln("\n××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××");
+
         _server.waitForStop();
     }
     
@@ -191,6 +202,8 @@ final class HTTPServer
     
 
 private:
+    bool _SSLEnabled = false;
+    ushort _port = 8080;
     HTTPCALL _newReq;
     ServerBootstrap!HTTPPipeline _server;
     HTTPConfig _config;
