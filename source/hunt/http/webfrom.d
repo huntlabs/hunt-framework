@@ -15,6 +15,7 @@ import collie.buffer;
 
 import std.string;
 import std.exception;
+import std.uri;
 
 class WebForm
 {
@@ -163,7 +164,7 @@ protected:
             buffer.readUtil(boundary, delegate(in ubyte[] rdata) {
                 value ~= cast(string) rdata;
             });
-            _forms[name] ~= value;
+            _forms[name] ~=  value;
         }
         ubyte[2] ub;
         buffer.read(ub);
@@ -194,7 +195,7 @@ protected:
 			{
 				string key = parts[0];
 				string value = pair[parts[0].length + 1 .. $];
-				_forms[key] ~= value;
+				_forms[key] ~= decodeComponent(value);
 			}
 		}
 	}
