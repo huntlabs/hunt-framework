@@ -15,6 +15,9 @@ import collie.buffer;
 
 import std.string;
 import std.exception;
+import std.experimental.logger;
+
+enum ubyte[2] ENDMYITLFORM = ['-','-']; 
 
 class WebForm
 {
@@ -28,7 +31,7 @@ class WebForm
 	private : 
 		this(){}
     }
-
+    
     this(HTTPRequest req)
     {
         string type = req.Header.getHeaderValue("Content-Type");
@@ -100,6 +103,7 @@ protected:
         buffer.rest();
         string brony = "--" ~ brand;
         auto sttr = buffer.readLine();
+
         if (!((cast(string) sttr) == brony))
             return;
         brony = "\r\n" ~ brony;
@@ -159,19 +163,22 @@ protected:
         }
         else
         {
-            string value;
+			import std.array;
+			auto value = appender!(string)();
             buffer.readUtil(boundary, delegate(in ubyte[] rdata) {
-                value ~= cast(string) rdata;
+                //value ~= cast(string) rdata;
+				value.put(cast(string) rdata);
             });
-            _forms[name] ~= value;
+			string stdr = value.data;
+			_forms[name] ~= stdr;
         }
         ubyte[2] ub;
         buffer.read(ub);
-        if (ub == "--")
+        if (ub == ENDMYITLFORM)
         {
             return false;
         }
-        enforce(ub == cast(ubyte[]) "\r\n");
+        enforce(ub == cast(ubyte[]) "\r\n", "showed be \\r\\n");
         return true;
     }
 
@@ -200,6 +207,6 @@ protected:
 	}
 private:
     bool _vaild = true;
-	StringArray[string] _forms;
+    StringArray[string] _forms;
     FormFile[string] _files;
 }
