@@ -185,26 +185,27 @@ protected:
 
 	void parseFromKeyValues(string raw, string split1 = "&", string spilt2 = "=")
 	{
-		if (raw.length == 0)
-			return ;
-		string[] pairs = raw.strip.split(split1);
-		foreach (string pair; pairs)
-		{
-			string[] parts = pair.split(spilt2);
-			
-			// Accept formats a=b/a=b=c=d/a
-			if (parts.length == 1)
-			{
-				string key = parts[0];
-				_forms[key] ~= "";
-			}
-			else if (parts.length > 1)
-			{
-				string key = parts[0];
-				string value = pair[parts[0].length + 1 .. $];
-				_forms[key] ~= decodeComponent(value);
-			}
-		}
+            import std.uri;
+            if (raw.length == 0)
+                    return ;
+            string[] pairs = raw.strip.split(split1);
+            foreach (string pair; pairs)
+            {
+                    string[] parts = pair.split(spilt2);
+                    
+                    // Accept formats a=b/a=b=c=d/a
+                    if (parts.length == 1)
+                    {
+                            string key = parts[0];
+                            _forms[key] ~= "";
+                    }
+                    else if (parts.length > 1)
+                    {
+                            string key = parts[0];
+                            string value = pair[parts[0].length + 1 .. $];
+                            _forms[key] ~= decodeComponent(value);
+                    }
+            }
 	}
 private:
     bool _vaild = true;
