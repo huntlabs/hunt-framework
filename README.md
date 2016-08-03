@@ -17,10 +17,8 @@ http://localhost:8080/
 config/routes.conf
 ```conf
 #
-# [GET,POST,PUT...]    path    controller.method
+# [GET,POST,PUT...]    path    controller.action
 #
-#{domain}
-#[path]
 
-GET / controller.action
+GET / index.index
 ```
