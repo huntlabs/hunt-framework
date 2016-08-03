@@ -15,6 +15,7 @@ import collie.buffer;
 
 import std.string;
 import std.exception;
+
 import std.experimental.logger;
 
 enum ubyte[2] ENDMYITLFORM = ['-','-']; 
@@ -79,11 +80,11 @@ class WebForm
 			return aty[0];
     }
 
-	StringArray getFromValueArray(string key)
-	{
-		StringArray aty;
-		return _forms.get(key, aty);
-	}
+    StringArray getFromValueArray(string key)
+    {
+            StringArray aty;
+            return _forms.get(key, aty);
+    }
 
     auto getFileValue(string key) const
     {
@@ -163,14 +164,14 @@ protected:
         }
         else
         {
-			import std.array;
-			auto value = appender!(string)();
+            import std.array;
+            auto value = appender!(string)();
             buffer.readUtil(boundary, delegate(in ubyte[] rdata) {
-                //value ~= cast(string) rdata;
-				value.put(cast(string) rdata);
+		value.put(cast(string) rdata);
             });
-			string stdr = value.data;
-			_forms[name] ~= stdr;
+            string stdr = value.data;
+            _forms[name] ~= stdr;
+
         }
         ubyte[2] ub;
         buffer.read(ub);
@@ -201,7 +202,7 @@ protected:
 			{
 				string key = parts[0];
 				string value = pair[parts[0].length + 1 .. $];
-				_forms[key] ~= value;
+				_forms[key] ~= decodeComponent(value);
 			}
 		}
 	}
