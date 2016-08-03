@@ -25,7 +25,7 @@ class Conf
         setConfigFile(file);
     }
     
-    pragma(inline, true)
+    //pragma(inline, true)
     void setConfigFile(string file)
     {
         _fileName = file;
