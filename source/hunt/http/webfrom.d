@@ -15,7 +15,10 @@ import collie.buffer;
 
 import std.string;
 import std.exception;
-import std.uri;
+
+import std.experimental.logger;
+
+enum ubyte[2] ENDMYITLFORM = ['-','-']; 
 
 class WebForm
 {
@@ -29,7 +32,7 @@ class WebForm
 	private : 
 		this(){}
     }
-
+    
     this(HTTPRequest req)
     {
         string type = req.Header.getHeaderValue("Content-Type");
@@ -77,11 +80,11 @@ class WebForm
 			return aty[0];
     }
 
-	StringArray getFromValueArray(string key)
-	{
-		StringArray aty;
-		return _forms.get(key, aty);
-	}
+    StringArray getFromValueArray(string key)
+    {
+            StringArray aty;
+            return _forms.get(key, aty);
+    }
 
     auto getFileValue(string key) const
     {
@@ -101,6 +104,7 @@ protected:
         buffer.rest();
         string brony = "--" ~ brand;
         auto sttr = buffer.readLine();
+
         if (!((cast(string) sttr) == brony))
             return;
         brony = "\r\n" ~ brony;
@@ -160,47 +164,51 @@ protected:
         }
         else
         {
-            string value;
+            import std.array;
+            auto value = appender!(string)();
             buffer.readUtil(boundary, delegate(in ubyte[] rdata) {
-                value ~= cast(string) rdata;
+		value.put(cast(string) rdata);
             });
-            _forms[name] ~=  value;
+            string stdr = value.data;
+            _forms[name] ~= stdr;
+
         }
         ubyte[2] ub;
         buffer.read(ub);
-        if (ub == "--")
+        if (ub == ENDMYITLFORM)
         {
             return false;
         }
-        enforce(ub == cast(ubyte[]) "\r\n");
+        enforce(ub == cast(ubyte[]) "\r\n", "showed be \\r\\n");
         return true;
     }
 
 	void parseFromKeyValues(string raw, string split1 = "&", string spilt2 = "=")
 	{
-		if (raw.length == 0)
-			return ;
-		string[] pairs = raw.strip.split(split1);
-		foreach (string pair; pairs)
-		{
-			string[] parts = pair.split(spilt2);
-			
-			// Accept formats a=b/a=b=c=d/a
-			if (parts.length == 1)
-			{
-				string key = parts[0];
-				_forms[key] ~= "";
-			}
-			else if (parts.length > 1)
-			{
-				string key = parts[0];
-				string value = pair[parts[0].length + 1 .. $];
-				_forms[key] ~= decodeComponent(value);
-			}
-		}
+            import std.uri;
+            if (raw.length == 0)
+                    return ;
+            string[] pairs = raw.strip.split(split1);
+            foreach (string pair; pairs)
+            {
+                    string[] parts = pair.split(spilt2);
+                    
+                    // Accept formats a=b/a=b=c=d/a
+                    if (parts.length == 1)
+                    {
+                            string key = parts[0];
+                            _forms[key] ~= "";
+                    }
+                    else if (parts.length > 1)
+                    {
+                            string key = parts[0];
+                            string value = pair[parts[0].length + 1 .. $];
+                            _forms[key] ~= decodeComponent(value);
+                    }
+            }
 	}
 private:
     bool _vaild = true;
-	StringArray[string] _forms;
+    StringArray[string] _forms;
     FormFile[string] _files;
 }
