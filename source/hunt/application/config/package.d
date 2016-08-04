@@ -16,6 +16,9 @@ import hunt.routing.configbase;
 public import hunt.application.config.database;
 public import hunt.application.config.http;
 
+import hunt.utils.path;
+import std.experimental.logger;
+
 interface IWebConfig
 {
     @property HTTPConfig httpConfig();
@@ -30,9 +33,12 @@ class WebConfig : IWebConfig
         import hunt.router.config;
         if(!endsWith(path,"/"))
             path ~= "/";
-		_http = new HTTPConfig(path ~ "application.conf");
-        _router = new RouterConfig(path ~ "routes.conf");
-		_db = new DBConf(path ~ "database.conf");
+		_http = new HTTPConfig(buildPath(theExecutorPath,  path ~ "application.conf"));
+		_router = new RouterConfig(buildPath(theExecutorPath,path ~ "routes.conf"));
+			_db = new DBConf(buildPath(theExecutorPath,path ~ "database.conf"));
+		info("application config path:", buildPath(theExecutorPath,  path ~ "application.conf") );
+		info("routes config path:", buildPath(theExecutorPath,  path ~ "routes.conf") );
+		info("database config path:", buildPath(theExecutorPath,  path ~ "database.conf") );
     }
     
     this()
