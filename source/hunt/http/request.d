@@ -144,6 +144,13 @@ class Request
     }
 
 
+	///获取请求的url地址
+	public string getRequestURI()
+	{
+		import std.format;
+		return format("%s://%s%s",  "http",  host,  _req.Header().requestString);
+	}
+
     /// get a post
     T post(T = string)(string key, T v = T.init)
     {
