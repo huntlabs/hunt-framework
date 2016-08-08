@@ -29,6 +29,7 @@ class WebForm
         string contentType;
         ulong startSize = 0;
         ulong length = 0;
+		ubyte[] data;
 	private : 
 		this(){}
     }
@@ -88,7 +89,7 @@ class WebForm
 
     auto getFileValue(string key) const
     {
-        _files.get(key, null);
+      return   _files.get(key, null);
     }
 
 protected:
@@ -153,13 +154,18 @@ protected:
         }
         if (filename.length > 0)
         {
+			import std.array;
             FormFile fp = new FormFile;
             fp.fileName = filename;
             fp.contentType = header.get("content-type", "");
             fp.startSize = buffer.readSize();
+			auto value = appender!(ubyte[])();
+
             buffer.readUtil(boundary, delegate(in ubyte[] rdata) {
                 fp.length += rdata.length;
+					value.put(rdata);
             });
+			fp.data = value.data;
             _files[name] = fp;
         }
         else
