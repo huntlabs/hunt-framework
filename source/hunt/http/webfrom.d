@@ -104,9 +104,14 @@ protected:
     {
         buffer.rest();
         string brony = "--" ~ brand;
-        auto sttr = buffer.readLine();
+        auto sttr = cast(string)(buffer.readLine());
+		sttr.strip;
+		if(sttr.length == 0){
+			sttr = cast(string)(buffer.readLine());
+			sttr.strip;
+		}
 
-        if (!((cast(string) sttr) == brony))
+        if (!(sttr == brony))
             return;
         brony = "\r\n" ~ brony;
         bool run;
