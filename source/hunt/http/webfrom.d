@@ -43,6 +43,8 @@ class WebForm
             auto strBoundary = tmp.get("boundary", "").strip();
             if (strBoundary.length > 0)
             {
+				if(strBoundary[0] = '\"')
+					strBoundary = strBoundary[1..strBoundary.length -1];
                 readMultiFrom(strBoundary, req.Body);
             }
         }
