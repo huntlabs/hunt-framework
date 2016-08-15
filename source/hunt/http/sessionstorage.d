@@ -310,7 +310,7 @@ class MemcacheSessionStorage :SessionStorageInterface{
 	public bool del()
 	{
 		try{
-			theMemcache.del(getSavedKey());
+			MemcachedCache.defaultCahe.remove(getSavedKey());
 			_session_Id = null;
 			return true;
 		}
@@ -371,25 +371,25 @@ class MemcacheSessionStorage :SessionStorageInterface{
 		{
 			_session_Id  = generateSessionId();
 		}
-		string savedData = theMemcache.get(getSavedKey());
+		string savedData = MemcachedCache.defaultCahe.get(getSavedKey());
 		
 		if(savedData.length == 0)
 		{
 			import core.stdc.time;
 			JSONValue json = [ key: value ];
-			theMemcache.set(getSavedKey(), json.toString(), SESSION_MAX_VAILD);
+			MemcachedCache.defaultCahe.set(getSavedKey(), json.toString(), SESSION_MAX_VAILD);
 		}
 		else
 		{
 			JSONValue j = parseJSON(savedData);
 			import core.stdc.time;
 			j[key] = value;
-			theMemcache.set(getSavedKey(), j.toString(),SESSION_MAX_VAILD);
+			MemcachedCache.defaultCahe.set(getSavedKey(), j.toString(),SESSION_MAX_VAILD);
 		}
 	}
 	
 	string get(string key){
-		string savedData = theMemcache.get(getSavedKey());
+		string savedData = MemcachedCache.defaultCahe.get(getSavedKey());
 		if(savedData.length == 0)
 		{
 			return string.init;
@@ -415,7 +415,7 @@ class MemcacheSessionStorage :SessionStorageInterface{
 	///session 是否过期
 	bool isExpired()
 	{
-		string savedData = theMemcache.get(getSavedKey());
+		string savedData = MemcachedCache.defaultCahe.get(getSavedKey());
 		if(savedData.length == 0)
 		{
 			return true;
