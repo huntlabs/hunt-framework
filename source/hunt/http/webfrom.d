@@ -43,6 +43,8 @@ class WebForm
             auto strBoundary = tmp.get("boundary", "").strip();
             if (strBoundary.length > 0)
             {
+				if(strBoundary[0] == '\"')
+					strBoundary = strBoundary[1..strBoundary.length -1];
                 readMultiFrom(strBoundary, req.Body);
             }
         }
@@ -104,9 +106,14 @@ protected:
     {
         buffer.rest();
         string brony = "--" ~ brand;
-        auto sttr = buffer.readLine();
+        auto sttr = cast(string)(buffer.readLine());
+		sttr.strip;
+		if(sttr.length == 0){
+			sttr = cast(string)(buffer.readLine());
+			sttr.strip;
+		}
 
-        if (!((cast(string) sttr) == brony))
+        if (!(sttr == brony))
             return;
         brony = "\r\n" ~ brony;
         bool run;
