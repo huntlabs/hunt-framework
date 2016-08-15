@@ -73,7 +73,7 @@ class MemcachedCache : Cache
 	{
 		info("memcache packstring:",  t);
 		//return "\"" ~ t ~ "\"";
-		return t.replace(" ", "");
+		return t.replace(" ", "+");
 	}
 
 private:
