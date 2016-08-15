@@ -12,7 +12,8 @@ module hunt.cache.memcached;
 
 import hunt.storage.memcached;
 import hunt.cache.base;
-
+import std.experimental.logger;
+import std.string;
 class MemcachedCache : Cache
 {
 	static @property defaultCahe()
@@ -33,11 +34,13 @@ class MemcachedCache : Cache
 	{
 		if(master_key.length > 0)
 		{
-			return _mcache.getByKey!string(master_key,key,v);
+			return _mcache.getByKey!string(packString(master_key),packString(key),v);
 		}
 		else
 		{
-			return _mcache.get!string(key,v);
+			auto xx = _mcache.get!string(packString(key),v);
+			info("memcached....", xx);
+			return xx;
 		}
 	}
 	///add a cache  expired after expires seconeds
@@ -45,11 +48,11 @@ class MemcachedCache : Cache
 	{
 		if(master_key.length > 0)
 		{
-			return _mcache.setByKey!string(master_key,key,value,expires);
+			return _mcache.setByKey!string(packString(master_key),packString(key),value,expires);
 		}
 		else
 		{
-			return _mcache.set!string(key,value,expires);
+			return _mcache.set!string(packString(key),value,expires);
 		}
 	}
 	
@@ -58,12 +61,19 @@ class MemcachedCache : Cache
 	{
 		if(master_key.length > 0)
 		{
-			return _mcache.delByKey(master_key,key);
+			return _mcache.delByKey(packString(master_key),packString(key));
 		}
 		else
 		{
-			return _mcache.del(key);
+			return _mcache.del(packString(key));
 		}
+	}
+
+	private string packString(string t)
+	{
+		info("memcache packstring:",  t);
+		//return "\"" ~ t ~ "\"";
+		return t.replace(" ", "");
 	}
 
 private:
