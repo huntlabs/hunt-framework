@@ -29,7 +29,8 @@ enum Delim
 	Open,
 	OpenStr,
 	CloseShort,
-	Close
+	Close,
+	CloseStr,
 }
 
 enum Delims = [EnumMembers!Delim];
@@ -48,7 +49,8 @@ enum OpenDelims = [EnumMembers!OpenDelim];
 enum CloseDelim : Delim
 {
 	CloseShort = Delim.CloseShort,
-	Close      = Delim.Close
+	Close      = Delim.Close,
+	CloseStr = Delim.CloseStr,
 }
 enum CloseDelims = [EnumMembers!CloseDelim];
 
@@ -59,7 +61,7 @@ enum OpenToClose =
 	OpenDelim.OpenShort    : CloseDelim.CloseShort,
 	OpenDelim.OpenShortStr : CloseDelim.CloseShort,
 	OpenDelim.Open         : CloseDelim.Close,
-	OpenDelim.OpenStr      : CloseDelim.Close
+	OpenDelim.OpenStr      : CloseDelim.CloseStr
 ];
 
 string toString(in Delim d)
@@ -68,10 +70,11 @@ string toString(in Delim d)
 	{
 		case OpenShort:     return "%";
 		case OpenShortStr:  return "%=";
-		case Open:          return "<%";
-		case OpenStr:       return "<%=";
+		case Open:          return "{%";
+		case OpenStr:       return "{{";
 		case CloseShort:    return "\n";
-		case Close:         return "%>";
+		case Close:         return "%}";
+		case CloseStr:         return "}}";
 	}
 }
 
