@@ -92,6 +92,11 @@ class Controller : IController
 	{
 		this.response.html(this.view.render!filename());
 	}
+
+	void show(string filename = null)()
+	{
+		this.response.html(this.view.show!filename());
+	}
 }
 
 alias MakeController = HuntDynamicCallFun;
