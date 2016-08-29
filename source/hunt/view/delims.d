@@ -12,7 +12,7 @@
 module hunt.view.delims;
 
 import
-	std.traits,
+std.traits,
 	std.typecons;
 
 /// Represents a delimer and the index that it is located at
@@ -21,63 +21,121 @@ template DelimPos(D = Delim)
 	alias DelimPos = Tuple!(size_t, "pos", D, "delim");
 }
 
-/// All of the delimer types parsed by Temple
-enum Delim
+version(quickTemplateCompile)
 {
-	OpenShort,
-	OpenShortStr,
-	Open,
-	OpenStr,
-	CloseShort,
-	Close,
-	CloseStr,
-}
-
-enum Delims = [EnumMembers!Delim];
-
-/// Subset of Delims, only including opening delimers
-enum OpenDelim  : Delim
-{
-	OpenShort       = Delim.OpenShort,
-	Open            = Delim.Open,
-	OpenShortStr    = Delim.OpenShortStr,
-	OpenStr         = Delim.OpenStr
-}
-enum OpenDelims = [EnumMembers!OpenDelim];
-
-/// Subset of Delims, only including close delimers
-enum CloseDelim : Delim
-{
-	CloseShort = Delim.CloseShort,
-	Close      = Delim.Close,
-	CloseStr = Delim.CloseStr,
-}
-enum CloseDelims = [EnumMembers!CloseDelim];
-
-/// Maps an open delimer to its matching closing delimer
-/// Formally, an onto function
-enum OpenToClose =
-[
-	OpenDelim.OpenShort    : CloseDelim.CloseShort,
-	OpenDelim.OpenShortStr : CloseDelim.CloseShort,
-	OpenDelim.Open         : CloseDelim.Close,
-	OpenDelim.OpenStr      : CloseDelim.CloseStr
-];
-
-string toString(in Delim d)
-{
-	final switch(d) with(Delim)
+	/// All of the delimer types parsed by Temple
+	enum Delim
 	{
-		case OpenShort:     return "%";
-		case OpenShortStr:  return "%=";
-		case Open:          return "{%";
-		case OpenStr:       return "{{";
-		case CloseShort:    return "\n";
-		case Close:         return "%}";
-		case CloseStr:         return "}}";
+		OpenShort,
+		OpenShortStr,
+		Open,
+		OpenStr,
+		CloseShort,
+		Close
+	}
+
+	enum Delims = [EnumMembers!Delim];
+
+	/// Subset of Delims, only including opening delimers
+	enum OpenDelim  : Delim
+	{
+		OpenShort       = Delim.OpenShort,
+		Open            = Delim.Open,
+		OpenShortStr    = Delim.OpenShortStr,
+		OpenStr         = Delim.OpenStr
+	}
+	enum OpenDelims = [EnumMembers!OpenDelim];
+
+	/// Subset of Delims, only including close delimers
+	enum CloseDelim : Delim
+	{
+		CloseShort = Delim.CloseShort,
+		Close      = Delim.Close
+	}
+	enum CloseDelims = [EnumMembers!CloseDelim];
+
+	/// Maps an open delimer to its matching closing delimer
+	/// Formally, an onto function
+	enum OpenToClose =
+		[
+		OpenDelim.OpenShort    : CloseDelim.CloseShort,
+		OpenDelim.OpenShortStr : CloseDelim.CloseShort,
+		OpenDelim.Open         : CloseDelim.Close,
+		OpenDelim.OpenStr      : CloseDelim.Close
+		];
+
+	string toString(in Delim d)
+	{
+		final switch(d) with(Delim)
+		{
+			case OpenShort:     return "%";
+			case OpenShortStr:  return "%=";
+			case Open:          return "<%";
+			case OpenStr:       return "<%=";
+			case CloseShort:    return "\n";
+			case Close:         return "%>";
+		}
 	}
 }
+else
+{
+	/// All of the delimer types parsed by Temple
+	enum Delim
+	{
+		OpenShort,
+		OpenShortStr,
+		Open,
+		OpenStr,
+		CloseShort,
+		Close,
+		CloseStr,
+	}
 
+	enum Delims = [EnumMembers!Delim];
+
+	/// Subset of Delims, only including opening delimers
+	enum OpenDelim  : Delim
+	{
+		OpenShort       = Delim.OpenShort,
+		Open            = Delim.Open,
+		OpenShortStr    = Delim.OpenShortStr,
+		OpenStr         = Delim.OpenStr
+	}
+	enum OpenDelims = [EnumMembers!OpenDelim];
+
+	/// Subset of Delims, only including close delimers
+	enum CloseDelim : Delim
+	{
+		CloseShort = Delim.CloseShort,
+		Close      = Delim.Close,
+		CloseStr = Delim.CloseStr,
+	}
+	enum CloseDelims = [EnumMembers!CloseDelim];
+
+	/// Maps an open delimer to its matching closing delimer
+	/// Formally, an onto function
+	enum OpenToClose =
+		[
+		OpenDelim.OpenShort    : CloseDelim.CloseShort,
+		OpenDelim.OpenShortStr : CloseDelim.CloseShort,
+		OpenDelim.Open         : CloseDelim.Close,
+		OpenDelim.OpenStr      : CloseDelim.CloseStr
+		];
+
+	string toString(in Delim d)
+	{
+		final switch(d) with(Delim)
+		{
+			case OpenShort:     return "%";
+			case OpenShortStr:  return "%=";
+			case Open:          return "{%";
+			case OpenStr:       return "{{";
+			case CloseShort:    return "\n";
+			case Close:         return "%}";
+			case CloseStr:         return "}}";
+		}
+	}
+}
 /// Is the delimer a shorthand delimer?
 /// e.g., `%=`, or `%`
 bool isShort(in Delim d)
