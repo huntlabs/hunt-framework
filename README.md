@@ -21,4 +21,11 @@ config/routes.conf
 #
 
 GET / index.index
+[domain=bbs.putao.com@web]
+#only request path http://bbs.putao.com/user/show
+GET /user/show user.show
+
+#request path http://any-domain/api/user/show
+[path=api@apidir]
+GET /user/show user.show
 ```

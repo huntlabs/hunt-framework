@@ -47,4 +47,10 @@ public:
 			return child.toString(context);
 		}
 	}
+
+	string show(string filename = null)()
+	{
+		auto child = compile_temple_file!filename; 
+		return child.toString(context);
+	}
 }
