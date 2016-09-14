@@ -77,6 +77,7 @@ protected:
         }
         _element = new Element();
         if(!f.isOpen()) return;
+		scope(exit) f.close();
         Element ele = _element;
         int line = 1;
         while(!f.eof())
