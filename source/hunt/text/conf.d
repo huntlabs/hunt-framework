@@ -14,8 +14,14 @@ module hunt.text.conf;
 import std.array;
 import std.stdio;
 import std.string;
+import std.exception;
 
-class Conf
+class INIFormatExceptionException : Exception
+{
+	mixin basicExceptionCtors;
+}
+
+class Ini
 {
     this()
     {}
@@ -96,17 +102,8 @@ protected:
                 continue;
             }
             auto site = str.indexOf("=");
-            if(site == -1)
-            {
-                import std.format;
-                throw new Exception(format("the format is erro in file %s, in line %d",_fileName,line));
-            }
+			enforce!INIFormatExceptionException((site > 0),format("the format is erro in file %s, in line %d",_fileName,line));
             string key = str[0..site].strip;
-            if(key.length == 0)
-            {
-                import std.format;
-                throw new Exception(format("the Key is empty in file %s, in line %d",_fileName,line));
-            }
             string value  = str[site + 1..$].strip;
             ele.values[key] = value;
         }
@@ -165,6 +162,8 @@ private:
     string _fileName;
     Element _element; 
 }
+
+alias Conf = Ini;
 
 private:
 final class Element

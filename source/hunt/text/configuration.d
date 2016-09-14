@@ -7,7 +7,7 @@ import std.array;
 import std.stdio;
 import std.string;
 
-class FileFormatException : Exception
+class ConfFormatException : Exception
 {
 	mixin basicExceptionCtors;
 }
@@ -108,7 +108,7 @@ private:
 				continue;
 			}
 			auto site = str.indexOf("=");
-			enforce!FileFormatException((site > 0),format("the format is erro in file %s, in line %d",filename,line));
+			enforce!ConfFormatException((site > 0),format("the format is erro in file %s, in line %d",filename,line));
 			string key = str[0..site].strip;
 			setValue(split(key,'.'),str[site + 1..$].strip);
 		}
