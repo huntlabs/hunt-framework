@@ -6,7 +6,6 @@
     "libs" : [],
     "dependencies": {
         "collie": "~>0.8.2",
-        "libmemcached": "~>1.0.2",
 	"entity" : "~>0.0.8"
     },
     "subConfigurations": {
