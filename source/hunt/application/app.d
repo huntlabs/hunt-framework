@@ -16,6 +16,6 @@ import hunt.application;
 
 void main()
 {
-    auto app = Application.app();
+    auto app = Application.getInstance();
     app.run();
 }

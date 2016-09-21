@@ -34,7 +34,7 @@ void initControllerCall(string FUN, T, ARGS...)(string str, ARGS args) if (
 	(is(T == class) || is(T == interface)) && hasMember!(T, FUN))
 {
 	///dowidget
-	auto app_m = Application.app().middlewareFactory;
+	auto app_m = Application.getInstance().middlewareFactory;
 	if(app_m !is null)
 	{
 		auto middlewares = app_m.getMiddlewares();
