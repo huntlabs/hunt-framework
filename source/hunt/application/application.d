@@ -220,7 +220,7 @@ private:
 	{
 		_server.bind(Config.app.server.bindAddress() );
 		//_server.setSSLConfig(_config.httpConfig.sslConfig());
-		auto ts = Config.app.server.workThreads;
+		uint ts = Config.app.server.workThreads - 1;
 		if(ts > 0)
 		{
 			_group = new EventLoopGroup(ts);
