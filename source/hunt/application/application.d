@@ -188,7 +188,7 @@ private:
 		pipe = _router.match(req.host,req.method, req.path);
 		if (pipe is null)
 		{
-			app._404(req, res);
+			_app._404(req, res);
 		}
 		else
 		{
