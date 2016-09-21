@@ -153,12 +153,13 @@ class Session : SessionInterface
 
 unittest
 {
+	import std.conv;
 	//test no session id
 	Session session = new Session();
 	session.set("test", "testvalue");
 	assert(session.get("test") == "testvalue");
-	session.set("uid", 123455);
-	assert(session.get!int("uid") == 123455);
+	session.set("uid", to!string(123455));
+	assert(to!int(session.get("uid")) == 123455);
 	import std.experimental.logger;
 	log("test no session id:", session.getId);
 	
