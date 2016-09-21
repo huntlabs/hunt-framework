@@ -32,7 +32,7 @@ void test(Request, Response res)
 
 static this()
 {
-    auto app = Application.app();
+    auto app = Application.getInstance();
     app.addRouter("GET","/test",toDelegate(&test)).addRouter("GET","/hello",toDelegate(&hello))
     	.setMiddlewareFactory(new MiddlewareFactory())
     	.enableLocale();
