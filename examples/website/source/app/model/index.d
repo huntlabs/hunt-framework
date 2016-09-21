@@ -1,5 +1,6 @@
 module app.model.index;
 
+version(USE_ENTITY):
 import hunt.application;
 public import entity;
 

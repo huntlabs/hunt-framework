@@ -9,7 +9,7 @@
  *
  */
 module hunt.storage.memcached;
-
+version(USE_MEMCACHED):
 public import collie.libmemcache4d.memcache;
 
 @property theMemcache()

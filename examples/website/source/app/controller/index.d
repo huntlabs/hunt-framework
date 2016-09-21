@@ -11,7 +11,9 @@
 module app.controller.index;
 import hunt.application;
 import app.middleware;
-import app.model.index;
+
+version(USE_ENTITY) import app.model.index;
+
 class IndexController : Controller
 {
     this()
