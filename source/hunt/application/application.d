@@ -28,8 +28,16 @@ public import hunt.view;
 public import hunt.i18n;
 public import std.file;
 public import hunt.utils.path;
+public import hunt.application.config;
 
 public import hunt.application.middleware;
+
+abstract class WebSocketFactory
+{
+	import collie.codec.http;
+	WebSocket newWebSocket(const HTTPHeader header);
+}
+
 
 final class Application
 {
@@ -142,33 +150,23 @@ final class Application
 	
 	@property loopGroup(){return _group;}
 	
-	@property appConfig(){return _config;}
-	
-	auto setConfigPath(string path)
-	{
-		_config = new WebConfig(path);
-		return this;
-	}
-	
-	auto setConfig(IWebConfig conf)
-	{
-		_config = conf;
-	}
+	@property appConfig(){return Config.app;}
+
 	/**
         Start the HTTPServer server , and block current thread.
     */
 	void run()
 	{
 		upConfig();
-		auto config = _config.routerConfig();
+		auto config = Config.router;
 		if(config !is null)
 			setRouterConfigHelper!("__CALLACTION__",IController,HTTPRouterGroup)
 				(_router,config);
 		router.done();
 		
-		auto _db = _config.dbConfig();
-		if(_db && _db.isVaild())
-			initDb(_db.getUrl());
+	//	auto _db = _config.dbConfig();
+	//	if(_db && _db.isVaild())
+	//		initDb(_db.getUrl());
 		
 		_server.run();
 	}
@@ -217,24 +215,24 @@ private:
 		res.setContext("No Found");
 		res.done();
 	}
-	
+
 	void upConfig()
 	{
-		_server.bind(_config.httpConfig.bindAddress());
-		_server.setSSLConfig(_config.httpConfig.sslConfig());
-		auto ts = _config.httpConfig.threadSize() - 1;
+		_server.bind(Config.app.server.bindAddress() );
+		//_server.setSSLConfig(_config.httpConfig.sslConfig());
+		auto ts = Config.app.server.workThreads;
 		if(ts > 0)
 		{
 			_group = new EventLoopGroup(ts);
 			_server.group(_group);
 		} 
-		_server.keepAliveTimeOut(_config.httpConfig.keepAliveTimeOut());
-		_server.maxBodySize(_config.httpConfig.httpMaxBodySize());
-		_server.maxHeaderSize(_config.httpConfig.httpMaxHeaderSize());
-		_server.headerStectionSize(_config.httpConfig.httpHeaderStectionSize());
-		_server.requestBodyStectionSize(_config.httpConfig.httpRequestBodyStectionSize());
-		_server.responseBodyStectionSize(_config.httpConfig.httpResponseBodyStectionSize());
-		_wfactory = _config.httpConfig.webSocketFactory();
+		_server.keepAliveTimeOut(Config.app.http.keepAliveTimeOut);
+		_server.maxBodySize(Config.app.http.maxBodySzie);
+		_server.maxHeaderSize(Config.app.http.maxHeaderSize);
+		_server.headerStectionSize(Config.app.http.headerSection);
+		_server.requestBodyStectionSize(Config.app.http.requestSection);
+		_server.responseBodyStectionSize(Config.app.http.responseSection);
+		_wfactory = Config.app.http.webSocketFactory;
 		if(_wfactory is null)
 		{
 			_server.setWebsocketFactory(null);  
@@ -253,7 +251,6 @@ private:
 		_router = new HTTPRouterGroup();
 		_server.setCallBack(&doHandle);
 		_404 = &default404;
-		_config = new WebConfig();
 	}
 	
 	__gshared static Application _app;
@@ -265,7 +262,6 @@ private:
 	EventLoop _mainLoop;
 	EventLoopGroup _group;
 	WebSocketFactory _wfactory;
-	IWebConfig _config;
 	
 	shared AbstractMiddlewareFactory _middlewareFactory;
 }

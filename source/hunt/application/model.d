@@ -1,5 +1,5 @@
 ﻿module hunt.application.model;
-
+version(USE_ENTITY) :
 import entity;
 
 abstract class Model(T) if(is(T == class) || is(T == struct))

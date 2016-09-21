@@ -271,6 +271,7 @@ class FileSessionStorage : SessionStorageInterface
     }
 }
 
+version(USE_MEMCACHED):
 import hunt.cache.memcached;
 import std.experimental.logger;
 import hunt.storage.memcached;
