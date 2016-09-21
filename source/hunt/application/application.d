@@ -41,7 +41,7 @@ abstract class WebSocketFactory
 
 final class Application
 {
-	static @property app(){
+	static @property getInstance(){
 		if(_app is null)
 		{
 			_app = new Application();
