@@ -12,12 +12,13 @@ module hunt.cache;
 
 public import hunt.cache.base;
 public import hunt.cache.memcached;
+public import hunt.cache.mapcache;
 
 @property defaultCache()
 {
 	if(_cache is null)
 	{
-		_cache = MemcachedCache.defaultCahe();
+		_cache = MapCache.defaultCahe();
 	}
 	return _cache;
 }

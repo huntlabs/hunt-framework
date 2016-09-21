@@ -10,6 +10,7 @@
  */
 module hunt.cache.memcached;
 
+version(USE_MEMCACHED):
 import hunt.storage.memcached;
 import hunt.cache.base;
 import std.experimental.logger;
