@@ -16,7 +16,7 @@ http://localhost:8080/
 ```
 
 ## Router config
-config/routes.conf
+config/routes
 ```conf
 #
 # [GET,POST,PUT...]    path    controller.action
