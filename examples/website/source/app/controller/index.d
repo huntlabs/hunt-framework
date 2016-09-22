@@ -48,7 +48,7 @@ class IndexController : Controller
     @middleware(OneMiddleware.stringof)
     void list()
     {
-		this.view.setLayout!"layouts/main.dhtml"();	
+		this.view.setLayout!"main.dhtml"();	
 		this.view.test = "viile";
 		this.view.username = "viile";
 		this.view.header = "donglei header";

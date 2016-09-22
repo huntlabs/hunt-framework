@@ -3,9 +3,8 @@
 	"description": "A minimal D application.",
 	"copyright": "Copyright © 2016, huntframework.com",
 	"targetType" : "executable",
-	"stringImportPaths": [ "./resources/views" ],
-	"versions" : ["USE_DEFAULT_WEB_MAIN"],
-	"mainSourceFile": "source/bootstrap.d",
+	"stringImportPaths": [ "./resources/views" ,"./resources/views/layouts","./resources/views/shared"],
+	"mainSourceFile": "./source/bootstrap.d",
 	"dependencies": {
             "hunt" : {
                 "path" : "../../"

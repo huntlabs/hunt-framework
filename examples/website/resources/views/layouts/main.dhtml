@@ -1,9 +1,9 @@
 <html>
     <body>
-        {{ render!"shared/header.dhtml" }}
+        {{ render!"header.dhtml" }}
         <div class="content">
             {{ yield }}
         </div>
-        {{ render!"shared/footer.dhtml" }}
+        {{ render!"footer.dhtml" }}
     </body>
 <html>
