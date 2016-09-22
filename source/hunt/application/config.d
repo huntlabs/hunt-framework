@@ -27,6 +27,7 @@ final class AppConfig
 		uint headerSection = 4 * 1024;
 		uint requestSection = 8 * 1024;
 		uint responseSection = 8 * 1024;
+		
 		WebSocketFactory webSocketFactory = null;
 
 		CookieConfig cookie;
@@ -34,9 +35,9 @@ final class AppConfig
 
 	struct ServerConfig
 	{
-		uint workThreads;// = totalCPUs;
+		uint workerThreads; // default is totalCPUs;
 		string listen = "0.0.0.0";
-		ushort port = 8081;
+		ushort port = 80;
 		string defaultLanguage = "zh-cn";
 		string encoding  = "utf-8";
 		string timeZone = "Asia/Shanghai";
@@ -74,10 +75,12 @@ final class AppConfig
 	static AppConfig parseAppConfig(Configuration conf)
 	{
 		AppConfig app = new AppConfig();
+		
 		app._config = conf;
+		
 		collectException(conf.http.addr.value(),app.server.listen);
 		collectException(conf.http.port.as!ushort(),app.server.port);
-		collectException(conf.http.worker_threads.as!uint(),app.server.workThreads);
+		collectException(conf.http.worker_threads.as!uint(),app.server.workerThreads);
 		collectException(conf.config.default_language.value(),app.server.defaultLanguage);
 		collectException(conf.config.encoding.value(), app.server.encoding);
 		collectException(conf.config.time_zone.value(), app.server.timeZone);
@@ -87,12 +90,15 @@ final class AppConfig
 		collectException(conf.http.header_section.as!uint(), app.http.headerSection);
 		collectException(conf.http.request_section.as!uint(), app.http.requestSection);
 		collectException(conf.http.response_section.as!uint(), app.http.responseSection);
+		
 		string ws;
 		collectException(conf.http.webSocket_factory.value(), ws);
+		
 		if(ws.length > 0){
 			auto obj = Object.factory(ws);
 			if(obj) app.http.webSocketFactory = cast(WebSocketFactory)obj;
 		}
+		
 		collectException(conf.log.level.value(), app.log.level);
 		collectException(conf.log.file.value(), app.log.file);
 
@@ -102,13 +108,14 @@ final class AppConfig
 		collectException(conf.db.dbname.value(), app.db.dbname);
 		collectException(conf.db.username.value(), app.db.username);
 		collectException(conf.db.password.value(), app.db.password);
+		
 		return app;
 	}
 
 private:
 	Configuration _config;
 
-	this(){server.workThreads = totalCPUs;}
+	this(){server.workerThreads = totalCPUs;}
 }
 
 import core.sync.rwmutex;
@@ -150,7 +157,7 @@ class ConfigManger
 
 	void setAppSection(string sec)
 	{
-		auto con = new Configuration(path ~= "/application.conf",sec);
+		auto con = new Configuration(path ~= "/application.conf", sec);
 		_app = AppConfig.parseAppConfig(con);
 	}
 	
@@ -178,10 +185,12 @@ class ConfigManger
 	}
 	
 private:
-	this(){
+	this()
+	{
 		_mutex = new ReadWriteMutex();
 		path = dirName(thisExePath) ~ "/config/";
 	}
+	
 	~this(){_mutex.destroy;}
 	AppConfig _app;
 	RouterConfigBase _router;
