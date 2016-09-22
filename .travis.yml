@@ -1,0 +1,7 @@
+ 
+language: d
+
+d:
+  - dmd
+  #- gdc
+  #- ldc
