@@ -4,7 +4,6 @@
 	"copyright": "Copyright © 2016, huntframework.com",
 	"targetType" : "executable",
 	"stringImportPaths": [ "./resources/views" ],
-	"versions" : ["USE_DEFAULT_WEB_MAIN"],
 	"mainSourceFile": "source/bootstrap.d",
 	"dependencies": {
             "hunt" : {
