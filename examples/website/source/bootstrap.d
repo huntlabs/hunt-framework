@@ -30,7 +30,7 @@ void test(Request, Response res)
     res.redirect("hello");
 }
 
-static this()
+void main()
 {
     auto app = Application.getInstance();
     app.addRouter("GET","/test",toDelegate(&test)).addRouter("GET","/hello",toDelegate(&hello))
@@ -50,5 +50,7 @@ static this()
 	///设置语言
 	setLocale("en-us");
 	writeln( getText("email.subject", "empty"));
+
+	app.run();
 }
 
