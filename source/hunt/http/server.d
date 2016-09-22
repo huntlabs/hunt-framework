@@ -182,10 +182,11 @@ final class HTTPServer
         import std.conv;
         import std.stdio;
         
-        ushort default_http_port = 80;
+     //   ushort default_http_port = 80;
 
         writeln("××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××\n");
-	writeln("  Please open " ~ (_SSLEnabled ? "https" : "http") ~ "://127.0.0.1" ~ (_port == default_http_port ? "" : ":" ~ to!string(_port)) ~ "/ in your browser.");
+		//writeln("  Please open " ~ (_SSLEnabled ? "https" : "http") ~ "://127.0.0.1" ~ (port == "80" ? "" : ":" ~ port) ~ "/ in your browser.");
+		writeln("  Please open " ~ (_SSLEnabled ? "https" : "http") ~ "://" ~ _server.address.toString() ~ "/ in your browser.");
         writeln("\n××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××");
 
         _server.waitForStop();
@@ -203,7 +204,6 @@ final class HTTPServer
 
 private:
     bool _SSLEnabled = false;
-    ushort _port = 8080;
     HTTPCALL _newReq;
     ServerBootstrap!HTTPPipeline _server;
     HTTPConfig _config;
