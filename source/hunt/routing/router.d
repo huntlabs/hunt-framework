@@ -98,6 +98,8 @@ final class Router(ARGS...)
     */
     Pipeline match(string method, string path)
     {
+        import std.stdio;
+        writeln("0---------------", method, "-------", path, "+++++++++");
         Pipeline pipe = null;
         if (!condigDone)
             return pipe;
