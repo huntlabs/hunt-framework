@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2015-2016  Shanghai Putao Technology Co., Ltd 
  *
- * Developer: putao's Dlang team
+ * Developer: HuntStudio
  *
  * Licensed under the Apache License.
  *
