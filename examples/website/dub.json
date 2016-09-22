@@ -1,5 +1,5 @@
 {
-	"name": "server",
+	"name": "website",
 	"description": "A minimal D application.",
 	"copyright": "Copyright © 2016, huntframework.com",
 	"targetType" : "executable",
