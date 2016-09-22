@@ -220,12 +220,14 @@ private:
 	{
 		_server.bind(Config.app.server.bindAddress() );
 		//_server.setSSLConfig(_config.httpConfig.sslConfig());
-		uint ts = Config.app.server.workThreads - 1;
+		uint ts = Config.app.server.workerThreads - 1;
+		
 		if(ts > 0)
 		{
 			_group = new EventLoopGroup(ts);
 			_server.group(_group);
-		} 
+		}
+		
 		_server.keepAliveTimeOut(Config.app.http.keepAliveTimeOut);
 		_server.maxBodySize(Config.app.http.maxBodySzie);
 		_server.maxHeaderSize(Config.app.http.maxHeaderSize);
@@ -233,6 +235,7 @@ private:
 		_server.requestBodyStectionSize(Config.app.http.requestSection);
 		_server.responseBodyStectionSize(Config.app.http.responseSection);
 		_wfactory = Config.app.http.webSocketFactory;
+		
 		if(_wfactory is null)
 		{
 			_server.setWebsocketFactory(null);  
