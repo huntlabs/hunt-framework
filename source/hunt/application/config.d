@@ -133,7 +133,8 @@ class ConfigManger
 	@property router(){
 		if(!_router)
 		{
-			string ph = path ~= "/routers";
+			string ph = path ~ "/routes";
+			trace("router path is : ", ph);
 			if (exists(ph)) {
 				_router = new RouterConfig(ph);
 			}
@@ -150,7 +151,7 @@ class ConfigManger
 
 	void setAppSection(string sec)
 	{
-		auto con = new Configuration(path ~= "/application.conf",sec);
+		auto con = new Configuration(path ~ "/application.conf",sec);
 		_app = AppConfig.parseAppConfig(con);
 	}
 	
