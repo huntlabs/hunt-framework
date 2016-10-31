@@ -7,6 +7,7 @@ class View
 private:
 	TempleContext _context;
 	CompiledTemple _layout;
+	bool _setLayout = false;
 
 public:
 
@@ -21,6 +22,7 @@ public:
 
 	void setLayout(string filename = null)()
 	{
+		_setLayout = true;
 		_layout = compile_temple_file!filename;
 	}
 
@@ -37,8 +39,9 @@ public:
 	string render(string filename = null)()
 	{
 		auto child = compile_temple_file!filename; 
-		if(_layout.toString)
+		if(_setLayout)
 		{
+			_setLayout = false;
 			auto composed = _layout.layout(&child);
 			return composed.toString(context);
 		}
