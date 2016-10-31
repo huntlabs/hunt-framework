@@ -1293,7 +1293,7 @@ struct var {
 
 	string toJson() {
 		auto v = toJsonValue();
-		return toJSON(&v);
+		return toJSON(v);
 	}
 
 	JSONValue toJsonValue() {
@@ -1408,7 +1408,7 @@ class PrototypeObject {
 				val.object[k] = v.toJsonValue();
 		}
 
-		return toJSON(&val);
+		return toJSON(val);
 	}
 
 	var[string] _properties;
