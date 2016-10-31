@@ -66,6 +66,8 @@ import std.traits;
 import std.conv;
 import std.json;
 
+import std.compiler;
+
 // uda for wrapping classes
 enum Scriptable;
 
@@ -1293,7 +1295,12 @@ struct var {
 
 	string toJson() {
 		auto v = toJsonValue();
-		return toJSON(v);
+		//return toJSON(v);
+
+		static if(version_minor > 71)
+			return toJSON(v);
+		else
+			return toJSON(&v);
 	}
 
 	JSONValue toJsonValue() {
@@ -1408,7 +1415,10 @@ class PrototypeObject {
 				val.object[k] = v.toJsonValue();
 		}
 
-		return toJSON(val);
+		static if(version_minor > 71)
+			return toJSON(val);
+		else
+			return toJSON(&val);
 	}
 
 	var[string] _properties;
