@@ -165,8 +165,10 @@ class FileSessionStorage : SessionStorageInterface
         import core.cpuid;
         import std.string;
 
-        return toHexString(sha1Of(format("%s--%s--%s",
-            Clock.currTime().toISOExtString, uniform(long.min, long.max), processor()))).toLower;
+        auto str = toHexString(sha1Of(format("%s--%s--%s",
+					Clock.currTime().toISOExtString, uniform(long.min, long.max), processor())));
+
+		return toLower(cast(string)(str[]));
     }
 
     ///Sets a typed field to the session.
