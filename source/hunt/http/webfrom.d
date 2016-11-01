@@ -11,7 +11,7 @@
 module hunt.http.webfrom;
 
 import collie.codec.http;
-import collie.buffer;
+import collie.buffer.sectionbuffer;
 
 import std.string;
 import std.exception;
