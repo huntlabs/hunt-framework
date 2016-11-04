@@ -21,29 +21,29 @@ import std.string;
 
 class Request
 {
-    this(HTTPRequest req)
-    {
-        assert(req);
-        _req = req;
-    }
+	this(HTTPRequest req)
+	{
+		assert(req);
+		_req = req;
+	}
 
-    @property WebForm postForm()
-    {
-        if (_form is null)
-            _form = new WebForm(_req);
-        return _form;
-    }
+	@property WebForm postForm()
+	{
+		if (_form is null)
+			_form = new WebForm(_req);
+		return _form;
+	}
 
 	@property Header(){return _req.Header();}
 
 	@property Body(){return _req.Body();}
 
-    @property mate(){return _mate;}
+	@property mate(){return _mate;}
 
 	@property path(){return _req.Header().path();}
 
 	@property method(){return _req.Header().methodString();}
-	
+
 	@property host(){return _req.Header().host();}
 
 
@@ -62,7 +62,16 @@ class Request
 		}
 		return clientAddress.toAddrString();
 	}
-	
+	@property string referer()
+	{
+		string rf = this._req.Header.getHeaderValue("Referer");
+		string[] rfarr = split(rf,", ");
+		if(rfarr.length)
+		{
+			return rfarr[0];
+		}
+		return "";
+	}
 	@property clientAddress(){return _req.clientAddress();}
 
 
@@ -80,15 +89,15 @@ class Request
 		return _req.Body().read(cast(size_t)file.length,cback);
 	}
 
-    string getMate(string key)
-    {
-        return _mate.get(key, "");
-    }
+	string getMate(string key)
+	{
+		return _mate.get(key, "");
+	}
 
-    void addMate(string key, string value)
-    {
-        _mate[key] = value;
-    }
+	void addMate(string key, string value)
+	{
+		_mate[key] = value;
+	}
 
 	SessionInterface getSession( S = Session)(string sessionName = "hunt_session", SessionStorageInterface t =  newStorage()) //if()
 	{
@@ -106,42 +115,42 @@ class Request
 		}
 		return cookies.get(key,null);
 	}
-	
-	string getCookieValue(string key)
- 	{
-         auto cookie = this.getCookie(key);
-         if(cookie is null)
-         {
-             return ""; 
-         }
-         return cookie.value;
- 	}
 
-    ///get queries
-    @property string[string] queries()
-    {
-        if(_queries is null)
-        {
-            _queries = _req.Header.queryMap();
-        }
-        return _queries;
-    }
+	string getCookieValue(string key)
+	{
+		auto cookie = this.getCookie(key);
+		if(cookie is null)
+		{
+			return ""; 
+		}
+		return cookie.value;
+	}
+
+	///get queries
+	@property string[string] queries()
+	{
+		if(_queries is null)
+		{
+			_queries = _req.Header.queryMap();
+		}
+		return _queries;
+	}
 	/// get a query
-    T get(T = string)(string key, T v = T.init)
-    {
-        import std.conv;
-        auto tmp = this.queries;
-        if(tmp is null)
-        {
-            return v;   
-        }
-        auto _v = tmp.get(key, "");
-        if(_v.length)
-        {
-            return to!T(_v);
-        }
-        return v;
-    }
+	T get(T = string)(string key, T v = T.init)
+	{
+		import std.conv;
+		auto tmp = this.queries;
+		if(tmp is null)
+		{
+			return v;   
+		}
+		auto _v = tmp.get(key, "");
+		if(_v.length)
+		{
+			return to!T(_v);
+		}
+		return v;
+	}
 
 
 	///获取请求的url地址
@@ -151,25 +160,25 @@ class Request
 		return format("%s://%s%s",  "http",  host,  _req.Header().requestString);
 	}
 
-    /// get a post
-    T post(T = string)(string key, T v = T.init)
-    {
-        import std.conv;
+	/// get a post
+	T post(T = string)(string key, T v = T.init)
+	{
+		import std.conv;
 		auto _v = postForm.getFromValue(key);
-        if(_v.length)
-        {
-            return to!T(_v);
-        }
-        return v;
-    }
-//	alias _req this;
+		if(_v.length)
+		{
+			return to!T(_v);
+		}
+		return v;
+	}
+	//	alias _req this;
 
-    @property ref string[string] materef() {return _mate;}
-private:
-    HTTPRequest _req;
-    WebForm _form = null;
-    string[string] _mate;
-    SessionInterface session;
-    Cookie[string] cookies;
-    string[string] _queries;
+	@property ref string[string] materef() {return _mate;}
+	private:
+	HTTPRequest _req;
+	WebForm _form = null;
+	string[string] _mate;
+	SessionInterface session;
+	Cookie[string] cookies;
+	string[string] _queries;
 }
