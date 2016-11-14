@@ -132,25 +132,6 @@ DelimPos!(D)* nextDelim(D)(string haystack, const(D)[] delims) if (is(D : Delim)
     assert(false, "internal bug: \natPos: " ~ index.to!string ~ "\nhaystack: " ~ haystack);
 }
 
-unittest
-{
-    const haystack = "% Я";
-    static assert(*(haystack.nextDelim([Delim.OpenShort])) == DelimPos!Delim(0, Delim.OpenShort));
-}
-
-unittest
-{
-    const haystack = "Я";
-    static assert(haystack.nextDelim([Delim.OpenShort]) == null);
-}
-
-unittest
-{
-    const haystack = "Я%";
-    static assert(
-        *(haystack.nextDelim([Delim.OpenShort])) == DelimPos!Delim(
-        codeLength!char('Я'), Delim.OpenShort));
-}
 
 unittest
 {
