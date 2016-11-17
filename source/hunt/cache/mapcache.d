@@ -34,7 +34,9 @@ class MapCache : Cache
 	/// NOTES : expires is not used
 	override bool setByKey(string master_key,string key, string value, int expires)
 	{
-		string pk = master_key ~ key;
+		import std.conv;
+		string prefix = master_key.length.to!string ~ ",";
+		string pk = prefix ~ master_key ~ key;
 		_mutex.writer.lock();
 		scope(exit) _mutex.writer.unlock();
 		_map[pk] = value;
