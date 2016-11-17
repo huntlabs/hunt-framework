@@ -5,6 +5,6 @@
     "license": "Apache-2.0",
     "libs" : [],
     "dependencies": {
-        "collie": "~>0.8.5"
+        "collie": "~>0.8.7"
     }
 }
