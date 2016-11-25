@@ -8,7 +8,7 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.routing.utils;
+module hunt.router.utils;
 
 import std.string;
 import std.regex;

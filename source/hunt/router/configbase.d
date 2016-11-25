@@ -8,7 +8,7 @@
  * Licensed under the BSD License.
  *
  */
-module hunt.routing.configbase;
+module hunt.router.configbase;
 
 import std.file;
 import std.string;
