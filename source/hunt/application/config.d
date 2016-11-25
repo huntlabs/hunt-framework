@@ -9,9 +9,11 @@ import hunt.text.configuration;
 import hunt.application.application : WebSocketFactory;
 
 import hunt.routing.configbase;
+import collie.codec.http.server.httpserveroptions;
 
 final class AppConfig
 {
+	alias AddressList = HTTPServerOptions.HVector;
 	struct CookieConfig
 	{
 		string domain = ".huntframework.com";
@@ -36,17 +38,20 @@ final class AppConfig
 	struct ServerConfig
 	{
 		uint workerThreads; // default is totalCPUs;
-		string listen = "0.0.0.0";
-		ushort port = 80;
+		uint ioThreads = 2;
 		string defaultLanguage = "zh-cn";
 		string encoding  = "utf-8";
 		string timeZone = "Asia/Shanghai";
 
-		Address bindAddress(){
-			trace("------------- ;isten : ", listen);
-			Address addr = parseAddress(listen,port);
-			return addr;
+		AddressList bindAddress(){
+			if(_binds.empty){
+				_binds.insertBack(new InternetAddress("127.0.0.1",80));
+			}
+			return _binds;
 		}
+
+	private:
+		AddressList _binds;
 	}
 
 	struct LogConfig
@@ -77,10 +82,10 @@ final class AppConfig
 		AppConfig app = new AppConfig();
 		
 		app._config = conf;
-		
-		collectException(conf.http.addr.value(),app.server.listen);
-		collectException(conf.http.port.as!ushort(),app.server.port);
+		string[] ips;
+		collectException(conf.http.binds.values(),ips);
 		collectException(conf.http.worker_threads.as!uint(),app.server.workerThreads);
+		collectException(conf.http.io_threads.as!uint(),app.server.ioThreads);
 		collectException(conf.config.default_language.value(),app.server.defaultLanguage);
 		collectException(conf.config.encoding.value(), app.server.encoding);
 		collectException(conf.config.time_zone.value(), app.server.timeZone);
@@ -90,7 +95,9 @@ final class AppConfig
 		collectException(conf.http.header_section.as!uint(), app.http.headerSection);
 		collectException(conf.http.request_section.as!uint(), app.http.requestSection);
 		collectException(conf.http.response_section.as!uint(), app.http.responseSection);
-		
+		foreach(ip;ips){
+			//todo: 解析IP
+		}
 		string ws;
 		collectException(conf.http.webSocket_factory.value(), ws);
 		
