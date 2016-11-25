@@ -20,6 +20,7 @@ import collie.codec.http;
 public import std.socket;
 public import std.experimental.logger;
 import std.uni;
+import std.parallelism;
 
 import hunt.router;
 public import hunt.http;
@@ -184,9 +185,10 @@ private:
 	
 	__gshared static Application _app;
 private:
-	//    ServerBootstrap!HTTPPipeline _server;
 	HttpServer _server;
 	WebSocketFactory _wfactory;
 	
 	shared AbstractMiddlewareFactory _middlewareFactory;
+
+	TaskPool _tpool;
 }
