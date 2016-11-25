@@ -15,44 +15,22 @@ import std.string;
 import std.regex;
 import std.traits;
 
-public import hunt.routing;
-public import hunt.router.middleware;
-public import hunt.router.configsignalmodule;
-public import hunt.router.configmultiplemodule;
-public import hunt.router.config;
+import hunt.router.config;
+public import hunt.router.router;
+public import hunt.router.routergroup;
+public import hunt.router.build;
 import collie.utils.functional;
 
-public import hunt.http.request;
-public import hunt.http.response;
-public import hunt.application;
+alias DoHandler = void function(Message *, Connection);
+import hunt.router.configbase;
 
 alias HTTPRouter = Router!(Request, Response);
 alias DOHandler = void delegate(Request, Response);
 alias HTTPRouterGroup = RouterGroup!(Request, Response);
 
-void initControllerCall(string FUN, T, ARGS...)(string str, ARGS args) if (
+void initControllerCall(string FUN, T)(string str, Request args) if (
 	(is(T == class) || is(T == interface)) && hasMember!(T, FUN))
 {
-	///dowidget
-	auto app_m = Application.getInstance().middlewareFactory;
-	if(app_m !is null)
-	{
-		auto middlewares = app_m.getMiddlewares();
-		if(middlewares !is null)
-		{
-			foreach(w; middlewares)
-			{
-				///arg0:context
-				///arg1 req
-				///arg2 res
-				if(!w.onProcess(args[1], args[2]))
-				{
-					args[2].done();
-					return;
-				}
-			}
-		}
-	}
 	import std.experimental.logger;
 	
 	auto index = lastIndexOf(str, '.');
@@ -77,41 +55,22 @@ void initControllerCall(string FUN, T, ARGS...)(string str, ARGS args) if (
 		error("cast(T)obj; erro!");
 		return;
 	}
-
-	auto ms_in_controller = a.getMiddleware();
-
-	if(ms_in_controller.length)
-	{
-		foreach(w; ms_in_controller)
-		{
-			///arg0:context
-			///arg1 req
-			///arg2 res
-			if(!w.onProcess(args[1], args[2]))
-			{
-				args[2].done();
-				return;
-			}
-		}
-	}
-	
 	mixin("bool ret = a." ~ FUN ~ "(funName,args);" ~ q{
 			if(!ret)
 			{
-				args[2].done();
+				args.done();
 				return;
 			}
 		});
 }
 
-void setRouterConfigHelper(string FUN, T, TRouter)(TRouter router, RouterConfigBase config) if (
-        (is(T == class) || is(T == interface)) && hasMember!(T, FUN) && hasMember!(TRouter, "addRouter"))
+void setRouterConfigHelper(string FUN, T)(TRouter router, RouterConfigBase config) if (
+        (is(T == class) || is(T == interface)) && hasMember!(T, FUN) )
 {
     import std.string;
     import std.array;
 
-	alias doFun = initControllerCall!(FUN, T,RouterPipelineContext, Request, Response);
-	alias MiddleWareFactory = AutoMiddleWarePipelineFactory!(Request, Response);
+	alias doFun = initControllerCall!(FUN, T);
     
     
     string getDirPath(RouterType type, string dir, string path)
@@ -154,15 +113,10 @@ void setRouterConfigHelper(string FUN, T, TRouter)(TRouter router, RouterConfigB
                     if (str.length == 0)
                         continue;
                     string path = getDirPath(item.routerType,item.dir,item.path);
-                    router.addRouter(str, path, bind(&doFun, item.hander),
-                        new shared MiddleWareFactory(item.middleWareBefore),
-                        new shared MiddleWareFactory(item.middleWareAfter));
+					defaultRouter.addRoute(str, path, bind(&doFun, item.hander));
                 }
             }
                 break;
-                
-static if(hasMember!(TRouter,"getRouter"))
-{
             case RouterType.DOMAIN_DIR:
             case RouterType.DOMAIN:
             {
@@ -171,17 +125,12 @@ static if(hasMember!(TRouter,"getRouter"))
                     if (str.length == 0)
                         continue;
                     string path = getDirPath(item.routerType,item.dir,item.path);
-                    router.addRouter(item.host,str, path, bind(&doFun, item.hander),
-                        new shared MiddleWareFactory(item.middleWareBefore),
-                        new shared MiddleWareFactory(item.middleWareAfter));
+					defaultRouter.addRoute(item.host,str, path, bind(&doFun, item.hander));
                 }
             }
             break;
-}
             default:
                 break;
         }
     }
 }
-
- 

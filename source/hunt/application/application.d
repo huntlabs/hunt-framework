@@ -14,8 +14,7 @@ module hunt.application.application;
 import collie.bootstrap.serversslconfig;
 public import collie.socket.eventloop;
 public import collie.socket.eventloopgroup;
-public import collie.channel;
-public import collie.codec.http.config;
+import collie.codec.http.server;
 import collie.codec.http;
 
 public import std.socket;
@@ -31,16 +30,19 @@ public import hunt.utils.path;
 public import hunt.application.config;
 
 public import hunt.application.middleware;
+import collie.codec.http.server.websocket;
 
 abstract class WebSocketFactory
 {
-	import collie.codec.http;
-	WebSocket newWebSocket(const HTTPHeader header);
+	IWebSocket newWebSocket(const HTTPMessage header);
 }
 
 
 final class Application
 {
+	alias HandleDelegate = void delegate(Request);
+	alias HandleFunction = void function(Request);
+
 	static @property getInstance(){
 		if(_app is null)
 		{
@@ -59,11 +61,11 @@ final class Application
             before =  The PipelineFactory that create the middleware list for the router rules, before  the router rule's handled execute.
             after  =  The PipelineFactory that create the middleware list for the router rules, after  the router rule's handled execute.
     */
-	auto addRouter(string domain, string method, string path, DOHandler handle,
-		shared RouterPipelineFactory before = null, shared RouterPipelineFactory after = null)
+	auto addRoute(T)(string domain, string method,T handle)
+		if(is(T == HandleDelegate) || is(T == HandleFunction))
 	{
 		method = toUpper(method);
-		router.addRouter(domain,method,path,handle,before,after);
+		defaultRouter.addRoute(domain,method,path,handle);
 		return this;
 	}
 	
@@ -76,32 +78,13 @@ final class Application
             before =  The PipelineFactory that create the middleware list for the router rules, before  the router rule's handled execute.
             after  =  The PipelineFactory that create the middleware list for the router rules, after  the router rule's handled execute.
     */
-	auto addRouter(string method, string path, DOHandler handle,
-		shared RouterPipelineFactory before = null, shared RouterPipelineFactory after = null)
+	auto addRoute(T)(string method, string path,T handle)
+		if(is(T == HandleDelegate) || is(T == HandleFunction))
 	{
 		method = toUpper(method);
-		router.addRouter(method,path,handle,before,after);
+		defaultRouter.addRoute(method,path,handle);
 		return this;
 	}
-	
-	/**
-        Set The PipelineFactory that create the middleware list for all router rules, before  the router rule's handled execute.
-    */
-	auto setGlobalBeforePipelineFactory(shared RouterPipelineFactory before)
-	{
-		router.setGlobalBeforePipelineFactory(before);
-		return this;
-	}
-	
-	/**
-        Set The PipelineFactory that create the middleware list for all router rules, after  the router rule's handled execute.
-    */
-	auto setGlobalAfterPipelineFactory(shared RouterPipelineFactory after)
-	{
-		router.setGlobalAfterPipelineFactory(after);
-		return this;
-	}
-	
 	///
 	auto setMiddlewareFactory(shared AbstractMiddlewareFactory mfactory)
 	{
@@ -122,33 +105,19 @@ final class Application
 		i18n.defaultLocale = defaultLocale;
 		return this;
 	}
-	
-	
-	/**
-        Set The delegate that handle 404,when the router don't math the rule.
-    */
-	auto setNoFoundHandler(DOHandler nofound)
-		in
-	{
-		assert(nofound !is null);
-	}
-	body
-	{
-		_404 = nofound;
-		return this;
-	}
+
 	
 	/// get the router.
 	@property router()
 	{
-		return _router;
+		return defaultRouter;
 	}
 	
 	@property server(){return _server;}
 	
-	@property mainLoop(){return _mainLoop;}
+	@property mainLoop(){return _server.eventLoop;}
 	
-	@property loopGroup(){return _group;}
+	@property loopGroup(){return _server.group;}
 	
 	@property appConfig(){return Config.app;}
 
@@ -158,17 +127,13 @@ final class Application
 	void run()
 	{
 		upConfig();
-		auto config = Config.router;
+		/*auto config = Config.router;
 		if(config !is null)
 			setRouterConfigHelper!("__CALLACTION__",IController,HTTPRouterGroup)
 				(_router,config);
-		router.done();
-		
-	//	auto _db = _config.dbConfig();
-	//	if(_db && _db.isVaild())
-	//		initDb(_db.getUrl());
-		
-		_server.run();
+		router.done();*/
+
+		_server.start();
 	}
 	
 	
@@ -181,41 +146,6 @@ final class Application
 	}
 	
 private:
-	/// math the router and start handle the middleware and handle.
-	void doHandle(Request req, Response res)
-	{
-		RouterPipeline pipe = null;
-		pipe = _router.match(req.host,req.method, req.path);
-		if (pipe is null)
-		{
-			_app._404(req, res);
-		}
-		else
-		{
-			
-			scope(exit)
-			{
-				import core.memory;
-				pipe.destroy;
-				GC.free(cast(void *)pipe);
-			}
-			
-			if(pipe.matchData().length > 0)
-			{
-				pipe.swapMatchData(req.materef());
-			}
-			pipe.handleActive(req, res);
-		}
-	}
-	
-	/// the default handle when the router rule don't match.
-	void default404(Request req, Response res)
-	{
-		res.Header.statusCode = 404;
-		res.setContext("No Found");
-		res.done();
-	}
-
 	void upConfig()
 	{
 		_server.bind(Config.app.server.bindAddress() );
@@ -249,21 +179,13 @@ private:
 	/// default Constructor
 	this()
 	{
-		_mainLoop = new EventLoop();
-		_server = new HTTPServer(_mainLoop);
-		_router = new HTTPRouterGroup();
-		_server.setCallBack(&doHandle);
-		_404 = &default404;
+
 	}
 	
 	__gshared static Application _app;
 private:
-	HTTPRouterGroup _router;
-	DOHandler _404;
 	//    ServerBootstrap!HTTPPipeline _server;
-	HTTPServer _server;
-	EventLoop _mainLoop;
-	EventLoopGroup _group;
+	HttpServer _server;
 	WebSocketFactory _wfactory;
 	
 	shared AbstractMiddlewareFactory _middlewareFactory;

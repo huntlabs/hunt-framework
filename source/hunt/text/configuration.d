@@ -27,8 +27,14 @@ class Configuration
 			return v;
 		}
 		
-		@property value(){
+		@property values(){
 			return _value;
+		}
+
+		@property value(){
+			if(_value.length == 0)
+				return null;
+			return _value[0];
 		}
 
 		auto as(T)(T value = T.init) if(isNumeric!(T))
@@ -50,18 +56,18 @@ class Configuration
 		auto as(T : string)(T value = T.init)
 		{
 			if(_value.length == 0)
-				return false;
+				return value;
 			else
-				return _value;
+				return _value[0];
 		}
-		
+
 		auto opDispatch(string s)()
 		{
 			return value(s);
 		}
 		
 	private :
-		string _value;
+		string[] _value;
 		ConfigurationValue[string] _map;
 	}
 	
@@ -128,7 +134,7 @@ private:
 		}
 		if(cvalue is _value)
 			return;
-		cvalue._value = value;
+		cvalue._value ~= value;
 	}
 	
 private:

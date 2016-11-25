@@ -10,52 +10,92 @@
  */
 module hunt.http.request;
 
-import collie.codec.http;
+import std.exception;
 
-import hunt.http.webfrom;
+import collie.buffer;
+import collie.codec.http;
+import collie.codec.http.server.requesthandler;
+import collie.codec.http.server.httpform;
+
+import hunt.http.response;
 import hunt.http.session;
 import hunt.http.sessionstorage;
 import hunt.http.cookie;
 
 import std.string;
 
-class Request
+alias CreatorBuffer = Buffer delegate();
+alias DoHandler = void function(Request) nothrow;
+
+final class Request : RequestHandler
 {
-	this(HTTPRequest req)
+	this(CreatorBuffer cuffer,DoHandler handler)
 	{
-		assert(req);
-		_req = req;
+		_creatorBuffer = cuffer;
+		_handler = handler;
 	}
 
-	@property WebForm postForm()
+	@property HTTPForm postForm()
 	{
-		if (_form is null)
-			_form = new WebForm(_req);
+		if (_body && ( _form is null))
+			_form = new HTTPForm(_req);
 		return _form;
 	}
 
-	@property Header(){return _req.Header();}
+	@property Header(){return _headers;}
 
-	@property Body(){return _req.Body();}
+	@property Body(){return _body;}
 
 	@property mate(){return _mate;}
 
-	@property path(){return _req.Header().path();}
+	@property path(){return Header.getPath;}
 
-	@property method(){return _req.Header().methodString();}
+	@property method(){return Header.methodString;}
 
-	@property host(){return _req.Header().host();}
+	@property host(){return header(HTTPHeaderCode.HOST);}
+
+	string header(HTTPHeaderCode code){
+		_headers.getHeaders.getSingleOrEmpty(code);
+	}
+
+	string header(string key){
+		_headers.getHeaders.getSingleOrEmpty(key);
+	}
+
+	bool headerExists(HTTPHeaderCode code){
+		_headers.getHeaders.exists(code);
+	}
+
+	bool headerExists(string key){
+		_headers.getHeaders.exists(code);
+	}
+
+	int headersForeach(scope int delegate(string key, string value) each){
+		return _headers.getHeaders.opApply(each);
+	}
+
+	int headersForeach(scope int delegate(HTTPHeaderCode code,string key, string value) each){
+		return _headers.getHeaders.opApply(each);
+	}
+
+	bool headerValueForeach(string name,scope bool delegate(string value) func){
+		return _headers.getHeaders.forEachValueOfHeader(name,func);
+	}
+
+	bool headerValueForeach(HTTPHeaderCode code,scope bool delegate(string value) func){
+		return _headers.getHeaders.forEachValueOfHeader(code,func);
+	}
 
 
 	@property string clientIp()
 	{
-		string XFF = this._req.Header.getHeaderValue("X-Forwarded-For");
+		string XFF = header("X-Forwarded-For");
 		string[] xff_arr = split(XFF,", ");
 		if(xff_arr.length > 0)
 		{
 			return xff_arr[0];
 		}
-		string XRealIP = this._req.Header.getHeaderValue("X-Real-IP");
+		string XRealIP = header("X-Real-IP");
 		if(XRealIP.length > 0)
 		{
 			return XRealIP;
@@ -64,7 +104,7 @@ class Request
 	}
 	@property string referer()
 	{
-		string rf = this._req.Header.getHeaderValue("Referer");
+		string rf = header("Referer");
 		string[] rfarr = split(rf,", ");
 		if(rfarr.length)
 		{
@@ -72,22 +112,7 @@ class Request
 		}
 		return "";
 	}
-	@property clientAddress(){return _req.clientAddress();}
-
-
-	@property GET(){return queries();}
-
-	@property POST(){return postForm().formMap();}
-
-	@property FILES(){return postForm().fileMap();}
-
-	@property rawPostData(){return _req.Body();}
-
-	size_t readFile(WebForm.FormFile file,void delegate(in ubyte[]) cback)
-	{
-		_req.Body().rest(cast(size_t)file.startSize);
-		return _req.Body().read(cast(size_t)file.length,cback);
-	}
+	@property clientAddress(){return _headers.clientAddress();}
 
 	string getMate(string key)
 	{
@@ -110,7 +135,7 @@ class Request
 	{
 		if(cookies.length == 0)
 		{
-			string cookie = this._req.Header.getHeaderValue("cookie");
+			string cookie = header(HTTPHeaderCode.COOKIE);
 			cookies = parseCookie(cookie);
 		}
 		return cookies.get(key,null);
@@ -129,17 +154,13 @@ class Request
 	///get queries
 	@property string[string] queries()
 	{
-		if(_queries is null)
-		{
-			_queries = _req.Header.queryMap();
-		}
-		return _queries;
+		_headers.queryParam();
 	}
 	/// get a query
 	T get(T = string)(string key, T v = T.init)
 	{
 		import std.conv;
-		auto tmp = this.queries;
+		auto tmp = queries();
 		if(tmp is null)
 		{
 			return v;   
@@ -153,17 +174,12 @@ class Request
 	}
 
 
-	///获取请求的url地址
-	public string getRequestURI()
-	{
-		import std.format;
-		return format("%s://%s%s",  "http",  host,  _req.Header().requestString);
-	}
-
 	/// get a post
 	T post(T = string)(string key, T v = T.init)
 	{
 		import std.conv;
+		auto form = postForm();
+		if(form is null) return v;
 		auto _v = postForm.getFromValue(key);
 		if(_v.length)
 		{
@@ -174,11 +190,60 @@ class Request
 	//	alias _req this;
 
 	@property ref string[string] materef() {return _mate;}
-	private:
-	HTTPRequest _req;
-	WebForm _form = null;
+
+	Response createResponse()
+	{
+		if(_error != HTTPErrorCode.NO_ERROR)
+			return null;
+		if(_res is null)
+			_res = new Response(_downstream);
+		return _res;
+	}
+protected:
+	override void onBody(const ubyte[] data) nothrow {
+		collectException((){
+				if(_body is null){
+					_body = _creatorBuffer();
+				}
+				_body.write(data);
+			});
+	}
+
+	override void onEOM() nothrow {
+		_handler();
+	}
+
+	override void requestComplete() nothrow {
+		collectException((){
+				_error = HTTPErrorCode.STREAM_CLOSED;
+				import collie.utils.memory;
+				if(_headers)gcFree(_headers);
+				if(_res)gcFree(_res);
+			}());
+	}
+
+	override void onResquest(HTTPMessage headers) nothrow {
+		_headers = headers;
+	}
+
+	override void onError(HTTPErrorCode code) nothrow {
+		collectException((){
+				if(_res)_res.clear();
+				_error = code;
+				if(error == HTTPErrorCode.TIME_OUT){
+					// send 502;
+				}
+			}());
+	}
+
+private:
 	string[string] _mate;
-	SessionInterface session;
+	//SessionInterface session;
 	Cookie[string] cookies;
-	string[string] _queries;
+	Buffer _body;
+	HTTPMessage _headers;
+	Response _res;
+	HTTPErrorCode _error = HTTPErrorCode.NO_ERROR;
+	CreatorBuffer _creatorBuffer;
+	DoHandler _handler;
 }
