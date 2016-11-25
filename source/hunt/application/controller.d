@@ -13,46 +13,33 @@ module hunt.application.controller;
 public import hunt.view;
 public import hunt.http.response;
 public import hunt.http.request;
-public import hunt.router.middleware;
+public import hunt.router;
 
 public import hunt.application.middleware;
 
 import std.traits;
 
-struct action{}
-
 struct middleware{
 	string className;
 }
 
-T instanceOf (T) (Object value)
+auto instanceOf (T) (Object value)
 {
 	return cast(T) (value);
 }
 
-interface IController
-{
-	bool __CALLACTION__(string method,RouterPipelineContext contex, Request req,  Response res);
-
-	IMiddleware[] getMiddleware();
-}
-
-class Controller : IController
+abstract class Controller : IController
 {
 	protected
 	{
 		Request request;
-		Response response;
-		RouterPipelineContext context;
 		///called before all actions
 		IMiddleware[] middlewares;
 		View _view;
 
 	}
-	bool __CALLACTION__(string method,RouterPipelineContext contex, Request req,  Response res)
-	{
-		return false;
-	}
+	bool __CALLACTION__(string method,Request req);
+
 	/// called before action  return true is continue false is finish
 	bool before(){return true;}
 	/// called after action  return true is continue false is finish
@@ -103,21 +90,20 @@ alias MakeController = HuntDynamicCallFun;
 
 mixin template HuntDynamicCallFun()
 {
-	import std.traits;
-	enum str = _createCallActionFun!(typeof(this));
-	//pragma(msg, "call fun generate in ..." ~ (fullyQualifiedName!(typeof(this))));
-	//pragma(msg, str);
-	mixin(str);
+public:
+	mixin(_createCallActionFun!(typeof(this)));
+	mixin BuildRouterFunction!(typeof(this),true);
+
 }
 
 string  _createCallActionFun(T)()
 {
     import std.traits;
 	import std.format;
-	string str = "override bool __CALLACTION__(string funName,RouterPipelineContext context,Request req,  Response res) {";
+	string str = "override bool __CALLACTION__(string funName,Request req) {";
 	str ~= "import std.experimental.logger;import std.variant;import std.conv;";
 	// str ~= "trace(\"call function \", funName);";
-	str ~= "this.request = req; this.response = res; this.context = context;";
+	str ~= "this.request = req; this.response = res;";
     str ~= "switch(funName){";
     foreach(memberName; __traits(allMembers, T))
     {
@@ -125,41 +111,37 @@ string  _createCallActionFun(T)()
         {
             foreach (t;__traits(getOverloads,T,memberName)) 
             {
-				static if(!hasUDA!(t, action))
+				static if(!hasUDA!(t, Action))
 				{
 					continue;
 				}
-				else
+				str ~= "case \"";
+				str ~= memberName;
+				str ~= "\":";
+				enum ws = getUDAs!(t, middleware);
+				static if(ws.length)
 				{
-					str ~= "case \"";
-					str ~= memberName;
-					str ~= "\":";
-					enum ws = getUDAs!(t, middleware);
-					static if(ws.length)
+					foreach(i,w; ws)
 					{
-						foreach(i,w; ws)
-						{
-							str ~= format(q{ 
-									auto wb_%s_%s = new %s();
-									if(!wb_%s_%s.onProcess(this.request, this.response)){return false;}
-								}, i,memberName, w.className, i, memberName);
-						}
-
+						str ~= format(q{ 
+								auto wb_%s_%s = new %s();
+								if(!wb_%s_%s.onProcess(this.request, this.response)){return false;}
+							}, i,memberName, w.className, i, memberName);
 					}
 
-					//before
-					str ~= q{
-						if(!this.before()){return false;}
-					};
-					//action
-					str ~= memberName ~ "();";
-					//after
-					str ~= q{
-						if(!this.after()){return false;}
-					};
-					str ~= "break;";
 				}
-               
+
+				//before
+				str ~= q{
+					if(!this.before()){return false;}
+				};
+				//action
+				str ~= memberName ~ "();";
+				//after
+				str ~= q{
+					if(!this.after()){return false;}
+				};
+				str ~= "break;";
             }
         }
     }

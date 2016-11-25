@@ -18,3 +18,5 @@ core
 *.so
 *.kate-swp
 dub.userprefs
+*.lib
+*.exe
