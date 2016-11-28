@@ -2,7 +2,7 @@
 
 import hunt.http.request;
 import hunt.http.response;
-import collie.utils.functional;
+public import collie.utils.functional;
 import hunt.router.routergroup;
 
 import std.traits;
@@ -28,11 +28,11 @@ mixin template BuildRouterFunction(T, bool controller = false) if(is(T == class)
 		import std.experimental.logger;
 		import std.conv;
 		import hunt.router.build;
-		mixin(_createCallActionFun!(T,controller)());
+		mixin(_createRouterCallActionFun!(T,controller)());
 	}
 }
 
-string  _createCallActionFun(T, bool controller)()
+string  _createRouterCallActionFun(T, bool controller)()
 {
 	string str = "";
 	
@@ -42,24 +42,21 @@ string  _createCallActionFun(T, bool controller)()
 		{
 			foreach (t;__traits(getOverloads,T,memberName)) 
 			{
-				static if(!hasUDA!(t, Action) || !TisPublic!(t))
-					continue;
+				static if(hasUDA!(t, Action) && (controller || TisPublic!(t))) {
+					alias actions = getUDAs!(t, Action);
+					static if(actions.length == 0) continue;
 
-				static if(!controller && !TisPublic!(t))
-					continue;
-
-				Action action = getUDAs!(t, Action)[0];
-				if(action.path.length == 0){
-					continue;
-				}
-				alias ptype = Parameters!(t);
-				static if(ptype.length != 1 || !is(ptype[0] == Request))
-					continue;
-
-				static if(controller){
-					str ~= "\t\tdefaultRouter.addRoute(\"" ~ action.domain ~"\",\""~ path ~ "\",&doHandler!(" ~ T.stringof ~ ",\"" ~ memberName ~ "\"));\n";
-				} else {
-					str ~= "\t\tdefaultRouter.addRoute(\"" ~ action.domain ~"\",\""~ path ~ "\",bind(&callHandler!(" ~ T.stringof ~ "),\"" ~ memberName ~ "\");\n";
+					Action action = actions[0];
+					if(action.path.length > 0){
+						alias ptype = Parameters!(t);
+						static if(ptype.length == 1 && is(ptype[0] == Request)) {
+							static if(!controller){
+								str ~= "\t\tdefaultRouter.addRoute(\"" ~ action.domain ~"\",\""~ action.path ~ "\",&doHandler!(" ~ T.stringof ~ ",\"" ~ memberName ~ "\"));\n";
+							} else {
+								str ~= "\t\tdefaultRouter.addRoute(\"" ~ action.domain ~"\",\""~ action.path ~ "\",bind(&callHandler!(" ~ T.stringof ~ "),\"" ~ memberName ~ "\"));\n";
+							}
+						}
+					}
 				}
 			}
 		}

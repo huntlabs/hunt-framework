@@ -16,11 +16,10 @@ class IndexController : Controller
 {
     mixin MakeController;
     
-    @action
+    @Action()
     void show()
     {
-    	alias res = this.response;
-        import std.stdio;
+		auto res = this.request.createResponse();
         res.html("hello world<br/>"~__FUNCTION__);
     }
 }
