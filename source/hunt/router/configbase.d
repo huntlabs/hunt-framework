@@ -29,8 +29,6 @@ struct RouterContext
     RouterType routerType = RouterType.DEFAULT; /// the rule type.
     string host;                                /// the domain group.
     string dir;                                 /// the dir group.
-    string[] middleWareBefore;                  /// the before MiddleWare list,
-    string[] middleWareAfter;                   /// the after MiddleWare list,
 }
 
 /// the router rule type.
@@ -99,46 +97,8 @@ abstract class ConfigLine : RouterConfigBase
     {
         _controllerPrefix = controllerPrefix;
     }
-
-    final @property beforeFlag(){return _beforeFlag;}
-    final @property beforeFlag(string beforeFlag)
-    {
-        _beforeFlag = beforeFlag;
-    }
-
-    final @property afterFlag(){return _afterFlag;}
-    final @property afterFlag(string afterFlag)
-    {
-        _afterFlag = afterFlag;
-    }
-    
-protected:
-    final void parseMiddleware(string toParse, out string[] beforeMiddleware, out string[] afterMiddleware)
-    {
-        size_t beforePos, afterPos, semicolonPos;
-        beforePos = toParse.indexOf(_beforeFlag);
-        afterPos = toParse.indexOf(_afterFlag);
-        semicolonPos = toParse.indexOf(";");
-        assert(beforePos <= afterPos, "after position and before position worry");
-        if (beforePos < 0)
-            beforePos = toParse.length - 1;
-        else
-            beforePos += _beforeFlag.length;
-        if (afterPos < 0)
-            afterPos = toParse.length - 1;
-        else
-            afterPos += _afterFlag.length;
-        if (semicolonPos < 0)
-            semicolonPos = toParse.length - 1;
-        if (beforePos < semicolonPos)
-            beforeMiddleware = split(toParse[beforePos .. semicolonPos], ',');
-        afterMiddleware = split(toParse[afterPos .. $], ',');
-    }
-    
 private:
     string _controllerPrefix = "Controller";
-    string _beforeFlag = "before:";
-    string _afterFlag = "after:";
 }
 
 enum fullMethod = "OPTIONS,GET,HEAD,POST,PUT,DELETE,TRACE,CONNECT";

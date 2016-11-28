@@ -42,12 +42,12 @@ class Configuration
 			if(_value.length == 0)
 				return value;
 			else
-				return to!T(_value);
+				return to!T(_value[0]);
 		}
 		
 		auto as(T : bool)(T value = T.init)
 		{
-			if(_value.length == 0 || _value == "false" || _value == "0")
+			if(_value.length == 0 || _value[0] == "false" || _value[0] == "0")
 				return false;
 			else
 				return true;

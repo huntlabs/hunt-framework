@@ -99,16 +99,14 @@ final class RouterGroup
     */
 	MachData match(string domain,string method, string path)
 	{
-		if(_routerList.length == 0 || domain.length == 0)
+		Router route = _router;
+		if(_routerList.length > 0 && domain.length > 0)
 		{
-			return _router.match(method,path);
+			route = _routerList.get(domain,null);
+			if(route is null) route = _router;
 		}
-		
-		auto router = _routerList.get(domain,null);
-		if(router is null)
-			return MachData();
-		else
-			return router.match(method,path);
+
+		return route.match(method,path);
 	}
 	
 	/**

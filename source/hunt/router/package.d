@@ -21,12 +21,9 @@ public import hunt.router.routergroup;
 public import hunt.router.build;
 import collie.utils.functional;
 
-alias DoHandler = void function(Message *, Connection);
 import hunt.router.configbase;
-
-alias HTTPRouter = Router!(Request, Response);
-alias DOHandler = void delegate(Request, Response);
-alias HTTPRouterGroup = RouterGroup!(Request, Response);
+import hunt.http.request;
+import hunt.http.response;
 
 void initControllerCall(string FUN, T)(string str, Request args) if (
 	(is(T == class) || is(T == interface)) && hasMember!(T, FUN))
@@ -58,13 +55,14 @@ void initControllerCall(string FUN, T)(string str, Request args) if (
 	mixin("bool ret = a." ~ FUN ~ "(funName,args);" ~ q{
 			if(!ret)
 			{
-				args.done();
+				Response res = args.createResponse();
+				res.done();
 				return;
 			}
 		});
 }
 
-void setRouterConfigHelper(string FUN, T)(TRouter router, RouterConfigBase config) if (
+void setRouterConfigHelper(string FUN, T)(RouterConfigBase config) if (
         (is(T == class) || is(T == interface)) && hasMember!(T, FUN) )
 {
     import std.string;
