@@ -16,29 +16,33 @@ import collie.buffer;
 import collie.codec.http;
 import collie.codec.http.server.requesthandler;
 import collie.codec.http.server.httpform;
+import collie.utils.memory;
 
 import hunt.http.response;
 import hunt.http.session;
 import hunt.http.sessionstorage;
 import hunt.http.cookie;
+import hunt.http.exception;
 
 import std.string;
+import std.conv;
 
-alias CreatorBuffer = Buffer delegate();
-alias DoHandler = void function(Request) nothrow;
+alias CreatorBuffer = Buffer delegate(HTTPMessage) nothrow;
+alias DoHandler = void delegate(Request) nothrow;
 
 final class Request : RequestHandler
 {
-	this(CreatorBuffer cuffer,DoHandler handler)
+	this(CreatorBuffer cuffer,DoHandler handler,uint maxsize = 8 * 1024 * 1024)
 	{
 		_creatorBuffer = cuffer;
 		_handler = handler;
+		_maxBodySize = maxsize;
 	}
 
 	@property HTTPForm postForm()
 	{
 		if (_body && ( _form is null))
-			_form = new HTTPForm(_req);
+			_form = new HTTPForm(header(HTTPHeaderCode.CONTENT_TYPE),_body);
 		return _form;
 	}
 
@@ -55,19 +59,19 @@ final class Request : RequestHandler
 	@property host(){return header(HTTPHeaderCode.HOST);}
 
 	string header(HTTPHeaderCode code){
-		_headers.getHeaders.getSingleOrEmpty(code);
+		return _headers.getHeaders.getSingleOrEmpty(code);
 	}
 
 	string header(string key){
-		_headers.getHeaders.getSingleOrEmpty(key);
+		return _headers.getHeaders.getSingleOrEmpty(key);
 	}
 
 	bool headerExists(HTTPHeaderCode code){
-		_headers.getHeaders.exists(code);
+		return _headers.getHeaders.exists(code);
 	}
 
 	bool headerExists(string key){
-		_headers.getHeaders.exists(code);
+		return _headers.getHeaders.exists(key);
 	}
 
 	int headersForeach(scope int delegate(string key, string value) each){
@@ -154,7 +158,7 @@ final class Request : RequestHandler
 	///get queries
 	@property string[string] queries()
 	{
-		_headers.queryParam();
+		return _headers.queryParam();
 	}
 	/// get a query
 	T get(T = string)(string key, T v = T.init)
@@ -194,7 +198,7 @@ final class Request : RequestHandler
 	Response createResponse()
 	{
 		if(_error != HTTPErrorCode.NO_ERROR)
-			return null;
+			throw new CreateResponseException("http ero is : " ~ to!string(_error));
 		if(_res is null)
 			_res = new Response(_downstream);
 		return _res;
@@ -202,21 +206,35 @@ final class Request : RequestHandler
 protected:
 	override void onBody(const ubyte[] data) nothrow {
 		collectException((){
-				if(_body is null){
-					_body = _creatorBuffer();
+				if(fristBody){
+					_body = _creatorBuffer(_headers);
+					fristBody = false;
+					if(_body is null) {
+						onError(HTTPErrorCode.FRAME_SIZE_ERROR);
+						return;
+					}
 				}
-				_body.write(data);
+				if(_body) {
+					_body.write(data);
+					gcFree(_body);
+					_body = null;
+					if(_body.length > _maxBodySize){
+						onError(HTTPErrorCode.FRAME_SIZE_ERROR);
+					}
+				}
 			});
 	}
 
 	override void onEOM() nothrow {
-		_handler();
+		if(_error == HTTPErrorCode.NO_ERROR)
+			_handler(this);
 	}
 
 	override void requestComplete() nothrow {
 		collectException((){
 				_error = HTTPErrorCode.STREAM_CLOSED;
 				import collie.utils.memory;
+				if(_body)gcFree(_body);
 				if(_headers)gcFree(_headers);
 				if(_res)gcFree(_res);
 			}());
@@ -228,22 +246,35 @@ protected:
 
 	override void onError(HTTPErrorCode code) nothrow {
 		collectException((){
-				if(_res)_res.clear();
+				scope(exit)
+					if(_res)_res.clear();
 				_error = code;
-				if(error == HTTPErrorCode.TIME_OUT){
-					// send 502;
+				if(_error == HTTPErrorCode.TIME_OUT){
+					collectException(createResponse());
+					if(_res){
+						_res.setHttpStatusCode(408);
+						_res.done();
+					}
+				} else if(_error ==  HTTPErrorCode.FRAME_SIZE_ERROR){
+					collectException(createResponse());
+					if(_res){
+						_res.setHttpStatusCode(429);
+						_res.done();
+					}
 				}
 			}());
 	}
 
 private:
 	string[string] _mate;
-	//SessionInterface session;
 	Cookie[string] cookies;
 	Buffer _body;
 	HTTPMessage _headers;
+	HTTPForm _form;
 	Response _res;
 	HTTPErrorCode _error = HTTPErrorCode.NO_ERROR;
 	CreatorBuffer _creatorBuffer;
+	uint _maxBodySize;
 	DoHandler _handler;
+	bool fristBody = true;
 }

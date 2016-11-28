@@ -28,7 +28,7 @@ auto instanceOf (T) (Object value)
 	return cast(T) (value);
 }
 
-abstract class Controller : IController
+abstract class Controller
 {
 	protected
 	{

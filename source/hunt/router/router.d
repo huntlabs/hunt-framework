@@ -14,7 +14,7 @@ import std.regex;
 import std.string;
 import std.experimental.logger;
 
-import hunt.routing.utils;
+import hunt.router.utils;
 import hunt.http.request;
 import hunt.http.response;
 import std.exception;
@@ -126,7 +126,7 @@ final class Router
 		RouteMap map = _map.get(method, null);
 		if (!map)
 			return MachData();
-		return map.match(path);;
+		return map.match(path);
 	}
 	/**
         get config is done.
@@ -285,10 +285,10 @@ final class RegexMap
 		}
 		else
 		{
-			RElementMap map = _map.get(str, null);
+			RegexMap map = _map.get(str, null);
 			if (!map)
 			{
-				map = new RElementMap(str);
+				map = new RegexMap(str);
 				_map[str] = map;
 			}
 			return map.add(ele, rege);
@@ -305,16 +305,16 @@ final class RegexMap
 		string frist = getFirstPath(path, lpath);
 		if (frist.length == 0)
 			return data;
-		RElementMap map = _map.get(frist, null);
+		auto map = _map.get(frist, null);
 		if (map)
 		{
-			data = map.match(lpath, pipe);
+			data = map.match(lpath);
 		}
 		else
 		{
 			foreach (ele; _list)
 			{
-				data = ele.macth(path, pipe);
+				data = ele.macth(path);
 				if (data.macth !is null)
 				{
 					break;
@@ -335,7 +335,7 @@ final class RouteMap
 	alias HandleDelegate = RouterHandler.HandleDelegate;
 	alias HandleFunction = RouterHandler.HandleFunction;
 	
-	this(Route router)
+	this(Router router)
 	{
 		_router = router;
 		_regexMap = new RegexMap("/");
@@ -370,7 +370,7 @@ final class RouteMap
 	}
 	
 private:
-	Route _router;
-	PElement[string] _pathMap;
-	RElementMap _regexMap;
+	Router _router;
+	RouteElement[string] _pathMap;
+	RegexMap _regexMap;
 }

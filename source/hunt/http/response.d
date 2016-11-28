@@ -57,16 +57,16 @@ final class Response : ResponseBuilder
     }
 
     ///set http status code eg. 404 200
-    auto setHttpStatusCode(int code)
+    auto setHttpStatusCode(ushort code)
     {
-		promise(code,HTTPMessage.statusText(code));
+		status(code,HTTPMessage.statusText(code));
         return this;
     }
 
     ///return json value
-    auto json(JSONValue json)
+    auto json(JSONValue js)
     {
-		json(json.toString());
+		json(js.toString());
         return this;
     }
     ///render json string value
