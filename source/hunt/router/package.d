@@ -22,8 +22,8 @@ public import hunt.router.build;
 import collie.utils.functional;
 
 import hunt.router.configbase;
-import hunt.http.request;
-import hunt.http.response;
+public import hunt.http.request;
+public import hunt.http.response;
 
 void initControllerCall(string FUN, T)(string str, Request args) if (
 	(is(T == class) || is(T == interface)) && hasMember!(T, FUN))

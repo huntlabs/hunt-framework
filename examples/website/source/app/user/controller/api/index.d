@@ -15,7 +15,7 @@ import hunt.application;
 class IndexController : Controller
 {
     mixin MakeController;
-    @action
+	@Action()
     void show()
     {
     	alias res = this.response;

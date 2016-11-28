@@ -5,7 +5,7 @@ import hunt.application;
 class AdminController : Controller
 {
     mixin MakeController;
-    @action
+    @Action()
     void show()
     {
     	alias res = this.response;

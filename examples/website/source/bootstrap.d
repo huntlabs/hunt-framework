@@ -19,21 +19,24 @@ import hunt;
 import app.middleware;
 import hunt.i18n;
 
-void hello(Request, Response res)
+void hello(Request req)
 {
+	Response res = req.createResponse();
     res.html("hello world");
     res.done();
 }
 
-void test(Request, Response res)
+void test(Request req)
 {
+	Response res = req.createResponse();
     res.redirect("hello");
+	res.done();
 }
 
 void main()
 {
     auto app = Application.getInstance();
-    app.addRoute("GET","/test",toDelegate(&test)).addRouter("GET","/hello",toDelegate(&hello))
+    app.addRoute("GET","/test",&test).addRoute("GET","/hello",&hello)
     	.setMiddlewareFactory(new MiddlewareFactory())
     	.enableLocale();
 

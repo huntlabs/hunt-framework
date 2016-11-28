@@ -31,8 +31,8 @@ final class AppConfig
 		string timeZone = "Asia/Shanghai";
 		uint keepAliveTimeOut = 30;
 		uint listenBacklog = 1024;
-		uint maxHeaderSize = 60 * 1024;
-		uint maxBodySzie = 8 * 1024 * 1024;
+		uint maxHeaderSize = 60;
+		uint maxBodySzie = 8 * 1024;
 		uint fastOpenQueueSize = 10000;
 		WebSocketFactory webSocketFactory = null;
 		
@@ -82,12 +82,14 @@ final class AppConfig
 		collectException(conf.server.default_language.value(),app.server.defaultLanguage);
 		collectException(conf.server.encoding.value(), app.server.encoding);
 		collectException(conf.server.time_zone.value(), app.server.timeZone);
-		collectException(conf.server.keepalive_timeout.as!uint(), app.server.keepAliveTimeOut);
+		collectException(conf.server.timeout.as!uint(), app.server.keepAliveTimeOut);
 		collectException(conf.server.max_body_szie.as!uint(), app.server.maxBodySzie);
 		collectException(conf.server.max_header_size.as!uint(), app.server.maxHeaderSize);
 		collectException(conf.server.cookie.domain.value(), app.server.cookie.domain);
 		collectException(conf.server.cookie.prefix.value(), app.server.cookie.prefix);
 		collectException(conf.server.cookie.expire.as!uint(), app.server.cookie.expire);
+		app.server.maxBodySzie = app.server.maxBodySzie << 10;// * 1024
+		app.server.maxHeaderSize = app.server.maxHeaderSize << 10;// * 1024
 		if(ips.length == 0){ 
 			ips ~= "127.0.0.1:8080";
 			ips ~= "::1:8080";

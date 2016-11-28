@@ -31,20 +31,19 @@ class IndexController : Controller
         return true;
     }
     mixin MakeController;
-    @action
+    @Action()
     @middleware(BeforeMiddleware.stringof)
     @middleware(AfterMiddleware.stringof)
     void show()
-    {
-        this.response.html("hello world<br/>")
+	{ 
+		auto response = this.request.createResponse();
+        response.html("hello world<br/>")
         //.setHeader("content-type","text/html;charset=UTF-8")
         .setCookie("name", "value", 10000)
         .setCookie("name1", "value", 10000, "/path")
         .setCookie("name2", "value", 10000);
-      //  auto model = new IndexModel();
-        //model.showTest2();
     }
-    @action
+    @Action()
     @middleware(OneMiddleware.stringof)
     void list()
     {
@@ -55,12 +54,12 @@ class IndexController : Controller
 		this.view.footer = "footer";
 		this.render!"content.dhtml"();
     }
-    @action
+	@Action()
     void index()
     {
         this.response.html("list");
     }
-    @action
+	@Action()
     void showbool()
     {
         this.response.html("list");

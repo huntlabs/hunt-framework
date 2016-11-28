@@ -38,6 +38,10 @@ abstract class Controller
 		View _view;
 
 	}
+	final @property response(){
+		return request.createResponse();
+	}
+
 	bool __CALLACTION__(string method,Request req);
 
 	/// called before action  return true is continue false is finish
@@ -92,8 +96,12 @@ mixin template HuntDynamicCallFun()
 {
 public:
 	mixin(_createCallActionFun!(typeof(this)));
-	mixin BuildRouterFunction!(typeof(this),true);
-
+	shared static this(){
+		import std.experimental.logger;
+		import std.conv;
+		import hunt.router.build;
+		mixin(_createRouterCallActionFun!(typeof(this),true)());
+	}
 }
 
 string  _createCallActionFun(T)()
@@ -103,7 +111,7 @@ string  _createCallActionFun(T)()
 	string str = "override bool __CALLACTION__(string funName,Request req) {";
 	str ~= "import std.experimental.logger;import std.variant;import std.conv;";
 	// str ~= "trace(\"call function \", funName);";
-	str ~= "this.request = req; this.response = res;";
+	str ~= "this.request = req;";
     str ~= "switch(funName){";
     foreach(memberName; __traits(allMembers, T))
     {
@@ -111,37 +119,35 @@ string  _createCallActionFun(T)()
         {
             foreach (t;__traits(getOverloads,T,memberName)) 
             {
-				static if(!hasUDA!(t, Action))
-				{
-					continue;
-				}
-				str ~= "case \"";
-				str ~= memberName;
-				str ~= "\":";
-				enum ws = getUDAs!(t, middleware);
-				static if(ws.length)
-				{
-					foreach(i,w; ws)
+				static if(hasUDA!(t, Action)) {
+					str ~= "case \"";
+					str ~= memberName;
+					str ~= "\": {\n";
+					enum ws = getUDAs!(t, middleware);
+					static if(ws.length)
 					{
-						str ~= format(q{ 
-								auto wb_%s_%s = new %s();
-								if(!wb_%s_%s.onProcess(this.request, this.response)){return false;}
-							}, i,memberName, w.className, i, memberName);
+						foreach(i,w; ws)
+						{
+							str ~= format(q{ 
+									auto wb_%s_%s = new %s();
+									if(!wb_%s_%s.onProcess(this.request, this.response)){return false;}
+								}, i,memberName, w.className, i, memberName);
+						}
+
 					}
 
+					//before
+					str ~= q{
+						if(!this.before()){return false;}
+					};
+					//action
+					str ~= memberName ~ "();";
+					//after
+					str ~= q{
+						if(!this.after()){return false;}
+					};
+					str ~= "}\n break;";
 				}
-
-				//before
-				str ~= q{
-					if(!this.before()){return false;}
-				};
-				//action
-				str ~= memberName ~ "();";
-				//after
-				str ~= q{
-					if(!this.after()){return false;}
-				};
-				str ~= "break;";
             }
         }
     }

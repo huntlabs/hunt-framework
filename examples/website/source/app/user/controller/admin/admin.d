@@ -6,10 +6,10 @@ class AdminController : Controller
 {
     mixin MakeController;
     
-    @action
+    @Action()
     void show()
     {
-    	alias res = this.response;
+		auto res = this.request.createResponse();
 
         res.html("<h2>"~"line:"~__LINE__~",function:"~__FUNCTION__);
     }
