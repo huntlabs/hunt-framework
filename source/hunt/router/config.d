@@ -19,7 +19,7 @@ import std.uni;
 import std.conv;
 import std.experimental.logger;
 
-import hunt.routing.configbase;
+import hunt.router.configbase;
 
 
 class RouterConfig : ConfigLine
@@ -77,10 +77,6 @@ class RouterConfig : ConfigLine
                             tmpRoute.method = toUpper(tmpSplites[0]);
                         tmpRoute.path = tmpSplites[1];
                         tmpRoute.hander = parseToFullController(tmpSplites[2]);
-                        
-                        if (tmpSplites.length == 4)
-                            parseMiddleware(tmpSplites[3], tmpRoute.middleWareBefore,
-                                tmpRoute.middleWareAfter);
                         routerContext ~= tmpRoute;
                     }
                 }
@@ -142,10 +138,6 @@ class RouterConfig : ConfigLine
                             tmpRoute.method = toUpper(tmpSplites[0]);
                         tmpRoute.path = tmpSplites[1];
                         tmpRoute.hander = parseToFullController(tmpSplites[2], filedir);
-                        
-                        if (tmpSplites.length == 4)
-                            parseMiddleware(tmpSplites[3], tmpRoute.middleWareBefore,
-                                tmpRoute.middleWareAfter);
                         routerContext ~= tmpRoute;
                     }
                 }

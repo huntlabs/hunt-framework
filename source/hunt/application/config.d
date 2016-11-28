@@ -4,35 +4,22 @@ import std.exception;
 import std.parallelism : totalCPUs;
 import std.socket : Address, parseAddress;
 import std.experimental.logger;
+import std.string;
 
 import hunt.text.configuration;
 import hunt.application.application : WebSocketFactory;
 
-import hunt.routing.configbase;
+import hunt.router.configbase;
 import collie.codec.http.server.httpserveroptions;
 
 final class AppConfig
 {
-	alias AddressList = HTTPServerOptions.HVector;
+	alias AddressList = Address[];
 	struct CookieConfig
 	{
 		string domain = ".huntframework.com";
 		string prefix = "hunt_";
 		uint expire = 3600;
-	}
-
-	struct HttpConfig
-	{
-		uint keepAliveTimeOut = 30;
-		uint maxBodySzie = 8 * 1024 * 1024;
-		uint maxHeaderSize = 4 * 1024;
-		uint headerSection = 4 * 1024;
-		uint requestSection = 8 * 1024;
-		uint responseSection = 8 * 1024;
-		
-		WebSocketFactory webSocketFactory = null;
-
-		CookieConfig cookie;
 	}
 
 	struct ServerConfig
@@ -42,11 +29,17 @@ final class AppConfig
 		string defaultLanguage = "zh-cn";
 		string encoding  = "utf-8";
 		string timeZone = "Asia/Shanghai";
+		uint keepAliveTimeOut = 30;
+		uint listenBacklog = 1024;
+		uint maxHeaderSize = 60 * 1024;
+		uint maxBodySzie = 8 * 1024 * 1024;
+		uint fastOpenQueueSize = 10000;
+		WebSocketFactory webSocketFactory = null;
+		
+		CookieConfig cookie;
+
 
 		AddressList bindAddress(){
-			if(_binds.empty){
-				_binds.insertBack(new InternetAddress("127.0.0.1",80));
-			}
 			return _binds;
 		}
 
@@ -71,7 +64,6 @@ final class AppConfig
 	}
 
 	DBConfig db;
-	HttpConfig http;
 	ServerConfig server;
 	LogConfig log;
 
@@ -80,30 +72,46 @@ final class AppConfig
 	static AppConfig parseAppConfig(Configuration conf)
 	{
 		AppConfig app = new AppConfig();
-		
+
 		app._config = conf;
 		string[] ips;
-		collectException(conf.http.binds.values(),ips);
-		collectException(conf.http.worker_threads.as!uint(),app.server.workerThreads);
-		collectException(conf.http.io_threads.as!uint(),app.server.ioThreads);
-		collectException(conf.config.default_language.value(),app.server.defaultLanguage);
-		collectException(conf.config.encoding.value(), app.server.encoding);
-		collectException(conf.config.time_zone.value(), app.server.timeZone);
-		collectException(conf.http.keepalive_timeout.as!uint(), app.http.keepAliveTimeOut);
-		collectException(conf.http.max_body_szie.as!uint(), app.http.maxBodySzie);
-		collectException(conf.http.max_header_size.as!uint(), app.http.maxHeaderSize);
-		collectException(conf.http.header_section.as!uint(), app.http.headerSection);
-		collectException(conf.http.request_section.as!uint(), app.http.requestSection);
-		collectException(conf.http.response_section.as!uint(), app.http.responseSection);
+		collectException(conf.server.binds.values(),ips);
+		collectException(conf.server.worker_threads.as!uint(),app.server.workerThreads);
+		collectException(conf.server.io_threads.as!uint(),app.server.ioThreads);
+		collectException(conf.server.fast_open.as!uint(),app.server.fastOpenQueueSize);
+		collectException(conf.server.default_language.value(),app.server.defaultLanguage);
+		collectException(conf.server.encoding.value(), app.server.encoding);
+		collectException(conf.server.time_zone.value(), app.server.timeZone);
+		collectException(conf.server.keepalive_timeout.as!uint(), app.server.keepAliveTimeOut);
+		collectException(conf.server.max_body_szie.as!uint(), app.server.maxBodySzie);
+		collectException(conf.server.max_header_size.as!uint(), app.server.maxHeaderSize);
+		collectException(conf.server.cookie.domain.value(), app.server.cookie.domain);
+		collectException(conf.server.cookie.prefix.value(), app.server.cookie.prefix);
+		collectException(conf.server.cookie.expire.as!uint(), app.server.cookie.expire);
+		if(ips.length == 0){ 
+			ips ~= "127.0.0.1:8080";
+			ips ~= "::1:8080";
+		}
 		foreach(ip;ips){
-			//todo: 解析IP
+			import std.conv;
+			auto index = lastIndexOf(ip,':');
+			if(index <= 0 ) continue;
+			string tip =  strip(ip[0..index]);
+			string tport = strip(ip[index+1..$]);
+			ushort port = 0;
+			collectException(to!(ushort)(tport),port);
+			if(port == 0)continue;
+			Address addr;
+			collectException(parseAddress(tip,port),addr);
+			if(addr is null) continue;
+			app.server._binds ~= addr;
 		}
 		string ws;
-		collectException(conf.http.webSocket_factory.value(), ws);
+		collectException(conf.server.webSocket_factory.value(), ws);
 		
 		if(ws.length > 0){
 			auto obj = Object.factory(ws);
-			if(obj) app.http.webSocketFactory = cast(WebSocketFactory)obj;
+			if(obj) app.server.webSocketFactory = cast(WebSocketFactory)obj;
 		}
 		
 		collectException(conf.log.level.value(), app.log.level);

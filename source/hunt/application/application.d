@@ -32,6 +32,7 @@ public import hunt.application.config;
 
 public import hunt.application.middleware;
 import collie.codec.http.server.websocket;
+import collie.buffer;
 
 abstract class WebSocketFactory
 {
@@ -122,18 +123,19 @@ final class Application
 	
 	@property appConfig(){return Config.app;}
 
+	void setCreateBuffer(CreatorBuffer cbuffer){
+		if(cbuffer)
+			_cbuffer = cbuffer;
+	}
+
 	/**
         Start the HTTPServer server , and block current thread.
     */
 	void run()
 	{
-		upConfig();
-		/*auto config = Config.router;
-		if(config !is null)
-			setRouterConfigHelper!("__CALLACTION__",IController,HTTPRouterGroup)
-				(_router,config);
-		router.done();*/
-
+		setLogConfig(Config.app.log);
+		upConfig(Config.app.server);
+		upRouterConfig();
 		_server.start();
 	}
 	
@@ -145,50 +147,170 @@ final class Application
 	{
 		_server.stop();
 	}
-	
 private:
-	void upConfig()
+	RequestHandler newHandler(RequestHandler handler,HTTPMessage msg){
+		if(!msg.upgraded){
+			return new Request(_cbuffer,&handleRequest,_maxBodySize);
+		} else if(_wfactory){
+			return _wfactory.newWebSocket(msg);
+		}
+		return null;
+	}
+
+	Buffer defaultBuffer(HTTPMessage msg) nothrow
 	{
-		_server.bind(Config.app.server.bindAddress() );
-		//_server.setSSLConfig(_config.httpConfig.sslConfig());
-		uint ts = Config.app.server.workerThreads - 1;
-		
-		if(ts > 0)
-		{
-			_group = new EventLoopGroup(ts);
-			_server.group(_group);
-		}
-		
-		_server.keepAliveTimeOut(Config.app.http.keepAliveTimeOut);
-		_server.maxBodySize(Config.app.http.maxBodySzie);
-		_server.maxHeaderSize(Config.app.http.maxHeaderSize);
-		_server.headerStectionSize(Config.app.http.headerSection);
-		_server.requestBodyStectionSize(Config.app.http.requestSection);
-		_server.responseBodyStectionSize(Config.app.http.responseSection);
-		_wfactory = Config.app.http.webSocketFactory;
-		
-		if(_wfactory is null)
-		{
-			_server.setWebsocketFactory(null);  
-		}
-		else
-		{
-			_server.setWebsocketFactory(&_wfactory.newWebSocket);
+		try{
+			import std.experimental.allocator.gc_allocator;
+			import collie.buffer.ubytebuffer;
+			if(msg.chunked == false){
+				string contign = msg.getHeaders.getSingleOrEmpty(HTTPHeaderCode.CONTENT_LENGTH);
+				if(contign.length > 0){
+					uint len = 0;
+					collectException(to!(uint)(contign),len);
+					if(len > _maxBodySize)
+						return null;
+				}
+			}
+			return new UbyteBuffer!GCAllocator();
+		} catch(Exception e){
+			return null;
 		}
 	}
-	
+
+	void handleRequest(Request req) nothrow
+	{
+		auto e = collectException(_tpool.put(task!doHandleReqest(req)));
+		if(e)
+			showException(e);
+	}
+
+private:
+	void upConfig(ref AppConfig.ServerConfig conf)
+	{
+		_maxBodySize = conf.maxBodySzie;
+		_tpool = new TaskPool(conf.workerThreads);
+		_tpool.isDaemon = true;
+
+		HTTPServerOptions option;
+		option.maxHeaderSize = conf.maxHeaderSize;
+		option.listenBacklog = conf.listenBacklog;
+
+		option.threads = conf.ioThreads;
+		option.timeOut = conf.keepAliveTimeOut;
+		option.handlerFactories.insertBack(&newHandler);
+		_server = new HttpServer(option);
+		foreach(Address addr; conf.bindAddress){
+			HTTPServerOptions.IPConfig ipconf;
+			ipconf.address = addr;
+			ipconf.fastOpenQueueSize = conf.fastOpenQueueSize;
+			ipconf.enableTCPFastOpen = (conf.fastOpenQueueSize > 0);
+			_server.addBind(ipconf);
+		}
+
+		_wfactory = conf.webSocketFactory;
+	}
+
+	void setLogConfig(ref AppConfig.LogConfig conf)
+	{
+		switch(conf.level)
+		{
+			case "all":
+				globalLogLevel = LogLevel.all;
+				break;
+			case "critical":
+				globalLogLevel = LogLevel.critical;
+				break;
+			case "error":
+				globalLogLevel = LogLevel.error;
+				break;
+			case "fatal":
+				globalLogLevel = LogLevel.fatal;
+				break;
+			case "info":
+				globalLogLevel = LogLevel.info;
+				break;
+			case "trace":
+				globalLogLevel = LogLevel.trace;
+				break;
+			case "warning":
+				globalLogLevel = LogLevel.warning;
+				break;
+			case "off":
+			default:
+				globalLogLevel = LogLevel.off;
+				break;
+		}
+		if(conf.file)
+		{
+			sharedLog = new FileLogger(conf.file);
+		}
+	}
+
+	void upRouterConfig()
+	{
+		auto router = Config.router;
+		if(router)
+			setRouterConfigHelper!("__CALLACTION__",Controller)(router);
+		defaultRouter.done();
+	}
+
 	/// default Constructor
 	this()
 	{
-
+		_cbuffer = &defaultBuffer;
 	}
 	
 	__gshared static Application _app;
 private:
 	HttpServer _server;
 	WebSocketFactory _wfactory;
-	
+	uint _maxBodySize;
 	shared AbstractMiddlewareFactory _middlewareFactory;
+	CreatorBuffer _cbuffer;
 
 	TaskPool _tpool;
+}
+
+import collie.utils.exception;
+import hunt.application.controller;
+
+void doHandleReqest(Request req) nothrow
+{
+	try{
+		MachData data = defaultRouter.match(req.header(HTTPHeaderCode.HOST),req.method,req.path);
+		if(data.macth){
+			foreach(key,value; data.mate){req.addMate(key,value);}
+			switch(data.macth.type){
+				case RouterHandlerType.Function:
+					data.macth.dgate()(req);
+					return;
+				case RouterHandlerType.Delegate:
+					data.macth.func()(req);
+					return;
+				default:
+					break;
+			}
+		} 
+		Response rep = req.createResponse();
+		if(rep){
+			rep.setHttpStatusCode(404);
+			rep.setContext("NOT Fount");
+			rep.connectionClose();
+			rep.done();
+		}
+	} catch (CreateResponseException e){
+		showException(e);
+	} catch (Exception e){
+		showException(e);
+		Response rep;
+		collectException(req.createResponse,rep);
+		if(rep){
+			collectException((){
+					rep.setHttpStatusCode(502);
+					rep.setContext(e.toString());
+					rep.connectionClose();
+					rep.done();
+				}());
+		}
+	}
 }
