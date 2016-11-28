@@ -12,3 +12,4 @@
 module hunt;
  
 public import hunt.application;
+public import hunt.router;

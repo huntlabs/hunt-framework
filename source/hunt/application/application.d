@@ -63,7 +63,7 @@ final class Application
             before =  The PipelineFactory that create the middleware list for the router rules, before  the router rule's handled execute.
             after  =  The PipelineFactory that create the middleware list for the router rules, after  the router rule's handled execute.
     */
-	auto addRoute(T)(string domain, string method,T handle)
+	auto addRoute(T)(string domain, string method,string path,T handle)
 		if(is(T == HandleDelegate) || is(T == HandleFunction))
 	{
 		method = toUpper(method);
@@ -179,7 +179,7 @@ private:
 
 	void handleRequest(Request req) nothrow
 	{
-		auto e = collectException(_tpool.put(task!doHandleReqest(req)));
+		auto e = collectException(/*_tpool.put(task!*/doHandleReqest(req)/*)*/);
 		if(e)
 			showException(e);
 	}
@@ -191,7 +191,7 @@ private:
 		_tpool = new TaskPool(conf.workerThreads);
 		_tpool.isDaemon = true;
 
-		HTTPServerOptions option;
+		HTTPServerOptions option = new HTTPServerOptions();
 		option.maxHeaderSize = conf.maxHeaderSize;
 		option.listenBacklog = conf.listenBacklog;
 
@@ -240,7 +240,7 @@ private:
 				globalLogLevel = LogLevel.off;
 				break;
 		}
-		if(conf.file)
+		if(conf.file.length > 0)
 		{
 			sharedLog = new FileLogger(conf.file);
 		}
@@ -268,7 +268,7 @@ private:
 	shared AbstractMiddlewareFactory _middlewareFactory;
 	CreatorBuffer _cbuffer;
 
-	TaskPool _tpool;
+	__gshared TaskPool _tpool;
 }
 
 import collie.utils.exception;
@@ -281,10 +281,10 @@ void doHandleReqest(Request req) nothrow
 		if(data.macth){
 			foreach(key,value; data.mate){req.addMate(key,value);}
 			switch(data.macth.type){
-				case RouterHandlerType.Function:
+				case RouterHandlerType.Delegate:
 					data.macth.dgate()(req);
 					return;
-				case RouterHandlerType.Delegate:
+				case RouterHandlerType.Function:
 					data.macth.func()(req);
 					return;
 				default:
