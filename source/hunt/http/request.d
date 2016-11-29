@@ -199,8 +199,9 @@ final class Request : RequestHandler
 	{
 		if(_error != HTTPErrorCode.NO_ERROR)
 			throw new CreateResponseException("http ero is : " ~ to!string(_error));
-		if(_res is null)
+		if(_res is null) {
 			_res = new Response(_downstream);
+		}
 		return _res;
 	}
 protected:

@@ -33,7 +33,7 @@ final class AppConfig
 		uint listenBacklog = 1024;
 		uint maxHeaderSize = 60;
 		uint maxBodySzie = 8 * 1024;
-		uint fastOpenQueueSize = 10000;
+		uint fastOpenQueueSize = 0;
 		WebSocketFactory webSocketFactory = null;
 		
 		CookieConfig cookie;
