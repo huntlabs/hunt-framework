@@ -97,6 +97,7 @@ final class Router
 	{
 		if (condigDone)
 			return null;
+		method = toUpper(method);
 		RouteMap map = _map.get(method, null);
 		if (!map)
 		{
@@ -343,7 +344,6 @@ final class RouteMap
 
 	RouteElement add(T)(string path, T handle) if(is(T == HandleDelegate) || is(T == HandleFunction))
 	{
-		trace("add function: ", path);
 		if (isHaveRegex(path))
 		{
 			auto ele = new RegexElement(path);

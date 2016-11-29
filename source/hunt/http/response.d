@@ -30,6 +30,7 @@ final class Response : ResponseBuilder
     this(ResponseHandler resp)
     {
 		super(resp);
+		setHttpStatusCode(200);
     }
 
     auto setHeader(T = string)(string key, T value)
