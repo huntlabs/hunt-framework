@@ -75,7 +75,13 @@ final class AppConfig
 
 		app._config = conf;
 		string[] ips;
-		collectException(conf.server.binds.values(),ips);
+		{
+			string ip;
+			collectException(conf.server.binds.value(),ip);
+			if(ip.length > 0){
+				ips = split(ip,';');
+			}
+		}
 		collectException(conf.server.worker_threads.as!uint(),app.server.workerThreads);
 		collectException(conf.server.io_threads.as!uint(),app.server.ioThreads);
 		collectException(conf.server.fast_open.as!uint(),app.server.fastOpenQueueSize);
@@ -92,7 +98,6 @@ final class AppConfig
 		app.server.maxHeaderSize = app.server.maxHeaderSize << 10;// * 1024
 		if(ips.length == 0){ 
 			ips ~= "127.0.0.1:8080";
-			ips ~= "::1:8080";
 		}
 		foreach(ip;ips){
 			import std.conv;

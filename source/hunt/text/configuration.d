@@ -26,15 +26,9 @@ class Configuration
 			enforce!NoValueHasException(v,format(" %s is not in config! ",name));
 			return v;
 		}
-		
-		@property values(){
-			return _value;
-		}
 
 		@property value(){
-			if(_value.length == 0)
-				return null;
-			return _value[0];
+			return _value;
 		}
 
 		auto as(T)(T value = T.init) if(isNumeric!(T))
@@ -42,12 +36,12 @@ class Configuration
 			if(_value.length == 0)
 				return value;
 			else
-				return to!T(_value[0]);
+				return to!T(_value);
 		}
 		
 		auto as(T : bool)(T value = T.init)
 		{
-			if(_value.length == 0 || _value[0] == "false" || _value[0] == "0")
+			if(_value.length == 0 || _value == "false" || _value == "0")
 				return false;
 			else
 				return true;
@@ -58,7 +52,7 @@ class Configuration
 			if(_value.length == 0)
 				return value;
 			else
-				return _value[0];
+				return _value;
 		}
 
 		auto opDispatch(string s)()
@@ -67,7 +61,7 @@ class Configuration
 		}
 		
 	private :
-		string[] _value;
+		string _value;
 		ConfigurationValue[string] _map;
 	}
 	
@@ -134,7 +128,7 @@ private:
 		}
 		if(cvalue is _value)
 			return;
-		cvalue._value ~= value;
+		cvalue._value = value;
 	}
 	
 private:
@@ -145,6 +139,7 @@ private:
 
 unittest
 {
+	import std.stdio;
 	import FE = std.file;
 	FE.write("test.config","http.listen = 100 \napp.test =  \n# this is  \n ; start dev\n [dev]\napp.test = dev");
 	auto conf = new Configuration("test.config");
@@ -153,6 +148,7 @@ unittest
 	
 	auto confdev = new Configuration("test.config","dev");
 	assert(confdev.http.listen.as!long() == 100);
+	writeln("----------" ,confdev.app.test.value());
 	assert(confdev.app.test.value() == "dev");
 
 	string str;
