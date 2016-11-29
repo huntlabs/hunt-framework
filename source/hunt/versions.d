@@ -11,4 +11,4 @@
 
 module hunt.versions;
 
-enum HUNT_VERSION = "v0.8.7";
+enum HUNT_VERSION = "v0.9.x";

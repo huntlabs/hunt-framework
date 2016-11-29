@@ -179,7 +179,7 @@ private:
 
 	void handleRequest(Request req) nothrow
 	{
-		auto e = collectException(/*_tpool.put(task!*/doHandleReqest(req)/*)*/);
+		auto e = collectException(_tpool.put(task!doHandleReqest(req)));
 		if(e)
 			showException(e);
 	}

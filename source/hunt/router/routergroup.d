@@ -2,6 +2,7 @@
 
 import hunt.router.router;
 import hunt.router.utils;
+import std.experimental.logger;
 
 /**
     the router group.
@@ -55,6 +56,7 @@ final class RouterGroup
     */
 	RouteElement addRoute(T)(string domain, string method,string path, T handle) if(is(T == HandleDelegate) || is(T == HandleFunction))
 	{
+		trace("add Route!  domain : ", domain, "   method: ",method, "\t path: ",path);
 		if(domain.length == 0)
 		{
 			return _router.addRoute(method,path,handle);
@@ -83,6 +85,7 @@ final class RouterGroup
     */
 	RouteElement addRoute(T)(string method, string path, T handle) if(is(T == HandleDelegate) || is(T == HandleFunction))
 	{
+		trace("add Route!   method: ",method, "\t path",path);
 		return _router.addRoute(method,path,handle);
 	}
 

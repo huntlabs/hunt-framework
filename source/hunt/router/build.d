@@ -10,15 +10,18 @@ import std.exception;
 
 struct Action
 {
-	this(string dom, string pa){
+	this(string dom, string md,string pa){
+		method = md;
 		domain = dom;
 		path = path;
 	}
-	this(string pa){
+	this(string md,string pa){
+		method = md;
 		path = pa;
 	}
 
 	string domain;
+	string method;
 	string path;
 }
 
@@ -51,9 +54,9 @@ string  _createRouterCallActionFun(T, bool controller)()
 						alias ptype = Parameters!(t);
 						static if(ptype.length == 1 && is(ptype[0] == Request)) {
 							static if(!controller){
-								str ~= "\t\tdefaultRouter.addRoute(\"" ~ action.domain ~"\",\""~ action.path ~ "\",&doHandler!(" ~ T.stringof ~ ",\"" ~ memberName ~ "\"));\n";
+								str ~= "\t\tdefaultRouter.addRoute(\"" ~ action.domain ~"\",\""~ action.method ~ "\",\""~ action.path ~ "\",&doHandler!(" ~ T.stringof ~ ",\"" ~ memberName ~ "\"));\n";
 							} else {
-								str ~= "\t\tdefaultRouter.addRoute(\"" ~ action.domain ~"\",\""~ action.path ~ "\",bind(&callHandler!(" ~ T.stringof ~ "),\"" ~ memberName ~ "\"));\n";
+								str ~= "\t\tdefaultRouter.addRoute(\"" ~ action.domain ~"\",\""~ action.method ~ "\",bind(&callHandler!(" ~ T.stringof ~ "),\"" ~ memberName ~ "\"));\n";
 							}
 						}
 					}
