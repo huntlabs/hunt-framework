@@ -95,7 +95,7 @@ final class Router
     */
 	RouteElement addRoute(T)(string method, string path,T handle) if(is(T == HandleDelegate) || is(T == HandleFunction))
 	{
-		if (condigDone)
+		if (condigDone || method.length == 0 || path.length == 0 || handle is null)
 			return null;
 		method = toUpper(method);
 		RouteMap map = _map.get(method, null);
