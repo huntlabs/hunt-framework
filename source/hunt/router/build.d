@@ -54,9 +54,9 @@ string  _createRouterCallActionFun(T, bool controller)()
 						alias ptype = Parameters!(t);
 						static if(ptype.length == 1 && is(ptype[0] == Request)) {
 							static if(!controller){
-								str ~= "\t\tdefaultRouter.addRoute(\"" ~ action.domain ~"\",\""~ action.method ~ "\",\""~ action.path ~ "\",&doHandler!(" ~ T.stringof ~ ",\"" ~ memberName ~ "\"));\n";
+								str ~= "\t\taddRouteHelp(\"" ~ action.domain ~"\",\""~ action.method ~ "\",\""~ action.path ~ "\",&doHandler!(" ~ T.stringof ~ ",\"" ~ memberName ~ "\"));\n";
 							} else {
-								str ~= "\t\tdefaultRouter.addRoute(\"" ~ action.domain ~"\",\""~ action.method ~ "\",bind(&callHandler!(" ~ T.stringof ~ "),\"" ~ memberName ~ "\"));\n";
+								str ~= "\t\taddRouteHelp(\"" ~ action.domain ~"\",\""~ action.method ~ "\",bind(&callHandler!(" ~ T.stringof ~ "),\"" ~ memberName ~ "\"));\n";
 							}
 						}
 					}
@@ -65,6 +65,20 @@ string  _createRouterCallActionFun(T, bool controller)()
 		}
 	}
 	return str;
+}
+
+void addRouteHelp(Handler)(string domin, string method, string path,Handler t)
+{
+	import std.string;
+	import hunt.router.configbase;
+
+	if(method == "*"){
+		method = fullMethod;
+	} 
+	string[]  methods = split(method,',');
+	foreach(str;methods) {
+		defaultRouter.addRoute(domin,strip(str),path,t);
+	}
 }
 
 void doHandler(T,string fun)(Request req) if(is(T == class) || is(T == struct))

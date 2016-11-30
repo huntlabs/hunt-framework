@@ -29,7 +29,6 @@ final class RouterGroup
 
 	void setDefaultRoute(T)(string domain,T dohandle)if(is(T == HandleDelegate) || is(T == HandleFunction))
 	{
-
 		Router router;
 		if(domain.length == 0){
 			router = _router;
