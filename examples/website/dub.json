@@ -9,5 +9,20 @@
             "hunt" : {
                 "path" : "../../"
             }
-	}
+	},
+	"configurations" : [
+		{
+			"name" : "default",
+			"subConfigurations": {
+				"hunt": "default"
+			}
+			
+		},
+		{
+			"name" : "no_taskpool",
+			"subConfigurations": {
+				"hunt": "no_taskpool"
+			}
+		}
+	]
 }
