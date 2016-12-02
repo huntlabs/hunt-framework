@@ -108,7 +108,11 @@ final class Application
 		return this;
 	}
 
-	
+	void setWebSocketFactory(WebSocketFactory webfactory)
+	{
+		_wfactory = webfactory;
+	}
+
 	/// get the router.
 	@property router()
 	{
@@ -174,13 +178,18 @@ private:
 			}
 			return new UbyteBuffer!(CollieAllocator!ubyte)();
 		} catch(Exception e){
+			showException(e);
 			return null;
 		}
 	}
 
 	void handleRequest(Request req) nothrow
 	{
-		auto e = collectException(_tpool.put(task!doHandleReqest(req)));
+		version(NO_TASKPOOL){
+			auto e = collectException(doHandleReqest(req));
+		} else {
+			auto e = collectException(_tpool.put(task!doHandleReqest(req)));
+		}
 		if(e)
 			showException(e);
 	}
@@ -189,14 +198,19 @@ private:
 	void upConfig(ref AppConfig.ServerConfig conf)
 	{
 		_maxBodySize = conf.maxBodySzie;
-		_tpool = new TaskPool(conf.workerThreads);
-		_tpool.isDaemon = true;
+		version(NO_TASKPOOL){} else {
+			_tpool = new TaskPool(conf.workerThreads);
+			_tpool.isDaemon = true;
+		}
 
 		HTTPServerOptions option = new HTTPServerOptions();
 		option.maxHeaderSize = conf.maxHeaderSize;
 		option.listenBacklog = conf.listenBacklog;
-
-		option.threads = conf.ioThreads;
+		version(NO_TASKPOOL){
+			option.threads = conf.ioThreads + conf.workerThreads;
+		} else {
+			option.threads = conf.ioThreads;
+		}
 		option.timeOut = conf.keepAliveTimeOut;
 		option.handlerFactories.insertBack(&newHandler);
 		_server = new HttpServer(option);
@@ -207,8 +221,8 @@ private:
 			ipconf.enableTCPFastOpen = (conf.fastOpenQueueSize > 0);
 			_server.addBind(ipconf);
 		}
-
-		_wfactory = conf.webSocketFactory;
+		if(conf.webSocketFactory)
+			_wfactory = conf.webSocketFactory;
 	}
 
 	void setLogConfig(ref AppConfig.LogConfig conf)
@@ -255,7 +269,6 @@ private:
 		defaultRouter.done();
 	}
 
-	/// default Constructor
 	this()
 	{
 		_cbuffer = &defaultBuffer;
@@ -268,8 +281,9 @@ private:
 	uint _maxBodySize;
 	shared AbstractMiddlewareFactory _middlewareFactory;
 	CreatorBuffer _cbuffer;
-
-	__gshared TaskPool _tpool;
+	version(NO_TASKPOOL){}else {
+		__gshared TaskPool _tpool;
+	}
 }
 
 import collie.utils.exception;

@@ -2,7 +2,7 @@
 # [GET,POST,PUT...]    path    controller.method
 #
 
-*	/	index.show
+*	/show	index.show
 *	/list	index.list
 *	/index	index.index
 *	/showint	index.showint

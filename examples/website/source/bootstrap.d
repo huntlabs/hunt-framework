@@ -29,14 +29,14 @@ void hello(Request req)
 void test(Request req)
 {
 	Response res = req.createResponse();
-    res.redirect("hello");
+    res.redirect("/");
 	res.done();
 }
 
 void main()
 {
     auto app = Application.getInstance();
-    app.addRoute("GET","/test",&test).addRoute("GET","/hello",&hello)
+    app.addRoute("GET","/test",&test).addRoute("GET","/",&hello)
     	.setMiddlewareFactory(new MiddlewareFactory())
     	.enableLocale();
 
