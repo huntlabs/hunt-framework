@@ -1,6 +1,5 @@
 Hunt framework
-=======
-[![Build Status](https://travis-ci.org/putaolabs/hunt.svg?branch=master)](https://travis-ci.org/putaolabs/hunt)
+
 ----------------
 Hunt is a high-level [dlang](http://dlang.org/) Web framework that encourages rapid development and clean, pragmatic design. It lets you build high-performance Web applications quickly and easily.
 
