@@ -163,7 +163,6 @@ private:
 
 	Buffer defaultBuffer(HTTPMessage msg) nothrow
 	{
-		import collie.utils.allocator;
 		try{
 			import std.experimental.allocator.gc_allocator;
 			import collie.buffer.ubytebuffer;
@@ -176,7 +175,7 @@ private:
 						return null;
 				}
 			}
-			return new UbyteBuffer!(CollieAllocator!ubyte)();
+			return new UbyteBuffer!ubyte();
 		} catch(Exception e){
 			showException(e);
 			return null;
