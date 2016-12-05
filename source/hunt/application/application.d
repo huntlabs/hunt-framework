@@ -308,7 +308,7 @@ void doHandleReqest(Request req) nothrow
 		Response rep = req.createResponse();
 		if(rep){
 			rep.setHttpStatusCode(404);
-			rep.setContext("NOT Fount");
+			rep.setContext("<h1>NOT Found<h1>");
 			rep.connectionClose();
 			rep.done();
 		}

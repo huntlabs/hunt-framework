@@ -247,22 +247,24 @@ protected:
 
 	override void onError(HTTPErrorCode code) nothrow {
 		collectException((){
-				scope(exit)
+				scope(exit) {
 					if(_res)_res.clear();
-				_error = code;
-				if(_error == HTTPErrorCode.TIME_OUT){
-					collectException(createResponse());
-					if(_res){
-						_res.setHttpStatusCode(408);
-						_res.done();
-					}
-				} else if(_error ==  HTTPErrorCode.FRAME_SIZE_ERROR){
-					collectException(createResponse());
-					if(_res){
-						_res.setHttpStatusCode(429);
-						_res.done();
-					}
+					_downstream = null;
 				}
+				_error = code;
+				if(_error == HTTPErrorCode.REMOTE_CLOSED)
+					return;
+				if(_res is null){
+					_res = new Response(_downstream);
+				}
+				if(_error == HTTPErrorCode.TIME_OUT){
+					_res.setHttpStatusCode(408);
+				} else if(_error ==  HTTPErrorCode.FRAME_SIZE_ERROR){
+					_res.setHttpStatusCode(429);
+				} else {
+					_res.setHttpStatusCode(502);
+				}
+				_res.done();
 			}());
 	}
 
