@@ -217,13 +217,13 @@ protected:
 				}
 				if(_body) {
 					_body.write(data);
-					gcFree(_body);
-					_body = null;
 					if(_body.length > _maxBodySize){
 						onError(HTTPErrorCode.FRAME_SIZE_ERROR);
+						gcFree(_body);
+						_body = null;
 					}
 				}
-			});
+			}());
 	}
 
 	override void onEOM() nothrow {
