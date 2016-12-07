@@ -22,9 +22,9 @@ config/routes
 # [GET,POST,PUT...]    path    controller.action
 #
 
-GET  /           index.index
-GET  /users      user.list
-POST /user/login user.login
-GET  /user/show  user.info
+GET		/				index.index
+GET		/users			user.list
+POST	/user/login		user.login
+GET		/user/show		user.info
 
 ```
