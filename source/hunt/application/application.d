@@ -164,7 +164,6 @@ private:
 
 	Buffer defaultBuffer(HTTPMessage msg) nothrow
 	{
-		import collie.utils.allocator;
 		try{
 			import std.experimental.allocator.gc_allocator;
 			import collie.buffer.ubytebuffer;
@@ -177,7 +176,7 @@ private:
 						return null;
 				}
 			}
-			return new UbyteBuffer!(CollieAllocator!ubyte)();
+			return new UbyteBuffer!ubyte();
 		} catch(Exception e){
 			showException(e);
 			return null;
@@ -310,7 +309,7 @@ void doHandleReqest(Request req) nothrow
 		Response rep = req.createResponse();
 		if(rep){
 			rep.setHttpStatusCode(404);
-			rep.setContext("NOT Fount");
+			rep.setContext("<h1>NOT Found<h1>");
 			rep.connectionClose();
 			rep.done();
 		}
