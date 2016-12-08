@@ -1,10 +1,6 @@
  
 module hunt.utils.path;
 
-public import std.path;
-
-//TODO: if in the bin path, the path will be start path
-//TODO: if in the bin path, the path will be start path
 @property theExecutorPath()
 {
 	return _theExecutorPath;
@@ -21,9 +17,11 @@ private shared string _theConfigPath = "";
 shared static this()
 {
 	import core.runtime;
+	import std.path;
+	import std.file;
 	
 	auto list = Runtime.args();
-	_theExecutorPath = absolutePath(dirName(list[0]));
+	_theExecutorPath = absolutePath(thisExePath);
 	if(list.length == 1)
 	{
 		_theConfigPath = _theExecutorPath;
