@@ -2,24 +2,27 @@
 	"name": "website",
 	"description": "A minimal D application.",
 	"copyright": "Copyright © 2016, huntframework.com",
-	"targetType" : "executable",
-	"stringImportPaths": [ "./resources/views" ,"./resources/views/layouts","./resources/views/shared"],
+	"targetType": "executable",
+	"stringImportPaths": [
+		"./resources/views",
+		"./resources/views/layouts",
+		"./resources/views/shared"
+	],
 	"mainSourceFile": "./source/bootstrap.d",
 	"dependencies": {
-            "hunt" : {
-                "path" : "../../"
-            }
+		"hunt": {
+			"path": "../../"
+		}
 	},
-	"configurations" : [
+	"configurations": [
 		{
-			"name" : "default",
+			"name": "default",
 			"subConfigurations": {
 				"hunt": "default"
 			}
-			
 		},
 		{
-			"name" : "no_taskpool",
+			"name": "no_taskpool",
 			"subConfigurations": {
 				"hunt": "no_taskpool"
 			}
