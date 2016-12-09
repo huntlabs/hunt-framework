@@ -20,6 +20,7 @@ import collie.codec.http;
 public import std.socket;
 public import std.experimental.logger;
 import std.uni;
+import std.path;
 import std.parallelism;
 
 import hunt.router;
