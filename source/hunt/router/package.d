@@ -42,16 +42,10 @@ void initControllerCall(string FUN, T)(string str, Request args) if (
 	
 	auto obj = Object.factory(objName);
 	if (!obj)
-	{
-		error("Object.factory erro!, the obj Name is : ", objName);
-		return;
-	}
+		throw new RourerFactoryException("Object.factory erro!, the obj Name is : "~objName);
 	auto a = cast(T) obj;
 	if (!a)
-	{
-		error("cast(T)obj; erro!");
-		return;
-	}
+		throw new RourerFactoryException("cast("~ FUN ~")obj; erro!"~objName );
 	mixin("bool ret = a." ~ FUN ~ "(funName,args);" ~ q{
 			if(!ret)
 			{
@@ -132,3 +126,9 @@ void setRouterConfigHelper(string FUN, T)(RouterConfigBase config) if (
         }
     }
 }
+
+
+import collie.utils.exception;
+import hunt.exception;
+
+mixin ExceptionBuild!("RourerFactory","Hunt");
