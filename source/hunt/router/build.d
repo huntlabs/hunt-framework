@@ -87,6 +87,13 @@ void doHandler(T,string fun)(Request req) if(is(T == class) || is(T == struct))
 	mixin("handler." ~ fun ~ "(req);");
 }
 
+
+template CallController(T,string fun)
+	if(is(T == class) || is(T == struct) && hasMember!(T,"__CALLACTION__"))
+{
+	alias CallController = (Request req){callHandler!T(fun,req);};
+}
+
 void callHandler(T)(string fun,Request req) if(is(T == class) || is(T == struct) && hasMember!(T,"__CALLACTION__"))
 {
 	auto handler = new T();
