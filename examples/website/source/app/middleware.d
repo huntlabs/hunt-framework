@@ -15,18 +15,6 @@ import std.functional;
 import hunt.application;
 import hunt.router;
 
-
-class MiddlewareFactory : AbstractMiddlewareFactory
-{
-    override IMiddleware[] getMiddlewares()
-    {
-        IMiddleware[] _list;
-        _list ~= new OneMiddleware();
-        _list ~= new TwoMiddleware();
-       return _list;
-    }
-}
-
 class OneMiddleware : IMiddleware
 {
     override string name()

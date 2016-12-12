@@ -36,11 +36,11 @@ void test(Request req)
 void main()
 {
     auto app = Application.getInstance();
-    app.addRoute("GET","/test",&test).addRoute("GET","/",&hello)
-    	.setMiddlewareFactory(new MiddlewareFactory())
-    	.enableLocale();
+	app.addRoute("GET","/test",&test).addRoute("GET","/",&hello);
+    	//.setMiddlewareFactory(new MiddlewareFactory())
+    	//.enableLocale();
 
-    
+	app.addRoute("GET","/label/edit/{id:[0-9]*}",&hello);
 	
 	///设置语言
 	setLocale("en-br");

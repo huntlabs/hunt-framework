@@ -9,11 +9,5 @@ interface IMiddleware
 	///get the middleware name
 	string name();
 	///return true is continue, false is finish
-	bool onProcess(Request req, Response res);
-}
-
-///middleware factory
-abstract shared class AbstractMiddlewareFactory
-{
-	IMiddleware[] getMiddlewares();
+	bool onProcess(Request req,Response res);
 }
