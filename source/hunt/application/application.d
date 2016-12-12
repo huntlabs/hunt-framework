@@ -88,17 +88,6 @@ final class Application
 		defaultRouter.addRoute(method,path,handle);
 		return this;
 	}
-	///
-	auto setMiddlewareFactory(shared AbstractMiddlewareFactory mfactory)
-	{
-		_middlewareFactory = mfactory;
-		return this;
-	}
-
-	@property auto middlewareFactory()
-	{
-		return _middlewareFactory;
-	}
 
 	///启用国际化
 	auto enableLocale(string resPath = buildPath(theExecutorPath, "./resources/lang"), string defaultLocale = "zh-cn")
@@ -279,7 +268,6 @@ private:
 	HttpServer _server;
 	WebSocketFactory _wfactory;
 	uint _maxBodySize;
-	shared AbstractMiddlewareFactory _middlewareFactory;
 	CreatorBuffer _cbuffer;
 	version(NO_TASKPOOL){}else {
 		__gshared TaskPool _tpool;

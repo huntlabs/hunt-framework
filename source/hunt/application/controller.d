@@ -88,6 +88,16 @@ abstract class Controller
 	{
 		this.response.html(this.view.show!filename());
 	}
+
+	protected final bool __handleWares()
+	{
+		foreach(ws;middlewares){
+			if(!ws.onProcess(request,response())){
+				return false;
+			}
+		}
+		return true;
+	}
 }
 
 alias MakeController = HuntDynamicCallFun;
@@ -112,6 +122,7 @@ string  _createCallActionFun(T)()
 	str ~= "import std.experimental.logger;import std.variant;import std.conv;";
 	// str ~= "trace(\"call function \", funName);";
 	str ~= "this.request = req;";
+	str ~= "if(!__handleWares()) return false;";
     str ~= "switch(funName){";
     foreach(memberName; __traits(allMembers, T))
     {
