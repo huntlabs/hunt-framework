@@ -215,16 +215,18 @@ final class RegexElement :RouteElement
 	
 	override MachData macth(string path)
 	{
-		//writeln("the path is : ", path, "  \t\t regex is : ", _reg);
+		trace("the path is : ", path, "  \t\t regex is : ", _reg);
 		auto rg = regex(_reg, "s");
 		auto mt = matchFirst(path, rg);
 		MachData data;
 		if (mt)
 		{
+			data.macth = &_handler;
 			foreach (attr; rg.namedCaptures)
 			{
 				data.mate[attr] = mt[attr];
 			}
+
 		}
 		return data;
 	}
@@ -254,8 +256,8 @@ final class RegexMap
 	{
 		string rege;
 		string str = getFirstPath(preg, rege);
-		//writeln("RegexMap add : path = ", ele.path, " \n\tpreg = ", preg, "\n\t str = ", str,
-		//       "\n\t rege = ", rege, "\n");
+		trace("RegexMap add : path = ", ele.path, " \n\tpreg = ", preg, "\n\t str = ", str,
+		       "\n\t rege = ", rege, "\n");
 		if (str.length == 0)
 		{
 			ele.destroy;
@@ -263,7 +265,7 @@ final class RegexMap
 		}
 		if (isHaveRegex(str))
 		{
-			//  writeln("set regex is  : ", preg);
+			trace("set regex is  : ", preg);
 			if (!ele.setRegex(preg))
 				return null;
 			
@@ -307,6 +309,7 @@ final class RegexMap
 		if (frist.length == 0)
 			return data;
 		auto map = _map.get(frist, null);
+		trace("math frist: ", map);
 		if (map)
 		{
 			data = map.match(lpath);
