@@ -11,6 +11,7 @@
 module hunt.router.router;
 
 import std.regex;
+import std.array;
 import std.string;
 import std.experimental.logger;
 
@@ -120,13 +121,13 @@ final class Router
     */
 	MachData match(string method, string path)
 	{
-		import std.stdio;
 		trace("0---------------", method, "-------", path, "+++++++++");
 		if (!condigDone)
 			return MachData();
 		RouteMap map = _map.get(method, null);
 		if (!map)
 			return MachData();
+		path = replace(path,"//","/");
 		return map.match(path);
 	}
 	/**

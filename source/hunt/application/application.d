@@ -102,7 +102,9 @@ final class Application
 	{
 		_wfactory = webfactory;
 	}
-
+	version(NO_TASKPOOL){} else {
+		@property TaskPool taskPool(){return _tpool;}
+	}
 	/// get the router.
 	@property router()
 	{
