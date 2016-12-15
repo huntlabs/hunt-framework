@@ -118,9 +118,9 @@ final class Request : RequestHandler
 	}
 	@property clientAddress(){return _headers.clientAddress();}
 
-	string getMate(string key)
+	string getMate(string key,string value = null)
 	{
-		return _mate.get(key, "");
+		return _mate.get(key, value);
 	}
 
 	void addMate(string key, string value)
