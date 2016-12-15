@@ -6,6 +6,7 @@ import std.exception;
 import std.array;
 import std.stdio;
 import std.string;
+import std.experimental.logger;
 
 class ConfFormatException : Exception
 {
@@ -95,9 +96,6 @@ private:
 		{
 			scope(exit) line += 1;
 			string str = f.readln();
-			if(section != _section && section != "")
-				continue;// 不是自己要读取的分段，就跳过
-			
 			str = strip(str);
 			if(str.length == 0) continue;
 			if(str[0] == '#' || str[0] == ';') continue;
@@ -107,6 +105,8 @@ private:
 				section = str[1..len].strip;
 				continue;
 			}
+			if(section != _section && section != "")
+				continue;// 不是自己要读取的分段，就跳过
 			auto site = str.indexOf("=");
 			enforce!ConfFormatException((site > 0),format("the format is erro in file %s, in line %d",filename,line));
 			string key = str[0..site].strip;
