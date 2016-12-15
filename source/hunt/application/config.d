@@ -96,6 +96,7 @@ final class AppConfig
 		collectException(conf.server.cookie.expire.as!uint(), app.server.cookie.expire);
 		app.server.maxBodySzie = app.server.maxBodySzie << 10;// * 1024
 		app.server.maxHeaderSize = app.server.maxHeaderSize << 10;// * 1024
+		trace("listened ips : ", ips);
 		if(ips.length == 0){ 
 			ips ~= "127.0.0.1:8080";
 		}
@@ -174,7 +175,7 @@ class ConfigManger
 	void setConfigPath(string path)
 	{
 		import std.string;
-		if(path.length < 0) return;
+		if(path.length == 0) return;
 		if(path[$ -1] != '/') path ~= "/";
 	}
 
