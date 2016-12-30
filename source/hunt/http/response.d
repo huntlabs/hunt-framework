@@ -27,132 +27,134 @@ enum XPoweredBy = "Hunt " ~ HUNT_VERSION;
 
 final class Response : ResponseBuilder
 {
-	this(ResponseHandler resp)
-	{
-		super(resp);
-		setHttpStatusCode(200);
-	}
+    this(ResponseHandler resp)
+    {
+        super(resp);
+        setHttpStatusCode(200);
+    }
 
-	auto setHeader(T = string)(string key, T value)
-	{
-		header!T(key,value);
+    auto setHeader(T = string)(string key, T value)
+    {
+        header!T(key,value);
 
-		return this;
-	}
+        return this;
+    }
 
-	auto setHeader(T = string)(HTTPHeaderCode key, T value)
-	{
-		header!T(key,value);
+    auto setHeader(T = string)(HTTPHeaderCode key, T value)
+    {
+        header!T(key,value);
 
-		return this;
-	}
+        return this;
+    }
 
-	auto setContext(string str)
-	{
-		setBody(cast(ubyte[]) str);
+    auto setContext(string str)
+    {
+        setBody(cast(ubyte[]) str);
 
-		return this;
-	}
+        return this;
+    }
 
-	auto setContext(ubyte[] data)
-	{
-		setBody(data);
+    auto setContext(ubyte[] data)
+    {
+        setBody(data);
 
-		return this;
-	}
+        return this;
+    }
 
-	///set http status code eg. 404 200
-	auto setHttpStatusCode(ushort code)
-	{
-		status(code,HTTPMessage.statusText(code));
+    ///set http status code eg. 404 200
+    auto setHttpStatusCode(ushort code)
+    {
+        status(code,HTTPMessage.statusText(code));
 
-		return this;
-	}
+        return this;
+    }
 
-	///return json value
-	auto json(JSONValue js)
-	{
-		json(js.toString());
+    ///return json value
+    auto json(JSONValue js)
+    {
+        json(js.toString());
 
-		return this;
-	}
-	///render json string value
-	auto json(string jsonString)
-	{
-		setHeader(HTTPHeaderCode.CONTENT_TYPE, "application/json;charset=utf-8").setContext(jsonString);
+        return this;
+    }
+    ///render json string value
+    auto json(string jsonString)
+    {
+        setHeader(HTTPHeaderCode.CONTENT_TYPE, "application/json;charset=utf-8").setContext(jsonString);
 
-		return this;
-	}
-	///render html string 
-	auto html(string htmlString, string content_type = "text/html;charset=utf-8")
-	{
-		setHeader(HTTPHeaderCode.CONTENT_TYPE, content_type).setContext(htmlString);
+        return this;
+    }
 
-		return this;
-	}
-	///render plain text string 
-	auto plain(string textString, string content_type = "text/plain;charset=utf-8")
-	{
-		setHeader(HTTPHeaderCode.CONTENT_TYPE, content_type).setContext(textString);
+    ///render html string 
+    auto html(string htmlString, string content_type = "text/html;charset=utf-8")
+    {
+        setHeader(HTTPHeaderCode.CONTENT_TYPE, content_type).setContext(htmlString);
 
-		return this;
-	}
+        return this;
+    }
 
-	/**
-	 * set Cookie
-	 */
-	auto setCookie(string name, string value, int expires, string path = "/", string domain = null)
-	{
-		import std.typecons;
-		auto cookie = scoped!Cookie(name, value, ["path" : path, "domain"
-				: domain, "expires"
-				: printDate(cast(DateTime) Clock.currTime(UTC()) + dur!"seconds"(expires))]); //栈中优化
+    ///render plain text string 
+    auto plain(string textString, string content_type = "text/plain;charset=utf-8")
+    {
+        setHeader(HTTPHeaderCode.CONTENT_TYPE, content_type).setContext(textString);
 
-		setHeader(HTTPHeaderCode.SET_COOKIE, cookie.output(""));
+        return this;
+    }
 
-		return this;
-	}
+    /**
+     * set Cookie
+     */
+    auto setCookie(string name, string value, int expires, string path = "/", string domain = null)
+    {
+        import std.typecons;
+        auto cookie = scoped!Cookie(name, value, ["path" : path, "domain"
+                : domain, "expires"
+                : printDate(cast(DateTime) Clock.currTime(UTC()) + dur!"seconds"(expires))]); //栈中优化
 
-	pragma(inline) final void done()
-	{
-		if(_isDone) return;
+        setHeader(HTTPHeaderCode.SET_COOKIE, cookie.output(""));
 
-		_isDone = true;
-		setHeader(HTTPHeaderCode.X_POWERED_BY, XPoweredBy);
-		sendWithEOM();
-	}
+        return this;
+    }
 
-	void redirect(string url, bool is301 = false)
-	{
-		if(_isDone) return;
+    pragma(inline) final void done()
+    {
+        if(_isDone) return;
 
-		setHttpStatusCode((is301 ? 301 : 302));
-		setHeader(HTTPHeaderCode.LOCATION, url);
-		connectionClose();
+        _isDone = true;
+        setHeader(HTTPHeaderCode.X_POWERED_BY, XPoweredBy);
+        sendWithEOM();
+    }
 
-		done();
-	}
+    void redirect(string url, bool is301 = false)
+    {
+        if(_isDone) return;
 
-	void do404(string body_ = "",string contentype = "text/plain;charset=UTF-8")
-	{
-		if(_isDone) return;
+        setHttpStatusCode((is301 ? 301 : 302));
+        setHeader(HTTPHeaderCode.LOCATION, url);
+        connectionClose();
 
-		setHttpStatusCode(404);
-		header(HTTPHeaderCode.CONTENT_TYPE,"text/plain;charset=UTF-8");
+        done();
+    }
 
-		if(body_.length > 0)
-			setContext(body_);
+    void do404(string body_ = "",string contentype = "text/plain;charset=UTF-8")
+    {
+        if(_isDone) return;
 
-		connectionClose();
+        setHttpStatusCode(404);
+        header(HTTPHeaderCode.CONTENT_TYPE,"text/plain;charset=UTF-8");
 
-		done();
-	}
+        if(body_.length > 0)
+            setContext(body_);
+
+        connectionClose();
+
+        done();
+    }
 
 package(hunt.http):
-	void clear()
-	{
-		setResponseHandler(null);
-	}
+    void clear()
+    {
+        setResponseHandler(null);
+    }
 private:
-	bool _isDone = false;
+    bool _isDone = false;
 }
