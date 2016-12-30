@@ -38,14 +38,17 @@ abstract class Controller
 		View _view;
 
 	}
-	final @property response(){
+
+	final @property response()
+	{
 		return request.createResponse();
 	}
 
-	bool __CALLACTION__(string method,Request req);
+	bool __CALLACTION__(string method, Request req);
 
 	/// called before action  return true is continue false is finish
 	bool before(){return true;}
+
 	/// called after action  return true is continue false is finish
 	bool after(){return true;}
 
@@ -63,6 +66,7 @@ abstract class Controller
 		this.middlewares ~= midw;
 		return true;
 	}
+
 	///add middleware
 	IMiddleware[] getMiddleware()
 	{
@@ -91,8 +95,10 @@ abstract class Controller
 
 	protected final bool __handleWares()
 	{
-		foreach(ws;middlewares){
-			if(!ws.onProcess(request,response())){
+		foreach(ws;middlewares)
+		{
+			if(!ws.onProcess(request,response()))
+			{
 				return false;
 			}
 		}
@@ -106,11 +112,12 @@ mixin template HuntDynamicCallFun()
 {
 public:
 	mixin(_createCallActionFun!(typeof(this)));
-	shared static this(){
+	shared static this()
+	{
 		import std.experimental.logger;
 		import std.conv;
 		import hunt.router.build;
-		mixin(_createRouterCallActionFun!(typeof(this),true)());
+		mixin(_createRouterCallActionFun!(typeof(this), true)());
 	}
 }
 
@@ -118,17 +125,18 @@ string  _createCallActionFun(T)()
 {
     import std.traits;
 	import std.format;
+
 	string str = "override bool __CALLACTION__(string funName,Request req) {";
 	str ~= "import std.experimental.logger;import std.variant;import std.conv;";
-	// str ~= "trace(\"call function \", funName);";
 	str ~= "this.request = req;";
 	str ~= "if(!__handleWares()) return false;";
     str ~= "switch(funName){";
+
     foreach(memberName; __traits(allMembers, T))
     {
-        static if (is(typeof(__traits(getMember,  T, memberName)) == function) )
+        static if (is(typeof(__traits(getMember,  T, memberName)) == function))
         {
-            foreach (t;__traits(getOverloads,T,memberName)) 
+            foreach (t; __traits(getOverloads,T,memberName)) 
             {
 				static if(hasUDA!(t, Action)) {
 					str ~= "case \"";
@@ -151,20 +159,24 @@ string  _createCallActionFun(T)()
 					str ~= q{
 						if(!this.before()){return false;}
 					};
+
 					//action
 					str ~= memberName ~ "();";
+
 					//after
 					str ~= q{
 						if(!this.after()){return false;}
 					};
+
 					str ~= "}\n break;";
 				}
             }
         }
     }
-	str ~= "default : break;}";
 
+	str ~= "default : break;}";
 	str ~= "return false;";
     str ~= "}";
+
     return str;
 }
