@@ -10,12 +10,15 @@ import std.exception;
 
 struct Action
 {
-	this(string dom, string md,string pa){
+	this(string dom, string md,string pa)
+	{
 		method = md;
 		domain = dom;
 		path = path;
 	}
-	this(string md,string pa){
+
+	this(string md,string pa)
+	{
 		method = md;
 		path = pa;
 	}
@@ -41,21 +44,27 @@ string  _createRouterCallActionFun(T, bool controller)()
 	
 	foreach(memberName; __traits(allMembers, T))
 	{
-		static if (is(typeof(__traits(getMember,  T, memberName)) == function) )
+		static if (is(typeof(__traits(getMember,  T, memberName)) == function))
 		{
 			foreach (t;__traits(getOverloads,T,memberName)) 
 			{
-				static if(hasUDA!(t, Action) && (controller || TisPublic!(t))) {
+				static if(hasUDA!(t, Action) && (controller || TisPublic!(t)))
+				{
 					alias actions = getUDAs!(t, Action);
 					static if(actions.length == 0) continue;
 
 					Action action = actions[0];
-					if(action.path.length > 0){
+					if (action.path.length > 0)
+					{
 						alias ptype = Parameters!(t);
-						static if(ptype.length == 1 && is(ptype[0] == Request)) {
-							static if(!controller){
+						static if(ptype.length == 1 && is(ptype[0] == Request))
+						{
+							static if(!controller)
+							{
 								str ~= "\t\taddRouteHelp(\"" ~ action.domain ~"\",\""~ action.method ~ "\",\""~ action.path ~ "\",&doHandler!(" ~ T.stringof ~ ",\"" ~ memberName ~ "\"));\n";
-							} else {
+							}
+							else
+							{
 								str ~= "\t\taddRouteHelp(\"" ~ action.domain ~"\",\""~ action.method ~ "\",bind(&callHandler!(" ~ T.stringof ~ "),\"" ~ memberName ~ "\"));\n";
 							}
 						}
@@ -64,6 +73,7 @@ string  _createRouterCallActionFun(T, bool controller)()
 			}
 		}
 	}
+
 	return str;
 }
 
@@ -72,12 +82,15 @@ void addRouteHelp(Handler)(string domin, string method, string path,Handler t)
 	import std.string;
 	import hunt.router.configbase;
 
-	if(method == "*"){
+	if (method == "*")
+	{
 		method = fullMethod;
 	} 
-	string[]  methods = split(method,',');
-	foreach(str;methods) {
-		defaultRouter.addRoute(domin,strip(str),path,t);
+	string[]  methods = split(method, ',');
+
+	foreach (str;methods)
+	{
+		defaultRouter.addRoute(domin,strip(str), path, t);
 	}
 }
 
@@ -101,6 +114,7 @@ void callHandler(T)(string fun,Request req) if(is(T == class) || is(T == struct)
 	{
 		Response res;
 		collectException(req.createResponse(),res);
+
 		if(res)
 			res.done();
 	}
