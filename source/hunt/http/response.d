@@ -106,9 +106,11 @@ final class Response : ResponseBuilder
     auto setCookie(string name, string value, int expires, string path = "/", string domain = null)
     {
         import std.typecons;
-        auto cookie = scoped!Cookie(name, value, ["path" : path, "domain"
-                : domain, "expires"
-                : printDate(cast(DateTime) Clock.currTime(UTC()) + dur!"seconds"(expires))]); //栈中优化
+        auto cookie = scoped!Cookie(name, value, [
+                "path": path,
+                "domain": domain,
+                "expires": printDate(cast(DateTime) Clock.currTime(UTC()) + dur!"seconds"(expires))
+            ]);
 
         setHeader(HTTPHeaderCode.SET_COOKIE, cookie.output(""));
 
