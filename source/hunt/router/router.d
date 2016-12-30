@@ -31,15 +31,22 @@ struct RouterHandler
 {
 	alias HandleDelegate = void delegate(Request);
 	alias HandleFunction = void function(Request);
-	@property type(){
+
+	@property type()
+	{
 		return _type;
 	}
-	@property dgate(){
+
+	@property dgate()
+	{
 		return _dgate;
 	}
-	@property func(){
+
+	@property func()
+	{
 		return _func;
 	}
+
 private:
 	RouterHandlerType _type = RouterHandlerType.Null;
 	HandleDelegate _dgate;
@@ -51,6 +58,7 @@ struct MachData
 	RouterHandler * macth;
 	string[string] mate;
 }
+
 /**
     The Router Class, Save and Macth the rule, and generte the Pipeline.
 */
@@ -97,15 +105,19 @@ final class Router
 	RouteElement addRoute(T)(string method, string path,T handle) if(is(T == HandleDelegate) || is(T == HandleFunction))
 	{
 		if (condigDone || method.length == 0 || path.length == 0 || handle is null)
+		{
 			return null;
+		}
+
 		method = toUpper(method);
 		RouteMap map = _map.get(method, null);
+
 		if (!map)
 		{
 			map = new RouteMap(this);
 			_map[method] = map;
 		}
-		trace("add Router method: ", method);
+
 		return map.add(path, handle);
 	}
 
@@ -121,15 +133,22 @@ final class Router
     */
 	MachData match(string method, string path)
 	{
-		trace("0---------------", method, "-------", path, "+++++++++");
 		if (!condigDone)
+		{
 			return MachData();
+		}
+
 		RouteMap map = _map.get(method, null);
 		if (!map)
+		{
 			return MachData();
+		}
+
 		path = replace(path,"//","/");
+
 		return map.match(path);
 	}
+
 	/**
         get config is done.
         if config is done, the add rule will erro.
@@ -216,10 +235,11 @@ final class RegexElement :RouteElement
 	
 	override MachData macth(string path)
 	{
-		trace("the path is : ", path, "  \t\t regex is : ", _reg);
 		auto rg = regex(_reg, "s");
 		auto mt = matchFirst(path, rg);
+
 		MachData data;
+
 		if (mt)
 		{
 			data.macth = &_handler;
@@ -229,6 +249,7 @@ final class RegexElement :RouteElement
 			}
 
 		}
+
 		return data;
 	}
 	
@@ -236,10 +257,17 @@ private:
 	bool setRegex(string reg)
 	{
 		if (reg.length == 0)
+		{
 			return false;
+		}
+
 		_reg = buildRegex(reg);
+
 		if (_reg.length == 0)
+		{
 			return false;
+		}
+
 		return true;
 	}
 	
@@ -257,8 +285,7 @@ final class RegexMap
 	{
 		string rege;
 		string str = getFirstPath(preg, rege);
-		trace("RegexMap add : path = ", ele.path, " \n\tpreg = ", preg, "\n\t str = ", str,
-		       "\n\t rege = ", rege, "\n");
+
 		if (str.length == 0)
 		{
 			ele.destroy;
@@ -266,11 +293,13 @@ final class RegexMap
 		}
 		if (isHaveRegex(str))
 		{
-			trace("set regex is  : ", preg);
 			if (!ele.setRegex(preg))
+			{
 				return null;
+			}
 			
 			bool isHas = false;
+
 			for (int i = 0; i < _list.length; ++i) //添加的时候去重
 			{
 				if (_list[i].path == ele.path)
@@ -281,36 +310,47 @@ final class RegexMap
 					tele.destroy;
 				}
 			}
+
 			if (!isHas)
 			{
 				_list ~= ele;
 			}
+
 			return ele;
 		}
 		else
 		{
 			RegexMap map = _map.get(str, null);
+
 			if (!map)
 			{
 				map = new RegexMap(str);
 				_map[str] = map;
 			}
+
 			return map.add(ele, rege);
 		}
 	}
 	
 	MachData match(string path)
 	{
-		trace(" \t\tREGEX macth path:  ", path);
 		MachData data;
+
 		if (path.length == 0)
+		{
 			return data;
+		}
+
 		string lpath;
 		string frist = getFirstPath(path, lpath);
+
 		if (frist.length == 0)
+		{
 			return data;
+		}
+
 		auto map = _map.get(frist, null);
-		trace("math frist: ", map);
+
 		if (map)
 		{
 			data = map.match(lpath);
@@ -326,6 +366,7 @@ final class RegexMap
 				}
 			}
 		}
+
 		return data;
 	}
 	
@@ -350,25 +391,31 @@ final class RouteMap
 	{
 		if (isHaveRegex(path))
 		{
-			auto ele = new RegexElement(path);
-			ele.sethandler(handle);
-			return _regexMap.add(ele, path);
+			auto element = new RegexElement(path);
+			element.sethandler(handle);
+
+			return _regexMap.add(element, path);
 		}
 		else
 		{
-			auto ele = new RouteElement(path);
-			ele.sethandler(handle);
-			_pathMap[path] = ele;
-			return ele;
+			auto element = new RouteElement(path);
+			element.sethandler(handle);
+			_pathMap[path] = element;
+
+			return element;
 		}
 	}
 	
 	MachData match(string path)
 	{
 		RouteElement element = _pathMap.get(path, null);
-		if (!element){
+
+		if (!element)
+		{
 			return _regexMap.match(path);
-		} else {
+		}
+		else
+		{
 			return element.macth(path);
 		}
 	}

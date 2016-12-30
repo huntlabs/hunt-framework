@@ -8,8 +8,8 @@ import std.string;
 
 import hunt.text.configuration;
 import hunt.application.application : WebSocketFactory;
-
 import hunt.router.configbase;
+
 import collie.codec.http.server.httpserveroptions;
 
 final class AppConfig
@@ -39,7 +39,8 @@ final class AppConfig
 		CookieConfig cookie;
 
 
-		AddressList bindAddress(){
+		AddressList bindAddress()
+		{
 			return _binds;
 		}
 
@@ -74,14 +75,18 @@ final class AppConfig
 		AppConfig app = new AppConfig();
 
 		app._config = conf;
+
 		string[] ips;
 		{
 			string ip;
-			collectException(conf.server.binds.value(),ip);
-			if(ip.length > 0){
+			collectException(conf.server.binds.value(), ip);
+
+			if (ip.length > 0)
+			{
 				ips = split(ip,';');
 			}
 		}
+
 		collectException(conf.server.worker_threads.as!uint(),app.server.workerThreads);
 		collectException(conf.server.io_threads.as!uint(),app.server.ioThreads);
 		collectException(conf.server.fast_open.as!uint(),app.server.fastOpenQueueSize);
@@ -94,32 +99,50 @@ final class AppConfig
 		collectException(conf.server.cookie.domain.value(), app.server.cookie.domain);
 		collectException(conf.server.cookie.prefix.value(), app.server.cookie.prefix);
 		collectException(conf.server.cookie.expire.as!uint(), app.server.cookie.expire);
+
 		app.server.maxBodySzie = app.server.maxBodySzie << 10;// * 1024
 		app.server.maxHeaderSize = app.server.maxHeaderSize << 10;// * 1024
-		trace("listened ips : ", ips);
-		if(ips.length == 0){ 
+
+		if (ips.length == 0)
+		{ 
 			ips ~= "127.0.0.1:8080";
 		}
-		foreach(ip;ips){
+
+		foreach (ip;ips)
+		{
 			import std.conv;
+
 			auto index = lastIndexOf(ip,':');
-			if(index <= 0 ) continue;
+
+			if (index <= 0 ) continue;
+
 			string tip =  strip(ip[0..index]);
 			string tport = strip(ip[index+1..$]);
 			ushort port = 0;
+
 			collectException(to!(ushort)(tport),port);
-			if(port == 0)continue;
+
+			if (port == 0) continue;
+
 			Address addr;
 			collectException(parseAddress(tip,port),addr);
-			if(addr is null) continue;
+
+			if (addr is null) continue;
+
 			app.server._binds ~= addr;
 		}
+
 		string ws;
 		collectException(conf.server.webSocket_factory.value(), ws);
 		
-		if(ws.length > 0){
+		if (ws.length > 0)
+		{
 			auto obj = Object.factory(ws);
-			if(obj) app.server.webSocketFactory = cast(WebSocketFactory)obj;
+
+			if(obj)
+			{
+				app.server.webSocketFactory = cast(WebSocketFactory)obj;
+			}
 		}
 		
 		collectException(conf.log.level.value(), app.log.level);
@@ -138,7 +161,10 @@ final class AppConfig
 private:
 	Configuration _config;
 
-	this(){server.workerThreads = totalCPUs;}
+	this()
+	{
+		server.workerThreads = totalCPUs;
+	}
 }
 
 import core.sync.rwmutex;
@@ -154,45 +180,61 @@ class ConfigNotFoundException : Exception
 
 class ConfigManger
 {
-	@property app() {
-		if(!_app) {
+	@property app()
+	{
+		if(!_app)
+		{
 			setAppSection("");
 		}
+
 		return _app;
 	}
-	@property router(){
+
+	@property router()
+	{
 		if(!_router)
 		{
-			string ph = path ~ "/routes";
-			trace("router path is : ", ph);
-			if (exists(ph)) {
-				_router = new RouterConfig(ph);
+			string configFile = path ~ "/routes";
+
+			if (exists(configFile))
+			{
+				_router = new RouterConfig(configFile);
 			}
 		}
+
 		return _router;
 	}
 
 	void setConfigPath(string path)
 	{
-		import std.string;
-		if(path.length == 0) return;
-		if(path[$ -1] != '/') path ~= "/";
+		if(path.length == 0)
+		{
+			return;
+		}
+
+		if(path[$ -1] != '/')
+		{
+			path ~= "/";
+		}
 	}
 
 	void setAppSection(string sec)
 	{
-		auto con = new Configuration(path ~ "/application.conf",sec);
+		auto con = new Configuration(path ~ "/application.conf", sec);
 		_app = AppConfig.parseAppConfig(con);
 	}
-	
+
 	Configuration config(string key)
 	{
 		import std.format;
 		Configuration v = null;
-		synchronized(_mutex.reader) {
+		synchronized(_mutex.reader)
+		{
 			v =  _conf.get(key, null);
 		}
-		enforce!ConfigNotFoundException(v,format(" %s is not in config! ",key));
+
+		enforce!ConfigNotFoundException(v, format(" %s is not in config! ", key));
+
 		return v;
 	}
 
@@ -226,7 +268,10 @@ private:
 	ReadWriteMutex _mutex;
 }
 
-@property Config(){return _manger;}
+@property Config()
+{
+	return _manger;
+}
 
 shared static this()
 {
