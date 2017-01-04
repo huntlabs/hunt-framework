@@ -25,45 +25,9 @@ import hunt.router.configbase;
 public import hunt.http.request;
 public import hunt.http.response;
 
-void initControllerCall(string FUN, T)(string str, Request args) if (
-	(is(T == class) || is(T == interface)) && hasMember!(T, FUN))
+void setRouterConfigHelper(RouterConfigBase config)
 {
-	import std.experimental.logger;
-	
-	auto index = lastIndexOf(str, '.');
-	if (index < 0 || index == (str.length - 1))
-	{
-		error("can not find function!, the str is  : ", str);
-		return;
-	}
-	
-	string objName = str[0 .. index];
-	string funName = str[(index + 1) .. $];
-	
-	auto obj = Object.factory(objName);
-	if (!obj)
-		throw new RourerFactoryException("Object.factory erro!, the obj Name is : "~objName);
-	auto a = cast(T) obj;
-	if (!a)
-		throw new RourerFactoryException("cast("~ FUN ~")obj; erro!"~objName );
-	mixin("bool ret = a." ~ FUN ~ "(funName,args);" ~ q{
-			if(!ret)
-			{
-				Response res = args.createResponse();
-				res.done();
-				return;
-			}
-		});
-}
-
-void setRouterConfigHelper(string FUN, T)(RouterConfigBase config) if (
-        (is(T == class) || is(T == interface)) && hasMember!(T, FUN) )
-{
-    import std.string;
-    import std.array;
-
-	alias doFun = initControllerCall!(FUN, T);
-    
+	import hunt.application.controller;
     
     string getDirPath(RouterType type, string dir, string path)
     {
@@ -94,31 +58,24 @@ void setRouterConfigHelper(string FUN, T)(RouterConfigBase config) if (
     RouterContext[] routeList = config.doParse();
     foreach (ref item; routeList)
     {
-        auto list = split(item.method, ',');
+		RouterHandler.HandleFunction fun = getRouteFormList(item.hander);
+		if(fun is null) continue;
+
+        //auto list = split(item.method, ',');
         switch(item.routerType)
         {
             case RouterType.DEFAULT:
             case RouterType.DIR:
             {
-                foreach (ref str; list)
-                {
-                    if (str.length == 0)
-                        continue;
-                    string path = getDirPath(item.routerType,item.dir,item.path);
-					defaultRouter.addRoute(str, path, bind(&doFun, item.hander));
-                }
+				string path = getDirPath(item.routerType,item.dir,item.path);
+				addRouteHelp("",item.method,path,fun);
             }
                 break;
             case RouterType.DOMAIN_DIR:
             case RouterType.DOMAIN:
             {
-                foreach (ref str; list)
-                {
-                    if (str.length == 0)
-                        continue;
-                    string path = getDirPath(item.routerType,item.dir,item.path);
-					defaultRouter.addRoute(item.host,str, path, bind(&doFun, item.hander));
-                }
+				string path = getDirPath(item.routerType,item.dir,item.path);
+				addRouteHelp(item.host,item.method,path,fun);
             }
             break;
             default:
