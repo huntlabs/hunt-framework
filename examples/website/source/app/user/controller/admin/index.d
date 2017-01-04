@@ -12,11 +12,9 @@ module app.user.controller.admin.index;
 
 import hunt.application;
 
-class IndexController : Controller
+class IndexController : Controller!IndexController
 {
-    mixin MakeController;
-    
-    @Action()
+    @Action
     void show()
     {
 		auto res = this.request.createResponse();

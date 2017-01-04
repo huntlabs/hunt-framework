@@ -2,10 +2,9 @@ module app.user.controller.api.admin;
 
 import hunt.application;
 
-class AdminController : Controller
+class AdminController : Controller!AdminController
 {
-    mixin MakeController;
-    @Action()
+    @Action
     void show()
     {
     	alias res = this.response;

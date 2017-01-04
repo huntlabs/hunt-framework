@@ -10,11 +10,12 @@
  */
 module app.controller.index;
 import hunt.application;
-import app.middleware;
+public import app.middleware;
+import std.experimental.logger;
 
 version(USE_ENTITY) import app.model.index;
 
-class IndexController : Controller
+class IndexController : Controller!IndexController
 {
     this()
     {
@@ -22,7 +23,9 @@ class IndexController : Controller
     }
     override bool before()
     {
+		trace("before-----");
         this.response.html("<h3>before...</h3>");
+		trace("before-----offiter");
         return true;
     }
     override bool after()
@@ -30,10 +33,9 @@ class IndexController : Controller
         this.response.html("<h3>after...</h3>");
         return true;
     }
-    mixin MakeController;
-    @Action()
-    @middleware(BeforeMiddleware.stringof)
-    @middleware(AfterMiddleware.stringof)
+    @Action
+    @Middleware(BeforeMiddleware.stringof)
+    @Middleware(AfterMiddleware.stringof)
     void show()
 	{ 
 		auto response = this.request.createResponse();
@@ -43,8 +45,8 @@ class IndexController : Controller
         .setCookie("name1", "value", 10000, "/path")
         .setCookie("name2", "value", 10000);
     }
-    @Action()
-    @middleware(OneMiddleware.stringof)
+	@Action
+    @Middleware(OneMiddleware.stringof)
     void list()
     {
 		this.view.setLayout!"main.dhtml"();	
@@ -54,14 +56,16 @@ class IndexController : Controller
 		this.view.footer = "footer";
 		this.render!"content.dhtml"();
     }
-	@Action()
+	@Action
     void index()
     {
         this.response.html("list");
     }
-	@Action()
+
+	@Action
     void showbool()
     {
+		trace("---show bool----");
         this.response.html("list");
     }
 }

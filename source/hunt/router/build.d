@@ -8,7 +8,7 @@ import hunt.router.routergroup;
 import std.traits;
 import std.exception;
 
-struct Action
+struct Route
 {
 	this(string dom, string md,string pa){
 		method = md;
@@ -31,11 +31,11 @@ mixin template BuildRouterFunction(T, bool controller = false) if(is(T == class)
 		import std.experimental.logger;
 		import std.conv;
 		import hunt.router.build;
-		mixin(_createRouterCallActionFun!(T,controller)());
+		mixin(_createRouterCallRouteFun!(T,controller)());
 	}
 }
 
-string  _createRouterCallActionFun(T, bool controller)()
+string  _createRouterCallRouteFun(T, bool controller)()
 {
 	string str = "";
 	
@@ -45,18 +45,18 @@ string  _createRouterCallActionFun(T, bool controller)()
 		{
 			foreach (t;__traits(getOverloads,T,memberName)) 
 			{
-				static if(hasUDA!(t, Action) && (controller || TisPublic!(t))) {
-					alias actions = getUDAs!(t, Action);
+				static if(hasUDA!(t, Route) && (controller || TisPublic!(t))) {
+					alias actions = getUDAs!(t, Route);
 					static if(actions.length == 0) continue;
 
-					Action action = actions[0];
+					Route action = actions[0];
 					if(action.path.length > 0){
 						alias ptype = Parameters!(t);
 						static if(ptype.length == 1 && is(ptype[0] == Request)) {
 							static if(!controller){
 								str ~= "\t\taddRouteHelp(\"" ~ action.domain ~"\",\""~ action.method ~ "\",\""~ action.path ~ "\",&doHandler!(" ~ T.stringof ~ ",\"" ~ memberName ~ "\"));\n";
 							} else {
-								str ~= "\t\taddRouteHelp(\"" ~ action.domain ~"\",\""~ action.method ~ "\",bind(&callHandler!(" ~ T.stringof ~ "),\"" ~ memberName ~ "\"));\n";
+								str ~= "\t\taddRouteHelp(\"" ~ action.domain ~"\",\""~ action.method ~ "\",&callHandler!(" ~ T.stringof ~ ",\"" ~ memberName ~ "\"));\n";
 							}
 						}
 					}
@@ -88,13 +88,7 @@ void doHandler(T,string fun)(Request req) if(is(T == class) || is(T == struct))
 }
 
 
-template CallController(T,string fun)
-	if(is(T == class) || is(T == struct) && hasMember!(T,"__CALLACTION__"))
-{
-	alias CallController = (Request req){callHandler!T(fun,req);};
-}
-
-void callHandler(T)(string fun,Request req) if(is(T == class) || is(T == struct) && hasMember!(T,"__CALLACTION__"))
+void callHandler(T,string fun)(Request req) if(is(T == class) || is(T == struct) && hasMember!(T,"__CALLACTION__"))
 {
 	auto handler = new T();
 	if(!handler.__CALLACTION__(fun,req))

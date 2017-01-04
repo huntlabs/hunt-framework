@@ -256,7 +256,7 @@ private:
 	{
 		auto router = Config.router;
 		if(router)
-			setRouterConfigHelper!("__CALLACTION__",Controller)(router);
+			setRouterConfigHelper(router);
 		defaultRouter.done();
 	}
 
