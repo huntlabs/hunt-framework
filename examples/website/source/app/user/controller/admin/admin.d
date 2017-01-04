@@ -2,11 +2,9 @@ module app.user.controller.admin.admin;
 
 import hunt.application;
 
-class AdminController : Controller
+class AdminController : Controller!AdminController
 {
-    mixin MakeController;
-    
-    @Action()
+    @Action
     void show()
     {
 		auto res = this.request.createResponse();

@@ -12,10 +12,9 @@ module app.user.controller.api.index;
 
 import hunt.application;
 
-class IndexController : Controller
+class IndexController : Controller!IndexController
 {
-    mixin MakeController;
-	@Action()
+	@Action
     void show()
     {
     	alias res = this.response;
