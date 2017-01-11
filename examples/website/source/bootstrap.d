@@ -28,13 +28,18 @@ void hello(Request req)
 
 void test(Request req)
 {
+
+	import app.controller.index;
+	auto test = new IndexController();
+	test.__CALLACTION__("show",req);
 	Response res = req.createResponse();
-    res.redirect("/");
+   //res.redirect("/");
 	res.done();
 }
 
 void main()
 {
+
     auto app = Application.getInstance();
 	app.addRoute("GET","/test",&test).addRoute("GET","/",&hello);
     	//.setMiddlewareFactory(new MiddlewareFactory())

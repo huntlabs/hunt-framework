@@ -15,8 +15,9 @@ import std.experimental.logger;
 
 version(USE_ENTITY) import app.model.index;
 
-class IndexController : Controller!IndexController
+class IndexController : Controller
 {
+	mixin MakeController;
     this()
     {
         this.addMiddleware(new BeforeMiddleware());

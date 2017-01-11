@@ -10,11 +10,14 @@
  */
 module hunt.application.controller;
 
+import std.experimental.logger;
+
 public import hunt.view;
 public import hunt.http.response;
 public import hunt.http.request;
 public import hunt.router;
 import hunt.router.router;
+
 
 public import hunt.application.middleware;
 
@@ -27,10 +30,8 @@ struct Middleware{
 }
 
 
-abstract class Controller(T, string moduleName = __MODULE__)
+abstract class Controller
 {
-	mixin("import " ~ __MODULE__ ~ ";");
-	mixin HuntDynamicCallFun!(T,moduleName);
 	protected
 	{
 		Request request;
@@ -42,13 +43,6 @@ abstract class Controller(T, string moduleName = __MODULE__)
 	final @property response(){
 		return request.createResponse();
 	}
-
-	final bool __CALLACTION__(string fun,Request req){
-		this.request = req;
-		return __STATIC_CALLACTION__(this,fun,req);
-	}
-
-	
 	/// called before action  return true is continue false is finish
 	bool before(){return true;}
 	/// called after action  return true is continue false is finish
@@ -106,20 +100,19 @@ abstract class Controller(T, string moduleName = __MODULE__)
 	}
 }
 
-alias MakeController = HuntDynamicCallFun;
+mixin template MakeController(string moduleName = __MODULE__)
+{
+	mixin HuntDynamicCallFun!(typeof(this),moduleName);
+}
 
 mixin template HuntDynamicCallFun(T,string moduleName)
 {
 public:
-	pragma(msg,__createCallActionFun!(T,moduleName));
 	mixin(__createCallActionFun!(T,moduleName));
 	shared static this(){
-		import std.experimental.logger;
-		import std.conv;
 		import hunt.router.build;
-		mixin("import " ~ moduleName ~ ";");
-		mixin(_createRouterCallRouteFun!(T,true)());
 		mixin(__creteRouteMap!(T,moduleName));
+		mixin(_createRouterCallRouteFun!(T,true)());
 	}
 }
 
@@ -127,12 +120,10 @@ string  __createCallActionFun(T, string moduleName)()
 {
 	import std.traits;
 	import std.format;
-	string str = "static bool __STATIC_CALLACTION__(typeof(this) ptr,string funName,Request req) {";
-	str ~= "import std.experimental.logger;import std.variant;import std.conv;import " ~ moduleName ~ ";";
-	str ~= "auto action = cast(" ~ T.stringof ~")ptr; trace(\"action is null? \", (action is null), \"  funName is: \", funName, \"   \", typeof(action).stringof);";
-	str ~= "if(!action) return false;";
-	str ~= "if(!action.__handleWares()) return false;trace(\"------------------\");";
-	str ~= " switch(funName){";
+	string str = "bool __CALLACTION__(string funName,Request req) {";
+	str ~= "\n\tauto ptr = this; ptr.request = req;";
+	str ~= "\n\tif(!ptr.__handleWares()) return false;trace(\"------------------\");";
+	str ~= "\n\t switch(funName){";
 	foreach(memberName; __traits(allMembers, T))
 	{
 		static if (is(typeof(__traits(getMember,  T, memberName)) == function) )
@@ -153,7 +144,7 @@ string  __createCallActionFun(T, string moduleName)()
 								str ~= format(q{ 
 										scope auto wb_%s_%s = new %s();
 										trace("do middler");
-										if(!wb_%s_%s.onProcess(action.request, action.response)){return false;}
+										if(!wb_%s_%s.onProcess(ptr.request, ptr.response)){return false;}
 									}, i,memberName, w.className, i, memberName);
 							}
 
@@ -162,16 +153,16 @@ string  __createCallActionFun(T, string moduleName)()
 						//before
 						str ~= q{
 							trace("do funnnn---------before---------");
-							if(!action.before()){return false;}
+							if(!ptr.before()){return false;}
 							trace("do funnnn---------");
 						};
 					}
 					//action
-					str ~= "action." ~ memberName ~ "();";
+					str ~= "ptr." ~ memberName ~ "();";
 					static if(hasUDA!(t, Action)){
 						//after
 						str ~= q{
-							if(!action.after()){return false;}
+							if(!ptr.after()){return false;}
 						};
 					}
 					str ~= "}\n break;";
@@ -203,12 +194,14 @@ string  __creteRouteMap(T, string moduleName)()
 
 RouterHandler.HandleFunction getRouteFormList(string str){
 	if(!_init) _init = true;
+	trace("get router : ", str);
 	return __routerList.get(str,null);
 }
 
 void addRouteList(string str, RouterHandler.HandleFunction fun)
 {
 	if(!_init){
+		trace("addRouteList : ", str);
 		__routerList[str] = fun;
 	}
 }
