@@ -2,8 +2,10 @@ module app.user.controller.admin.admin;
 
 import hunt.application;
 
-class AdminController : Controller!AdminController
+class AdminController : Controller
 {
+	mixin MakeController;
+
     @Action
     void show()
     {

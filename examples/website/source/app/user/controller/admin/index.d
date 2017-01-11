@@ -12,8 +12,10 @@ module app.user.controller.admin.index;
 
 import hunt.application;
 
-class IndexController : Controller!IndexController
+class IndexController : Controller
 {
+	mixin MakeController;
+
     @Action
     void show()
     {
