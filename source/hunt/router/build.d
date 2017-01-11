@@ -90,7 +90,7 @@ void doHandler(T,string fun)(Request req) if(is(T == class) || is(T == struct))
 
 void callHandler(T,string fun)(Request req) if(is(T == class) || is(T == struct) && hasMember!(T,"__CALLACTION__"))
 {
-	auto handler = new T();
+	T handler = new T();
 	if(!handler.__CALLACTION__(fun,req))
 	{
 		Response res;
