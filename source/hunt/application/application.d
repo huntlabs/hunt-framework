@@ -11,14 +11,19 @@
 
 module hunt.application.application;
 
-import collie.bootstrap.serversslconfig;
-public import collie.socket.eventloop;
-public import collie.socket.eventloopgroup;
+import collie.codec.http.server.websocket;
+import collie.buffer;
 import collie.codec.http.server;
 import collie.codec.http;
+import collie.bootstrap.serversslconfig;
+
+public import collie.socket.eventloop;
+public import collie.socket.eventloopgroup;
 
 public import std.socket;
 public import std.experimental.logger;
+public import std.file;
+
 import std.uni;
 import std.path;
 import std.parallelism;
@@ -27,13 +32,9 @@ import hunt.router;
 public import hunt.http;
 public import hunt.view;
 public import hunt.i18n;
-public import std.file;
 public import hunt.utils.path;
 public import hunt.application.config;
-
 public import hunt.application.middleware;
-import collie.codec.http.server.websocket;
-import collie.buffer;
 
 abstract class WebSocketFactory
 {
@@ -46,7 +47,8 @@ final class Application
 	alias HandleDelegate = void delegate(Request);
 	alias HandleFunction = void function(Request);
 
-	static @property getInstance(){
+	static @property getInstance()
+	{
 		if(_app is null)
 		{
 			_app = new Application();
@@ -69,6 +71,7 @@ final class Application
 	{
 		method = toUpper(method);
 		defaultRouter.addRoute(domain,method,path,handle);
+
 		return this;
 	}
 	
@@ -86,6 +89,7 @@ final class Application
 	{
 		method = toUpper(method);
 		defaultRouter.addRoute(method,path,handle);
+
 		return this;
 	}
 
@@ -95,6 +99,7 @@ final class Application
 		auto i18n = I18n.instance();
 		i18n.loadLangResources(resPath);
 		i18n.defaultLocale = defaultLocale;
+
 		return this;
 	}
 
@@ -102,9 +107,11 @@ final class Application
 	{
 		_wfactory = webfactory;
 	}
+
 	version(NO_TASKPOOL){} else {
 		@property TaskPool taskPool(){return _tpool;}
 	}
+
 	/// get the router.
 	@property router()
 	{
@@ -119,7 +126,8 @@ final class Application
 	
 	@property appConfig(){return Config.app;}
 
-	void setCreateBuffer(CreatorBuffer cbuffer){
+	void setCreateBuffer(CreatorBuffer cbuffer)
+	{
 		if(cbuffer)
 			_cbuffer = cbuffer;
 	}
@@ -145,11 +153,15 @@ final class Application
 	}
 private:
 	RequestHandler newHandler(RequestHandler handler,HTTPMessage msg){
-		if(!msg.upgraded){
+		if(!msg.upgraded)
+		{
 			return new Request(_cbuffer,&handleRequest,_maxBodySize);
-		} else if(_wfactory){
+		}
+		else if(_wfactory)
+		{
 			return _wfactory.newWebSocket(msg);
 		}
+
 		return null;
 	}
 
@@ -176,11 +188,15 @@ private:
 
 	void handleRequest(Request req) nothrow
 	{
-		version(NO_TASKPOOL){
+		version(NO_TASKPOOL)
+		{
 			auto e = collectException(doHandleReqest(req));
-		} else {
+		}
+		else
+		{
 			auto e = collectException(_tpool.put(task!doHandleReqest(req)));
 		}
+
 		if(e)
 			showException(e);
 	}
@@ -189,7 +205,12 @@ private:
 	void upConfig(ref AppConfig.ServerConfig conf)
 	{
 		_maxBodySize = conf.maxBodySzie;
-		version(NO_TASKPOOL){} else {
+		version(NO_TASKPOOL)
+		{
+			// NOTHING
+		}
+		else
+		{
 			_tpool = new TaskPool(conf.workerThreads);
 			_tpool.isDaemon = true;
 		}
@@ -197,21 +218,29 @@ private:
 		HTTPServerOptions option = new HTTPServerOptions();
 		option.maxHeaderSize = conf.maxHeaderSize;
 		option.listenBacklog = conf.listenBacklog;
-		version(NO_TASKPOOL){
+
+		version(NO_TASKPOOL)
+		{
 			option.threads = conf.ioThreads + conf.workerThreads;
-		} else {
+		}
+		else
+		{
 			option.threads = conf.ioThreads;
 		}
+
 		option.timeOut = conf.keepAliveTimeOut;
 		option.handlerFactories.insertBack(&newHandler);
 		_server = new HttpServer(option);
-		foreach(Address addr; conf.bindAddress){
+		foreach(Address addr; conf.bindAddress)
+		{
 			HTTPServerOptions.IPConfig ipconf;
 			ipconf.address = addr;
 			ipconf.fastOpenQueueSize = conf.fastOpenQueueSize;
 			ipconf.enableTCPFastOpen = (conf.fastOpenQueueSize > 0);
+
 			_server.addBind(ipconf);
 		}
+
 		if(conf.webSocketFactory)
 			_wfactory = conf.webSocketFactory;
 	}
@@ -246,6 +275,7 @@ private:
 				globalLogLevel = LogLevel.off;
 				break;
 		}
+
 		if(conf.file.length > 0)
 		{
 			sharedLog = new FileLogger(conf.file);
@@ -256,6 +286,7 @@ private:
 	{
 		auto router = Config.router;
 		if(router)
+
 			setRouterConfigHelper(router);
 		defaultRouter.done();
 	}
@@ -271,7 +302,13 @@ private:
 	WebSocketFactory _wfactory;
 	uint _maxBodySize;
 	CreatorBuffer _cbuffer;
-	version(NO_TASKPOOL){}else {
+
+	version(NO_TASKPOOL)
+	{
+		// NOTHING TODO
+	}
+	else
+	{
 		__gshared TaskPool _tpool;
 	}
 }
@@ -281,11 +318,19 @@ import hunt.application.controller;
 
 void doHandleReqest(Request req) nothrow
 {
-	try{
-		MachData data = defaultRouter.match(req.header(HTTPHeaderCode.HOST),req.method,req.path);
-		if(data.macth){
-			foreach(key,value; data.mate){req.addMate(key,value);}
-			switch(data.macth.type){
+	try
+	{
+		MachData data = defaultRouter.match(req.header(HTTPHeaderCode.HOST), req.method, req.path);
+
+		if(data.macth)
+		{
+			foreach(key, value; data.mate)
+			{
+				req.addMate(key,value);
+			}
+
+			switch(data.macth.type)
+			{
 				case RouterHandlerType.Delegate:
 					data.macth.dgate()(req);
 					return;
@@ -295,21 +340,31 @@ void doHandleReqest(Request req) nothrow
 				default:
 					break;
 			}
-		} 
+		}
+
 		Response rep = req.createResponse();
-		if(rep){
+		if(rep)
+		{
 			rep.setHttpStatusCode(404);
 			rep.setContext("<h1>NOT Found<h1>");
 			rep.connectionClose();
 			rep.done();
 		}
-	} catch (CreateResponseException e){
+
+	}
+	catch (CreateResponseException e)
+	{
 		showException(e);
-	} catch (Exception e){
+	}
+	catch (Exception e)
+	{
 		showException(e);
+
 		Response rep;
-		collectException(req.createResponse,rep);
-		if(rep){
+		collectException(req.createResponse, rep);
+
+		if(rep)
+		{
 			collectException((){
 					rep.setHttpStatusCode(502);
 					rep.setContext(e.toString());

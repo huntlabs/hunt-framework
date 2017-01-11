@@ -40,11 +40,14 @@ abstract class Controller
 		View _view;
 
 	}
-	final @property response(){
+
+	final @property response()
+	{
 		return request.createResponse();
 	}
 	/// called before action  return true is continue false is finish
 	bool before(){return true;}
+
 	/// called after action  return true is continue false is finish
 	bool after(){return true;}
 
@@ -63,6 +66,7 @@ abstract class Controller
 		this.middlewares ~= midw;
 		return true;
 	}
+
 	///add middleware
 	IMiddleware[] getMiddleware()
 	{
@@ -91,8 +95,10 @@ abstract class Controller
 
 	protected final bool __handleWares()
 	{
-		foreach(ws;middlewares){
-			if(!ws.onProcess(request,response())){
+		foreach(ws;middlewares)
+		{
+			if(!ws.onProcess(request,response()))
+			{
 				return false;
 			}
 		}
@@ -157,6 +163,7 @@ string  __createCallActionFun(T, string moduleName)()
 							trace("do funnnn---------");
 						};
 					}
+
 					//action
 					str ~= "ptr." ~ memberName ~ "();";
 					static if(hasUDA!(t, Action)){
@@ -170,8 +177,8 @@ string  __createCallActionFun(T, string moduleName)()
 			}
 		}
 	}
-	str ~= "default : break;}";
 
+	str ~= "default : break;}";
 	str ~= "return false;";
 	str ~= "}";
 	return str;
@@ -209,53 +216,3 @@ void addRouteList(string str, RouterHandler.HandleFunction fun)
 private:
 __gshared bool _init = false;
 __gshared RouterHandler.HandleFunction[string]  __routerList;
-
-/*
-static bool __STATIC_CALLACTION__(typeof(this) ptr,string funName,Request req) {
-	import std.experimental.logger;
-	import std.variant;
-	import std.conv;import app.controller.index;
-	auto action = cast(IndexController)ptr;
-	trace("action is null? ", (action is null), "  funName is: ", funName);
-	if(!action) return false;
-	if(!action.__handleWares()) return false;
-	trace("------------------"); switch(funName){
-		case "show": {
-			scope auto wb_0_show = new BeforeMiddleware();
-			if(!wb_0_show.onProcess(action.request, action.response)){return false;}
-			
-			scope auto wb_1_show = new AfterMiddleware();
-			if(!wb_1_show.onProcess(action.request, action.response)){return false;}
-			
-			if(!action.before()){return false;}
-			action.show();
-			if(!action.after()){return false;}
-		}
-			break;
-		case "list": {
-			
-			scope auto wb_0_list = new OneMiddleware();
-			if(!wb_0_list.onProcess(action.request, action.response)){return false;}
-			
-			if(!action.before()){return false;}
-			action.list();
-			if(!action.after()){return false;}
-		}
-			break;
-		case "index": {
-			
-			if(!action.before()){return false;}
-			action.index();
-			if(!action.after()){return false;}
-		}
-			break;
-		case "showbool": {
-			
-			if(!action.before()){return false;}
-			action.showbool();
-			if(!action.after()){return false;}
-		}
-		break;default : break;}
-	return false;
-}
-*/
