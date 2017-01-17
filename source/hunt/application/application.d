@@ -372,5 +372,10 @@ void doHandleReqest(Request req) nothrow
 					rep.done();
 				}());
 		}
+	}  catch (Error e){
+		import std.stdio;
+		collectException({error(e.toString); writeln(e.toString());}());
+		import core.stdc.stdlib;
+		exit(-1);
 	}
 }
