@@ -188,9 +188,12 @@ string  __creteRouteMap(T, string moduleName)()
 {
 	string str = "";
 	foreach(memberName; __traits(allMembers, T)){
-		static if (is(typeof(__traits(getMember,  T, memberName)) == function) ){
-			foreach (t;__traits(getOverloads,T,memberName)) {
-				static if(/*ParameterTypeTuple!(t).length == 0 && */ hasUDA!(t, Action) ){
+		static if (is(typeof(__traits(getMember, T, memberName)) == function))
+		{
+			foreach (t;__traits(getOverloads, T, memberName))
+			{
+				static if (/*ParameterTypeTuple!(t).length == 0 && */ hasUDA!(t, Action))
+				{
 					str ~= "\n\taddRouteList(\"" ~ moduleName ~ "." ~ T.stringof ~ "." ~ memberName  ~ "\",&callHandler!(" ~ T.stringof ~ ",\"" ~ memberName ~ "\"));\n";
 				}
 			}
@@ -199,16 +202,17 @@ string  __creteRouteMap(T, string moduleName)()
 	return str;
 }
 
-RouterHandler.HandleFunction getRouteFormList(string str){
-	if(!_init) _init = true;
-	trace("get router : ", str);
+RouterHandler.HandleFunction getRouteFormList(string str)
+{
+	if (!_init) _init = true;
+
 	return __routerList.get(str,null);
 }
 
 void addRouteList(string str, RouterHandler.HandleFunction fun)
 {
-	if(!_init){
-		trace("addRouteList : ", str);
+	if(!_init)
+	{
 		__routerList[str] = fun;
 	}
 }
