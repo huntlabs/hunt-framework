@@ -124,7 +124,7 @@ class I18n
 }
 
 ///设置本地化
-private string _local;
+private string _local = I18N_DEFAULT_LOCALE;
 
 private @property string getLocale(){
 	if(_local)
