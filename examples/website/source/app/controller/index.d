@@ -50,12 +50,13 @@ class IndexController : Controller
     @Middleware(OneMiddleware.stringof)
     void list()
     {
-		this.view.setLayout!"main.dhtml"();	
+		/*this.view.setLayout!"main.dhtml"();	
 		this.view.test = "viile";
 		this.view.username = "viile";
 		this.view.header = "donglei header";
-		this.view.footer = "footer";
+		this.view.footer = "footer";*/
 		this.render!"content.dhtml"();
+
     }
 	@Action
     void index()

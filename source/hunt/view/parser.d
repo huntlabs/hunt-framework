@@ -137,7 +137,7 @@ class Parser
 		this.str = str;
 		this.stt = strToTree(str,0,str.length.to!int - 1);
 	}
-	string toString()
+	override string toString()
 	{
 		return FunHeader ~ stt.Evaluate(ctx) ~ FunFooter;
 	}

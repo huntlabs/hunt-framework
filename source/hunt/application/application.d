@@ -27,6 +27,7 @@ public import std.file;
 import std.uni;
 import std.path;
 import std.parallelism;
+import std.exception;
 
 import hunt.router;
 public import hunt.http;
@@ -55,6 +56,8 @@ final class Application
 		}
 		return _app;
 	}
+
+	Address binded(){return addr;}
 	
 	/**
         Add a Router rule
@@ -138,8 +141,10 @@ final class Application
 	void run()
 	{
 		setLogConfig(Config.app.log);
-		upConfig(Config.app.server);
+		upConfig(Config.app);
 		upRouterConfig();
+		import std.stdio;
+		writeln("please open http://",addr.toAddrString,"/");
 		_server.start();
 	}
 	
@@ -173,6 +178,7 @@ private:
 			if(msg.chunked == false){
 				string contign = msg.getHeaders.getSingleOrEmpty(HTTPHeaderCode.CONTENT_LENGTH);
 				if(contign.length > 0){
+					import std.conv;
 					uint len = 0;
 					collectException(to!(uint)(contign),len);
 					if(len > _maxBodySize)
@@ -202,47 +208,48 @@ private:
 	}
 
 private:
-	void upConfig(ref AppConfig.ServerConfig conf)
+	void upConfig(AppConfig conf)
 	{
-		_maxBodySize = conf.maxBodySzie;
+		_maxBodySize = conf.upload.maxSize;
 		version(NO_TASKPOOL)
 		{
 			// NOTHING
 		}
 		else
 		{
-			_tpool = new TaskPool(conf.workerThreads);
+			_tpool = new TaskPool(conf.http.workerThreads);
 			_tpool.isDaemon = true;
 		}
 
 		HTTPServerOptions option = new HTTPServerOptions();
-		option.maxHeaderSize = conf.maxHeaderSize;
-		option.listenBacklog = conf.listenBacklog;
+		//option.maxHeaderSize = conf.maxHeaderSize;
+		//option.listenBacklog = conf.listenBacklog;
 
 		version(NO_TASKPOOL)
 		{
-			option.threads = conf.ioThreads + conf.workerThreads;
+			option.threads = conf.http.ioThreads + conf.http.workerThreads;
 		}
 		else
 		{
-			option.threads = conf.ioThreads;
+			option.threads = conf.http.ioThreads;
 		}
 
-		option.timeOut = conf.keepAliveTimeOut;
+		//option.timeOut = conf.keepAliveTimeOut;
 		option.handlerFactories.insertBack(&newHandler);
 		_server = new HttpServer(option);
-		foreach(Address addr; conf.bindAddress)
-		{
+		addr = parseAddress(conf.http.address,conf.http.port);
+		// foreach(Address addr; conf.bindAddress)
+		// {
 			HTTPServerOptions.IPConfig ipconf;
 			ipconf.address = addr;
-			ipconf.fastOpenQueueSize = conf.fastOpenQueueSize;
-			ipconf.enableTCPFastOpen = (conf.fastOpenQueueSize > 0);
+			//ipconf.fastOpenQueueSize = conf.fastOpenQueueSize;
+			//ipconf.enableTCPFastOpen = (conf.fastOpenQueueSize > 0);
 
 			_server.addBind(ipconf);
-		}
+		// }
 
-		if(conf.webSocketFactory)
-			_wfactory = conf.webSocketFactory;
+		//if(conf.webSocketFactory)
+		//	_wfactory = conf.webSocketFactory;
 	}
 
 	void setLogConfig(ref AppConfig.LogConfig conf)
@@ -275,10 +282,12 @@ private:
 				globalLogLevel = LogLevel.off;
 				break;
 		}
-
-		if(conf.file.length > 0)
+		
+		if(conf.file.length > 0 && conf.path.length > 0)
 		{
-			sharedLog = new FileLogger(conf.file);
+			import std.path;
+			string file = buildPath(conf.path,conf.file);
+			sharedLog = new FileLogger(file);
 		}
 	}
 
@@ -298,6 +307,7 @@ private:
 	
 	__gshared static Application _app;
 private:
+	Address addr;
 	HttpServer _server;
 	WebSocketFactory _wfactory;
 	uint _maxBodySize;

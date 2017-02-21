@@ -15,58 +15,111 @@ import collie.codec.http.server.httpserveroptions;
 final class AppConfig
 {
 	alias AddressList = Address[];
-	struct CookieConfig
+
+	struct ApplicationConf
 	{
-		string domain = ".huntframework.com";
-		string prefix = "hunt_";
+		string name;
+		string baseUrl;
+		string defaultCookieDomain = ".example.com";
+		string defaultLanguage = "zh-CN";
+		string languages = "zh-CN,en-US";
+		string secret;
+		string encoding = "UTF-8";
+	}
+
+	struct SessionConf
+	{
+		string prefix = "hunt";
+		string storage = "memcache";
 		uint expire = 3600;
 	}
 
-	struct ServerConfig
+	struct HttpConf
 	{
-		uint workerThreads; // default is totalCPUs;
+		string address = "127.0.0.1";
+		ushort port = 8080;
+		uint workerThreads = 4;
 		uint ioThreads = 2;
-		string defaultLanguage = "zh-cn";
-		string encoding  = "utf-8";
-		string timeZone = "Asia/Shanghai";
-		uint keepAliveTimeOut = 30;
-		uint listenBacklog = 1024;
-		uint maxHeaderSize = 60;
-		uint maxBodySzie = 8 * 1024;
-		uint fastOpenQueueSize = 0;
-		WebSocketFactory webSocketFactory = null;
-		
-		CookieConfig cookie;
+		int cacheControl;
+		string path;
+	}
 
-
-		AddressList bindAddress()
-		{
-			return _binds;
-		}
-
-	private:
-		AddressList _binds;
+	struct HttpsConf
+	{
+		bool enabled;
+		string protocol;
+		string keyStore;
+		string keyStoreType;
+		string keyStorePassword;
 	}
 
 	struct LogConfig
 	{
 		string level = "warning";
+		string path = "";
 		string file = "";
+	}
+
+	struct UploadConf
+	{
+		string path;
+		uint maxSize;
+	}
+
+	struct MailSmtpConf
+	{
+		string host;
+		string channel;
+		ushort port;
+		string protocol;
+		string user;
+		string password;
+	}
+	
+	struct MailConf
+	{
+		MailSmtpConf smtp;
+	}
+
+	struct DbPoolConf
+	{
+		uint maxSize;
+		uint minSize;
+		uint timeout;
 	}
 
 	struct DBConfig
 	{
-		string type;
-		string host;
-		string port;
-		string dbname;
-		string username;
-		string password;
+		string driver;
+		string url;
+		DbPoolConf pool;
 	}
 
-	DBConfig db;
-	ServerConfig server;
+	struct DBConf{
+		DBConfig default_;
+	}
+
+	struct DateConf
+	{
+		string format;
+		string timeZone;
+	}
+
+	struct CornConf
+	{
+		string noon;
+	}
+
+	DBConf database;
+	ApplicationConf application;
+	SessionConf session;
+	HttpConf http;
+	HttpsConf https;
 	LogConfig log;
+	UploadConf upload;
+	CornConf cron;
+	DateConf date;
+	MailConf mail;
 
 	@property Configuration config(){return _config;}
 
@@ -76,84 +129,70 @@ final class AppConfig
 
 		app._config = conf;
 
-		string[] ips;
-		{
-			string ip;
-			collectException(conf.server.binds.value(), ip);
-
-			if (ip.length > 0)
-			{
-				ips = split(ip,';');
-			}
-		}
-
-		collectException(conf.server.worker_threads.as!uint(),app.server.workerThreads);
-		collectException(conf.server.io_threads.as!uint(),app.server.ioThreads);
-		collectException(conf.server.fast_open.as!uint(),app.server.fastOpenQueueSize);
-		collectException(conf.server.default_language.value(),app.server.defaultLanguage);
-		collectException(conf.server.encoding.value(), app.server.encoding);
-		collectException(conf.server.time_zone.value(), app.server.timeZone);
-		collectException(conf.server.timeout.as!uint(), app.server.keepAliveTimeOut);
-		collectException(conf.server.max_body_szie.as!uint(), app.server.maxBodySzie);
-		collectException(conf.server.max_header_size.as!uint(), app.server.maxHeaderSize);
-		collectException(conf.server.cookie.domain.value(), app.server.cookie.domain);
-		collectException(conf.server.cookie.prefix.value(), app.server.cookie.prefix);
-		collectException(conf.server.cookie.expire.as!uint(), app.server.cookie.expire);
-
-		app.server.maxBodySzie = app.server.maxBodySzie << 10;// * 1024
-		app.server.maxHeaderSize = app.server.maxHeaderSize << 10;// * 1024
-
-		if (ips.length == 0)
-		{ 
-			ips ~= "127.0.0.1:8080";
-		}
-
-		foreach (ip;ips)
-		{
-			import std.conv;
-
-			auto index = lastIndexOf(ip,':');
-
-			if (index <= 0 ) continue;
-
-			string tip =  strip(ip[0..index]);
-			string tport = strip(ip[index+1..$]);
-			ushort port = 0;
-
-			collectException(to!(ushort)(tport),port);
-
-			if (port == 0) continue;
-
-			Address addr;
-			collectException(parseAddress(tip,port),addr);
-
-			if (addr is null) continue;
-
-			app.server._binds ~= addr;
-		}
-
-		string ws;
-		collectException(conf.server.webSocket_factory.value(), ws);
 		
-		if (ws.length > 0)
-		{
-			auto obj = Object.factory(ws);
+		collectException(conf.application.name.value,	app.application.name);
+		collectException(conf.application.baseUrl.value,	app.application.baseUrl);
+		collectException(conf.application.defaultCookieDomain.value,	app.application.defaultCookieDomain);
+		collectException(conf.application.defaultLanguage.value,	app.application.defaultLanguage);
+		collectException(conf.application.languages.value,	app.application.languages);
+		collectException(conf.application.secret.value,	app.application.secret);
+		collectException(conf.application.encoding.value,	app.application.encoding);
 
-			if(obj)
-			{
-				app.server.webSocketFactory = cast(WebSocketFactory)obj;
-			}
-		}
-		
+		collectException(conf.session.prefix.value(),	app.session.prefix);
+		collectException(conf.session.storage.value(),	app.session.storage);
+		collectException(conf.session.expire.as!uint(), 	app.session.expire);
+
+		collectException(conf.http.address.value(), app.http.address);
+		collectException(conf.http.port.as!ushort(), app.http.port);
+		collectException(conf.http.workerThreads.as!uint(), app.http.workerThreads);
+		collectException(conf.http.ioThreads.as!uint(), app.http.ioThreads);
+		collectException(conf.http.cacheControl.as!int(), app.http.cacheControl);
+		collectException(conf.http.path.value(), app.http.path);
+
+		collectException(conf.https.enabled.as!bool(), app.https.enabled);
+		collectException(conf.https.protocol.value(), app.https.protocol);
+		collectException(conf.https.keyStore.value(), app.https.keyStore);
+		collectException(conf.https.keyStoreType.value(), app.https.keyStoreType);
+		collectException(conf.https.keyStorePassword.value(), app.https.keyStorePassword);
+
 		collectException(conf.log.level.value(), app.log.level);
+		collectException(conf.log.path.value(), app.log.path);
 		collectException(conf.log.file.value(), app.log.file);
 
-		collectException(conf.db.type.value(), app.db.type);
-		collectException(conf.db.host.value(), app.db.host);
-		collectException(conf.db.port.value(), app.db.port);
-		collectException(conf.db.dbname.value(), app.db.dbname);
-		collectException(conf.db.username.value(), app.db.username);
-		collectException(conf.db.password.value(), app.db.password);
+		collectException(conf.upload.path.value(), app.upload.path);
+		collectException(conf.upload.maxSize.as!uint(), app.upload.maxSize);
+
+		collectException(conf.cron.noon.value(), app.cron.noon);
+
+		collectException(conf.date.format.value(), app.date.format);
+		collectException(conf.date.timeZone.value(), app.date.timeZone);
+
+		collectException(conf.database.default_.driver.value(), app.database.default_.driver);
+		collectException(conf.database.default_.url.value(), app.database.default_.url);
+		collectException(conf.database.default_.pool.maxSize.as!uint(), app.database.default_.pool.maxSize);
+		collectException(conf.database.default_.pool.minSize.as!uint(), app.database.default_.pool.minSize);
+		collectException(conf.database.default_.pool.timeout.as!uint(), app.database.default_.pool.timeout);
+
+		collectException(conf.mail.smtp.host.value(), app.mail.smtp.host);
+		collectException(conf.mail.smtp.channel.value(), app.mail.smtp.channel);
+		collectException(conf.mail.smtp.port.as!ushort(), app.mail.smtp.port);
+		collectException(conf.mail.smtp.protocol.value(), app.mail.smtp.protocol);.
+		collectException(conf.mail.smtp.user.value(), app.mail.smtp.user);
+		collectException(conf.mail.smtp.password.value(), app.mail.smtp.password);
+
+
+		// string ws;
+		// collectException(conf.server.webSocket_factory.value(), ws);
+		
+		// if (ws.length > 0)
+		// {
+		// 	auto obj = Object.factory(ws);
+
+		// 	if(obj)
+		// 	{
+		// 		app.server.webSocketFactory = cast(WebSocketFactory)obj;
+		// 	}
+		// }
 		
 		return app;
 	}
@@ -163,7 +202,7 @@ private:
 
 	this()
 	{
-		server.workerThreads = totalCPUs;
+		http.workerThreads = totalCPUs;
 	}
 }
 
