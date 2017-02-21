@@ -144,7 +144,7 @@ final class Application
 		upConfig(Config.app);
 		upRouterConfig();
 		import std.stdio;
-		writeln("please open http://",addr.toAddrString,"/");
+		writeln("please open http://",addr.toString,"/");
 		_server.start();
 	}
 	
