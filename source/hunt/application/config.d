@@ -63,7 +63,7 @@ final class AppConfig
 	struct UploadConf
 	{
 		string path;
-		uint maxSize;
+		uint maxSize = 4 * 1024 * 1024;
 	}
 
 	struct MailSmtpConf
