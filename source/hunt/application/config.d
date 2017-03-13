@@ -40,6 +40,8 @@ final class AppConfig
 		ushort port = 8080;
 		uint workerThreads = 4;
 		uint ioThreads = 2;
+		size_t keepAliveTimeOut = 30;
+		size_t maxHeaderSize = 60 * 1024;
 		int cacheControl;
 		string path;
 	}
@@ -146,6 +148,8 @@ final class AppConfig
 		collectException(conf.http.port.as!ushort(), app.http.port);
 		collectException(conf.http.workerThreads.as!uint(), app.http.workerThreads);
 		collectException(conf.http.ioThreads.as!uint(), app.http.ioThreads);
+		collectException(conf.http.maxHeaderSize.as!size_t(), app.http.maxHeaderSize);
+		collectException(conf.http.keepAliveTimeOut.as!size_t(), app.http.keepAliveTimeOut);
 		collectException(conf.http.cacheControl.as!int(), app.http.cacheControl);
 		collectException(conf.http.path.value(), app.http.path);
 
