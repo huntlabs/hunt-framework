@@ -222,8 +222,8 @@ private:
 		}
 
 		HTTPServerOptions option = new HTTPServerOptions();
-		//option.maxHeaderSize = conf.maxHeaderSize;
-		//option.listenBacklog = conf.listenBacklog;
+		option.maxHeaderSize = conf.http.maxHeaderSize;
+		//option.listenBacklog = conf.http.listenBacklog;
 
 		version(NO_TASKPOOL)
 		{
@@ -234,7 +234,7 @@ private:
 			option.threads = conf.http.ioThreads;
 		}
 
-		//option.timeOut = conf.keepAliveTimeOut;
+		option.timeOut = conf.http.keepAliveTimeOut;
 		option.handlerFactories.insertBack(&newHandler);
 		_server = new HttpServer(option);
 		addr = parseAddress(conf.http.address,conf.http.port);
