@@ -1,0 +1,29 @@
+{
+	"name": "orm",
+	"description": "orm.",
+	"copyright": "Copyright © 2016, huntframework.com",
+	"targetType": "executable",
+	"stringImportPaths": [
+		"./resources/views"
+	],
+	"mainSourceFile": "./source/bootstrap.d",
+	"dependencies": {
+		"hunt": {
+			"path": "../../"
+		}
+	},
+	"configurations": [
+		{
+			"name": "default",
+			"subConfigurations": {
+				"hunt": "default"
+			}
+		},
+		{
+			"name": "no_taskpool",
+			"subConfigurations": {
+				"hunt": "no_taskpool"
+			}
+		}
+	]
+}

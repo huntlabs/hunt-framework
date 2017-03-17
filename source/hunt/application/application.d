@@ -134,6 +134,28 @@ final class Application
 		if(cbuffer)
 			_cbuffer = cbuffer;
 	}
+	private void initDb(AppConfig.DBConf conf)
+	{
+		trace("conf..", conf.default_);
+		if(conf.default_.url == "")return;
+		import std.string;
+		//mysql://root:123456@localhost:3306/test
+		auto pos_driver = conf.default_.url.indexOf("://");
+		assert(pos_driver != -1, "Incorrect format");
+		import hunt.orm.entity;
+		string driver = conf.default_.url[0 .. pos_driver];
+		auto mouse_pos = conf.default_.url.lastIndexOf("@");
+		string user_password = conf.default_.url[pos_driver + 3 .. mouse_pos];
+		string hosturl = driver~"://" ~conf.default_.url[mouse_pos +1..$];
+		auto user_pos = user_password.indexOf(":");
+
+		import std.experimental.logger;
+
+
+		trace("driver:", driver, " hosturl ", hosturl," user:",user_password[0 .. user_pos], " pwd:", user_password[user_pos+1 .. $]);
+		//ORMEntity.getInstance.initDB("mysql", "mysql://10.1.11.31:3306/test",["user":"dev", "password":"111111"]);	
+		ORMEntity.getInstance.initDB(driver, hosturl,["user":cast(string)user_password[0 .. user_pos], "password":cast(string)user_password[user_pos+1 .. $]]);	
+	}
 
 	/**
         Start the HTTPServer server , and block current thread.
@@ -143,6 +165,7 @@ final class Application
 		setLogConfig(Config.app.log);
 		upConfig(Config.app);
 		upRouterConfig();
+		initDb(Config.app.database);
 		import std.stdio;
 		writeln("please open http://",addr.toString,"/");
 		_server.start();
