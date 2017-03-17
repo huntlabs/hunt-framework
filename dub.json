@@ -5,7 +5,8 @@
     "license": "Apache-2.0",
     "libs" : [],
     "dependencies": {
-        "collie": "~>0.9.1"
+        "collie": "~>0.9.1",
+        "entity": {"path": "../entity-github"}
     },
 	"configurations" : [
 		{
@@ -13,7 +14,35 @@
 		},
 		{
 			"name" : "no_taskpool",
-			"versions" : ["NO_TASKPOOL"],
-		}
-	]
+			"versions" : ["NO_TASKPOOL"]
+		},
+        {
+            "name": "full",
+            "versions": ["USE_MYSQL", "USE_SQLITE", "USE_PGSQL"],
+            "subConfigurations": {
+                "entity": "full"
+            }
+        },
+        {
+            "name": "MySQL",
+            "versions": ["USE_MYSQL"],
+            "subConfigurations": {
+                "entity": "MySQL"
+            }
+        },
+        {
+            "name": "SQLite",
+            "versions": ["USE_SQLITE"],
+            "subConfigurations": {
+                "entity": "SQLite"
+            }
+        },
+        {
+            "name": "PGSQL",
+            "versions": ["USE_PGSQL"],
+            "subConfigurations": {
+                "entity": "PGSQL"
+            }
+        }
+    ]
 }
