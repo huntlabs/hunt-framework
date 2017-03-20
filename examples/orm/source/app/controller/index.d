@@ -9,11 +9,12 @@
  *
  */
 module app.controller.index;
-import hunt.application;
-public import app.middleware;
+
+import hunt;
+
 import std.experimental.logger;
-import hunt.orm.entity;
-import entity;
+
+import app.middleware;
 
 version(USE_ENTITY) import app.model.index;
 
@@ -36,9 +37,24 @@ class IndexController : Controller
     {
 	import app.dao.user;
 	import std.conv;
+	import std.datetime;
+	StopWatch sw;
+		sw.start();
 	auto vid = UserDao.registerUser();
-	this.response.html("id is :" ~to!string(vid));
-
+		sw.stop();
+		this.response.html("id is :" ~to!string(sw.peek().msecs));
+	
+		sw.reset();
+		sw.start();
 	UserDao.updateUserName(vid, "dl_" ~to!string(vid));
+		sw.stop();
+		this.response.html("id is :" ~to!string(sw.peek().msecs));
+
+		sw.reset();
+		sw.start();
+		UserDao.getUserName(10);
+		sw.stop();
+
+		this.response.html("id is :" ~to!string(sw.peek().msecs));
     }
 }

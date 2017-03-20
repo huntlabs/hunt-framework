@@ -1,5 +1,7 @@
 ﻿module app.entity.user;
+
 import entity;
+
 class User
 {
 	@Id @Generated

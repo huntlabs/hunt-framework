@@ -58,7 +58,7 @@ void main()
 	///设置语言
 	setLocale("en-us");
 	writeln( getText("email.subject", "empty"));
-	import hunt.orm.entity;
+
 	import app.entity.user;
 	registerEntity!(User);
 
