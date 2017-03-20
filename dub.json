@@ -6,7 +6,7 @@
     "libs" : [],
     "dependencies": {
         "collie": "~>0.9.1",
-        "entity": {"path": "../entity-github"}
+        "entity": "~>0.1.0"
     },
 	"configurations" : [
 		{
