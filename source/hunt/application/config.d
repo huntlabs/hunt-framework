@@ -97,10 +97,6 @@ final class AppConfig
 		DbPoolConf pool;
 	}
 
-	struct DBConf{
-		DBConfig default_;
-	}
-
 	struct DateConf
 	{
 		string format;
@@ -112,7 +108,7 @@ final class AppConfig
 		string noon;
 	}
 
-	DBConf database;
+	DBConfig database;
 	ApplicationConf application;
 	SessionConf session;
 	HttpConf http;
@@ -171,11 +167,11 @@ final class AppConfig
 		collectException(conf.date.format.value(), app.date.format);
 		collectException(conf.date.timeZone.value(), app.date.timeZone);
 
-		collectException(conf.database.default_.driver.value(), app.database.default_.driver);
-		collectException(conf.database.default_.url.value(), app.database.default_.url);
-		collectException(conf.database.default_.pool.maxSize.as!uint(), app.database.default_.pool.maxSize);
-		collectException(conf.database.default_.pool.minSize.as!uint(), app.database.default_.pool.minSize);
-		collectException(conf.database.default_.pool.timeout.as!uint(), app.database.default_.pool.timeout);
+		collectException(conf.database.driver.value(), app.database.driver);
+		collectException(conf.database.url.value(), app.database.url);
+		collectException(conf.database.pool.maxSize.as!uint(), app.database.pool.maxSize);
+		collectException(conf.database.pool.minSize.as!uint(), app.database.pool.minSize);
+		collectException(conf.database.pool.timeout.as!uint(), app.database.pool.timeout);
 
 		collectException(conf.mail.smtp.host.value(), app.mail.smtp.host);
 		collectException(conf.mail.smtp.channel.value(), app.mail.smtp.channel);
