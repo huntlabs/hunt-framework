@@ -134,19 +134,19 @@ final class Application
 		if(cbuffer)
 			_cbuffer = cbuffer;
 	}
-	private void initDb(AppConfig.DBConf conf)
+	private void initDb(AppConfig.DBConfig conf)
 	{
-		trace("conf..", conf.default_);
-		if(conf.default_.url == "")return;
+		trace("conf..", conf);
+		if(conf.url == "")return;
 		import std.string;
 		//mysql://root:123456@localhost:3306/test
-		auto pos_driver = conf.default_.url.indexOf("://");
+		auto pos_driver = conf.url.indexOf("://");
 		assert(pos_driver != -1, "Incorrect format");
-		import hunt.orm.entity;
-		string driver = conf.default_.url[0 .. pos_driver];
-		auto mouse_pos = conf.default_.url.lastIndexOf("@");
-		string user_password = conf.default_.url[pos_driver + 3 .. mouse_pos];
-		string hosturl = driver~"://" ~conf.default_.url[mouse_pos +1..$];
+		import hunt.application.model;
+		string driver = conf.url[0 .. pos_driver];
+		auto mouse_pos = conf.url.lastIndexOf("@");
+		string user_password = conf.url[pos_driver + 3 .. mouse_pos];
+		string hosturl = driver~"://" ~conf.url[mouse_pos +1..$];
 		auto user_pos = user_password.indexOf(":");
 
 		import std.experimental.logger;

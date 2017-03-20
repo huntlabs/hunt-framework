@@ -1,8 +1,7 @@
 ﻿module app.dao.user;
 import app.entity.user;
 
-import hunt.orm.entity;
-import entity;
+import hunt;
 
 class UserDao
 {
@@ -24,6 +23,15 @@ class UserDao
 		EntityManager manager = entityManagerFactory.createEntityManager();
 		scope(exit){manager.close();}
 		manager.update(user);
+	}
+
+	static string getUserName(long uid)
+	{
+		EntityManager manager = entityManagerFactory.createEntityManager();
+		scope(exit){manager.close();}
+		User user = manager.get!User(uid);
+
+		return user.name;
 	}
 
 
