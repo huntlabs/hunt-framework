@@ -22,7 +22,7 @@ final class ORMEntity{
 		return _orm;
 	}
 
-	void initDB(string driver,string url, string[string]params = null, int maxPoolSize = 1, int timeToLive = 600, int waitTimeOut = 30){
+	void initDB(string driver,string url, string[string]params = null, int maxPoolSize = 2, int timeToLive = 600, int waitTimeOut = 30){
 		import std.experimental.logger;
 		driver = toLower(driver);
 		if(driver == "mysql")

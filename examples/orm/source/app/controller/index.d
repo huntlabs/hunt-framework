@@ -34,7 +34,11 @@ class IndexController : Controller
 	@Action
     void showbool()
     {
-		import app.dao.user;
-		UserDao.registerUser();
+	import app.dao.user;
+	import std.conv;
+	auto vid = UserDao.registerUser();
+	this.response.html("id is :" ~to!string(vid));
+
+	UserDao.updateUserName(vid, "dl_" ~to!string(vid));
     }
 }
