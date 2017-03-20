@@ -1,6 +1,6 @@
 {
-	"name": "orm",
-	"description": "orm.",
+	"name": "hunt-entity",
+	"description": "hunt use entity.",
 	"copyright": "Copyright © 2016, huntframework.com",
 	"targetType": "executable",
 	"stringImportPaths": [
