@@ -3,10 +3,26 @@ import entity;
 import std.string;
 import ddbc.all;
 
-private __gshared static EntityMetaData _schema;
+private __gshared static EntityMetaData _g_schema;
+private __gshared string _g_driver;
+private __gshared string _g_url;
+private __gshared string[string] _g_params;
+private __gshared int _g_maxPoolSize;
+private __gshared int _g_timeToLive;
+private __gshared int _g_waitTimeOut;
+
+void initDB(string driver,string url, string[string]params = null, int maxPoolSize = 2, int timeToLive = 600, int waitTimeOut = 30)
+{
+	_g_driver = driver;
+	_g_url = url;
+	_g_params = params;
+	_g_maxPoolSize = maxPoolSize;
+	_g_timeToLive = timeToLive;
+	_g_waitTimeOut = waitTimeOut;
+}
 
 final class ORMEntity{
-	__gshared static ORMEntity _orm;
+	static ORMEntity _orm;
 
 	private EntityManagerFactory _entityManagerFactory;
 	private Dialect _dialect;
@@ -18,7 +34,7 @@ final class ORMEntity{
 		if(_orm is null)
 			_orm = new ORMEntity();
 		import std.stdio, core.thread;
-		writeln("----", Thread.getThis.id, " orm " , _orm.toHash, " shame ", _schema.toHash);
+		writeln("----", Thread.getThis.id, " orm " , _orm.toHash, " shame ", _g_schema.toHash);
 		return _orm;
 	}
 
@@ -46,22 +62,25 @@ final class ORMEntity{
 		}
 		_ds = new ConnectionPoolDataSourceImpl(_driver, url, params, maxPoolSize, timeToLive, waitTimeOut);
 		trace(_driver, url, params, maxPoolSize, timeToLive, waitTimeOut);
-		_entityManagerFactory = new EntityManagerFactory(_schema, _dialect, _ds);
+		_entityManagerFactory = new EntityManagerFactory(_g_schema, _dialect, _ds);
 	}
 
 	@property EntityManagerFactory entityManagerFactory(){
-		assert(_entityManagerFactory !is null, " init db first");
+		if(_entityManagerFactory is null)
+		{
+			this.initDB(_g_driver,_g_url, _g_params, _g_maxPoolSize, _g_timeToLive, _g_waitTimeOut);
+		}
 		return _entityManagerFactory;
 	}
 }
 
 
 
-@property __gshared static  EntityManagerFactory entityManagerFactory(){
+@property static  EntityManagerFactory entityManagerFactory(){
 	return ORMEntity.getInstance.entityManagerFactory;
 }
 
 void registerEntity(T...)()
 {
-	_schema = new SchemaInfoImpl!(T);
+	_g_schema = new SchemaInfoImpl!(T);
 }
