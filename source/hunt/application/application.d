@@ -154,7 +154,8 @@ final class Application
 
 		trace("driver:", driver, " hosturl ", hosturl," user:",user_password[0 .. user_pos], " pwd:", user_password[user_pos+1 .. $]);
 		//ORMEntity.getInstance.initDB("mysql", "mysql://10.1.11.31:3306/test",["user":"dev", "password":"111111"]);	
-		ORMEntity.getInstance.initDB(driver, hosturl,["user":cast(string)user_password[0 .. user_pos], "password":cast(string)user_password[user_pos+1 .. $]]);	
+		//ORMEntity.getInstance.initDB(driver, hosturl,["user":cast(string)user_password[0 .. user_pos], "password":cast(string)user_password[user_pos+1 .. $]]);
+		initDB(driver, hosturl,["user":cast(string)user_password[0 .. user_pos], "password":cast(string)user_password[user_pos+1 .. $]]);
 	}
 
 	/**
