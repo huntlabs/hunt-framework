@@ -1,6 +1,6 @@
 {
 	"name": "entity",
-	"description": "hunt use entity.",
+	"description": "hunt use entity. ",
 	"copyright": "Copyright © 2016, huntframework.com",
 	"targetType": "executable",
 	"stringImportPaths": [

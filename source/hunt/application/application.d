@@ -139,23 +139,14 @@ final class Application
 		trace("conf..", conf);
 		if(conf.url == "")return;
 		import std.string;
-		//mysql://root:123456@localhost:3306/test
-		auto pos_driver = conf.url.indexOf("://");
-		assert(pos_driver != -1, "Incorrect format");
+		import hunt.utils.url;
+		import std.conv;
 		import hunt.application.model;
-		string driver = conf.url[0 .. pos_driver];
-		auto mouse_pos = conf.url.lastIndexOf("@");
-		string user_password = conf.url[pos_driver + 3 .. mouse_pos];
-		string hosturl = driver~"://" ~conf.url[mouse_pos +1..$];
-		auto user_pos = user_password.indexOf(":");
-
-		import std.experimental.logger;
-
-
-		trace("driver:", driver, " hosturl ", hosturl," user:",user_password[0 .. user_pos], " pwd:", user_password[user_pos+1 .. $]);
-		//ORMEntity.getInstance.initDB("mysql", "mysql://10.1.11.31:3306/test",["user":"dev", "password":"111111"]);	
-		//ORMEntity.getInstance.initDB(driver, hosturl,["user":cast(string)user_password[0 .. user_pos], "password":cast(string)user_password[user_pos+1 .. $]]);
-		initDB(driver, hosturl,["user":cast(string)user_password[0 .. user_pos], "password":cast(string)user_password[user_pos+1 .. $]]);
+		URL url = conf.url.parseURL();
+		url.queryArr["user"] = url.user;
+		url.queryArr["password"] = url.pass;
+		trace("driver:", url.scheme, " hosturl ", url.toString()," user:",url.user, " pwd:", url.pass, "queryarr", url.queryArr);
+		initDB(url.scheme, url.scheme~"://" ~url.host ~":" ~to!string(url.port) ~url.path~"?"~url.query,url.queryArr);
 	}
 
 	/**
