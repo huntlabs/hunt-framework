@@ -12,6 +12,7 @@ private __gshared string[string] _g_params;
 private __gshared int _g_maxPoolSize;
 private __gshared int _g_timeToLive;
 private __gshared int _g_waitTimeOut;
+private __gshared string _g_tablePrefix;
 
 void initDB(string driver,string url, string[string]params = null, int maxPoolSize = 2, int timeToLive = 600, int waitTimeOut = 30)
 {
@@ -21,6 +22,10 @@ void initDB(string driver,string url, string[string]params = null, int maxPoolSi
 	_g_maxPoolSize = maxPoolSize;
 	_g_timeToLive = timeToLive;
 	_g_waitTimeOut = waitTimeOut;
+	if(params !is null && "prefix" in params)
+	{
+		_g_schema.tablePrefix = params["prefix"];
+	}
 }
 
 final class HuntEntity
