@@ -5,7 +5,7 @@ import entity;
 class User
 {
     @Id
-	@Generated
+    @Generated
     long id;
 	
     string name;
