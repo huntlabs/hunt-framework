@@ -8,14 +8,14 @@
         "collie": "~>0.9.1",
         "entity": "~>0.1.0"
     },
-	"configurations" : [
-		{
-			"name" : "default",
-		},
-		{
-			"name" : "no_taskpool",
-			"versions" : ["NO_TASKPOOL"]
-		},
+    "configurations" : [
+        {
+            "name" : "default",
+        },
+        {
+            "name" : "no_taskpool",
+            "versions" : ["NO_TASKPOOL"]
+        },
         {
             "name": "full",
             "versions": ["USE_MYSQL", "USE_SQLITE", "USE_PGSQL"],
