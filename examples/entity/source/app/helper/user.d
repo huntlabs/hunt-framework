@@ -1,9 +1,9 @@
-﻿module app.helper.user;
+﻿module app.service.user;
 import app.model.user;
 
 import hunt;
 
-class UserHelper
+class UserService
 {
     static long registerUser()
     {
@@ -33,7 +33,4 @@ class UserHelper
 
         return user.name;
     }
-
-
 }
-
