@@ -13,15 +13,13 @@ module app.controller.index;
 
 import hunt;
 
-import std.experimental.logger;
-
 import app.middleware;
-
-version(USE_ENTITY) import app.model.index;
+import app.service.user;
 
 class IndexController : Controller
 {
     mixin MakeController;
+	
     this()
     {
         this.addMiddleware(new BeforeMiddleware());
@@ -37,27 +35,25 @@ class IndexController : Controller
     void showbool()
     {
         import std.conv;
-        import std.datetime;
-        
-        import app.helper.user;
+        import std.datetime : StopWatch;
         
         StopWatch sw;
         sw.start();
-        auto vid = UserHelper.registerUser();
+        auto vid = UserService.registerUser();
         sw.stop();
         
         this.response.html("id is :" ~to!string(sw.peek().msecs));
     
         sw.reset();
         sw.start();
-        UserHelper.updateUserName(vid, "dl_" ~to!string(vid));
+        UserService.updateUserName(vid, "dl_" ~to!string(vid));
         sw.stop();
         
         this.response.html("id is :" ~to!string(sw.peek().msecs));
 
         sw.reset();
         sw.start();
-        UserHelper.getUserName(10);
+        UserService.getUserName(10);
         sw.stop();
 
         this.response.html("id is :" ~to!string(sw.peek().msecs));

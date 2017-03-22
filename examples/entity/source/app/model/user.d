@@ -1,6 +1,6 @@
 ﻿module app.model.user;
 
-import entity;
+import hunt;
 
 class User
 {
