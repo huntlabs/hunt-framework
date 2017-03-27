@@ -23,6 +23,7 @@ import hunt.http.session;
 import hunt.http.sessionstorage;
 import hunt.http.cookie;
 import hunt.http.exception;
+import hunt.http.nullbuffer;
 
 import std.string;
 import std.conv;
@@ -48,7 +49,12 @@ final class Request : RequestHandler
 
 	@property Header(){return _headers;}
 
-	@property Body(){return _body;}
+	@property Body(){
+		if(_body)
+			return _body; 
+		else 
+			return defaultBuffer;
+	}
 
 	@property mate(){return _mate;}
 
