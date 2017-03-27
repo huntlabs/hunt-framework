@@ -134,6 +134,20 @@ final class Application
 		if(cbuffer)
 			_cbuffer = cbuffer;
 	}
+	private void initDb(AppConfig.DBConfig conf)
+	{
+		trace("conf..", conf);
+		if(conf.url == "")return;
+		import std.string;
+		import hunt.utils.url;
+		import std.conv;
+		import hunt.application.model;
+		URL url = conf.url.parseURL();
+		url.queryArr["user"] = url.user;
+		url.queryArr["password"] = url.pass;
+		trace("driver:", url.scheme, " hosturl ", url.toString()," user:",url.user, " pwd:", url.pass, "queryarr", url.queryArr);
+		initDB(url.scheme, url.scheme~"://" ~url.host ~":" ~to!string(url.port) ~url.path~"?"~url.query,url.queryArr);
+	}
 
 	/**
         Start the HTTPServer server , and block current thread.
@@ -143,6 +157,7 @@ final class Application
 		setLogConfig(Config.app.log);
 		upConfig(Config.app);
 		upRouterConfig();
+		initDb(Config.app.database);
 		import std.stdio;
 		writeln("please open http://",addr.toString,"/");
 		_server.start();
