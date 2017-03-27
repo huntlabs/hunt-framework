@@ -1,107 +1,97 @@
 ﻿module hunt.application.model;
-version(USE_ENTITY) :
-import entity;
 
-abstract class Model(T) if(is(T == class) || is(T == struct))
+public import entity;
+
+import std.string;
+import ddbc.all;
+
+private __gshared static EntityMetaData _g_schema;
+private __gshared string _g_driver;
+private __gshared string _g_url;
+private __gshared string[string] _g_params;
+private __gshared int _g_maxPoolSize;
+private __gshared int _g_timeToLive;
+private __gshared int _g_waitTimeOut;
+private __gshared string _g_tablePrefix;
+
+void initDB(string driver,string url, string[string]params = null, int maxPoolSize = 2, int timeToLive = 600, int waitTimeOut = 30)
 {
-	alias MQuery = Query!T;
-	alias Iterator = MQuery.Iterator;
-
-	this()
-	{}
-
-	this (DataBase db)
+	_g_driver = driver;
+	_g_url = url;
+	_g_params = params;
+	_g_maxPoolSize = maxPoolSize;
+	_g_timeToLive = timeToLive;
+	_g_waitTimeOut = waitTimeOut;
+	if(params !is null && "prefix" in params)
 	{
-		_dbc = db;
+		_g_schema.tablePrefix = params["prefix"];
 	}
-
-	final @property MQuery query()
-	{
-		if(_queryc is null)
-			_queryc = new MQuery(database);
-		return _queryc;
-	}
-
-	final @property DataBase database()
-	{
-		if(_dbc is null)
-			_dbc = DB;
-		return _dbc;
-	}
-
-	final Iterator Select(string table = "")()
-	{
-		return query.Select!(table)();
-	}
-	
-	final Iterator Select(string sql)
-	{
-		return query.Select(sql);
-	}
-	
-	final void Insert(string table = "")(ref T v)
-	{
-		query.Insert!(table)(v);
-	}
-	
-	final void Update(string table = "")(ref T v)
-	{
-		query.Update!(table)(v);
-	}
-	
-	final void Update(string table = "")(ref T v, string where)
-	{
-		query.Update!(table)(v,where);
-	}
-	
-	final void Update(string table = "")(ref T v, WhereBuilder where)
-	{
-		query.Update!(table)(v,where);
-	}
-	
-	final void Delete(string table = "")(ref T v)
-	{
-		query.Delete!(table)(v,where);
-	}
-	
-	final void Delete(string table = "")(ref T v, string where)
-	{
-		query.Delete!(table)(v,where);
-	}
-	
-	final void Delete(string table = "")(ref T v, WhereBuilder where)
-	{
-		query.Delete!(table)(v,where);
-	}
-
-private:
-	DataBase _dbc;
-	MQuery _queryc;
 }
 
-@property DataBase DB()
+final class HuntEntity
 {
-	if(_db is null)
+	static HuntEntity _entity;
+
+	private EntityManagerFactory _entityManagerFactory;
+	private Dialect _dialect;
+	private DataSource _dataSource;
+	private Driver _driver;
+
+	static @property getInstance()
 	{
-		import std.exception;
-		_db = DataBase.create(_conStr);
-		//enforce(_db, "the db  is Not support "~_conStr);
-		_db.connect();
+		if(_entity is null)
+		{
+			_entity = new HuntEntity();
+		}
+
+		return _entity;
 	}
-	return _db;
+
+	void initDB(string driver,string url, string[string]params = null, int maxPoolSize = 2, int timeToLive = 600, int waitTimeOut = 30)
+	{
+		import std.experimental.logger;
+		driver = toLower(driver);
+
+		if(driver == "mysql")
+		{
+			_dialect = new MySQLDialect();
+			_driver = new MySQLDriver();
+		}
+		else if(driver == "postgresql")
+		{
+			_dialect = new PGSQLDialect();
+			_driver = new PGSQLDriver();
+		}
+		else if(driver == "")
+		{
+			_dialect = new SQLiteDialect();
+			_driver = new SQLITEDriver();
+		}
+		else
+		{
+			assert(false, "not support dialect " ~ driver);
+		}
+
+		_dataSource = new ConnectionPoolDataSourceImpl(_driver, url, params, maxPoolSize, timeToLive, waitTimeOut);
+		_entityManagerFactory = new EntityManagerFactory(_g_schema, _dialect, _dataSource);
+	}
+
+	@property EntityManagerFactory entityManagerFactory()
+	{
+		if(_entityManagerFactory is null)
+		{
+			this.initDB(_g_driver,_g_url, _g_params, _g_maxPoolSize, _g_timeToLive, _g_waitTimeOut);
+		}
+		return _entityManagerFactory;
+	}
 }
 
-@property auto DBQuery(T)()
+@property static  EntityManagerFactory entityManagerFactory()
 {
-	return new Query!T(DB);
+	return HuntEntity.getInstance.entityManagerFactory;
 }
 
-void initDb(string str)
+void registerEntity(T...)()
 {
-	_conStr = str;
-	DB();
+	_g_schema = new SchemaInfoImpl!(T);
 }
-
-private:
-__gshared string _conStr;
-DataBase _db;
