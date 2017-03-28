@@ -5,8 +5,7 @@
     "license": "Apache-2.0",
     "libs" : [],
     "dependencies": {
-        "collie": "~>0.9.1",
-        "entity": "~>0.1.0"
+        "collie": "~>0.9.7"
     },
     "configurations" : [
         {
@@ -18,28 +17,40 @@
         },
         {
             "name": "full",
-            "versions": ["USE_MYSQL", "USE_SQLITE", "USE_PGSQL"],
+            "versions": ["WITH_ENTITY","USE_MYSQL", "USE_SQLITE", "USE_PGSQL"],
+			"dependencies":{
+				"entity": "~>0.1.0"
+			},
             "subConfigurations": {
                 "entity": "full"
             }
         },
         {
             "name": "MySQL",
-            "versions": ["USE_MYSQL"],
+            "versions": ["WITH_ENTITY","USE_MYSQL"],
+			"dependencies":{
+				"entity": "~>0.1.0"
+			},
             "subConfigurations": {
                 "entity": "MySQL"
             }
         },
         {
             "name": "SQLite",
-            "versions": ["USE_SQLITE"],
+            "versions": ["WITH_ENTITY","USE_SQLITE"],
+			"dependencies":{
+				"entity": "~>0.1.0"
+			},
             "subConfigurations": {
                 "entity": "SQLite"
             }
         },
         {
             "name": "PGSQL",
-            "versions": ["USE_PGSQL"],
+            "versions": ["WITH_ENTITY","USE_PGSQL"],
+			"dependencies":{
+				"entity": "~>0.1.0"
+			},
             "subConfigurations": {
                 "entity": "PGSQL"
             }
