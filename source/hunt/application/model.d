@@ -1,5 +1,6 @@
 ﻿module hunt.application.model;
 
+version (WITH_ENTITY) :
 public import entity;
 
 import std.string;
