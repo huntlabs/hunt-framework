@@ -29,9 +29,16 @@ final class AppConfig
 
 	struct SessionConf
 	{
-		string prefix = "hunt";
 		string storage = "memcache";
+		string prefix = "huntsession_";
 		uint expire = 3600;
+	}
+
+	struct CacheConf
+	{
+		string storage = "memory";
+		string prefix = "huntcache_";
+		uint exprie = 3600;
 	}
 
 	struct HttpConf
@@ -132,6 +139,7 @@ final class AppConfig
 	DBConfig database;
 	ApplicationConf application;
 	SessionConf session;
+	CacheConf cache;
 	HttpConf http;
 	HttpsConf https;
 	RouteConf route;
@@ -160,9 +168,13 @@ final class AppConfig
 		collectException(conf.application.secret.value,	app.application.secret);
 		collectException(conf.application.encoding.value,	app.application.encoding);
 
-		collectException(conf.session.prefix.value(),	app.session.prefix);
 		collectException(conf.session.storage.value(),	app.session.storage);
+		collectException(conf.session.prefix.value(),	app.session.prefix);
 		collectException(conf.session.expire.as!uint(), 	app.session.expire);
+
+		collectException(conf.cache.storage.value(),	app.cache.storage);
+		collectException(conf.cache.prefix.value(),	app.cache.prefix);
+		collectException(conf.cache.expire.as!uint(), 	app.cache.expire);
 
 		collectException(conf.http.address.value(), app.http.address);
 		collectException(conf.http.port.as!ushort(), app.http.port);
