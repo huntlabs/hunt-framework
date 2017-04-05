@@ -280,7 +280,7 @@ class ConfigManger
 	{
 		if(!_router)
 		{
-			string configFile = path ~ "/routes";
+			string configFile = path ~ "routes";
 
 			if (exists(configFile))
 			{
@@ -307,7 +307,7 @@ class ConfigManger
 
 	void setAppSection(string sec)
 	{
-		auto con = new Configuration(path ~ "/application.conf", sec);
+		auto con = new Configuration(path ~ "application.conf", sec);
 		_app = AppConfig.parseAppConfig(con);
 	}
 
