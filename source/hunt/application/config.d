@@ -29,8 +29,15 @@ final class AppConfig
 
 	struct SessionConf
 	{
-		string prefix = "hunt";
 		string storage = "memcache";
+		string prefix = "huntsession_";
+		uint expire = 3600;
+	}
+
+	struct CacheConf
+	{
+		string storage = "memory";
+		string prefix = "huntcache_";
 		uint expire = 3600;
 	}
 
@@ -55,11 +62,32 @@ final class AppConfig
 		string keyStorePassword;
 	}
 
+	struct RouteConf
+	{
+		string groups;
+	}
+
 	struct LogConfig
 	{
 		string level = "warning";
 		string path = "";
 		string file = "";
+	}
+
+	struct MemcacheConf
+	{
+		bool enabled;
+		string servers;
+	}
+
+	struct RedisConf
+	{
+		bool enabled;
+		string host = "localhost";
+		string password = "";
+		ushort database = 0;
+		ushort port = 6379;
+		uint timeout = 0;
 	}
 
 	struct UploadConf
@@ -111,8 +139,12 @@ final class AppConfig
 	DBConfig database;
 	ApplicationConf application;
 	SessionConf session;
+	CacheConf cache;
 	HttpConf http;
 	HttpsConf https;
+	RouteConf route;
+	MemcacheConf memcache;
+	RedisConf redis;
 	LogConfig log;
 	UploadConf upload;
 	CornConf cron;
@@ -136,9 +168,13 @@ final class AppConfig
 		collectException(conf.application.secret.value,	app.application.secret);
 		collectException(conf.application.encoding.value,	app.application.encoding);
 
-		collectException(conf.session.prefix.value(),	app.session.prefix);
 		collectException(conf.session.storage.value(),	app.session.storage);
+		collectException(conf.session.prefix.value(),	app.session.prefix);
 		collectException(conf.session.expire.as!uint(), 	app.session.expire);
+
+		collectException(conf.cache.storage.value(),	app.cache.storage);
+		collectException(conf.cache.prefix.value(),	app.cache.prefix);
+		collectException(conf.cache.expire.as!uint(), 	app.cache.expire);
 
 		collectException(conf.http.address.value(), app.http.address);
 		collectException(conf.http.port.as!ushort(), app.http.port);
@@ -153,7 +189,18 @@ final class AppConfig
 		collectException(conf.https.protocol.value(), app.https.protocol);
 		collectException(conf.https.keyStore.value(), app.https.keyStore);
 		collectException(conf.https.keyStoreType.value(), app.https.keyStoreType);
-		collectException(conf.https.keyStorePassword.value(), app.https.keyStorePassword);
+
+		collectException(conf.route.groups.value(), app.route.groups);
+
+		collectException(conf.memcache.enabled.as!bool(), app.memcache.enabled);
+		collectException(conf.memcache.servers.value(), app.memcache.servers);
+
+		collectException(conf.redis.enabled.as!bool(), app.redis.enabled);
+		collectException(conf.redis.host.value(), app.redis.host);
+		collectException(conf.redis.password.value(), app.redis.password);
+		collectException(conf.redis.database.as!ushort(), app.redis.database);
+		collectException(conf.redis.port.as!ushort(), app.redis.port);
+		collectException(conf.redis.timeout.as!uint(), app.redis.timeout);
 
 		collectException(conf.log.level.value(), app.log.level);
 		collectException(conf.log.path.value(), app.log.path);
