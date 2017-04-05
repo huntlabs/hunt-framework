@@ -255,6 +255,7 @@ class ConfigManger
 		{
 			path ~= "/";
 		}
+		this.path = path;
 	}
 
 	void setAppSection(string sec)
