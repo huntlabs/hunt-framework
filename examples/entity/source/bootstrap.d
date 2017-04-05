@@ -59,7 +59,7 @@ void main()
 	setLocale("en-us");
 	writeln( getText("email.subject", "empty"));
 
-	import app.entity.user;
+	import app.model.user;
 	registerEntity!(User);
 
 	app.run();

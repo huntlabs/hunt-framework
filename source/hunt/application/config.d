@@ -38,7 +38,7 @@ final class AppConfig
 	{
 		string storage = "memory";
 		string prefix = "huntcache_";
-		uint exprie = 3600;
+		uint expire = 3600;
 	}
 
 	struct HttpConf
@@ -64,7 +64,7 @@ final class AppConfig
 
 	struct RouteConf
 	{
-		string[string] groups;
+		string groups;
 	}
 
 	struct LogConfig
@@ -77,7 +77,7 @@ final class AppConfig
 	struct MemcacheConf
 	{
 		bool enabled;
-		string[] servers;
+		string servers;
 	}
 
 	struct RedisConf
