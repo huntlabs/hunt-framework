@@ -11,7 +11,6 @@
 module hunt.cache;
 
 public import hunt.cache.base;
-public import hunt.cache.memcached;
 public import hunt.cache.mapcache;
 
 @property defaultCache()

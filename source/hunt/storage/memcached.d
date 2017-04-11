@@ -9,14 +9,13 @@
  *
  */
 module hunt.storage.memcached;
-version(USE_MEMCACHED):
-public import collie.libmemcache4d.memcache;
+public import driveMemcache = memcache;
 
-@property theMemcache()
+@property Memcache()
 {
 	if(_memcached is null)
 	{
-		_memcached = new Memcache();
+		_memcached = new driveMemcache.Memcache();
 		if(_host.length > 0)
 			_memcached.addServer(_host,_port);
 	}
@@ -26,7 +25,7 @@ public import collie.libmemcache4d.memcache;
 bool addMemcahedHost(string host, ushort port)
 {
 
-	return theMemcache.addServer(host,port);
+	return Memcache.addServer(host,port);
 }
 
 void setDefaultHost(string host, ushort port)
@@ -36,7 +35,7 @@ void setDefaultHost(string host, ushort port)
 }
 
 private:
-Memcache _memcached = null;
+driveMemcache.Memcache _memcached = null;
 
 __gshared string _host;
 __gshared ushort _port;
