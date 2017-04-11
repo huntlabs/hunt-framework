@@ -5,7 +5,9 @@
     "license": "Apache-2.0",
     "libs" : [],
     "dependencies": {
-        "collie": "~>0.9.7"
+        "collie": "~>0.9.7",
+		"libmemcached": "1.1.0",
+		"dredis" : "0.0.1"
     },
     "configurations" : [
         {
