@@ -36,6 +36,8 @@ public import hunt.i18n;
 public import hunt.utils.path;
 public import hunt.application.config;
 public import hunt.application.middleware;
+public import conRedis = hunt.storage.redis;
+public import conMemcached = hunt.storage.memcached;
 
 abstract class WebSocketFactory
 {
@@ -133,6 +135,14 @@ final class Application
 	{
 		if(cbuffer)
 			_cbuffer = cbuffer;
+	}
+	void setRedis(string host = "127.0.0.1",ushort port = 6379)
+	{
+		conRedis.setDefaultHost(host,port);	
+	}
+	void setMemcache(string host = "127.0.0.1",ushort port = 11211)
+	{
+		conMemcached.setDefaultHost(host,port);	
 	}
 	private void initDb(AppConfig.DBConfig conf)
 	{
