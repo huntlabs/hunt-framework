@@ -59,10 +59,9 @@ void main()
 	setLocale("en-us");
 	writeln( getText("email.subject", "empty"));
 
-	app.setRedis("127.0.0.1",6379);
-	app.setMemcache("127.0.0.1",11211);
-	writeln(Redis.set("hello","world"));
-	writeln(Memcache.set("hello","world"));
+	Redis.set("hello","world");
+	Memcache.set("hello","world");
+	writeln(Redis.get("hello"),Memcache.get("hello"));
 
 	app.run();
 }
