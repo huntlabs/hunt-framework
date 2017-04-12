@@ -24,6 +24,9 @@ public import std.socket;
 public import std.experimental.logger;
 public import std.file;
 
+import std.string;
+import std.conv;
+import std.stdio;
 import std.uni;
 import std.path;
 import std.parallelism;
@@ -136,13 +139,24 @@ final class Application
 		if(cbuffer)
 			_cbuffer = cbuffer;
 	}
-	void setRedis(string host = "127.0.0.1",ushort port = 6379)
+	void setRedis(AppConfig.RedisConf conf)
 	{
-		conRedis.setDefaultHost(host,port);	
+		if(conf.enabled == true && conf.host && conf.port)
+		{
+			writeln(conf);
+			conRedis.setDefaultHost(conf.host,conf.port);	
+		}
 	}
-	void setMemcache(string host = "127.0.0.1",ushort port = 11211)
+	void setMemcache(AppConfig.MemcacheConf conf)
 	{
-		conMemcached.setDefaultHost(host,port);	
+		if(conf.enabled == true){
+			writeln(conf);
+			auto tmp1 = split(conf.servers,","); 
+			auto tmp2 = split(tmp1[0],":"); 
+			if(tmp2[0] && tmp2[1]){
+				conMemcached.setDefaultHost(tmp2[0],tmp2[1].to!ushort);
+			}
+		}
 	}
 	private void initDb(AppConfig.DBConfig conf)
 	{
@@ -170,7 +184,8 @@ final class Application
 		upConfig(Config.app);
 		upRouterConfig();
 		initDb(Config.app.database);
-		import std.stdio;
+		setRedis(Config.app.redis);
+		setMemcache(Config.app.memcache);
 		writeln("please open http://",addr.toString,"/");
 		_server.start();
 	}
