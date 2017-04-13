@@ -8,7 +8,6 @@ import std.string;
 
 import hunt.text.configuration;
 import hunt.application.application : WebSocketFactory;
-import hunt.router.configbase;
 
 import collie.codec.http.server.httpserveroptions;
 
@@ -257,8 +256,6 @@ import core.sync.rwmutex;
 import std.file;
 import std.path;
 
-import hunt.router.config;
-
 class ConfigNotFoundException : Exception
 {
 	mixin basicExceptionCtors;
@@ -274,21 +271,6 @@ class ConfigManger
 		}
 
 		return _app;
-	}
-
-	@property router()
-	{
-		if(!_router)
-		{
-			string configFile = path ~ "routes";
-
-			if (exists(configFile))
-			{
-				_router = new RouterConfig(configFile);
-			}
-		}
-
-		return _router;
 	}
 
 	void setConfigPath(string path)
@@ -346,7 +328,6 @@ private:
 	
 	~this(){_mutex.destroy;}
 	AppConfig _app;
-	RouterConfigBase _router;
 	
 	Configuration[string] _conf;
 

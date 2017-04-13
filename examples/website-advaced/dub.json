@@ -1,10 +1,12 @@
 {
-	"name": "hunt-entity",
-	"description": "hunt use entity. ",
+	"name": "website-advaced",
+	"description": "An advaced website with hunt framework.",
 	"copyright": "Copyright © 2016, huntframework.com",
 	"targetType": "executable",
 	"stringImportPaths": [
-		"./resources/views"
+		"./resources/views",
+		"./resources/views/layouts",
+		"./resources/views/shared"
 	],
 	"mainSourceFile": "./source/bootstrap.d",
 	"dependencies": {
@@ -16,7 +18,7 @@
 		{
 			"name": "default",
 			"subConfigurations": {
-				"hunt": "full"
+				"hunt": "default"
 			}
 		},
 		{

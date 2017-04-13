@@ -16,11 +16,9 @@ public import hunt.view;
 public import hunt.http.response;
 public import hunt.http.request;
 public import hunt.router;
-import hunt.router.router;
-
-
 public import hunt.application.middleware;
 
+import std.exception;
 import std.traits;
 
 enum Action;
@@ -115,10 +113,9 @@ mixin template HuntDynamicCallFun(T,string moduleName)
 {
 public:
 	mixin(__createCallActionFun!(T,moduleName));
-	shared static this(){
-		import hunt.router.build;
+	shared static this()
+    {
 		mixin(__creteRouteMap!(T,moduleName));
-		mixin(_createRouterCallRouteFun!(T,true)());
 	}
 }
 
@@ -202,21 +199,40 @@ string  __creteRouteMap(T, string moduleName)()
 	return str;
 }
 
-RouterHandler.HandleFunction getRouteFormList(string str)
+void callHandler(T, string fun)(Request req) if(is(T == class) || is(T == struct) && hasMember!(T,"__CALLACTION__"))
 {
-	if (!_init) _init = true;
-
-	return __routerList.get(str,null);
+    T handler = new T();
+    if(!handler.__CALLACTION__(fun,req))
+    {
+        Response res;
+        collectException(req.createResponse(),res);
+        
+        if(res)
+            res.done();
+    }
 }
 
-void addRouteList(string str, RouterHandler.HandleFunction fun)
+HandleFunction getRouteFormList(string str)
 {
+	if (!_init)
+	{
+		_init = true;
+	}
+
+	return __routerList.get(str, null);
+}
+
+void addRouteList(string str, HandleFunction fun)
+{
+    trace("add str is .... ", str);
 	if(!_init)
 	{
-		__routerList[str] = fun;
+		import std.string : toLower;
+
+		__routerList[str.toLower] = fun;
 	}
 }
 
 private:
 __gshared bool _init = false;
-__gshared RouterHandler.HandleFunction[string]  __routerList;
+__gshared HandleFunction[string]  __routerList;

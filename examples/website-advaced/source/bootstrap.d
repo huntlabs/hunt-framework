@@ -1,7 +1,7 @@
 /*
  * Hunt - a framework for web and console application based on Collie using Dlang development
  *
- * Copyright (C) 2015-2016  Shanghai Putao Technology Co., Ltd
+ * Copyright (C) 2015-2016  Shanghai Putao Technology Co., Ltd 
  *
  * Developer: putao's Dlang team
  *
@@ -9,8 +9,11 @@
  *
  */
 
-module hunt.versions;
+import hunt;
 
-
-enum HUNT_VERSION = "v0.7.0";
-
+void main()
+{
+    auto app = Application.getInstance();
+	
+	app.run();
+}
