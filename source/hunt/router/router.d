@@ -1,427 +1,335 @@
 ﻿/*
  * Hunt - a framework for web and console application based on Collie using Dlang development
  *
- * Copyright (C) 2015-2016  Shanghai Putao Technology Co., Ltd 
+ * Copyright (C) 2015-2017  Shanghai Putao Technology Co., Ltd
  *
- * Developer: putao's Dlang team
+ * Developer: HuntLabs
  *
  * Licensed under the BSD License.
  *
  */
+
 module hunt.router.router;
 
-import std.regex;
-import std.array;
-import std.string;
-import std.experimental.logger;
+import hunt.router.define;
+import hunt.router.routegroup;
+import hunt.router.route;
+import hunt.router.config;
 
-import hunt.router.utils;
-import hunt.http.request;
-import hunt.http.response;
-import std.exception;
+import hunt.application.controller;
 
-enum RouterHandlerType
+class Router
 {
-	Delegate,
-	Function,
-	Null
-}
+    public
+    {
+        this()
+        {
+            this._defaultGroup = new RouteGroup(DEFAULT_ROUTE_GROUP);
+        }
 
-struct RouterHandler
-{
-	alias HandleDelegate = void delegate(Request);
-	alias HandleFunction = void function(Request);
+        void setConfigPath(string path)
+        {
+            // supplemental slash
+            this._configPath = (path[path.length-1] == '/') ? path : path ~ "/";
+        }
 
-	@property type()
-	{
-		return _type;
-	}
+        void addGroup(string group, string method, string value)
+        {
+            RouteGroup routeGroup = ("domain" == method) ? _domainGroups.get(group, null) : _directoryGroups.get(group, null);
 
-	@property dgate()
-	{
-		return _dgate;
-	}
+            if (routeGroup is null)
+            {
+                routeGroup = new RouteGroup(group);
 
-	@property func()
-	{
-		return _func;
-	}
+                _groups[group] = routeGroup;
 
-private:
-	RouterHandlerType _type = RouterHandlerType.Null;
-	HandleDelegate _dgate;
-	HandleFunction _func;
-}
+                if ("domain" == method)
+                {
+                    _domainGroups[value] = routeGroup;
+                }
+                else
+                {
+                    _directoryGroups[value] = routeGroup;
+                }
 
-struct MachData
-{
-	RouterHandler * macth;
-	string[string] mate;
-}
+                this._supportMultipleGroup = true;
+            }
+        }
 
-/**
-    The Router Class, Save and Macth the rule, and generte the Pipeline.
-*/
-final class Router
-{
-	alias HandleDelegate = RouterHandler.HandleDelegate;
-	alias HandleFunction = RouterHandler.HandleFunction;
-	this()
-	{
-		setDefaultRoute(&doDefault);
-	}
+        void loadConfig()
+        {
+            this.loadConfig(DEFAULT_ROUTE_GROUP);
 
-	static void doDefault(Request req){
-		Response res;
-		collectException(req.createResponse(),res);
-		if(!res) return;
-		res.setHttpStatusCode(404).connectionClose();
-		res.setContext("<H1>404! No Found<H1>");
-		res.done();
-	}
+            if (!this._supportMultipleGroup)
+            {
+                trace("Router multiple route group is disabled!");
 
-	void setDefaultRoute(HandleDelegate dohandle)
-	{
-		_handler._type = RouterHandlerType.Delegate;
-		_handler._dgate = dohandle;
-	}
+                return;
+            }
+            else
+            {
+                trace("Router multiple route group is enabled..");
+            }
 
-	void setDefaultRoute(HandleFunction dohandle)
-	{
-		_handler._type = RouterHandlerType.Function;
-		_handler._func = dohandle;
-	}
+            // load this group routes from config file
+            foreach (key, obj; this._groups)
+            {
+                this.loadConfig(key);
+            }
+        }
 
-	/**
-        Add a Router rule. if config is done, will always erro.
-        Params:
-            method =  the HTTP method. 
-            path   =  the request path.
-            handle =  the delegate that handle the request.
-            before =  The PipelineFactory that create the middleware list for the router rules, before  the router rule's handled execute.
-            after  =  The PipelineFactory that create the middleware list for the router rules, after  the router rule's handled execute.
-        Returns: the rule's element class. if can not add the rule will return null.
-    */
-	RouteElement addRoute(T)(string method, string path,T handle) if(is(T == HandleDelegate) || is(T == HandleFunction))
-	{
-		if (condigDone || method.length == 0 || path.length == 0 || handle is null)
-		{
-			return null;
-		}
+        void setSupportMultipleGroup(bool enabled = true)
+        {
+            this._supportMultipleGroup = enabled;
+        }
 
-		method = toUpper(method);
-		RouteMap map = _map.get(method, null);
+        Router addRoute(string method, string path, HandleFunction handle, string group = DEFAULT_ROUTE_GROUP)
+        {
+            this.addRoute(this.makeRoute!HandleFunction(method, path, handle, group));
 
-		if (!map)
-		{
-			map = new RouteMap(this);
-			_map[method] = map;
-		}
+            return this;
+        }
 
-		return map.add(path, handle);
-	}
+        Router addRoute(string group, Route route)
+        {
+            //
+            RouteGroup routeGroup = this._groups.get(group,null);
+            if (!routeGroup)
+            {
+                routeGroup = new RouteGroup(group);
 
-	/**
-        Match the rule.if config is not done, will always erro.
-        Params:
-            method = the method group.
-            path   = the path to match.
-        Returns: 
-            the pipeline has the Global MiddleWare ,Rule MiddleWare, Rule handler .
-            the list is : Before Global MiddleWare -> Before Rule MiddleWare -> Rule handler -> After Rule MiddleWare -> After Global MiddleWare
-            if don't match will  return null.
-    */
-	MachData match(string method, string path)
-	{
-		if (!condigDone)
-		{
-			return MachData();
-		}
+                this._groups[group] = routeGroup;
+            }
 
-		RouteMap map = _map.get(method, null);
-		if (!map)
-		{
-			return MachData();
-		}
+            return this;
+        }
 
-		path = replace(path,"//","/");
+        Router addRoute(Route route)
+        {
+            this.addRoute(DEFAULT_ROUTE_GROUP, route);
 
-		return map.match(path);
-	}
+            return this;
+        }
 
-	/**
-        get config is done.
-        if config is done, the add rule will erro.
-        else math rule will erro.
-    */
-	@property bool condigDone()
-	{
-		return _configDone;
-	}
-	
-	/// set config done.
-	void done()
-	{
-		_configDone = true;
-	}
-	
-private:
-	RouteMap[string] _map;
-	bool _configDone = false;
-	RouterHandler _handler;
-}
+        Route match(string domain, string method, string path)
+        {
+            path = this.mendPath(path);
 
+            if (false == this._supportMultipleGroup)
+            {
+                // don't support multiple route group, use defualt group match function
+                return this._defaultGroup.match(path);
+            }
 
-/**
-    A rule elment class.
-*/
-class RouteElement
-{
-	alias HandleDelegate = RouterHandler.HandleDelegate;
-	alias HandleFunction = RouterHandler.HandleFunction;
-	/**
-        Constructor and set the path.
-    */
-	this(string path)
-	{
-		_path = path;
-	}
-	
-	/// get the path
-	final @property path() const
-	{
-		return _path;
-	}
-	
-	/// get the handle.
-	final @property handler() const
-	{
-		return _handler;
-	}
+            RouteGroup routeGroup;
 
-	/// set the handle
-	final sethandler(HandleDelegate handle)
-	{
-		_handler._dgate = handle;
-		_handler._type = RouterHandlerType.Delegate;
-	}
+            routeGroup = this.getGroupByDomain(domain);
 
-	final sethandler(HandleFunction handle)
-	{
-		_handler._func = handle;
-		_handler._type = RouterHandlerType.Function;
-	}
-	
-	MachData macth(string path)
-	{
-		MachData data;
-		data.macth = &_handler;
-		return data;
-	}
-	
-private:
-	string _path;
-	RouterHandler _handler;
-}
+            if (!routeGroup)
+            {
+                if (path.length > 1)
+                {
+                    import std.array;
+                    // TODO: this is bug
+                    string directory = split(path, "/")[1];
 
-private:
+                    tracef("Directory is %s.", directory);
+                    routeGroup = this.getGroupByDirectory(directory);
+                    if (routeGroup)
+                    {
+                        path = path[directory.length+1 .. $];
+                    }
+                    else
+                    {
+                        routeGroup = this._defaultGroup;
+                    }
+                }
+                else
+                {
+                    routeGroup = this._defaultGroup;
+                }
+            }
 
-final class RegexElement :RouteElement
-{
-	this(string path)
-	{
-		super(path);
-	}
-	
-	override MachData macth(string path)
-	{
-		auto rg = regex(_reg, "s");
-		auto mt = matchFirst(path, rg);
+            tracef("Route group is: %s, path: %s", routeGroup.getName(), path);
 
-		MachData data;
+            return routeGroup.match(path);
+        }
 
-		if (mt)
-		{
-			data.macth = &_handler;
-			foreach (attr; rg.namedCaptures)
-			{
-				data.mate[attr] = mt[attr];
-			}
+        string mendPath(string path)
+        {
+            if (path != "/")
+            {
+                import std.algorithm.mutation : strip;
 
-		}
+                return "/" ~ path.strip('/') ~ "/";
+            }
 
-		return data;
-	}
-	
-private:
-	bool setRegex(string reg)
-	{
-		if (reg.length == 0)
-		{
-			return false;
-		}
+            return path;
+        }
+    }
 
-		_reg = buildRegex(reg);
+    private
+    {
+        //
+        void loadConfig(string group = DEFAULT_ROUTE_GROUP)
+        {
+            RouteGroup routeGroup;
 
-		if (_reg.length == 0)
-		{
-			return false;
-		}
+            tracef("load config for %s", group);
 
-		return true;
-	}
-	
-	string _reg;
-}
+            if (group == DEFAULT_ROUTE_GROUP)
+            {
+                routeGroup = this._defaultGroup;
+            }
+            else
+            {
+                routeGroup = this._groups.get(group, null);
+                if (routeGroup is null)
+                {
+                    warningf("Group [%s] non-existent.", group);
+                    return;
+                }
+            }
 
-final class RegexMap
-{
-	this(string path)
-	{
-		_path = path;
-	}
-	
-	RouteElement add(RegexElement ele, string preg)
-	{
-		string rege;
-		string str = getFirstPath(preg, rege);
+            string configFile = (DEFAULT_ROUTE_GROUP == group) ? this._configPath ~ "routes" : this._configPath ~ group ~ ".routes";
+            
+            // read file content
+            RouteConfig config;
+            RouteItem[] items = config.loadConfig(configFile);
 
-		if (str.length == 0)
-		{
-			ele.destroy;
-			return null;
-		}
-		if (isHaveRegex(str))
-		{
-			if (!ele.setRegex(preg))
-			{
-				return null;
-			}
-			
-			bool isHas = false;
+            Route route;
 
-			for (int i = 0; i < _list.length; ++i) //添加的时候去重
-			{
-				if (_list[i].path == ele.path)
-				{
-					isHas = true;
-					auto tele = _list[i];
-					_list[i] = ele;
-					tele.destroy;
-				}
-			}
+            foreach (item; items)
+            {
+                route = this.makeRoute(item.methods, item.path, item.route, group);
+                if (route)
+                {
+                    routeGroup.addRoute(route);
+                }
+            }
+        }
 
-			if (!isHas)
-			{
-				_list ~= ele;
-			}
+        RouteGroup getGroupByDomain(string domain)
+        {
+            return this._domainGroups.get(domain, null);
+        }
 
-			return ele;
-		}
-		else
-		{
-			RegexMap map = _map.get(str, null);
+        RouteGroup getGroupByDirectory(string directory)
+        {
+            return this._directoryGroups.get(directory, null);
+        }
 
-			if (!map)
-			{
-				map = new RegexMap(str);
-				_map[str] = map;
-			}
+        Route makeRoute(T = string)(string methods, string path, T mca, string group = DEFAULT_ROUTE_GROUP)
+        {
+            auto route = new Route();
 
-			return map.add(ele, rege);
-		}
-	}
-	
-	MachData match(string path)
-	{
-		MachData data;
+            import std.string : toUpper;
 
-		if (path.length == 0)
-		{
-			return data;
-		}
+            methods = toUpper(methods);
 
-		string lpath;
-		string frist = getFirstPath(path, lpath);
+            path = this.mendPath(path);
 
-		if (frist.length == 0)
-		{
-			return data;
-		}
+            route.setGroup(group);
+            route.setPattern(path);
 
-		auto map = _map.get(frist, null);
+            static if (is (T == string))
+            {
+                route.setRoute(mca);
 
-		if (map)
-		{
-			data = map.match(lpath);
-		}
-		else
-		{
-			foreach (ele; _list)
-			{
-				data = ele.macth(path);
-				if (data.macth !is null)
-				{
-					break;
-				}
-			}
-		}
+                import std.string : split;
+                string[] mcaArray = split(mca, ".");
 
-		return data;
-	}
-	
-private:
-	RegexMap[string] _map;
-	RegexElement[] _list;
-	string _path;
-}
+                if (mcaArray.length > 3 || mcaArray.length < 2)
+                {
+                    warningf("this route config mca length is: %d (%s)", mcaArray.length, mca);
+                    return null;
+                }
 
-final class RouteMap
-{
-	alias HandleDelegate = RouterHandler.HandleDelegate;
-	alias HandleFunction = RouterHandler.HandleFunction;
-	
-	this(Router router)
-	{
-		_router = router;
-		_regexMap = new RegexMap("/");
-	}
+                if (mcaArray.length == 2)
+                {
+                    route.setController(mcaArray[0]);
+                    route.setAction(mcaArray[1]);
+                }
+                else
+                {
+                    route.setModule(mcaArray[0]);
+                    route.setController(mcaArray[1]);
+                    route.setAction(mcaArray[2]);
+                }
 
-	RouteElement add(T)(string path, T handle) if(is(T == HandleDelegate) || is(T == HandleFunction))
-	{
-		if (isHaveRegex(path))
-		{
-			auto element = new RegexElement(path);
-			element.sethandler(handle);
+                import std.regex;
+                import std.array;
 
-			return _regexMap.add(element, path);
-		}
-		else
-		{
-			auto element = new RouteElement(path);
-			element.sethandler(handle);
-			_pathMap[path] = element;
+                auto matches = path.matchAll(regex(`<(\w+):([^>]+)>`));
+                if (matches)
+                {
+                    string[int] paramKeys;
+                    int paramCount = 0;
+                    string pattern = path;
+                    string urlTemplate = path;
 
-			return element;
-		}
-	}
-	
-	MachData match(string path)
-	{
-		RouteElement element = _pathMap.get(path, null);
+                    foreach (m; matches)
+                    {
+                        paramKeys[paramCount] = m[1];
+                        pattern = pattern.replaceFirst(m[0], "(" ~ m[2] ~ ")");
+                        urlTemplate = urlTemplate.replaceFirst(m[0], "{" ~ m[1] ~ "}");
+                        paramCount++;
+                    }
 
-		if (!element)
-		{
-			return _regexMap.match(path);
-		}
-		else
-		{
-			return element.macth(path);
-		}
-	}
-	
-private:
-	Router _router;
-	RouteElement[string] _pathMap;
-	RegexMap _regexMap;
+                    route.setPattern(pattern);
+                    route.setParamKeys(paramKeys);
+                    route.setRegular(true);
+                    route.setUrlTemplate(urlTemplate);
+                }
+
+                string handleKey = this.makeRequestHandleKey(route);
+
+                trace(handleKey);
+
+                route.handle = getRouteFormList(handleKey);
+            }
+            else
+            {
+                route.handle = mca;
+            }
+
+            if (route.handle is null)
+            {
+                tracef("handle is null (%s).", route.getPattern());
+                return null;
+            }
+
+            return route;
+        }
+
+        string makeRequestHandleKey(Route route)
+        {
+            string handleKey;
+            
+            if (route.getModule() == null)
+            {
+                handleKey = "app.controller." ~ ((route.getGroup() == DEFAULT_ROUTE_GROUP) ? "" : route.getGroup() ~ ".") ~ route.getController() ~ "." ~ route.getController() ~ "controller." ~ route.getAction();
+            }
+            else
+            {
+                handleKey = "app." ~ route.getModule() ~ ".controller." ~ ((route.getGroup() == DEFAULT_ROUTE_GROUP) ? "" : route.getGroup() ~ ".") ~ route.getController() ~ "." ~ route.getController() ~ "controller." ~ route.getAction();
+            }
+            
+            return handleKey;
+        }
+    }
+
+    private
+    {
+        RouteGroup _defaultGroup;
+
+        RouteGroup[string] _directoryGroups;
+        RouteGroup[string] _domainGroups;
+        RouteGroup[string] _groups;
+
+        // enable muiltple route group
+        bool _supportMultipleGroup = false;
+
+        string _configPath = "config/";
+    }
 }
