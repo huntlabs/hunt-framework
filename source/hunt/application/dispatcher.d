@@ -27,15 +27,22 @@ class Dispatcher
             {
                 Route route;
 
-                tracef("request host: %s, method: %s, path: %s", request.header(HTTPHeaderCode.HOST), request.method, request.path);
+                string cacheKey = request.header(HTTPHeaderCode.HOST) ~ "_" ~ request.method ~ "_" ~ request.path;
 
-                route = this._router.match(request.header(HTTPHeaderCode.HOST), request.method, request.path);
+                route = this._cached.get(cacheKey);
 
                 if (route is null)
                 {
-                    request.createResponse().do404();
+                    route = this._router.match(request.header(HTTPHeaderCode.HOST), request.method, request.path);
+                    
+                    if (route is null)
+                    {
+                        request.createResponse().do404();
+                        
+                        return;
+                    }
 
-                    return;
+                    this._cached[cacheKey] = route;
                 }
 
                 this._taskPool.put(task!doRequestHandle(route.handle, request));
@@ -71,6 +78,7 @@ class Dispatcher
     private
     {
         Router _router;
+        Route[string] _cached;
         __gshared TaskPool _taskPool;
     }
 }
