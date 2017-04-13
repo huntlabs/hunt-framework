@@ -1,17 +1,17 @@
 {
     "name": "hunt",
     "description": "A high performance full-stack Web framework.",
-    "copyright": "Copyright (C) 2015-2016 Shanghai Putao Technology Co., Ltd",
+    "copyright": "Copyright (C) 2015-2017 Shanghai Putao Technology Co., Ltd",
     "license": "Apache-2.0",
     "libs" : [],
     "dependencies": {
         "collie": "~>0.9.7",
-		"libmemcached": "1.1.0",
-		"dredis" : "0.0.1"
+        "libmemcached": "1.1.0",
+        "dredis" : "0.0.1"
     },
     "configurations" : [
         {
-            "name" : "default",
+            "name" : "default"
         },
         {
             "name" : "no_taskpool",
@@ -20,9 +20,9 @@
         {
             "name": "full",
             "versions": ["WITH_ENTITY","USE_MYSQL", "USE_SQLITE", "USE_PGSQL"],
-			"dependencies":{
-				"entity": "~>0.1.0"
-			},
+                "dependencies":{
+                    "entity": "~>0.1.0"
+                },
             "subConfigurations": {
                 "entity": "full"
             }
@@ -30,9 +30,9 @@
         {
             "name": "MySQL",
             "versions": ["WITH_ENTITY","USE_MYSQL"],
-			"dependencies":{
-				"entity": "~>0.1.0"
-			},
+            "dependencies":{
+                "entity": "~>0.1.0"
+            },
             "subConfigurations": {
                 "entity": "MySQL"
             }
@@ -40,9 +40,9 @@
         {
             "name": "SQLite",
             "versions": ["WITH_ENTITY","USE_SQLITE"],
-			"dependencies":{
-				"entity": "~>0.1.0"
-			},
+            "dependencies":{
+                "entity": "~>0.1.0"
+            },
             "subConfigurations": {
                 "entity": "SQLite"
             }
@@ -50,9 +50,9 @@
         {
             "name": "PGSQL",
             "versions": ["WITH_ENTITY","USE_PGSQL"],
-			"dependencies":{
-				"entity": "~>0.1.0"
-			},
+            "dependencies":{
+                "entity": "~>0.1.0"
+            },
             "subConfigurations": {
                 "entity": "PGSQL"
             }

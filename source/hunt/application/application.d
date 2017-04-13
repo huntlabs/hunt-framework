@@ -16,6 +16,7 @@ import collie.buffer;
 import collie.codec.http.server;
 import collie.codec.http;
 import collie.bootstrap.serversslconfig;
+import collie.utils.exception;
 
 public import collie.socket.eventloop;
 public import collie.socket.eventloopgroup;
@@ -33,6 +34,8 @@ import std.parallelism;
 import std.exception;
 
 import hunt.router;
+import hunt.application.dispatcher;
+
 public import hunt.http;
 public import hunt.view;
 public import hunt.i18n;
@@ -50,9 +53,6 @@ abstract class WebSocketFactory
 
 final class Application
 {
-	alias HandleDelegate = void delegate(Request);
-	alias HandleFunction = void function(Request);
-
 	static @property getInstance()
 	{
 		if(_app is null)
@@ -67,36 +67,16 @@ final class Application
 	/**
         Add a Router rule
         Params:
-            domain =  the rule's domain group.
             method =  the HTTP method. 
             path   =  the request path.
             handle =  the delegate that handle the request.
+            group  =  the rule's domain group.
             before =  The PipelineFactory that create the middleware list for the router rules, before  the router rule's handled execute.
             after  =  The PipelineFactory that create the middleware list for the router rules, after  the router rule's handled execute.
     */
-	auto addRoute(T)(string domain, string method,string path,T handle)
-		if(is(T == HandleDelegate) || is(T == HandleFunction))
+	auto addRoute(string method, string path, HandleFunction handle, string group = DEFAULT_ROUTE_GROUP)
 	{
-		method = toUpper(method);
-		defaultRouter.addRoute(domain,method,path,handle);
-
-		return this;
-	}
-	
-	/**
-        Add a Router rule
-        Params:
-            method =  the HTTP method. 
-            path   =  the request path.
-            handle =  the delegate that handle the request.
-            before =  The PipelineFactory that create the middleware list for the router rules, before  the router rule's handled execute.
-            after  =  The PipelineFactory that create the middleware list for the router rules, after  the router rule's handled execute.
-    */
-	auto addRoute(T)(string method, string path,T handle)
-		if(is(T == HandleDelegate) || is(T == HandleFunction))
-	{
-		method = toUpper(method);
-		defaultRouter.addRoute(method,path,handle);
+        this._dispatcher.router.addRoute(method, path, handle, group);
 
 		return this;
 	}
@@ -123,7 +103,7 @@ final class Application
 	/// get the router.
 	@property router()
 	{
-		return defaultRouter;
+		return this._dispatcher.router();
 	}
 	
 	@property server(){return _server;}
@@ -182,7 +162,6 @@ final class Application
 	{
 		setLogConfig(Config.app.log);
 		upConfig(Config.app);
-		upRouterConfig();
 		initDb(Config.app.database);
 		setRedis(Config.app.redis);
 		setMemcache(Config.app.memcache);
@@ -217,9 +196,11 @@ private:
 		try{
 			import std.experimental.allocator.gc_allocator;
 			import collie.buffer.ubytebuffer;
-			if(msg.chunked == false){
+			if(msg.chunked == false)
+            {
 				string contign = msg.getHeaders.getSingleOrEmpty(HTTPHeaderCode.CONTENT_LENGTH);
-				if(contign.length > 0){
+				if(contign.length > 0)
+                {
 					import std.conv;
 					uint len = 0;
 					collectException(to!(uint)(contign),len);
@@ -227,8 +208,11 @@ private:
 						return null;
 				}
 			}
+
 			return new UbyteBuffer!ubyte();
-		} catch(Exception e){
+		}
+        catch(Exception e)
+        {
 			showException(e);
 			return null;
 		}
@@ -236,17 +220,7 @@ private:
 
 	void handleRequest(Request req) nothrow
 	{
-		version(NO_TASKPOOL)
-		{
-			auto e = collectException(doHandleReqest(req));
-		}
-		else
-		{
-			auto e = collectException(_tpool.put(task!doHandleReqest(req)));
-		}
-
-		if(e)
-			showException(e);
+        this._dispatcher.dispatch(req);
 	}
 
 private:
@@ -292,6 +266,34 @@ private:
 
 		//if(conf.webSocketFactory)
 		//	_wfactory = conf.webSocketFactory;
+
+        trace(conf.route.groups);
+
+        this._dispatcher.setWorkers(_tpool);
+        // init dispatcer and routes
+        if (conf.route.groups)
+        {
+            import std.array : split;
+            import std.string : strip;
+
+            string[] groupConfig;
+
+            foreach (v; split(conf.route.groups, ','))
+            {
+                groupConfig = split(v, ":");
+
+                if (groupConfig.length == 3)
+                {
+                    this._dispatcher.addRouteGroup(strip(groupConfig[0]), strip(groupConfig[1]), strip(groupConfig[2]));
+
+                    continue;
+                }
+
+                warningf("Group config format error ( %s ).", v);
+            }
+
+            this._dispatcher.loadRouteGroups();
+        }
 	}
 
 	void setLogConfig(ref AppConfig.LogConfig conf)
@@ -333,18 +335,10 @@ private:
 		}
 	}
 
-	void upRouterConfig()
-	{
-		auto router = Config.router;
-		if(router)
-
-			setRouterConfigHelper(router);
-		defaultRouter.done();
-	}
-
 	this()
 	{
 		_cbuffer = &defaultBuffer;
+        this._dispatcher = new Dispatcher();
 	}
 	
 	__gshared static Application _app;
@@ -354,6 +348,7 @@ private:
 	WebSocketFactory _wfactory;
 	uint _maxBodySize;
 	CreatorBuffer _cbuffer;
+    Dispatcher _dispatcher;
 
 	version(NO_TASKPOOL)
 	{
@@ -362,72 +357,5 @@ private:
 	else
 	{
 		__gshared TaskPool _tpool;
-	}
-}
-
-import collie.utils.exception;
-import hunt.application.controller;
-
-void doHandleReqest(Request req) nothrow
-{
-	try
-	{
-		MachData data = defaultRouter.match(req.header(HTTPHeaderCode.HOST), req.method, req.path);
-
-		if(data.macth)
-		{
-			foreach(key, value; data.mate)
-			{
-				req.addMate(key,value);
-			}
-
-			switch(data.macth.type)
-			{
-				case RouterHandlerType.Delegate:
-					data.macth.dgate()(req);
-					return;
-				case RouterHandlerType.Function:
-					data.macth.func()(req);
-					return;
-				default:
-					break;
-			}
-		}
-
-		Response rep = req.createResponse();
-		if(rep)
-		{
-			rep.setHttpStatusCode(404);
-			rep.setContext("<h1>NOT Found<h1>");
-			rep.connectionClose();
-			rep.done();
-		}
-
-	}
-	catch (CreateResponseException e)
-	{
-		showException(e);
-	}
-	catch (Exception e)
-	{
-		showException(e);
-
-		Response rep;
-		collectException(req.createResponse, rep);
-
-		if(rep)
-		{
-			collectException((){
-					rep.setHttpStatusCode(502);
-					rep.setContext(e.toString());
-					rep.connectionClose();
-					rep.done();
-				}());
-		}
-	}  catch (Error e){
-		import std.stdio;
-		collectException({error(e.toString); writeln(e.toString());}());
-		import core.stdc.stdlib;
-		exit(-1);
 	}
 }

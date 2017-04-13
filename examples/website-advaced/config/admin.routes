@@ -1,0 +1,4 @@
+﻿
+GET		/				index.index
+GET		/login				index.login
+

@@ -16,7 +16,7 @@
 		{
 			"name": "default",
 			"subConfigurations": {
-				"hunt": "default"
+				"hunt": "full"
 			}
 		},
 		{
