@@ -291,9 +291,9 @@ private:
 
                 warningf("Group config format error ( %s ).", v);
             }
-
-            this._dispatcher.loadRouteGroups();
         }
+
+        this._dispatcher.loadRouteGroups();
 	}
 
 	void setLogConfig(ref AppConfig.LogConfig conf)
