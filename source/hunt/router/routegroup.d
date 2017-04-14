@@ -44,7 +44,16 @@ class RouteGroup
                 this._routes[route.getPattern()] = route;
             }
 
+            string mca = ((route.getModule()) ? route.getModule() ~ "." : "") ~ route.getController() ~ "." ~ route.getAction();
+
+            this._mcaRoutes[mca] = route;
+
             return this;
+        }
+
+        RouteGroup getRoute(string mca)
+        {
+            return this._mcaRoutes.get(mca, null);
         }
 
         Route match(string path)
@@ -91,6 +100,7 @@ class RouteGroup
     {
         string _name;
         Route[string] _routes;
+        Route[string] _mcaRoutes;
         Route[] _regexRoutes;
     }
 }

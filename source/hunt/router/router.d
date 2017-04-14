@@ -33,6 +33,78 @@ class Router
             this._configPath = (path[path.length-1] == '/') ? path : path ~ "/";
         }
 
+        string createUrl(string mca, string[string] params, string group = DEFAULT_ROUTE_GROUP)
+        {
+            // find Route
+
+            RouteGroup routeGroup = this.getGroup(group);
+
+            if (routeGroup is null)
+            {
+                return "#";
+            }
+
+            Route route = routeGroup.getRoute(mca);
+
+            string url;
+
+            if (route.getRegular() == true)
+            {
+                if (params.length == 0)
+                {
+                    warningf("this route need params (%s).", mca);
+
+                    return "#";
+                }
+                
+                if (route.getParamKeys().length > 0)
+                {
+                    url = route.getUrlTemplate();
+
+                    import std.regex;
+
+                    foreach (i, key; route.getParamKeys())
+                    {
+                        string value = params.get(key, null);
+
+                        if (value is null)
+                        {
+                            warningf("this route template need param (%s).", key);
+
+                            return "#";
+                        }
+
+                        params.remove(key);
+
+                        url.replaceFirst("{" ~ key ~ "}", value);
+                    }
+                }
+            }
+            else
+            {
+                url = route.getPattern();
+            }
+
+            return url ~ (params.length > 0 ? ("?" ~ buildUriQueryString(params)) : "");
+        }
+
+        string buildUriQueryString(string[string] params)
+        {
+            if (params.length == 0)
+            {
+                return "";
+            }
+
+            string uriQueryString;
+
+            foreach (k, v; params)
+            {
+                uriQueryString ~= (uriQueryString ? "&" : "") ~ k ~ "=" ~ v;
+            }
+
+            return uriQueryString;
+        }
+
         void addGroup(string group, string method, string value)
         {
             RouteGroup routeGroup = ("domain" == method) ? _domainGroups.get(group, null) : _directoryGroups.get(group, null);
@@ -54,6 +126,23 @@ class Router
 
                 this._supportMultipleGroup = true;
             }
+        }
+
+        RouteGroup getGroup(string group = DEFAULT_ROUTE_GROUP)
+        {
+            if (false == this._supportMultipleGroup)
+            {
+                return this._defaultGroup;
+            }
+
+            RouteGroup routeGroup = this._groups.get(group, null);
+
+            if (routeGroup is null)
+            {
+                return null;
+            }
+
+            return routeGroup;
         }
 
         void loadConfig()
