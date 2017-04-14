@@ -29,7 +29,7 @@ class Dispatcher
 
                 string cacheKey = request.header(HTTPHeaderCode.HOST) ~ "_" ~ request.method ~ "_" ~ request.path;
 
-                route = this._cached.get(cacheKey);
+                route = this._cached.get(cacheKey, null);
 
                 if (route is null)
                 {

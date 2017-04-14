@@ -90,9 +90,15 @@ class Router
             return this;
         }
 
-        Router addRoute(string group, Route route)
+        Router addRoute(Route route, string group = DEFAULT_ROUTE_GROUP)
         {
-            //
+            if (group == DEFAULT_ROUTE_GROUP)
+            {
+                this._defaultGroup.addRoute(route);
+
+                return this;
+            }
+
             RouteGroup routeGroup = this._groups.get(group,null);
             if (!routeGroup)
             {
@@ -101,12 +107,7 @@ class Router
                 this._groups[group] = routeGroup;
             }
 
-            return this;
-        }
-
-        Router addRoute(Route route)
-        {
-            this.addRoute(DEFAULT_ROUTE_GROUP, route);
+            routeGroup.addRoute(route);
 
             return this;
         }

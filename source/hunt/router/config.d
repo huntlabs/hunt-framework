@@ -64,7 +64,7 @@ struct RouteConfig
         }
 
         // match example: GET, POST    /users    module.controller.action
-        auto matched = line.match(regex(`([\w,\s\t\*]+[\w])\s+(/.+)\s([\w\.]+)`));
+        auto matched = line.match(regex(`([^/]+)\s+(/[\S]*?)\s+([\w\.]+)`));
 
         if (matched)
         {
