@@ -1,13 +1,14 @@
 /*
  * Hunt - a framework for web and console application based on Collie using Dlang development
  *
- * Copyright (C) 2015-2016  Shanghai Putao Technology Co., Ltd 
+ * Copyright (C) 2015-2017  Shanghai Putao Technology Co., Ltd
  *
- * Developer: putao's Dlang team
+ * Developer: HuntLabs
  *
- * Licensed under the BSD License.
+ * Licensed under the Apache-2.0 License.
  *
  */
+
 module hunt.http.request;
 
 import std.exception;

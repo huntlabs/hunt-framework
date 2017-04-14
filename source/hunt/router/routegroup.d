@@ -5,7 +5,7 @@
  *
  * Developer: HuntLabs
  *
- * Licensed under the BSD License.
+ * Licensed under the Apache-2.0 License.
  *
  */
 
