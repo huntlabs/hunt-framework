@@ -45,6 +45,17 @@ class Dispatcher
                     this._cached[cacheKey] = route;
                 }
 
+                // add route's params
+                auto params = route.getParams();
+                if (params.length > 0)
+                {
+                    foreach (param, value; params)
+                    {
+                        request.Header().setQueryParam(param, value);
+                    }
+                }
+
+                // add handle task to taskPool
                 this._taskPool.put(task!doRequestHandle(route.handle, request));
 
             }
