@@ -46,6 +46,11 @@ class Router
 
             Route route = routeGroup.getRoute(mca);
 
+            if (route is null)
+            {
+                return "#";
+            }
+
             string url;
 
             if (route.getRegular() == true)
@@ -61,7 +66,7 @@ class Router
                 {
                     url = route.getUrlTemplate();
 
-                    import std.regex;
+                    import std.array : replaceFirst;
 
                     foreach (i, key; route.getParamKeys())
                     {
