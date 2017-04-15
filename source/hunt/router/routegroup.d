@@ -51,7 +51,7 @@ class RouteGroup
             return this;
         }
 
-        RouteGroup getRoute(string mca)
+        Route getRoute(string mca)
         {
             return this._mcaRoutes.get(mca, null);
         }
