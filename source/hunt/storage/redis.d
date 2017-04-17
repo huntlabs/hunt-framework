@@ -10,25 +10,26 @@
  */
 
 module hunt.storage.redis;
-public import driveRedis = redis;
-
-@property Redis()
-{
-	if(_redis is null)
+version(USE_REDIS){
+	public import driveRedis = redis;
+	@property Redis()
 	{
-		_redis = new driveRedis.Redis(_host,_port);
+		if(_redis is null)
+		{
+			_redis = new driveRedis.Redis(_host,_port);
+		}
+		return  _redis;
 	}
-	return  _redis;
+
+	void setDefaultHost(string host = "127.0.0.1", ushort port = 6379)
+	{
+		_host = host;
+		_port = port;
+	}
+
+	private:
+	driveRedis.Redis _redis = null;
+
+	__gshared string _host = "127.0.0.1";
+	__gshared ushort _port = 6379;
 }
-
-void setDefaultHost(string host = "127.0.0.1", ushort port = 6379)
-{
-	_host = host;
-	_port = port;
-}
-
-private:
-driveRedis.Redis _redis = null;
-
-__gshared string _host = "127.0.0.1";
-__gshared ushort _port = 6379;
