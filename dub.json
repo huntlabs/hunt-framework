@@ -5,9 +5,7 @@
     "license": "Apache-2.0",
     "libs" : [],
     "dependencies": {
-        "collie": "~>0.9.7",
-        "libmemcached": "1.1.0",
-        "dredis" : "0.0.1"
+        "collie": "~>0.9.7"
     },
     "configurations" : [
         {
@@ -19,15 +17,31 @@
         },
         {
             "name": "full",
-            "versions": ["WITH_ENTITY","USE_MYSQL", "USE_SQLITE", "USE_PGSQL"],
+            "versions": ["WITH_ENTITY","USE_MYSQL", "USE_SQLITE", "USE_PGSQL","USE_REDIS","USE_MEMCACHE"],
                 "dependencies":{
-                    "entity": "~>0.1.0"
+                    "entity": "~>0.1.0",
+					"libmemcached": "1.1.0",
+					"dredis" : "0.0.1"
                 },
             "subConfigurations": {
                 "entity": "full"
             }
         },
         {
+            "name": "Redis",
+            "versions": ["USE_REDIS"],
+            "dependencies":{
+				"dredis" : "0.0.1"
+            }
+		},
+        {
+            "name": "Memcache",
+            "versions": ["USE_MEMCACHE"],
+            "dependencies":{
+				"libmemcached": "1.1.0"
+            }
+		},
+		{
             "name": "MySQL",
             "versions": ["WITH_ENTITY","USE_MYSQL"],
             "dependencies":{

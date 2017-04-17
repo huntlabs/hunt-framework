@@ -10,6 +10,7 @@
  */
 
 module hunt.storage.memcached;
+version(USE_MEMCACHE){
 public import driveMemcache = memcache;
 
 @property Memcache()
@@ -40,3 +41,4 @@ driveMemcache.Memcache _memcached = null;
 
 __gshared string _host;
 __gshared ushort _port;
+}
