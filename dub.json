@@ -41,6 +41,14 @@
 				"libmemcached": "1.1.0"
             }
 		},
+        {
+            "name": "R&M",
+            "versions": ["USE_REDIS","USE_MEMCACHE"],
+            "dependencies":{
+				"dredis" : "0.0.1",
+				"libmemcached": "1.1.0"
+            }
+		},
 		{
             "name": "MySQL",
             "versions": ["WITH_ENTITY","USE_MYSQL"],
