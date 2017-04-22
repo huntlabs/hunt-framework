@@ -109,13 +109,13 @@ Expression strToTree(string str,int s,int t)
 	}
 	//writeln("ves: ",ves," vet:",vet," findExe: ",findExe," findVar:",findVar);
 	//writeln(ves?str[ves .. vet]:str[s..t]);
-	if(ves==0 && !findVar && !findExe)return new Constant(str[s..t]);
+	if(ves==0 && !findVar && !findExe)return new Constant(str[s..t + 1]);
 	if(findVar && ves==s)return new VariableReference(str[ves+2 .. vet-2]);
 	if(findExe && ves==s)return new ExecuteBlock(str[ves+2 .. vet-2]);
 	if(str[ves .. ves+2] == "{%")
-		return new Operation(strToTree(str,s,ves),new ExecuteBlock(str[ves+2 .. vet-2]),strToTree(str,vet,t));
+		return new Operation(strToTree(str,s,ves - 1),new ExecuteBlock(str[ves+2 .. vet-2]),strToTree(str,vet,t));
 	else 
-		return new Operation(strToTree(str,s,ves),new VariableReference(str[ves+2 .. vet-2]),strToTree(str,vet,t));
+		return new Operation(strToTree(str,s,ves - 1),new VariableReference(str[ves+2 .. vet-2]),strToTree(str,vet,t));
 }
 
 class Parser 
