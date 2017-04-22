@@ -135,20 +135,39 @@ final class Request : RequestHandler
 		_mate[key] = value;
 	}
 
+	@property string[string] sessions()
+	{
+		return this.getSession().sessions();
+	}
+	
 	SessionInterface getSession( S = Session)(string sessionName = "hunt_session", SessionStorageInterface t =  newStorage()) //if()
 	{
-		auto co = getCookie(sessionName);
-		if (co is null) return new S(t);
-		return new S(co.value, t);
+		auto cookie = getCookie(sessionName);
+		if (cookie is null)
+		{
+			S session = new S(t);
+			string sessionId = session.getId();
+			this.createResponse().setCookie(sessionName, sessionId);
+			
+			return session;
+		}
+		
+		return new S(cookie.value, t);
 	}
 
-	private Cookie getCookie(string key)
+	@property Cookie[string] cookies()
 	{
-		if(cookies.length == 0)
+		if (_cookies.length == 0)
 		{
 			string cookie = header(HTTPHeaderCode.COOKIE);
-			cookies = parseCookie(cookie);
+			_cookies = parseCookie(cookie);
 		}
+
+		return _cookies;
+	}
+	
+	private Cookie getCookie(string key)
+	{
 		return cookies.get(key,null);
 	}
 
@@ -277,7 +296,7 @@ protected:
 
 private:
 	string[string] _mate;
-	Cookie[string] cookies;
+	Cookie[string] _cookies;
 	Buffer _body;
 	HTTPMessage _headers;
 	HTTPForm _form;

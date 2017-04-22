@@ -58,6 +58,7 @@ interface SessionStorageInterface
     public void setName(string name);
     ///Sets a typed field to the session.
     void set(string key, string value);
+    @property string[string] sessions();
     string get(string key);
 
     ///session 是否过期
@@ -72,6 +73,7 @@ interface SessionStorageInterface
 import std.file;
 import std.path;
 import std.json;
+import std.conv;
 
 ///session 有效期
 enum int SESSION_MAX_VAILD = 3600 * 12;
@@ -201,6 +203,50 @@ class FileSessionStorage : SessionStorageInterface
         }
     }
 
+	@property string[string] sessions()
+	{
+		string[string] result;
+
+        if (!exists(seesionPath))
+        {
+            return result;
+        }
+
+        string tmp = readText(seesionPath);
+        JSONValue j = parseJSON(tmp);
+
+        if ("__time" in j)
+        {
+            import core.stdc.time;
+
+            time_t now = time(null);
+            import std.conv : parse;
+
+            if ((now - j["__time"].integer) > SESSION_MAX_VAILD)
+            {
+                try
+                {
+                    remove(seesionPath);
+                }
+                catch (Exception e)
+                {
+                }
+                return result;
+            }
+        }
+        else
+        {
+            return result;
+        }
+
+        foreach (string key, ref value; j)
+        {
+           result[key] = (j[key].type() == JSON_TYPE.INTEGER) ? to!string(value.integer) : value.str;
+        }
+
+        return result;
+	}
+	
     string get(string key)
     {
         //assert(_session_Id !is null);
@@ -390,6 +436,27 @@ class MemcacheSessionStorage :SessionStorageInterface{
 			j[key] = value;
 			MemcachedCache.defaultCahe.set(getSavedKey(), j.toString(),SESSION_MAX_VAILD);
 		}
+	}
+	
+	@property string[string] sessions()
+	{
+		string[string] result;
+		
+		string savedData = MemcachedCache.defaultCahe.get(getSavedKey());
+		
+		if(savedData.length == 0)
+		{
+			return result;
+		}
+
+		JSONValue j = parseJSON(savedData);
+		
+		foreach(string key, ref value; j)
+		{
+			result[key] = (j[key].type() == JSON_TYPE.INTEGER) ? to!string(value.integer) : value.str;
+		}
+		
+		return result;
 	}
 	
 	string get(string key){
