@@ -60,6 +60,8 @@ interface SessionStorageInterface
     void set(string key, string value);
     @property string[string] sessions();
     string get(string key);
+    /// remove a type field from the session.
+    void remove(string key);
 
     ///session 是否过期
     bool isExpired();
@@ -299,6 +301,52 @@ class FileSessionStorage : SessionStorageInterface
         }
     }
 
+    /// remove a type field from the session.
+    void remove(string key)
+    {
+        if (!exists(seesionPath))
+        {
+            return;
+        }
+
+        JSONValue j = parseJSON(readText(seesionPath));
+
+        if ("__time" in j)
+        {
+            import core.stdc.time;
+
+            time_t now = time(null);
+            import std.conv : parse;
+
+            if ((now - j["__time"].integer) > SESSION_MAX_VAILD)
+            {
+                try
+                {
+                    std.file.remove(seesionPath);
+                }
+                catch (Exception ex) { }
+                
+                return;
+            }
+        }
+        else
+        {
+            return;
+        }
+
+		JSONValue newJ;
+		
+		foreach (string _key, ref value; j)
+        {
+        	if (_key != key)
+        	{
+        		newJ[_key] = value;
+        	}
+        }
+
+        write(seesionPath, newJ.toString());
+    }
+    
     ///session 是否过期
     bool isExpired()
     {
@@ -483,6 +531,30 @@ class MemcacheSessionStorage :SessionStorageInterface{
 		}
 	}
 	
+	/// remove a type field from the session.
+    void remove(string key)
+    {
+		string savedData = MemcachedCache.defaultCahe.get(getSavedKey());
+		
+		if(savedData.length == 0)
+		{
+			return;
+		}
+
+		JSONValue j = parseJSON(savedData);
+		JSONValue newJ;
+		
+		foreach (string _key, ref value; j)
+        {
+        	if (_key != key)
+        	{
+        		newJ[_key] = value;
+        	}
+        }
+
+		MemcachedCache.defaultCahe.set(getSavedKey(), newJ.toString(), SESSION_MAX_VAILD);
+    }
+    
 	///session 是否过期
 	bool isExpired()
 	{

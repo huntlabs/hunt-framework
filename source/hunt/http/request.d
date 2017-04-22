@@ -135,9 +135,9 @@ final class Request : RequestHandler
 		_mate[key] = value;
 	}
 
-	@property string[string] sessions()
+	@property string[string] sessions(string sessionName = "hunt_session", SessionStorageInterface t =  newStorage())
 	{
-		return this.getSession().sessions();
+		return this.getSession(sessionName, t).sessions();
 	}
 	
 	SessionInterface getSession( S = Session)(string sessionName = "hunt_session", SessionStorageInterface t =  newStorage()) //if()
@@ -153,6 +153,12 @@ final class Request : RequestHandler
 		}
 		
 		return new S(cookie.value, t);
+	}
+
+	/// remove a type field from the session.
+	void removeSession(string key, string sessionName = "hunt_session", SessionStorageInterface t =  newStorage())
+	{
+		this.getSession(sessionName, t).remove(key);
 	}
 
 	@property Cookie[string] cookies()
