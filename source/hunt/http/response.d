@@ -103,15 +103,20 @@ final class Response : ResponseBuilder
     /**
      * set Cookie
      */
-    auto setCookie(string name, string value, int expires, string path = "/", string domain = null)
+    auto setCookie(string name, string value, int expires = 0, string path = "/", string domain = null)
     {
         import std.typecons;
         auto cookie = scoped!Cookie(name, value, [
                 "path": path,
-                "domain": domain,
-                "expires": printDate(cast(DateTime) Clock.currTime(UTC()) + dur!"seconds"(expires))
+                "domain": domain
             ]);
 
+		if (expires != 0)
+        {
+            import std.conv; 
+            cookie.params["max-age"] = (expires < 0) ? "0" : to!string(expires);
+        }
+        
         setHeader(HTTPHeaderCode.SET_COOKIE, cookie.output(""));
 
         return this;
