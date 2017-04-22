@@ -40,6 +40,11 @@ abstract class Controller
 
 	}
 
+	final @property session()
+	{
+		return request.getSession();
+	}
+	
 	final @property response()
 	{
 		return request.createResponse();

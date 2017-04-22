@@ -362,7 +362,7 @@ class Cookie
     in
     {
         assert(name != null);
-        assert(value != null);
+        //assert(value != null);
     }
     body
     {
