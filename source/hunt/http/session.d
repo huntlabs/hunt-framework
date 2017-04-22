@@ -47,6 +47,8 @@ interface SessionInterface
 	string get(string key, lazy string def_value = string.init);
     ///Sets a typed field to the session.
     void set(string key, string value);
+    /// remove a type field from the session.
+    void remove(string key);
     ///Queries the session for the existence of a particular key.
     bool has(string key);
 
@@ -144,6 +146,13 @@ class Session : SessionInterface
 		import std.conv:to;
         this.storge.set(key, value);
     }
+    
+    /// remove a type field from the session.
+    void remove(string key)
+    {
+    	this.storge.remove(key);
+    }
+    
     ///Queries the session for the existence of a particular key.
     bool has(string key)
     {
