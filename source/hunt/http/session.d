@@ -41,6 +41,8 @@ interface SessionInterface
 
     public void init();
 
+	@property string[string] sessions();
+
     /// Gets a typed field from the session.
 	string get(string key, lazy string def_value = string.init);
     ///Sets a typed field to the session.
@@ -121,6 +123,11 @@ class Session : SessionInterface
         }
     }
 
+	@property string[string] sessions()
+	{
+		return storge.sessions();
+	}
+	
     /// Gets a typed field from the session.
     string get(string key, lazy string def_value = string.init)
     {
