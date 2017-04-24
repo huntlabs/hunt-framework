@@ -409,8 +409,10 @@ class Router
             {
                 handleKey = "app." ~ route.getModule() ~ ".controller." ~ ((route.getGroup() == DEFAULT_ROUTE_GROUP) ? "" : route.getGroup() ~ ".") ~ route.getController() ~ "." ~ route.getController() ~ "controller." ~ route.getAction();
             }
-            
-            return handleKey;
+
+            import std.string : toLower;
+
+            return handleKey.toLower();
         }
     }
 
