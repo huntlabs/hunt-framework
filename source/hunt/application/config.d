@@ -272,7 +272,7 @@ class ConfigNotFoundException : Exception
 	mixin basicExceptionCtors;
 }
 
-class ConfigManger
+class ConfigManager
 {
 	@property app()
 	{
@@ -354,8 +354,8 @@ private:
 
 shared static this()
 {
-	_manger = new ConfigManger();
+	_manger = new ConfigManager();
 }
 
 private:
-__gshared ConfigManger _manger;
+__gshared ConfigManager _manger;
