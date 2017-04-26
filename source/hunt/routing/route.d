@@ -9,9 +9,9 @@
  *
  */
 
-module hunt.router.route;
+module hunt.routing.route;
 
-import hunt.router.define;
+import hunt.routing.define;
 import hunt.application.controller;
 
 class Route
