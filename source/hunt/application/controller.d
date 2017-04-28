@@ -16,7 +16,7 @@ import std.experimental.logger;
 public import hunt.view;
 public import hunt.http.response;
 public import hunt.http.request;
-public import hunt.router;
+public import hunt.routing;
 public import hunt.application.middleware;
 
 import std.exception;
