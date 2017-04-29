@@ -70,4 +70,19 @@ class IndexController : Controller
 		trace("---show bool----");
         this.response.html("list");
     }
+	@Action void setCache()
+	{
+		auto key = request.get("key");	
+		auto value = request.get("value");	
+		cache.set(key,value);
+		auto response = this.request.createResponse();
+        response.html("key : " ~ key ~ " value : " ~ value);
+	}
+	@Action void getCache()
+	{
+		auto key = request.get("key");	
+		auto value = cast(string)cache.get(key);
+		auto response = this.request.createResponse();
+        response.html("key : " ~ key ~ " value : " ~ value);
+	}
 }

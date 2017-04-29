@@ -7,3 +7,6 @@
 *	/index	index.index
 *	/showint	index.showint
 *	/showbool	index.showbool
+
+GET /getCache index.getCache
+GET /setCache index.setCache
