@@ -16,7 +16,7 @@ import std.experimental.logger;
 public import hunt.view;
 public import hunt.http.response;
 public import hunt.http.request;
-public import hunt.router;
+public import hunt.routing;
 public import hunt.application.middleware;
 public import hunt.cache;
 
@@ -203,6 +203,11 @@ string  __createCallActionFun(T, string moduleName)()
 string  __creteRouteMap(T, string moduleName)()
 {
 	string str = "";
+
+	//pragma(msg, "moduleName", moduleName);
+	str ~= "\n\timport hunt.application.staticfile;\n";
+	str ~= "\n\taddRouteList(\"hunt.application.staticfile.StaticfileController.doStaticFile\", &callHandler!(StaticfileController, \"doStaticFile\"));\n";
+	
 	foreach(memberName; __traits(allMembers, T)){
 		static if (is(typeof(__traits(getMember, T, memberName)) == function))
 		{
@@ -215,6 +220,7 @@ string  __creteRouteMap(T, string moduleName)()
 			}
 		}
 	}
+
 	return str;
 }
 

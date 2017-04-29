@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.router.define;
+module hunt.routing.define;
 
 public import std.experimental.logger;
 

@@ -9,10 +9,9 @@
  *
  */
 
-module hunt.router.route;
+module hunt.routing.route;
 
-import hunt.router.define;
-import hunt.application.controller;
+import hunt.routing.define;
 
 class Route
 {
@@ -23,9 +22,29 @@ class Route
 
     public
     {
-        void setGroup(string groupValue)
+        Route copy()
+        {
+            Route route = new Route;
+
+            route.setGroup(_group)
+                .setUrlTemplate(_urlTemplate)
+                .setRoute(_route)
+                .setParamKeys(_paramKeys)
+                .setPattern(_pattern)
+                .setRegular(_regular)
+                .setModule(_module)
+                .setController(_controller)
+                .setAction(_action)
+                .setMethods(_methods)
+                .handle(_handle);
+
+            return route;
+        }
+
+        Route setGroup(string groupValue)
         {
             this._group = groupValue;
+            return this;
         }
 
         string getGroup()
@@ -33,9 +52,10 @@ class Route
             return this._group;
         }
 
-        void setUrlTemplate(string urlTemplate)
+        Route setUrlTemplate(string urlTemplate)
         {
             this._urlTemplate = urlTemplate;
+            return this;
         }
 
         string getUrlTemplate()
@@ -43,9 +63,10 @@ class Route
             return this._urlTemplate;
         }
 
-        void setRoute(string routeValue)
+        Route setRoute(string routeValue)
         {
             this._route = routeValue;
+            return this;
         }
 
         string getRoute()
@@ -53,9 +74,10 @@ class Route
             return this._route;
         }
 
-        void setParamKeys(string[int] paramKeys)
+        Route setParamKeys(string[int] paramKeys)
         {
             this._paramKeys = paramKeys;
+            return this;
         }
 
         string[int] getParamKeys()
@@ -63,9 +85,10 @@ class Route
             return this._paramKeys;
         }
 
-        void setParams(string[string] params)
+        Route setParams(string[string] params)
         {
             this._params = params;
+            return this;
         }
 
         string[string] getParams()
@@ -73,9 +96,10 @@ class Route
             return this._params;
         }
 
-        void setPattern(string patternValue)
+        Route setPattern(string patternValue)
         {
             this._pattern = patternValue;
+            return this;
         }
 
         string getPattern()
@@ -83,9 +107,10 @@ class Route
             return this._pattern;
         }
 
-        void setRegular(bool regularValue)
+        Route setRegular(bool regularValue)
         {
             this._regular = regularValue;
+            return this;
         }
 
         bool getRegular()
@@ -93,9 +118,10 @@ class Route
             return this._regular;
         }
 
-        void setModule(string moduleValue)
+        Route setModule(string moduleValue)
         {
             this._module = moduleValue;
+            return this;
         }
 
         string getModule()
@@ -103,9 +129,10 @@ class Route
             return this._module;
         }
 
-        void setController(string controllerValue)
+        Route setController(string controllerValue)
         {
             this._controller = controllerValue;
+            return this;
         }
 
         string getController()
@@ -113,9 +140,10 @@ class Route
             return this._controller;
         }
 
-        void setAction(string actionValue)
+        Route setAction(string actionValue)
         {
             this._action = actionValue;
+            return this;
         }
 
         string getAction()
@@ -123,9 +151,10 @@ class Route
             return this._action;
         }
 
-        void setMethods(HTTP_METHOS[] methods)
+        Route setMethods(HTTP_METHOS[] methods)
         {
             this._methods = methods;
+            return this;
         }
 
         HTTP_METHOS[] getMethods()
@@ -138,9 +167,20 @@ class Route
             return this._handle;
         }
 
-        @property void handle(HandleFunction handle)
+        @property Route handle(HandleFunction handle)
         {
             this._handle = handle;
+            return this;
+        }
+                
+        @property staticFilePath()
+        {
+        	return this._staticFilePath;
+        }
+        
+        @property void staticFilePath(string path)
+        {
+        	this._staticFilePath = path;
         }
     }
 
@@ -180,5 +220,8 @@ class Route
 
         // allowd http methods
         HTTP_METHOS[] _methods = [ HTTP_METHOS.GET, HTTP_METHOS.POST, HTTP_METHOS.PUT, HTTP_METHOS.DELETE ];
+        
+        // staticDir:path
+        string _staticFilePath;
     }
 }

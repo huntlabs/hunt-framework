@@ -25,6 +25,7 @@ import hunt.http.sessionstorage;
 import hunt.http.cookie;
 import hunt.http.exception;
 import hunt.http.nullbuffer;
+import hunt.routing.route;
 
 import std.string;
 import std.conv;
@@ -56,6 +57,9 @@ final class Request : RequestHandler
 		else 
 			return defaultBuffer;
 	}
+
+	@property route() { return _route; }
+	@property void route(Route value) { _route = value; }
 
 	@property mate(){return _mate;}
 
@@ -301,6 +305,7 @@ protected:
 	}
 
 private:
+	Route _route;
 	string[string] _mate;
 	Cookie[string] _cookies;
 	Buffer _body;

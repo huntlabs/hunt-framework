@@ -9,10 +9,10 @@
  *
  */
 
-module hunt.router;
+module hunt.routing;
 
-public import hunt.router.define;
-public import hunt.router.config;
-public import hunt.router.router;
-public import hunt.router.route;
-public import hunt.router.routegroup;
+public import hunt.routing.define;
+public import hunt.routing.config;
+public import hunt.routing.router;
+public import hunt.routing.route;
+public import hunt.routing.routegroup;
