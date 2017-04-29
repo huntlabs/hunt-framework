@@ -9,12 +9,12 @@
  *
  */
 
-module hunt.router.router;
+module hunt.routing.router;
 
-import hunt.router.define;
-import hunt.router.routegroup;
-import hunt.router.route;
-import hunt.router.config;
+import hunt.routing.define;
+import hunt.routing.routegroup;
+import hunt.routing.route;
+import hunt.routing.config;
 
 import hunt.application.controller;
 
@@ -331,51 +331,63 @@ class Router
             {
                 route.setRoute(mca);
 
-                import std.string : split;
-                string[] mcaArray = split(mca, ".");
+				import std.algorithm;
+				import std.string;
 
-                if (mcaArray.length > 3 || mcaArray.length < 2)
-                {
-                    warningf("this route config mca length is: %d (%s)", mcaArray.length, mca);
-                    return null;
-                }
+                if (mca.startsWith("staticDir:"))
+				{
+					route.setModule("hunt.application.staticfile");
+					route.setController("staticfile");
+					route.setAction("doStaticFile");
+					route.staticFilePath = mca.chompPrefix("staticDir:");
+				}
+				else
+				{	
+	                string[] mcaArray = split(mca, ".");
 
-                if (mcaArray.length == 2)
-                {
-                    route.setController(mcaArray[0]);
-                    route.setAction(mcaArray[1]);
-                }
-                else
-                {
-                    route.setModule(mcaArray[0]);
-                    route.setController(mcaArray[1]);
-                    route.setAction(mcaArray[2]);
-                }
+	                if (mcaArray.length > 3 || mcaArray.length < 2)
+	                {
+	                    warningf("this route config mca length is: %d (%s)", mcaArray.length, mca);
+	                    return null;
+	                }
+	
+	                if (mcaArray.length == 2)
+	                {
+	                    route.setController(mcaArray[0]);
+	                    route.setAction(mcaArray[1]);
+	                }
+	                else
+	                {
+	                    route.setModule(mcaArray[0]);
+	                    route.setController(mcaArray[1]);
+	                    route.setAction(mcaArray[2]);
+	                }
 
-                import std.regex;
-                import std.array;
-
-                auto matches = path.matchAll(regex(`<(\w+):([^>]+)>`));
-                if (matches)
-                {
-                    string[int] paramKeys;
-                    int paramCount = 0;
-                    string pattern = path;
-                    string urlTemplate = path;
-
-                    foreach (m; matches)
-                    {
-                        paramKeys[paramCount] = m[1];
-                        pattern = pattern.replaceFirst(m[0], "(" ~ m[2] ~ ")");
-                        urlTemplate = urlTemplate.replaceFirst(m[0], "{" ~ m[1] ~ "}");
-                        paramCount++;
-                    }
-
-                    route.setPattern(pattern);
-                    route.setParamKeys(paramKeys);
-                    route.setRegular(true);
-                    route.setUrlTemplate(urlTemplate);
-                }
+	                import std.regex;
+	                import std.array;
+	
+	                auto matches = path.matchAll(regex(`:(\w+)`));
+	                if (matches)
+	                {
+	                    string[int] paramKeys;
+	                    int paramCount = 0;
+	                    string pattern = path;
+	                    string urlTemplate = path;
+	
+	                    foreach (m; matches)
+	                    {
+	                        paramKeys[paramCount] = m[1];
+	                        pattern = pattern.replaceFirst(m[0], "([^/]*)");
+	                        urlTemplate = urlTemplate.replaceFirst(m[0], "{" ~ m[1] ~ "}");
+	                        paramCount++;
+	                    }
+	
+	                    route.setPattern(pattern);
+	                    route.setParamKeys(paramKeys);
+	                    route.setRegular(true);
+	                    route.setUrlTemplate(urlTemplate);
+	                }
+				}
 
                 string handleKey = this.makeRequestHandleKey(route);
 
@@ -401,16 +413,25 @@ class Router
         {
             string handleKey;
             
-            if (route.getModule() == null)
+            if (route.staticFilePath == string.init)
             {
-                handleKey = "app.controller." ~ ((route.getGroup() == DEFAULT_ROUTE_GROUP) ? "" : route.getGroup() ~ ".") ~ route.getController() ~ "." ~ route.getController() ~ "controller." ~ route.getAction();
+	            if (route.getModule() == null)
+	            {
+	                handleKey = "app.controller." ~ ((route.getGroup() == DEFAULT_ROUTE_GROUP) ? "" : route.getGroup() ~ ".") ~ route.getController() ~ "." ~ route.getController() ~ "controller." ~ route.getAction();
+	            }
+	            else
+	            {
+	                handleKey = "app." ~ route.getModule() ~ ".controller." ~ ((route.getGroup() == DEFAULT_ROUTE_GROUP) ? "" : route.getGroup() ~ ".") ~ route.getController() ~ "." ~ route.getController() ~ "controller." ~ route.getAction();
+	            }
             }
             else
             {
-                handleKey = "app." ~ route.getModule() ~ ".controller." ~ ((route.getGroup() == DEFAULT_ROUTE_GROUP) ? "" : route.getGroup() ~ ".") ~ route.getController() ~ "." ~ route.getController() ~ "controller." ~ route.getAction();
+            	handleKey = "hunt.application.staticfile.StaticfileController.doStaticFile";
             }
-            
-            return handleKey;
+
+            import std.string : toLower;
+
+            return handleKey.toLower();
         }
     }
 

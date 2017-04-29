@@ -9,10 +9,10 @@
  *
  */
 
-module hunt.router.routegroup;
+module hunt.routing.routegroup;
 
-import hunt.router.define;
-import hunt.router.route;
+import hunt.routing.define;
+import hunt.routing.route;
 
 class RouteGroup
 {
@@ -67,23 +67,40 @@ class RouteGroup
 
             if (route)
             {
-                return route;
+                return route.copy();
             }
-
+            else
+            {
+            	foreach(key, value; this._routes)
+            	{
+            		import std.string;
+            		if (path.startsWith(key))
+            		{
+            			route = this._routes.get(key, null);
+            			
+            			if (route.staticFilePath != string.init)
+            			{
+            				return route;
+            			}
+            		}
+            	}
+            }
+            
             import std.regex;
+            import std.uri : decode;
 
             foreach (r; this._regexRoutes)
             {
                 auto matched = path.match(regex(r.getPattern()));
                 if (matched)
                 {
-                    route = r;
+                    route = r.copy();
 
                     string[string] params;
 
                     foreach(i, key; route.getParamKeys())
                     {
-                        params[key] = matched.captures[i + 1];
+                        params[key] = decode(matched.captures[i + 1]);
                     }
 
                     route.setParams(params);
