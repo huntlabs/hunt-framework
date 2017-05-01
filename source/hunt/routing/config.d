@@ -9,9 +9,9 @@
  *
  */
 
-module hunt.router.config;
+module hunt.routing.config;
 
-import hunt.router.define;
+import hunt.routing.define;
 
 struct RouteItem
 {

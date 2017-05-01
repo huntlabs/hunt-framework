@@ -9,10 +9,10 @@
  *
  */
 
-module hunt.router.routegroup;
+module hunt.routing.routegroup;
 
-import hunt.router.define;
-import hunt.router.route;
+import hunt.routing.define;
+import hunt.routing.route;
 
 class RouteGroup
 {
