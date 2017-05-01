@@ -9,12 +9,12 @@
  *
  */
 
-module hunt.router.router;
+module hunt.routing.router;
 
-import hunt.router.define;
-import hunt.router.routegroup;
-import hunt.router.route;
-import hunt.router.config;
+import hunt.routing.define;
+import hunt.routing.routegroup;
+import hunt.routing.route;
+import hunt.routing.config;
 
 import hunt.application.controller;
 
