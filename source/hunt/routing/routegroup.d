@@ -67,7 +67,7 @@ class RouteGroup
 
             if (route)
             {
-                return route;
+                return route.copy();
             }
 
             import std.regex;
@@ -77,7 +77,7 @@ class RouteGroup
                 auto matched = path.match(regex(r.getPattern()));
                 if (matched)
                 {
-                    route = r;
+                    route = r.copy();
 
                     string[string] params;
 
