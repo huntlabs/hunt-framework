@@ -21,7 +21,11 @@ class StaticfileController : Controller
     		return;
     	}
     	
-    	StaticfileCache.createInstance();
+    	if (StaticfileCache.instance is null)
+    	{
+	    	StaticfileCache.createInstance();
+    	}
+    	
     	ubyte[] content = StaticfileCache.instance.getCache(request.path);
 
     	if (content != null)
@@ -105,7 +109,7 @@ class StaticfileCache
 		return fc.content;
 	}
 	
-	void setCache(string key, ubyte[] content)
+	synchronized void setCache(string key, ubyte[] content)
 	{
 		_contents[key] = new FileContent(content);
 	}
