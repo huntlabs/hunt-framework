@@ -355,7 +355,7 @@ class Router
                 import std.regex;
                 import std.array;
 
-                auto matches = path.matchAll(regex(`<(\w+):([^>]+)>`));
+                auto matches = path.matchAll(regex(`:(\w+)`));
                 if (matches)
                 {
                     string[int] paramKeys;
@@ -366,7 +366,7 @@ class Router
                     foreach (m; matches)
                     {
                         paramKeys[paramCount] = m[1];
-                        pattern = pattern.replaceFirst(m[0], "(" ~ m[2] ~ ")");
+                        pattern = pattern.replaceFirst(m[0], "([^/]*)");
                         urlTemplate = urlTemplate.replaceFirst(m[0], "{" ~ m[1] ~ "}");
                         paramCount++;
                     }
