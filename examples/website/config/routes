@@ -5,5 +5,5 @@
 *	/show	index.show
 *	/list	index.list
 *	/index	index.index
-*	/showint	index.showint
+
 *	/showbool	index.showbool
