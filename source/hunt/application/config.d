@@ -35,6 +35,7 @@ final class AppConfig
 		string languages = "zh-CN,en-US";
 		string secret;
 		string encoding = "UTF-8";
+		int staticFileCacheMinutes = 30;
 	}
 
 	struct SessionConf
@@ -177,6 +178,7 @@ final class AppConfig
 		collectException(conf.application.languages.value,	app.application.languages);
 		collectException(conf.application.secret.value,	app.application.secret);
 		collectException(conf.application.encoding.value,	app.application.encoding);
+		collectException(conf.application.staticFileCacheMinutes.as!int(),	app.application.staticFileCacheMinutes);
 
 		collectException(conf.session.storage.value(),	app.session.storage);
 		collectException(conf.session.prefix.value(),	app.session.prefix);
