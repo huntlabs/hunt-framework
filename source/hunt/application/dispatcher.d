@@ -39,13 +39,12 @@ class Dispatcher
                 Route route;
 
                 string cacheKey = request.header(HTTPHeaderCode.HOST) ~ "_" ~ request.method ~ "_" ~ request.path;
-
                 route = this._cached.get(cacheKey, null);
 
                 if (route is null)
                 {
                     route = this._router.match(request.header(HTTPHeaderCode.HOST), request.method, request.path);
-                    
+
                     if (route is null)
                     {
                         request.createResponse().do404();
@@ -67,6 +66,7 @@ class Dispatcher
                 }
 
                 // add handle task to taskPool
+                request.route = route;
                 this._taskPool.put(task!doRequestHandle(route.handle, request));
 
             }
