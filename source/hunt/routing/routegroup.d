@@ -71,6 +71,7 @@ class RouteGroup
             }
 
             import std.regex;
+            import std.uri : decode;
 
             foreach (r; this._regexRoutes)
             {
@@ -83,7 +84,7 @@ class RouteGroup
 
                     foreach(i, key; route.getParamKeys())
                     {
-                        params[key] = matched.captures[i + 1];
+                        params[key] = decode(matched.captures[i + 1]);
                     }
 
                     route.setParams(params);
