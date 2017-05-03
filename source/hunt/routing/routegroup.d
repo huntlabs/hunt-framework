@@ -67,23 +67,24 @@ class RouteGroup
 
             if (route)
             {
-                return route;
+                return route.copy();
             }
 
             import std.regex;
+            import std.uri : decode;
 
             foreach (r; this._regexRoutes)
             {
                 auto matched = path.match(regex(r.getPattern()));
                 if (matched)
                 {
-                    route = r;
+                    route = r.copy();
 
                     string[string] params;
 
                     foreach(i, key; route.getParamKeys())
                     {
-                        params[key] = matched.captures[i + 1];
+                        params[key] = decode(matched.captures[i + 1]);
                     }
 
                     route.setParams(params);

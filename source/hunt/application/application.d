@@ -33,7 +33,7 @@ import std.path;
 import std.parallelism;
 import std.exception;
 
-import hunt.router;
+import hunt.routing;
 import hunt.application.dispatcher;
 
 public import hunt.http;

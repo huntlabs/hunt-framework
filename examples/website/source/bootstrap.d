@@ -47,15 +47,15 @@ void main()
 
 	app.addRoute("GET","/label/edit/{id:[0-9]*}",&hello);
 
-	///设置语言
+	//set language
 	setLocale("en-br");
 	writeln( getText("message.hello-world"));
 
-	///设置语言
+	//set language
 	setLocale("zh-cn");
 	writeln( getText("email.subject"));
 
-	///设置语言
+	//set language
 	setLocale("en-us");
 	writeln( getText("email.subject", "empty"));
 

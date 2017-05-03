@@ -13,7 +13,7 @@ module app.middleware;
 import std.functional;
 
 import hunt.application;
-import hunt.router;
+import hunt.routing;
 
 class OneMiddleware : IMiddleware
 {
