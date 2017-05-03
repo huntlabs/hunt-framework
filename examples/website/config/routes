@@ -8,3 +8,4 @@
 *		/showint					index.showint
 *		/showbool					index.showbool
 GET		/public						staticDir:public
+

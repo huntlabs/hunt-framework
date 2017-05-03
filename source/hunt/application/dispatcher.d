@@ -11,7 +11,7 @@
 
 module hunt.application.dispatcher;
 
-import hunt.router;
+import hunt.routing;
 import hunt.http.request;
 import hunt.http.response;
 import hunt.application.controller;
