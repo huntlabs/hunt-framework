@@ -111,7 +111,7 @@ final class Response : ResponseBuilder
                 "domain": domain
             ]);
 
-		if (expires != 0)
+        if (expires != 0)
         {
             import std.conv; 
             cookie.params["max-age"] = (expires < 0) ? "0" : to!string(expires);
@@ -137,23 +137,28 @@ final class Response : ResponseBuilder
 
         setHttpStatusCode((is301 ? 301 : 302));
         setHeader(HTTPHeaderCode.LOCATION, url);
-        connectionClose();
 
+        connectionClose();
         done();
     }
 
-    void do404(string body_ = "",string contentype = "text/plain;charset=UTF-8")
+    void do404(string body_ = "",string contentype = "text/html;charset=UTF-8")
     {
         if(_isDone) return;
 
         setHttpStatusCode(404);
-        header(HTTPHeaderCode.CONTENT_TYPE,"text/plain;charset=UTF-8");
+        header(HTTPHeaderCode.CONTENT_TYPE,"text/html;charset=UTF-8");
 
         if(body_.length > 0)
+        {
             setContext(body_);
+        }
+        else
+        {
+            setContext(errorPageHtml(404));
+        }
 
         connectionClose();
-
         done();
     }
 
@@ -164,4 +169,69 @@ package(hunt.http):
     }
 private:
     bool _isDone = false;
+}
+
+import hunt.http.code;
+
+string errorPageHtml(int code)
+{
+    import std.conv : to;
+
+    string text = code.to!string;
+    text ~= " ";
+    text ~= HTTPCodeText(code);
+
+    string html = `<!doctype html>
+<html lang="en">
+    <meta charset="utf-8">
+    <title>`;
+
+    html ~= text;
+    html ~= `</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+
+        * {
+            line-height: 3;
+            margin: 0;
+        }
+
+        html {
+            color: #888;
+            display: table;
+            font-family: sans-serif;
+            height: 100%;
+            text-align: center;
+            width: 100%;
+        }
+
+        body {
+            display: table-cell;
+            vertical-align: middle;
+            margin: 2em auto;
+        }
+
+        h1 {
+            color: #555;
+            font-size: 2em;
+            font-weight: 400;
+        }
+
+        p {
+            margin: 0 auto;
+            width: 90%;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>`;
+    html ~= text;
+    html ~= `</h1>
+    <p>Sorry!! Unable to complete your request :(</p>
+</body>
+</html>
+`;
+
+    return html;
 }
