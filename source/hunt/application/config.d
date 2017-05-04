@@ -36,6 +36,7 @@ final class AppConfig
 		string secret;
 		string encoding = "UTF-8";
 		int staticFileCacheMinutes = 30;
+		int staticFileCacheMaxFileNum = 3000;
 	}
 
 	struct SessionConf
@@ -179,6 +180,7 @@ final class AppConfig
 		collectException(conf.application.secret.value,	app.application.secret);
 		collectException(conf.application.encoding.value,	app.application.encoding);
 		collectException(conf.application.staticFileCacheMinutes.as!int(),	app.application.staticFileCacheMinutes);
+		collectException(conf.application.staticFileCacheMaxFileNum.as!int(), app.application.staticFileCacheMaxFileNum);
 
 		collectException(conf.session.storage.value(),	app.session.storage);
 		collectException(conf.session.prefix.value(),	app.session.prefix);
