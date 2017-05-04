@@ -12,7 +12,6 @@
 module hunt.routing.route;
 
 import hunt.routing.define;
-import hunt.routing.define;
 
 class Route
 {
@@ -173,6 +172,16 @@ class Route
             this._handle = handle;
             return this;
         }
+                
+        @property staticFilePath()
+        {
+        	return this._staticFilePath;
+        }
+        
+        @property void staticFilePath(string path)
+        {
+        	this._staticFilePath = path;
+        }
     }
 
     private
@@ -211,5 +220,8 @@ class Route
 
         // allowd http methods
         HTTP_METHOS[] _methods = [ HTTP_METHOS.GET, HTTP_METHOS.POST, HTTP_METHOS.PUT, HTTP_METHOS.DELETE ];
+        
+        // staticDir:path
+        string _staticFilePath;
     }
 }

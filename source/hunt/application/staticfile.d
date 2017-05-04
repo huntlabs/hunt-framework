@@ -21,7 +21,6 @@ class StaticfileController : Controller
     		return;
     	}
     	
-    	StaticfileCache.createInstance();
     	ubyte[] content = StaticfileCache.instance.getCache(request.path);
 
     	if (content != null)
@@ -71,7 +70,7 @@ class StaticfileCache
 {
 	__gshared static StaticfileCache instance;
 
-	synchronized static void createInstance()
+	static this()
 	{
 		if (instance is null)
 		{
