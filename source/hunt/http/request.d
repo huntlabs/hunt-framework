@@ -25,7 +25,7 @@ import hunt.http.sessionstorage;
 import hunt.http.cookie;
 import hunt.http.exception;
 import hunt.http.nullbuffer;
-import hunt.router.route;
+import hunt.routing.route;
 
 import std.string;
 import std.conv;
