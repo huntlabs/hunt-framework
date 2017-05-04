@@ -20,3 +20,4 @@ core
 dub.userprefs
 *.lib
 *.exe
+.DS_Store
