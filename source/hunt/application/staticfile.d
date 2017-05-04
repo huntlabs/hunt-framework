@@ -75,7 +75,7 @@ class StaticfileCache
 {
 	__gshared static StaticfileCache instance;
 
-	synchronized static void createInstance()
+	static void createInstance()
 	{
 		if (instance is null)
 		{
@@ -109,7 +109,7 @@ class StaticfileCache
 		return fc.content;
 	}
 	
-	synchronized void setCache(string key, ubyte[] content)
+	void setCache(string key, ubyte[] content)
 	{
 		_contents[key] = new FileContent(content);
 	}
