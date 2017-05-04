@@ -1,49 +1,117 @@
 module hunt.cache.cache;
 
-import hunt.cache;
+import hunt.cache.driver;
+
+import std.conv;
+import std.experimental.logger;
 
 class Cache
 {
-	Store _store;
+    this(string driver = "memory")
+    {
+        switch(driver)
+        {
+            case "memory":
+            {
+                this._cacheDriver = new MemoryCache;
+            }
+            version(USE_MEMCACHE)
+            {
+            case "memcache":
+            {
+                //this._cacheDriver = new MemcacheCache;
+            }
+            }
+            version(USE_REDIS)
+            {
+            case "redis":
+            {
+                //this._cacheDriver = new RedisCache;
+            }
+            }
+            default:
+            {
+                new Exception("Can't support cache driver: ", driver);
+            }
+        }
+    }
 
-	this(Store store)
-	{
-		this._store = store;
-	}
+    bool set(string key, ubyte[] value, int expire = 0)
+    {
+        return _cacheDriver.set(this._prefix ~ key, value, expire);
+    }
 
-	bool set(string key,ubyte[] value)
-	{
-		return _store.set(key,value);		
-	}
-	bool set(string key,string value)
-	{
-		return set(key,cast(ubyte[])value);
-	}
+    bool set(string key, string value, int expire = 0)
+    {
+        return _cacheDriver.set(this._prefix ~ key, cast(ubyte[])value, expire);
+    }
 
-	ubyte[] get(string key)
-	{
-		return _store.get(key);
-	}
+    string get(string key)
+    {
+        return cast(string)_cacheDriver.get(this._prefix ~ key);
+    }
+
 	T get(T)(string key)
 	{
-		return cast(T)_store.get(key);
-	}
-
-	bool remove(string key)
-	{
-		return _store.remove(key);
+		return cast(T)_cacheDriver.get(this._prefix ~ key);
 	}
 
 	bool isset(string key)
 	{
-		return _store.isset(key);
+		return _cacheDriver.isset(this._prefix ~ key);
 	}
 
-	void clean()
-	{
-		_store.clean();
-	}
+    bool erase(string key)
+    {
+        return _cacheDriver.erase(this._prefix ~ key);
+    }
+
+    bool flush()
+    {
+        return _cacheDriver.flush();
+    }
+
+    void setPrefix(string prefix)
+    {
+        this._prefix = prefix;
+    }
+
+    void setExpire(int expire)
+    {
+        this._cacheDriver.setExpire(expire);
+    }
+
+    bool init()
+    {
+        return this._isInit;
+    }
+
+    private
+    {
+        bool _isInit = false;
+		string _prefix;
+        AbstractCache _cacheDriver;
+    }
 }
+
+
+
+unittest
+{
+
+import core.memory;
+import core.atomic;
+import core.thread;
+import core.sync.semaphore;
+import core.sync.mutex;
+import core.sync.rwmutex;
+
+import std.conv;
+import std.stdio;
+import std.functional;
+import std.traits;
+import std.typecons;
+import std.typetuple;
 
 pragma(inline) auto bind(T, Args...)(T fun, Args args) if (isCallable!(T))
 {
@@ -71,12 +139,8 @@ pragma(inline) auto bind(T, Args...)(T fun, Args args) if (isCallable!(T))
 	}
 }
 
-unittest
-{
-	__gshared Store store;
 	__gshared Cache cache;
-	store = new Memory();
-	cache = new Cache(store);
+	cache = new Cache();
 	assert(cache.set("test","test") == true);	
 	assert(cache.get("test") == "test");	
 
