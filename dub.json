@@ -1,124 +1,123 @@
 {
-	"configurations": [
-		{
-			"name": "default",
-			"targetType": "library"
-		},
-		{
-			"name": "no_taskpool",
-			"targetType": "library",
-			"versions": [
-				"NO_TASKPOOL"
-			]
-		},
-		{
-			"name": "full",
-			"dependencies": {
-				"entity": "~>0.1.0",
-				"libmemcached": "1.1.0",
-				"dredis": "0.0.1"
-			},
-			"targetType": "library",
-			"subConfigurations": {
-				"entity": "full"
-			},
-			"versions": [
-				"WITH_ENTITY",
-				"USE_MYSQL",
-				"USE_SQLITE",
-				"USE_PGSQL",
-				"USE_REDIS",
-				"USE_MEMCACHE"
-			]
-		},
-		{
-			"name": "Redis",
-			"dependencies": {
-				"dredis": "0.0.1"
-			},
-			"targetType": "library",
-			"versions": [
-				"USE_REDIS"
-			]
-		},
-		{
-			"name": "Memcache",
-			"dependencies": {
-				"libmemcached": "1.1.0"
-			},
-			"targetType": "library",
-			"versions": [
-				"USE_MEMCACHE"
-			]
-		},
-		{
-			"name": "R&M",
-			"dependencies": {
-				"libmemcached": "1.1.0",
-				"dredis": "0.0.1"
-			},
-			"targetType": "library",
-			"versions": [
-				"USE_REDIS",
-				"USE_MEMCACHE"
-			]
-		},
-		{
-			"name": "MySQL",
-			"dependencies": {
-				"entity": "~>0.1.0"
-			},
-			"targetType": "library",
-			"subConfigurations": {
-				"entity": "MySQL"
-			},
-			"versions": [
-				"WITH_ENTITY",
-				"USE_MYSQL"
-			]
-		},
-		{
-			"name": "SQLite",
-			"dependencies": {
-				"entity": "~>0.1.0"
-			},
-			"targetType": "library",
-			"subConfigurations": {
-				"entity": "SQLite"
-			},
-			"versions": [
-				"WITH_ENTITY",
-				"USE_SQLITE"
-			]
-		},
-		{
-			"name": "PGSQL",
-			"dependencies": {
-				"entity": "~>0.1.0"
-			},
-			"targetType": "library",
-			"subConfigurations": {
-				"entity": "PGSQL"
-			},
-			"versions": [
-				"WITH_ENTITY",
-				"USE_PGSQL"
-			]
-		}
-	],
-	"importPaths": [
-		"source/"
-	],
-	"name": "hunt",
-	"version": "0.7.0-beta6",
-	"license": "Apache-2.0",
-	"copyright": "Copyright (C) 2015-2017 Shanghai Putao Technology Co., Ltd",
-	"description": "A high performance full-stack Web framework.",
-	"libs": [],
-	"dependencies": {
-		"collie": "~>0.9.7"
-	},
-	"sourcePaths": [
-		"source/"
-	]
+    "name": "hunt",
+    "license": "Apache-2.0",
+    "copyright": "Copyright (C) 2015-2017 Shanghai Putao Technology Co., Ltd",
+    "description": "A high performance full-stack Web framework.",
+    "libs": [],
+    "dependencies": {
+        "collie": "~>0.9.7"
+    },
+    "importPaths": [
+        "source/"
+    ],
+    "sourcePaths": [
+        "source/"
+    ],
+    "configurations": [
+        {
+            "name": "default",
+            "targetType": "library"
+        },
+        {
+            "name": "no_taskpool",
+            "targetType": "library",
+            "versions": [
+                "NO_TASKPOOL"
+            ]
+        },
+        {
+            "name": "full",
+            "dependencies": {
+                "entity": "~>0.1.0",
+                "libmemcached": "1.1.0",
+                "dredis": "0.0.1"
+            },
+            "targetType": "library",
+            "subConfigurations": {
+                "entity": "full"
+            },
+            "versions": [
+                "WITH_ENTITY",
+                "USE_MYSQL",
+                "USE_SQLITE",
+                "USE_PGSQL",
+                "USE_REDIS",
+                "USE_MEMCACHE"
+            ]
+        },
+        {
+            "name": "Redis",
+            "dependencies": {
+                "dredis": "0.0.1"
+            },
+            "targetType": "library",
+            "versions": [
+                "USE_REDIS"
+            ]
+        },
+        {
+            "name": "Memcache",
+            "dependencies": {
+                "libmemcached": "1.1.0"
+            },
+            "targetType": "library",
+            "versions": [
+                "USE_MEMCACHE"
+            ]
+        },
+        {
+            "name": "R&M",
+            "dependencies": {
+                "libmemcached": "1.1.0",
+                "dredis": "0.0.1"
+            },
+            "targetType": "library",
+            "versions": [
+                "USE_REDIS",
+                "USE_MEMCACHE"
+            ]
+        },
+        {
+            "name": "MySQL",
+            "dependencies": {
+                "entity": "~>0.1.0"
+            },
+            "targetType": "library",
+            "subConfigurations": {
+                "entity": "MySQL"
+            },
+            "versions": [
+                "WITH_ENTITY",
+                "USE_MYSQL"
+            ]
+        },
+        {
+            "name": "SQLite",
+            "dependencies": {
+                "entity": "~>0.1.0"
+            },
+            "targetType": "library",
+            "subConfigurations": {
+                "entity": "SQLite"
+            },
+            "versions": [
+                "WITH_ENTITY",
+                "USE_SQLITE"
+            ]
+        },
+        {
+            "name": "PGSQL",
+            "dependencies": {
+                "entity": "~>0.1.0"
+            },
+            "targetType": "library",
+            "subConfigurations": {
+                "entity": "PGSQL"
+            },
+            "versions": [
+                "WITH_ENTITY",
+                "USE_PGSQL"
+            ]
+        }
+    ]
 }
