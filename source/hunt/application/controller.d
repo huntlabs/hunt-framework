@@ -18,6 +18,7 @@ public import hunt.http.response;
 public import hunt.http.request;
 public import hunt.routing;
 public import hunt.application.middleware;
+public import hunt.cache;
 
 import std.exception;
 import std.traits;
@@ -85,6 +86,18 @@ abstract class Controller
 			_view = new View();
 		}
 		return _view;
+	}
+
+	__gshared Store _store;
+	__gshared Cache _cache;
+	@property Cache cache()
+	{
+		if(_cache is null)
+		{
+			_store = new Memory();
+			_cache = new Cache(_store);
+		}
+		return _cache;
 	}
 
 	void render(string filename = null)()
