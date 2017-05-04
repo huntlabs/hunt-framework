@@ -69,7 +69,23 @@ class RouteGroup
             {
                 return route.copy();
             }
-
+            else
+            {
+            	foreach(key, value; this._routes)
+            	{
+            		import std.string;
+            		if (path.startsWith(key))
+            		{
+            			route = this._routes.get(key, null);
+            			
+            			if (route.staticFilePath != string.init)
+            			{
+            				return route;
+            			}
+            		}
+            	}
+            }
+            
             import std.regex;
             import std.uri : decode;
 
