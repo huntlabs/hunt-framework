@@ -18,7 +18,9 @@ public import hunt.http.response;
 public import hunt.http.request;
 public import hunt.routing;
 public import hunt.application.middleware;
-public import hunt.cache;
+
+import hunt.cache;
+import hunt.application.application;
 
 import std.exception;
 import std.traits;
@@ -38,7 +40,7 @@ abstract class Controller
 		///called before all actions
 		IMiddleware[] middlewares;
 		View _view;
-
+		Cache _cache;
 	}
 
 	final @property session()
@@ -88,15 +90,13 @@ abstract class Controller
 		return _view;
 	}
 
-	__gshared Store _store;
-	__gshared Cache _cache;
 	@property Cache cache()
 	{
 		if(_cache is null)
 		{
-			_store = new Memory();
-			_cache = new Cache(_store);
+			_cache = Application.getInstance().cache();
 		}
+		
 		return _cache;
 	}
 

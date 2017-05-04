@@ -44,6 +44,7 @@ public import hunt.application.config;
 public import hunt.application.middleware;
 public import conRedis = hunt.storage.redis;
 public import conMemcached = hunt.storage.memcached;
+public import hunt.cache;
 
 abstract class WebSocketFactory
 {
@@ -159,6 +160,30 @@ after  =  The PipelineFactory that create the middleware list for the router rul
         }
     }
 
+    private void initCache(AppConfig.CacheConf config)
+    {
+        Cache cache = new Cache(config.storage);
+
+        if (cache.init())
+        {
+            cache.setPrefix(config.prefix);
+            cache.setExpire(config.expire);
+
+            this._cache = cache;
+
+            return;
+        }
+
+        warning("Cache module init failed! use memory cache!");
+
+        this._cache = new Cache;
+    }
+
+    Cache cache()
+    {
+        return _cache;
+    }
+
     /**
       Start the HTTPServer server , and block current thread.
      */
@@ -169,7 +194,10 @@ after  =  The PipelineFactory that create the middleware list for the router rul
         initDb(Config.app.database);
         setRedis(Config.app.redis);
         setMemcache(Config.app.memcache);
+        initCache(Config.app.cache);
+
         writeln("please open http://",addr.toString,"/");
+
         _server.start();
     }
 
@@ -356,6 +384,7 @@ after  =  The PipelineFactory that create the middleware list for the router rul
     }
 
     __gshared static Application _app;
+
     private:
     Address addr;
     HttpServer _server;
@@ -363,6 +392,7 @@ after  =  The PipelineFactory that create the middleware list for the router rul
     uint _maxBodySize;
     CreatorBuffer _cbuffer;
     Dispatcher _dispatcher;
+    __gshared Cache _cache;
 
     version(NO_TASKPOOL)
     {
