@@ -69,6 +69,7 @@ class StaticfileController : Controller
 class StaticfileCache
 {
 	__gshared static StaticfileCache instance;
+	__gshared private FileContent[string] _contents;
 
 	static this()
 	{
@@ -90,8 +91,6 @@ class StaticfileCache
 		}
 	}
 
-	private FileContent[string] _contents;
-	
 	ubyte[] getCache(string key)
 	{
 		FileContent fc = _contents.get(key, null);
@@ -106,6 +105,32 @@ class StaticfileCache
 	
 	void setCache(string key, ubyte[] content)
 	{
+		if (_contents.length >= Config.app.application.staticFileCacheMaxFileNum)
+		{
+			cleanCache();
+		}
+		
+		if (_contents.length >= Config.app.application.staticFileCacheMaxFileNum)
+		{
+			trace("Static file cache has reached the maximum number of files.");
+			
+			return;
+		}
+		
 		_contents[key] = new FileContent(content);
+	}
+	
+	// clean invalid cache data.
+	void cleanCache()
+	{
+		SysTime t = Clock.currTime();
+		
+		foreach(key, fc; _contents)
+		{
+			if ((t - fc.cacheTime).total!"minutes" >= Config.app.application.staticFileCacheMinutes)
+			{
+				_contents.remove(key);
+			}
+		}
 	}
 }
