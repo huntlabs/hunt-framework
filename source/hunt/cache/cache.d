@@ -156,11 +156,11 @@ pragma(inline) auto bind(T, Args...)(T fun, Args args) if (isCallable!(T))
 		new Thread(bind!(void delegate(int))(&tttt,i)).start();
 		i+=1;
 	}
-	writeln("fuck...");
-	Thread.sleep(10.seconds);
+	writeln("Thread wait...");
+	Thread.sleep(5.seconds);
 
 	foreach (m; 0 .. 10)
 		writeln(m,"\t",cast(string)cache.get("test"~m.to!string));
 
-	Thread.sleep(20.seconds);
+	Thread.sleep(10.seconds);
 }
