@@ -11,7 +11,7 @@ class StaticfileController : Controller
 {
     mixin MakeController;
     
-    string chachePerfix = "_staticfile_";
+    string cachePerfix = "_staticfile_";
     
     @Action
     void doStaticFile()
@@ -23,7 +23,7 @@ class StaticfileController : Controller
     		return;
     	}
     	
-    	ubyte[] content = Application.getInstance.cache().get!(ubyte[])(chachePerfix ~ request.path);
+    	ubyte[] content = Application.getInstance.cache().get!(ubyte[])(cachePerfix ~ request.path);
 
     	if (content != null)
     	{
@@ -63,7 +63,7 @@ class StaticfileController : Controller
 		}
 
     	content = cast(ubyte[])read(staticFilename);
-	    Application.getInstance.cache().set(chachePerfix ~ request.path, content, Config.app.application.staticFileCacheMinutes);
+	    Application.getInstance.cache().set(cachePerfix ~ request.path, content, Config.app.application.staticFileCacheMinutes);
 		response.setContext(content);
     }
 }
