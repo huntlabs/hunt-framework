@@ -173,6 +173,7 @@ string getText(string key, lazy string default_value = string.init)
 
 
 
+/*
 unittest{
 	
 	I18n i18n = I18n.instance();
@@ -193,3 +194,4 @@ unittest{
 	setLocale("en-us");
 	assert( getText("email.subject", "empty") == "empty");
 }
+*/
