@@ -147,7 +147,7 @@ final class Response : ResponseBuilder
         if(_isDone) return;
 
         setHttpStatusCode(404);
-        header(HTTPHeaderCode.CONTENT_TYPE,"text/html;charset=UTF-8");
+        header(HTTPHeaderCode.CONTENT_TYPE, contentype);
 
         if(body_.length > 0)
         {
