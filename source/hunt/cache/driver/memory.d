@@ -64,28 +64,37 @@ class MemoryCache : AbstractCache
 
 	override bool set(string key, ubyte[] value, int exprie = 0)
 	{
-		if(isset(key))return false;
+		//if(isset(key))return false;
 
 		_mutex.writer.lock();
 		scope(exit) _mutex.writer.unlock();
 
 		auto trunk = new MemoryBuffer(key,value,value.length);
 
-		map[key] = trunk;
-		trunkNum++;
-		trunkSize+=value.length;
-        
-		if(head is MemoryBuffer.init){
-			head = trunk;
-			tail = trunk;
+		if(isset(key)){
+			trunkSize = trunkSize + value.length - map[key].length;
+			if(map[key].prv)trunk.prv = map[key].prv;
+			if(map[key].next)trunk.next = map[key].next;
+			map[key] = trunk;
 		}else{
-			tail.next = trunk;
-			trunk.prv = tail;
-			tail = trunk;
+			trunkNum++;
+			trunkSize+=value.length;
+			
+			map[key] = trunk;
+
+			if(head is MemoryBuffer.init){
+				head = trunk;
+				tail = trunk;
+			}else{
+				tail.next = trunk;
+				trunk.prv = tail;
+				tail = trunk;
+			}
 		}
 
 		return true;
 	}
+
 
 	override ubyte[] get(string key)
 	{
@@ -94,7 +103,7 @@ class MemoryCache : AbstractCache
 
 		return map.get(key,null) ? *(map[key].ptr) : null;
 	}
-    
+
 	override bool isset(string key)
 	{
 		if(map.get(key,null) is null) 
@@ -115,7 +124,7 @@ class MemoryCache : AbstractCache
 
 		trunkNum--;
 		trunkSize-=map[key].length;
-        
+
 		map[key].clear();
 		map[key].destroy();
 		map.remove(key);
@@ -126,7 +135,7 @@ class MemoryCache : AbstractCache
 	override bool flush()
 	{
 		foreach(k,v;map)
-        {
+		{
 			v.clear();
 			v.destroy();
 			map.remove(k);
@@ -138,7 +147,7 @@ class MemoryCache : AbstractCache
 		head = null;
 		tail = null;
 
-        return true;
+		return true;
 	}
 }
 
@@ -164,4 +173,11 @@ unittest
 	assert(memory.getTrunkSize == utest.length);
 	memory.flush();
 	assert(memory.getTrunkNum == 0);
+
+	assert(memory.set(test,utest) == true);
+	assert(memory.getTrunkNum == 1);
+	assert(memory.getTrunkSize == utest.length);
+	assert(memory.set(test,utest2) == true);
+	assert(memory.getTrunkNum == 1);
+	assert(memory.getTrunkSize == utest2.length);
 }
