@@ -162,5 +162,5 @@ pragma(inline) auto bind(T, Args...)(T fun, Args args) if (isCallable!(T))
 	foreach (m; 0 .. 10)
 		writeln(m,"\t",cast(string)cache.get("test"~m.to!string));
 
-	Thread.sleep(10.seconds);
+	Thread.sleep(2.seconds);
 }
