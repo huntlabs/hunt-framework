@@ -14,12 +14,14 @@ class Cache
             case "memory":
             {
                 this._cacheDriver = new MemoryCache;
+                break;
             }
             version(USE_MEMCACHE)
             {
             case "memcache":
             {
                 //this._cacheDriver = new MemcacheCache;
+                //break;
             }
             }
             version(USE_REDIS)
@@ -27,6 +29,7 @@ class Cache
             case "redis":
             {
                 //this._cacheDriver = new RedisCache;
+                //break;
             }
             }
             default:
