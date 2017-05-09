@@ -9,13 +9,13 @@ version(USE_MEMCACHE)
 {
 	class MemcacheCache : AbstractCache 
 	{
-		private int _expire;
-		override bool set(string key, ubyte[] value, int expire = 0)
+		private int _expire = 3600 * 24 * 365;
+		override bool set(string key, ubyte[] value, int expire)
 		{
 			return set(key,value.to!string,expire);
 		}
 
-		override bool set(string key,string value,int expire = 0)
+		override bool set(string key,string value,int expire)
 		{
 			return driverMemcached.Memcache.set(key,value,expire);	
 		}
