@@ -4,26 +4,21 @@ import std.conv : to;
 
 abstract class AbstractCache
 {
-    public
-    {
-        bool set(string key, ubyte[] value, int expire = 0);
+	//private int _expire;
+	bool set(string key, ubyte[] value, int expire = 0);
+	bool set(string key, ubyte[] value);
+	bool set(string key,string value,int expire = 0);
+	bool set(string key,string value);
 
-        ubyte[] get(string key);
+	string get(string key);
 
-        bool isset(string key);
+	//T get(T)(string key);
 
-        bool erase(string key);
+	bool isset(string key);
 
-        bool flush();
+	bool erase(string key);
 
-        void setExpire(int expire)
-        {
-            this._expire = expire;
-        }
-    }
+	bool flush();
 
-    protected
-    {
-        int _expire;
-    }
+	void setExpire(int expire);
 }
