@@ -205,6 +205,10 @@ class MemoryCache : AbstractCache
 			_counter = 0;
 		}
 	}
+
+	override void setDefaultHost(string host,ushort port)
+	{
+	}
 }
 
 unittest
