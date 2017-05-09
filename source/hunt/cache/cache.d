@@ -89,6 +89,11 @@ class Cache
 		return this._isInit;
 	}
 
+	AbstractCache driver()
+	{
+		return _cacheDriver;
+	}
+
 	private
 	{
 		bool _isInit = false;
@@ -144,7 +149,9 @@ unittest
 
 	__gshared Cache cache;
 	cache = new Cache();
+	writeln(cache.driver);
 	assert(cache.set("test","test") == true);	
+	writeln(cache.get("test"));
 	assert(cache.get("test") == "test");	
 
 	__gshared int i = 0;
