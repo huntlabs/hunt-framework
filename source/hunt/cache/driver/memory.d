@@ -2,7 +2,7 @@ module hunt.cache.driver.memory;
 
 import hunt.cache.driver.base;
 import hunt.utils.time;
-
+import std.stdio;
 import core.memory;
 import core.sync.rwmutex;
 class MemoryBuffer
@@ -73,10 +73,11 @@ class MemoryCache : AbstractCache
 		_mutex.writer.lock();
 		scope(exit) _mutex.writer.unlock();
 
-		if(exprie <= 0)exprie = 0;
+		if(exprie < 0)exprie = 0;
 
 		auto trunk = new MemoryBuffer(key,value,value.length);
-		trunk.exprie = (exprie == 0) ? 0 : (getCurrUnixStramp + exprie);
+		trunk.exprie = ((exprie == 0) ? 0 : (getCurrUnixStramp + exprie));
+		writeln(trunk.exprie,cast(string)(*trunk.ptr));
 
 		if(isset(key)){
 			trunkSize = trunkSize + value.length - map[key].length;
@@ -102,6 +103,10 @@ class MemoryCache : AbstractCache
 		return true;
 	}
 
+	override bool set(string key,ubyte[] value)
+	{
+		return set(key,value,_exprie);
+	}
 	override bool set(string key,string value)
 	{
 		return set(key,cast(ubyte[])value,_exprie);
@@ -110,39 +115,20 @@ class MemoryCache : AbstractCache
 	{
 		return set(key,cast(ubyte[])value,exprie);
 	}
-	override bool set(string key,ubyte[] value)
-	{
-		return set(key,value,_exprie);
-	}
 
-	/*
-	override T get(T)(string key)
+	T get(T)(string key)
 	{
-		_mutex.reader.lock();
-		scope(exit) _mutex.reader.unlock();
-
-		if(!isset(key))return null;
-		if(isExpire(key)){
-			_mutex.reader.unlock();
-			erase(key);
-			return null;
-		}
-		return cast(T)(*(map[key].ptr));
+		return cast(T)get(key);
 	}
-	*/
 
 	override string get(string key)
 	{
-		_mutex.reader.lock();
-		//scope(exit) _mutex.reader.unlock();
-
 		if(!isset(key))return null;
-		if(isExpire(key)){
-			_mutex.reader.unlock();
-			erase(key);
+		if(!isExpire(key)){
 			return null;
 		}
-		_mutex.reader.unlock();
+		_mutex.reader.lock();
+		scope(exit) _mutex.reader.unlock();
 		return cast(string)(*(map[key].ptr));
 	}
 
@@ -196,6 +182,7 @@ class MemoryCache : AbstractCache
 
 	private bool isExpire(string key)
 	{
+		writeln(map[key].exprie);
 		if(map[key].exprie == 0)return true;
 		if(map[key].exprie <= getCurrUnixStramp)
 		{
