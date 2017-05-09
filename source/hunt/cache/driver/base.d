@@ -21,4 +21,6 @@ abstract class AbstractCache
 	bool flush();
 
 	void setExpire(int expire);
+
+	void setDefaultHost(string host, ushort port);
 }

@@ -9,6 +9,8 @@ class Cache
 {
 	this(string driver = "memory")
 	{
+		import std.stdio;
+		writeln(__FUNCTION__,driver);
 		switch(driver)
 		{
 			case "memory":
@@ -84,11 +86,6 @@ class Cache
 		this._cacheDriver.setExpire(expire);
 	}
 
-	bool init()
-	{
-		return this._isInit;
-	}
-
 	AbstractCache driver()
 	{
 		return _cacheDriver;
@@ -96,7 +93,6 @@ class Cache
 
 	private
 	{
-		bool _isInit = false;
 		string _prefix;
 		AbstractCache _cacheDriver;
 	}
