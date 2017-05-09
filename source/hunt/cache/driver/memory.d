@@ -67,7 +67,7 @@ class MemoryCache : AbstractCache
 		return trunkSize;
 	}
 
-	override bool set(string key, ubyte[] value, int exprie = 0)
+	override bool set(string key, ubyte[] value, int exprie)
 	{
 		//if(isset(key))return false;
 		_mutex.writer.lock();

@@ -1,6 +1,8 @@
 module hunt.cache.driver.redis;
 
 import std.conv;
+import std.stdio;
+import std.experimental.logger;
 
 import hunt.cache.driver.base;
 public import driverRedis = hunt.storage.redis;
@@ -9,22 +11,21 @@ version(USE_REDIS)
 {
 	class RedisCache : AbstractCache 
 	{
-		private int _expire;
+		private int _expire = 3600 * 24 * 365;
 		override bool set(string key, ubyte[] value)
 		{
-			return set(key,value.to!string,_expire);
+			return set(key,value,_expire);
 		}
-		override bool set(string key, ubyte[] value, int expire = 3600)
+		override bool set(string key, ubyte[] value, int expire)
 		{
-			return set(key,value.to!string,expire);
+			return driverRedis.Redis.set(key,cast(string)value,expire);
 		}
 
 		override bool set(string key,string value)
 		{
-			//import std.stdio; writeln(__FUNCTION__,_expire);
-			return driverRedis.Redis.set(key,value,_expire);	
+			return set(key,value,_expire);	
 		}
-		override bool set(string key,string value,int expire = 3600)
+		override bool set(string key,string value,int expire)
 		{
 			return driverRedis.Redis.set(key,value,expire);	
 		}
