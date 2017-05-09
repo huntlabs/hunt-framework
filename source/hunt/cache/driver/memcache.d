@@ -32,7 +32,7 @@ version(USE_MEMCACHE)
 
 		override string get(string key)
 		{
-			return driverMemcached.Memcache.get(key);
+			return cast(string)driverMemcached.Memcache.get(key);
 		}
 
 		T get(T)(string key)
@@ -62,6 +62,10 @@ version(USE_MEMCACHE)
 		auto opDispatch(string name,T...)(T args)
 		{
 			return null;
+		}
+		override void setDefaultHost(string host, ushort port)
+		{
+			driverMemcached.setDefaultHost(host,port);
 		}
 	}
 }

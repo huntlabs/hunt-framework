@@ -14,16 +14,17 @@ version(USE_REDIS)
 		{
 			return set(key,value.to!string,_expire);
 		}
-		override bool set(string key, ubyte[] value, int expire = 0)
+		override bool set(string key, ubyte[] value, int expire = 3600)
 		{
 			return set(key,value.to!string,expire);
 		}
 
 		override bool set(string key,string value)
 		{
+			//import std.stdio; writeln(__FUNCTION__,_expire);
 			return driverRedis.Redis.set(key,value,_expire);	
 		}
-		override bool set(string key,string value,int expire = 0)
+		override bool set(string key,string value,int expire = 3600)
 		{
 			return driverRedis.Redis.set(key,value,expire);	
 		}
@@ -62,6 +63,10 @@ version(USE_REDIS)
 		{
 			auto result =  driverRedis.Redis.send(name,args);
 			return result;
+		}
+		override void setDefaultHost(string host , ushort port)
+		{
+			driverRedis.setDefaultHost(host,port);
 		}
 	}
 }
