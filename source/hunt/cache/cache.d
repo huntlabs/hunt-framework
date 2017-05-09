@@ -9,8 +9,6 @@ class Cache
 {
 	this(string driver = "memory")
 	{
-		import std.stdio;
-		writeln(__FUNCTION__,driver);
 		switch(driver)
 		{
 			case "memory":
@@ -41,14 +39,23 @@ class Cache
 		}
 	}
 
-	bool set(string key, ubyte[] value, int expire = 0)
+	bool set(string key, ubyte[] value, int expire)
 	{
 		return _cacheDriver.set(this._prefix ~ key, value, expire);
 	}
+	bool set(string key, ubyte[] value)
+	{
+		return set(key, value, expire);
+	}
 
-	bool set(string key, string value, int expire = 0)
+	bool set(string key, string value, int expire)
 	{
 		return _cacheDriver.set(this._prefix ~ key, cast(ubyte[])value, expire);
+	}
+
+	bool set(string key, string value)
+	{
+		return set(key,value, expire);
 	}
 
 	string get(string key)
@@ -83,7 +90,13 @@ class Cache
 
 	void setExpire(int expire)
 	{
+		this._expire = expire;
 		this._cacheDriver.setExpire(expire);
+	}
+
+	int expire()
+	{
+		return _expire;
 	}
 
 	AbstractCache driver()
@@ -94,6 +107,7 @@ class Cache
 	private
 	{
 		string _prefix;
+		int _expire;
 		AbstractCache _cacheDriver;
 	}
 }

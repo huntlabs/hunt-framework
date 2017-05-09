@@ -5,9 +5,9 @@ import std.conv : to;
 abstract class AbstractCache
 {
 	//private int _expire;
-	bool set(string key, ubyte[] value, int expire = 0);
+	bool set(string key, ubyte[] value, int expire );
 	bool set(string key, ubyte[] value);
-	bool set(string key,string value,int expire = 0);
+	bool set(string key,string value,int expire);
 	bool set(string key,string value);
 
 	string get(string key);
