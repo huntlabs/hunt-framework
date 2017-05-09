@@ -59,5 +59,9 @@ version(USE_MEMCACHE)
 		{
 			this._expire = expire;
 		}
+		auto opDispatch(string name,T...)(T args)
+		{
+			return null;
+		}
 	}
 }

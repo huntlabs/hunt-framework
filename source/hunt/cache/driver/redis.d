@@ -57,5 +57,11 @@ version(USE_REDIS)
 		{
 			this._expire = expire;
 		}
+
+		auto opDispatch(string name,T...)(T args)
+		{
+			auto result =  driverRedis.Redis.send(name,args);
+			return result;
+		}
 	}
 }
