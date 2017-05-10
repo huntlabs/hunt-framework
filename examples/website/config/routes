@@ -9,7 +9,7 @@
 *		/showint					index.showint
 *		/showbool					index.showbool
 GET		/public						staticDir:public
-GET		/getCache					index.getCache
-GET		/setCache					index.setCache
+GET		/get					index.getCache
+GET		/set					index.setCache
 
 
