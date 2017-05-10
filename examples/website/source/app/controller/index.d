@@ -81,7 +81,7 @@ class IndexController : Controller
 	@Action void getCache()
 	{
 		auto key = request.get("key");	
-		auto value = cast(string)cache.get(key);
+		auto value = cache.get(key);
 		auto response = this.request.createResponse();
         response.html("key : " ~ key ~ " value : " ~ value);
 	}

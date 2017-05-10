@@ -49,7 +49,7 @@ final class AppConfig
 	{
 		string storage = "memory";
 		string prefix = "huntcache_";
-		uint expire = 3600;
+		int expire = 3600;
 	}
 
 	struct HttpConf
@@ -94,7 +94,7 @@ final class AppConfig
 	struct RedisConf
 	{
 		bool enabled;
-		string host = "localhost";
+		string host = "127.0.0.1";
 		string password = "";
 		ushort database = 0;
 		ushort port = 6379;

@@ -249,7 +249,7 @@ HandleFunction getRouteFormList(string str)
 
 void addRouteList(string str, HandleFunction fun)
 {
-    trace("add str is .... ", str);
+    //trace("add str is .... ", str);
 	if(!_init)
 	{
 		import std.string : toLower;
