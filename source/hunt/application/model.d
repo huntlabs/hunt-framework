@@ -28,82 +28,82 @@ private __gshared string _g_tablePrefix;
 
 void initDB(string driver,string url, string[string]params = null, int maxPoolSize = 2, int timeToLive = 600, int waitTimeOut = 30)
 {
-	_g_driver = driver;
-	_g_url = url;
-	_g_params = params;
-	_g_maxPoolSize = maxPoolSize;
-	_g_timeToLive = timeToLive;
-	_g_waitTimeOut = waitTimeOut;
-	if(params !is null && "prefix" in params)
-	{
-		_g_schema.tablePrefix = params["prefix"];
-	}
+    _g_driver = driver;
+    _g_url = url;
+    _g_params = params;
+    _g_maxPoolSize = maxPoolSize;
+    _g_timeToLive = timeToLive;
+    _g_waitTimeOut = waitTimeOut;
+    if(params !is null && "prefix" in params)
+    {
+        _g_schema.tablePrefix = params["prefix"];
+    }
 }
 
 final class HuntEntity
 {
-	static HuntEntity _entity;
+    static HuntEntity _entity;
 
-	private EntityManagerFactory _entityManagerFactory;
-	private Dialect _dialect;
-	private DataSource _dataSource;
-	private Driver _driver;
+    private EntityManagerFactory _entityManagerFactory;
+    private Dialect _dialect;
+    private DataSource _dataSource;
+    private Driver _driver;
 
-	static @property getInstance()
-	{
-		if(_entity is null)
-		{
-			_entity = new HuntEntity();
-		}
+    static @property getInstance()
+    {
+        if(_entity is null)
+        {
+            _entity = new HuntEntity();
+        }
 
-		return _entity;
-	}
+        return _entity;
+    }
 
-	void initDB(string driver,string url, string[string]params = null, int maxPoolSize = 2, int timeToLive = 600, int waitTimeOut = 30)
-	{
-		import std.experimental.logger;
-		driver = toLower(driver);
+    void initDB(string driver,string url, string[string]params = null, int maxPoolSize = 2, int timeToLive = 600, int waitTimeOut = 30)
+    {
+        import std.experimental.logger;
+        driver = toLower(driver);
 
-		if(driver == "mysql")
-		{
-			_dialect = new MySQLDialect();
-			_driver = new MySQLDriver();
-		}
-		else if(driver == "postgresql")
-		{
-			_dialect = new PGSQLDialect();
-			_driver = new PGSQLDriver();
-		}
-		else if(driver == "")
-		{
-			_dialect = new SQLiteDialect();
-			_driver = new SQLITEDriver();
-		}
-		else
-		{
-			assert(false, "not support dialect " ~ driver);
-		}
+        if(driver == "mysql")
+        {
+            _dialect = new MySQLDialect();
+            _driver = new MySQLDriver();
+        }
+        else if(driver == "postgresql")
+        {
+            _dialect = new PGSQLDialect();
+            _driver = new PGSQLDriver();
+        }
+        else if(driver == "")
+        {
+            _dialect = new SQLiteDialect();
+            _driver = new SQLITEDriver();
+        }
+        else
+        {
+            assert(false, "not support dialect " ~ driver);
+        }
 
-		_dataSource = new ConnectionPoolDataSourceImpl(_driver, url, params, maxPoolSize, timeToLive, waitTimeOut);
-		_entityManagerFactory = new EntityManagerFactory(_g_schema, _dialect, _dataSource);
-	}
+        _dataSource = new ConnectionPoolDataSourceImpl(_driver, url, params, maxPoolSize, timeToLive, waitTimeOut);
+        _entityManagerFactory = new EntityManagerFactory(_g_schema, _dialect, _dataSource);
+    }
 
-	@property EntityManagerFactory entityManagerFactory()
-	{
-		if(_entityManagerFactory is null)
-		{
-			this.initDB(_g_driver,_g_url, _g_params, _g_maxPoolSize, _g_timeToLive, _g_waitTimeOut);
-		}
-		return _entityManagerFactory;
-	}
+    @property EntityManagerFactory entityManagerFactory()
+    {
+        if(_entityManagerFactory is null)
+        {
+            this.initDB(_g_driver,_g_url, _g_params, _g_maxPoolSize, _g_timeToLive, _g_waitTimeOut);
+        }
+        return _entityManagerFactory;
+    }
 }
 
 @property static  EntityManagerFactory entityManagerFactory()
 {
-	return HuntEntity.getInstance.entityManagerFactory;
+    return HuntEntity.getInstance.entityManagerFactory;
 }
 
 void registerEntity(T...)()
 {
-	_g_schema = new SchemaInfoImpl!(T);
+    _g_schema = new SchemaInfoImpl!(T);
 }
