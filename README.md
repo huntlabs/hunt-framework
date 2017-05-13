@@ -5,7 +5,7 @@ Hunt is a high-level [dlang](http://dlang.org/) Web framework that encourages ra
 ```bash
 git clone https://github.com/huntlabs/hunt-skeleton.git myproject
 cd myproject
-dub run
+dub run -v
 ```
 
 Open the URL with the browser:
@@ -23,8 +23,7 @@ config/routes
 GET     /               index.index
 GET     /users          user.list
 POST    /user/login     user.login
-GET     /user/show      user.info
-*		/public			staticDir:public
+*       /public         staticDir:public
 
 ```
 
