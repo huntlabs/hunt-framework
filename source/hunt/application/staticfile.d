@@ -20,49 +20,49 @@ class StaticfileController : Controller
     @Action
     void doStaticFile()
     {
-    	if (request.route.staticFilePath == string.init)
-    	{
-    		response.do404();
-    		
-    		return;
-    	}
-
-    	string staticFilename = mendPath(request.route.staticFilePath);
-
-		if ((staticFilename == string.init) || (!std.file.exists(staticFilename)))
+        if (request.route.staticFilePath == string.init)
         {
-			response.do404();
-			
-			return;
-		}
+            response.do404();
+            
+            return;
+        }
 
-		FileInfo fi = makeFileInfo(staticFilename);
-		
-		if (fi.isDirectory)
-		{
-			response.do404();
-			
-			return;
-		}
+        string staticFilename = mendPath(request.route.staticFilePath);
 
-		auto lastModified = toRFC822DateTimeString(fi.timeModified.toUTC());
-		auto etag = "\"" ~ hexDigest!MD5(staticFilename ~ ":" ~ lastModified ~ ":" ~ to!string(fi.size)).idup ~ "\"";
-	
-		response.setHeader(HTTPHeaderCode.LAST_MODIFIED, lastModified);
-		response.setHeader(HTTPHeaderCode.ETAG, etag);
+        if ((staticFilename == string.init) || (!std.file.exists(staticFilename)))
+        {
+            response.do404();
+            
+            return;
+        }
 
-		if (Config.app.application.staticFileCacheMinutes > 0) {
-			auto expireTime = Clock.currTime(UTC()) + dur!"minutes"(Config.app.application.staticFileCacheMinutes);
-			response.setHeader(HTTPHeaderCode.EXPIRES, toRFC822DateTimeString(expireTime));
-			response.setHeader(HTTPHeaderCode.CACHE_CONTROL, "max-age=" ~ to!string(Config.app.application.staticFileCacheMinutes * 60));
-		}
+        FileInfo fi = makeFileInfo(staticFilename);
+        
+        if (fi.isDirectory)
+        {
+            response.do404();
+            
+            return;
+        }
 
-		if ((request.headerExists(HTTPHeaderCode.IF_MODIFIED_SINCE) && (request.header(HTTPHeaderCode.IF_MODIFIED_SINCE) == lastModified)) ||
-			(request.headerExists(HTTPHeaderCode.IF_NONE_MATCH) && (request.header(HTTPHeaderCode.IF_NONE_MATCH) == etag)))
-		{
-				response.setHttpStatusCode(304);	// HTTPStatus: NotModified
+        auto lastModified = toRFC822DateTimeString(fi.timeModified.toUTC());
+        auto etag = "\"" ~ hexDigest!MD5(staticFilename ~ ":" ~ lastModified ~ ":" ~ to!string(fi.size)).idup ~ "\"";
+    
+        response.setHeader(HTTPHeaderCode.LAST_MODIFIED, lastModified);
+        response.setHeader(HTTPHeaderCode.ETAG, etag);
 
-				return;
+        if (Config.app.application.staticFileCacheMinutes > 0) {
+            auto expireTime = Clock.currTime(UTC()) + dur!"minutes"(Config.app.application.staticFileCacheMinutes);
+            response.setHeader(HTTPHeaderCode.EXPIRES, toRFC822DateTimeString(expireTime));
+            response.setHeader(HTTPHeaderCode.CACHE_CONTROL, "max-age=" ~ to!string(Config.app.application.staticFileCacheMinutes * 60));
+        }
+
+        if ((request.headerExists(HTTPHeaderCode.IF_MODIFIED_SINCE) && (request.header(HTTPHeaderCode.IF_MODIFIED_SINCE) == lastModified)) ||
+            (request.headerExists(HTTPHeaderCode.IF_NONE_MATCH) && (request.header(HTTPHeaderCode.IF_NONE_MATCH) == etag)))
+        {
+                response.setHttpStatusCode(304);    // HTTPStatus: NotModified
+
+                return;
 		}
 	
 		auto mimetype = getMimeContentTypeForFile(staticFilename);
