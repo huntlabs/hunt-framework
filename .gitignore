@@ -24,3 +24,5 @@ dub.userprefs
 .project
 libhunt.a
 hunt-test-default
+.settings
+.vscode
