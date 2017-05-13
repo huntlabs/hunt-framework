@@ -51,7 +51,8 @@ class StaticfileController : Controller
         response.setHeader(HTTPHeaderCode.LAST_MODIFIED, lastModified);
         response.setHeader(HTTPHeaderCode.ETAG, etag);
 
-        if (Config.app.application.staticFileCacheMinutes > 0) {
+        if (Config.app.application.staticFileCacheMinutes > 0)
+		{
             auto expireTime = Clock.currTime(UTC()) + dur!"minutes"(Config.app.application.staticFileCacheMinutes);
             response.setHeader(HTTPHeaderCode.EXPIRES, toRFC822DateTimeString(expireTime));
             response.setHeader(HTTPHeaderCode.CACHE_CONTROL, "max-age=" ~ to!string(Config.app.application.staticFileCacheMinutes * 60));
