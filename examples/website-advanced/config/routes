@@ -8,6 +8,3 @@ POST		/show		index.show
 *			/index		index.index
 *			/showint	index.showint
 *			/showbool	index.showbool
-
-GET			/public		staticDir:public
-# access: http://127.0.0.1:8080/public/1.html
