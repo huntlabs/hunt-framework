@@ -61,7 +61,7 @@ class StaticfileController : Controller
         if ((request.headerExists(HTTPHeaderCode.IF_MODIFIED_SINCE) && (request.header(HTTPHeaderCode.IF_MODIFIED_SINCE) == lastModified)) ||
             (request.headerExists(HTTPHeaderCode.IF_NONE_MATCH) && (request.header(HTTPHeaderCode.IF_NONE_MATCH) == etag)))
         {
-                response.setHttpStatusCode(304);    // HTTPStatus: NotModified
+                response.setHttpStatusCode(HTTPCodes.NOT_MODIFIED);
 
                 return;
 		}
@@ -134,7 +134,7 @@ class StaticfileController : Controller
 			
 			response.setHeader(HTTPHeaderCode.CONTENT_LENGTH, to!string(rangeEnd - rangeStart + 1));
 			response.setHeader(HTTPHeaderCode.CONTENT_RANGE, "bytes %s-%s/%s".format(rangeStart < rangeEnd ? rangeStart : rangeEnd, rangeEnd, fi.size));
-			response.setHttpStatusCode(206);		// HTTPStatus: partialContent
+			response.setHttpStatusCode(HTTPCodes.PARTIAL_CONTENT);
 		}
 		else
 		{
