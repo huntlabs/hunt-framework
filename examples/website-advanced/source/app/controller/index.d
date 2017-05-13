@@ -20,12 +20,13 @@ class IndexController : Controller
     @Action
     void index()
     {
-        response.html("Welcome to this example website.");
+	cache.set("a", "A");
+    	    response.html("Welcome to this example website." ~ cache.get("a"));
     }
 
     @Action
     void show()
 	{
-        response.html("this is show page.");
+        response.html("this is show page." ~ cache.get("a"));
     }
 }
