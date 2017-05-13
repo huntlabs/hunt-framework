@@ -3,7 +3,7 @@ Hunt is a high-level [dlang](http://dlang.org/) Web framework that encourages ra
 
 ## Create project
 ```bash
-git clone https://github.com/putaolabs/hunt-skeleton.git myproject
+git clone https://github.com/huntlabs/hunt-skeleton.git myproject
 cd myproject
 dub run
 ```
