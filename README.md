@@ -24,6 +24,7 @@ GET     /               index.index
 GET     /users          user.list
 POST    /user/login     user.login
 GET     /user/show      user.info
+*		/public			staticDir:public
 
 ```
 
