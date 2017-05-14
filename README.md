@@ -1,5 +1,5 @@
 ## Hunt framework
-Hunt is a high-level [dlang](http://dlang.org/) Web framework that encourages rapid development and clean, pragmatic design. It lets you build high-performance Web applications quickly and easily.
+Hunt framework is a high-level [D Programming Language](http://dlang.org/) Web framework that encourages rapid development and clean, pragmatic design. It lets you build high-performance Web applications quickly and easily.
 
 ## Create project
 ```bash
@@ -9,7 +9,7 @@ dub run -v
 ```
 
 Open the URL with the browser:
-```html
+```bash
 http://localhost:8080/
 ```
 
@@ -27,3 +27,11 @@ POST    /user/login     user.login
 
 ```
 
+## Component based
+1. Routing
+2. Caching
+3. Middleware
+4. Configretion
+5. Validation
+6. ORM
+7. Template
