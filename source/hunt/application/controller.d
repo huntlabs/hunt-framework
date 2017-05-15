@@ -231,6 +231,8 @@ string  __creteRouteMap(T, string moduleName)()
 void callHandler(T, string fun)(Request req) if(is(T == class) || is(T == struct) && hasMember!(T,"__CALLACTION__"))
 {
     T handler = new T();
+	import core.memory;
+	scope(exit){if(!handler.isAsync){handler.destroy(); GC.free(cast(void *)handler);}}
     if(!handler.__CALLACTION__(fun,req))
     {
         Response res;
@@ -239,8 +241,6 @@ void callHandler(T, string fun)(Request req) if(is(T == class) || is(T == struct
         if(res)
             res.done();
     }
-	import core.memory;
-	if(!handler.isAsync)GC.free(&handler);
 }
 
 HandleFunction getRouteFormList(string str)
