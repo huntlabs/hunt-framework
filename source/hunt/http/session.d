@@ -1,14 +1,3 @@
-/*
- * Hunt - a framework for web and console application based on Collie using Dlang development
- *
- * Copyright (C) 2015-2017  Shanghai Putao Technology Co., Ltd
- *
- * Developer: HuntLabs
- *
- * Licensed under the Apache-2.0 License.
- *
- */
-
 module hunt.http.session;
 import hunt.cache.driver;
 import hunt.utils.time;
@@ -69,7 +58,7 @@ class Session
 						Clock.currTime().toISOExtString, uniform(long.min, long.max), processor())));
 
 		auto sstr = toLower(cast(string)(str[]));
-		
+
 		JSONValue json;
 		json[sessionName] = sstr;
 		json["_time"] = getCurrUnixStramp; 
@@ -80,17 +69,17 @@ class Session
 	}
 
 	/*
-	void setId(string id)
-	{
-		this._sessionId = id;
-	}
-	string getId()
-	{
-		if(!_sessionId.length)
-			_sessionId = generateSessionId();
-		return _sessionId;
-	}
-	*/
+	   void setId(string id)
+	   {
+	   this._sessionId = id;
+	   }
+	   string getId()
+	   {
+	   if(!_sessionId.length)
+	   _sessionId = generateSessionId();
+	   return _sessionId;
+	   }
+	 */
 
 	bool set(string key, ubyte[] value, int expire)
 	{
