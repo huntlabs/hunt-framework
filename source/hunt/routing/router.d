@@ -18,6 +18,9 @@ import hunt.routing.config;
 
 import hunt.application.controller;
 
+import std.file;
+import std.path;
+
 class Router
 {
     public
@@ -25,6 +28,7 @@ class Router
         this()
         {
             this._defaultGroup = new RouteGroup(DEFAULT_ROUTE_GROUP);
+            this._configPath = dirName(thisExePath) ~ "/config/";
         }
 
         void setConfigPath(string path)
