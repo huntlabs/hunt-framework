@@ -10,187 +10,177 @@
  */
 
 module hunt.http.session;
+import hunt.cache.driver;
+import hunt.utils.time;
 
-import hunt.http.sessionstorage;
+import std.json;
+import std.conv;
+import std.digest.sha;
+import std.format;
+import std.datetime;
+import std.random;
+import core.cpuid;
+import std.string;
+import std.experimental.logger;
 
-
-
-/**
-* Interface for the session.
-*
-* @author donglei xiaosan@outlook.com
-*/
-interface SessionInterface
+class Session
 {
-    /**
-	* Returns the session ID.
-	*
-	* @return string The session ID.
-	*
-	* @api
-	*/
-    public string getId();
-    /**
-	* Sets the session ID.
-	*
-	* @param string $id
-	*
-	* @api
-	*/
-    public void setId(string id);
-
-    public void init();
-
-	@property string[string] sessions();
-
-    /// Gets a typed field from the session.
-	string get(string key, lazy string def_value = string.init);
-    ///Sets a typed field to the session.
-    void set(string key, string value);
-    /// remove a type field from the session.
-    void remove(string key);
-    ///Queries the session for the existence of a particular key.
-    bool has(string key);
-
-    bool del();
-
-}
-
-/**
-* Represents a session.
-*
-* @author donglei xiaosan@outlook.com
-*
-*/
-class Session : SessionInterface
-{
-
-    protected
-    {
-        SessionStorageInterface storge;
-    }
-
-    this(string sessionId,SessionStorageInterface storg = newStorage())
-    {
-        this(storg);
-        setId(sessionId);
-    }
-
-    this(SessionStorageInterface storg = newStorage())
-    {
-		storge = storg;
-    }
-
-    /**
-	* Returns the session ID.
-	*
-	* @return string The session ID.
-	*
-	* @api
-	*/
-    public string getId()
-    {
-        return this.storge.getId();
-    }
-
-    public void init()
-    {
-        this.storge.init();
-    }
-
-    public bool del()
-    {
-        return this.storge.del();
-    }
-    /**
-	* Sets the session ID.
-	*
-	* @param string $id
-	*
-	* @api
-	*/
-    public void setId(string id)
-    {
-        this.storge.setId(id);
-        version (USE_MemcacheSessionStorage)
-        {
-        }
-
-		version(USE_FileSessionStorage)
-        {
-            if (this.storge.isExpired())
-            {
-                this.storge.setId(this.storge.generateSessionId());
-            }
-        }
-    }
-
-	@property string[string] sessions()
+	this(string driver = "memory")
 	{
-		return storge.sessions();
+		this._driverName = driver;
+		switch(driver)
+		{
+			case "memory":
+				{
+					this._cacheDriver = new MemoryCache;
+					break;
+				}
+			case "file":
+				{
+					this._cacheDriver = new FileCache;
+					break;
+				}
+				version(USE_MEMCACHE)
+				{
+					case "memcache":
+						{
+							this._cacheDriver = new MemcacheCache;
+							break;
+						}
+				}
+				version(USE_REDIS)
+				{
+					case "redis":
+						{
+							this._cacheDriver = new RedisCache;
+							break;
+						}
+				}
+			default:
+				{
+					new Exception("Can't support cache driver: ", driver);
+				}
+		}
 	}
-	
-    /// Gets a typed field from the session.
-    string get(string key, lazy string def_value = string.init)
-    {
-        string tmp = this.storge.get(key);
-        if (tmp is string.init)
-        {
-            return def_value;
-        }
-		return tmp;
-    }
-    ///Sets a typed field to the session.
-    void set(string key, string value)
-    {
-		import std.conv:to;
-        this.storge.set(key, value);
-    }
-    
-    /// remove a type field from the session.
-    void remove(string key)
-    {
-    	this.storge.remove(key);
-    }
-    
-    ///Queries the session for the existence of a particular key.
-    bool has(string key)
-    {
-        string value = this.storge.get(key);
-        if (value == string.init)
-            return false;
-        return true;
-    }
 
-    @property SessionStorageInterface SessionStorage()
-    {
-        return storge;
-    }
+	string generateSessionId(string sessionName = "hunt_session")
+	{
+		auto str = toHexString(sha1Of(format("%s--%s--%s",
+						Clock.currTime().toISOExtString, uniform(long.min, long.max), processor())));
+
+		auto sstr = toLower(cast(string)(str[]));
+		
+		JSONValue json;
+		json[sessionName] = sstr;
+		json["_time"] = getCurrUnixStramp; 
+
+		set(sstr,json.toString,_expire);
+
+		return sstr;
+	}
+
+	/*
+	void setId(string id)
+	{
+		this._sessionId = id;
+	}
+	string getId()
+	{
+		if(!_sessionId.length)
+			_sessionId = generateSessionId();
+		return _sessionId;
+	}
+	*/
+
+	bool set(string key, ubyte[] value, int expire)
+	{
+		return _cacheDriver.set(getRealAddr(key), value, expire);
+	}
+
+	bool set(string key, ubyte[] value)
+	{
+		return set(key, value, expire);
+	}
+
+	bool set(string key, string value, int expire)
+	{
+		return _cacheDriver.set(getRealAddr(key), cast(ubyte[])value, expire);
+	}
+
+	bool set(string key, string value)
+	{
+		return set(key,value, expire);
+	}
+
+	string get(string key)
+	{
+		return cast(string)_cacheDriver.get(getRealAddr(key));
+	}
+
+	T get(T)(string key)
+	{
+		return cast(T)get(key);
+	}
+
+	bool isset(string key)
+	{
+		return _cacheDriver.isset(getRealAddr(key));
+	}
+
+	alias del = erase;
+	alias remove = erase;
+	bool erase(string key)
+	{
+		return _cacheDriver.erase(getRealAddr(key));
+	}
+
+	bool flush()
+	{
+		return _cacheDriver.flush();
+	}
+
+	void setPrefix(string prefix)
+	{
+		this._prefix = prefix;
+	}
+
+	void setPath(string path)
+	{
+		this._path = path;
+	}
+
+	void setExpire(int expire)
+	{
+		this._expire = expire;
+		this._cacheDriver.setExpire(expire);
+	}
+
+	string getRealAddr(string key)
+	{
+		if(_driverName == "file")
+		{
+			return _path ~ _prefix ~ key;
+		}
+		return _prefix ~ key;
+	}
+	int expire()
+	{
+		return _expire;
+	}
+
+	AbstractCache driver()
+	{
+		return _cacheDriver;
+	}
+
+	private
+	{
+		string _driverName;
+		string _prefix;
+		string _sessionId;
+		string _path;
+		string _name;
+		int _expire;
+		AbstractCache _cacheDriver;
+	}
 }
-
-/*
-unittest
-{
-	import std.conv;
-	//test no session id
-	Session session = new Session();
-	session.set("test", "testvalue");
-	//assert(session.get("test") == "testvalue");
-	session.set("uid", to!string(123455));
-	//assert(to!int(session.get("uid")) == 123455);
-	import std.experimental.logger;
-	log("test no session id:", session.getId);
-	
-}
-
-
-unittest
-{
-	Session session = new Session("123456");
-	session.set("test", "testvalue");
-	//assert(session.get("test") == "testvalue");
-	//assert(session.getId() == "123456");
-	import std.experimental.logger;
-	log("test session with id:", session.getId());
-}
-*/

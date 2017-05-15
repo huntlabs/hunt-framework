@@ -53,26 +53,22 @@ version(USE_MEMCACHE)
 
         override bool isset(string key)
         {
-            return false;    
+            return cast(bool)(get(key).length);    
         }
 
         override bool erase(string key)
         {
-            return false;
+            return driverMemcached.Memcache.del(key);
         }
 
         override bool flush()
         {
-            return false;
+            return driverMemcached.Memcache.flush();
         }
 
         override void setExpire(int expire)
         {
             this._expire = expire;
-        }
-        auto opDispatch(string name,T...)(T args)
-        {
-            return null;
         }
         override void setDefaultHost(string host, ushort port)
         {
