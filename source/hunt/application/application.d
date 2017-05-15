@@ -167,14 +167,26 @@ after  =  The PipelineFactory that create the middleware list for the router rul
     private void initCache(AppConfig.CacheConf config)
     {
         _cache = new Cache(config.storage);
-        cache.setPrefix(config.prefix);
-        cache.setExpire(config.expire);
+        _cache.setPrefix(config.prefix);
+        _cache.setExpire(config.expire);
+    }
+    private void initSession(AppConfig.SessionConf config)
+    {
+        _session = new Session(config.storage);
+        _session.setPrefix(config.prefix);
+        _session.setPath(config.path);
+        _session.setExpire(config.expire);
     }
 
     Cache cache()
     {
         return _cache;
     }
+
+	Session session()
+	{
+		return _session;
+	}
 
     /**
       Start the HTTPServer server , and block current thread.
@@ -187,6 +199,7 @@ after  =  The PipelineFactory that create the middleware list for the router rul
         setRedis(Config.app.redis);
         setMemcache(Config.app.memcache);
         initCache(Config.app.cache);
+		initSession(Config.app.session);
 
         writeln("please open http://",addr.toString,"/");
 
@@ -385,6 +398,7 @@ after  =  The PipelineFactory that create the middleware list for the router rul
     CreatorBuffer _cbuffer;
     Dispatcher _dispatcher;
     __gshared Cache _cache;
+	__gshared Session _session;
 
     version(NO_TASKPOOL)
     {

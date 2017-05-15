@@ -3,6 +3,7 @@
 #
 
 
+*		/							index.show
 *		/show						index.show
 *		/list						index.list
 *		/index						index.index

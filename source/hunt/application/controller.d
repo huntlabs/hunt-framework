@@ -40,14 +40,13 @@ abstract class Controller
         ///called before all actions
         IMiddleware[] middlewares;
         View _view;
-        Cache _cache;
     }
-
+	/*
     final @property session()
     {
         return request.getSession();
     }
-    
+    */
     final @property response()
     {
         return request.createResponse();
@@ -92,12 +91,12 @@ abstract class Controller
 
     @property Cache cache()
     {
-        if(_cache is null)
-        {
-            _cache = Application.getInstance().cache();
-        }
-        
-        return _cache;
+		return Application.getInstance().cache();
+    }
+
+    @property Session session()
+    {
+        return Application.getInstance().session();
     }
 
     void render(string filename = null)()
