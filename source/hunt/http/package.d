@@ -16,7 +16,6 @@ public import hunt.http.request;
 public import hunt.http.response;
 public import hunt.http.cookie;
 public import hunt.http.session;
-public import hunt.http.sessionstorage;
 public import collie.codec.http;
 public import collie.codec.http.server;
 
