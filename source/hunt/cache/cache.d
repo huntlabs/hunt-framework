@@ -27,6 +27,11 @@ class Cache
 				this._cacheDriver = new MemoryCache;
 				break;
 			}
+			case "file":
+			{
+				this._cacheDriver = new FileCache;
+				break;
+			}
 			version(USE_MEMCACHE)
 			{
 				case "memcache":

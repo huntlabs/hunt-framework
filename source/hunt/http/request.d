@@ -21,11 +21,12 @@ import collie.utils.memory;
 
 import hunt.http.response;
 import hunt.http.session;
-import hunt.http.sessionstorage;
 import hunt.http.cookie;
 import hunt.http.exception;
 import hunt.http.nullbuffer;
 import hunt.routing.route;
+import hunt.utils.time;
+import hunt.application.application;
 
 import std.string;
 import std.conv;
@@ -139,30 +140,24 @@ final class Request : RequestHandler
 		_mate[key] = value;
 	}
 
-	@property string[string] sessions(string sessionName = "hunt_session", SessionStorageInterface t =  newStorage())
+	@property string[string] sessions()
 	{
-		return this.getSession(sessionName, t).sessions();
-	}
-	
-	SessionInterface getSession( S = Session)(string sessionName = "hunt_session", SessionStorageInterface t =  newStorage()) //if()
-	{
-		auto cookie = getCookie(sessionName);
-		if (cookie is null)
-		{
-			S session = new S(t);
-			string sessionId = session.getId();
-			this.createResponse().setCookie(sessionName, sessionId);
-			
-			return session;
-		}
-		
-		return new S(cookie.value, t);
+		return null;
 	}
 
-	/// remove a type field from the session.
-	void removeSession(string key, string sessionName = "hunt_session", SessionStorageInterface t =  newStorage())
+	void getSession(string sessionName = "hunt_session")
 	{
-		this.getSession(sessionName, t).remove(key);
+		auto cookie = getCookie(sessionName);
+		if(cookie is null)
+		{
+			string sessionId = Application.getInstance().session().generateSessionId(sessionName);
+			createResponse().setCookie(sessionName, sessionId);
+		}
+	}
+
+	void removeSession(string sessionName)
+	{
+        Application.getInstance().session().erase(sessionName);
 	}
 
 	@property Cookie[string] cookies()

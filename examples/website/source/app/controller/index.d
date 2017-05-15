@@ -39,6 +39,7 @@ class IndexController : Controller
     @Middleware(AfterMiddleware.stringof)
     void show()
 	{ 
+		this.request.getSession();
 		auto response = this.request.createResponse();
         response.html("hello world<br/>")
         //.setHeader("content-type","text/html;charset=UTF-8")
