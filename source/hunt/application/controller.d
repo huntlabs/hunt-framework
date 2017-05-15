@@ -120,6 +120,11 @@ abstract class Controller
         }
         return true;
     }
+
+	@property bool isAsync()
+	{
+		return true;
+	}
 }
 
 mixin template MakeController(string moduleName = __MODULE__)
@@ -234,6 +239,8 @@ void callHandler(T, string fun)(Request req) if(is(T == class) || is(T == struct
         if(res)
             res.done();
     }
+	import core.memory;
+	if(!handler.isAsync)GC.free(&handler);
 }
 
 HandleFunction getRouteFormList(string str)
