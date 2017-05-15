@@ -19,6 +19,7 @@ import std.string;
 
 import hunt.text.configuration;
 import hunt.application.application : WebSocketFactory;
+import hunt.application.application;
 
 import collie.codec.http.server.httpserveroptions;
 
@@ -40,8 +41,9 @@ final class AppConfig
 
     struct SessionConf
     {
-        string storage = "memcache";
+        string storage = "file";
         string prefix = "huntsession_";
+		string path = "./storage/session/";
         uint expire = 3600;
     }
 
@@ -169,7 +171,6 @@ final class AppConfig
         AppConfig app = new AppConfig();
 
         app._config = conf;
-
         
         collectException(conf.application.name.value,    app.application.name);
         collectException(conf.application.baseUrl.value,    app.application.baseUrl);
@@ -182,6 +183,7 @@ final class AppConfig
 
         collectException(conf.session.storage.value(),    app.session.storage);
         collectException(conf.session.prefix.value(),    app.session.prefix);
+        collectException(conf.session.path.value(),    app.session.path);
         collectException(conf.session.expire.as!uint(),     app.session.expire);
 
         collectException(conf.cache.storage.value(),    app.cache.storage);
