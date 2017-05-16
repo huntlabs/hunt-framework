@@ -68,29 +68,6 @@ class Session
 		return sstr;
 	}
 
-	/*
-	   void setId(string id)
-	   {
-	   this._sessionId = id;
-	   }
-	   string getId()
-	   {
-	   if(!_sessionId.length)
-	   _sessionId = generateSessionId();
-	   return _sessionId;
-	   }
-	 */
-
-	bool set(string key, ubyte[] value, int expire)
-	{
-		return _cacheDriver.set(getRealAddr(key), value, expire);
-	}
-
-	bool set(string key, ubyte[] value)
-	{
-		return set(key, value, expire);
-	}
-
 	bool set(string key, string value, int expire)
 	{
 		return _cacheDriver.set(getRealAddr(key), cast(ubyte[])value, expire);
@@ -98,17 +75,20 @@ class Session
 
 	bool set(string key, string value)
 	{
-		return set(key,value, expire);
+		return set(key,value,_expire);
 	}
 
 	string get(string key)
 	{
-		return cast(string)_cacheDriver.get(getRealAddr(key));
-	}
-
-	T get(T)(string key)
-	{
-		return cast(T)get(key);
+		string str = cast(string)_cacheDriver.get(getRealAddr(key));
+		if("_driverName" == "file"){
+			JSONValue js = parseJSON(str);
+			if(js["_time"].integer <= getCurrUnixStramp){
+				erase(key);
+				return null;
+			}
+		}
+		return str;
 	}
 
 	bool isset(string key)

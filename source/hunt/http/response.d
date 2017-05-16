@@ -122,6 +122,14 @@ final class Response : ResponseBuilder
         return this;
     }
 
+	/**
+	 * delete Cookie
+	 */
+	auto delCookie(string name)
+	{
+		setCookie(name,null,0);
+	}
+
     pragma(inline) final void done()
     {
         if(_isDone) return;
