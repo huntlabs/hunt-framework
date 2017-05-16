@@ -140,24 +140,23 @@ final class Request : RequestHandler
 		_mate[key] = value;
 	}
 
-	@property string[string] sessions()
+	string getSession(string sessionName = "hunt_session")
 	{
-		return null;
-	}
-
-	void getSession(string sessionName = "hunt_session")
-	{
-		auto cookie = getCookie(sessionName);
-		if(cookie is null)
+		auto sessionId = getCookieValue(sessionName);
+		if(!sessionId.length)
 		{
-			string sessionId = Application.getInstance().session().generateSessionId(sessionName);
+			sessionId = Application.getInstance().session().generateSessionId(sessionName);
 			createResponse().setCookie(sessionName, sessionId);
 		}
+
+		return sessionId; 
 	}
 
-	void removeSession(string sessionName)
+	void removeSession(string sessionName = "hunt_session")
 	{
-        Application.getInstance().session().erase(sessionName);
+		string sessionId = getCookieValue(sessionName);
+		createResponse().delCookie(sessionName);
+        Application.getInstance().session().erase(sessionId);
 	}
 
 	@property Cookie[string] cookies()
