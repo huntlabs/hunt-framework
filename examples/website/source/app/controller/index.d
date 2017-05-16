@@ -38,10 +38,10 @@ class IndexController : Controller
     @Middleware(BeforeMiddleware.stringof)
     @Middleware(AfterMiddleware.stringof)
     void show()
-	{ 
-		this.request.getSession();
+	{	
+		auto sessionId = request.getSession();
 		auto response = this.request.createResponse();
-        response.html("hello world<br/>")
+        response.html(sessionId ~ "hello world<br/>")
         //.setHeader("content-type","text/html;charset=UTF-8")
         .setCookie("name", "value", 10000)
         .setCookie("name1", "value", 10000, "/path")

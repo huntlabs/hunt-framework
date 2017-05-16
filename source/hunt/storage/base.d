@@ -1,19 +1,8 @@
-/*
- * Hunt - a framework for web and console application based on Collie using Dlang development
- *
- * Copyright (C) 2015-2017  Shanghai Putao Technology Co., Ltd
- *
- * Developer: HuntLabs
- *
- * Licensed under the Apache-2.0 License.
- *
- */
-
-module hunt.cache.driver.base;
+module hunt.storage.base;
 
 import std.conv : to;
 
-abstract class AbstractCache
+interface StorageInterface
 {
     //private int _expire;
     bool set(string key, ubyte[] value, int expire );

@@ -102,7 +102,6 @@ final class Request : RequestHandler
 		return _headers.getHeaders.forEachValueOfHeader(code,func);
 	}
 
-
 	@property string clientIp()
 	{
 		string XFF = header("X-Forwarded-For");
