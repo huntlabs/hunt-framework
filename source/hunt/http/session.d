@@ -16,6 +16,11 @@ class Session
 {
 	this(string driver = "memory")
 	{
+		if (driver == string.init)
+		{
+			driver = "memory";
+		}
+		
 		this._driverName = driver;
 		switch(driver)
 		{
