@@ -1,5 +1,6 @@
 module hunt.http.session;
-import hunt.cache.driver;
+
+import hunt.storage;
 import hunt.utils.time;
 
 import std.json;
@@ -14,26 +15,27 @@ import std.experimental.logger;
 
 class Session
 {
-	this(string driver = "memory")
+	this(string driver = "file")
 	{
+		if(driver == string.init)driver = "file";
 		this._driverName = driver;
 		switch(driver)
 		{
 			case "memory":
 				{
-					this._cacheDriver = new MemoryCache;
+					this._sessionStorage = new Memory;
 					break;
 				}
 			case "file":
 				{
-					this._cacheDriver = new FileCache;
+					this._sessionStorage = new File;
 					break;
 				}
 				version(USE_MEMCACHE)
 				{
 					case "memcache":
 						{
-							this._cacheDriver = new MemcacheCache;
+							this._sessionStorage = new Memcache;
 							break;
 						}
 				}
@@ -41,7 +43,7 @@ class Session
 				{
 					case "redis":
 						{
-							this._cacheDriver = new RedisCache;
+							this._sessionStorage = new Redis;
 							break;
 						}
 				}
@@ -70,7 +72,7 @@ class Session
 
 	bool set(string key, string value, int expire)
 	{
-		return _cacheDriver.set(getRealAddr(key), cast(ubyte[])value, expire);
+		return _sessionStorage.set(getRealAddr(key), cast(ubyte[])value, expire);
 	}
 
 	bool set(string key, string value)
@@ -80,7 +82,7 @@ class Session
 
 	string get(string key)
 	{
-		string str = cast(string)_cacheDriver.get(getRealAddr(key));
+		string str = cast(string)_sessionStorage.get(getRealAddr(key));
 		if("_driverName" == "file"){
 			JSONValue js = parseJSON(str);
 			if(js["_time"].integer <= getCurrUnixStramp){
@@ -93,19 +95,19 @@ class Session
 
 	bool isset(string key)
 	{
-		return _cacheDriver.isset(getRealAddr(key));
+		return _sessionStorage.isset(getRealAddr(key));
 	}
 
 	alias del = erase;
 	alias remove = erase;
 	bool erase(string key)
 	{
-		return _cacheDriver.erase(getRealAddr(key));
+		return _sessionStorage.erase(getRealAddr(key));
 	}
 
 	bool flush()
 	{
-		return _cacheDriver.flush();
+		return _sessionStorage.flush();
 	}
 
 	void setPrefix(string prefix)
@@ -121,7 +123,7 @@ class Session
 	void setExpire(int expire)
 	{
 		this._expire = expire;
-		this._cacheDriver.setExpire(expire);
+		this._sessionStorage.setExpire(expire);
 	}
 
 	string getRealAddr(string key)
@@ -137,9 +139,9 @@ class Session
 		return _expire;
 	}
 
-	AbstractCache driver()
+	StorageInterface driver()
 	{
-		return _cacheDriver;
+		return _sessionStorage;
 	}
 
 	private
@@ -150,6 +152,6 @@ class Session
 		string _path;
 		string _name;
 		int _expire;
-		AbstractCache _cacheDriver;
+		StorageInterface _sessionStorage;
 	}
 }

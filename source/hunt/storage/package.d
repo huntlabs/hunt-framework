@@ -1,5 +1,5 @@
 module hunt.storage;
 
-public import hunt.storage.memcached;
-public import hunt.storage.redis;
-public import hunt.storage.filestorage;
+public import hunt.storage.driver;
+public import hunt.storage.impl;
+public import hunt.storage.base;
