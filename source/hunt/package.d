@@ -13,5 +13,5 @@ module hunt;
  
 public import hunt.application;
 public import hunt.routing;
-public import hunt.storage.redis;
-public import hunt.storage.memcached;
+public import hunt.storage.driver.redis;
+public import hunt.storage.driver.memcache;

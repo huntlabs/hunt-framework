@@ -42,8 +42,8 @@ public import hunt.i18n;
 public import hunt.utils.path;
 public import hunt.application.config;
 public import hunt.application.middleware;
-public import conRedis = hunt.storage.redis;
-public import conMemcached = hunt.storage.memcached;
+public import conRedis = hunt.storage.driver.redis;
+public import conMemcache = hunt.storage.driver.memcache;
 public import hunt.cache;
 
 abstract class WebSocketFactory
@@ -140,7 +140,7 @@ after  =  The PipelineFactory that create the middleware list for the router rul
                 auto tmp1 = split(conf.servers,","); 
                 auto tmp2 = split(tmp1[0],":"); 
                 if(tmp2[0] && tmp2[1]){
-                    conMemcached.setDefaultHost(tmp2[0],tmp2[1].to!ushort);
+                    conMemcache.setDefaultHost(tmp2[0],tmp2[1].to!ushort);
                     //cache.driver.setDefaultHost(tmp2[0],tmp2[1].to!ushort);
                 }
             }

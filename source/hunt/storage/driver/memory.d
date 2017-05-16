@@ -1,21 +1,21 @@
-/*
- * Hunt - a framework for web and console application based on Collie using Dlang development
- *
- * Copyright (C) 2015-2017  Shanghai Putao Technology Co., Ltd
- *
- * Developer: HuntLabs
- *
- * Licensed under the Apache-2.0 License.
- *
- */
+module hunt.storage.driver.memory;
 
-module hunt.cache.driver.memory;
-
-import hunt.cache.driver.base;
 import hunt.utils.time;
+
 import std.stdio;
 import core.memory;
 import core.sync.rwmutex;
+
+MemoryStorage _memory;
+@property MemoryInstance()
+{
+	if(_memory is null)
+	{
+		_memory = new MemoryStorage;
+	}
+	return  _memory;
+}
+
 class MemoryBuffer
 {
     string key;
@@ -45,7 +45,7 @@ class MemoryBuffer
     }
 }
 
-class MemoryCache : AbstractCache
+class MemoryStorage
 {
     private ulong trunkNum;
     private ulong trunkSize;
@@ -78,7 +78,7 @@ class MemoryCache : AbstractCache
         return trunkSize;
     }
 
-    override bool set(string key, ubyte[] value, int exprie)
+    bool set(string key, ubyte[] value, int exprie)
     {
         //if(isset(key))return false;
         _mutex.writer.lock();
@@ -114,15 +114,15 @@ class MemoryCache : AbstractCache
         return true;
     }
 
-    override bool set(string key,ubyte[] value)
+    bool set(string key,ubyte[] value)
     {
         return set(key,value,_exprie);
     }
-    override bool set(string key,string value)
+    bool set(string key,string value)
     {
         return set(key,cast(ubyte[])value,_exprie);
     }
-    override bool set(string key,string value,int exprie)
+    bool set(string key,string value,int exprie)
     {
         return set(key,cast(ubyte[])value,exprie);
     }
@@ -132,7 +132,7 @@ class MemoryCache : AbstractCache
         return cast(T)get(key);
     }
 
-    override string get(string key)
+    string get(string key)
     {
         if(!isset(key))return null;
         if(!isExpire(key)){
@@ -143,13 +143,13 @@ class MemoryCache : AbstractCache
         return cast(string)(*(map[key].ptr));
     }
 
-    override bool isset(string key)
+    bool isset(string key)
     {
         if(map.get(key,null) is null)return false;
         return true;
     }
 
-    override bool erase(string key)
+    bool erase(string key)
     {
         _mutex.writer.lock();
         scope(exit) _mutex.writer.unlock();
@@ -168,7 +168,7 @@ class MemoryCache : AbstractCache
         return true;
     }
 
-    override bool flush()
+    bool flush()
     {
         foreach(k,v;map)
         {
@@ -186,7 +186,7 @@ class MemoryCache : AbstractCache
         return true;
     }
 
-    override void setExpire(int exprie)
+    void setExpire(int exprie)
     {
         this._exprie = exprie;
     }
@@ -217,7 +217,7 @@ class MemoryCache : AbstractCache
         }
     }
 
-    override void setDefaultHost(string host,ushort port)
+    void setDefaultHost(string host,ushort port)
     {
     }
 }
@@ -226,7 +226,7 @@ unittest
 {
     import std.stdio;
     import core.thread;
-    auto memory = new MemoryCache();
+    auto memory = new MemoryStorage();
     string test = "test";
     ubyte[] utest = cast(ubyte[])test;
     memory.set(test,utest);
