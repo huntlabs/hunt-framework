@@ -4,7 +4,7 @@ import hunt.utils.time;
 import std.stdio;
 import core.memory;
 import stdFile = std.file;
-import Path = std.path;
+import stdPath = std.path;
 import core.sync.rwmutex;
 
 Filestorage _file;
@@ -32,6 +32,7 @@ class Filestorage
 
 	bool set(string key, ubyte[] value)
 	{
+		checkPath(key);
 		_mutex.writer.lock();
 		scope(exit) _mutex.writer.unlock();
 
@@ -75,37 +76,15 @@ class Filestorage
 		return true;
 	}
 
-	/*
 	bool flush()
 	{
-		stdFile.remove(_path);
 		return true;
 	}
 
-	void setExpire(int exprie)
+	void checkPath(string path)
 	{
-		this._exprie = exprie;
+		if(!stdFile.exists(path))stdFile.mkdirRecurse(stdPath.dirName(path));
 	}
-
-	bool isExpire(string key)
-	{
-		int exprie = (cast(int[])stdFile.read(key,4))[0];
-		if(exprie == 0)return true;
-		if(exprie <= getCurrUnixStramp)
-		{
-			scope(exit)erase(key);
-			return false;
-		}else{
-			return true;
-		}
-
-	}
-	void setPath(string path)
-	{
-		this._path = path;
-		if(!stdFile.exists(path))File.mkdirRecurse(Path.dirName(path));
-	}
-	*/
 
 	void setDefaultHost(string host,ushort port)
 	{
