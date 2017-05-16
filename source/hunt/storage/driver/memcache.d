@@ -5,19 +5,19 @@ version(USE_MEMCACHE){
 
 	@property MemcacheInstance()
 	{
-		if(_memcached is null)
+		if(_memcache is null)
 		{
-			_memcached = new driveMemcache.Memcache();
+			_memcache = new driveMemcache.Memcache();
 			if(_host.length > 0)
-				_memcached.addServer(_host,_port);
+				_memcache.addServer(_host,_port);
 		}
-		return  _memcached;
+		return  _memcache;
 	}
 
 	bool addMemcahedHost(string host, ushort port)
 	{
 
-		return Memcache.addServer(host,port);
+		return MemcacheInstance.addServer(host,port);
 	}
 
 	void setDefaultHost(string host, ushort port)
@@ -27,7 +27,7 @@ version(USE_MEMCACHE){
 	}
 
 	private:
-	driveMemcache.Memcache _memcached = null;
+	driveMemcache.Memcache _memcache = null;
 
 	__gshared string _host;
 	__gshared ushort _port;
