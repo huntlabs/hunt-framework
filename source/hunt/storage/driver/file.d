@@ -1,4 +1,4 @@
-module hunt.storage.filestorage;
+module hunt.storage.driver.file;
 
 import hunt.utils.time;
 import std.stdio;
@@ -7,16 +7,16 @@ import stdFile = std.file;
 import stdPath = std.path;
 import core.sync.rwmutex;
 
-Filestorage _file;
-@property File()
+FileStorage _file;
+@property FileInstance()
 {
 	if(_file is null)
 	{
-		_file = new Filestorage;
+		_file = new FileStorage;
 	}
 	return  _file;
 }
-class Filestorage
+class FileStorage
 {
 	private ReadWriteMutex _mutex;
 

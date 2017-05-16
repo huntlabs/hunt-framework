@@ -1,17 +1,6 @@
-/*
- * Hunt - a framework for web and console application based on Collie using Dlang development
- *
- * Copyright (C) 2015-2017  Shanghai Putao Technology Co., Ltd
- *
- * Developer: HuntLabs
- *
- * Licensed under the Apache-2.0 License.
- *
- */
-
 module hunt.cache.cache;
 
-import hunt.cache.driver;
+import hunt.storage;
 
 import std.conv;
 import std.experimental.logger;
@@ -20,23 +9,24 @@ class Cache
 {
     this(string driver = "memory")
     {
+		if(driver == string.init)driver = "memory";
         switch(driver)
         {
 			case "memory":
 			{
-				this._cacheDriver = new MemoryCache;
+				this._cacheStorage = new Memory;
 				break;
 			}
 			case "file":
 			{
-				this._cacheDriver = new FileCache;
+				this._cacheStorage = new File;
 				break;
 			}
 			version(USE_MEMCACHE)
 			{
 				case "memcache":
 				{
-					this._cacheDriver = new MemcacheCache;
+					this._cacheStorage = new Memcache;
 					break;
 				}
 			}
@@ -44,7 +34,7 @@ class Cache
 			{
 				case "redis":
 				{
-					this._cacheDriver = new RedisCache;
+					this._cacheStorage = new Redis;
 					break;
 				}
 			}
@@ -57,7 +47,7 @@ class Cache
 
     bool set(string key, ubyte[] value, int expire)
     {
-        return _cacheDriver.set(this._prefix ~ key, value, expire);
+        return _cacheStorage.set(this._prefix ~ key, value, expire);
     }
 	
     bool set(string key, ubyte[] value)
@@ -67,7 +57,7 @@ class Cache
 
     bool set(string key, string value, int expire)
     {
-        return _cacheDriver.set(this._prefix ~ key, cast(ubyte[])value, expire);
+        return _cacheStorage.set(this._prefix ~ key, cast(ubyte[])value, expire);
     }
 
     bool set(string key, string value)
@@ -77,27 +67,27 @@ class Cache
 
     string get(string key)
     {
-        return cast(string)_cacheDriver.get(this._prefix ~ key);
+        return cast(string)_cacheStorage.get(this._prefix ~ key);
     }
 
     T get(T)(string key)
     {
-        return cast(T)_cacheDriver.get(this._prefix ~ key);
+        return cast(T)_cacheStorage.get(this._prefix ~ key);
     }
 
     bool isset(string key)
     {
-        return _cacheDriver.isset(this._prefix ~ key);
+        return _cacheStorage.isset(this._prefix ~ key);
     }
 
     bool erase(string key)
     {
-        return _cacheDriver.erase(this._prefix ~ key);
+        return _cacheStorage.erase(this._prefix ~ key);
     }
 
     bool flush()
     {
-        return _cacheDriver.flush();
+        return _cacheStorage.flush();
     }
 
     void setPrefix(string prefix)
@@ -108,7 +98,7 @@ class Cache
     void setExpire(int expire)
     {
         this._expire = expire;
-        this._cacheDriver.setExpire(expire);
+        this._cacheStorage.setExpire(expire);
     }
 
     int expire()
@@ -116,16 +106,16 @@ class Cache
         return _expire;
     }
 
-    AbstractCache driver()
+    StorageInterface driver()
     {
-        return _cacheDriver;
+        return _cacheStorage;
     }
 
     private
     {
         string _prefix;
         int _expire;
-        AbstractCache _cacheDriver;
+        StorageInterface _cacheStorage;
     }
 }
 
