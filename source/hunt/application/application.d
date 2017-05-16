@@ -191,21 +191,28 @@ after  =  The PipelineFactory that create the middleware list for the router rul
     /**
       Start the HTTPServer server , and block current thread.
      */
-    void run()
-    {
-        setLogConfig(Config.app.log);
-        upConfig(Config.app);
-        initDb(Config.app.database);
-        setRedis(Config.app.redis);
-        setMemcache(Config.app.memcache);
-        initCache(Config.app.cache);
-		initSession(Config.app.session);
+     void run()
+	{
+		setConfig(Config.app);
+		start();
+	}
 
-        writeln("please open http://",addr.toString,"/");
+	void setConfig(AppConfig config)
+	{
+		setLogConfig(config.log);
+		upConfig(config);
+		initDb(config.database);
+		setRedis(config.redis);
+		setMemcache(config.memcache);
+		initCache(config.cache);
+		initSession(config.session);
+	}
 
-        _server.start();
-    }
-
+	void start()
+	{
+		writeln("Try to open http://",addr.toString(),"/");
+		_server.start();
+	}
 
     /**
       Stop the server.
