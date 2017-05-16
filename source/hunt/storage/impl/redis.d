@@ -4,18 +4,17 @@ import std.conv;
 import std.stdio;
 import std.experimental.logger;
 
-import hunt.storage;
-
-public import driverRedis = hunt.storage.driver.redis;
+import hunt.storage.base;
+public import hunt.storage.driver.redis;
 
 version(USE_REDIS)
 {
-    class Redis : AbstractCache 
+    class Redis : StorageInterface 
     {
         private int _expire = 3600 * 24 * 365;
         auto opDispatch(string name,T...)(T args)
         {
-            auto result =  driverRedis.Redis.send(name,args);
+            auto result =  RedisInstance.send(name,args);
             return result;
         }
         bool set(string key, ubyte[] value)
@@ -24,7 +23,7 @@ version(USE_REDIS)
         }
         bool set(string key, ubyte[] value, int expire)
         {
-            return driverRedis.Redis.set(key,cast(string)value,expire);
+            return RedisInstance.set(key,cast(string)value,expire);
         }
 
         bool set(string key,string value)
@@ -33,31 +32,31 @@ version(USE_REDIS)
         }
         bool set(string key,string value,int expire)
         {
-            return driverRedis.Redis.set(key,value,expire);    
+            return RedisInstance.set(key,value,expire);    
         }
 
         T get(T)(string key)
         {
-            return cast(T)driverRedis.Redis.get(key);
+            return cast(T)RedisInstance.get(key);
         }
         string get(string key)
         {
-            return driverRedis.Redis.get(key);
+            return RedisInstance.get(key);
         }
 
         bool isset(string key)
         {
-            return driverRedis.Redis.exists(key);
+            return RedisInstance.exists(key);
         }
 
         bool erase(string key)
         {
-            return cast(bool)driverRedis.Redis.del(key);
+            return cast(bool)RedisInstance.del(key);
         }
 
         bool flush()
         {
-            driverRedis.Redis.flushall();
+            RedisInstance.flushall();
             return true;
         }
 
@@ -67,7 +66,7 @@ version(USE_REDIS)
         }
         void setDefaultHost(string host , ushort port)
         {
-            driverRedis.setDefaultHost(host,port);
+            RedisInstance.setDefaultHost(host,port);
         }
     }
 }
