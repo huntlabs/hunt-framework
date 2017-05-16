@@ -120,6 +120,11 @@ abstract class Controller
         }
         return true;
     }
+
+	@property bool isAsync()
+	{
+		return true;
+	}
 }
 
 mixin template MakeController(string moduleName = __MODULE__)
@@ -226,6 +231,8 @@ string  __creteRouteMap(T, string moduleName)()
 void callHandler(T, string fun)(Request req) if(is(T == class) || is(T == struct) && hasMember!(T,"__CALLACTION__"))
 {
     T handler = new T();
+	import core.memory;
+	scope(exit){if(!handler.isAsync){handler.destroy(); GC.free(cast(void *)handler);}}
     if(!handler.__CALLACTION__(fun,req))
     {
         Response res;
