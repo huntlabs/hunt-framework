@@ -19,6 +19,6 @@ interface IMiddleware
 {
     ///get the middleware name
     string name();
-    ///return true is continue, false is finish
-    bool onProcess(Request req,Response res);
+    ///return null is continue, response is close the session
+    Response onProcess(Request request, Response response);
 }

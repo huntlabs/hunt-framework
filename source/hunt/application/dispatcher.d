@@ -15,6 +15,7 @@ import hunt.routing;
 import hunt.http.request;
 import hunt.http.response;
 import hunt.application.controller;
+import hunt.application.config;
 
 import collie.utils.exception;
 import collie.codec.http;
@@ -28,6 +29,7 @@ class Dispatcher
     this()
     {
         this._router = new Router;
+        this._router.setConfigPath(Config.path);
     }
 
     public
