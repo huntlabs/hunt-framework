@@ -56,18 +56,20 @@ class Session
 
 	string generateSessionId(string sessionName = "hunt_session")
 	{
-		auto str = toHexString(sha1Of(format("%s--%s--%s",
-						Clock.currTime().toISOExtString, uniform(long.min, long.max), processor())));
-
-		auto sstr = toLower(cast(string)(str[]));
+		import hunt.utils.random;
+		SHA1 hash;
+		hash.start();
+		hash.put(getRandom);
+		ubyte[20] result = hash.finish();
+		string str = toLower(toHexString(result));
 
 		JSONValue json;
-		json[sessionName] = sstr;
+		json[sessionName] = str;
 		json["_time"] = getCurrUnixStramp; 
 
-		set(sstr,json.toString,_expire);
+		set(str,json.toString,_expire);
 
-		return sstr;
+		return str;
 	}
 
 	bool set(string key, string value, int expire)
