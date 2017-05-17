@@ -17,6 +17,7 @@ import std.socket : Address, parseAddress;
 import std.experimental.logger;
 import std.string;
 
+import hunt.define;
 import hunt.text.configuration;
 import hunt.application.application : WebSocketFactory;
 import hunt.application.application;
@@ -43,7 +44,7 @@ final class AppConfig
     {
         string storage = "file";
         string prefix = "huntsession_";
-		string path = "./storage/session/";
+		string path = buildPath(DEFAULT_STORAGE_PATH, "session/");
         uint expire = 3600;
     }
 
@@ -241,7 +242,6 @@ final class AppConfig
         collectException(conf.mail.smtp.user.value(), app.mail.smtp.user);
         collectException(conf.mail.smtp.password.value(), app.mail.smtp.password);
 
-
         // string ws;
         // collectException(conf.server.webSocket_factory.value(), ws);
         
@@ -268,6 +268,7 @@ private:
 }
 
 import core.sync.rwmutex;
+
 import std.file;
 import std.path;
 
@@ -288,6 +289,11 @@ class ConfigManager
         return _app;
     }
 
+    @property path()
+    {
+        return this._path;
+    }
+
     void setConfigPath(string path)
     {
         if(path.length == 0)
@@ -297,9 +303,10 @@ class ConfigManager
 
         if(path[$ -1] != '/')
         {
-            path ~= "/";
+            _path ~= "/";
         }
-        this.path = path;
+
+        this._path = path;
     }
 
     void setAppSection(string sec)
@@ -328,7 +335,7 @@ class ConfigManager
         scope(exit)_mutex.writer.unlock();
         _conf[key] = conf;
     }
-    
+
     auto opDispatch(string s)()
     {
         return config(s);
@@ -338,15 +345,16 @@ private:
     this()
     {
         _mutex = new ReadWriteMutex();
-        path = dirName(thisExePath) ~ "/config/";
+        _path = DEFAULT_CONFIG_PATH;
     }
     
     ~this(){_mutex.destroy;}
+
     AppConfig _app;
     
     Configuration[string] _conf;
 
-    string path;
+    string _path;
 
     ReadWriteMutex _mutex;
 }
