@@ -83,7 +83,7 @@ after  =  The PipelineFactory that create the middleware list for the router rul
     }
 
     ///启用国际化
-    auto enableLocale(string resPath = buildPath(theExecutorPath, "./resources/lang"), string defaultLocale = "zh-cn")
+    auto enableLocale(string resPath = buildPath(dirName(theExecutorPath), "./resources/lang"), string defaultLocale = "zh-cn")
     {
         auto i18n = I18n.instance();
         i18n.loadLangResources(resPath);
