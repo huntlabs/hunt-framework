@@ -48,6 +48,7 @@ void main()
 	app.addRoute("GET","/label/edit/{id:[0-9]*}",&hello);
 
 	//set language
+	app.enableLocale();
 	setLocale("en-br");
 	writeln( getText("message.hello-world"));
 
