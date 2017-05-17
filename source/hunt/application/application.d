@@ -33,18 +33,20 @@ import std.path;
 import std.parallelism;
 import std.exception;
 
+import hunt.init;
 import hunt.routing;
 import hunt.application.dispatcher;
 
 public import hunt.http;
 public import hunt.view;
 public import hunt.i18n;
+public import hunt.cache;
 public import hunt.utils.path;
 public import hunt.application.config;
 public import hunt.application.middleware;
+
 public import conRedis = hunt.storage.driver.redis;
 public import conMemcache = hunt.storage.driver.memcache;
-public import hunt.cache;
 
 abstract class WebSocketFactory
 {
@@ -66,14 +68,12 @@ final class Application
     Address binded(){return addr;}
 
     /**
-      Add a Router rule
-Params:
-method =  the HTTP method. 
-path   =  the request path.
-handle =  the delegate that handle the request.
-group  =  the rule's domain group.
-before =  The PipelineFactory that create the middleware list for the router rules, before  the router rule's handled execute.
-after  =  The PipelineFactory that create the middleware list for the router rules, after  the router rule's handled execute.
+     Add a Router rule
+     Params:
+     method =  the HTTP method. 
+     path   =  the request path.
+     handle =  the delegate that handle the request.
+     group  =  the rule's domain group.
      */
     auto addRoute(string method, string path, HandleFunction handle, string group = DEFAULT_ROUTE_GROUP)
     {
@@ -82,10 +82,11 @@ after  =  The PipelineFactory that create the middleware list for the router rul
         return this;
     }
 
-    ///启用国际化
-    auto enableLocale(string resPath = buildPath(dirName(theExecutorPath), "./resources/lang"), string defaultLocale = "zh-cn")
+    // enable i18n
+    auto enableLocale(string resPath = buildPath(DEFAULT_RESOURCE_PATH, "lang"), string defaultLocale = "en-us")
     {
         auto i18n = I18n.instance();
+
         i18n.loadLangResources(resPath);
         i18n.defaultLocale = defaultLocale;
 
@@ -132,6 +133,7 @@ after  =  The PipelineFactory that create the middleware list for the router rul
             }
         }
     }
+
     void setMemcache(AppConfig.MemcacheConf conf)
     {
         version(USE_MEMCACHE){
@@ -170,6 +172,7 @@ after  =  The PipelineFactory that create the middleware list for the router rul
         _cache.setPrefix(config.prefix);
         _cache.setExpire(config.expire);
     }
+    
     private void initSession(AppConfig.SessionConf config)
     {
         _session = new Session(config.storage);
