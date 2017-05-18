@@ -28,13 +28,12 @@ class Router
         this()
         {
             this._defaultGroup = new RouteGroup(DEFAULT_ROUTE_GROUP);
-            this._configPath = dirName(thisExePath) ~ "/config/";
         }
 
         void setConfigPath(string path)
         {
             // supplemental slash
-            this._configPath = (path[path.length-1] == '/') ? path : path ~ "/";
+            this._configPath = (path[$-1] == '/') ? path : path ~ "/";
         }
 
         string createUrl(string mca, string[string] params, string group = DEFAULT_ROUTE_GROUP)
@@ -346,7 +345,7 @@ class Router
 					route.staticFilePath = mca.chompPrefix("staticDir:");
 				}
 				else
-				{	
+				{
 	                string[] mcaArray = split(mca, ".");
 
 	                if (mcaArray.length > 3 || mcaArray.length < 2)
