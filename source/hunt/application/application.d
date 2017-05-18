@@ -41,7 +41,6 @@ public import hunt.http;
 public import hunt.view;
 public import hunt.i18n;
 public import hunt.cache;
-public import hunt.utils.path;
 public import hunt.application.config;
 public import hunt.application.middleware;
 
@@ -177,7 +176,7 @@ final class Application
     {
         _session = new Session(config.storage);
         _session.setPrefix(config.prefix);
-        _session.setPath(config.path);
+        _session.setPath((config.path is null) ? DEFAULT_SESSION_PATH : config.path);
         _session.setExpire(config.expire);
     }
 

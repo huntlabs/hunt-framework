@@ -60,18 +60,18 @@ abstract class Controller
 
     ///add middleware
     ///return true is ok, the named middleware is already exist return false
-    bool addMiddleware(IMiddleware midw)
+    bool addMiddleware(IMiddleware m)
     {
-        if(midw is null) return false;
+        if(m is null) return false;
         foreach(tmp; this.middlewares)
         {
-            if(tmp.name == midw.name)
+            if(tmp.name == m.name)
             {
                 return false;
             }
         }
 
-        this.middlewares ~= midw;
+        this.middlewares ~= m;
         return true;
     }
 
@@ -111,16 +111,17 @@ abstract class Controller
         this.response.html(this.view.show!filename());
     }
 
-    protected final bool __handleWares()
+    protected final void doMiddleware()
     {
-        foreach(ws; middlewares)
+        foreach(m; middlewares)
         {
-            if(!ws.onProcess(request,response()))
+            auto response = m.onProcess(this.request, this.response);
+            if(!(response is null))
             {
-                return false;
+                tracef("Middleware %s is retrun done.", m.name);
+                response.done();
             }
         }
-        return true;
     }
 
 	@property bool isAsync()
@@ -148,10 +149,9 @@ string  __createCallActionFun(T, string moduleName)()
 {
     import std.traits;
     import std.format;
-    string str = "bool __CALLACTION__(string funName,Request req) {";
+    string str = "bool __CALLACTION__(string funName, Request req) {";
     str ~= "\n\tauto ptr = this; ptr.request = req;";
-    str ~= "\n\tif(!ptr.__handleWares()) return false;trace(\"------------------\");";
-    str ~= "\n\t switch(funName){";
+    str ~= "\n\tswitch(funName){";
     foreach(memberName; __traits(allMembers, T))
     {
         static if (is(typeof(__traits(getMember,  T, memberName)) == function) )
@@ -159,36 +159,33 @@ string  __createCallActionFun(T, string moduleName)()
             foreach (t;__traits(getOverloads,T,memberName)) 
             {
                 //alias pars = ParameterTypeTuple!(t);
-                static if(/*ParameterTypeTuple!(t).length == 0 && */( hasUDA!(t, Action) || hasUDA!(t, Route))) {
+                static if(/*ParameterTypeTuple!(t).length == 0 && */( hasUDA!(t, Action) || hasUDA!(t, Route)))
+                {
                     str ~= "case \"";
                     str ~= memberName;
                     str ~= "\": {\n";
                     static if(hasUDA!(t, Action))
                     {
-                        enum ws = getUDAs!(t, Middleware);
-                        static if(ws.length)
+                        enum middlewares = getUDAs!(t, Middleware);
+                        static if(middlewares.length)
                         {
-                            foreach(i,w; ws)
+                            foreach(i, middleware; middlewares)
                             {
-                                str ~= format(q{ 
-                                        scope auto wb_%s_%s = new %s();
-                                        trace("do middleware onProcess");
-                                        if(!wb_%s_%s.onProcess(ptr.request, ptr.response)){return false;}
-                                    }, i,memberName, w.className, i, memberName);
+                                str ~= format("ptr.addMiddleware(new %s);", middleware.className);
                             }
-
                         }
+
+                        str ~= "ptr.doMiddleware();";
 
                         //before
                         str ~= q{
-                            trace("do funnnn---------before---------");
                             if(!ptr.before()){return false;}
-                            trace("do funnnn---------");
                         };
                     }
 
                     //action
                     str ~= "ptr." ~ memberName ~ "();";
+
                     static if(hasUDA!(t, Action)){
                         //after
                         str ~= q{
@@ -237,14 +234,9 @@ void callHandler(T, string fun)(Request req) if(is(T == class) || is(T == struct
     T handler = new T();
 	import core.memory;
 	scope(exit){if(!handler.isAsync){handler.destroy(); GC.free(cast(void *)handler);}}
-    if(!handler.__CALLACTION__(fun,req))
-    {
-        Response res;
-        collectException(req.createResponse(),res);
-        
-        if(res)
-            res.done();
-    }
+    handler.before();
+    handler.__CALLACTION__(fun, req);
+    handler.after();
 }
 
 HandleFunction getRouteFormList(string str)
