@@ -30,13 +30,13 @@ final class AppConfig
 
     struct ApplicationConf
     {
-        string name;
+        string name = "HUNT APPLICATION";
         string baseUrl;
         string defaultCookieDomain = ".example.com";
         string defaultLanguage = "zh-CN";
         string languages = "zh-CN,en-US";
         string secret;
-        string encoding = "UTF-8";
+        string encoding = "utf-8";
         int staticFileCacheMinutes = 30;
     }
 
@@ -44,7 +44,7 @@ final class AppConfig
     {
         string storage = "file";
         string prefix = "huntsession_";
-		string path = buildPath(DEFAULT_STORAGE_PATH, "session/");
+		string path = DEFAULT_SESSION_PATH;
         uint expire = 3600;
     }
 
@@ -84,7 +84,7 @@ final class AppConfig
     struct LogConfig
     {
         string level = "warning";
-        string path = "";
+        string path = DEFAULT_LOG_PATH;
         string file = "";
     }
 
