@@ -83,7 +83,7 @@ final class Application
     }
 
     // enable i18n
-    auto enableLocale(string resPath = buildPath(DEFAULT_RESOURCE_PATH, "lang"), string defaultLocale = "en-us")
+    auto enableLocale(string resPath = DEFAULT_LANGUAGE_PATH, string defaultLocale = "en-us")
     {
         auto i18n = I18n.instance();
 
