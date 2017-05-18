@@ -82,8 +82,7 @@ class Operation : Expression
 }
 Expression strToTree(string str,int s,int t)
 {
-	//writeln("s : ",s," t : ",t);
-	if(s > t)return new Constant(null);
+	if(s >= t)return new Constant(null);
 
 	bool findVar = false;
 	bool findExe = false;
@@ -91,7 +90,7 @@ Expression strToTree(string str,int s,int t)
 	static import std.algorithm;
 	for(int i = s;i<t;i++)
 	{
-		if(canFind(["{{","{%"],str[i..i+2]))
+		if((i+2 <= t) && canFind(["{{","{%"],str[i..i+2]))
 		{
 			ves = i;
 			if(str[i+1] == '{') findVar = true;
@@ -107,15 +106,13 @@ Expression strToTree(string str,int s,int t)
 			break;
 		}
 	}
-	//writeln("ves: ",ves," vet:",vet," findExe: ",findExe," findVar:",findVar);
-	//writeln(ves?str[ves .. vet]:str[s..t]);
-	if(ves==0 && !findVar && !findExe)return new Constant(str[s..t + 1]);
-	if(findVar && ves==s)return new VariableReference(str[ves+2 .. vet-2]);
-	if(findExe && ves==s)return new ExecuteBlock(str[ves+2 .. vet-2]);
+	if(ves==0 && !findVar && !findExe)return new Constant(str[s..t]);
+	if(findVar && ves==s && vet==t)return new VariableReference(str[ves+2 .. vet-2]);
+	if(findExe && ves==s && vet==t)return new ExecuteBlock(str[ves+2 .. vet-2]);
 	if(str[ves .. ves+2] == "{%")
-		return new Operation(strToTree(str,s,ves - 1),new ExecuteBlock(str[ves+2 .. vet-2]),strToTree(str,vet,t));
+		return new Operation(strToTree(str,s,ves),new ExecuteBlock(str[ves+2 .. vet-2]),strToTree(str,vet,t));
 	else 
-		return new Operation(strToTree(str,s,ves - 1),new VariableReference(str[ves+2 .. vet-2]),strToTree(str,vet,t));
+		return new Operation(strToTree(str,s,ves),new VariableReference(str[ves+2 .. vet-2]),strToTree(str,vet,t));
 }
 
 class Parser 
@@ -136,8 +133,8 @@ class Parser
 			}
 			string str;
 			with(var){
-	`;
-	public string FunFooter = `
+				`;
+				public string FunFooter = `
 			}
 			return str;
 		}`;
@@ -146,10 +143,16 @@ class Parser
 	this(string str)
 	{
 		this.str = str;
-		this.stt = strToTree(str,0,str.length.to!int - 1);
+		this.stt = strToTree(str,0,str.length.to!int);
 	}
 	override string toString()
 	{
 		return FunHeader ~ stt.Evaluate(ctx) ~ FunFooter;
 	}
+}
+
+unittest 
+{
+	auto p = new Parser(```{% import std.stdio; %}<div>{{value["name"]}}```);
+	assert(p.stt.Evaluate() == " str ~= ``; import std.stdio;  str ~= `<div>`; str ~= std.conv.to!string(value[\"name\"]); str ~= ``;");
 }
