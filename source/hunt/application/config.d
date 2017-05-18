@@ -17,7 +17,7 @@ import std.socket : Address, parseAddress;
 import std.experimental.logger;
 import std.string;
 
-import hunt.define;
+import hunt.init;
 import hunt.text.configuration;
 import hunt.application.application : WebSocketFactory;
 import hunt.application.application;
@@ -44,7 +44,7 @@ final class AppConfig
     {
         string storage = "file";
         string prefix = "huntsession_";
-		string path = DEFAULT_SESSION_PATH;
+		string path;
         uint expire = 3600;
     }
 
@@ -84,7 +84,7 @@ final class AppConfig
     struct LogConfig
     {
         string level = "warning";
-        string path = DEFAULT_LOG_PATH;
+        string path;
         string file = "";
     }
 
