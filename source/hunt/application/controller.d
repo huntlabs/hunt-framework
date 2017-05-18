@@ -27,7 +27,8 @@ import std.traits;
 
 enum Action;
 
-struct Middleware{
+struct Middleware
+{
     string className;
 }
 
@@ -69,12 +70,13 @@ abstract class Controller
                 return false;
             }
         }
+
         this.middlewares ~= midw;
         return true;
     }
 
-    ///add middleware
-    IMiddleware[] getMiddleware()
+    // get all middleware
+    IMiddleware[] getMiddlewares()
     {
         return this.middlewares;
     }
@@ -111,7 +113,7 @@ abstract class Controller
 
     protected final bool __handleWares()
     {
-        foreach(ws;middlewares)
+        foreach(ws; middlewares)
         {
             if(!ws.onProcess(request,response()))
             {
@@ -161,7 +163,8 @@ string  __createCallActionFun(T, string moduleName)()
                     str ~= "case \"";
                     str ~= memberName;
                     str ~= "\": {\n";
-                    static if(hasUDA!(t, Action)){
+                    static if(hasUDA!(t, Action))
+                    {
                         enum ws = getUDAs!(t, Middleware);
                         static if(ws.length)
                         {
@@ -169,7 +172,7 @@ string  __createCallActionFun(T, string moduleName)()
                             {
                                 str ~= format(q{ 
                                         scope auto wb_%s_%s = new %s();
-                                        trace("do middler");
+                                        trace("do middleware onProcess");
                                         if(!wb_%s_%s.onProcess(ptr.request, ptr.response)){return false;}
                                     }, i,memberName, w.className, i, memberName);
                             }
@@ -212,7 +215,8 @@ string  __creteRouteMap(T, string moduleName)()
     str ~= "\n\timport hunt.application.staticfile;\n";
     str ~= "\n\taddRouteList(\"hunt.application.staticfile.StaticfileController.doStaticFile\", &callHandler!(StaticfileController, \"doStaticFile\"));\n";
     
-    foreach(memberName; __traits(allMembers, T)){
+    foreach(memberName; __traits(allMembers, T))
+    {
         static if (is(typeof(__traits(getMember, T, memberName)) == function))
         {
             foreach (t;__traits(getOverloads, T, memberName))
