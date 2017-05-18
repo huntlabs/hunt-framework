@@ -13,7 +13,7 @@ module hunt.init;
 
 public import hunt.versions;
 
-import std.path : buildPath;
+import std.path : buildPath, dirName;
 import std.file : thisExePath;
 
 __gshared string APP_PATH;
@@ -26,7 +26,7 @@ __gshared string DEFAULT_SESSION_PATH = "session/";
 
 shared static this()
 {
-    APP_PATH = thisExePath();
+    APP_PATH = dirName(thisExePath());
     DEFAULT_CONFIG_PATH = buildPath(APP_PATH, DEFAULT_CONFIG_PATH);
     DEFAULT_LANGUAGE_PATH = buildPath(APP_PATH, DEFAULT_LANGUAGE_PATH);
     DEFAULT_PUBLIC_PATH = buildPath(APP_PATH, DEFAULT_PUBLIC_PATH);
