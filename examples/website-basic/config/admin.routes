@@ -1,0 +1,6 @@
+#
+# [GET,POST,PUT...]    path    controller.method
+#
+
+*	/	index.dashboard
+#*	/	admin.show

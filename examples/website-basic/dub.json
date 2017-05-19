@@ -1,0 +1,31 @@
+{
+	"name": "website-basic",
+	"description": "A minimal D application.",
+	"copyright": "Copyright © 2016, huntframework.com",
+	"targetType": "executable",
+	"stringImportPaths": [
+		"./resources/views",
+		"./resources/views/layouts",
+		"./resources/views/shared"
+	],
+	"mainSourceFile": "./source/bootstrap.d",
+	"dependencies": {
+		"hunt": {
+			"path": "../../"
+		}
+	},
+	"configurations": [
+		{
+			"name": "default",
+			"subConfigurations": {
+				"hunt": "R&M"
+			}
+		},
+		{
+			"name": "no_taskpool",
+			"subConfigurations": {
+				"hunt": "no_taskpool"
+			}
+		}
+	]
+}
