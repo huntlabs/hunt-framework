@@ -23,7 +23,7 @@ ubyte[] getRandom(ushort len = 64)
 		HCRYPTPROV hCryptProv;
 		assert(CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT) != 0);
 		CryptGenRandom(hCryptProv, cast(DWORD)buffer.length, buffer.ptr);
-		scope(exit)CryptReleaseContext(this.hCryptProv, 0);
+		scope(exit)CryptReleaseContext(hCryptProv, 0);
 	}else{
 		import core.stdc.stdio : FILE, _IONBF, fopen, fclose, fread, setvbuf;
 		auto file = fopen("/dev/urandom","rb");
