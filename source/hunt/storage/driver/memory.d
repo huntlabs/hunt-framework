@@ -3,6 +3,7 @@ module hunt.storage.driver.memory;
 import hunt.utils.time;
 
 import std.stdio;
+import std.conv;
 import core.memory;
 import core.sync.rwmutex;
 
@@ -19,13 +20,13 @@ MemoryStorage _memory;
 class MemoryBuffer
 {
     string key;
-    ulong length;
+    uint length;
     ubyte[] *ptr;
     int exprie;
     MemoryBuffer prv;
     MemoryBuffer next;
 
-    this(string key,ubyte[] value,ulong length)
+    this(string key,ubyte[] value,uint length)
     {
         this.key = key;
         this.length = length;
@@ -86,7 +87,7 @@ class MemoryStorage
 
         if(exprie < 0)exprie = 0;
 
-        auto trunk = new MemoryBuffer(key,value,value.length);
+        auto trunk = new MemoryBuffer(key,value,value.length.to!uint);
         trunk.exprie = ((exprie == 0) ? 0 : (getCurrUnixStramp + exprie));
         writeln(trunk.exprie,cast(string)(*trunk.ptr));
 
