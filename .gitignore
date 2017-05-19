@@ -26,3 +26,6 @@ libhunt.a
 hunt-test-default
 .settings
 .vscode
+test.config
+tmp.conf
+tmp.saveas.conf

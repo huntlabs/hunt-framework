@@ -148,7 +148,7 @@ class StaticfileController : Controller
 		scope(exit) f.close();
 	
 		f.seek(rangeStart);
-		auto buf = f.rawRead(new ubyte[rangeEnd - rangeStart + 1]);
+		auto buf = f.rawRead(new ubyte[rangeEnd.to!uint - rangeStart.to!uint + 1]);
 		response.setContext(buf);
     }
     
