@@ -7,7 +7,7 @@ import hunt.storage.driver.file;
 
 class File : StorageInterface
 {
-    private int _expire;
+    private int _expire = 3600 * 24 * 365;
     bool set(string key, ubyte[] value, int expire )
     {
         return FileInstance.set(key,value);    
