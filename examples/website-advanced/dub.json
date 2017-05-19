@@ -4,11 +4,6 @@
 	"copyright": "Copyright © 2016, huntframework.com",
 	"targetType": "executable",
 	"Versions": ["USE_MEMCACHE"],
-	"stringImportPaths": [
-		"./resources/views",
-		"./resources/views/layouts",
-		"./resources/views/shared"
-	],
 	"mainSourceFile": "./source/bootstrap.d",
 	"dependencies": {
 		"hunt": {
