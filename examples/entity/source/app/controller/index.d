@@ -13,7 +13,6 @@ module app.controller.index;
 
 import hunt;
 
-import app.middleware;
 import app.service.user;
 
 class IndexController : Controller
@@ -22,7 +21,6 @@ class IndexController : Controller
 	
     this()
     {
-        this.addMiddleware(new BeforeMiddleware());
     }
   
     @Action
