@@ -40,7 +40,7 @@ class Cache
 			}
 			default:
 			{
-				new Exception("Can't support cache driver: ", driver);
+				throw new Exception("Can't support cache driver: ", driver);
 			}
         }
     }
