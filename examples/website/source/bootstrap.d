@@ -16,7 +16,6 @@ import std.experimental.logger;
 /* use hunt framework */
 import hunt;
 
-import app.middleware;
 import hunt.i18n;
 
 void hello(Request req)
@@ -26,22 +25,11 @@ void hello(Request req)
 	res.done();
 }
 
-void test(Request req)
-{
-
-	import app.controller.index;
-	auto test = new IndexController();
-	test.__CALLACTION__("show",req);
-	Response res = req.createResponse();
-	//res.redirect("/");
-	res.done();
-}
-
 void main()
 {
 
 	auto app = Application.getInstance();
-	app.addRoute("GET","/test",&test).addRoute("GET","/",&hello);
+	app.addRoute("GET","/",&hello);
 	//.setMiddlewareFactory(new MiddlewareFactory())
 	//.enableLocale();
 

@@ -10,7 +10,6 @@
  */
 module app.controller.index;
 import hunt.application;
-public import app.middleware;
 import std.experimental.logger;
 
 version(USE_ENTITY) import app.model.index;
@@ -20,23 +19,8 @@ class IndexController : Controller
 	mixin MakeController;
     this()
     {
-        this.addMiddleware(new BeforeMiddleware());
-    }
-    override bool before()
-    {
-		trace("before-----");
-        this.response.html("<h3>before...</h3>");
-		trace("before-----offiter");
-        return true;
-    }
-    override bool after()
-    {
-        this.response.html("<h3>after...</h3>");
-        return true;
     }
     @Action
-    @Middleware(BeforeMiddleware.stringof)
-    @Middleware(AfterMiddleware.stringof)
     void show()
 	{	
 		auto sessionId = request.getSession();
@@ -48,7 +32,6 @@ class IndexController : Controller
         .setCookie("name2", "value", 10000);
     }
 	@Action
-    @Middleware(OneMiddleware.stringof)
     void list()
     {
 		this.view.setLayout!"main.dhtml"();	
