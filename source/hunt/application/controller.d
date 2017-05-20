@@ -111,16 +111,27 @@ abstract class Controller
         this.response.html(this.view.show!filename());
     }
 
+    void done()
+    {
+        this.response.done();
+    }
+
     protected final void doMiddleware()
     {
+        trace("doMiddlware ..");
+
         foreach(m; middlewares)
         {
-            auto response = m.onProcess(this.request, this.response);
-            if(!(response is null))
+            tracef("do %s onProcess ..", m.name());
+
+            auto response = m.onProcess(this.request, null);
+            if(response is null)
             {
-                tracef("Middleware %s is retrun done.", m.name);
-                response.done();
+                continue;
             }
+
+            tracef("Middleware %s is retrun done.", m.name);
+            response.done();
         }
     }
 
@@ -149,7 +160,8 @@ string  __createCallActionFun(T, string moduleName)()
 {
     import std.traits;
     import std.format;
-    string str = "bool __CALLACTION__(string funName, Request req) {";
+
+    string str = "bool callAction(string funName, Request req) {";
     str ~= "\n\tauto ptr = this; ptr.request = req;";
     str ~= "\n\tswitch(funName){";
     foreach(memberName; __traits(allMembers, T))
@@ -201,6 +213,7 @@ string  __createCallActionFun(T, string moduleName)()
     str ~= "default : break;}";
     str ~= "return false;";
     str ~= "}";
+
     return str;
 }
 
@@ -232,11 +245,14 @@ string  __creteRouteMap(T, string moduleName)()
 void callHandler(T, string fun)(Request req) if(is(T == class) || is(T == struct) && hasMember!(T,"__CALLACTION__"))
 {
     T handler = new T();
+    
 	import core.memory;
 	scope(exit){if(!handler.isAsync){handler.destroy(); GC.free(cast(void *)handler);}}
+
     handler.before();
-    handler.__CALLACTION__(fun, req);
+    handler.callAction(fun, req);
     handler.after();
+    handler.done();
 }
 
 HandleFunction getRouteFormList(string str)
