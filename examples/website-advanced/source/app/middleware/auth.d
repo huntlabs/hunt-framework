@@ -10,18 +10,20 @@ class AuthMiddleware : IMiddleware
         return "AuthMiddleware";
     }
 
-    Response onProcess(Request request, Response response = null)
+    Response onProcess(Request request, Response response)
     {
         bool allowed = false;
 
-        if (allowed)
+        if (!allowed)
         {
             if (response is null)
             {
+                trace("createResponse");
                 response = request.createResponse();
             }
-            
-            response.setHttpStatusCode(403);
+
+            trace("setHttpStatusCode to 403");
+            response.setHttpError(403);
 
             return response;
         }
