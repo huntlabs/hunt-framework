@@ -20,5 +20,5 @@ interface IMiddleware
     ///get the middleware name
     string name();
     ///return null is continue, response is close the session
-    Response onProcess(Request request, Response response);
+    Response onProcess(Request request, Response response = null);
 }

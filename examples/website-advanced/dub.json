@@ -1,8 +1,9 @@
 {
-	"name": "website-advaced",
-	"description": "An advaced website with hunt framework.",
+	"name": "website-advanced",
+	"description": "An advanced website with hunt framework.",
 	"copyright": "Copyright © 2016, huntframework.com",
 	"targetType": "executable",
+	"Versions": ["USE_MEMCACHE"],
 	"stringImportPaths": [
 		"./resources/views",
 		"./resources/views/layouts",

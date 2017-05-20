@@ -13,6 +13,8 @@ module app.controller.index;
 
 import hunt;
 
+import app.middleware.auth;
+
 class IndexController : Controller
 {
 	mixin MakeController;
@@ -20,13 +22,19 @@ class IndexController : Controller
     @Action
     void index()
     {
-	cache.set("a", "A");
-    	    response.html("Welcome to this example website." ~ cache.get("a"));
+        response.html("Welcome to this example website.");
     }
 
     @Action
     void show()
 	{
-        response.html("this is show page." ~ cache.get("a"));
+        response.html("this is show page.");
+    }
+
+    @Action
+    @Middleware("AuthMiddleware")
+    void allowed()
+    {
+        response.html("You are allowed.");
     }
 }
