@@ -170,6 +170,12 @@ final class Response : ResponseBuilder
         done();
     }
 
+    void setHttpError(ushort code)
+    {
+        this.setHttpStatusCode(code);
+        this.setContext(errorPageHtml(code));
+    }
+
 package(hunt.http):
     void clear()
     {
