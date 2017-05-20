@@ -18,4 +18,5 @@ core
 *.a
 *.so
 *.kate-swp
-/website-advanced
+/server
+website-basic

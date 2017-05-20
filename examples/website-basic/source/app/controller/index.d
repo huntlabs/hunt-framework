@@ -30,6 +30,8 @@ class IndexController : Controller
         .setCookie("name", "value", 10000)
         .setCookie("name1", "value", 10000, "/path")
         .setCookie("name2", "value", 10000);
+
+		response.done();
     }
 	@Action
     void list()
