@@ -1,0 +1,1 @@
+hello-world=你好，繁体
