@@ -105,11 +105,7 @@ abstract class Controller
     {
         this.response.html(this.view.render!filename());
     }
-
-    void show(string filename = null)()
-    {
-        this.response.html(this.view.show!filename());
-    }
+	alias show = render;
 
     void done()
     {
