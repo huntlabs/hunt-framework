@@ -23,9 +23,8 @@ class IndexController : Controller
     @Action
     void show()
 	{	
-		auto sessionId = request.getSession();
 		auto response = this.request.createResponse();
-        response.html(sessionId ~ "hello world<br/>")
+        response.html("hello world<br/>")
         //.setHeader("content-type","text/html;charset=UTF-8")
         .setCookie("name", "value", 10000)
         .setCookie("name1", "value", 10000, "/path")
@@ -58,17 +57,20 @@ class IndexController : Controller
     }
 	@Action void setCache()
 	{
-		auto key = request.get("key");	
-		auto value = request.get("value");	
-		cache.set(key,value);
+		session.set("test","test");
+		//auto key = request.get("key");	
+		//auto value = request.get("value");	
+		//cache.set(key,value);
 		auto response = this.request.createResponse();
-        response.html("key : " ~ key ~ " value : " ~ value);
+        //response.html("key : " ~ key ~ " value : " ~ value);
+		response.html(session.sessionId);
 	}
 	@Action void getCache()
 	{
-		auto key = request.get("key");	
-		auto value = cache.get(key);
+		//auto key = request.get("key");	
+		//auto value = cache.get(key);
 		auto response = this.request.createResponse();
-        response.html("key : " ~ key ~ " value : " ~ value);
+        //response.html(session.get("test") ~ " key : " ~ key ~ " value : " ~ value);
+        response.html(session.get("test"));
 	}
 }

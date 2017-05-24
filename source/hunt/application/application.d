@@ -172,12 +172,12 @@ final class Application
         _cache.setExpire(config.expire);
     }
     
-    private void initSession(AppConfig.SessionConf config)
+    private void initSessionStorage(AppConfig.SessionConf config)
     {
-        _session = new Session(config.storage);
-        _session.setPrefix(config.prefix);
-        _session.setPath((config.path is null) ? DEFAULT_SESSION_PATH : config.path);
-        _session.setExpire(config.expire);
+        _sessionStorage = new SessionStorage(config.storage);
+        _sessionStorage.setPrefix(config.prefix);
+        _sessionStorage.setPath((config.path is null) ? DEFAULT_SESSION_PATH : config.path);
+        _sessionStorage.setExpire(config.expire);
     }
 
     Cache cache()
@@ -185,9 +185,9 @@ final class Application
         return _cache;
     }
 
-	Session session()
+	SessionStorage sessionStorage()
 	{
-		return _session;
+		return _sessionStorage;
 	}
 
     /**
@@ -207,7 +207,7 @@ final class Application
 		setRedis(config.redis);
 		setMemcache(config.memcache);
 		initCache(config.cache);
-		initSession(config.session);
+		initSessionStorage(config.session);
 	}
 
 	void start()
@@ -407,7 +407,7 @@ final class Application
     CreatorBuffer _cbuffer;
     Dispatcher _dispatcher;
     __gshared Cache _cache;
-	__gshared Session _session;
+	__gshared SessionStorage _sessionStorage;
 
     version(NO_TASKPOOL)
     {

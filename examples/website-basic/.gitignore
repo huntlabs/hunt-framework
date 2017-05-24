@@ -20,3 +20,4 @@ core
 *.kate-swp
 /server
 website-basic
+storage/sessions/*
