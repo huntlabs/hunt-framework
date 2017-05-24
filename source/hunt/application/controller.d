@@ -42,12 +42,10 @@ abstract class Controller
         IMiddleware[] middlewares;
         View _view;
     }
-	/*
     final @property session()
     {
         return request.getSession();
     }
-    */
     final @property response()
     {
         return request.createResponse();
@@ -94,11 +92,6 @@ abstract class Controller
     @property Cache cache()
     {
 		return Application.getInstance().cache();
-    }
-
-    @property Session session()
-    {
-        return Application.getInstance().session();
     }
 
     void render(string filename = null)()
