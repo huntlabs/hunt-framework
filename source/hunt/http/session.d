@@ -15,6 +15,42 @@ import std.experimental.logger;
 
 class Session
 {
+	private string _sessionId;
+	private JSONValue _sessions;
+	private SessionStorage _sessionStorage;
+
+	this(SessionStorage sessionStorage)
+	{
+		this._sessionStorage = sessionStorage;
+		this._sessionId = _sessionStorage.generateSessionId();
+		this._sessions = parseJSON(_sessionStorage.get(_sessionId));
+	}
+	this(string sessionId,SessionStorage sessionStorage)
+	{
+		this._sessionId = sessionId;
+		this._sessionStorage = sessionStorage;
+		this._sessions = parseJSON(_sessionStorage.get(_sessionId));
+	}
+	Session set(string key,string value)
+	{
+		_sessions[key] = value;
+		_sessionStorage.set(_sessionId,_sessions.toString);
+		return this;
+	}
+
+	string get(string key)
+	{
+		return _sessions[key].str;
+	}
+
+	string sessionId()
+	{
+		return _sessionId;
+	}
+}
+
+class SessionStorage
+{
 	this(string driver = "file")
 	{
 		if(driver == string.init)driver = "file";
