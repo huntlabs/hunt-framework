@@ -449,6 +449,7 @@ class Router
         // enable muiltple route group
         bool _supportMultipleGroup = false;
 
-        string _configPath = "config/";
+		import hunt.init;
+        alias _configPath = DEFAULT_CONFIG_PATH;
     }
 }
