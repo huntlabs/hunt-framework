@@ -101,7 +101,7 @@ class SessionStorage
 
 		JSONValue json;
 		json[sessionName] = str;
-		json["_time"] = getCurrUnixStramp; 
+		json["_time"] = getCurrUnixStramp + _expire; 
 
 		set(str,json.toString,_expire);
 
