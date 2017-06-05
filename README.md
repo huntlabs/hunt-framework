@@ -40,5 +40,5 @@ POST    /user/login     user.login
 7. Template
 
 ## Community
-QQ Group: 184183224
+QQ Group: 184183224 
 [Facebook](https://www.facebook.com/huntframework/)
