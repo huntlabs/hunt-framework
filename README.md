@@ -38,3 +38,8 @@ POST    /user/login     user.login
 5. Validation
 6. ORM
 7. Template
+
+## Community
+QQ Group: 184183224 
+
+[Facebook](https://www.facebook.com/huntframework/)
