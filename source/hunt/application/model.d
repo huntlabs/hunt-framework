@@ -74,7 +74,7 @@ final class HuntEntity
         }
         else if(driver == "postgresql")
         {
-            version(PGSQL)
+            version(USE_PGSQL)
             {
                 _dialect = new PGSQLDialect();
                 _driver = new PGSQLDriver();
