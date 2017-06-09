@@ -61,8 +61,6 @@ class RouteGroup
             // TODO: 引用类型使用结构体二次包装
             Route route;
 
-            tracef("Match in group: %s, %s", this._name, this._routes);
-
             route = this._routes.get(path, null);
 
             if (route)
