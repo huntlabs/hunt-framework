@@ -4,14 +4,13 @@
 
 
 *		/							index.show
-*		/show						index.show
-*		/list						index.list
-*		/index						index.index
-*		/showint					index.showint
-*		/showbool					index.showbool
-GET		/get						index.getCache
-GET		/set						index.setCache
+#*		/show						index.show
+#*		/list						index.list
+#*		/index						index.index
+#*		/showint					index.showint
+#*		/showbool					index.showbool
+#GET		/get						index.getCache
+#GET		/set						index.setCache
 
-
-GET		/public						staticDir:public
+#GET		/public						staticDir:public
 # access: http://127.0.0.1:8080/public/1.html
