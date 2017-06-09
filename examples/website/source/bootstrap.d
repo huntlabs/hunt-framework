@@ -29,7 +29,7 @@ void main()
 {
 
 	auto app = Application.getInstance();
-	app.addRoute("GET","/",&hello);
+	app.addRoute("GET","/showuser",&hello);
 	//.setMiddlewareFactory(new MiddlewareFactory())
 	//.enableLocale();
 
