@@ -66,20 +66,30 @@ final class HuntEntity
 
         if(driver == "mysql")
         {
-            _dialect = new MySQLDialect();
-            _driver = new MySQLDriver();
+            version(USE_MYSQL)
+            {
+                _dialect = new MySQLDialect();
+                _driver = new MySQLDriver();
+            }
         }
         else if(driver == "postgresql")
         {
-            _dialect = new PGSQLDialect();
-            _driver = new PGSQLDriver();
+            version(USE_PGSQL)
+            {
+                _dialect = new PGSQLDialect();
+                _driver = new PGSQLDriver();
+            }
         }
         else if(driver == "")
         {
-            _dialect = new SQLiteDialect();
-            _driver = new SQLITEDriver();
+            version(USE_SQLITE)
+            {
+                _dialect = new SQLiteDialect();
+                _driver = new SQLITEDriver();
+            }
         }
-        else
+        
+	if(_dialect is null || _driver is null)
         {
             assert(false, "not support dialect " ~ driver);
         }
