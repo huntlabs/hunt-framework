@@ -7,7 +7,7 @@ import stdFile = std.file;
 import stdPath = std.path;
 import core.sync.rwmutex;
 
-FileStorage _file;
+__gshared FileStorage _file;
 @property FileInstance()
 {
 	if(_file is null)
