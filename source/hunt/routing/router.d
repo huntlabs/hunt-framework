@@ -231,7 +231,6 @@ class Router
                     // TODO: this is bug
                     string directory = split(path, "/")[1];
 
-                    tracef("Directory is %s.", directory);
                     routeGroup = this.getGroupByDirectory(directory);
                     if (routeGroup)
                     {
@@ -247,8 +246,6 @@ class Router
                     routeGroup = this._defaultGroup;
                 }
             }
-
-            tracef("Route group is: %s, path: %s", routeGroup.getName(), path);
 
             return routeGroup.match(path);
         }

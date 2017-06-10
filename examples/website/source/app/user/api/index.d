@@ -21,6 +21,6 @@ class IndexController : Controller
     {
     	alias res = this.response;
         import std.stdio;
-        res.html("hello world<br/>");
+        res.html("hello world<br/>"~__FUNCTION__);
     }
 }

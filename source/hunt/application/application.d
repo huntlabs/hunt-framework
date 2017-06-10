@@ -300,15 +300,10 @@ final class Application
         option.handlerFactories.insertBack(&newHandler);
         _server = new HttpServer(option);
         addr = parseAddress(conf.http.address,conf.http.port);
-        // foreach(Address addr; conf.bindAddress)
-        // {
         HTTPServerOptions.IPConfig ipconf;
         ipconf.address = addr;
-        //ipconf.fastOpenQueueSize = conf.fastOpenQueueSize;
-        //ipconf.enableTCPFastOpen = (conf.fastOpenQueueSize > 0);
 
         _server.addBind(ipconf);
-        // }
 
         //if(conf.webSocketFactory)
         //    _wfactory = conf.webSocketFactory;
@@ -336,7 +331,7 @@ final class Application
                     {
                         if (std.conv.to!int(groupConfig[3]) > 0)
                         {
-                            value ~= groupConfig[3];
+                            value ~= ":"~groupConfig[3];
                         }
                     }
 
