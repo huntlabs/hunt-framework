@@ -27,7 +27,7 @@ version(USE_MEMCACHE){
 	}
 
 	private:
-	driveMemcache.Memcache _memcache = null;
+	__gshared driveMemcache.Memcache _memcache = null;
 
 	__gshared string _host;
 	__gshared ushort _port;

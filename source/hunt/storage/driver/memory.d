@@ -7,7 +7,7 @@ import std.conv;
 import core.memory;
 import core.sync.rwmutex;
 
-MemoryStorage _memory;
+__gshared MemoryStorage _memory;
 @property MemoryInstance()
 {
 	if(_memory is null)
@@ -89,7 +89,6 @@ class MemoryStorage
 
         auto trunk = new MemoryBuffer(key,value,value.length.to!uint);
         trunk.exprie = ((exprie == 0) ? 0 : (getCurrUnixStramp + exprie));
-        writeln(trunk.exprie,cast(string)(*trunk.ptr));
 
         if(isset(key)){
             trunkSize = trunkSize + value.length - map[key].length;
@@ -111,7 +110,6 @@ class MemoryStorage
                 tail = trunk;
             }
         }
-
         return true;
     }
 
@@ -194,7 +192,6 @@ class MemoryStorage
 
     private bool isExpire(string key)
     {
-        writeln(map[key].exprie);
         if(map[key].exprie == 0)return true;
         if(map[key].exprie <= getCurrUnixStramp)
         {

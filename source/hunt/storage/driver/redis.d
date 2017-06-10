@@ -18,7 +18,7 @@ version(USE_REDIS){
 	}
 
 	private:
-	driveRedis.Redis _redis = null;
+	__gshared driveRedis.Redis _redis = null;
 
 	__gshared string _host = "127.0.0.1";
 	__gshared ushort _port = 6379;
