@@ -48,6 +48,26 @@ class IndexController : Controller
     }
 
 	@Action
+	void upload()
+	{
+		import std.stdio;
+		auto test = request.file("test");
+		writeln(test.fileName);
+		writeln(test.fileSize);
+		writeln(test.contentType);
+		ubyte[] rdata;
+		test.read(test.fileSize,(in ubyte[] data){
+			rdata ~= data;	
+		});
+		writeln(cast(string)rdata);
+	}
+	@Action
+	void download()
+	{
+		this.response.download("test",cast(ubyte[])"test");
+	}
+
+	@Action
     void showbool()
     {
 		trace("---show bool----");
