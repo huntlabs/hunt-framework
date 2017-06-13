@@ -200,7 +200,6 @@ final class Request : RequestHandler
 		return v;
 	}
 
-
 	/// get a post
 	T post(T = string)(string key, T v = T.init)
 	{
@@ -215,6 +214,12 @@ final class Request : RequestHandler
 		return v;
 	}
 	//	alias _req this;
+
+	/// GET FILE
+	auto file(T = string)(string key,T v = T.init)
+	{
+		return postForm.getFileValue(key);
+	}
 
 	@property ref string[string] materef() {return _mate;}
 
