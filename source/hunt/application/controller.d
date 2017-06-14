@@ -238,9 +238,9 @@ void callHandler(T, string fun)(Request req) if(is(T == class) || is(T == struct
 	import core.memory;
 	scope(exit){if(!handler.isAsync){handler.destroy(); GC.free(cast(void *)handler);}}
 
-    handler.before();
+    //handler.before();		// It's already been called in line 183.
     handler.callAction(fun, req);
-    handler.after();
+    handler.after();		// Although the line 193 also has the code that calls after, but where has not executed, so this reservation
     handler.done();
 }
 

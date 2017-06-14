@@ -40,7 +40,42 @@ class Session
 
 	string get(string key)
 	{
-		return _sessions[key].str;
+		try
+		{
+			return _sessions[key].str;
+		}
+		catch (Exception e)
+		{
+			return string.init;
+		}
+	}
+
+	void remove(string key)
+	{
+		JSONValue json;
+		
+		foreach (string _key, ref value; _sessions)
+        {
+        	if (_key != key)
+        	{
+        		json[_key] = value;
+        	}
+        }
+
+		_sessions = json;
+		_sessionStorage.set(_sessionId, _sessions.toString);
+	}
+
+	string[] keys()
+	{
+		string[] ret;
+		
+		foreach (string key, value; _sessions)
+        {
+        	ret ~= key;
+        }
+        
+        return ret;
 	}
 
 	string sessionId()
