@@ -215,8 +215,8 @@ final class Request : RequestHandler
 	}
 	//	alias _req this;
 
-	/// GET FILE
-	auto file(T = string)(string key,T v = T.init)
+	/// GET FILE , if return NULL , file is null
+	auto file(string key)
 	{
 		return postForm.getFileValue(key);
 	}
