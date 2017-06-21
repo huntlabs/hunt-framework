@@ -30,7 +30,7 @@
             "dependencies": {
                 "entity": "~>0.1.0",
                 "libmemcached": "1.1.0",
-                "dredis": "0.0.1"
+                "dredis": "0.0.2"
             },
             "targetType": "library",
             "subConfigurations": {
@@ -48,7 +48,7 @@
         {
             "name": "Redis",
             "dependencies": {
-                "dredis": "0.0.1"
+                "dredis": "0.0.2"
             },
             "targetType": "library",
             "versions": [
@@ -69,7 +69,7 @@
             "name": "R&M",
             "dependencies": {
                 "libmemcached": "1.1.0",
-                "dredis": "0.0.1"
+                "dredis": "0.0.2"
             },
             "targetType": "library",
             "versions": [
