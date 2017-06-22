@@ -276,7 +276,6 @@ protected:
 	override void onError(HTTPErrorCode code) nothrow {
 		collectException((){
 				scope(exit) {
-					if(_res)_res.clear();
 					_downstream = null;
 				}
 				_error = code;
@@ -293,6 +292,7 @@ protected:
 					_res.setHttpStatusCode(502);
 				}
 				_res.done();
+				//_res.clear();
 			}());
 	}
 
