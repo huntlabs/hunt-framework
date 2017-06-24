@@ -5,14 +5,8 @@
     "description": "A high performance full-stack Web framework.",
     "libs": [],
     "dependencies": {
-        "collie": "~>0.9.7"
+        "collie": "~>0.9.10"
     },
-    "importPaths": [
-        "source/"
-    ],
-    "sourcePaths": [
-        "source/"
-    ],
     "configurations": [
         {
             "name": "default",
