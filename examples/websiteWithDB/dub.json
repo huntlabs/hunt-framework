@@ -1,0 +1,33 @@
+{
+	"name": "website-database",
+	"description": "A minimal D application.",
+	"copyright": "Copyright © 2016, huntframework.com",
+	"targetType": "executable",
+	"stringImportPaths": [
+		"./resources/views",
+	],
+	"mainSourceFile": "./source/bootstrap.d",
+	"dependencies": {
+		"hunt": {
+			"path": "../../"
+		},
+		"db": {
+			"path":"../../../database/"
+		}
+	},
+	"configurations": [
+		{
+			"name": "default",
+			"subConfigurations": {
+				"hunt": "R&M",
+				"db":"mysql"
+			}
+		},
+		{
+			"name": "no_taskpool",
+			"subConfigurations": {
+				"hunt": "no_taskpool"
+			}
+		}
+	]
+}

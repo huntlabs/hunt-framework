@@ -52,6 +52,10 @@ class IndexController : Controller
 	{
 		import std.stdio;
 		auto test = request.file("test");
+		if(test is null){
+			this.response.html("upload error");
+			return;
+		}
 		writeln(test.fileName);
 		writeln(test.fileSize);
 		writeln(test.contentType);
@@ -59,7 +63,7 @@ class IndexController : Controller
 		test.read(test.fileSize,(in ubyte[] data){
 			rdata ~= data;	
 		});
-		writeln(cast(string)rdata);
+		this.response.html(test.fileName);
 	}
 	@Action
 	void download()

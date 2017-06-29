@@ -5,14 +5,8 @@
     "description": "A high performance full-stack Web framework.",
     "libs": [],
     "dependencies": {
-        "collie": "~>0.9.7"
+        "collie": "~>0.9.10"
     },
-    "importPaths": [
-        "source/"
-    ],
-    "sourcePaths": [
-        "source/"
-    ],
     "configurations": [
         {
             "name": "default",
@@ -30,7 +24,7 @@
             "dependencies": {
                 "entity": "~>0.1.0",
                 "libmemcached": "1.1.0",
-                "dredis": "0.0.1"
+                "dredis": "0.0.3"
             },
             "targetType": "library",
             "subConfigurations": {
@@ -48,7 +42,7 @@
         {
             "name": "Redis",
             "dependencies": {
-                "dredis": "0.0.1"
+                "dredis": "0.0.3"
             },
             "targetType": "library",
             "versions": [
@@ -69,7 +63,7 @@
             "name": "R&M",
             "dependencies": {
                 "libmemcached": "1.1.0",
-                "dredis": "0.0.1"
+                "dredis": "0.0.3"
             },
             "targetType": "library",
             "versions": [

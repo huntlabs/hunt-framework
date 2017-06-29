@@ -215,8 +215,8 @@ final class Request : RequestHandler
 	}
 	//	alias _req this;
 
-	/// GET FILE
-	auto file(T = string)(string key,T v = T.init)
+	/// GET FILE , if return NULL , file is null
+	auto file(string key)
 	{
 		return postForm.getFileValue(key);
 	}
@@ -276,7 +276,6 @@ protected:
 	override void onError(HTTPErrorCode code) nothrow {
 		collectException((){
 				scope(exit) {
-					if(_res)_res.clear();
 					_downstream = null;
 				}
 				_error = code;
@@ -293,6 +292,7 @@ protected:
 					_res.setHttpStatusCode(502);
 				}
 				_res.done();
+				//_res.clear();
 			}());
 	}
 
