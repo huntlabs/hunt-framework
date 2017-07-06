@@ -4,6 +4,7 @@ import std.conv;
 
 import hunt.storage.base;
 import driverMemcache = hunt.storage.driver.memcache;
+import std.experimental.logger;
 
 version(USE_MEMCACHE)
 {
