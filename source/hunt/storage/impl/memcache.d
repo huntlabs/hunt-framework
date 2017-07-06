@@ -17,7 +17,7 @@ version(USE_MEMCACHE)
         }
         bool set(string key, ubyte[] value, int expire)
         {
-            return set(key,value.to!string,expire);
+            return set(key,cast(string)value,expire);
         }
 
         bool set(string key,string value,int expire)
