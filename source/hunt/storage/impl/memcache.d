@@ -4,6 +4,7 @@ import std.conv;
 
 import hunt.storage.base;
 import driverMemcache = hunt.storage.driver.memcache;
+import std.experimental.logger;
 
 version(USE_MEMCACHE)
 {
@@ -17,7 +18,7 @@ version(USE_MEMCACHE)
         }
         bool set(string key, ubyte[] value, int expire)
         {
-            return set(key,value.to!string,expire);
+            return set(key,cast(string)value,expire);
         }
 
         bool set(string key,string value,int expire)
