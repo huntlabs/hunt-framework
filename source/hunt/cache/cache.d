@@ -57,7 +57,7 @@ class Cache
 
     bool set(string key, string value, int expire)
     {
-        return _cacheStorage.set(this._prefix ~ key, cast(ubyte[])value, expire);
+        return _cacheStorage.set(this._prefix ~ key, value, expire);
     }
 
     bool set(string key, string value)
