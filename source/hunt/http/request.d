@@ -232,6 +232,17 @@ final class Request : RequestHandler
 		}
 		return _res;
 	}
+	
+	@property void action(string value)
+	{
+		_action = value;
+	}
+	
+	@property string action()
+	{
+		return _action;
+	}
+	
 protected:
 	override void onBody(const ubyte[] data) nothrow {
 		collectException((){
@@ -309,4 +320,5 @@ private:
 	uint _maxBodySize;
 	DoHandler _handler;
 	bool fristBody = true;
+	string _action;
 }
