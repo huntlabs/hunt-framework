@@ -239,6 +239,7 @@ void callHandler(T, string fun)(Request req) if(is(T == class) || is(T == struct
 	scope(exit){if(!handler.isAsync){handler.destroy(); GC.free(cast(void *)handler);}}
 
     //handler.before();		// It's already been called in line 183.
+    req.action = fun;
     handler.callAction(fun, req);
     handler.after();		// Although the line 193 also has the code that calls after, but where has not executed, so this reservation
     handler.done();
