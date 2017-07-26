@@ -96,7 +96,9 @@ private:
 	void loadConfig(string filename)
 	{
 		_value = new ConfigurationValue();
-		
+
+		import std.file;
+		if(!exists(filename))return;
 		import std.format;
 		auto f = File(filename,"r");
 		if(!f.isOpen()) return;

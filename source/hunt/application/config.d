@@ -35,7 +35,7 @@ final class AppConfig
         string defaultCookieDomain = ".example.com";
         string defaultLanguage = "zh-CN";
         string languages = "zh-CN,en-US";
-        string secret;
+        string secret = "CD6CABB1123C86EDAD9";
         string encoding = "utf-8";
         int staticFileCacheMinutes = 30;
     }
@@ -44,7 +44,7 @@ final class AppConfig
     {
         string storage = "file";
         string prefix = "huntsession_";
-		string path;
+		string path = "/tmp";
         uint expire = 3600;
     }
 
@@ -57,7 +57,7 @@ final class AppConfig
 
     struct HttpConf
     {
-        string address = "127.0.0.1";
+        string address = "0.0.0.0";
         ushort port = 8080;
         uint workerThreads = 4;
         uint ioThreads = 2;
@@ -69,7 +69,7 @@ final class AppConfig
 
     struct HttpsConf
     {
-        bool enabled;
+        bool enabled = false;
         string protocol;
         string keyStore;
         string keyStoreType;
@@ -83,20 +83,20 @@ final class AppConfig
 
     struct LogConfig
     {
-        string level = "warning";
+        string level = "all";
         string path;
         string file = "";
     }
 
     struct MemcacheConf
     {
-        bool enabled;
+        bool enabled = false;
         string servers;
     }
 
     struct RedisConf
     {
-        bool enabled;
+        bool enabled = false;
         string host = "127.0.0.1";
         string password = "";
         ushort database = 0;

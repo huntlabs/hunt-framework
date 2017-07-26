@@ -1,0 +1,2 @@
+module hunt.utils.log;
+
