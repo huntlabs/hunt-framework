@@ -82,6 +82,42 @@ final class Application
         return this;
     }
 
+	Application GET(string path,HandleFunction handle)
+	{
+        this._dispatcher.router.addRoute("GET", path, handle,DEFAULT_ROUTE_GROUP);
+		return this;
+	}
+	Application POST(string path,HandleFunction handle)
+	{
+        this._dispatcher.router.addRoute("POST", path, handle,DEFAULT_ROUTE_GROUP);
+		return this;
+	}
+	Application DELETE(string path,HandleFunction handle)
+	{
+        this._dispatcher.router.addRoute("DELETE", path, handle,DEFAULT_ROUTE_GROUP);
+		return this;
+	}
+	Application PATCH(string path,HandleFunction handle)
+	{
+        this._dispatcher.router.addRoute("PATCH", path, handle,DEFAULT_ROUTE_GROUP);
+		return this;
+	}
+	Application PUT(string path,HandleFunction handle)
+	{
+        this._dispatcher.router.addRoute("PUT", path, handle,DEFAULT_ROUTE_GROUP);
+		return this;
+	}
+	Application HEAD(string path,HandleFunction handle)
+	{
+        this._dispatcher.router.addRoute("HEAD", path, handle,DEFAULT_ROUTE_GROUP);
+		return this;
+	}
+	Application OPTIONS(string path,HandleFunction handle)
+	{
+        this._dispatcher.router.addRoute("OPTIONS", path, handle,DEFAULT_ROUTE_GROUP);
+		return this;
+	}
+
     // enable i18n
     auto enableLocale(string resPath = DEFAULT_LANGUAGE_PATH, string defaultLocale = "en-us")
     {
