@@ -232,6 +232,13 @@ final class Application
 		setConfig(Config.app);
 		start();
 	}
+	void run(Address addr)
+	{
+		Config.app.http.address = addr.toAddrString;
+		Config.app.http.port = addr.toPortString.to!ushort;
+		setConfig(Config.app);
+		start();
+	}
 
 	void setConfig(AppConfig config)
 	{
@@ -333,6 +340,7 @@ final class Application
         option.timeOut = conf.http.keepAliveTimeOut;
         option.handlerFactories.insertBack(&newHandler);
         _server = new HttpServer(option);
+        trace("addr:",conf.http.address,conf.http.port);
         addr = parseAddress(conf.http.address,conf.http.port);
         HTTPServerOptions.IPConfig ipconf;
         ipconf.address = addr;
@@ -408,13 +416,13 @@ final class Application
                 break;
             case "off":
             default:
-                globalLogLevel = LogLevel.off;
+				globalLogLevel = LogLevel.all;
                 break;
         }
 
+        import std.path;
         if(conf.file.length > 0 && conf.path.length > 0)
         {
-            import std.path;
             string file = buildPath(conf.path,conf.file);
             sharedLog = new FileLogger(file);
         }
