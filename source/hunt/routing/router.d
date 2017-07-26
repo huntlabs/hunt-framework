@@ -288,6 +288,7 @@ class Router
             }
 
             string configFile = (DEFAULT_ROUTE_GROUP == group) ? this._configPath ~ "routes" : this._configPath ~ group ~ ".routes";
+			if(!exists(configFile))return;
             
             // read file content
             RouteConfig config;

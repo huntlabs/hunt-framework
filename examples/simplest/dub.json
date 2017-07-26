@@ -1,0 +1,24 @@
+{
+	"name": "web",
+	"authors": [
+		"root"
+	],
+	"description": "A minimal D application.",
+	"copyright": "Copyright © 2017, root",
+	"license": "proprietary",
+	"mainSourceFile": "./source/bootstrap.d",
+	"targetType": "executable",
+	"dependencies": {
+		"hunt": {
+			"path": "../../"
+		}
+	},
+	"configurations": [
+	{
+		"name": "default",
+		"subConfigurations": {
+			"hunt": "default"
+		}
+	}
+	]
+}
