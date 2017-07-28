@@ -14,6 +14,44 @@ module hunt.routing.routegroup;
 import hunt.routing.define;
 import hunt.routing.route;
 
+import std.algorithm.searching;
+import std.string;
+
+class RouteInfo
+{
+	string mca;
+	string path;
+	HTTP_METHODS[] methods;
+
+	this(string mca,string path,HTTP_METHODS[] methods)
+	{
+		this.mca = mca;
+		this.path = path;
+		this.methods = methods;
+	}
+}
+
+class RoutePathInfo
+{
+	string path;
+	HTTP_METHODS[] methods;
+
+	this(string path,HTTP_METHODS[] methods)
+	{
+		this.path = path;
+		this.methods = methods;
+	}
+}
+
+class RouteRegInfo
+{
+	HTTP_METHODS[] methods;
+	this(HTTP_METHODS[] methods)
+	{
+		this.methods = methods;
+	}
+}
+
 class RouteGroup
 {
     this(string name = DEFAULT_ROUTE_GROUP)
@@ -41,27 +79,41 @@ class RouteGroup
             }
             else
             {
-                this._routes[route.getPattern()] = route;
+				//path 
+                this._routes[new RoutePathInfo(route.getPattern(),route.getMethods)] = route;
             }
 
             string mca = ((route.getModule()) ? route.getModule() ~ "." : "") ~ route.getController() ~ "." ~ route.getAction();
 
-            this._mcaRoutes[mca] = route;
+            this._mcaRoutes[new RouteInfo(mca,route.getPattern,route.getMethods)] = route;
 
             return this;
         }
 
-        Route getRoute(string mca)
+        Route getRoute(string method,string mca)
         {
-            return this._mcaRoutes.get(mca, null);
+			auto m = getMethod(method);
+			foreach(k,v;_mcaRoutes){
+				if(k.mca == mca){
+					if(canFind(k.methods,m) || m == HTTP_METHODS.ALL)
+						return v;
+				}
+			}
+			return null;
         }
 
-        Route match(string path)
+        Route match(string method,string path)
         {
             // TODO: 引用类型使用结构体二次包装
-            Route route;
+            Route route = null;
 
-            route = this._routes.get(path, null);
+			auto http_method = getMethod(toUpper(method));
+			foreach(k,v;_routes){
+				if(k.path == path){
+					if(canFind(k.methods,http_method) || http_method == HTTP_METHODS.ALL)
+						route = v;
+				}
+			}
 
             if (route)
             {
@@ -72,11 +124,16 @@ class RouteGroup
             	foreach(key, value; this._routes)
             	{
             		import std.string;
-            		if (path.startsWith(key))
+            		if (path.startsWith(key.path))
             		{
-            			route = this._routes.get(key, null);
+						foreach(k,v;_routes){
+							if(k.path == path){
+								if(canFind(k.methods,http_method) || http_method == HTTP_METHODS.ALL)
+									route = v;
+							}
+						}
             			
-            			if (route.staticFilePath != string.init)
+            			if (route && route.staticFilePath != string.init)
             			{
             				return route;
             			}
@@ -90,6 +147,9 @@ class RouteGroup
             foreach (r; this._regexRoutes)
             {
                 auto matched = path.match(regex(r.getPattern()));
+				bool matchMethod = false;
+				if(canFind(r.getMethods,http_method) || http_method == HTTP_METHODS.ALL)
+					matchMethod = true;
                 if (matched)
                 {
                     route = r.copy();
@@ -114,8 +174,8 @@ class RouteGroup
     private
     {
         string _name;
-        Route[string] _routes;
-        Route[string] _mcaRoutes;
+        Route[RoutePathInfo] _routes;
+        Route[RouteInfo] _mcaRoutes;
         Route[] _regexRoutes;
     }
 }

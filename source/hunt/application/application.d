@@ -76,6 +76,7 @@ final class Application
      */
     auto addRoute(string method, string path, HandleFunction handle, string group = DEFAULT_ROUTE_GROUP)
     {
+        trace(__FUNCTION__,method, path, handle, group);
         this._dispatcher.router.addRoute(method, path, handle, group);
 
         return this;
@@ -126,9 +127,7 @@ final class Application
         version(USE_REDIS){
             if(conf.enabled == true && conf.host && conf.port)
             {
-                //writeln(conf);
                 conRedis.setDefaultHost(conf.host,conf.port);    
-                //cache.driver.setDefaultHost(conf.host,conf.port);    
             }
         }
     }
@@ -137,12 +136,11 @@ final class Application
     {
         version(USE_MEMCACHE){
             if(conf.enabled == true){
-                writeln(conf);
+                trace(conf);
                 auto tmp1 = split(conf.servers,","); 
                 auto tmp2 = split(tmp1[0],":"); 
                 if(tmp2[0] && tmp2[1]){
                     conMemcache.setDefaultHost(tmp2[0],tmp2[1].to!ushort);
-                    //cache.driver.setDefaultHost(tmp2[0],tmp2[1].to!ushort);
                 }
             }
         }
