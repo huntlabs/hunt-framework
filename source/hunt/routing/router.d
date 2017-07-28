@@ -20,6 +20,7 @@ import hunt.application.controller;
 
 import std.file;
 import std.path;
+import std.array;
 
 class Router
 {
@@ -47,7 +48,7 @@ class Router
                 return "#";
             }
 
-            Route route = routeGroup.getRoute(mca);
+            Route route = routeGroup.getRoute("",mca);
 
             if (route is null)
             {
@@ -95,8 +96,8 @@ class Router
 
             return url ~ (params.length > 0 ? ("?" ~ buildUriQueryString(params)) : "");
         }
-
-        string buildUriQueryString(string[string] params)
+        
+		string buildUriQueryString(string[string] params)
         {
             if (params.length == 0)
             {
@@ -216,7 +217,7 @@ class Router
             if (false == this._supportMultipleGroup)
             {
                 // don't support multiple route group, use defualt group match function
-                return this._defaultGroup.match(path);
+                return this._defaultGroup.match(method,path);
             }
 
             RouteGroup routeGroup;
@@ -247,7 +248,7 @@ class Router
                 }
             }
 
-            return routeGroup.match(path);
+            return routeGroup.match(method,path);
         }
 
         string mendPath(string path)
@@ -324,8 +325,16 @@ class Router
 
             path = this.mendPath(path);
 
+			route.path = path;
+
             route.setGroup(group);
             route.setPattern(path);
+			auto arr = split(methods,",");
+			HTTP_METHODS[] http_methods;
+			foreach(v;arr){
+				http_methods ~= getMethod(v);
+			}
+			route.setMethods(http_methods);
 
             static if (is (T == string))
             {
