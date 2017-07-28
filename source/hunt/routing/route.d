@@ -151,13 +151,13 @@ class Route
             return this._action;
         }
 
-        Route setMethods(HTTP_METHOS[] methods)
+        Route setMethods(HTTP_METHODS[] methods)
         {
             this._methods = methods;
             return this;
         }
 
-        HTTP_METHOS[] getMethods()
+        HTTP_METHODS[] getMethods()
         {
             return this._methods;
         }
@@ -184,6 +184,7 @@ class Route
         }
     }
 
+	public string path;
     private
     {
         // Route group name
@@ -219,7 +220,7 @@ class Route
         HandleFunction _handle;
 
         // allowd http methods
-        HTTP_METHOS[] _methods = [ HTTP_METHOS.GET, HTTP_METHOS.POST, HTTP_METHOS.PUT, HTTP_METHOS.DELETE ];
+        HTTP_METHODS[] _methods = [ HTTP_METHODS.GET, HTTP_METHODS.POST, HTTP_METHODS.PUT, HTTP_METHODS.DELETE ];
         
         // staticDir:path
         string _staticFilePath;
