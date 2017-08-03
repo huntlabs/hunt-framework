@@ -95,7 +95,7 @@ class RouteGroup
 			auto m = getMethod(method);
 			foreach(k,v;_mcaRoutes){
 				if(k.mca == mca){
-					if(canFind(k.methods,m) || m == HTTP_METHODS.ALL)
+					if(canFind(k.methods,m) || k.methods == [HTTP_METHODS.ALL])
 						return v;
 				}
 			}
@@ -110,7 +110,7 @@ class RouteGroup
 			auto http_method = getMethod(toUpper(method));
 			foreach(k,v;_routes){
 				if(k.path == path){
-					if(canFind(k.methods,http_method) || http_method == HTTP_METHODS.ALL)
+					if(canFind(k.methods,http_method) || k.methods == [HTTP_METHODS.ALL])
 						route = v;
 				}
 			}
@@ -128,7 +128,7 @@ class RouteGroup
             		{
 						foreach(k,v;_routes){
 							if(k.path == path){
-								if(canFind(k.methods,http_method) || http_method == HTTP_METHODS.ALL)
+								if(canFind(k.methods,http_method) || k.methods == [HTTP_METHODS.ALL])
 									route = v;
 							}
 						}
@@ -148,7 +148,7 @@ class RouteGroup
             {
                 auto matched = path.match(regex(r.getPattern()));
 				bool matchMethod = false;
-				if(canFind(r.getMethods,http_method) || http_method == HTTP_METHODS.ALL)
+				if(canFind(r.getMethods,http_method) || r.getMethods == [HTTP_METHODS.ALL])
 					matchMethod = true;
                 if (matched)
                 {
