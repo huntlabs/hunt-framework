@@ -40,7 +40,6 @@ class Router
         string createUrl(string mca, string[string] params, string group = DEFAULT_ROUTE_GROUP)
         {
             // find Route
-
             RouteGroup routeGroup = this.getGroup(group);
 
             if (routeGroup is null)
@@ -232,6 +231,7 @@ class Router
                     // TODO: this is bug
                     string directory = split(path, "/")[1];
 
+
                     routeGroup = this.getGroupByDirectory(directory);
                     if (routeGroup)
                     {
@@ -400,8 +400,6 @@ class Router
 				}
 
                 string handleKey = this.makeRequestHandleKey(route);
-
-                trace(handleKey);
 
                 route.handle = getRouteFormList(handleKey);
             }
