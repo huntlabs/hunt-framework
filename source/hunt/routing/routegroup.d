@@ -123,20 +123,13 @@ class RouteGroup
             {
             	foreach(key, value; this._routes)
             	{
-            		import std.string;
-            		if (path.startsWith(key.path))
+					import std.string;
+					import std.algorithm.searching;
+					
+            		if (startsWith(path,key.path) && value.staticFilePath.length > 0 && 
+							(canFind(key.methods,http_method) || key.methods == [HTTP_METHODS.ALL]))
             		{
-						foreach(k,v;_routes){
-							if(k.path == path){
-								if(canFind(k.methods,http_method) || k.methods == [HTTP_METHODS.ALL])
-									route = v;
-							}
-						}
-            			
-            			if (route && route.staticFilePath != string.init)
-            			{
-            				return route;
-            			}
+            				return value;
             		}
             	}
             }
@@ -150,7 +143,7 @@ class RouteGroup
 				bool matchMethod = false;
 				if(canFind(r.getMethods,http_method) || r.getMethods == [HTTP_METHODS.ALL])
 					matchMethod = true;
-                if (matched)
+                if (matched && matchMethod)
                 {
                     route = r.copy();
 
