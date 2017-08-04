@@ -318,6 +318,7 @@ class Router
 
         Route makeRoute(T = string)(string methods, string path, T mca, string group = DEFAULT_ROUTE_GROUP)
         {
+			trace(methods,path,mca,group);
             auto route = new Route();
 
             import std.string : toUpper;
