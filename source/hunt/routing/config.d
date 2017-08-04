@@ -64,7 +64,7 @@ struct RouteConfig
         }
 
         // match example: GET, POST    /users    module.controller.action | staticDir:public
-		auto matched = line.match(regex(`([^/]+)\s+(/[\S]*?)\s+((staticDir[\:][\w]+)|([\w\.]+))`));
+		auto matched = line.match(regex(`([^/]+)\s+(/[\S]*?)\s+((staticDir[\:][\w|\/|\\]+)|([\w\.]+))`));
 
         if (matched)
         {

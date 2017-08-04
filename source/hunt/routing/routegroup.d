@@ -125,7 +125,6 @@ class RouteGroup
             	{
 					import std.string;
 					import std.algorithm.searching;
-					
             		if (startsWith(path,key.path) && value.staticFilePath.length > 0 && 
 							(canFind(key.methods,http_method) || key.methods == [HTTP_METHODS.ALL]))
             		{
