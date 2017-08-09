@@ -42,6 +42,17 @@ class Configuration
 		@property value(){
 			return _value;
 		}
+		
+		auto opCast(T)(){
+                    static if(is(T == bool))
+                        return as!bool(true);
+                    else static if(isSomeString!T)
+                        return cast(T)(value());
+                    else static if(isNumeric!(T))
+                        return as!T(T.init);
+                    else
+                        static assert(0,"not support type");
+		}
 
 		auto as(T)(T value = T.init) if(isNumeric!(T))
 		{
@@ -160,9 +171,16 @@ unittest
 	assert(conf.app.test.value() == "");
 	
 	auto confdev = new Configuration("test.config","dev");
+	long tv = cast(long)confdev.http.listen;
+	assert(tv == 100);
 	assert(confdev.http.listen.as!long() == 100);
 	writeln("----------" ,confdev.app.test.value());
+	string tvstr = cast(string)confdev.app.test;
+	auto tvstrw = cast(wstring)confdev.app.test;
+	assert(tvstr == "dev");
 	assert(confdev.app.test.value() == "dev");
+	bool tvBool = cast(bool)confdev.app.test;
+	assert(tvBool);
 
 	string str;
 	auto e = collectException!NoValueHasException(confdev.app.host.value(), str);
