@@ -33,8 +33,6 @@
             "versions": [
                 "WITH_ENTITY",
                 "USE_MYSQL",
-                "USE_SQLITE",
-                "USE_PGSQL",
                 "USE_REDIS",
                 "USE_MEMCACHE"
             ]
