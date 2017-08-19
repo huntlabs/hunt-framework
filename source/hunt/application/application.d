@@ -185,8 +185,9 @@ final class Application
     private void initDb(AppConfig.DBConfig conf)
     {
         version (WITH_ENTITY) {
+			import hunt.application.model;
             if(conf.url == "")return;
-            initDB(url.url);
+            initDB(conf.url);
         }
     }
 

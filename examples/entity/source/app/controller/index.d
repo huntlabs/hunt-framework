@@ -31,9 +31,6 @@ class IndexController : Controller
     @Action
     void showbool()
     {
-        import std.conv;
-        import std.datetime : StopWatch;
-
         EntityManager entitymanager = entityManagerFactory.createEntityManager!(User);
         
     }
