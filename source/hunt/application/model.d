@@ -18,14 +18,20 @@ import std.string;
 
 private __gshared static DatabaseConfig _dbconfig;
 private __gshared static EntityManagerFactory _entityManagerFactory;
+__gshared static EntityManager _entityManager;
 
 void initDB(string url)
 {
     _dbconfig = new DatabaseConfig(url);
-    _entityManagerFactory = Persistence.createEntityManagerFactory("hunt",config);
+    _entityManagerFactory = Persistence.createEntityManagerFactory("hunt",_dbconfig);
 }
 
-@property static  EntityManagerFactory entityManagerFactory()
+@property static  EntityManager entityManager()
 {
-    return _entityManagerFactory;
+    return _entityManager;
+}
+
+void registerEntity(T...)()
+{
+	_entityManager = _entityManagerFactory.createEntityManager!(T)();
 }
