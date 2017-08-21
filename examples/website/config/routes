@@ -1,19 +1,4 @@
 #
 # [GET,POST,PUT...]    path    controller.method
 #
-
-
-*		/							index.show
-*		/show						index.show
-*		/list						index.list
-*		/index						index.index
-*		/showint					index.showint
-*		/showbool					index.showbool
-GET		/get						index.getCache
-GET		/set						index.setCache
-
-POST /upload index.upload
-GET /download index.download
-
-#GET		/public						staticDir:public
-# access: http://127.0.0.1:8080/public/1.html
+*		/public						staticDir:public

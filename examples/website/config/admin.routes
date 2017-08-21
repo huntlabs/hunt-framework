@@ -1,5 +1,0 @@
-#
-# [GET,POST,PUT...]    path    controller.method
-#
-
-*	/show	user.index.show

@@ -4,8 +4,7 @@ import hunt;
 
 class User
 {
-    @Id
-    @Generated
+	@AutoIncrement @PrimaryKey
     long id;
 	
     string name;

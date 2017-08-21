@@ -185,17 +185,8 @@ final class Application
     private void initDb(AppConfig.DBConfig conf)
     {
         version (WITH_ENTITY) {
-            trace("conf..", conf);
             if(conf.url == "")return;
-            import std.string;
-            import hunt.utils.url;
-            import std.conv;
-            import hunt.application.model;
-            URL url = conf.url.parseURL();
-            url.queryArr["user"] = url.user;
-            url.queryArr["password"] = url.pass;
-            trace("driver:", url.scheme, " hosturl ", url.toString()," user:",url.user, " pwd:", url.pass, "queryarr", url.queryArr);
-            initDB(url.scheme, url.scheme~"://" ~url.host ~":" ~to!string(url.port) ~url.path~"?"~url.query,url.queryArr);
+            initDB(url.url);
         }
     }
 
