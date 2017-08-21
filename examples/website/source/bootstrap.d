@@ -29,24 +29,24 @@ void main()
 {
 
 	auto app = Application.getInstance();
-	app.addRoute("GET","/showuser",&hello);
+	//app.addRoute("GET","/showuser",&hello);
 	//.setMiddlewareFactory(new MiddlewareFactory())
 	//.enableLocale();
 
-	app.addRoute("GET","/label/edit/{id:[0-9]*}",&hello);
+	//app.addRoute("GET","/label/edit/{id:[0-9]*}",&hello);
 
 	//set language
-	app.enableLocale();
-	setLocale("en-br");
-	writeln( getText("message.hello-world"));
+	//app.enableLocale();
+	//setLocale("en-br");
+	//writeln( getText("message.hello-world"));
 
 	//set language
-	setLocale("zh-cn");
-	writeln( getText("email.subject"));
+	//setLocale("zh-cn");
+	//writeln( getText("email.subject"));
 
 	//set language
-	setLocale("en-us");
-	writeln( getText("email.subject", "empty"));
+	//setLocale("en-us");
+	//writeln( getText("email.subject", "empty"));
 
 	//Redis.set("hello","world");
 	//Memcache.set("hello","world");

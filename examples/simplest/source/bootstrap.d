@@ -9,6 +9,13 @@ void main()
 		res.html("hello world");
 		res.done();
 	});
+	
+    app.POST("/index",function(Request req){
+        auto form = req.postForm();
+		Response res = req.createResponse();
+		res.html("hello world");
+		res.done();
+	});
 
 	app.run(parseAddress("0.0.0.0",11234));
 }
