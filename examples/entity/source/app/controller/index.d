@@ -31,7 +31,6 @@ class IndexController : Controller
     @Action
     void showbool()
     {
-        EntityManager entitymanager = entityManagerFactory.createEntityManager!(User);
         
     }
 }
