@@ -3,9 +3,6 @@
 	"description": "hunt use entity. ",
 	"copyright": "Copyright © 2016, huntframework.com",
 	"targetType": "executable",
-	"stringImportPaths": [
-		"./resources/views"
-	],
 	"mainSourceFile": "./source/bootstrap.d",
 	"dependencies": {
 		"hunt": {

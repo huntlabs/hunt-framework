@@ -16,9 +16,9 @@ public import orm;
 
 import std.string;
 
-private __gshared static DatabaseConfig _dbconfig;
-private __gshared static EntityManagerFactory _entityManagerFactory;
-__gshared static EntityManager _entityManager;
+__gshared DatabaseConfig _dbconfig;
+__gshared EntityManagerFactory _entityManagerFactory;
+__gshared EntityManager _entityManager;
 
 void initDB(string url)
 {
@@ -33,5 +33,5 @@ void initDB(string url)
 
 void registerEntity(T...)()
 {
-	_entityManager = _entityManagerFactory.createEntityManager!(T)();
+	_entityManager = _entityManagerFactory.createEntityManager!(T);
 }
