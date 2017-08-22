@@ -22,13 +22,13 @@
         {
             "name": "full",
             "dependencies": {
-                "orm": "~>0.0.2",
+                "entity": "~>0.0.3",
                 "libmemcached": "1.1.0",
                 "dredis": "0.0.3"
             },
             "targetType": "library",
             "subConfigurations": {
-				"orm": "mysql"
+				"entity": "mysql"
             },
             "versions": [
                 "WITH_ENTITY",
@@ -72,11 +72,11 @@
         {
             "name": "MySQL",
             "dependencies": {
-                "orm": "~>0.0.2"
+                "entity": "~>0.0.2"
             },
             "targetType": "library",
             "subConfigurations": {
-				"orm": "mysql"
+				"entity": "mysql"
             },
             "versions": [
                 "WITH_ENTITY",
@@ -86,11 +86,11 @@
         {
             "name": "SQLite",
             "dependencies": {
-                "orm": "~>0.0.2"
+                "entity": "~>0.0.3"
             },
             "targetType": "library",
             "subConfigurations": {
-				"orm": "sqlite"
+				"entity": "sqlite"
             },
             "versions": [
                 "WITH_ENTITY",
@@ -100,11 +100,11 @@
         {
             "name": "PGSQL",
             "dependencies": {
-                "orm": "~>0.0.2"
+                "entity": "~>0.0.3"
             },
             "targetType": "library",
             "subConfigurations": {
-				"orm": "postgresql"
+				"entity": "postgresql"
             },
             "versions": [
                 "WITH_ENTITY",
