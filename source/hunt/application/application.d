@@ -344,7 +344,13 @@ final class Application
 
         trace(conf.route.groups);
 
-        this._dispatcher.setWorkers(_tpool);
+        version(NO_TASKPOOL)
+        {
+            this._dispatcher.setWorkers(_tpool);
+        }
+        else
+        {
+        }
         // init dispatcer and routes
         if (conf.route.groups)
         {
