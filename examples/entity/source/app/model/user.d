@@ -5,17 +5,12 @@ import hunt;
 @Table("user")
 class User
 {
-	@AutoIncrement @PrimaryKey
-    long id;
-	
-    string name;
-}
+    @AutoIncrement @PrimaryKey 
+    int id;
 
-@Table("blog")
-class Blog
-{
-	@AutoIncrement @PrimaryKey
-    long id;
-	
+    @NotNull
     string name;
+    float money;
+    string email;
+    bool status;
 }

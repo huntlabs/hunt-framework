@@ -182,15 +182,6 @@ final class Application
         }
     }
 
-    private void initDb(AppConfig.DBConfig conf)
-    {
-        version (WITH_ENTITY) {
-			import hunt.application.model;
-            if(conf.url == "")return;
-            initDB(conf.url);
-        }
-    }
-
     private void initCache(AppConfig.CacheConf config)
     {
         _cache = new Cache(config.storage);
@@ -236,7 +227,6 @@ final class Application
 	{
 		setLogConfig(config.log);
 		upConfig(config);
-		initDb(config.database);
 		setRedis(config.redis);
 		setMemcache(config.memcache);
 		initCache(config.cache);
@@ -346,10 +336,10 @@ final class Application
 
         version(NO_TASKPOOL)
         {
-            this._dispatcher.setWorkers(_tpool);
         }
         else
         {
+            this._dispatcher.setWorkers(_tpool);
         }
         // init dispatcer and routes
         if (conf.route.groups)

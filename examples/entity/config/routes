@@ -2,10 +2,10 @@
 # [GET,POST,PUT...]    path    controller.method
 #
 
-*	/show		index.show
-*	/list		index.list
-*	/index		index.index
-*	/showint	index.showint
-*	/showbool	index.showbool
+GET	/add		index.add
+GET	/list		index.list
+GET	/del		index.del
+GET	/update		index.update
+GET	/find		index.find
 
 GET	/public		staticDir:public
