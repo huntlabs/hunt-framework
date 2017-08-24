@@ -32,18 +32,33 @@ class IndexController : Controller
         cb.where(cb.gt(cb.User.id,1));
         User[] users = entityManager.getResultList!User(cb);
 
-        string str;
+        string str = "id &nbsp; name &nbsp; action<p>";
         foreach(user;users){
-            str ~= "<a href=\"find?id="~user.id.to!string~"\">"~user.id.to!string ~ "</a>&nbsp;" ~ user.name ~ "<p>";
+            str ~= "<a href=\"find?id="~user.id.to!string~"\">"~user.id.to!string ~ "</a>&nbsp;" ~ user.name  
+            ~"&nbsp;  <a href=\"/del?id="~user.id.to!string~"\">delete</a>"
+            ~"&nbsp;  <a href=\"/update?id="~user.id.to!string~"\">update</a><p>";
         }
 
+        str ~= "<br>  <a href=\"/add\">add</a><p>";
         response.html(str);
     }
-
+    
     @Action
     void add()
     {
-        auto name = request.get("name","");
+        response.html(```
+                      <form action="/add" method="post">
+                        <p>name: <input type="text" name="name" /></p>
+                        <input type="submit" value="Submit" />
+                      </form>
+                      ```);
+    }
+    
+
+    @Action
+    void addPost()
+    {
+        auto name = request.post("name","");
         User user = new User();
         user.name = name;
         entityManager.persist(user);
@@ -64,7 +79,23 @@ class IndexController : Controller
     void update()
     {
         auto id = request.get("id","");
-        auto name = request.get("name","");
+        User user = new User();
+        user.id = id.to!int;
+        entityManager.find(user);
+        response.html(```
+                      <form action="/update" method="post">
+                        <p>name: <input type="hidden"  name="id" value="```~id~```" /></p>
+                        <p>name: <input type="text" name="name" value="`````~user.name~`"/></p>
+                        <input type="submit" value="Submit" />
+                      </form>
+                      ```);
+    }
+    
+    @Action
+    void updatePost()
+    {
+        auto id = request.post("id","");
+        auto name = request.post("name","");
         User user = new User();
         user.id = id.to!int;
         user.name = name;
@@ -79,8 +110,6 @@ class IndexController : Controller
         User user = new User();
         user.id = id.to!int;
         entityManager.find(user);
-        writeln(user.money);
-        response.html(id ~ "&nbsp;" ~ user.name.to!string ~ "&nbsp;" ~ ((user.money == 0) ? "0" : user.money.to!string) 
-                      ~ "<br> <a href=\"/list\">list</a>");
+        response.html("id:" ~id ~ "&nbsp; name:" ~ user.name.to!string ~ "<br> <a href=\"/list\">list</a>");
     }
 }

@@ -3,9 +3,11 @@
 #
 
 GET	/add		index.add
+POST	/add		index.addPost
 GET	/list		index.list
 GET	/del		index.del
 GET	/update		index.update
+POST	/update		index.updatePost
 GET	/find		index.find
 
 GET	/public		staticDir:public
