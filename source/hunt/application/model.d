@@ -13,18 +13,13 @@ module hunt.application.model;
 
 version (WITH_ENTITY) :
 public import entity;
+public import hunt.application.config;
 
 import std.string;
 
 __gshared DatabaseConfig _dbconfig;
 __gshared EntityManagerFactory _entityManagerFactory;
 __gshared EntityManager _entityManager;
-
-void initDB(string url)
-{
-    _dbconfig = new DatabaseConfig(url);
-    _entityManagerFactory = Persistence.createEntityManagerFactory("hunt",_dbconfig);
-}
 
 @property static  EntityManager entityManager()
 {
@@ -33,5 +28,10 @@ void initDB(string url)
 
 void registerEntity(T...)()
 {
+    assert(Config.app.database.url,"Please add database url first");
+    _dbconfig = new DatabaseConfig(Config.app.database.url);
+	assert(_dbconfig,"Please init db config first");
+    _entityManagerFactory = Persistence.createEntityManagerFactory("hunt",_dbconfig);
+	assert(_entityManagerFactory,"Please init entity manager factory first");
 	_entityManager = _entityManagerFactory.createEntityManager!(T);
 }
