@@ -22,7 +22,7 @@
         {
             "name": "full",
             "dependencies": {
-                "entity": "1.0.6",
+                "entity": "~>1.0.8",
                 "libmemcached": "1.1.0",
                 "dredis": "0.0.3"
             },
@@ -72,7 +72,7 @@
         {
             "name": "MySQL",
             "dependencies": {
-                "entity": "1.0.6"
+                "entity": "~>1.0.8"
             },
             "targetType": "library",
             "subConfigurations": {
@@ -86,7 +86,7 @@
         {
             "name": "SQLite",
             "dependencies": {
-                "entity": "1.0.6"
+                "entity": "~>1.0.8"
             },
             "targetType": "library",
             "subConfigurations": {
@@ -100,7 +100,7 @@
         {
             "name": "PGSQL",
             "dependencies": {
-                "entity": "1.0.6"
+                "entity": "~>1.0.8"
             },
             "targetType": "library",
             "subConfigurations": {
