@@ -416,6 +416,26 @@ final class Application
         }
     }
 
+    version(USE_KISS_RPC) {
+        import KissRpc.RpcManager;
+        public void startRpcService(T,A...)() {
+            if (Config.app.rpc.enabled == false)
+                return;
+            string ip = Config.app.rpc.service.address;
+            ushort port = Config.app.rpc.service.port;
+            int threadNum = Config.app.rpc.service.workerThreads;
+            RpcManager.getInstance().startService!(T,A)(ip, port, threadNum);
+        }
+        public void startRpcClient(T)() {
+            if (Config.app.rpc.enabled == false)
+                return;
+            string ip = Config.app.rpc.service.address;
+            ushort port = Config.app.rpc.service.port;
+            int threadNum = Config.app.rpc.service.workerThreads;
+            RpcManager.getInstance().connectService!(T)(ip, port, threadNum);
+        }
+    }
+
     this()
     {
         _cbuffer = &defaultBuffer;
