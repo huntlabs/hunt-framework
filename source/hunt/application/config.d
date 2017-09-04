@@ -150,6 +150,18 @@ final class AppConfig
         string noon;
     }
 
+    struct ServiceConf {
+        string address = "127.0.0.1";
+        ushort port;
+        int workerThreads;
+        string password;
+    }
+
+    struct RpcConf {
+        bool enabled = true;
+        ServiceConf service;
+    }
+
     DBConfig database;
     ApplicationConf application;
     SessionConf session;
@@ -164,6 +176,7 @@ final class AppConfig
     CornConf cron;
     DateConf date;
     MailConf mail;
+    RpcConf rpc;
 
     @property Configuration config(){return _config;}
 
@@ -241,6 +254,16 @@ final class AppConfig
         collectException(conf.mail.smtp.protocol.value(), app.mail.smtp.protocol);.
         collectException(conf.mail.smtp.user.value(), app.mail.smtp.user);
         collectException(conf.mail.smtp.password.value(), app.mail.smtp.password);
+
+        collectException(conf.rpc.enabled.as!bool(), app.rpc.enabled);
+        collectException(conf.rpc.service.address.value(), app.rpc.service.address);
+        collectException(conf.rpc.service.port.as!ushort(), app.rpc.service.port);
+        collectException(conf.rpc.service.workerThreads.as!int(), app.rpc.service.workerThreads);.
+        collectException(conf.rpc.service.password.value(), app.rpc.service.password);
+
+
+  
+
 
         // string ws;
         // collectException(conf.server.webSocket_factory.value(), ws);
