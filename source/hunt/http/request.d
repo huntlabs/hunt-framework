@@ -30,6 +30,7 @@ import hunt.application.application;
 
 import std.string;
 import std.conv;
+import std.json;
 
 alias CreatorBuffer = Buffer delegate(HTTPMessage) nothrow;
 alias DoHandler = void delegate(Request) nothrow;
@@ -57,6 +58,15 @@ final class Request : RequestHandler
 			return _body; 
 		else 
 			return defaultBuffer;
+	}
+	
+    @property ubyteBody(){
+		if(!_uBody.length){
+            Body.readAll((in ubyte[] data){
+                _uBody ~= data;
+            });
+        }
+		return _uBody; 
 	}
 
 	@property route() { return _route; }
@@ -178,6 +188,10 @@ final class Request : RequestHandler
 		return cookie.value;
 	}
 
+    @property JSONValue json()
+    {
+        return parseJSON(cast(string)ubyteBody()); 
+    }
 	///get queries
 	@property string[string] queries()
 	{
@@ -312,6 +326,7 @@ private:
 	string[string] _mate;
 	Cookie[string] _cookies;
 	Buffer _body;
+    ubyte[] _uBody;
 	HTTPMessage _headers;
 	HTTPForm _form;
 	Response _res;
