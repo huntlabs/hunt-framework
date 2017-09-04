@@ -165,5 +165,16 @@
                 "USE_SQLITE"
             ]
         },
+	{
+            "name": "rpc",
+            "dependencies": {
+                "kiss-rpc": "~>0.0.2"
+            },
+            "targetType": "library",
+            "versions": [
+                "USE_KISS_RPC"
+            ]
+        }
+	
     ]
 }
