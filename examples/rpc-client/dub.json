@@ -1,0 +1,20 @@
+{
+	"name": "hunt-rpc-client",
+	"description": "hunt use entity. ",
+	"copyright": "Copyright © 2016, huntframework.com",
+	"targetType": "executable",
+	"mainSourceFile": "./source/bootstrap.d",
+	"dependencies": {
+		"hunt": {
+			"path": "../../"
+		}
+	},
+	"configurations": [
+		{
+			"name": "rpc",
+			"subConfigurations": {
+				"hunt": "rpc"
+			}
+		}
+	]
+}

@@ -1,0 +1,8 @@
+namespace KissRpc.IDL.flatbuffer;
+
+table UserInfoFB{
+	i:int;
+	name:string;
+}
+
+
