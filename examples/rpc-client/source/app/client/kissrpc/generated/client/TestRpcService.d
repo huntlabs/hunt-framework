@@ -1,11 +1,11 @@
-module KissRpc.IDL.TestRpcService;
+module kissrpc.generated.TestRpcService;
 
 
-import KissRpc.IDL.TestRpcInterface;
-import KissRpc.IDL.TestRpcMessage;
+import kissrpc.generated.TestRpcInterface;
+import kissrpc.generated.TestRpcMessage;
 
-import KissRpc.RpcClient;
-import KissRpc.Unit;
+import kissrpc.RpcClient;
+import kissrpc.Unit;
 
 
 class RpcTestService: RpcTestInterface{
