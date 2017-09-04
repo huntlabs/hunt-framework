@@ -1,16 +1,15 @@
-module KissRpc.IDL.TestRpcInterface;
+module kissrpc.generated.TestRpcInterface;
 
-import KissRpc.IDL.TestRpcMessage;
-import KissRpc.IDL.TestRpcService;
+import kissrpc.generated.TestRpcMessage;
+import kissrpc.generated.TestRpcService;
 
-import KissRpc.RpcRequest;
-import KissRpc.RpcClientImpl;
-import KissRpc.RpcClient;
-import KissRpc.RpcResponse;
-import KissRpc.Unit;
+import kissrpc.RpcRequest;
+import kissrpc.RpcClientImpl;
+import kissrpc.RpcClient;
+import kissrpc.RpcResponse;
+import kissrpc.Unit;
 import flatbuffers;
-import KissRpc.IDL.flatbuffer.TestRpc;
-import std.conv;
+import kissrpc.generated.message.TestRpc;
 
 abstract class RpcTestInterface{ 
 

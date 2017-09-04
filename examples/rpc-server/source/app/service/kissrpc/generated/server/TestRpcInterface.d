@@ -1,16 +1,14 @@
-module KissRpc.IDL.TestRpcInterface;
+module kissrpc.generated.TestRpcInterface;
 
-import KissRpc.IDL.TestRpcMessage;
-import KissRpc.IDL.TestRpcService;
+import kissrpc.generated.TestRpcMessage;
+import kissrpc.generated.TestRpcService;
 
-import KissRpc.RpcServer;
-import KissRpc.RpcServerImpl;
-import KissRpc.RpcResponse;
-import KissRpc.RpcRequest;
+import kissrpc.RpcServer;
+import kissrpc.RpcServerImpl;
+import kissrpc.RpcResponse;
+import kissrpc.RpcRequest;
 import flatbuffers;
-import KissRpc.IDL.flatbuffer.TestRpc;
-
-import std.stdio;
+import kissrpc.generated.message.TestRpc;
 
 abstract class RpcTestInterface{ 
 
@@ -43,7 +41,8 @@ abstract class RpcTestInterface{
 		auto builder = new FlatBufferBuilder(512);
 		//input flatbuffer code for UserInfoFB class
 
-		auto ret_UserInfoPos = UserInfoFB.createUserInfoFB(builder, ret_UserInfo.i, builder.createString(ret_UserInfo.name), );
+				auto ret_UserInfoPos = UserInfoFB.createUserInfoFB(builder, ret_UserInfo.i, builder.createString(ret_UserInfo.name), );
+
 
 		builder.finish(ret_UserInfoPos);
 

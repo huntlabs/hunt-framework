@@ -15,8 +15,8 @@ import std.experimental.logger;
 
 import hunt;
 
-import KissRpc.RpcServerListener;
-import KissRpc.IDL.TestRpcService;
+import kissrpc.RpcServerListener;
+import kissrpc.generated.TestRpcService;
 
 void main()
 {
