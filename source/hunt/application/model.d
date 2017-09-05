@@ -30,6 +30,8 @@ void registerEntity(T...)()
 {
     assert(Config.app.database.url,"Please add database url first");
     _dbconfig = new DatabaseConfig(Config.app.database.url);
+    _dbconfig.setMaximumConnection(Config.app.database.pool.maxConnection);
+    _dbconfig.setConnectionTimeout(Config.app.database.pool.timeout);
 	assert(_dbconfig,"Please init db config first");
     _entityManagerFactory = Persistence.createEntityManagerFactory("hunt",_dbconfig);
 	assert(_entityManagerFactory,"Please init entity manager factory first");
