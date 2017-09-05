@@ -127,14 +127,13 @@ final class AppConfig
 
     struct DbPoolConf
     {
-        uint maxSize;
-        uint minSize;
-        uint timeout;
+        uint maxConnection = 10;
+        uint minConnection = 1;
+        uint timeout = 10000;
     }
 
     struct DBConfig
     {
-        string driver;
         string url;
         DbPoolConf pool;
     }
@@ -242,10 +241,9 @@ final class AppConfig
         collectException(conf.date.format.value(), app.date.format);
         collectException(conf.date.timeZone.value(), app.date.timeZone);
 
-        collectException(conf.database.driver.value(), app.database.driver);
         collectException(conf.database.url.value(), app.database.url);
-        collectException(conf.database.pool.maxSize.as!uint(), app.database.pool.maxSize);
-        collectException(conf.database.pool.minSize.as!uint(), app.database.pool.minSize);
+        collectException(conf.database.pool.maxConnection.as!uint(), app.database.pool.maxConnection);
+        collectException(conf.database.pool.minConnection.as!uint(), app.database.pool.minConnection);
         collectException(conf.database.pool.timeout.as!uint(), app.database.pool.timeout);
 
         collectException(conf.mail.smtp.host.value(), app.mail.smtp.host);
@@ -261,23 +259,6 @@ final class AppConfig
         collectException(conf.rpc.service.workerThreads.as!int(), app.rpc.service.workerThreads);.
         collectException(conf.rpc.service.password.value(), app.rpc.service.password);
 
-
-  
-
-
-        // string ws;
-        // collectException(conf.server.webSocket_factory.value(), ws);
-        
-        // if (ws.length > 0)
-        // {
-        //     auto obj = Object.factory(ws);
-
-        //     if(obj)
-        //     {
-        //         app.server.webSocketFactory = cast(WebSocketFactory)obj;
-        //     }
-        // }
-        
         return app;
     }
 
