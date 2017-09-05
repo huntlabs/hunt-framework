@@ -1,10 +1,10 @@
-module KissRpc.IDL.TestRpcService;
+module kissrpc.generated.TestRpcService;
 
-import KissRpc.IDL.TestRpcInterface;
-import KissRpc.IDL.TestRpcMessage;
+import kissrpc.generated.TestRpcInterface;
+import kissrpc.generated.TestRpcMessage;
 
-import KissRpc.RpcServer;
-import KissRpc.Unit;
+import kissrpc.RpcServer;
+import kissrpc.Unit;
 
 
 class RpcTestService: RpcTestInterface{
@@ -18,6 +18,8 @@ class RpcTestService: RpcTestInterface{
 
 		UserInfo userInfoRet = userInfo;
 		//input service code for UserInfo class
+
+
 
 		return userInfoRet;
 	}

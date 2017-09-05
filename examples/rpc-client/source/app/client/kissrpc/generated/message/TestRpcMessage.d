@@ -1,4 +1,4 @@
-module KissRpc.IDL.TestRpcMessage;
+module kissrpc.generated.TestRpcMessage;
 import std.typetuple;
 
 

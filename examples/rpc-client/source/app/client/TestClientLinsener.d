@@ -3,13 +3,14 @@
 
 module service.TestClientLinsener;
 
-import KissRpc.RpcClientListener;
+import kissrpc.RpcClientListener;
 import kiss.aio.AsynchronousChannelSelector;
-import KissRpc.RpcSocketBaseInterface;
-import KissRpc.Logs;
-import KissRpc.IDL.TestRpcService;
-import KissRpc.IDL.TestRpcMessage;
-import KissRpc.Unit;
+import kissrpc.RpcSocketBaseInterface;
+import kissrpc.Logs;
+
+import kissrpc.generated.TestRpcMessage;
+import kissrpc.generated.TestRpcService;
+import kissrpc.Unit;
 
 import std.conv;
 import std.stdio;
