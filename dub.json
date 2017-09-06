@@ -168,10 +168,30 @@
 	{
             "name": "rpc",
             "dependencies": {
-                "kiss-rpc": "~>0.0.3"
+               "kiss-rpc": "~>0.0.4"
             },
             "targetType": "library",
             "versions": [
+                "USE_KISS_RPC"
+            ]
+        },
+        {
+            "name" : "R&M&PGSQL&rpc",
+            "dependencies": {
+                "libmemcached": "1.1.0",
+                "dredis": "0.0.3",
+                "entity": "~>1.0.9",
+                "kiss-rpc": "~>0.0.4"
+            },
+            "targetType": "library",
+            "subConfigurations": {
+                "entity": "postgresql"
+            },
+            "versions": [
+                "USE_REDIS",
+                "USE_MEMCACHE",
+                "WITH_ENTITY",
+                "USE_PGSQL",
                 "USE_KISS_RPC"
             ]
         }

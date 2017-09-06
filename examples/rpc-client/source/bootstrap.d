@@ -22,7 +22,7 @@ void main()
 {
 
     auto app = Application.getInstance();
-    app.startRpcClient!(TestClientLinsener)();
+    app.startRpcClient!(TestClientLinsener)("127.0.0.1", 9192);
     app.run();
 
 }
