@@ -168,7 +168,7 @@
 	{
             "name": "rpc",
             "dependencies": {
-               "kiss-rpc": "~>0.0.6"
+               "kiss-rpc": "~>0.0.7"
             },
             "targetType": "library",
             "versions": [
@@ -181,7 +181,7 @@
                 "libmemcached": "1.1.0",
                 "dredis": "0.0.3",
                 "entity": "~>1.0.9",
-                "kiss-rpc": "~>0.0.6"
+                "kiss-rpc": "~>0.0.7"
             },
             "targetType": "library",
             "subConfigurations": {
