@@ -417,7 +417,7 @@ final class Application
     }
 
     version(USE_KISS_RPC) {
-        import KissRpc.RpcManager;
+        import kissrpc.RpcManager;
         public void startRpcService(T,A...)() {
             if (Config.app.rpc.enabled == false)
                 return;
