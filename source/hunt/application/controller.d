@@ -113,7 +113,7 @@ abstract class Controller
         {
             tracef("do %s onProcess ..", m.name());
 
-            auto response = m.onProcess(this.request, null);
+            auto response = m.onProcess(this.request, this.response);
             if(response is null)
             {
                 continue;
