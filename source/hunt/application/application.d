@@ -412,9 +412,25 @@ final class Application
         if(conf.file.length > 0 && conf.path.length > 0)
         {
             string file = buildPath(conf.path,conf.file);
+            touch(file);
             sharedLog = new FileLogger(file);
         }
+
     }
+
+    void touch(string file = "")
+    {
+            if(!file.length)return;
+            if(file.isFile)return;
+            auto info = split(file,"/");
+            if(info.length > 1)
+            {
+                        string path = join(info[0 .. $-1],"/");
+                        mkdirRecurse(path);
+                    }
+            std.file.write(file,"");
+    }
+
 
     version(USE_KISS_RPC) {
         import kissrpc.RpcManager;
