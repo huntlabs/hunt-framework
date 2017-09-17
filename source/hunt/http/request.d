@@ -197,7 +197,7 @@ final class Request : RequestHandler
     @property auto json(T)(string key)
     {
         import std.traits;
-        auto obj = (key in (getBody.objectNoRef));
+        auto obj = (key in (json.objectNoRef));
         if(obj is null)
             return T.init;
         static if(isIntegral!(T))
