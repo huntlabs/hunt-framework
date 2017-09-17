@@ -190,7 +190,34 @@ final class Request : RequestHandler
 
     @property JSONValue json()
     {
-        return parseJSON(cast(string)ubyteBody()); 
+        if(_json == JSONValue.init)
+            _json = parseJSON(cast(string)ubyteBody()); 
+        return _json;
+    }
+    @property auto json(T)(string key)
+    {
+        import std.traits;
+        auto obj = (key in (getBody.objectNoRef));
+        if(obj is null)
+            return T.init;
+        static if(isIntegral!(T))
+            return cast(T)((*obj).integer);
+        else static if(is(T == string))
+            return (*obj).str;
+        else static if(is(FloatingPointTypeOf!T X))
+            return cast(T)((*obj).floating);
+        else static if(is(T == bool)){
+            if(obj.type == JSON_TYPE.TRUE)
+                return true;
+            else if(obj.type == JSON_TYPE.FALSE)
+                return false;
+            else {
+                throw new Exception("json error");
+                return false;
+            }
+        } else {
+            return (*obj);
+        }
     }
 	///get queries
 	@property string[string] queries()
@@ -326,6 +353,7 @@ private:
 	string[string] _mate;
 	Cookie[string] _cookies;
 	Buffer _body;
+    JSONValue _json = JSONValue.init;
     ubyte[] _uBody;
 	HTTPMessage _headers;
 	HTTPForm _form;
