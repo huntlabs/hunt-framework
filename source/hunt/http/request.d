@@ -62,6 +62,7 @@ final class Request : RequestHandler
 	
     @property ubyteBody(){
 		if(!_uBody.length){
+            Body.rest(0);
             Body.readAll((in ubyte[] data){
                 _uBody ~= data;
             });
@@ -190,14 +191,15 @@ final class Request : RequestHandler
 
     @property JSONValue json()
     {
-        if(_json == JSONValue.init)
+        if(_json == JSONValue.init){
             _json = parseJSON(cast(string)ubyteBody()); 
+        }
         return _json;
     }
-    @property auto json(T)(string key)
+    auto json(T)(string key)
     {
         import std.traits;
-        auto obj = (key in (json.objectNoRef));
+        auto obj = (key in (json().objectNoRef));
         if(obj is null)
             return T.init;
         static if(isIntegral!(T))
@@ -353,7 +355,7 @@ private:
 	string[string] _mate;
 	Cookie[string] _cookies;
 	Buffer _body;
-    JSONValue _json = JSONValue.init;
+    JSONValue _json;
     ubyte[] _uBody;
 	HTTPMessage _headers;
 	HTTPForm _form;
