@@ -105,7 +105,7 @@ abstract class Controller
         this.response.done();
     }
 
-    protected final void doMiddleware()
+    protected final bool doMiddleware()
     {
         trace("doMiddlware ..");
 
@@ -121,7 +121,10 @@ abstract class Controller
 
             tracef("Middleware %s is retrun done.", m.name);
             response.done();
+            return false;
         }
+
+        return true;
     }
 
 	@property bool isAsync()
@@ -176,7 +179,7 @@ string  __createCallActionFun(T, string moduleName)()
                             }
                         }
 
-                        str ~= "ptr.doMiddleware();";
+                        str ~= "if(!ptr.doMiddleware()){return false;}";
 
                         //before
                         str ~= q{
