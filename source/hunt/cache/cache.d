@@ -3,10 +3,12 @@ module hunt.cache.cache;
 import hunt.storage;
 
 import std.conv;
+import core.sync.rwmutex;
 import std.experimental.logger;
 
 class Cache
 {
+    private ReadWriteMutex _mutex;
     this(string driver = "memory")
     {
 		if(driver == string.init)driver = "memory";
@@ -43,35 +45,33 @@ class Cache
 				throw new Exception("Can't support cache driver: ", driver);
 			}
         }
+        
+        _mutex = new ReadWriteMutex();
     }
 
-    bool set(string key, ubyte[] value, int expire)
+    ~this()
     {
-        return _cacheStorage.set(this._prefix ~ key, value, expire);
-    }
-	
-    bool set(string key, ubyte[] value)
-    {
-        return set(key, value, expire);
+        _mutex.destroy();
     }
 
-    bool set(string key, string value, int expire)
+    bool set(T)(string key,T value , int expire = 0)
     {
-        return _cacheStorage.set(this._prefix ~ key, value, expire);
-    }
-
-    bool set(string key, string value)
-    {
-        return set(key,value, expire);
+        _mutex.writer.lock();
+        scope(exit) _mutex.writer.unlock();
+        return _cacheStorage.set(this._prefix ~ key, value, expire == 0 ? this.expire : expire);
     }
 
     string get(string key)
     {
+        _mutex.reader.lock();
+        scope(exit) _mutex.reader.unlock();
         return cast(string)_cacheStorage.get(this._prefix ~ key);
     }
 
     T get(T)(string key)
     {
+        _mutex.reader.lock();
+        scope(exit) _mutex.reader.unlock();
         return cast(T)_cacheStorage.get(this._prefix ~ key);
     }
 
