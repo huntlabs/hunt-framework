@@ -63,15 +63,15 @@ class Cache
 
     string get(string key)
     {
-        _mutex.reader.lock();
-        scope(exit) _mutex.reader.unlock();
+        _mutex.writer.lock();
+        scope(exit) _mutex.writer.unlock();
         return cast(string)_cacheStorage.get(this._prefix ~ key);
     }
 
     T get(T)(string key)
     {
-        _mutex.reader.lock();
-        scope(exit) _mutex.reader.unlock();
+        _mutex.writer.lock();
+        scope(exit) _mutex.writer.unlock();
         return cast(T)_cacheStorage.get(this._prefix ~ key);
     }
 
