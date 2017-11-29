@@ -134,7 +134,7 @@ class Parser
 			string str;
 			with(var){
 				`;
-				public string FunFooter = `
+	public string FunFooter = `
 			}
 			return str;
 		}`;
