@@ -6,7 +6,7 @@ version(USE_REDIS){
 	{
 		if(_redis is null)
 		{
-			_redis = new driveRedis.Redis(_host,_port,password);
+			_redis = new driveRedis.Redis(_host,_port,_password);
 		}
 		return  _redis;
 	}
