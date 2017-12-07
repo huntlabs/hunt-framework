@@ -163,7 +163,7 @@ final class Application
         version(USE_REDIS){
             if(conf.enabled == true && conf.host && conf.port)
             {
-                conRedis.setDefaultHost(conf.host,conf.port);    
+                conRedis.setDefaultHost(conf.host,conf.port,conf.password);    
             }
         }
     }
