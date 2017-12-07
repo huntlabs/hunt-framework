@@ -11,7 +11,6 @@ class Cache
     private ReadWriteMutex _mutex;
     this(string driver = "memory")
     {
-		if(driver == string.init)driver = "memory";
         switch(driver)
         {
 			case "memory":

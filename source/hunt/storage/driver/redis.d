@@ -6,15 +6,16 @@ version(USE_REDIS){
 	{
 		if(_redis is null)
 		{
-			_redis = new driveRedis.Redis(_host,_port);
+			_redis = new driveRedis.Redis(_host,_port,password);
 		}
 		return  _redis;
 	}
 
-	void setDefaultHost(string host = "127.0.0.1", ushort port = 6379)
+	void setDefaultHost(string host = "127.0.0.1", ushort port = 6379,string password="")
 	{
 		_host = host;
 		_port = port;
+		_password = password;
 	}
 
 	private:
@@ -22,4 +23,5 @@ version(USE_REDIS){
 
 	__gshared string _host = "127.0.0.1";
 	__gshared ushort _port = 6379;
+	__gshared string _password = "";
 }
