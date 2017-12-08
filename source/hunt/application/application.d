@@ -418,17 +418,16 @@ final class Application
 
     }
 
-    void touch(string file = "")
+    void touch(string f = "")
     {
-            if(!file.length)return;
-            if(file.isFile)return;
-            auto info = split(file,"/");
-            if(info.length > 1)
-            {
-                        string path = join(info[0 .. $-1],"/");
-                        mkdirRecurse(path);
-                    }
-            std.file.write(file,"");
+        import std.file;
+        try{
+            f.isFile();
+        }catch(Exception e){
+            mkdirRecurse(f);
+            rmdir(f);
+            write(f,"");
+        }
     }
 
 
