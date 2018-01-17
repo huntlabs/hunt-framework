@@ -12,14 +12,14 @@
 module hunt.application.application;
 
 import collie.codec.http.server.websocket;
-import collie.buffer;
+import kiss.buffer;
 import collie.codec.http.server;
 import collie.codec.http;
 import collie.bootstrap.serversslconfig;
 import collie.utils.exception;
 
-public import collie.socket.eventloop;
-public import collie.socket.eventloopgroup;
+public import kiss.event;
+public import collie.net.eventloopgroup;
 
 public import std.socket;
 public import std.experimental.logger;
@@ -264,7 +264,7 @@ final class Application
     {
         try{
             import std.experimental.allocator.gc_allocator;
-            import collie.buffer.ubytebuffer;
+            import kiss.buffer.ByteBuffer;
             if(msg.chunked == false)
             {
                 string contign = msg.getHeaders.getSingleOrEmpty(HTTPHeaderCode.CONTENT_LENGTH);
@@ -278,7 +278,7 @@ final class Application
                 }
             }
 
-            return new UbyteBuffer!ubyte();
+            return new ByteBuffer!(GCAllocator)();
         }
         catch(Exception e)
         {
@@ -320,7 +320,7 @@ final class Application
         }
 
         option.timeOut = conf.http.keepAliveTimeOut;
-        option.handlerFactories.insertBack(&newHandler);
+        option.handlerFactories ~= (&newHandler);
         _server = new HttpServer(option);
         trace("addr:",conf.http.address,conf.http.port);
         addr = parseAddress(conf.http.address,conf.http.port);
