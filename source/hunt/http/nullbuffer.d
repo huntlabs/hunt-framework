@@ -11,7 +11,7 @@
 
 module hunt.http.nullbuffer;
 
-import collie.buffer;
+import kiss.buffer;
 
 final class NullBuffer : Buffer
 {
@@ -30,6 +30,8 @@ final class NullBuffer : Buffer
     override size_t readUtil(in ubyte[] data, scope void delegate(in ubyte[]) cback){return 0;}
     
     override size_t readPos(){return 0;}
+
+    override size_t set(size_t pos,in ubyte[] data){return 0;}
 }
 
 @property defaultBuffer(){return _default;}
