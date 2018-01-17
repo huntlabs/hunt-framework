@@ -13,7 +13,7 @@ module hunt.http.request;
 
 import std.exception;
 
-import collie.buffer;
+import kiss.buffer;
 import collie.codec.http;
 import collie.codec.http.server.requesthandler;
 import collie.codec.http.server.httpform;
