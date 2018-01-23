@@ -128,7 +128,7 @@ final class AppConfig
     struct DbPoolConf
     {
         uint maxConnection = 10;
-        uint minConnection = 1;
+        uint minConnection = 10;
         uint timeout = 10000;
     }
 
