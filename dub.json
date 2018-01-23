@@ -5,7 +5,7 @@
     "description": "A high performance full-stack Web framework.",
     "libs": [],
     "dependencies": {
-        "collie": {"path":"../collie/"}
+        "collie": "~>0.10.0"
     },
     "configurations": [
         {
