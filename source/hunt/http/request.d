@@ -51,16 +51,16 @@ final class Request : RequestHandler
 		return _form;
 	}
 
-	@property Header(){return _headers;}
+	@property HTTPMessage Header(){return _headers;}
 
-	@property Body(){
+	@property Buffer Body(){
 		if(_body)
 			return _body; 
 		else 
 			return defaultBuffer;
 	}
 	
-    @property ubyteBody(){
+    @property ubyte[] ubyteBody(){
 		if(!_uBody.length){
             Body.rest(0);
             Body.readAll((in ubyte[] data){
@@ -70,16 +70,16 @@ final class Request : RequestHandler
 		return _uBody; 
 	}
 
-	@property route() { return _route; }
+	@property Route route() { return _route; }
 	@property void route(Route value) { _route = value; }
 
-	@property mate(){return _mate;}
+	@property string[string] mate(){return _mate;}
 
-	@property path(){return Header.getPath;}
+	@property string path(){return Header.getPath;}
 
-	@property method(){return Header.methodString;}
+	@property string method(){return Header.methodString;}
 
-	@property host(){return header(HTTPHeaderCode.HOST);}
+	@property string host(){return header(HTTPHeaderCode.HOST);}
 
 	string header(HTTPHeaderCode code){
 		return _headers.getHeaders.getSingleOrEmpty(code);
@@ -138,7 +138,7 @@ final class Request : RequestHandler
 		}
 		return "";
 	}
-	@property clientAddress(){return _headers.clientAddress();}
+	@property Address clientAddress(){return _headers.clientAddress();}
 
 	string getMate(string key,string value = null)
 	{
