@@ -283,7 +283,7 @@ class ConfigNotFoundException : Exception
 
 class ConfigManager
 {
-    @property app()
+    @property AppConfig app()
     {
         if(!_app)
         {
@@ -293,7 +293,7 @@ class ConfigManager
         return _app;
     }
 
-    @property path()
+    @property string path()
     {
         return this._path;
     }
@@ -363,7 +363,7 @@ private:
     ReadWriteMutex _mutex;
 }
 
-@property Config()
+@property ConfigManager Config()
 {
     return _manger;
 }
