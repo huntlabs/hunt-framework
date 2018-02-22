@@ -32,6 +32,24 @@ POST    /user/login     user.login
 
 ```
 
+## Controller example
+```D
+module app.controller.test;
+
+import hunt;
+
+class TestController : Controller
+{
+    mixin MakeController;
+
+    @Action
+    void hello()
+    {
+        response.html("Hello world!");
+    }
+}
+```
+
 ## Component based
 1. Routing
 2. Caching
