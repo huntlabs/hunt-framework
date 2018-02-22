@@ -49,6 +49,7 @@ class TestController : Controller
     }
 }
 ```
+View [hunt-skeleton](https://github.com/huntlabs/hunt-skeleton) example project source code.
 
 ## Component based
 1. Routing
