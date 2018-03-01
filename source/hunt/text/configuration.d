@@ -109,7 +109,10 @@ private:
 		_value = new ConfigurationValue();
 
 		import std.file;
-		if(!exists(filename))return;
+		if(!exists(filename))
+		{	
+			throw new Exception("The config file doesn't exist: " ~ filename);
+		}
 		import std.format;
 		auto f = File(filename,"r");
 		if(!f.isOpen()) return;
