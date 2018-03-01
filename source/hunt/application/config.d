@@ -300,17 +300,13 @@ class ConfigManager
 
     void setConfigPath(string path)
     {
-        if(path.length == 0)
-        {
+        if(path.empty)
             return;
-        }
 
-        if(path[$ -1] != '/')
-        {
-            _path ~= "/";
-        }
-
-        this._path = path;
+        if(path[$-1] == '/')
+            this._path = path;
+        else
+            this._path = path ~ "/";
     }
 
     void setAppSection(string sec)
