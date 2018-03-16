@@ -55,9 +55,9 @@ View [hunt-skeleton](https://github.com/huntlabs/hunt-skeleton) example project 
 1. Routing
 2. Caching
 3. Middleware
-4. Configretion
+4. Configuration
 5. Validation
-6. ORM
+6. Entity
 7. Template
 
 ## Community
