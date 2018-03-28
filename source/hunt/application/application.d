@@ -156,7 +156,7 @@ final class Application
             _cbuffer = cbuffer;
     }
 
-    void setRedis(AppConfig.RedisConf conf)
+    /*void setRedis(AppConfig.RedisConf conf)
     {
         version(USE_REDIS){
             if(conf.enabled == true && conf.host && conf.port)
@@ -178,7 +178,7 @@ final class Application
                 }
             }
         }
-    }
+    }*/
 
     private void initCache(AppConfig.CacheConf config)
     {
@@ -232,8 +232,8 @@ final class Application
 	{
 		setLogConfig(config.log);
 		upConfig(config);
-		setRedis(config.redis);
-		setMemcache(config.memcache);
+		//setRedis(config.redis);
+		//setMemcache(config.memcache);
 		initCache(config.cache);
 		initSessionStorage(config.session);
 	}
