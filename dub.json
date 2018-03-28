@@ -5,7 +5,8 @@
     "description": "A high performance full-stack Web framework.",
     "libs": [],
     "dependencies": {
-        "collie": "~>0.10.4"
+        "collie": "~>0.10.4",
+		"cache":{"version":"~>0.0.1"},
     },
     "configurations": [
         {

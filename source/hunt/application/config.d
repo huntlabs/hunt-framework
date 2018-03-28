@@ -42,17 +42,17 @@ final class AppConfig
 
     struct SessionConf
     {
-        string storage = "file";
+		string storage = "memory";
         string prefix = "huntsession_";
-		string path = "/tmp";
+		string args = "/tmp";
         uint expire = 3600;
     }
 
     struct CacheConf
     {
-        string storage = "memory";
-        string prefix = "huntcache_";
-        int expire = 3600;
+		string storage = "memory";
+		string args = "/tmp";
+		bool   enableL2 = false;	
     }
 
     struct HttpConf
@@ -194,14 +194,14 @@ final class AppConfig
         collectException(conf.application.encoding.value,    app.application.encoding);
         collectException(conf.application.staticFileCacheMinutes.as!int,    app.application.staticFileCacheMinutes);
 
-        collectException(conf.session.storage.value(),    app.session.storage);
+		collectException(conf.session.storage.value(),    app.session.storage);
         collectException(conf.session.prefix.value(),    app.session.prefix);
-        collectException(conf.session.path.value(),    app.session.path);
+		collectException(conf.session.args.value(),    app.session.args);
         collectException(conf.session.expire.as!uint(),     app.session.expire);
 
-        collectException(conf.cache.storage.value(),    app.cache.storage);
-        collectException(conf.cache.prefix.value(),    app.cache.prefix);
-        collectException(conf.cache.expire.as!uint(),     app.cache.expire);
+		collectException(conf.cache.storage.value(),    app.cache.storage);
+        ///collectException(conf.cache.prefix.value(),    app.cache.prefix);
+		collectException(conf.cache.args.value(),     app.cache.args);
 
         collectException(conf.http.address.value(), app.http.address);
         collectException(conf.http.port.as!ushort(), app.http.port);

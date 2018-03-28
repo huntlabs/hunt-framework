@@ -155,12 +155,12 @@ final class Request : RequestHandler
 		auto sessionId = getCookieValue(sessionName);
 		if(!sessionId.length)
 		{
-			auto _tmp = new Session(Application.getInstance.sessionStorage);
+			auto _tmp = new Session(Application.getInstance().getSessionStorage());
 			createResponse().setCookie(sessionName, _tmp.sessionId);
 			return _tmp;
 		}
 
-		return new Session(sessionId,Application.getInstance.sessionStorage); 
+		return new Session(sessionId,Application.getInstance().getSessionStorage()); 
 	}
 
 	@property Cookie[string] cookies()

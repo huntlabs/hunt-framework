@@ -17,6 +17,7 @@ import collie.codec.http.server;
 import collie.codec.http;
 import collie.bootstrap.serversslconfig;
 import collie.utils.exception;
+import huntlabs.cache;
 
 public import kiss.event;
 public import collie.net.eventloopgroup;
@@ -40,12 +41,9 @@ import hunt.application.dispatcher;
 public import hunt.http;
 public import hunt.view;
 public import hunt.i18n;
-public import hunt.cache;
 public import hunt.application.config;
 public import hunt.application.middleware;
 
-public import conRedis = hunt.storage.driver.redis;
-public import conMemcache = hunt.storage.driver.memcache;
 
 abstract class WebSocketFactory
 {
@@ -184,27 +182,34 @@ final class Application
 
     private void initCache(AppConfig.CacheConf config)
     {
-        _cache = new Cache(config.storage);
-        _cache.setPrefix(config.prefix);
-        _cache.setExpire(config.expire);
-    }
+		_manger.createCache("default" , config.storage , config.args , config.enableL2);
+	}
     
     private void initSessionStorage(AppConfig.SessionConf config)
     {
-        _sessionStorage = new SessionStorage(config.storage);
-        _sessionStorage.setPrefix(config.prefix);
-        _sessionStorage.setPath((config.path is null) ? DEFAULT_SESSION_PATH : config.path);
+		_sessionStorage = new SessionStorage(UCache.CreateUCache(config.storage , config.args , false));
+      
+		_sessionStorage.setPrefix(config.prefix);
         _sessionStorage.setExpire(config.expire);
+
+		writeln(" initSessionStorage " ,_sessionStorage);
     }
 
-    Cache cache()
-    {
-        return _cache;
-    }
-
-	SessionStorage sessionStorage()
+	CacheManger getCacheManger()
 	{
+		return _manger;
+	}
+	
+	SessionStorage getSessionStorage()
+	{
+		writeln(" getSessionStorage " , _sessionStorage);
 		return _sessionStorage;
+	}
+	
+	UCache getCache()
+	{
+		return  _manger.getCache("default");
+
 	}
 
     /**
@@ -451,8 +456,12 @@ final class Application
     this()
     {
         _cbuffer = &defaultBuffer;
+		_manger = new CacheManger();
         this._dispatcher = new Dispatcher();
     }
+
+
+
 
     __gshared static Application _app;
 
@@ -463,9 +472,8 @@ final class Application
     uint _maxBodySize;
     CreatorBuffer _cbuffer;
     Dispatcher _dispatcher;
-    __gshared Cache _cache;
-	__gshared SessionStorage _sessionStorage;
-
+    CacheManger _manger;
+	SessionStorage _sessionStorage;
     version(NO_TASKPOOL)
     {
         // NOTHING TODO
