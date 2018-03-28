@@ -19,7 +19,7 @@ public import hunt.http.request;
 public import hunt.routing;
 public import hunt.application.middleware;
 
-import hunt.cache;
+import huntlabs.cache;
 import hunt.application.application;
 
 import std.exception;
@@ -89,10 +89,15 @@ abstract class Controller
         return _view;
     }
 
-    @property Cache cache()
+    @property UCache cache()
     {
-		return Application.getInstance().cache();
+		return Application.getInstance().getCache();
     }
+
+	@property cacheManger()
+	{
+		return Application.getInstance().getCacheManger();
+	}
 
     void render(string filename = null)()
     {
