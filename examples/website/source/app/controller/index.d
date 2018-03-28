@@ -81,14 +81,14 @@ class IndexController : Controller
 	{
 		auto key = request.get("key");	
 		auto value = request.get("value");	
-		cache.set(key,value);
+		cache.put(key,value);
 		auto response = this.request.createResponse();
         response.html("key : " ~ key ~ " value : " ~ value);
 	}
 	@Action void getCache()
 	{
 		auto key = request.get("key");	
-		auto value = cache.get(key);
+		auto value = cast(string)cache.get!string(key);
 		auto response = this.request.createResponse();
         response.html("key : " ~ key ~ " value : " ~ value);
 	}
