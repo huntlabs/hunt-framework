@@ -1,4 +1,4 @@
-module hunt.security.permission.Item;
+module hunt.security.acl.permission.Item;
 
 struct PermissionItem
 {

@@ -1,6 +1,6 @@
-module hunt.security.permission.Permission;
+module hunt.security.acl.permission.Permission;
 
-import hunt.security.permission.Item;
+import hunt.security.acl.permission.Item;
 
 class Permission
 {
