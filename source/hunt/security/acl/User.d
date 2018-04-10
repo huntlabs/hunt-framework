@@ -1,7 +1,7 @@
 module hunt.security.User;
 
 import hunt.security.Role;
-import hunt.security.permission.Permission;
+import hunt.security.acl.permission.Permission;
 
 class User
 {
