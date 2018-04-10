@@ -1,6 +1,7 @@
 module hunt.security.User;
 
 import hunt.security.Role;
+import hunt.security.permission.Permission;
 
 class User
 {
@@ -8,6 +9,7 @@ class User
     {
         int id;
         string name;
+        Permission permission;
         Role role;
         Role[] roles;
     }
@@ -17,6 +19,8 @@ class User
         this.id = userid;
         this.name = username;
         this.role = role;
+
+        this.permission = new Permission(role.permissions);
     }
     public int userId()
     {
@@ -28,5 +32,26 @@ class User
         this.roles ~= role;
         
         return this;
+    }
+
+    public string getRoleName()
+    {
+        return this.role.name;
+    }
+
+    public string[] getRoleNames()
+    {
+        string[] names;
+        foreach(role; this.roles)
+        {
+            names ~= role.name;
+        }
+
+        return names;
+    }
+
+    public bool hasPermission(string key)
+    {
+        return false;
     }
 }
