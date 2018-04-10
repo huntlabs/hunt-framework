@@ -1,10 +1,10 @@
 module hunt.security.Role;
 
-import hunt.security.permission.Permission;
+import hunt.security.permission.Item;
 
 class Role
 {
     int id;
     string name;
-    Permission[string] permissions;
+    PermissionItem[string] permissions;
 }
