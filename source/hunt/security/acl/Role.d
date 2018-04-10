@@ -1,6 +1,6 @@
 module hunt.security.Role;
 
-import hunt.security.permission.Item;
+import hunt.security.acl.permission.Item;
 
 class Role
 {
