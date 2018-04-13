@@ -1,6 +1,6 @@
 module hunt.security.authentication.Authenticate;
 
-import hunt.security.acl.permission.User;
+import hunt.security.User;
 
 class Authenticate
 {

@@ -6,7 +6,7 @@ class Permission
 {
     PermissionItem[string] permissions;
 
-    public this(PermissionItem[] permissions)
+    public this(PermissionItem[string] permissions)
     {
         this.permissions = permissions;
     }
