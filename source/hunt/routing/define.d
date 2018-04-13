@@ -11,7 +11,7 @@
 
 module hunt.routing.define;
 
-public import std.experimental.logger;
+public import kiss.log;
 
 public import hunt.http.request;
 

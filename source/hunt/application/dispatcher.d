@@ -143,7 +143,7 @@ void doRequestHandle(HandleFunction handle, Request request)
     {
         import std.stdio : writeln;
 
-        collectException({error(e.toString); writeln(e.toString());}());
+        collectException({logError(e.toString); writeln(e.toString());}());
 
         import core.stdc.stdlib : exit;
 

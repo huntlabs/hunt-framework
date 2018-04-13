@@ -23,7 +23,7 @@ public import kiss.event;
 public import collie.net.eventloopgroup;
 
 public import std.socket;
-public import std.experimental.logger;
+public import kiss.log;
 public import std.file;
 
 import std.string;
@@ -74,7 +74,7 @@ final class Application
      */
     auto addRoute(string method, string path, HandleFunction handle, string group = DEFAULT_ROUTE_GROUP)
     {
-        trace(__FUNCTION__,method, path, handle, group);
+       logDebug(__FUNCTION__,method, path, handle, group);
         this._dispatcher.router.addRoute(method, path, handle, group);
 
         return this;
@@ -170,7 +170,7 @@ final class Application
     {
         version(USE_MEMCACHE){
             if(conf.enabled == true){
-                trace(conf);
+               logDebug(conf);
                 auto tmp1 = split(conf.servers,","); 
                 auto tmp2 = split(tmp1[0],":"); 
                 if(tmp2[0] && tmp2[1]){
@@ -327,7 +327,7 @@ final class Application
         option.timeOut = conf.http.keepAliveTimeOut;
         option.handlerFactories ~= (&newHandler);
         _server = new HttpServer(option);
-        trace("addr:",conf.http.address,conf.http.port);
+       logDebug("addr:",conf.http.address,conf.http.port);
         addr = parseAddress(conf.http.address,conf.http.port);
         HTTPServerOptions.IPConfig ipconf;
         ipconf.address = addr;
@@ -337,7 +337,7 @@ final class Application
         //if(conf.webSocketFactory)
         //    _wfactory = conf.webSocketFactory;
 
-        trace(conf.route.groups);
+       logDebug(conf.route.groups);
 
         version(NO_TASKPOOL)
         {
@@ -375,7 +375,7 @@ final class Application
                     continue;
                 }
 
-                warningf("Group config format error ( %s ).", v);
+                logWarningf("Group config format error ( %s ).", v);
             }
         }
 
@@ -384,56 +384,45 @@ final class Application
 
     void setLogConfig(ref AppConfig.LogConfig conf)
     {
+		int level = 0;
         switch(conf.level)
         {
             case "all":
-                globalLogLevel = LogLevel.all;
+			case "trace":
+			case "debug":
+				level = 0;
                 break;
             case "critical":
-                globalLogLevel = LogLevel.critical;
-                break;
             case "error":
-                globalLogLevel = LogLevel.error;
+				level = 3;
                 break;
             case "fatal":
-                globalLogLevel = LogLevel.fatal;
+				level = 4;
                 break;
             case "info":
-                globalLogLevel = LogLevel.info;
-                break;
-            case "trace":
-                globalLogLevel = LogLevel.trace;
+				level = 1;
                 break;
             case "warning":
-                globalLogLevel = LogLevel.warning;
+				level = 2;
                 break;
             case "off":
-            default:
-				globalLogLevel = LogLevel.all;
+				level = 5;
                 break;
+			default:
+				level = 0;
         }
+		LogConf logconf;
+		logconf.level = level;
+		logconf.disableConsole = conf.disableConsole;
+		logconf.fileName = conf.path ~ conf.file;
+		logconf.maxSize = conf.maxSize;
+		logconf.maxNum = conf.maxNum;
 
-        import std.path;
-        if(conf.file.length > 0 && conf.path.length > 0)
-        {
-            string file = buildPath(conf.path,conf.file);
-            touch(file);
-            sharedLog = new FileLogger(file);
-        }
+		logLoadConf(logconf);
 
     }
 
-    void touch(string f = "")
-    {
-        import std.file;
-        try{
-            f.isFile();
-        }catch(Exception e){
-            mkdirRecurse(f);
-            rmdir(f);
-            write(f,"");
-        }
-    }
+
 
 
     version(USE_KISS_RPC) {
