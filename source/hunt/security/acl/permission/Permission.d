@@ -13,7 +13,7 @@ class Permission
         return this;
     }
 
-    public Permission addPermissions(PermissionItem[] permissions)
+    public Permission addPermissions(PermissionItem[string] permissions)
     {
         foreach(permission; permissions)
         {
