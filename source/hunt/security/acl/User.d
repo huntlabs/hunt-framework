@@ -1,30 +1,27 @@
-module hunt.security.User;
+module hunt.security.acl.User;
 
-import hunt.security.Role;
+import hunt.security.acl.Role;
 import hunt.security.acl.permission.Permission;
 
 class User
 {
     private
     {
-        int id;
-        string name;
-        Permission permission;
+        int _id;
+        Permission _permission;
         Role role;
         Role[] roles;
     }
 
-    public this(int userid, string username, Role role)
+    public this(int id)
     {
-        this.id = userid;
-        this.name = username;
-        this.role = role;
-
-        this.permission = new Permission(role.permissions);
+        this._id = id;
+        this._permission = new Permission;
     }
-    public int userId()
+
+    public int id()
     {
-        return this.id;
+        return this._id;
     }
 
     public User assignRole(Role role)

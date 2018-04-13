@@ -43,12 +43,12 @@ public import hunt.view;
 public import hunt.i18n;
 public import hunt.application.config;
 public import hunt.application.middleware;
-
+public import hunt.security.authentication.Identity;
 
 abstract class WebSocketFactory
 {
     IWebSocket newWebSocket(const HTTPMessage header);
-}
+};
 
 
 final class Application
@@ -77,6 +77,12 @@ final class Application
         trace(__FUNCTION__,method, path, handle, group);
         this._dispatcher.router.addRoute(method, path, handle, group);
 
+        return this;
+    }
+
+    Application addIdentity(Identity identity)
+    {
+        this._dispatcher.addIdentity(identity);
         return this;
     }
 
