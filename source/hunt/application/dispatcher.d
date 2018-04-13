@@ -14,8 +14,13 @@ module hunt.application.dispatcher;
 import hunt.routing;
 import hunt.http.request;
 import hunt.http.response;
+
 import hunt.application.controller;
 import hunt.application.config;
+
+import hunt.security.authentication.Authenticate;
+import hunt.security.authentication.Identity;
+import hunt.security.acl.User;
 
 import collie.utils.exception;
 import collie.codec.http;
@@ -32,6 +37,11 @@ class Dispatcher
     {
         this._router = new Router;
         this._router.setConfigPath(Config.path);
+    }
+
+    private
+    {
+        Identity[string] _identites;
     }
 
     public
@@ -69,15 +79,48 @@ class Dispatcher
                     }
                 }
 
-                // add handle task to taskPool
                 request.route = route;
-                this._taskPool.put(task!doRequestHandle(route.handle, request));
 
+                // hunt.security filter
+                request.user = this.authenticateUser(request);
+
+                // add handle task to taskPool
+                this._taskPool.put(task!doRequestHandle(route.handle, request));
             }
             catch(Exception e)
             {
                 showException(e);
             }
+        }
+
+        Dispatcher addIdentity(Identity identity)
+        {
+            this._identites[identity.group()] = identity;
+
+            return this;
+        }
+
+        Identity getIdentity(string routeGroup)
+        {
+            return this._identites[routeGroup];
+        }
+
+        User authenticateUser(Request request)
+        {
+            User user;
+            
+            Identity identity = this.getIdentity(request.route.getGroup());
+            if (identity is null)
+            {
+                user = identity.login(request);
+            }
+
+            if (user is null)
+            {
+                user = new User;
+            }
+
+            return user;
         }
 
         void addRouteGroup(string group, string method, string value)

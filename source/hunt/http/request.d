@@ -27,6 +27,7 @@ import hunt.http.nullbuffer;
 import hunt.routing.route;
 import hunt.utils.time;
 import hunt.application.application;
+import hunt.security.acl.User;
 
 import std.string;
 import std.conv;
@@ -37,7 +38,7 @@ alias DoHandler = void delegate(Request) nothrow;
 
 final class Request : RequestHandler
 {
-	this(CreatorBuffer cuffer,DoHandler handler,uint maxsize = 8 * 1024 * 1024)
+	this(CreatorBuffer cuffer, DoHandler handler, uint maxsize = 8 * 1024 * 1024)
 	{
 		_creatorBuffer = cuffer;
 		_handler = handler;
@@ -71,7 +72,18 @@ final class Request : RequestHandler
 	}
 
 	@property Route route() { return _route; }
+
 	@property void route(Route value) { _route = value; }
+
+	@property User user()
+	{
+		return this._user;
+	}
+
+	@property void user(User user)
+	{
+		this._user = user;
+	}
 
 	@property string[string] mate(){return _mate;}
 
