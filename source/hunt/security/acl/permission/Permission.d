@@ -6,9 +6,26 @@ class Permission
 {
     PermissionItem[string] permissions;
 
-    public this(PermissionItem[] permissions)
+    public Permission addPermission(string key, PermissionItem permission)
     {
-        this.permissions = permissions;
+        this.permissions[key] = permission;
+
+        return this;
+    }
+
+    public Permission addPermissions(PermissionItem[] permissions)
+    {
+        foreach(permission; permissions)
+        {
+            this.permissions[permission.key] = permission;
+        }
+
+        return this;
+    }
+
+    public bool hasPermission(string key)
+    {
+        return true;
     }
 
     public Permission create(string name, string key, string discription)
