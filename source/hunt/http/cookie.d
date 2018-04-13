@@ -535,7 +535,7 @@ protected:
 unittest
 {
     auto cookies = parseCookie("PHPSESSID=dh5vvosj68hv1raprertnku6s7; LBN=node2; Hm_lvt_9e6c6312b8b64e7e38b0b84c12642b96=1461739077,1461897406,1462760128,1462760222; Hm_lpvt_9e6c6312b8b64e7e38b0b84c12642b96=1463122691; __utmt=1; __utma=233165215.1997191855.1458546658.1463106445.1463122691.5; __utmb=233165215.1.10.1463122691; __utmc=233165215; __utmz=233165215.1458546658.1.1.utmcsr=account.start.wang|utmccn=(referral)|utmcmd=referral|utmcct=/register");
-    import std.experimental.logger;
+    import kiss.log;
 
     assert(cookies.get("PHPSESSID", null).value == "dh5vvosj68hv1raprertnku6s7");
     assert(cookies["LBN"].value == "node2");
@@ -546,7 +546,7 @@ unittest
     //generate cookie
     auto cookie = new Cookie("PHPSESSID", "dh5vvosj68hv1raprertnku6s7");
     //assert();
-    import std.experimental.logger;
+    import kiss.log;
 
     assert(cookie.output == "Set-Cookie: PHPSESSID=dh5vvosj68hv1raprertnku6s7");
     cookie.params = ["expires" : "Fri, 13 May 2016 17:44:17 GMT", "path" : "/",

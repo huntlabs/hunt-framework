@@ -11,7 +11,7 @@
  
 module hunt.application.controller;
 
-import std.experimental.logger;
+import kiss.log;
 
 public import hunt.view;
 public import hunt.http.response;
@@ -112,11 +112,11 @@ abstract class Controller
 
     protected final bool doMiddleware()
     {
-        trace("doMiddlware ..");
+       logDebug("doMiddlware ..");
 
         foreach(m; middlewares)
         {
-            tracef("do %s onProcess ..", m.name());
+           logDebugf("do %s onProcess ..", m.name());
 
             auto response = m.onProcess(this.request, this.response);
             if(response is null)
@@ -124,7 +124,7 @@ abstract class Controller
                 continue;
             }
 
-            tracef("Middleware %s is retrun done.", m.name);
+           logDebugf("Middleware %s is retrun done.", m.name);
             response.done();
             return false;
         }

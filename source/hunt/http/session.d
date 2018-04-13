@@ -11,7 +11,7 @@ import std.datetime;
 import std.random;
 import core.cpuid;
 import std.string;
-import std.experimental.logger;
+import kiss.log;
 
 class Session
 {
