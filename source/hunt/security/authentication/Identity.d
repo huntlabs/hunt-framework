@@ -1,10 +1,7 @@
 module hunt.security.authentication.Identity;
 
 public import hunt.security.acl.User;
-
-import hunt.http.request;
-
-import std.variant;
+public import hunt.http.request;
 
 interface Identity
 {

@@ -9,7 +9,6 @@ class User
     {
         int _id;
         Permission _permission;
-        Role role;
         Role[] roles;
     }
 
@@ -24,16 +23,23 @@ class User
         return this._id;
     }
 
+    public bool hasRole(int groupId)
+    {
+        return false;
+    }
+
+    public bool can(string key)
+    {
+        return this._permission.hasPermission(key);
+    }
+
     public User assignRole(Role role)
     {
         this.roles ~= role;
+
+        this._permission.addPermissions(role.permissions);
         
         return this;
-    }
-
-    public string getRoleName()
-    {
-        return this.role.name;
     }
 
     public string[] getRoleNames()
@@ -45,10 +51,5 @@ class User
         }
 
         return names;
-    }
-
-    public bool hasPermission(string key)
-    {
-        return false;
     }
 }
