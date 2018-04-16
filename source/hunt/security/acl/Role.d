@@ -6,5 +6,5 @@ class Role
 {
     int id;
     string name;
-    Permission _permission;
+    Permission permission;
 }
