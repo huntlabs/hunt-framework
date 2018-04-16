@@ -14,7 +14,7 @@ module hunt.application.config;
 import std.exception;
 import std.parallelism : totalCPUs;
 import std.socket : Address, parseAddress;
-import std.experimental.logger;
+import kiss.log;
 import std.string;
 
 import hunt.init;
@@ -86,6 +86,9 @@ final class AppConfig
         string level = "all";
         string path;
         string file = "";
+		bool   disableConsole = false;
+		string maxSize = "8M";
+		uint   maxNum = 8;
     }
 
     struct MemcacheConf
@@ -232,6 +235,9 @@ final class AppConfig
         collectException(conf.log.level.value(), app.log.level);
         collectException(conf.log.path.value(), app.log.path);
         collectException(conf.log.file.value(), app.log.file);
+		collectException(conf.log.disableConsole.as!bool(), app.log.disableConsole);
+		collectException(conf.log.maxSize.value(), app.log.maxSize);
+		collectException(conf.log.maxNum.as!uint(), app.log.maxNum);
 
         collectException(conf.upload.path.value(), app.upload.path);
         collectException(conf.upload.maxSize.as!uint(), app.upload.maxSize);

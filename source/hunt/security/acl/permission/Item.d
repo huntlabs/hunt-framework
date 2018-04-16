@@ -2,16 +2,12 @@ module hunt.security.acl.permission.Item;
 
 struct PermissionItem
 {
-    string group;
     string key;
-    string routes;
     string name;
-    string discription;
 
-    public this(string name, string key, string discription)
+    public this(string name, string key)
     {
         this.name = name;
         this.key = key;
-        this.discription = discription;
     }
 }
