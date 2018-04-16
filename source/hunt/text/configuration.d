@@ -17,7 +17,7 @@ import std.exception;
 import std.array;
 import std.stdio;
 import std.string;
-import std.experimental.logger;
+import kiss.log;
 
 class ConfFormatException : Exception
 {
@@ -167,7 +167,9 @@ private:
 unittest
 {
 	import std.stdio;
+
 	import FE = std.file;
+
 	FE.write("test.config","http.listen = 100 \napp.test =  \n# this is  \n ; start dev\n [dev]\napp.test = dev");
 	auto conf = new Configuration("test.config");
 	assert(conf.http.listen.as!long() == 100);
@@ -178,8 +180,10 @@ unittest
 	assert(tv == 100);
 	assert(confdev.http.listen.as!long() == 100);
 	writeln("----------" ,confdev.app.test.value());
+
 	string tvstr = cast(string)confdev.app.test;
-	auto tvstrw = cast(wstring)confdev.app.test;
+	//auto tvstrw = cast(wstring)confdev.app.test;
+
 	assert(tvstr == "dev");
 	assert(confdev.app.test.value() == "dev");
 	bool tvBool = cast(bool)confdev.app.test;
@@ -188,4 +192,5 @@ unittest
 	string str;
 	auto e = collectException!NoValueHasException(confdev.app.host.value(), str);
 	assert(e && e.msg == " host is not in config! ");
+
 }

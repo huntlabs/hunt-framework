@@ -26,5 +26,10 @@ class AccessManager
         {
             return this.roles[id];
         }
+
+        User createUser(int id, string name)
+        {
+            return null;
+        }
     }
 }
