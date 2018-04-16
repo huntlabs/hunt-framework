@@ -60,7 +60,7 @@ class Router
             {
                 if (params.length == 0)
                 {
-                    warningf("this route need params (%s).", mca);
+                    logWarningf("this route need params (%s).", mca);
 
                     return "#";
                 }
@@ -77,7 +77,7 @@ class Router
 
                         if (value is null)
                         {
-                            warningf("this route template need param (%s).", key);
+                            logWarningf("this route template need param (%s).", key);
 
                             return "#";
                         }
@@ -159,13 +159,13 @@ class Router
 
             if (!this._supportMultipleGroup)
             {
-                trace("Router multiple route group is disabled!");
+               logDebug("Router multiple route group is disabled!");
 
                 return;
             }
             else
             {
-                trace("Router multiple route group is enabled..");
+               logDebug("Router multiple route group is enabled..");
             }
 
             // load this group routes from config file
@@ -271,7 +271,7 @@ class Router
         {
             RouteGroup routeGroup;
 
-            tracef("load config for %s", group);
+           logDebugf("load config for %s", group);
 
             if (group == DEFAULT_ROUTE_GROUP)
             {
@@ -282,7 +282,7 @@ class Router
                 routeGroup = this._groups.get(group, null);
                 if (routeGroup is null)
                 {
-                    warningf("Group [%s] non-existent.", group);
+                    logWarningf("Group [%s] non-existent.", group);
                     return;
                 }
             }
@@ -318,7 +318,7 @@ class Router
 
         Route makeRoute(T = string)(string methods, string path, T mca, string group = DEFAULT_ROUTE_GROUP)
         {
-			trace(methods,path,mca,group);
+			logDebug(methods,path,mca,group);
             auto route = new Route();
 
             import std.string : toUpper;
@@ -358,7 +358,7 @@ class Router
 
 	                if (mcaArray.length > 3 || mcaArray.length < 2)
 	                {
-	                    warningf("this route config mca length is: %d (%s)", mcaArray.length, mca);
+	                    logWarningf("this route config mca length is: %d (%s)", mcaArray.length, mca);
 	                    return null;
 	                }
 	
@@ -411,7 +411,7 @@ class Router
 
             if (route.handle is null)
             {
-                tracef("handle is null (%s).", route.getPattern());
+               logDebugf("handle is null (%s).", route.getPattern());
                 return null;
             }
 

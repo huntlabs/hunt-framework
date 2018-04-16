@@ -12,7 +12,7 @@ class User
         Role[] roles;
     }
 
-    public this(int id)
+    public this(int id = 0)
     {
         this._id = id;
         this._permission = new Permission;
@@ -21,6 +21,11 @@ class User
     public int id()
     {
         return this._id;
+    }
+
+    public bool isGuest()
+    {
+        return this._id == 0;
     }
 
     public bool hasRole(int groupId)
@@ -37,19 +42,8 @@ class User
     {
         this.roles ~= role;
 
-        this._permission.addPermissions(role.permissions);
+        this._permission.addPermissions(role.permission.getPermissions();
         
         return this;
-    }
-
-    public string[] getRoleNames()
-    {
-        string[] names;
-        foreach(role; this.roles)
-        {
-            names ~= role.name;
-        }
-
-        return names;
     }
 }

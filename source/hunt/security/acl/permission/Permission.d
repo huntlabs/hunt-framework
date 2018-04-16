@@ -6,7 +6,7 @@ class Permission
 {
     PermissionItem[string] permissions;
 
-    public Permission addPermission(string key, PermissionItem permission)
+    public Permission addPermission(PermissionItem permission)
     {
         this.permissions[key] = permission;
 

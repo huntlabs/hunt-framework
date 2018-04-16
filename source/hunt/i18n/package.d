@@ -15,7 +15,7 @@ import std.path;
 import std.file;
 import std.algorithm;
 import std.array;
-import std.experimental.logger;
+import kiss.log;
 import std.stdio;
 import std.string;
 
@@ -59,7 +59,7 @@ class I18n
 				.array;
 		if(resfiles.length == 0)
 		{
-			log("lang res file is empty");
+			logDebug("lang res file is empty");
 			return false;
 		}
 		
@@ -157,7 +157,7 @@ string getText(string key, lazy string default_value = string.init)
 	{
 		return p.get(key, default_value);
 	}
-	log("not support local ", getLocale, " change for ", I18n.instance().defaultLocale);
+	logDebug("not support local ", getLocale, " change for ", I18n.instance().defaultLocale);
 	
 	p = I18n.instance().defaultLocale in I18n.instance.resources;
 	
@@ -166,7 +166,7 @@ string getText(string key, lazy string default_value = string.init)
 		return p.get(key, default_value);
 	}
 	
-	log("not support local ", I18n.instance().defaultLocale );
+	logDebug("not support local ", I18n.instance().defaultLocale );
 	
 	return default_value;
 }
