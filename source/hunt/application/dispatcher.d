@@ -18,9 +18,7 @@ import hunt.http.response;
 import hunt.application.controller;
 import hunt.application.config;
 
-import hunt.security.authentication.Authenticate;
-import hunt.security.authentication.Identity;
-import hunt.security.acl.User;
+import hunt.security.acl.Manager;
 
 import collie.utils.exception;
 import collie.codec.http;
@@ -28,8 +26,9 @@ import collie.codec.http;
 import std.stdio;
 
 import std.exception;
-
+import hunt.application.application;
 import std.parallelism;
+import hunt.security.acl.User;
 
 class Dispatcher
 {
@@ -37,11 +36,6 @@ class Dispatcher
     {
         this._router = new Router;
         this._router.setConfigPath(Config.path);
-    }
-
-    private
-    {
-        Identity[string] _identites;
     }
 
     public
@@ -82,7 +76,7 @@ class Dispatcher
                 request.route = route;
 
                 // hunt.security filter
-                request.user = this.authenticateUser(request);
+				request.user = authenticateUser(request);
 
                 // add handle task to taskPool
                 this._taskPool.put(task!doRequestHandle(route.handle, request));
@@ -93,35 +87,24 @@ class Dispatcher
             }
         }
 
-        Dispatcher addIdentity(Identity identity)
-        {
-            this._identites[identity.group()] = identity;
+		User authenticateUser(Request request)
+		{
+			User user;
+			Identity identity = Application.getInstance().getAccessManager().getIdentity(request.route.getGroup());
+			if (identity !is null)
+			{
+				user = identity.login(request);
+			}
+			
+			if (user is null)
+			{
+				return User.defaultUser;
+			}
+			
+			return user;
+		}
 
-            return this;
-        }
-
-        Identity getIdentity(string routeGroup)
-        {
-            return this._identites[routeGroup];
-        }
-
-        User authenticateUser(Request request)
-        {
-            User user;
-            
-            Identity identity = this.getIdentity(request.route.getGroup());
-            if (identity is null)
-            {
-                user = identity.login(request);
-            }
-
-            if (user is null)
-            {
-                user = new User(0);
-            }
-
-            return user;
-        }
+    
 
         void addRouteGroup(string group, string method, string value)
         {

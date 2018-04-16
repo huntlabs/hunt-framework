@@ -37,13 +37,14 @@ import std.exception;
 import hunt.init;
 import hunt.routing;
 import hunt.application.dispatcher;
+import hunt.security.acl.Manager;
 
 public import hunt.http;
 public import hunt.view;
 public import hunt.i18n;
 public import hunt.application.config;
 public import hunt.application.middleware;
-public import hunt.security.authentication.Identity;
+public import hunt.security.acl.Identity;
 
 abstract class WebSocketFactory
 {
@@ -80,11 +81,7 @@ final class Application
         return this;
     }
 
-    Application addIdentity(Identity identity)
-    {
-        this._dispatcher.addIdentity(identity);
-        return this;
-    }
+   
 
 	Application GET(string path,HandleFunction handle)
 	{
@@ -216,6 +213,11 @@ final class Application
 	{
 		return  _manger.getCache("default");
 
+	}
+
+	AccessManager getAccessManager()
+	{
+		return _accessManager;
 	}
 
     /**
@@ -451,7 +453,9 @@ final class Application
     this()
     {
         _cbuffer = &defaultBuffer;
+		_accessManager = new AccessManager();
 		_manger = new CacheManger();
+
         this._dispatcher = new Dispatcher();
     }
 
@@ -469,6 +473,7 @@ final class Application
     Dispatcher _dispatcher;
     CacheManger _manger;
 	SessionStorage _sessionStorage;
+	AccessManager  _accessManager;
     version(NO_TASKPOOL)
     {
         // NOTHING TODO

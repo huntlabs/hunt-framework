@@ -8,7 +8,7 @@ class Permission
 
     public Permission addPermission(PermissionItem permission)
     {
-        this.permissions[key] = permission;
+		this.permissions[permission.key] = permission;
 
         return this;
     }
@@ -17,7 +17,7 @@ class Permission
     {
         foreach(permission; permissions)
         {
-            this.permissions[permission.key] = permission;
+			addPermission(permission);
         }
 
         return this;
@@ -25,13 +25,12 @@ class Permission
 
     public bool hasPermission(string key)
     {
-        return true;
+		return (key in permissions) != null;
     }
 
-    public Permission create(string name, string key, string discription)
+	public Permission addPermission(string name, string key)
     {
-        auto item = new PermissionItem(name, key, discription);
-
+		addPermission( PermissionItem(name, key));
         return this;
     }
 }
