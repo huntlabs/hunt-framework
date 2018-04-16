@@ -363,6 +363,7 @@ protected:
 	}
 
 private:
+	User _user;
 	Route _route;
 	string[string] _mate;
 	Cookie[string] _cookies;
