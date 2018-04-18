@@ -75,8 +75,15 @@ class Dispatcher
 
                 request.route = route;
 
+
                 // hunt.security filter
 				request.user = authenticateUser(request);
+
+				if (!accessFilter(request))
+				{
+					request.createResponse().do403("no permiss to access: " ~ request.route.getController() ~ "." ~ request.route.getAction() );
+					return;
+				}
 
                 // add handle task to taskPool
                 this._taskPool.put(task!doRequestHandle(route.handle, request));
@@ -87,6 +94,17 @@ class Dispatcher
             }
         }
 
+		bool accessFilter(Request request)
+		{
+			//兼容老的.
+			Identity identity =  Application.getInstance().getAccessManager().getIdentity(request.route.getGroup());
+			if (identity is null || request.route.getController().length == 0)
+				return true;
+
+
+			return request.user.can(request.route.getController() ~ "." ~ request.route.getAction());
+		}
+
 		User authenticateUser(Request request)
 		{
 			User user;
@@ -95,6 +113,8 @@ class Dispatcher
 			{
 				user = identity.login(request);
 			}
+
+
 			
 			if (user is null)
 			{
