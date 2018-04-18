@@ -39,6 +39,8 @@ class AccessManager
 
 		Identity getIdentity(string groupName)
 		{
+			if( groupName !in identitys)
+				return null;
 			return identitys[groupName];
 		}
 
