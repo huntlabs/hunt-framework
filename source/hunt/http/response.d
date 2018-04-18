@@ -18,7 +18,7 @@ import collie.codec.http.headers.httpcommonheaders;
 import collie.codec.http.server.responsehandler;
 import collie.codec.http.server.responsebuilder;
 import collie.codec.http.httpmessage;
-
+import kiss.log;
 import hunt.http.cookie;
 import hunt.utils.string;
 import hunt.versions;
@@ -165,23 +165,24 @@ final class Response : ResponseBuilder
 
     void do404(string body_ = "",string contentype = "text/html;charset=UTF-8")
     {
-        if(_isDone) return;
-
-        setHttpStatusCode(404);
-        header(HTTPHeaderCode.CONTENT_TYPE, contentype);
-
-        if(body_.length > 0)
-        {
-            setContext(body_);
-        }
-        else
-        {
-            setContext(errorPageHtml(404));
-        }
-
-        connectionClose();
-        done();
+		doError(404 , body_ , contentype);
     }
+
+	void do403(string body_ = "",string contentype = "text/html;charset=UTF-8")
+	{
+		doError(403 , body_ , contentype);
+	}
+
+	void doError(ushort code ,  string body_ = "",string contentype = "text/html;charset=UTF-8")
+	{
+		if(_isDone) return;
+		
+		setHttpStatusCode(code);
+		header(HTTPHeaderCode.CONTENT_TYPE, contentype);
+		setContext(errorPageHtml(code , body_));
+		connectionClose();
+		done();
+	}
 
     void setHttpError(ushort code)
     {
@@ -200,7 +201,7 @@ private:
 
 import hunt.http.code;
 
-string errorPageHtml(int code)
+string errorPageHtml(int code , string _body = "")
 {
     import std.conv : to;
 
@@ -256,6 +257,10 @@ string errorPageHtml(int code)
     html ~= text;
     html ~= `</h1>
     <p>Sorry!! Unable to complete your request :(</p>
+	`;
+	if(_body.length > 0)
+		html ~= "<p>" ~ _body ~ "</p>";
+html ~= `
 </body>
 </html>
 `;

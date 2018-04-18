@@ -39,7 +39,6 @@ class AccessManager
 
 		Identity getIdentity(string groupName)
 		{
-			logInfo(groupName , identitys);
 			return identitys[groupName];
 		}
 

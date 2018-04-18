@@ -225,16 +225,17 @@ final class Application
      */
      void run()
 	{
-		setConfig(Config.app);
 		start();
 	}
+
+	/*
 	void run(Address addr)
 	{
 		Config.app.http.address = addr.toAddrString;
 		Config.app.http.port = addr.toPortString.to!ushort;
 		setConfig(Config.app);
 		start();
-	}
+	}*/
 
 	void setConfig(AppConfig config)
 	{
@@ -248,7 +249,7 @@ final class Application
 
 	void start()
 	{
-		writeln("Try to open http://",addr.toString(),"/");
+		logInfo("Try to open http://",addr.toString(),"/");
 		_server.start();
 	}
 
@@ -457,6 +458,7 @@ final class Application
 		_manger = new CacheManger();
 
         this._dispatcher = new Dispatcher();
+		setConfig(Config.app);
     }
 
 
