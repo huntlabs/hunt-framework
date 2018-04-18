@@ -6,7 +6,7 @@
     "libs": [],
     "dependencies": {
         "collie": {"version":"~>0.10.6"},
-		"cache":{"version":"~>0.0.1"}
+		"cache":{"version":"~>0.0.2"} 
     },
     "configurations": [
         {
@@ -23,54 +23,17 @@
         {
             "name": "full",
             "dependencies": {
-                "entity" : "~>1.2.1",
-                "libmemcached": "1.1.0",
-                "dredis": "0.0.5"
+                "entity" : "~>1.2.1"
             },
             "targetType": "library",
             "subConfigurations": {
                 "entity": "mysql"
             },
             "versions": [
-                "WITH_ENTITY",
-                "USE_MYSQL",
-                "USE_REDIS",
-                "USE_MEMCACHE"
+                "WITH_ENTITY"
             ]
         },
-        {
-            "name": "Redis",
-            "dependencies": {
-                "dredis": "0.0.5"
-            },
-            "targetType": "library",
-            "versions": [
-                "USE_REDIS"
-            ]
-        },
-        {
-            "name": "Memcache",
-            "dependencies": {
-                "libmemcached": "1.1.0"
-            },
-            "targetType": "library",
-            "versions": [
-                "USE_MEMCACHE"
-            ]
-        },
-        {
-            "name": "R&M",
-            "dependencies": {
-                "libmemcached": "1.1.0",
-                "dredis": "0.0.5"
-            },
-            "targetType": "library",
-            "versions": [
-                "USE_REDIS",
-                "USE_MEMCACHE"
-            ]
-        },
-        {
+		{
             "name": "MySQL",
             "dependencies": {
                 "entity" : "~>1.2.1"
@@ -80,8 +43,7 @@
                 "entity": "mysql"
             },
             "versions": [
-                "WITH_ENTITY",
-                "USE_MYSQL"
+                "WITH_ENTITY"
             ]
         },
         {
@@ -94,8 +56,7 @@
                 "entity": "sqlite"
             },
             "versions": [
-                "WITH_ENTITY",
-                "USE_SQLITE"
+                "WITH_ENTITY"
             ]
         },
         {
@@ -108,62 +69,7 @@
                 "entity": "postgresql"
             },
             "versions": [
-                "WITH_ENTITY",
-                "USE_PGSQL"
-            ]
-        },
-        {
-            "name": "R&M&PGSQL",
-            "dependencies": {
-                "libmemcached": "1.1.0",
-                "dredis": "0.0.5",
-                "entity" : "~>1.2.1"
-            },
-            "targetType": "library",
-            "subConfigurations": {
-                "entity": "postgresql"
-            },
-            "versions": [
-                "USE_REDIS",
-                "USE_MEMCACHE",
-                "WITH_ENTITY",
-                "USE_PGSQL"
-            ]
-        },
-        {
-            "name": "R&M&MYSQL",
-            "dependencies": {
-                "libmemcached": "1.1.0",
-                "dredis": "0.0.5",
-                "entity" : "~>1.2.1"
-            },
-            "targetType": "library",
-            "subConfigurations": {
-                "entity": "mysql"
-            },
-            "versions": [
-                "USE_REDIS",
-                "USE_MEMCACHE",
-                "WITH_ENTITY",
-                "USE_MYSQL"
-            ]
-        },
-        {
-            "name": "R&M&SQLITE",
-            "dependencies": {
-                "libmemcached": "1.1.0",
-                "dredis": "0.0.5",
-                "entity" : "~>1.2.1"
-            },
-            "targetType": "library",
-            "subConfigurations": {
-                "entity": "sqlite"
-            },
-            "versions": [
-                "USE_REDIS",
-                "USE_MEMCACHE",
-                "WITH_ENTITY",
-                "USE_SQLITE"
+                "WITH_ENTITY"
             ]
         }
     ]
