@@ -315,9 +315,9 @@ class ConfigManager
             this._path = path ~ "/";
     }
 
-    void setAppSection(string sec)
+    void setAppSection(string sec, string fileName = "application.conf")
     {
-        auto con = new Configuration(path ~ "application.conf", sec);
+        auto con = new Configuration(path ~ fileName, sec);
         _app = AppConfig.parseAppConfig(con);
     }
 
