@@ -423,6 +423,7 @@ final class Application
 		LogConf logconf;
 		logconf.level = level;
 		logconf.disableConsole = conf.disableConsole;
+        if(!conf.file.empty)
 		logconf.fileName = conf.path ~ conf.file;
 		logconf.maxSize = conf.maxSize;
 		logconf.maxNum = conf.maxNum;
