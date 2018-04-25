@@ -54,7 +54,7 @@ abstract class WebSocketFactory
 
 final class Application
 {
-    static @property getInstance()
+    static @property Application getInstance()
     {
         if(_app is null)
         {
@@ -151,7 +151,7 @@ final class Application
 
     @property loopGroup(){return _server.group;}
 
-    @property appConfig(){return Config.app;}
+    @property AppConfig appConfig(){return Config.app;}
 
     void setCreateBuffer(CreatorBuffer cbuffer)
     {
@@ -249,7 +249,7 @@ final class Application
 
 	void start()
 	{
-		logInfo("Try to open http://",addr.toString(),"/");
+		writeln("Try to open http://",addr.toString(),"/");
 		_server.start();
 	}
 
@@ -261,7 +261,7 @@ final class Application
         _server.stop();
     }
     private:
-    RequestHandler newHandler(RequestHandler handler,HTTPMessage msg){
+    RequestHandler newHandler(RequestHandler, HTTPMessage msg){
         if(!msg.upgraded)
         {
             return new Request(_cbuffer,&handleRequest,_maxBodySize);
@@ -424,7 +424,7 @@ final class Application
 		logconf.level = level;
 		logconf.disableConsole = conf.disableConsole;
         if(!conf.file.empty)
-		logconf.fileName = conf.path ~ conf.file;
+		    logconf.fileName = buildPath(conf.path, conf.file);
 		logconf.maxSize = conf.maxSize;
 		logconf.maxNum = conf.maxNum;
 
