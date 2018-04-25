@@ -1,7 +1,7 @@
 {
     "name": "hunt",
     "license": "Apache-2.0",
-    "copyright": "Copyright (C) 2015-2017 Shanghai Putao Technology Co., Ltd",
+    "copyright": "Copyright (C) 2015-2018, Shanghai Putao Technology Co., Ltd",
     "description": "A high performance full-stack Web framework.",
     "libs": [],
     "dependencies": {
