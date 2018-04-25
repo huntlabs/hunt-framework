@@ -2,6 +2,7 @@
 module app.middleware.auth;
 
 import hunt;
+import std.experimental.logger;
 
 class AuthMiddleware : IMiddleware
 {
