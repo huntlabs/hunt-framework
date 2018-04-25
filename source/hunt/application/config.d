@@ -317,8 +317,14 @@ class ConfigManager
 
     void setAppSection(string sec, string fileName = "application.conf")
     {
-        auto con = new Configuration(path ~ fileName, sec);
-        _app = AppConfig.parseAppConfig(con);
+        string fullName = buildPath(path, fileName);
+        if(exists(fullName))
+        {
+            auto con = new Configuration(fullName, sec);
+            _app = AppConfig.parseAppConfig(con);
+        }
+        else
+            _app = new AppConfig();
     }
 
     Configuration config(string key)
