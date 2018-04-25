@@ -12,7 +12,7 @@
 module hunt.application.application;
 
 import collie.codec.http.server.websocket;
-import kiss.buffer;
+import kiss.container.ByteBuffer;
 import collie.codec.http.server;
 import collie.codec.http;
 import collie.bootstrap.serversslconfig;
@@ -120,9 +120,9 @@ final class Application
 	}
 
     // enable i18n
-    auto enableLocale(string resPath = DEFAULT_LANGUAGE_PATH, string defaultLocale = "en-us")
+    Application enableLocale(string resPath = DEFAULT_LANGUAGE_PATH, string defaultLocale = "en-us")
     {
-        auto i18n = I18n.instance();
+        I18n i18n = I18n.instance();
 
         i18n.loadLangResources(resPath);
         i18n.defaultLocale = defaultLocale;
@@ -336,7 +336,7 @@ final class Application
         option.timeOut = conf.http.keepAliveTimeOut;
         option.handlerFactories ~= (&newHandler);
         _server = new HttpServer(option);
-       logDebug("addr:",conf.http.address,conf.http.port);
+        logDebug("addr:",conf.http.address, ":", conf.http.port);
         addr = parseAddress(conf.http.address,conf.http.port);
         HTTPServerOptions.IPConfig ipconf;
         ipconf.address = addr;
