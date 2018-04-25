@@ -2,3 +2,11 @@
 # [GET,POST,PUT...]    path    controller.method
 #
 *		/public						staticDir:public
+GET     /               Index.index
+GET     /show           Index.show
+GET     /list           Index.list
+POST    /upload         Index.upload
+GET     /download       Index.download
+GET     /showbool       Index.showbool
+GET     /setCache       Index.setCache
+GET     /getCache       Index.getCache

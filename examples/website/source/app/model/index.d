@@ -1,9 +1,7 @@
 module app.model.index;
 
-version(USE_ENTITY):
-import hunt.application;
+version (USE_ENTITY)  : import hunt.application;
 public import entity;
-
 
 @Table("test2")
 struct Test
@@ -11,7 +9,7 @@ struct Test
 	@Primarykey()
 	int id;
 
-	@Field ("floatcol")
+	@Field("floatcol")
 	float fcol;
 
 	@Field("doublecol")
@@ -31,25 +29,25 @@ struct Test
 
 	@Field()
 	ubyte[] ubytecol;
-} 
+}
 
 class IndexModel : Model!Test
 {
-    void showTest2()
-    {
+	void showTest2()
+	{
 		auto iterator = Select();
 
-		if(iterator !is null)
-			foreach(tp; iterator)
-            {
-                writeln("float is  : ", tp.fcol);
-                writeln("the string is : ", tp.stringcol);
-                writeln("the ubyte is : ", cast(string)tp.ubytecol);
-            }
-    }
-    
-    void insertNew(Test t)
-    {
+		if (iterator !is null)
+			foreach (tp; iterator)
+			{
+				writeln("float is  : ", tp.fcol);
+				writeln("the string is : ", tp.stringcol);
+				writeln("the ubyte is : ", cast(string) tp.ubytecol);
+			}
+	}
+
+	void insertNew(Test t)
+	{
 		Insert(t);
-    }
+	}
 }

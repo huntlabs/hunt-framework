@@ -1,7 +1,8 @@
 {
 	"name": "website",
+	"license": "Apache-2.0",
 	"description": "A minimal D application.",
-	"copyright": "Copyright © 2016, huntframework.com",
+	"copyright": "Copyright © 2016-2018, Shanghai Putao Technology Co., Ltd",
 	"targetType": "executable",
 	"stringImportPaths": [
 		"./resources/views",
@@ -16,10 +17,7 @@
 	},
 	"configurations": [
 		{
-			"name": "default",
-			"subConfigurations": {
-				"hunt": "R&M"
-			}
+			"name": "default"
 		},
 		{
 			"name": "no_taskpool",
