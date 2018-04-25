@@ -1,7 +1,8 @@
 {
 	"name": "website-advanced",
+    "license": "Apache-2.0",
 	"description": "An advanced website with hunt framework.",
-	"copyright": "Copyright © 2016, huntframework.com",
+	"copyright": "Copyright © 2016-2018, Shanghai Putao Technology Co., Ltd",
 	"targetType": "executable",
 	"Versions": ["USE_MEMCACHE"],
 	"mainSourceFile": "./source/bootstrap.d",
@@ -12,10 +13,7 @@
 	},
 	"configurations": [
 		{
-			"name": "default",
-			"subConfigurations": {
-				"hunt": "default"
-			}
+			"name": "default"
 		},
 		{
 			"name": "no_taskpool",
