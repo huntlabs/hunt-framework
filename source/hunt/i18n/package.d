@@ -38,7 +38,7 @@ class I18n
 		_default = I18N_DEFAULT_LOCALE;
 	}
 	
-	static auto instance()
+	static I18n instance()
 	{
 		if(_instance is null)
 		{
@@ -47,12 +47,10 @@ class I18n
 		return _instance;
 	}
 
-
-
-	
 	///加载资源文件
 	bool loadLangResources(string path, lazy string ext = "res")
 	{
+		_isResLoaded = false;
 		auto resfiles = std.file.dirEntries(path, "*.{res}", SpanMode.depth)
 			.filter!(a => a.isFile)
 				.map!(a => std.path.absolutePath(a.name))
@@ -67,8 +65,12 @@ class I18n
 		{
 			parseResFile(r);
 		}
+		_isResLoaded = true;
 		return true;
 	}
+
+	@property bool isResLoaded() { return _isResLoaded; }
+	private bool _isResLoaded = false;
 	
 	@property StrStrStr resources()
 	{
@@ -152,21 +154,28 @@ private string _local = I18N_DEFAULT_LOCALE;
 ///key is [filename.key]
 string getText(string key, lazy string default_value = string.init)
 { 
-	auto p = getLocale in I18n.instance.resources;
+	I18n i18n = I18n.instance();
+	if(!i18n.isResLoaded)
+	{
+		logWarning("The lang resources has't loaded yet!");
+		return key;
+	}
+
+	auto p = getLocale in i18n.resources;
 	if(p !is null)
 	{
 		return p.get(key, default_value);
 	}
-	logDebug("not support local ", getLocale, " change for ", I18n.instance().defaultLocale);
+	logDebug("unsupported local: ", getLocale, ", use default now: ", i18n.defaultLocale);
 	
-	p = I18n.instance().defaultLocale in I18n.instance.resources;
+	p = i18n.defaultLocale in i18n.resources;
 	
 	if(p !is null)
 	{
 		return p.get(key, default_value);
 	}
 	
-	logDebug("not support local ", I18n.instance().defaultLocale );
+	logDebug("unsupport local ", i18n.defaultLocale );
 	
 	return default_value;
 }
@@ -184,7 +193,7 @@ unittest{
 	
 	///
 	setLocale("en-br");
-	assert( getText("message.hello-world", "empty") == "你好，世界");
+	assert( getText("message.hello-world", "empty") == "Hello, world");
 	
 	///
 	setLocale("zh-cn");

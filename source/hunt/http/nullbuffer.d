@@ -11,7 +11,7 @@
 
 module hunt.http.nullbuffer;
 
-import kiss.buffer;
+import kiss.container.ByteBuffer;
 
 final class NullBuffer : Buffer
 {
