@@ -4,8 +4,8 @@
 		"root"
 	],
 	"description": "A minimal D application.",
-	"copyright": "Copyright © 2017, root",
-	"license": "proprietary",
+	"copyright": "Copyright © 2017-2018, Shanghai Putao Technology Co., Ltd",
+	"license": "Apache-2.0",
 	"mainSourceFile": "./source/bootstrap.d",
 	"targetType": "executable",
 	"dependencies": {

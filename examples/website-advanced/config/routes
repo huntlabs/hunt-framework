@@ -3,5 +3,5 @@
 #
 
 GET    		/    		index.index
-POST		/show		index.show
-GET             /allowed        index.allowed
+GET 		/show		index.show
+GET         /allowed    index.allowed
