@@ -12,7 +12,7 @@
 module hunt.application.application;
 
 import collie.codec.http.server.websocket;
-import kiss.buffer;
+import kiss.container.ByteBuffer;
 import collie.codec.http.server;
 import collie.codec.http;
 import collie.bootstrap.serversslconfig;
@@ -54,7 +54,7 @@ abstract class WebSocketFactory
 
 final class Application
 {
-    static @property getInstance()
+    static @property Application getInstance()
     {
         if(_app is null)
         {
@@ -120,9 +120,9 @@ final class Application
 	}
 
     // enable i18n
-    auto enableLocale(string resPath = DEFAULT_LANGUAGE_PATH, string defaultLocale = "en-us")
+    Application enableLocale(string resPath = DEFAULT_LANGUAGE_PATH, string defaultLocale = "en-us")
     {
-        auto i18n = I18n.instance();
+        I18n i18n = I18n.instance();
 
         i18n.loadLangResources(resPath);
         i18n.defaultLocale = defaultLocale;
@@ -151,7 +151,7 @@ final class Application
 
     @property loopGroup(){return _server.group;}
 
-    @property appConfig(){return Config.app;}
+    @property AppConfig appConfig(){return Config.app;}
 
     void setCreateBuffer(CreatorBuffer cbuffer)
     {
@@ -249,7 +249,7 @@ final class Application
 
 	void start()
 	{
-		logInfo("Try to open http://",addr.toString(),"/");
+		writeln("Try to open http://",addr.toString(),"/");
 		_server.start();
 	}
 
@@ -261,7 +261,7 @@ final class Application
         _server.stop();
     }
     private:
-    RequestHandler newHandler(RequestHandler handler,HTTPMessage msg){
+    RequestHandler newHandler(RequestHandler, HTTPMessage msg){
         if(!msg.upgraded)
         {
             return new Request(_cbuffer,&handleRequest,_maxBodySize);
@@ -336,7 +336,7 @@ final class Application
         option.timeOut = conf.http.keepAliveTimeOut;
         option.handlerFactories ~= (&newHandler);
         _server = new HttpServer(option);
-       logDebug("addr:",conf.http.address,conf.http.port);
+        logDebug("addr:",conf.http.address, ":", conf.http.port);
         addr = parseAddress(conf.http.address,conf.http.port);
         HTTPServerOptions.IPConfig ipconf;
         ipconf.address = addr;
@@ -423,7 +423,8 @@ final class Application
 		LogConf logconf;
 		logconf.level = level;
 		logconf.disableConsole = conf.disableConsole;
-		logconf.fileName = conf.path ~ conf.file;
+        if(!conf.file.empty)
+		    logconf.fileName = buildPath(conf.path, conf.file);
 		logconf.maxSize = conf.maxSize;
 		logconf.maxNum = conf.maxNum;
 
