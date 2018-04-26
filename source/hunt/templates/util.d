@@ -3,6 +3,7 @@ module hunt.templates.util;
 import hunt.templates.element;
 import hunt.templates.rule;
 import std.stdio;
+import std.regex;
 
 class Util
 {
@@ -59,7 +60,8 @@ public:
             {
                 auto elm = cast(ElementExpression)(e);
                 printSpace(level);
-                writeln("Type : Expression,  Function : ", elm.func, ", command :", elm.command, ", result :", elm.result.toString);
+                writeln("Type : Expression,  Function : ", elm.func,
+                        ", command :", elm.command, ", result :", elm.result.toString);
                 printSpace(level);
                 writeln("       =====args begin=====");
                 foreach (child; elm.args)
@@ -129,5 +131,11 @@ public:
     {
         for (size_t i = 0; i < num; i++)
             write("       ");
+    }
+
+    static bool is_num(string str)
+    {
+        auto m = match(str, regex(`^[0-9]\d*$`));
+        return !m.empty;
     }
 }
