@@ -1,21 +1,27 @@
 import hunt;
+import hunt.application.config;
 
 void main()
 {
-	auto app = Application.getInstance();
+	Application app = Application.getInstance();
 
-	app.GET("/index",function(Request req){
+	app.GET("/", function(Request req) {
 		Response res = req.createResponse();
-		res.html("hello world");
-		res.done();
-	});
-	
-    app.POST("/index",function(Request req){
-        auto form = req.postForm();
-		Response res = req.createResponse();
-		res.html("hello world");
+		res.html("Hello world!");
 		res.done();
 	});
 
-	app.run(parseAddress("0.0.0.0",11234));
+	app.POST("/", function(Request req) {
+		auto form = req.postForm();
+		Response res = req.createResponse();
+		res.html("Hello world!");
+		res.done();
+	});
+
+	AppConfig c = app.appConfig();
+	// c.http.address = "0.0.0.0";
+	c.http.port = 8090;
+	app.setConfig(c);
+
+	app.run();
 }
