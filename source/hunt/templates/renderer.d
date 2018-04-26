@@ -14,6 +14,7 @@ import hunt.templates.rule;
 import hunt.templates.element;
 import hunt.templates.match;
 import hunt.templates.ast;
+import hunt.templates.util;
 
 class Renderer
 {
@@ -160,23 +161,33 @@ public:
                         result = data[element.command];
                     else
                     {
-                        auto cmds = split(element.command,".");
-                        if(cmds.length > 1)
+                        auto cmds = split(element.command, ".");
+                        if (cmds.length > 1)
                         {
-                            if(cmds.length == 2)
+                            if (cmds.length == 2)
                             {
-                                if(cmds[0] in data && cmds[1] in data[cmds[0]])
-                                    result = data[cmds[0]][cmds[1]];
-                            }                               
+                                if (cmds[0] in data)
+                                {
+                                    if (Util.is_num(cmds[1]))
+                                    {
+                                        auto idx = to!int(cmds[1]);
+
+                                        result = data[cmds[0]][idx];
+                                    }
+                                    else if (cmds[1] in data[cmds[0]])
+                                        result = data[cmds[0]][cmds[1]];
+                                }
+
+                            }
                         }
                         else
                             result = element.command;
                     }
-                    return result;
                 }
                 catch (Exception e)
                 {
-                    template_engine_throw("render_error", "variable '" ~ element.command ~ "' not found");
+                    template_engine_throw("render_error",
+                            "variable '" ~ element.command ~ "' not found");
                 }
                 break;
             }
@@ -200,7 +211,8 @@ public:
             }
         default:
             {
-                template_engine_throw("render_error", "function '" ~ to!string(element.func) ~ "' not found");
+                template_engine_throw("render_error",
+                        "function '" ~ to!string(element.func) ~ "' not found");
             }
         }
 
@@ -208,7 +220,7 @@ public:
         return T();
     }
 
-    string render(ASTNode temp,ref JSONValue data)
+    string render(ASTNode temp, ref JSONValue data)
     {
         string result = "";
         //writeln("------temp.parsed_node.children-----: ",temp.parsed_node.children.length);
@@ -249,9 +261,10 @@ public:
                         {
                             auto list = eval_expression(element_loop.list, data);
                             //writeln("----list ----: ", list);
-                            if(list.type != JSON_TYPE.ARRAY)
+                            if (list.type != JSON_TYPE.ARRAY)
                             {
-                                template_engine_throw("render_error", list.toString ~ " is not an array");
+                                template_engine_throw("render_error",
+                                        list.toString ~ " is not an array");
                             }
                             foreach (size_t k, v; list)
                             {
@@ -267,9 +280,10 @@ public:
                         {
                             auto map = eval_expression(element_loop.list, data);
                             //writeln("----Loop type ----: ", map.type," map.toString : ",map.toString);
-                            if(map.type != JSON_TYPE.OBJECT)
+                            if (map.type != JSON_TYPE.OBJECT)
                             {
-                                template_engine_throw("render_error", map.toString ~ " is not an object");
+                                template_engine_throw("render_error",
+                                        map.toString ~ " is not an object");
                             }
                             foreach (string k, v; map)
                             {
