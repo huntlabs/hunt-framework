@@ -6,7 +6,7 @@
     "libs": [],
     "dependencies": {
 		"collie": {"version": "~>0.10.9"},
-		"entity": {"version":"~>1.3.2"},
+		"entity": {"version":"~>1.3.3"},
 		"cache": {"version":"~>0.0.2"}
     },
     "configurations": [
