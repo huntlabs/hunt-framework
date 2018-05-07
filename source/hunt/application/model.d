@@ -34,7 +34,7 @@ void registerEntity(T...)()
     _dbconfig.setMinimumConnection(Config.app.database.pool.minConnection);
     _dbconfig.setConnectionTimeout(Config.app.database.pool.timeout);
 	assert(_dbconfig,"Please init db config first");
-    _entityManagerFactory = Persistence.createEntityManagerFactory("hunt",_dbconfig);
+    _entityManagerFactory = Persistence.createEntityManagerFactory("default",_dbconfig);
 	assert(_entityManagerFactory,"Please init entity manager factory first");
 	_entityManager = _entityManagerFactory.createEntityManager!(T);
 }
