@@ -6,7 +6,8 @@
     "libs": [],
     "dependencies": {
 		"collie": {"version": "~>0.10.9"},
-		"cache":{"version":"~>0.0.2"} 
+		"entity": {"version":"~>1.3.2"},
+		"cache": {"version":"~>0.0.2"}
     },
     "configurations": [
         {
@@ -14,63 +15,28 @@
             "targetType": "library"
         },
         {
-            "name": "no_taskpool",
-            "targetType": "library",
-            "versions": [
-                "NO_TASKPOOL"
-            ]
-        },
-        {
             "name": "full",
-            "dependencies": {
-                "entity" : "~>1.2.1"
-            },
-            "targetType": "library",
             "subConfigurations": {
                 "entity": "mysql"
-            },
-            "versions": [
-                "WITH_ENTITY"
-            ]
+            }
         },
 		{
-            "name": "MySQL",
-            "dependencies": {
-                "entity" : "~>1.2.1"
-            },
-            "targetType": "library",
+            "name": "mysql",
             "subConfigurations": {
                 "entity": "mysql"
-            },
-            "versions": [
-                "WITH_ENTITY"
-            ]
+            }
         },
         {
-            "name": "SQLite",
-            "dependencies": {
-                "entity" : "~>1.2.1"
-            },
-            "targetType": "library",
+            "name": "sqlite",
             "subConfigurations": {
                 "entity": "sqlite"
-            },
-            "versions": [
-                "WITH_ENTITY"
-            ]
+            }
         },
         {
-            "name": "PGSQL",
-            "dependencies": {
-                "entity" : "~>1.2.1"
-            },
-            "targetType": "library",
+            "name": "postgresql",
             "subConfigurations": {
                 "entity": "postgresql"
-            },
-            "versions": [
-                "WITH_ENTITY"
-            ]
+            }
         }
     ]
 }
