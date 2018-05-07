@@ -46,6 +46,8 @@ public import hunt.application.config;
 public import hunt.application.middleware;
 public import hunt.security.acl.Identity;
 
+public import entity;
+
 abstract class WebSocketFactory
 {
     IWebSocket newWebSocket(const HTTPMessage header);
@@ -60,6 +62,7 @@ final class Application
         {
             _app = new Application();
         }
+
         return _app;
     }
 
@@ -80,8 +83,6 @@ final class Application
 
         return this;
     }
-
-   
 
 	Application GET(string path,HandleFunction handle)
 	{
@@ -183,6 +184,16 @@ final class Application
         }
     }*/
 
+    private void initDatabase(AppConfig.DBConfig config)
+    {
+        auto options = new DatabaseOption(config.url);
+        options.setMaximumConnection(config.pool.maxConnection);
+        options.setMinimumConnection(config.pool.minConnection);
+        options.setConnectionTimeout(config.pool.timeout);
+
+        _entityManagerFactory = Persistence.createEntityManagerFactory("default", options);
+    }
+
     private void initCache(AppConfig.CacheConf config)
     {
 		_manger.createCache("default" , config.storage , config.args , config.enableL2);
@@ -196,6 +207,11 @@ final class Application
         _sessionStorage.setExpire(config.expire);
 
 		writeln(" initSessionStorage " ,_sessionStorage);
+    }
+
+    EntityManagerFactory getEntityManagerFactory()
+    {
+        return _entityManagerFactory;
     }
 
 	CacheManger getCacheManger()
@@ -243,6 +259,7 @@ final class Application
 		upConfig(config);
 		//setRedis(config.redis);
 		//setMemcache(config.memcache);
+        initDatabase(config.database);
 		initCache(config.cache);
 		initSessionStorage(config.session);
 	}
@@ -462,9 +479,6 @@ final class Application
 		setConfig(Config.app);
     }
 
-
-
-
     __gshared static Application _app;
 
     private:
@@ -474,9 +488,11 @@ final class Application
     uint _maxBodySize;
     CreatorBuffer _cbuffer;
     Dispatcher _dispatcher;
+    EntityManagerFactory _entityManagerFactory;
     CacheManger _manger;
 	SessionStorage _sessionStorage;
 	AccessManager  _accessManager;
+
     version(NO_TASKPOOL)
     {
         // NOTHING TODO
