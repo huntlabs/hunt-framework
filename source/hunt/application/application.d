@@ -45,10 +45,9 @@ public import hunt.i18n;
 public import hunt.application.config;
 public import hunt.application.middleware;
 public import hunt.security.acl.Identity;
-version (WITH_ENTITY)
-{
-    public import entity;
-}
+
+public import entity;
+
 
 abstract class WebSocketFactory
 {
