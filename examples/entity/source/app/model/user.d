@@ -1,11 +1,12 @@
 ﻿module app.model.user;
 
-import hunt;
+import hunt.data.entity;
 
 @Table("user")
 class User
 {
-    @AutoIncrement @PrimaryKey 
+    @AutoIncrement
+    @PrimaryKey 
     int id;
 
     @NotNull

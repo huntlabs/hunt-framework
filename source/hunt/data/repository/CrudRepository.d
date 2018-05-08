@@ -120,7 +120,20 @@ abstract class CrudRepository(T, ID) : Repository!(T, ID)
 
     public T save(T entity)
     {
-        return em.merge!(T)(entity);
+        auto em = this.createEntityManager();
+        
+        if (null == em.find!T(entity))
+        {
+            em.persist(entity);
+        }
+        else
+        {
+            entity = em.merge!(T)(entity);
+        }
+
+        em.close();
+
+        return entity;
     }
 
     public T[] saveAll(T[] entities)

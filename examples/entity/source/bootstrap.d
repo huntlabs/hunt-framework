@@ -8,21 +8,11 @@
 * Licensed under the BSD License.
 *
 */
-
-import std.stdio;
-import std.functional;
-import std.experimental.logger;
-
 import hunt;
 
 void main()
 {
-
     auto app = Application.getInstance();
-    
-    import app.model.user;
-    registerEntity!(User);
-
     app.run();
 }
 
