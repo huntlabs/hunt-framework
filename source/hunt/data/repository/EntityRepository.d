@@ -9,9 +9,9 @@
  *
  */
  
-module hunt.database.repository.EntityRepository;
+module hunt.data.repository.EntityRepository;
 
-import hunt.database.repository.CrudRepository;
+import hunt.data.repository.CrudRepository;
 
 abstract class EntityRepository (T, ID) : CrudRepository!(T, ID)
 {

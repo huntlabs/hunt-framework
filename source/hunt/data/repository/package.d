@@ -9,7 +9,7 @@
  *
  */
  
-module hunt.database.repository;
+module hunt.data.repository;
 
-public import hunt.database.repository.CrudRepository;
-public import hunt.database.repository.EntityRepository;
+public import hunt.data.repository.CrudRepository;
+public import hunt.data.repository.EntityRepository;
