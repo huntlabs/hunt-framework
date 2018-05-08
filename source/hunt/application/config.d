@@ -164,6 +164,11 @@ final class AppConfig
         ServiceConf service;
     }
 
+    struct Templates
+    {
+        string path;
+    }
+
     DBConfig database;
     ApplicationConf application;
     SessionConf session;
@@ -179,7 +184,8 @@ final class AppConfig
     DateConf date;
     MailConf mail;
     RpcConf rpc;
-
+    Templates templates;
+    
     @property Configuration config(){return _config;}
 
     static AppConfig parseAppConfig(Configuration conf)
@@ -265,6 +271,8 @@ final class AppConfig
         collectException(conf.rpc.service.workerThreads.as!int(), app.rpc.service.workerThreads);.
         collectException(conf.rpc.service.password.value(), app.rpc.service.password);
 
+        collectException(conf.templates.path.value(), app.templates.path);
+
         return app;
     }
 
@@ -315,16 +323,10 @@ class ConfigManager
             this._path = path ~ "/";
     }
 
-    void setAppSection(string sec, string fileName = "application.conf")
+    void setAppSection(string sec)
     {
-        string fullName = buildPath(path, fileName);
-        if(exists(fullName))
-        {
-            auto con = new Configuration(fullName, sec);
-            _app = AppConfig.parseAppConfig(con);
-        }
-        else
-            _app = new AppConfig();
+        auto con = new Configuration(path ~ "application.conf", sec);
+        _app = AppConfig.parseAppConfig(con);
     }
 
     Configuration config(string key)

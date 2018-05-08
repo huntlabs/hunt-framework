@@ -4,6 +4,7 @@ import std.string;
 import std.json;
 import std.file;
 
+import hunt.application.config;
 import hunt.templates.match;
 import hunt.templates.rule;
 import hunt.templates.parser;
@@ -22,7 +23,10 @@ class Environment
 public:
     this()
     {
-        input_path = output_path = "./views/";
+        auto tpl_path = Config.app.config.templates.path.value;
+        if(tpl_path.length == 0)
+            tpl_path = "./views/";
+        input_path = output_path = tpl_path;
         parser = new Parser();
         renderer = new Renderer();
     }
@@ -129,7 +133,10 @@ public:
 
 @property Environment Env(string inpath = "./views/")
 {
-    return new Environment(inpath);
+    auto tpl_path = Config.app.config.templates.path.value;
+    if(tpl_path.length == 0)
+            tpl_path = inpath;
+    return new Environment(tpl_path);
 }
 
 @property Environment Env(string input, string ouput)
