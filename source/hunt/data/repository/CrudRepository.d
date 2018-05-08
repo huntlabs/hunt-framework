@@ -129,7 +129,7 @@ abstract class CrudRepository(T, ID) : Repository!(T, ID)
 
         foreach (entity; entities)
         {
-            resultList ~= this.save(e);
+            resultList ~= this.save(entity);
         }
 
         return resultList;
