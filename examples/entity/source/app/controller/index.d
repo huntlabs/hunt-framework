@@ -13,7 +13,7 @@ module app.controller.index;
 
 import hunt;
 
-import app.model.user;
+import app.repository.UserRepository;
 
 import std.conv;
 
@@ -28,9 +28,9 @@ class IndexController : Controller
     @Action
     void list()
     {
-        auto cb = entityManager.createCriteriaBuilder!User();
-        cb.where(cb.gt(cb.User.id,1));
-        User[] users = entityManager.getResultList!User(cb);
+        auto repository = new UserRepository;
+
+        User[] users = repository.findAll();
 
         string str = "id &nbsp; name &nbsp; action<p>";
         foreach(user;users){
@@ -58,10 +58,14 @@ class IndexController : Controller
     @Action
     void addPost()
     {
+        auto repository = new UserRepository;
+        
         auto name = request.post("name","");
+
         User user = new User();
         user.name = name;
-        entityManager.persist(user);
+        repository.save(user);
+
         response.html(user.id.to!string ~ "<br> <a href=\"/list\">list</a>");
     }
     
@@ -69,19 +73,22 @@ class IndexController : Controller
     void del()
     {
         auto id = request.get("id","");
-        User user = new User();
-        user.id = id.to!int;
-        int result = entityManager.remove(user);
-        response.html(result.to!string ~ "<br> <a href=\"/list\">list</a>");
+
+        auto repository = new UserRepository;
+
+        repository.remove(id.to!int);
+
+        response.html("<br> <a href=\"/list\">list</a>");
     }
     
     @Action
     void update()
     {
         auto id = request.get("id","");
-        User user = new User();
-        user.id = id.to!int;
-        entityManager.find(user);
+        
+        auto repository = new UserRepository;
+        User user = repository.find(id.to!int);
+
         response.html(```
                       <form action="/update" method="post">
                         <p>name: <input type="hidden"  name="id" value="```~id~```" /></p>
@@ -96,10 +103,14 @@ class IndexController : Controller
     {
         auto id = request.post("id","");
         auto name = request.post("name","");
-        User user = new User();
-        user.id = id.to!int;
+
+        auto repository = new UserRepository;
+        User user = repository.find(id.to!int);
+        
         user.name = name;
-        entityManager.merge(user);
+
+        repository.save(user);
+
         response.html(id ~ "<br> <a href=\"/list\">list</a>");
     }
     
@@ -107,9 +118,10 @@ class IndexController : Controller
     void find()
     {
         auto id = request.get("id","");
-        User user = new User();
-        user.id = id.to!int;
-        entityManager.find(user);
+
+        auto repository = new UserRepository;
+        User user = repository.find(id.to!int);
+
         response.html("id:" ~id ~ "&nbsp; name:" ~ user.name.to!string ~ "<br> <a href=\"/list\">list</a>");
     }
 }

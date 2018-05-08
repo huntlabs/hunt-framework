@@ -1,9 +1,8 @@
 {
 	"name": "hunt-entity",
-	"description": "hunt use entity. ",
-	"copyright": "Copyright © 2016, huntframework.com",
+	"description": "hunt use entity.",
+	"copyright": "Copyright © 2018, huntframework.com",
 	"targetType": "executable",
-	"mainSourceFile": "./source/bootstrap.d",
 	"dependencies": {
 		"hunt": {
 			"path": "../../"
@@ -13,7 +12,7 @@
 		{
 			"name": "default",
 			"subConfigurations": {
-				"hunt": "MySQL"
+				"hunt": "mysql"
 			}
 		},
 		{
