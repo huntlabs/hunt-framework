@@ -11,7 +11,7 @@
  
 module hunt.application.controller;
 
-import kiss.log;
+import kiss.logger;
 
 public import hunt.view;
 public import hunt.http.response;

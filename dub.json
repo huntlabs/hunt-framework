@@ -3,11 +3,10 @@
     "license": "Apache-2.0",
     "copyright": "Copyright (C) 2015-2018, Shanghai Putao Technology Co., Ltd",
     "description": "A high performance full-stack Web framework.",
-    "libs": [],
     "dependencies": {
-		"collie": {"version": "~>0.10.9"},
+		"collie": {"version": "~>0.10.10"},
 		"entity": {"version":"~>1.3.3"},
-		"cache": {"version":"~>0.0.2"}
+		"cache": {"version":"~>0.0.3"}
     },
     "configurations": [
         {

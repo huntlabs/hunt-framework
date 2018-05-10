@@ -11,7 +11,7 @@
 
 module hunt.routing.define;
 
-public import kiss.log;
+public import kiss.logger;
 
 public import hunt.http.request;
 
