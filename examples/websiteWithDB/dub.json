@@ -19,7 +19,6 @@
 		{
 			"name": "default",
 			"subConfigurations": {
-				"hunt": "R&M",
 				"db":"mysql"
 			}
 		},
