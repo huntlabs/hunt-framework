@@ -18,7 +18,7 @@ import collie.codec.http.headers.httpcommonheaders;
 import collie.codec.http.server.responsehandler;
 import collie.codec.http.server.responsebuilder;
 import collie.codec.http.httpmessage;
-import kiss.log;
+import kiss.logger;
 import hunt.http.cookie;
 import hunt.utils.string;
 import hunt.versions;

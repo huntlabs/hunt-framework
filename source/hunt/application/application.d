@@ -20,10 +20,10 @@ import collie.utils.exception;
 import huntlabs.cache;
 
 public import kiss.event;
-public import collie.net.eventloopgroup;
+public import kiss.event.EventLoopGroup;
 
 public import std.socket;
-public import kiss.log;
+public import kiss.logger;
 public import std.file;
 
 import std.string;
@@ -187,12 +187,20 @@ final class Application
 
     private void initDatabase(AppConfig.DBConfig config)
     {
-        auto options = new DatabaseOption(config.url);
-        options.setMaximumConnection(config.pool.maxConnection);
-        options.setMinimumConnection(config.pool.minConnection);
-        options.setConnectionTimeout(config.pool.timeout);
+        if(config.url.empty)
+        {
+            logWarning("No database configured!");
+        }
+        else
+        {
+            auto options = new DatabaseOption(config.url);
 
-        _entityManagerFactory = Persistence.createEntityManagerFactory("default", options);
+            options.setMaximumConnection(config.pool.maxConnection);
+            options.setMinimumConnection(config.pool.minConnection);
+            options.setConnectionTimeout(config.pool.timeout);
+
+            _entityManagerFactory = Persistence.createEntityManagerFactory("default", options);
+        }
     }
 
     private void initCache(AppConfig.CacheConf config)

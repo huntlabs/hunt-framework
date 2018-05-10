@@ -14,7 +14,7 @@ module hunt.application.config;
 import std.exception;
 import std.parallelism : totalCPUs;
 import std.socket : Address, parseAddress;
-import kiss.log;
+import kiss.logger;
 import std.string;
 
 import hunt.init;
@@ -328,11 +328,15 @@ class ConfigManager
         string fullName = buildPath(path, fileName);
         if(exists(fullName))
         {
+            logDebugf("using config file: %s", fullName);
             auto con = new Configuration(fullName, sec);
             _app = AppConfig.parseAppConfig(con);
         }
         else
+        {
+            logDebug("using default configs.");
             _app = new AppConfig();
+        }
     }
 
     Configuration config(string key)
