@@ -17,7 +17,7 @@ import std.exception;
 import std.array;
 import std.stdio;
 import std.string;
-import kiss.log;
+import kiss.logger;
 
 class ConfFormatException : Exception
 {
