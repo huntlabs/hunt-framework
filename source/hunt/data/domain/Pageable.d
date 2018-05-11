@@ -2,35 +2,35 @@ module hunt.data.domain.Pageable;
 
 class Pageable
 {
-	static Pageable unpaged() {
-		return null;
-	}
+	// static Pageable unpaged() {
+	// 	return null;
+	// }
 
-	boolean isPaged() {
-		return true;
-	}
+	// boolean isPaged() {
+	// 	return true;
+	// }
 
-	boolean isUnpaged() {
-		return !isPaged();
-	}
+	// boolean isUnpaged() {
+	// 	return !isPaged();
+	// }
 
-	int getPageNumber();
+	// int getPageNumber();
 
-	int getPageSize();
+	// int getPageSize();
 
-	long getOffset();
+	// long getOffset();
 
-	Sort getSort();
+	// Sort getSort();
 
-	Sort getSortOr(Sort sort) {
-		return getSort().isSorted() ? getSort() : sort;
-	}
+	// Sort getSortOr(Sort sort) {
+	// 	return getSort().isSorted() ? getSort() : sort;
+	// }
 
-	Pageable next();
+	// Pageable next();
 
-	Pageable previousOrFirst();
+	// Pageable previousOrFirst();
 
-	Pageable first();
+	// Pageable first();
 
-	boolean hasPrevious();
+	// boolean hasPrevious();
 }
