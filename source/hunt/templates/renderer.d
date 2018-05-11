@@ -61,18 +61,38 @@ public:
 
     bool cmp(JSONValue a, JSONValue b, Function func)
     {
-        //writeln("--------cmp : ", func, " a type :", a.type);
-        if (a.type != b.type)
-            return false;
+        //writeln("--------cmp : ", func, " a type :", a.type ," b type :", b.type );
+        
         if (a.type == JSON_TYPE.OBJECT || a.type == JSON_TYPE.ARRAY)
             return false;
         else if (a.type == JSON_TYPE.STRING)
         {
+            if (a.type != b.type)
+                return false;
             return execCmp!string(a.str, b.str, func);
         }
-        else if (a.type == JSON_TYPE.INTEGER)
+        else if (a.type == JSON_TYPE.INTEGER )
         {
-            return execCmp!long(a.integer, b.integer, func);
+            //writeln("a :",a.integer,"b :", b.integer);
+            if(b.type == JSON_TYPE.INTEGER )
+                return execCmp!long(a.integer, b.integer, func);
+            else if(b.type == JSON_TYPE.UINTEGER )
+            {
+                return execCmp!long(a.integer, b.uinteger, func);
+            }
+            else
+                return false;
+        }
+        else if (a.type == JSON_TYPE.UINTEGER)
+        {
+            if(b.type == JSON_TYPE.INTEGER )
+                return execCmp!long(a.uinteger, b.integer, func);
+            else if(b.type == JSON_TYPE.UINTEGER )
+            {
+                return execCmp!long(a.uinteger, b.uinteger, func);
+            }
+            else
+                return false;
         }
         else if (a.type == JSON_TYPE.TRUE)
         {
@@ -196,6 +216,17 @@ public:
             {
                 //writeln("--read result --:", element.result.toString);
                 result = element.result;
+                return result;
+            }
+        case Function.Length:
+            {
+                auto res = eval_expression(element.args[0], data);
+                if (res.type == JSON_TYPE.STRING)
+                    result = res.str.length;
+                else if(res.type == JSON_TYPE.ARRAY)
+                    result = res.array.length;
+                else
+                    result = 0;
                 return result;
             }
         case Function.Default:

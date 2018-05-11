@@ -9,7 +9,7 @@ void main()
 	data["name"] = "Cree";
 	data["alias"] = "Cree";
 	data["city"] = "Christchurch";
-	data["age"] = 29;
+	data["age"] = 3;
 	data["age1"] = 28;
 	data["addrs"] = ["ShangHai", "BeiJing"];
 	data["is_happy"] = false;
@@ -17,7 +17,7 @@ void main()
 	data["users"] = ["name" : "jeck", "age" : "18"];
 	JSONValue user1;
 	user1["name"] = "cree";
-	user1["age"] = 18;
+	user1["age"] = 2;
 	JSONValue user2;
 	user2["name"] = "jeck";
 	user2["age"] = 28;
@@ -52,14 +52,12 @@ void main()
 	writeln("result : ",Env().render(input, data));
 
 	writeln("-------------FUNC compare operator------------");
-	input = "{% if age >= age1 %}true{% else %}false{% endif %}";
+	input = "{% if length(addrs)>=4 %}true{% else %}false{% endif %}";
 	writeln("result : ",Env().render(input, data));
 
 	writeln("-------------FUNC compare operator (string)------------");
 	input = "{% if name != \"Peter\" %}true{% else %}false{% endif %}";
 	writeln("result : ",Env().render(input, data));
-
-	//Util.debug_ast(Env().parse(input).parsed_node);
 
 	writeln("---------Render file with `include`-----------");
 	writeln("result : ", Env().render_file("index.txt", data));
@@ -71,17 +69,21 @@ void main()
 	Env().write("index.txt", data,"index.html");
 
 
-	writeln("------------------deep for-------------------------");
+	writeln("------------------Deep for-------------------------");
 	input = "{% for user in userinfo %}{{ user.name }} : {{user.age}}  {% endfor %}";
 	writeln("result : ",Env().render(input, data));
 
 	writeln("-------------FUNC  operator------------");
-	input = "{{ 'a' <= '1' }}";
+	input = "{{ 'a' <= '1' }} ~ {{ age >= age1 }} ~ {{ 2 < 1 }} ~ {{ 4 > 3 }} ~ {{ '4' > 3 }}";
 	writeln("result : ",Env().render(input, data));
 
 	writeln("-------------Array value------------");
 	input = "{{ addrs.0 }} or {{ users.name }}";
 	writeln("result : ",Env().render(input, data));
+
+	 writeln("-------------FUNC length------------");
+	 input = "{{ length(name) }} or {{ length(users) }}";
+	 writeln("result : ",Env().render(input, data));
 
 	//Util.debug_ast(Env().parse(input).parsed_node);
 
