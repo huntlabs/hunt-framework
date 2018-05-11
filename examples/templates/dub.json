@@ -1,0 +1,13 @@
+{
+	"name": "hunt-template",
+	"authors": [
+		"gaoxincheng"
+	],
+	"dependencies": {
+        "hunt" : {"path":"../../"}
+	},
+	"description": "A minimal D application.",
+	"copyright": "Copyright © 2018, gaoxincheng",
+	"license": "BSD",
+	"targetType": "executable"
+}

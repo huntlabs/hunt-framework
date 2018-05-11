@@ -183,6 +183,7 @@ public:
                         else
                             result = element.command;
                     }
+                    return result;
                 }
                 catch (Exception e)
                 {
