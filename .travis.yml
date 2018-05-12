@@ -7,5 +7,6 @@ services:
 d:
   - dmd
 
- before_install:
-    mysql -u root < ./entity.sql
+before_install:
+  - mysql -u root < ./entity.sql
+
