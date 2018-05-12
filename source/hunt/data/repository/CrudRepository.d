@@ -16,13 +16,6 @@ import entity.EntityManagerFactory;
 import hunt;
 public import entity.repository.Repository;
 
-struct Page(T)
-{
-	long totalAll;
-	uint pageIndex;
-	uint pageNum;
-	T[] arrData;
-}
 
 
 class CrudRepository(T, ID) : Repository!(T, ID)
@@ -91,28 +84,7 @@ class CrudRepository(T, ID) : Repository!(T, ID)
         return (entity !is null);
     }
 
-	public Page!T find(uint page , uint num , bool asc = true)
-	{
-		auto em = this.createEntityManager();
-		CriteriaBuilder builder = em.getCriteriaBuilder();
-		auto criteriaQuery = builder.createQuery!(T);
-		Root!T root = criteriaQuery.from();
 
-		if(asc == false)
-		{
-			mixin(orderByIDDesc!T());
-		}
-
-		TypedQuery!T typedQuery = em.createQuery(criteriaQuery.select(root));
-		auto ts = typedQuery.setFirstResult( page * num).setMaxResults(num).getResultList();
-		Page!T resPage;
-		resPage.pageNum = num;
-		resPage.pageIndex = page;
-		resPage.arrData = ts;
-		resPage.totalAll = count();
-		em.close();
-		return resPage;
-	}
 
     public T[] findAll()
     {
@@ -183,8 +155,4 @@ class CrudRepository(T, ID) : Repository!(T, ID)
 
 
 
-string orderByIDDesc(T)()
-{
-	string code = "criteriaQuery.orderBy(builder.desc(root."~ T.stringof ~"."~ getSymbolsByUDA!(T, PrimaryKey)[0].stringof ~"));";
-	return code;
-}
+
