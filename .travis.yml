@@ -9,5 +9,5 @@ d:
 
 before_install:
   - sudo apt-get install mysql-client mysql-client-5.5 -y
-  - mysql -u root < ./entity.sql
+  - mysql -u root -h 127.0.0.1 < ./entity.sql
 
