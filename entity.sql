@@ -2,7 +2,7 @@
 
 
 DROP DATABASE IF EXISTS `hunt_test`;
-CREATE DATABASE IF NOT EXISTS `hunt_test` 
+CREATE DATABASE IF NOT EXISTS `hunt_test`; 
 USE `hunt_test`;
 
 
