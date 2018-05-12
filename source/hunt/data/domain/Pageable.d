@@ -1,36 +1,47 @@
 module hunt.data.domain.Pageable;
 
+import hunt.data.domain.Sort;
+
 class Pageable
 {
-	// static Pageable unpaged() {
-	// 	return null;
-	// }
+	int 	_page;
+	int 	_size;
+	Sort 	_sort;
 
-	// boolean isPaged() {
-	// 	return true;
-	// }
+	this(int page , int size)
+	{
+		this(page , size , new Sort());
+	}
 
-	// boolean isUnpaged() {
-	// 	return !isPaged();
-	// }
+	this(int page , int size , string column , OrderBy by )
+	{
+		this(page , size , new Sort(column , by));
+	}
 
-	// int getPageNumber();
+	this(int page , int size , Sort sort)
+	{
+		_page = page;
+		_size = size;
+		_sort = sort;
+	}
 
-	// int getPageSize();
+	int getPageNumber() 
+	{
+		return _page;
+	}  
 
-	// long getOffset();
+	int getPageSize()
+	{
+		return _size;
+	}
 
-	// Sort getSort();
+	int getOffset()
+	{
+		return _page * _size;
+	}
 
-	// Sort getSortOr(Sort sort) {
-	// 	return getSort().isSorted() ? getSort() : sort;
-	// }
-
-	// Pageable next();
-
-	// Pageable previousOrFirst();
-
-	// Pageable first();
-
-	// boolean hasPrevious();
+	Sort getSort()
+	{
+		return _sort;
+	}
 }
