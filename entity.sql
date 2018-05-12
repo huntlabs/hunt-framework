@@ -2,7 +2,7 @@
 
 
 DROP DATABASE IF EXISTS `hunt_test`;
-CREATE DATABASE IF NOT EXISTS `hunt_test` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin */;
+CREATE DATABASE IF NOT EXISTS `hunt_test` 
 USE `hunt_test`;
 
 
@@ -20,7 +20,6 @@ CREATE TABLE IF NOT EXISTS `p_menu` (
 ) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 
-/*!40000 ALTER TABLE `p_menu` DISABLE KEYS */;
 INSERT INTO `p_menu` (`ID`, `name`, `up_menu_id`, `perident`, `index`, `icon`, `status`) VALUES
 	(1, 'User', 0, 'user.edit', 0, 'fe-box', 0),
 	(2, 'Role', 0, 'role.edit', 0, 'fe-box', 0),
@@ -37,7 +36,4 @@ INSERT INTO `p_menu` (`ID`, `name`, `up_menu_id`, `perident`, `index`, `icon`, `
 	(13, 'Add Permission', 4, 'permission.add', 0, '0', 0),
 	(14, 'Manage Menu', 5, 'menu.edit', 0, '0', 0),
 	(15, 'Add Menu', 5, 'menu.add', 0, '0', 0);
-/*!40000 ALTER TABLE `p_menu` ENABLE KEYS */;
-/*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
-/*!40014 SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS IS NULL, 1, @OLD_FOREIGN_KEY_CHECKS) */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+

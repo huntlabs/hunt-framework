@@ -8,6 +8,5 @@ d:
   - dmd
 
 before_install:
-  - sudo apt-get install mysql-client mysql-client-5.5 -y
-  - mysql -u root -h localhost < ./entity.sql
+  - mysql -u root < ./entity.sql
 
