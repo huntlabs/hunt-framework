@@ -16,14 +16,33 @@ import entity.EntityManagerFactory;
 import hunt;
 public import entity.repository.Repository;
 
+version(unittest)
+{
+	__gshared  EntityManagerFactory g_entityManagerFactory = null;
+	static this()
+	{
+		if(g_entityManagerFactory is null)
+		{
+			DatabaseOption options = new DatabaseOption("mysql://root:@localhost:3306/hunt_test?charset=utf-8");
+			g_entityManagerFactory = Persistence.createEntityManagerFactory("default", options);
+		}
+	}
+
+}
 
 
 class CrudRepository(T, ID) : Repository!(T, ID)
 {
     EntityManager createEntityManager()
     {
-        return Application.getInstance().getEntityManagerFactory().createEntityManager();
-    }
+		version(unittest)
+		{
+			return g_entityManagerFactory.createEntityManager();
+		}
+		else{
+      	  return Application.getInstance().getEntityManagerFactory().createEntityManager();
+		}
+	}
 
     public long count()
     {

@@ -1,7 +1,11 @@
  
 language: d
 
+services:
+  - mysql
+
 d:
   - dmd
-  #- gdc
-  #- ldc
+
+ before_install:
+    mysql -u root < ./entity.sql
