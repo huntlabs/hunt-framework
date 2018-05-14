@@ -18,13 +18,16 @@ void main()
 	JSONValue user1;
 	user1["name"] = "cree";
 	user1["age"] = 2;
+	user1["hobby"] = ["eat", "drink"];
 	JSONValue user2;
 	user2["name"] = "jeck";
 	user2["age"] = 28;
+	user2["hobby"] = ["sing", "football"];
 	JSONValue[] userinfo;
 	userinfo ~= user1;
 	userinfo ~= user2;
-	data["userinfo"] = userinfo;
+	JSONValue data2;
+	data2["userinfo"] = userinfo;
 
 	string input;
 	writeln("------------------IF--------------------------");
@@ -70,8 +73,13 @@ void main()
 
 
 	writeln("------------------Deep for-------------------------");
-	input = "{% for user in userinfo %}{{ user.name }} : {{user.age}}  {% endfor %}";
-	writeln("result : ",Env().render(input, data));
+	input = "{% for user in userinfo %}{{user.hobby.1}} {% endfor %}";
+	writeln("result : ",Env().render(input, data2));
+
+	writeln("------------------Deep for 2-------------------------");
+	input = "{{userinfo.1.name}}";
+	writeln("result : ",Env().render(input, data2));
+
 
 	writeln("-------------FUNC  operator------------");
 	input = "{{ 'a' <= '1' }} ~ {{ age >= age1 }} ~ {{ 2 < 1 }} ~ {{ 4 > 3 }} ~ {{ '4' > 3 }}";

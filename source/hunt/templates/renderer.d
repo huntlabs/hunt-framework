@@ -62,7 +62,7 @@ public:
     bool cmp(JSONValue a, JSONValue b, Function func)
     {
         //writeln("--------cmp : ", func, " a type :", a.type ," b type :", b.type );
-        
+
         if (a.type == JSON_TYPE.OBJECT || a.type == JSON_TYPE.ARRAY)
             return false;
         else if (a.type == JSON_TYPE.STRING)
@@ -71,12 +71,12 @@ public:
                 return false;
             return execCmp!string(a.str, b.str, func);
         }
-        else if (a.type == JSON_TYPE.INTEGER )
+        else if (a.type == JSON_TYPE.INTEGER)
         {
             //writeln("a :",a.integer,"b :", b.integer);
-            if(b.type == JSON_TYPE.INTEGER )
+            if (b.type == JSON_TYPE.INTEGER)
                 return execCmp!long(a.integer, b.integer, func);
-            else if(b.type == JSON_TYPE.UINTEGER )
+            else if (b.type == JSON_TYPE.UINTEGER)
             {
                 return execCmp!long(a.integer, b.uinteger, func);
             }
@@ -85,9 +85,9 @@ public:
         }
         else if (a.type == JSON_TYPE.UINTEGER)
         {
-            if(b.type == JSON_TYPE.INTEGER )
+            if (b.type == JSON_TYPE.INTEGER)
                 return execCmp!long(a.uinteger, b.integer, func);
-            else if(b.type == JSON_TYPE.UINTEGER )
+            else if (b.type == JSON_TYPE.UINTEGER)
             {
                 return execCmp!long(a.uinteger, b.uinteger, func);
             }
@@ -128,6 +128,63 @@ public:
         }
         else
             return true;
+    }
+
+    T read_json(T = JSONValue)(JSONValue data, string command)
+    {
+       // writeln("------read json---- :", data.toString, "  command : ",command);
+        T result;
+        if(data.type == JSON_TYPE.OBJECT)
+        {
+            auto obj = command in data;
+            if (obj !is null)
+            {
+                result = data[command];
+            }
+            else
+            {
+                auto cmds = split(command, ".");
+                if (cmds.length > 1)
+                {
+                    auto first = cmds[0];
+                    auto remain_cmd = command[first.length+1 .. $];
+                   // writeln("------remain cmd---- :", remain_cmd);
+                    if(first in  data)
+                        result = read_json(data[first],remain_cmd);
+                    else
+                        template_engine_throw("render_error",
+                            "variable '" ~ first ~ "' not found");
+                    
+                }
+            }
+            return result;
+        }
+        else if (data.type == JSON_TYPE.ARRAY)
+        {
+            if(Util.is_num(command))
+                return data[to!int(command)];
+            else
+            {
+                auto cmds = split(command, ".");
+                if (cmds.length > 1)
+                {
+                    auto first = cmds[0];
+                    auto remain_cmd = command[first.length+1 .. $];
+                   // writeln("------remain cmd---- :", remain_cmd);
+                    if(Util.is_num(first))
+                        result = read_json(data[to!int(first)],remain_cmd);
+                    else
+                        template_engine_throw("render_error",
+                            "variable '" ~ first ~ "' not found");
+                    
+                }
+            }
+            return result;
+        }
+        else
+        {
+            return data;
+        }
     }
 
     T eval_expression(T = JSONValue)(ElementExpression element, ref JSONValue data)
@@ -177,32 +234,33 @@ public:
                 try
                 {
                     //writeln("--read * json --:", element.command);
-                    if (element.command.length > 0 && element.command in data)
-                        result = data[element.command];
-                    else
-                    {
-                        auto cmds = split(element.command, ".");
-                        if (cmds.length > 1)
-                        {
-                            if (cmds.length == 2)
-                            {
-                                if (cmds[0] in data)
-                                {
-                                    if (Util.is_num(cmds[1]))
-                                    {
-                                        auto idx = to!int(cmds[1]);
+                    // if (element.command.length > 0 && element.command in data)
+                    //     result = data[element.command];
+                    // else
+                    // {
+                    //     auto cmds = split(element.command, ".");
+                    //     if (cmds.length > 1)
+                    //     {
+                    //         if (cmds.length == 2)
+                    //         {
+                    //             if (cmds[0] in data)
+                    //             {
+                    //                 if (Util.is_num(cmds[1]))
+                    //                 {
+                    //                     auto idx = to!int(cmds[1]);
 
-                                        result = data[cmds[0]][idx];
-                                    }
-                                    else if (cmds[1] in data[cmds[0]])
-                                        result = data[cmds[0]][cmds[1]];
-                                }
+                    //                     result = data[cmds[0]][idx];
+                    //                 }
+                    //                 else if (cmds[1] in data[cmds[0]])
+                    //                     result = data[cmds[0]][cmds[1]];
+                    //             }
 
-                            }
-                        }
-                        else
-                            result = element.command;
-                    }
+                    //         }
+                    //     }
+                    //     else
+                    //         result = element.command;
+                    // }
+                    result = read_json(data,element.command);
                     return result;
                 }
                 catch (Exception e)
@@ -223,7 +281,7 @@ public:
                 auto res = eval_expression(element.args[0], data);
                 if (res.type == JSON_TYPE.STRING)
                     result = res.str.length;
-                else if(res.type == JSON_TYPE.ARRAY)
+                else if (res.type == JSON_TYPE.ARRAY)
                     result = res.array.length;
                 else
                     result = 0;
