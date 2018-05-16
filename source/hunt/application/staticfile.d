@@ -149,7 +149,7 @@ class StaticfileController : Controller
 	
 		f.seek(rangeStart);
 		auto buf = f.rawRead(new ubyte[rangeEnd.to!uint - rangeStart.to!uint + 1]);
-		response.setContext(buf);
+		response.setContent(buf);
     }
     
     private string mendPath(string path)
