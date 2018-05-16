@@ -3,6 +3,8 @@ module hunt.templates.environment;
 import std.string;
 import std.json;
 import std.file;
+import std.path;
+import std.stdio;
 
 import hunt.application.config;
 import hunt.templates.match;
@@ -20,32 +22,34 @@ class Environment
     Parser parser;
     Renderer renderer;
 
-public:
+private:
     this()
     {
         auto tpl_path = Config.app.config.templates.path.value;
         if(tpl_path.length == 0)
             tpl_path = "./views/";
-        input_path = output_path = tpl_path;
+        input_path = output_path = buildNormalizedPath(tpl_path) ~ dirSeparator;
         parser = new Parser();
         renderer = new Renderer();
     }
 
     this(string global_path)
     {
-        input_path = output_path = global_path;
+        input_path = output_path = buildNormalizedPath(global_path) ~ dirSeparator;
+        //writeln("input path : ",input_path);
         parser = new Parser();
         renderer = new Renderer();
     }
 
     this(string input_path, string output_path)
     {
-        this.input_path = input_path;
-        this.output_path = output_path;
+        this.input_path = buildNormalizedPath(input_path) ~ dirSeparator;
+        this.output_path = buildNormalizedPath(output_path) ~ dirSeparator;
         parser = new Parser();
         renderer = new Renderer();
     }
 
+public:
     void set_statement(string open, string close)
     {
         regex_map_delimiters[Delimiter.Statement] = open ~ "\\s*(.+?)\\s*" ~ close;
@@ -131,11 +135,12 @@ public:
     }
 };
 
-@property Environment Env(string inpath = "./views/")
+@property Environment Env(string inpath = "")
 {
     auto tpl_path = Config.app.config.templates.path.value;
-    if(tpl_path.length == 0)
+    if(inpath.length != 0)
             tpl_path = inpath;
+    //writeln("templates path : ",tpl_path);
     return new Environment(tpl_path);
 }
 

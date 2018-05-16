@@ -13,15 +13,36 @@ module hunt.data.repository.CrudRepository;
 
 import entity;
 import entity.EntityManagerFactory;
-
+import hunt;
 public import entity.repository.Repository;
 
-abstract class CrudRepository(T, ID) : Repository!(T, ID)
+version(unittest)
+{
+	__gshared  EntityManagerFactory g_entityManagerFactory = null;
+	static this()
+	{
+		if(g_entityManagerFactory is null)
+		{
+			DatabaseOption options = new DatabaseOption("mysql://root:@localhost:3306/hunt_test?charset=utf-8");
+			g_entityManagerFactory = Persistence.createEntityManagerFactory("default", options);
+		}
+	}
+
+}
+
+
+class CrudRepository(T, ID) : Repository!(T, ID)
 {
     EntityManager createEntityManager()
     {
-        return Application.getInstance().getEntityManagerFactory().createEntityManager();
-    }
+		version(unittest)
+		{
+			return g_entityManagerFactory.createEntityManager();
+		}
+		else{
+      	  return Application.getInstance().getEntityManagerFactory().createEntityManager();
+		}
+	}
 
     public long count()
     {
@@ -33,7 +54,7 @@ abstract class CrudRepository(T, ID) : Repository!(T, ID)
         criteriaQuery.select(builder.count(root));
         
         Long result = cast(Long)(em.createQuery(criteriaQuery).getSingleResult());
-
+		em.close();
         return result.longValue();
     }
 
@@ -79,8 +100,10 @@ abstract class CrudRepository(T, ID) : Repository!(T, ID)
     {
         T entity = this.findById(id);
         
-        return (null != entity);
+        return (entity !is null);
     }
+
+
 
     public T[] findAll()
     {
@@ -102,7 +125,7 @@ abstract class CrudRepository(T, ID) : Repository!(T, ID)
         foreach (id; ids)
         {
             T entity = this.findById(id);
-            if (null != entity)
+            if (entity !is null)
                 entities ~= entity;
         }
 
@@ -122,13 +145,13 @@ abstract class CrudRepository(T, ID) : Repository!(T, ID)
     {
         auto em = this.createEntityManager();
         
-        if (null == em.find!T(entity))
+        if (em.find!T(entity) is null)
         {
             em.persist(entity);
         }
         else
         {
-            entity = em.merge!(T)(entity);
+            em.merge!T(entity);
         }
 
         em.close();
@@ -148,3 +171,7 @@ abstract class CrudRepository(T, ID) : Repository!(T, ID)
         return resultList;
     }
 }
+
+
+
+
