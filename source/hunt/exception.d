@@ -11,6 +11,15 @@
 
 module hunt.exception;
 
+import std.exception;
 import collie.utils.exception;
 
 mixin ExceptionBuild!("Hunt","");
+
+class NotImplementedException : Exception
+{
+    this(string method)
+    {
+        super(method ~ " is not implemented");
+    }
+}

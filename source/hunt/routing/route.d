@@ -96,6 +96,17 @@ class Route
             return this._params;
         }
 
+        string getParameter(string key)
+        {
+            return _params.get(key, "");
+        }
+
+        bool hasParameter(string key)
+        {
+            string* p = (key in _params);
+            return p !is null;
+        }
+
         Route setPattern(string patternValue)
         {
             this._pattern = patternValue;
