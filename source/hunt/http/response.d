@@ -11,6 +11,7 @@
 
 module hunt.http.response;
 
+import std.conv;
 import std.datetime;
 import std.json;
 
@@ -20,12 +21,14 @@ import collie.codec.http.server.responsebuilder;
 import collie.codec.http.httpmessage;
 import kiss.logger;
 import hunt.http.cookie;
+import hunt.http.code;
 import hunt.utils.string;
 import hunt.versions;
 
+
 enum XPoweredBy = "Hunt " ~ HUNT_VERSION;
 
-final class Response : ResponseBuilder
+class Response : ResponseBuilder
 {
     this(ResponseHandler resp)
     {
@@ -33,36 +36,65 @@ final class Response : ResponseBuilder
         setHttpStatusCode(200);
     }
 
-    auto setHeader(T = string)(string key, T value)
+    Response setHeader(T = string)(string key, T value)
     {
         header!T(key,value);
 
         return this;
     }
 
-    auto setHeader(T = string)(HTTPHeaderCode key, T value)
+    Response setHeader(T = string)(HTTPHeaderCode key, T value)
     {
         header!T(key,value);
 
         return this;
     }
 
-    auto setContext(string str)
+    deprecated("Spelling error. Using setContent instead.")
+    Response setContext(string data)
     {
-        setBody(cast(ubyte[]) str);
+        return setContent(data);
+    }
+
+    deprecated("Spelling error. Using setContent instead.")
+    Response setContext(ubyte[] data)
+    {
+        return setContent(data);
+    }
+
+    /**
+     * Sets the response content.
+     *
+     * @return $this
+     */
+    Response setContent(string content)
+    {
+        setBody(cast(ubyte[]) content);
 
         return this;
     }
 
-    auto setContext(ubyte[] data)
+    // ditto
+    Response setContent(ubyte[] content)
     {
-        setBody(data);
+        setBody(cast(ubyte[]) content);
 
         return this;
     }
+
+    /**
+     * Gets the current response content.
+     *
+     * @return string Content
+     */
+    string getContent()
+    {
+        return cast(string) originalContent;
+    }
+    
 
     ///set http status code eg. 404 200
-    auto setHttpStatusCode(ushort code)
+    Response setHttpStatusCode(ushort code)
     {
         status(code,HTTPMessage.statusText(code));
 
@@ -70,44 +102,43 @@ final class Response : ResponseBuilder
     }
 
     ///return json value
-    auto json(JSONValue js)
+    Response json(JSONValue js)
     {
         json(js.toString());
 
         return this;
     }
     ///render json string value
-    auto json(string jsonString)
+    Response json(string jsonString)
     {
-        setHeader(HTTPHeaderCode.CONTENT_TYPE, "application/json;charset=utf-8").setContext(jsonString);
+        setHeader(HTTPHeaderCode.CONTENT_TYPE, "application/json;charset=utf-8").setContent(jsonString);
 
         return this;
     }
 
     ///render html string 
-    auto html(string htmlString, string content_type = "text/html;charset=utf-8")
+    Response html(string htmlString, string content_type = "text/html;charset=utf-8")
     {
-        setHeader(HTTPHeaderCode.CONTENT_TYPE, content_type).setContext(htmlString);
+        setHeader(HTTPHeaderCode.CONTENT_TYPE, content_type).setContent(htmlString);
 
         return this;
     }
 
     ///render plain text string 
-    auto plain(string textString, string content_type = "text/plain;charset=utf-8")
+    Response plain(string textString, string content_type = "text/plain;charset=utf-8")
     {
-        setHeader(HTTPHeaderCode.CONTENT_TYPE, content_type).setContext(textString);
+        setHeader(HTTPHeaderCode.CONTENT_TYPE, content_type).setContent(textString);
 
         return this;
     }
 
     ///download file 
-    auto download(string filename,ubyte[] file, string content_type = "binary/octet-stream")
+    Response download(string filename,ubyte[] file, string content_type = "binary/octet-stream")
     {
-		import std.conv;
 		setHeader(HTTPHeaderCode.CONTENT_TYPE, content_type)
 		.setHeader(HTTPHeaderCode.CONTENT_DISPOSITION,
 				"attachment; filename="~filename~"; size="~(file.length.to!string))
-		.setContext(file);
+		.setContent(file);
 
         return this;
     }
@@ -115,7 +146,7 @@ final class Response : ResponseBuilder
     /**
      * set Cookie
      */
-    auto setCookie(string name, string value, int expires = 0, string path = "/", string domain = null)
+    Response setCookie(string name, string value, int expires = 0, string path = "/", string domain = null)
     {
 
         import std.typecons;
@@ -138,10 +169,35 @@ final class Response : ResponseBuilder
 	/**
 	 * delete Cookie
 	 */
-	auto delCookie(string name)
+	Response delCookie(string name)
 	{
 		setCookie(name,null,0);
+        return this;
 	}
+
+    /**
+     * Add a cookie to the response.
+     *
+     * @param  Cookie $cookie
+     * @return $this
+     */
+    Response cookie(Cookie cookie)
+    {
+        withCookie(cookie);
+        return this;
+    }
+
+    /**
+     * Add a cookie to the response.
+     *
+     * @param  Cookie $cookie
+     * @return $this
+     */
+    Response withCookie(Cookie cookie)
+    {
+        setHeader(HTTPHeaderCode.SET_COOKIE, cookie.output(""));
+        return this;
+    }
 
     pragma(inline) final void done()
     {
@@ -179,7 +235,7 @@ final class Response : ResponseBuilder
 		
 		setHttpStatusCode(code);
 		header(HTTPHeaderCode.CONTENT_TYPE, contentype);
-		setContext(errorPageHtml(code , body_));
+		setContent(errorPageHtml(code , body_));
 		connectionClose();
 		done();
 	}
@@ -187,8 +243,29 @@ final class Response : ResponseBuilder
     void setHttpError(ushort code)
     {
         this.setHttpStatusCode(code);
-        this.setContext(errorPageHtml(code));
+        this.setContent(errorPageHtml(code));
     }
+
+    
+    /**
+     * Get the content of the response.
+     *
+     * @return string
+     */
+    string content()
+    {
+        return cast(string) _body.allData.data();
+    }
+
+    /**
+     * Get the original response content.
+     *
+     * @return mixed
+     */
+    const(ubyte)[] getOriginalContent()
+    {
+        return originalContent;
+    }     
 
 package(hunt.http):
     void clear()
@@ -199,7 +276,6 @@ private:
     bool _isDone = false;
 }
 
-import hunt.http.code;
 
 string errorPageHtml(int code , string _body = "")
 {
@@ -266,4 +342,57 @@ html ~= `
 `;
 
     return html;
+}
+
+
+/**
+ * Response represents an HTTP response in JSON format.
+ *
+ * Note that this class does not force the returned JSON content to be an
+ * object. It is however recommended that you do return an object as it
+ * protects yourself against XSSI and JSON-JavaScript Hijacking.
+ *
+ * @see https://www.owasp.org/index.php/OWASP_AJAX_Security_Guidelines#Always_return_JSON_with_an_Object_on_the_outside
+ *
+ */
+class JsonResponse : Response
+{
+    this(ResponseHandler resp)
+    {
+        super(resp);
+    }
+
+    /**
+     * Get the json_decoded data from the response.
+     *
+     * @return JSONValue
+     */
+    JSONValue getData()
+    {
+        return parseJSON(cast(string)originalContent);
+    }
+
+    /**
+     * Sets the data to be sent as JSON.
+     *
+     * @return $this
+     */
+    JsonResponse setData(string data)
+    {
+        return setJson(data);
+    }
+
+    /**
+     * Sets a raw string containing a JSON document to be sent.
+     *
+     * @param string data
+     *
+     * @return $this
+     */
+    JsonResponse setJson(string data)
+    {
+        this.json(data);
+        return this;
+    }
+
 }
