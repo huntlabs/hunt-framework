@@ -179,7 +179,7 @@ void doRequestHandle(HandleFunction handle, Request request)
         {
             collectException((){
                     response.setHttpStatusCode(502);
-                    response.setContext(e.toString());
+                    response.setContent(e.toString());
                     response.connectionClose();
                     response.done();
                 }());

@@ -1285,7 +1285,7 @@ final class Request : RequestHandler
 	/**
      * Get the user resolver callback.
      *
-     * @return \Closure
+     * @return Closure
      */
 	Closure getUserResolver()
 	{
@@ -1298,7 +1298,7 @@ final class Request : RequestHandler
 	/**
      * Set the user resolver callback.
      *
-     * @param  \Closure callback
+     * @param  Closure callback
      * @returnthis
      */
 	Request setUserResolver(Closure callback)
@@ -1310,7 +1310,7 @@ final class Request : RequestHandler
 	/**
      * Get the route resolver callback.
      *
-     * @return \Closure
+     * @return Closure
      */
 	public Closure getRouteResolver()
 	{
@@ -1323,7 +1323,7 @@ final class Request : RequestHandler
 	/**
      * Set the route resolver callback.
      *
-     * @param  \Closure callback
+     * @param  Closure callback
      * @returnthis
      */
 	Request setRouteResolver(Closure callback)
