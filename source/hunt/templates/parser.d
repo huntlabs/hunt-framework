@@ -42,6 +42,13 @@ public:
                     return result;
                 }
 
+                if(Util.is_num(command))
+                {
+                    ElementExpression result = new ElementExpression(Function.Result);
+                    result.result = to!int(command);
+                    return result;
+                }
+
                 ElementExpression result = new ElementExpression(Function.ReadJson);
                 switch (element_notation)
                 {

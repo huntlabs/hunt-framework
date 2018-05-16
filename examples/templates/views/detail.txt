@@ -1,0 +1,158 @@
+<script src="public/assets/js/detail.js"></script>
+<!-- <form> -->
+    <div class="wrapper">
+        <div class="container-fluid">
+            <!-- Page-Title -->
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="page-title-box">
+                        <div class="btn-group pull-right">
+                            <ol class="breadcrumb hide-phone p-0 m-0">
+                                <li class="breadcrumb-item">
+                                    <a href="#">Putao</a>
+                                </li>
+                                <li class="breadcrumb-item active">推送详情</li>
+                            </ol>
+                        </div>
+                        <ul>
+                            <li class="li-h" style="position:relative;">
+                                <h4 id="h01" class="page-title">{{ appname }}&nbsp;&nbsp;&nbsp;&nbsp;</h4>
+                            </li>
+                            <li class="li-h">
+                                <h4 class="page-title">&nbsp;&nbsp;&nbsp;&nbsp;推送详情</h4>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- end page title end breadcrumb -->
+            <br>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card-box" style="padding:30px 50px;">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <label style="color:rgb(0, 217, 255);">
+                                    <strong>通知/透传消息/富媒体消息</strong>
+                                </label>
+                                <p>
+                                    <span>标题：{{ title }}</span>
+                                </p>
+                                <p>
+                                    <span>内容：{{ content }}</span>
+                                </p>
+                                <div class="row">
+                                    <div class="col-lg-3">
+                                        <p>
+                                            <span>推送平台：{{ platform }}</span>
+                                        </p>
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <p>
+                                            <span>推送范围：{{ pushscope }}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-3">
+                                        <p>
+                                            <span>推送方式：{{ type }}</span>
+                                        </p>
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <p>
+                                            <span>目标设备数：{{ count }}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-3">
+                                        <p>
+                                            <span>推送时间：{{ time }}</span>
+                                        </p>
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <p>
+                                            <span>离线消息保留时长：{{ savetotime }}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <label style="color:rgb(0, 217, 255);">
+                                    <strong>推送记录</strong>
+                                </label>
+                                <form id="filterForm" data-msgid="{{ msgid }}">
+                                        <div class="form-inline">
+                                                <input type="text" name="devid" placeholder="设备ID">
+                                                <div style="width:60px;"></div>
+                                                <input type="text" name="alias" placeholder="别名">
+                                                <div style="width:60px;"></div>
+                                                <select class="form-control" name="pushresult">
+                                                    <option>
+                                                        <推送结果>
+                                                    </option>
+                                                    <option>推送成功</option>
+                                                    <option>推送失败</option>
+                                                    <option>设备离线</option>
+                                                    <option>设备不存在</option>
+                                                    <option>未确认</option>
+                                                </select>
+                                                <div style="width:60px;"></div>
+                                                <select class="form-control" name="platform" id="platform">
+                                                    <option>
+                                                        <推送平台>
+                                                    </option>
+                                                    <!-- <option>ios</option>
+                                                    <option>Android</option>
+                                                    <option>Linux</option>
+                                                    <option>Windows</option> -->
+                                                </select>
+                                                <div style="width:60px;"></div>
+                                                <button type="button" id="filterBtn" class="btn btn-primary btn-custom waves-effect w-md waves-light m-b-5" style="float:right">筛选</button>
+                                            </div>
+                                </form>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="form-inline">
+                                    <table class="table" id="detailTable">
+                                        <thead class="thead-default">
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>别名</th>
+                                                <th>推送平台</th>
+                                                <th>推送设备令牌</th>
+                                                <th>推送结果</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="detailbody">
+                                           {# this is for loop !#}
+                                           {% for user in userinfo %}
+                                            <tr>
+                                                <td scope="row">{{ user.name }}</td>
+                                                <td>{{ user.age }}</td>                                                                                            
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <ul class="pagination" id="historypage">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end container -->
+    </div>
+<!-- </form> -->
