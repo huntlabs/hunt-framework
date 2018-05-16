@@ -579,10 +579,17 @@ final class Request : RequestHandler
      * @param  string|array|null  default
      * @return string|array
      */
-	public string[] old(string key = null, string[] defaults = null)
+	public string[string] old(string[string] defaults = null)
+	{
+		return this.hasSession() ? this.session().getOldInput(defaults) : defaults;
+	}
+
+	/// ditto
+	public string old(string key, string defaults = null)
 	{
 		return this.hasSession() ? this.session().getOldInput(key, defaults) : defaults;
 	}
+
 
 	/**
      * Flash the input for the current request to the session.
@@ -636,7 +643,7 @@ final class Request : RequestHandler
 		return getSession();
 	}
 
-	void setLaravelSession(Session session)
+	void setSession(Session session)
 	{
 		this._session = session;
 	}

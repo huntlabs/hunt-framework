@@ -84,20 +84,85 @@ class Session
 		return _sessionId;
 	}
 
-	void flashInput(string[string] values)
+    /**
+     * Flash an input array to the session.
+     *
+     * @param  array  $value
+     * @return void
+     */
+	void flashInput(string[string] value)
 	{
-		throw new NotImplementedException("flashInput");
+		flash("_old_input", to!string(value));
 	}
 
-	string[] getOldInput(string key = null, string[] defaults = null)
+
+    /**
+     * Get the requested item from the flashed input array.
+     *
+     * @param  string  $key
+     * @param  mixed   $default
+     * @return mixed
+     */
+	string[string] getOldInput(string[string] defaults = null)
     {
-		throw new NotImplementedException("flashInput");
+		string v = get("_old_input");
+		if(v.empty)
+			return defaults;
+		else
+			return to!(string[string])(v);
+    }
+
+	/// ditto
+	string getOldInput(string key, string defaults = null)
+    {
+		string old = get("_old_input");
+		string[string] v= to!(string[string])(old);
+		return v.get(key, defaults);
     }
 
 	void flush()
     {
 		throw new NotImplementedException("flashInput");
     }
+
+
+    /**
+     * Flash a key / value pair to the session.
+     *
+     * @param  string  $key
+     * @param  mixed   $value
+     * @return void
+     */
+    void flash(string key, string value)
+    {
+        set(key, value);
+    }
+
+	/**
+     * Push a value onto a session array.
+     *
+     * @param  string  $key
+     * @param  mixed   $value
+     * @return void
+     */
+    void push(string key, string value)
+    {
+        set(key, value);
+    }
+
+    /**
+     * Put a key / value pair or array of key / value pairs in the session.
+     *
+     * @param  string|array  $key
+     * @param  mixed       $value
+     * @return void
+     */
+    void put(string key, string value = null)
+    {
+		_sessions[key] = value;
+		_sessionStorage.set(_sessionId,_sessions.toString);
+    }
+
 }
 
 class SessionStorage
