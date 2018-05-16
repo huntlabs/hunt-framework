@@ -2,6 +2,7 @@ module hunt.http.session;
 
 import huntlabs.cache;
 import hunt.utils.time;
+import hunt.exception;
 
 import std.json;
 import std.conv;
@@ -82,6 +83,21 @@ class Session
 	{
 		return _sessionId;
 	}
+
+	void flashInput(string[string] values)
+	{
+		throw new NotImplementedException("flashInput");
+	}
+
+	string[] getOldInput(string key = null, string[] defaults = null)
+    {
+		throw new NotImplementedException("flashInput");
+    }
+
+	void flush()
+    {
+		throw new NotImplementedException("flashInput");
+    }
 }
 
 class SessionStorage
