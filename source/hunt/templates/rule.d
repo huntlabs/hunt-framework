@@ -33,17 +33,17 @@ enum  Statement {
 	Loop
 }
 
-//the order is import
+//the order is import(maximum match)
 enum  Function {
 	Not,
 	And,
 	Or,
 	In,
 	Equal,
-	Greater,
 	GreaterEqual,
-	Less,
+	Greater,
 	LessEqual,
+	Less,
 	Different,
 	Callback,
 	DivisibleBy,
@@ -130,12 +130,12 @@ enum string[Function] regex_map_functions = [
 	Function.And : "(.+) and (.+)",
 	Function.Or : "(.+) or (.+)",
 	Function.In : "(.+) in (.+)",
-	Function.Equal : "(.+) == (.+)",
-	Function.Greater : "(.+) > (.+)",
-	Function.Less : "(.+) < (.+)",
-	Function.GreaterEqual : "(.+) >= (.+)",
-	Function.LessEqual : "(.+) <= (.+)",
-	Function.Different : "(.+) != (.+)",
+	Function.Equal : "(.+)\\s*==\\s*(.+)",
+	Function.Greater : "(.+)\\s*>\\s*(.+)",
+	Function.Less : "(.+)\\s*<\\s*(.+)",
+	Function.GreaterEqual : "(.+)\\s*>=\\s*(.+)",
+	Function.LessEqual : "(.+)\\s*<=\\s*(.+)",
+	Function.Different : "(.+)\\s*!=\\s*(.+)",
 	Function.Default : function_regex("default", 2),
 	Function.DivisibleBy : function_regex("divisibleBy", 2),
 	Function.Even : function_regex("even", 1),
