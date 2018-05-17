@@ -30,3 +30,4 @@ test.config
 tmp.conf
 tmp.saveas.conf
 web
+examples/simplest/hunt-web
