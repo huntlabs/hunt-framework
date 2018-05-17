@@ -65,7 +65,7 @@ class Response : ResponseBuilder
     /**
      * Sets the response content.
      *
-     * @return $this
+     * @return this
      */
     Response setContent(string content)
     {
@@ -178,8 +178,8 @@ class Response : ResponseBuilder
     /**
      * Add a cookie to the response.
      *
-     * @param  Cookie $cookie
-     * @return $this
+     * @param  Cookie cookie
+     * @return this
      */
     Response cookie(Cookie cookie)
     {
@@ -190,8 +190,8 @@ class Response : ResponseBuilder
     /**
      * Add a cookie to the response.
      *
-     * @param  Cookie $cookie
-     * @return $this
+     * @param  Cookie cookie
+     * @return this
      */
     Response withCookie(Cookie cookie)
     {

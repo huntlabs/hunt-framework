@@ -60,8 +60,8 @@ class RedirectResponse : Response
     /**
      * Flash a piece of data to the session.
      *
-     * @param  string|array  $key
-     * @param  mixed  $value
+     * @param  string|array  key
+     * @param  mixed  value
      * @return RedirectResponse
      */
     RedirectResponse withSession(string key, string value)
@@ -83,8 +83,8 @@ class RedirectResponse : Response
     /**
      * Add multiple cookies to the response.
      *
-     * @param  array  $cookies
-     * @return $this
+     * @param  array  cookies
+     * @return this
      */
     RedirectResponse withCookies(Cookie[] cookies)
     {
@@ -99,8 +99,8 @@ class RedirectResponse : Response
     /**
      * Flash an array of input to the session.
      *
-     * @param  array  $input
-     * @return $this
+     * @param  array  input
+     * @return this
      */
     RedirectResponse withInput(string[string] input = null)
     {
@@ -113,7 +113,7 @@ class RedirectResponse : Response
     /**
      * Remove all uploaded files form the given input array.
      *
-     * @param  array  $input
+     * @param  array  input
      * @return array
      */
     protected string[string] removeFilesFromInput(string[string] input)
@@ -125,7 +125,7 @@ class RedirectResponse : Response
     /**
      * Flash an array of input to the session.
      *
-     * @return $this
+     * @return this
      */
     RedirectResponse onlyInput(string[] keys...)
     {
