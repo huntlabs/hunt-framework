@@ -96,7 +96,6 @@ class Dispatcher
 
 		bool accessFilter(Request request)
 		{
-			//兼容老的.
 			Identity identity =  Application.getInstance().getAccessManager().getIdentity(request.route.getGroup());
 			if (identity is null || request.route.getController().length == 0)
 				return true;
@@ -161,7 +160,8 @@ void doRequestHandle(HandleFunction handle, Request request)
 
     try
     {
-        handle(request);
+        Response response = handle(request);
+        response.done();
     }
     catch (CreateResponseException e)
     {

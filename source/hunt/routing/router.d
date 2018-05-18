@@ -402,7 +402,7 @@ class Router
 
                 string handleKey = this.makeRequestHandleKey(route);
 
-                route.handle = getRouteFormList(handleKey);
+                route.handle = getRouteFromList(handleKey);
             }
             else
             {
