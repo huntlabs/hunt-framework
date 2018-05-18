@@ -233,7 +233,7 @@ unittest{
 	}
 
 
-	test_entity_repository();
+	// test_entity_repository();
 }
 
 
