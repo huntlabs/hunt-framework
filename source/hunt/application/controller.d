@@ -40,16 +40,30 @@ abstract class Controller
         Request request;
         ///called before all actions
         IMiddleware[] middlewares;
+    }
+
+    private
+    {
+        Response _response;
         View _view;
     }
+
+    /*
+    // session from request, plaese!
     final @property session()
     {
         return request.getSession();
     }
+    */
+    
     final @property Response response()
     {
-        return request.createResponse();
+        if (this._response is null)
+            request.createResponse();
+
+        return this._response;
     }
+
     /// called before action  return true is continue false is finish
     // bool before(){return true;}
     bool before()
@@ -161,16 +175,16 @@ abstract class Controller
 
 mixin template MakeController(string moduleName = __MODULE__)
 {
-    mixin HuntDynamicCallFun!(typeof(this),moduleName);
+    mixin HuntDynamicCallFun!(typeof(this), moduleName);
 }
 
-mixin template HuntDynamicCallFun(T,string moduleName)
+mixin template HuntDynamicCallFun(T, string moduleName)
 {
 public:
-    mixin(__createCallActionFun!(T,moduleName));
+    mixin(__createCallActionFun!(T, moduleName));
     shared static this()
     {
-        mixin(__creteRouteMap!(T,moduleName));
+        mixin(__createRouteMap!(T, moduleName));
     }
 }
 
@@ -179,49 +193,58 @@ string  __createCallActionFun(T, string moduleName)()
     import std.traits;
     import std.format;
 
-    string str = "bool callAction(string funName, Request req) {";
-    str ~= "\n\tauto ptr = this; ptr.request = req;";
+    string str = "Response callAction(string funName, Request req) {";
+    str ~= "\n\tptr.request = req;";
     str ~= "\n\tswitch(funName){";
+    
     foreach(memberName; __traits(allMembers, T))
     {
         static if (is(typeof(__traits(getMember,  T, memberName)) == function) )
         {
-            foreach (t;__traits(getOverloads,T,memberName)) 
+            foreach (t; __traits(getOverloads, T, memberName)) 
             {
-                //alias pars = ParameterTypeTuple!(t);
-                static if(/*ParameterTypeTuple!(t).length == 0 && */( hasUDA!(t, Action) || hasUDA!(t, Route)))
+                str ~= "case \"";
+                str ~= memberName;
+                str ~= "\": {\n";
+
+                static if(hasUDA!(t, Action))
                 {
-                    str ~= "case \"";
-                    str ~= memberName;
-                    str ~= "\": {\n";
-                    static if(hasUDA!(t, Action))
+                    enum middlewares = getUDAs!(t, Middleware);
+                    static if(middlewares.length)
                     {
-                        enum middlewares = getUDAs!(t, Middleware);
-                        static if(middlewares.length)
+                        foreach(i, middleware; middlewares)
                         {
-                            foreach(i, middleware; middlewares)
-                            {
-                                str ~= format("ptr.addMiddleware(new %s);", middleware.className);
-                            }
+                            str ~= format("this.addMiddleware(new %s);", middleware.className);
                         }
-
-                        str ~= "if(!ptr.doMiddleware()){return false;}";
-
-                        //before
-                        str ~= q{
-                            if(!ptr.before()){return false;}
-                        };
                     }
 
-                    //action
-                    str ~= "ptr." ~ memberName ~ "();";
+                    str ~= "if(!this.doMiddleware()){return false;}";
 
-                    // static if(hasUDA!(t, Action)){
-                    //     //after
-                    //     str ~= q{
-                    //         if(!ptr.after()){return false;}
-                    //     };
-                    // }
+                    //action
+                    static if (typeof(t) == hunt.http.response.Response)
+                    {
+                        str ~= "return this." ~ memberName ~ "();";
+                    }
+                    else static if (typeof(t) == std.json.JSONValue)
+                    {
+                        str ~= "return this.response.setContent(this." ~ memberName ~ "().toString());";
+                    }
+                    else static if (typeof(t) == string)
+                    {
+                        str ~= "return this.response.setContent(this." ~ memberName ~ "());";
+                    }
+                    else static if (typeof(t) == void)
+                    {
+                        // nothing to do?!
+                        str ~= "return this.response;";
+                    }
+                    else
+                    {
+                        // What do you want?!
+                        str ~= "import std.conv : to;\n";
+                        str ~= "return this.response.setContent(this." ~ memberName ~ "().to!string);";
+                    }
+
                     str ~= "}\n break;";
                 }
             }
@@ -229,13 +252,13 @@ string  __createCallActionFun(T, string moduleName)()
     }
 
     str ~= "default : break;}";
-    str ~= "return false;";
+    str ~= "return this.response;";
     str ~= "}";
 
     return str;
 }
 
-string  __creteRouteMap(T, string moduleName)()
+string  __createRouteMap(T, string moduleName)()
 {
     string str = "";
 
@@ -260,20 +283,19 @@ string  __creteRouteMap(T, string moduleName)()
     return str;
 }
 
-Response callHandler(T, string fun)(Request req) if(is(T == class) || is(T == struct) && hasMember!(T,"__CALLACTION__"))
+Response callHandler(T, string method)(Request req) if(is(T == class) || is(T == struct) && hasMember!(T,"__CALLACTION__"))
 {
     T controller = new T();
     
 	// import core.memory;
 	// scope(exit){if(!controller.isAsync){controller.destroy(); GC.free(cast(void *)controller);}}
 
-    //controller.before();		// It's already been called in line 183.
-    req.action = fun;
-    controller.callAction(fun, req);
+    controller.before();
+    req.action = method;
+    Response response = controller.callAction(method, req);
     controller.after();		// Although the line 193 also has the code that calls after, but where has not executed, so this reservation
-    controller.done();
 
-    return controller.response;
+    return response;
 }
 
 HandleFunction getRouteFromList(string str)

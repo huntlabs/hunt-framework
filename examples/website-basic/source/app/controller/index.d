@@ -13,6 +13,8 @@ import hunt.application;
 import std.experimental.logger;
 import std.stdio;
 
+import std.json;
+
 version(USE_ENTITY) import app.model.index;
 
 class IpFilterMiddleware : IMiddleware{
@@ -33,6 +35,35 @@ class IndexController : Controller
 	{
 		this.addMiddleware(new IpFilterMiddleware());
 	}
+
+	@Action
+	string helloworld()
+	{
+		return "hello world!";
+	}
+
+	@Action
+	int hello123()
+	{
+		return 123;
+	}
+
+	@Action
+	JSONValue hellojson()
+	{
+		JSONValue j = [ "hello": "json" ];
+
+		return j;
+	}
+
+	@Action
+	Reponse hello()
+	{
+		response.setContent("hello");
+
+		return response;
+	}
+
 	@Action
 		Response show()
 		{	
