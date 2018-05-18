@@ -553,6 +553,4 @@ unittest
         "domain" : "putao.com", "secure" : "true", "httponly" : "false"];
 
     assert( cookie.output == "Set-Cookie: PHPSESSID=dh5vvosj68hv1raprertnku6s7;expires=Fri, 13 May 2016 17:44:17 GMT;domain=putao.com;path=/;secure=true;httponly=false");
-
-
 }
