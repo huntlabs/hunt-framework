@@ -39,7 +39,7 @@ abstract class Controller
     {
         Request request;
         ///called before all actions
-        IMiddleware[] middlewares;
+        Middleware[] middlewares;
     }
 
     private
@@ -93,7 +93,7 @@ abstract class Controller
 
     ///add middleware
     ///return true is ok, the named middleware is already exist return false
-    bool addMiddleware(IMiddleware m)
+    bool addMiddleware(Middleware m)
     {
         if(m is null) return false;
         foreach(tmp; this.middlewares)
@@ -109,7 +109,7 @@ abstract class Controller
     }
 
     // get all middleware
-    IMiddleware[] getMiddlewares()
+    Middleware[] getMiddlewares()
     {
         return this.middlewares;
     }
