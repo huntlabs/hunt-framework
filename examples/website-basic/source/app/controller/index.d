@@ -17,7 +17,7 @@ import std.json;
 
 version(USE_ENTITY) import app.model.index;
 
-class IpFilterMiddleware : IMiddleware{
+class IpFilterMiddleware : Middleware{
 
 	override string name() {
 		return IpFilterMiddleware.stringof;
