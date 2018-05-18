@@ -13,7 +13,6 @@ module hunt.application.controller;
 
 import kiss.logger;
 
-public import hunt.view;
 public import hunt.http.response;
 public import hunt.http.request;
 public import hunt.routing;
