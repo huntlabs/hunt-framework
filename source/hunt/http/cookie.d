@@ -11,6 +11,7 @@
  
 module hunt.http.cookie;
 
+import hunt.exception;;
 import std.regex : regex, Regex;
 import std.string;
 import std.conv;
@@ -46,7 +47,8 @@ static this()
 
     RESERVED_PARAMS = ["expires" : "expires", "path" : "Path",
         "comment" : "Comment", "domain" : "Domain", "max-age" : "Max-Age",
-        "secure" : "secure", "httponly" : "httponly", "version" : "Version"];
+        "secure" : "secure", "httponly" : "httponly", "version" : "Version",
+        "raw" : "raw","samesite" : "samesite"];
 }
 
 // Chars not needing quotation (fake set for fast lookup)
@@ -335,6 +337,9 @@ class Cookie
 {
     enum DEFAULT_HEADER = "Set-Cookie: ";
 
+    enum SAMESITE_LAX = "lax";
+    enum SAMESITE_STRICT = "strict";
+
     static bool is_reserved_key(string key)
     {
         return (toLower(key) in RESERVED_PARAMS) != null;
@@ -516,6 +521,106 @@ class Cookie
         return output();
     }
 
+    /**
+     * Gets the name of the cookie.
+     *
+     * @return string
+     */
+    public string getName()
+    {
+        return name();
+    }
+    /**
+     * Gets the value of the cookie.
+     *
+     * @return string|null
+     */
+    public string getValue()
+    {
+        return value();
+    }
+    /**
+     * Gets the domain that the cookie is available to.
+     *
+     * @return string|null
+     */
+    public string getDomain()
+    {
+        return get("domain");
+    }
+    /**
+     * Gets the time the cookie expires.
+     *
+     * @return string
+     */
+    public string getExpiresTime()
+    {
+        return get("expires");
+    }
+    /**
+     * Gets the max-age attribute.
+     *
+     * @return string
+     */
+    public string getMaxAge()
+    {
+        return get("max-age");
+    }
+    /**
+     * Gets the path on the server in which the cookie will be available on.
+     *
+     * @return string
+     */
+    public string getPath()
+    {
+        return get("path");
+    }
+    /**
+     * Checks whether the cookie should only be transmitted over a secure HTTPS connection from the client.
+     *
+     * @return bool
+     */
+    public bool isSecure()
+    {
+        return get("secure") == "true" ? true : false;
+    }
+    /**
+     * Checks whether the cookie will be made accessible only through the HTTP protocol.
+     *
+     * @return bool
+     */
+    public bool isHttpOnly()
+    {
+        return get("httponly") == "true" ? true : false;
+    }
+    /**
+     * Whether this cookie is about to be cleared.
+     *
+     * @return bool
+     */
+    public bool isCleared()
+    {
+        throw new NotImplementedException("isCleared");
+    }
+    /**
+     * Checks if the cookie value should be sent with no url encoding.
+     *
+     * @return bool
+     */
+    public bool isRaw()
+    {
+        return get("raw") == "true" ? true : false;
+    }
+    /**
+     * Gets the SameSite attribute.
+     *
+     * @return string|null
+     */
+    public string getSameSite()
+    {
+        return get("samesite");
+    }
+
 private:
     string _name = null;
     string _quoted_value = null;
@@ -527,7 +632,21 @@ protected:
     void initialize_cookieparams()
     {
         foreach (key, value; RESERVED_PARAMS)
-            _cookieparams[key] = "";
+        {
+            if(key == "expires")
+                _cookieparams[key] = "0";
+            else if(key == "path")
+                _cookieparams[key] = "/";
+            else if(key == "secure")
+                _cookieparams[key] = "false";
+            else if(key == "httponly")
+                _cookieparams[key] = "false";
+            else if(key == "raw")
+                _cookieparams[key] = "true";
+            else
+                 _cookieparams[key] = "";
+
+        }
     }
 
 }

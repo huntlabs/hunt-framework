@@ -15,6 +15,8 @@ void main()
 	data["is_happy"] = false;
 	data["allow"] = false;
 	data["users"] = ["name" : "jeck", "age" : "18"];
+	data["nums"] = [3,5,2,1];
+	
 	JSONValue user1;
 	user1["name"] = "cree";
 	user1["age"] = 2;
@@ -80,6 +82,9 @@ void main()
 	input = "{{userinfo.1.name}}";
 	writeln("result : ",Env().render(input, data2));
 
+	writeln("------------------Deep for-------------------------");
+	input = "{% for user in userinfo %}{% for h in user.hobby %} {{ h }} {% endfor %}{% endfor %}";
+	writeln("result : ",Env().render(input, data2));
 
 	writeln("-------------FUNC  operator------------");
 	input = "{{ 'a' <= '1' }} ~ {{ age >= age1 }} ~ {{ 2 < 1 }} ~ {{ 4 > 3 }} ~ {{ '4' > 3 }}";
@@ -110,4 +115,8 @@ void main()
 
 	writeln("---------Render file  & save to file-----------");
 	Env().write("detail.txt", d,"detail.html");
+
+	writeln("------------------FUNCTION range-------------------------");
+	input = "{% for id in range(1,4) %}{{id}} {% endfor %}";
+	writeln("result : ",Env().render(input, data));
 }
