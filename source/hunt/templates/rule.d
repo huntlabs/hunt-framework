@@ -148,7 +148,7 @@ enum string[Function] regex_map_functions = [
 	Function.Max : function_regex("max", 1),
 	Function.Min : function_regex("min", 1),
 	Function.Odd : function_regex("odd", 1),
-	Function.Range : function_regex("range", 1),
+	Function.Range : function_regex("range", 2),
 	Function.Round : function_regex("round", 2),
 	Function.Sort : function_regex("sort", 1),
 	Function.Upper : function_regex("upper", 1),

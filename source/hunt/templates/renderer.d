@@ -132,9 +132,9 @@ public:
 
     T read_json(T = JSONValue)(JSONValue data, string command)
     {
-       // writeln("------read json---- :", data.toString, "  command : ",command);
+        // writeln("------read json---- :", data.toString, "  command : ",command);
         T result;
-        if(data.type == JSON_TYPE.OBJECT)
+        if (data.type == JSON_TYPE.OBJECT)
         {
             auto obj = command in data;
             if (obj !is null)
@@ -147,21 +147,20 @@ public:
                 if (cmds.length > 1)
                 {
                     auto first = cmds[0];
-                    auto remain_cmd = command[first.length+1 .. $];
-                   // writeln("------remain cmd---- :", remain_cmd);
-                    if(first in  data)
-                        result = read_json(data[first],remain_cmd);
+                    auto remain_cmd = command[first.length + 1 .. $];
+                    // writeln("------remain cmd---- :", remain_cmd);
+                    if (first in data)
+                        result = read_json(data[first], remain_cmd);
                     else
-                        template_engine_throw("render_error",
-                            "variable '" ~ first ~ "' not found");
-                    
+                        template_engine_throw("render_error", "variable '" ~ first ~ "' not found");
+
                 }
             }
             return result;
         }
         else if (data.type == JSON_TYPE.ARRAY)
         {
-            if(Util.is_num(command))
+            if (Util.is_num(command))
                 return data[to!int(command)];
             else
             {
@@ -169,14 +168,13 @@ public:
                 if (cmds.length > 1)
                 {
                     auto first = cmds[0];
-                    auto remain_cmd = command[first.length+1 .. $];
-                   // writeln("------remain cmd---- :", remain_cmd);
-                    if(Util.is_num(first))
-                        result = read_json(data[to!int(first)],remain_cmd);
+                    auto remain_cmd = command[first.length + 1 .. $];
+                    // writeln("------remain cmd---- :", remain_cmd);
+                    if (Util.is_num(first))
+                        result = read_json(data[to!int(first)], remain_cmd);
                     else
-                        template_engine_throw("render_error",
-                            "variable '" ~ first ~ "' not found");
-                    
+                        template_engine_throw("render_error", "variable '" ~ first ~ "' not found");
+
                 }
             }
             return result;
@@ -260,7 +258,7 @@ public:
                     //     else
                     //         result = element.command;
                     // }
-                    result = read_json(data,element.command);
+                    result = read_json(data, element.command);
                     return result;
                 }
                 catch (Exception e)
@@ -286,6 +284,31 @@ public:
                 else
                     result = 0;
                 return result;
+            }
+        case Function.Range:
+            {
+                auto arg0 = eval_expression(element.args[0], data);
+                auto arg1 = eval_expression(element.args[1], data);
+                JSONValue[] ar;
+                if (arg0.type == JSON_TYPE.INTEGER && arg1.type == JSON_TYPE.INTEGER)
+                {
+                    for (long i = arg0.integer; i <= arg1.integer; i++)
+                        ar ~= JSONValue(i);
+                }
+
+                result = ar;
+
+                return result;
+            }
+        case Function.Sort:
+            {
+                // auto res = eval_expression(element.args[0], data);
+                // if (res.type == JSON_TYPE.ARRAY)
+                // {
+                //     import std.algorithm.sorting;
+                //     result = sort!("a > b")(res.array);
+                // }
+                // return result;
             }
         case Function.Default:
             {
