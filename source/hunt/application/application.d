@@ -40,7 +40,6 @@ import hunt.application.dispatcher;
 import hunt.security.acl.Manager;
 
 public import hunt.http;
-public import hunt.view;
 public import hunt.i18n;
 public import hunt.application.config;
 public import hunt.application.middleware;
