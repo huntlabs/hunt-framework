@@ -14,13 +14,14 @@ module hunt.routing.define;
 public import kiss.logger;
 
 public import hunt.http.request;
+import hunt.http.response;
 
 public import std.exception;
 
 // default route group name
 enum DEFAULT_ROUTE_GROUP = "default";
 
-alias HandleFunction = void function(Request);
+alias HandleFunction = Response function(Request);
 
 // support methods
 enum HTTP_METHODS {

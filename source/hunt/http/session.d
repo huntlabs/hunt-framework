@@ -149,10 +149,16 @@ class Session
      */
 	string[string] all()
 	{
+		if(_sessions.isNull)
+			return null;
+
 		string[string] v;
 		foreach (string key, ref JSONValue value; _sessions)
 		{
-			v[key] = value.toString();
+			if(value.type == JSON_TYPE.STRING)
+				v[key] = value.str;
+			else
+				v[key] = value.toString();
 		}
 
 		return v;
@@ -161,7 +167,7 @@ class Session
 	/**
      * Checks if a key exists.
      *
-     * @param  string|array  $key
+     * @param  string|array  key
      * @return bool
      */
 	bool exists(string key)
@@ -175,7 +181,7 @@ class Session
 	/**
      * Checks if a key is present and not null.
      *
-     * @param  string|array  $key
+     * @param  string|array  key
      * @return bool
      */
 	bool has(string key)
@@ -193,8 +199,8 @@ class Session
 	/**
      * Get an item from the session.
      *
-     * @param  string  $key
-     * @param  mixed  $default
+     * @param  string  key
+     * @param  mixed  default
      * @return mixed
      */
 	T get(T = string)(string key)
@@ -233,8 +239,8 @@ class Session
 	/**
      * Get the value of a given key and then forget it.
      *
-     * @param  string  $key
-     * @param  string  $default
+     * @param  string  key
+     * @param  string  default
      * @return mixed
      */
 	void pull(string key, string value)
@@ -245,7 +251,7 @@ class Session
 	/**
      * Determine if the session contains old input.
      *
-     * @param  string  $key
+     * @param  string  key
      * @return bool
      */
 	bool hasOldInput(string key)
@@ -257,8 +263,8 @@ class Session
 	/**
      * Get the requested item from the flashed input array.
      *
-     * @param  string  $key
-     * @param  mixed   $default
+     * @param  string  key
+     * @param  mixed   default
      * @return mixed
      */
 	string[string] getOldInput(string[string] defaults = null)
@@ -281,19 +287,20 @@ class Session
 	/**
      * Replace the given session attributes entirely.
      *
-     * @param  array  $attributes
+     * @param  array  attributes
      * @return void
      */
 	void replace(string[string] attributes)
 	{
+		_sessions = JSONValue.init;
 		put(attributes);
 	}
 
 	/**
      * Put a key / value pair or array of key / value pairs in the session.
      *
-     * @param  string|array  $key
-     * @param  mixed       $value
+     * @param  string|array  key
+     * @param  mixed       value
      * @return void
      */
 	void put(T=string)(string key, T value)
@@ -312,8 +319,8 @@ class Session
 	/**
      * Get an item from the session, or store the default value.
      *
-     * @param  string  $key
-     * @param  \Closure  $callback
+     * @param  string  key
+     * @param  \Closure  callback
      * @return mixed
      */
 	string remember(string key, string value)
@@ -329,8 +336,8 @@ class Session
 	/**
      * Push a value onto a session array.
      *
-     * @param  string  $key
-     * @param  mixed   $value
+     * @param  string  key
+     * @param  mixed   value
      * @return void
      */
 	void push(T=string)(string key, T value)
@@ -344,8 +351,8 @@ class Session
 	/**
      * Flash a key / value pair to the session.
      *
-     * @param  string  $key
-     * @param  mixed   $value
+     * @param  string  key
+     * @param  mixed   value
      * @return void
      */
 	void flash(T = string)(string key, T value)
@@ -358,8 +365,8 @@ class Session
     /**
      * Flash a key / value pair to the session for immediate use.
      *
-     * @param  string $key
-     * @param  mixed $value
+     * @param  string key
+     * @param  mixed value
      * @return void
      */
     void now(T = string)(string key, T value)
@@ -382,7 +389,7 @@ class Session
     /**
      * Reflash a subset of the current flash data.
      *
-     * @param  array|mixed  $keys
+     * @param  array|mixed  keys
      * @return void
      */
 	 void keep(string[] keys...)
@@ -394,7 +401,7 @@ class Session
 	/**
      * Merge new flash keys into the new flash array.
      *
-     * @param  array  $keys
+     * @param  array  keys
      * @return void
      */
     protected void mergeNewFlashes(string[] keys)
@@ -409,7 +416,7 @@ class Session
 	/**
      * Remove the given keys from the old flash data.
      *
-     * @param  array  $keys
+     * @param  array  keys
      * @return void
      */
 	protected void removeFromOldFlashData(string[] keys)
@@ -422,7 +429,7 @@ class Session
 	/**
      * Flash an input array to the session.
      *
-     * @param  array  $value
+     * @param  array  value
      * @return void
      */
 	void flashInput(string[string] value)
@@ -433,7 +440,7 @@ class Session
     /**
      * Remove an item from the session, returning its value.
      *
-     * @param  string  $key
+     * @param  string  key
      * @return mixed
      */
 	string remove(string key)
@@ -446,7 +453,7 @@ class Session
     /**
      * Remove one or many items from the session.
      *
-     * @param  string|array  $keys
+     * @param  string|array  keys
      * @return void
      */
     void forget(string[] keys)
@@ -484,7 +491,7 @@ class Session
     /**
      * Generate a new session identifier.
      *
-     * @param  bool  $destroy
+     * @param  bool  destroy
      * @return bool
      */
     public bool regenerate(bool destroy = false)
@@ -495,7 +502,7 @@ class Session
 	/**
      * Generate a new session ID for the session.
      *
-     * @param  bool  $destroy
+     * @param  bool  destroy
      * @return bool
      */
 	bool migrate(bool destroy = false)
@@ -537,7 +544,7 @@ class Session
 	/**
      * Set the name of the session.
      *
-     * @param  string  $name
+     * @param  string  name
      * @return void
      */
 	void setName(string name)
@@ -558,7 +565,7 @@ class Session
 	/**
      * Set the session ID.
      *
-     * @param  string  $id
+     * @param  string  id
      * @return void
      */
 	void setId(string id)
@@ -569,7 +576,7 @@ class Session
 	/**
      * Determine if this is a valid session ID.
      *
-     * @param  string  $id
+     * @param  string  id
      * @return bool
      */
 	static bool isValidId(string id)
@@ -620,7 +627,7 @@ class Session
 	/**
      * Set the "previous" URL in the session.
      *
-     * @param  string  $url
+     * @param  string  url
      * @return void
      */
 	void setPreviousUrl(string url)

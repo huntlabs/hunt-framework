@@ -173,7 +173,7 @@ class Route
             return this._methods;
         }
 
-        @property handle()
+        @property HandleFunction handle()
         {
             return this._handle;
         }
