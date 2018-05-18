@@ -138,16 +138,10 @@ abstract class Controller
     {
         this.response.html(this.view.render!filename());
     }
-	alias show = render;
 
-    void done()
+    protected final Response doMiddleware()
     {
-        this.response.done();
-    }
-
-    protected final bool doMiddleware()
-    {
-       logDebug("doMiddlware ..");
+        logDebug("doMiddlware ..");
 
         foreach(m; middlewares)
         {
@@ -159,12 +153,11 @@ abstract class Controller
                 continue;
             }
 
-           logDebugf("Middleware %s is retrun done.", m.name);
-            response.done();
-            return false;
+            logDebugf("Middleware %s is to retrun.", m.name);
+            return response;
         }
 
-        return true;
+        return null;
     }
 
 	@property bool isAsync()
@@ -218,31 +211,32 @@ string  __createCallActionFun(T, string moduleName)()
                         }
                     }
 
-                    str ~= "if(!this.doMiddleware()){return false;}";
+                    str ~= "Response res = this.doMiddleware()\n";
+                    str ~= "if(response !is null) {return res;}\n";
 
                     //action
                     static if (typeof(t) == hunt.http.response.Response)
                     {
-                        str ~= "return this." ~ memberName ~ "();";
+                        str ~= "return this." ~ memberName ~ "();\n";
                     }
                     else static if (typeof(t) == std.json.JSONValue)
                     {
-                        str ~= "return this.response.setContent(this." ~ memberName ~ "().toString());";
+                        str ~= "return this.response.setContent(this." ~ memberName ~ "().toString());\n";
                     }
                     else static if (typeof(t) == string)
                     {
-                        str ~= "return this.response.setContent(this." ~ memberName ~ "());";
+                        str ~= "return this.response.setContent(this." ~ memberName ~ "());\n";
                     }
                     else static if (typeof(t) == void)
                     {
                         // nothing to do?!
-                        str ~= "return this.response;";
+                        str ~= "return this.response;\n";
                     }
                     else
                     {
                         // What do you want?!
                         str ~= "import std.conv : to;\n";
-                        str ~= "return this.response.setContent(this." ~ memberName ~ "().to!string);";
+                        str ~= "return this.response.setContent(this." ~ memberName ~ "().to!string);\n";
                     }
 
                     str ~= "}\n break;";
