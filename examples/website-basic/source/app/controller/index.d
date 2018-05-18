@@ -34,7 +34,7 @@ class IndexController : Controller
 		this.addMiddleware(new IpFilterMiddleware());
 	}
 	@Action
-		void show()
+		Response show()
 		{	
 			auto response = this.request.createResponse();
 			response.html("hello world<br/>")
@@ -44,9 +44,10 @@ class IndexController : Controller
 				.setCookie("name2", "value", 10000);
 
 			response.done();
+			return response;			
 		}
 	@Action
-		void list()
+		Response  list()
 		{
 			this.view.setLayout!"main.dhtml"();	
 			this.view.test = "viile";
@@ -54,21 +55,23 @@ class IndexController : Controller
 			this.view.header = "donglei header";
 			this.view.footer = "footer";
 			this.render!"content.dhtml"();
-
+			return response;
 		}
 	@Action
-		void index()
+		Response  index()
 		{
 			this.response.html("list");
+			return response;
 		}
 
 	@Action
-		void showbool()
+		Response  showbool()
 		{
 			trace("---show bool----");
 			this.response.html("list");
+			return response;
 		}
-	@Action void setCache()
+	@Action Response  setCache()
 	{
 		session.set("test","test");
 		//auto key = request.get("key");	
@@ -77,13 +80,15 @@ class IndexController : Controller
 		auto response = this.request.createResponse();
 		//response.html("key : " ~ key ~ " value : " ~ value);
 		response.html(session.sessionId);
+		return response;
 	}
-	@Action void getCache()
+	@Action Response  getCache()
 	{
 		//auto key = request.get("key");	
 		//auto value = cache.get(key);
 		auto response = this.request.createResponse();
 		//response.html(session.get("test") ~ " key : " ~ key ~ " value : " ~ value);
 		response.html(session.get("test"));
+		return response;
 	}
 }

@@ -19,13 +19,13 @@ class StaticfileController : Controller
     mixin MakeController;
     
     @Action
-    void doStaticFile()
+    Response doStaticFile()
     {
         if (request.route.staticFilePath == string.init)
         {
             response.do404();
             
-            return;
+            return response;
         }
 
         string staticFilename = mendPath(request.route.staticFilePath);
@@ -34,7 +34,7 @@ class StaticfileController : Controller
         {
             response.do404();
             
-            return;
+            return response;
         }
 
         FileInfo fi = makeFileInfo(staticFilename);
@@ -43,7 +43,7 @@ class StaticfileController : Controller
         {
             response.do404();
             
-            return;
+            return response;
         }
 
         auto lastModified = toRFC822DateTimeString(fi.timeModified.toUTC());
@@ -64,7 +64,7 @@ class StaticfileController : Controller
         {
                 response.setHttpStatusCode(HTTPCodes.NOT_MODIFIED);
 
-                return;
+                return response;
 		}
 	
 		auto mimetype = getMimeContentTypeForFile(staticFilename);
@@ -150,6 +150,8 @@ class StaticfileController : Controller
 		f.seek(rangeStart);
 		auto buf = f.rawRead(new ubyte[rangeEnd.to!uint - rangeStart.to!uint + 1]);
 		response.setContent(buf);
+
+		return response;
     }
     
     private string mendPath(string path)

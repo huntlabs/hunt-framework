@@ -46,7 +46,7 @@ abstract class Controller
     {
         return request.getSession();
     }
-    final @property response()
+    final @property Response response()
     {
         return request.createResponse();
     }
@@ -216,12 +216,12 @@ string  __createCallActionFun(T, string moduleName)()
                     //action
                     str ~= "ptr." ~ memberName ~ "();";
 
-                    static if(hasUDA!(t, Action)){
-                        //after
-                        str ~= q{
-                            if(!ptr.after()){return false;}
-                        };
-                    }
+                    // static if(hasUDA!(t, Action)){
+                    //     //after
+                    //     str ~= q{
+                    //         if(!ptr.after()){return false;}
+                    //     };
+                    // }
                     str ~= "}\n break;";
                 }
             }
@@ -260,21 +260,23 @@ string  __creteRouteMap(T, string moduleName)()
     return str;
 }
 
-void callHandler(T, string fun)(Request req) if(is(T == class) || is(T == struct) && hasMember!(T,"__CALLACTION__"))
+Response callHandler(T, string fun)(Request req) if(is(T == class) || is(T == struct) && hasMember!(T,"__CALLACTION__"))
 {
-    T handler = new T();
+    T controller = new T();
     
-	import core.memory;
-	scope(exit){if(!handler.isAsync){handler.destroy(); GC.free(cast(void *)handler);}}
+	// import core.memory;
+	// scope(exit){if(!controller.isAsync){controller.destroy(); GC.free(cast(void *)controller);}}
 
-    //handler.before();		// It's already been called in line 183.
+    //controller.before();		// It's already been called in line 183.
     req.action = fun;
-    handler.callAction(fun, req);
-    handler.after();		// Although the line 193 also has the code that calls after, but where has not executed, so this reservation
-    handler.done();
+    controller.callAction(fun, req);
+    controller.after();		// Although the line 193 also has the code that calls after, but where has not executed, so this reservation
+    controller.done();
+
+    return controller.response;
 }
 
-HandleFunction getRouteFormList(string str)
+HandleFunction getRouteFromList(string str)
 {
     if (!_init)
     {
