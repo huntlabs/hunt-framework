@@ -5,6 +5,8 @@ import hunt.utils.time;
 import hunt.exception;
 import hunt.utils.random;
 
+import std.array;
+import std.algorithm;
 import std.ascii;
 import std.json;
 import std.conv;
@@ -13,6 +15,7 @@ import std.format;
 import std.datetime;
 import std.random;
 import std.conv;
+import std.traits;
 
 import core.cpuid;
 import std.string;
@@ -23,7 +26,7 @@ const SessionIdLenth = 20;
 class Session
 {
 	private string _sessionId;
-	private string[string] _sessions;
+	private JSONValue _sessions;
 	private SessionStorage _sessionStorage;
 
 	this(SessionStorage sessionStorage, bool canStart = true)
@@ -32,7 +35,7 @@ class Session
 		if (canStart)
 		{
 			this._sessionId = _sessionStorage.generateSessionId();
-			this._sessions = to!(string[string]) (_sessionStorage.get(_sessionId));
+			this._sessions = parseJSON(_sessionStorage.get(_sessionId));
 
 			_isStarted = true;
 		}
@@ -42,21 +45,21 @@ class Session
 	{
 		this._sessionId = sessionId;
 		this._sessionStorage = sessionStorage;
-		this._sessions = to!(string[string])(_sessionStorage.get(_sessionId));
+		this._sessions = parseJSON(_sessionStorage.get(_sessionId));
 	}
 
 	Session set(string key, string value)
 	{
 		_sessions[key] = value;
-		_sessionStorage.set(_sessionId, to!(string)(_sessions));
+		_sessionStorage.set(_sessionId, _sessions.toString);
 		return this;
 	}
 
 	void remove(string key)
 	{
-		string[string] json;
+		JSONValue json;
 
-		foreach (string _key, ref string value; _sessions)
+		foreach (string _key, ref value; _sessions)
 		{
 			if (_key != key)
 			{
@@ -65,7 +68,7 @@ class Session
 		}
 
 		_sessions = json;
-		_sessionStorage.set(_sessionId, to!(string)(_sessions));
+		_sessionStorage.set(_sessionId, _sessions.toString);
 	}
 
 	string[] keys()
@@ -113,9 +116,8 @@ class Session
 	protected void loadSession()
 	{
 		string s = _sessionStorage.get(_sessionId);
-		// trace("xxxx=>", s);
-		if(!s.empty)
-			this._sessions = to!(string[string])(s);
+		if (!s.empty)
+			this._sessions = parseJSON(s);
 	}
 
 	/**
@@ -125,7 +127,7 @@ class Session
      */
 	bool save()
 	{
-		_sessionStorage.set(_sessionId, to!(string)(_sessions));
+		_sessionStorage.set(_sessionId, _sessions.toString);
 		_isStarted = false;
 		return _isStarted;
 	}
@@ -137,7 +139,7 @@ class Session
      */
 	void ageFlashData()
 	{
-		// throw new NotImplementedException("ageFlashData");
+		throw new NotImplementedException("ageFlashData");
 	}
 
 	/**
@@ -148,9 +150,9 @@ class Session
 	string[string] all()
 	{
 		string[string] v;
-		foreach (string key, string value; _sessions)
+		foreach (string key, ref JSONValue value; _sessions)
 		{
-			v[key] = value;
+			v[key] = value.toString();
 		}
 
 		return v;
@@ -164,9 +166,9 @@ class Session
      */
 	bool exists(string key)
 	{
-		if (_sessions  is null)
+		if (_sessions.isNull)
 			return false;
-		string* item = key in _sessions;
+		const(JSONValue)* item = key in _sessions;
 		return item !is null;
 	}
 
@@ -178,11 +180,11 @@ class Session
      */
 	bool has(string key)
 	{
-		if (_sessions  is null)
+		if (_sessions.isNull)
 			return false;
 
 		auto item = key in _sessions;
-		if ((item !is null) && (!item.empty))
+		if ((item !is null) && (!item.str.empty))
 			return true;
 		else
 			return false;
@@ -195,24 +197,37 @@ class Session
      * @param  mixed  $default
      * @return mixed
      */
-	string get(string key)
+	T get(T = string)(string key)
 	{
-		if (_sessions is null)
-			return null;
+		if (_sessions.isNull)
+			return T.init;
 
 		auto item = key in _sessions;
 		if (item is null)
-			return null;
+			return T.init;
+
+		static if (is(T : string))
+			return item.str;
+		else static if (is(T: U[], U))
+		{
+			U[] r;
+			foreach(ref const(JSONValue) v; item.array)
+			{
+				static if(is(U:string))
+				{
+					r ~= v.str;
+				}
+				else static if(isNumeric(U))
+				{
+					r ~= cast(U) v.integer;
+				}
+				else
+				 static assert(false, "unsupported type: " ~ U.stringof);
+			}
+			return r;
+		}
 		else
-			return *item;
-		// try
-		// {
-		// 	return _sessions[key].str;
-		// }
-		// catch (Exception e)
-		// {
-		// 	return string.init;
-		// }
+			item.toString();
 	}
 
 	/**
@@ -281,7 +296,7 @@ class Session
      * @param  mixed       $value
      * @return void
      */
-	void put(string key, string value = null)
+	void put(T=string)(string key, T value)
 	{
 		_sessions[key] = value;
 	}
@@ -289,11 +304,10 @@ class Session
 	/// ditto
 	void put(string[string] pairs)
 	{
-		_sessions = pairs;
-
-		// foreach (string key, string value; pairs)
-		// 	_sessions[key] = value;
+		foreach (string key, string value; pairs)
+			_sessions[key] = value;
 	}
+
 
 	/**
      * Get an item from the session, or store the default value.
@@ -319,9 +333,90 @@ class Session
      * @param  mixed   $value
      * @return void
      */
-	void push(string key, string value)
+	void push(T=string)(string key, T value)
+	{
+		T[] array = this.get!(T[])(key);
+		array ~= value;
+
+		this.put(key, array);
+	}
+
+	/**
+     * Flash a key / value pair to the session.
+     *
+     * @param  string  $key
+     * @param  mixed   $value
+     * @return void
+     */
+	void flash(T = string)(string key, T value)
 	{
 		this.put(key, value);
+		this.push("_flash.new", key);
+		this.removeFromOldFlashData([key]);
+	}
+
+    /**
+     * Flash a key / value pair to the session for immediate use.
+     *
+     * @param  string $key
+     * @param  mixed $value
+     * @return void
+     */
+    void now(T = string)(string key, T value)
+    {
+        this.put(key, value);
+        this.push("_flash.old", key);
+    }
+
+    /**
+     * Reflash all of the session flash data.
+     *
+     * @return void
+     */
+    public void reflash()
+    {
+        this.mergeNewFlashes(this.get!(string[])("_flash.old"));
+        this.put!(string[])("_flash.old", []);
+    }
+
+    /**
+     * Reflash a subset of the current flash data.
+     *
+     * @param  array|mixed  $keys
+     * @return void
+     */
+	 void keep(string[] keys...)
+	 {
+		 mergeNewFlashes(keys);
+		 removeFromOldFlashData(keys);
+	 }
+
+	/**
+     * Merge new flash keys into the new flash array.
+     *
+     * @param  array  $keys
+     * @return void
+     */
+    protected void mergeNewFlashes(string[] keys)
+    {
+		string[] oldKeys = this.get!(string[])("_flash.new");
+        string[] values = oldKeys ~ keys;
+		values = values.sort().uniq().array;
+
+        this.put("_flash.new", values);
+    }
+
+	/**
+     * Remove the given keys from the old flash data.
+     *
+     * @param  array  $keys
+     * @return void
+     */
+	protected void removeFromOldFlashData(string[] keys)
+	{
+		string[] olds = this.get!(string[])("_flash.old");
+		string[] news = olds.remove!(x => keys.canFind(x));
+		this.put("_flash.old", news);
 	}
 
 	/**
@@ -335,9 +430,42 @@ class Session
 		flash("_old_input", to!string(value));
 	}
 
+    /**
+     * Remove an item from the session, returning its value.
+     *
+     * @param  string  $key
+     * @return mixed
+     */
+	string remove(string key)
+	{
+		 string r = _sessions[key].toString();
+		 _sessions[key] = JSONValue.init;
+		 return r;
+	}
+
+    /**
+     * Remove one or many items from the session.
+     *
+     * @param  string|array  $keys
+     * @return void
+     */
+    void forget(string[] keys)
+    {
+		foreach(string k; keys)
+		{
+			_sessions[k] = JSONValue.init;
+			// _sessions.remove(k);
+		}
+    }
+
+    /**
+     * Remove all of the items from the session.
+     *
+     * @return void
+     */
 	void flush()
 	{
-		_sessions = null;
+		_sessions = JSONValue.init;
 		_sessionStorage.clear();
 	}
 
@@ -346,12 +474,23 @@ class Session
      *
      * @return bool
      */
-	public bool invalidate()
+	bool invalidate()
 	{
 		flush();
 
 		return migrate(true);
 	}
+
+    /**
+     * Generate a new session identifier.
+     *
+     * @param  bool  $destroy
+     * @return bool
+     */
+    public bool regenerate(bool destroy = false)
+    {
+		throw new NotImplementedException("regenerate");
+    }
 
 	/**
      * Generate a new session ID for the session.
@@ -359,7 +498,7 @@ class Session
      * @param  bool  $destroy
      * @return bool
      */
-	public bool migrate(bool destroy = false)
+	bool migrate(bool destroy = false)
 	{
 		if (destroy)
 		{
@@ -372,23 +511,11 @@ class Session
 	}
 
 	/**
-     * Flash a key / value pair to the session.
-     *
-     * @param  string  $key
-     * @param  mixed   $value
-     * @return void
-     */
-	void flash(string key, string value)
-	{
-		set(key, value);
-	}
-
-	/**
      * Determine if the session has been started.
      *
      * @return bool
      */
-	public bool isStarted()
+	bool isStarted()
 	{
 		return _isStarted;
 	}
@@ -462,7 +589,7 @@ class Session
      *
      * @return string
      */
-	public string token()
+	string token()
 	{
 		return this.get("_token");
 	}
@@ -472,7 +599,7 @@ class Session
      *
      * @return void
      */
-	public void regenerateToken()
+	void regenerateToken()
 	{
 		ubyte[] result = getRandom(SessionIdLenth);
 		string str = toLower(toHexString(result));
@@ -485,7 +612,7 @@ class Session
      *
      * @return string|null
      */
-	public string previousUrl()
+	string previousUrl()
 	{
 		return this.get("_previous.url");
 	}
@@ -496,7 +623,7 @@ class Session
      * @param  string  $url
      * @return void
      */
-	public void setPreviousUrl(string url)
+	void setPreviousUrl(string url)
 	{
 		this.put("_previous.url", url);
 	}
