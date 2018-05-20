@@ -14,6 +14,26 @@ module hunt.utils.random;
 import std.stdio;
 import std.exception;
 
+version (CRuntime_Bionic)
+	version = SecureARC4Random; // ChaCha20
+version (OSX)
+	version = SecureARC4Random; // AES
+version (OpenBSD)
+	version = SecureARC4Random; // ChaCha20
+version (NetBSD)
+	version = SecureARC4Random; // ChaCha20
+
+// Insecure arc4random implementations are deliberately not enabled.
+// If a cryptographically secure PRNG is not required, they can be used.
+//version (CRuntime_UClibc)
+//	version = LegacyARC4Random; // ARC4
+//version (FreeBSD)
+//	version = LegacyARC4Random; // ARC4
+//version (DragonFlyBSD)
+//	version = LegacyARC4Random; // ARC4
+//version (BSD)
+//	version = LegacyARC4Random; // Unknown implementation
+
 ubyte[] getRandom(ushort len = 64)
 {
 	assert(len);
@@ -24,6 +44,8 @@ ubyte[] getRandom(ushort len = 64)
 		assert(CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT) != 0);
 		CryptGenRandom(hCryptProv, cast(DWORD)buffer.length, buffer.ptr);
 		scope(exit)CryptReleaseContext(hCryptProv, 0);
+	}else version(SecureARC4Random){
+		arc4random_buf(buffer.ptr, len);
 	}else{
 		import core.stdc.stdio : FILE, _IONBF, fopen, fclose, fread, setvbuf;
 		auto file = fopen("/dev/urandom","rb");
@@ -68,5 +90,10 @@ version(Windows){
 		BOOL CryptReleaseContext(HCRYPTPROV hProv, DWORD dwFlags);
 
 		BOOL CryptGenRandom(HCRYPTPROV hProv, DWORD dwLen, BYTE* pbBuffer);
+	}
+}else version(SecureARC4Random){
+	extern(C) @nogc nothrow private @system
+	{
+		void arc4random_buf(scope void* buf, size_t nbytes);
 	}
 }
