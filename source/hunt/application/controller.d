@@ -44,7 +44,7 @@ abstract class Controller
     private
     {
         Response _response;
-        View _view;
+        //View _view;
     }
 
     /*
@@ -114,14 +114,14 @@ abstract class Controller
     }
 
     //view render
-    @property View view()
-    {
-        if(_view is null)
-        {
-            _view = new View();
-        }
-        return _view;
-    }
+    // @property View view()
+    // {
+    //     if(_view is null)
+    //     {
+    //         _view = new View();
+    //     }
+    //     return _view;
+    // }
 
     @property UCache cache()
     {
@@ -133,10 +133,10 @@ abstract class Controller
 		return Application.getInstance().getCacheManger();
 	}
 
-    void render(string filename = null)()
-    {
-        this.response.html(this.view.render!filename());
-    }
+    // void render(string filename = null)()
+    // {
+    //     this.response.html(this.view.render!filename());
+    // }
 
     protected final Response doMiddleware()
     {

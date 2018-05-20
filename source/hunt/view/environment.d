@@ -19,8 +19,8 @@ class Environment
     string input_path;
     string output_path;
 
-    Parser parser;
-    Render render;
+    Parser _parser;
+    Render _render;
 
 private:
     this()
@@ -29,24 +29,24 @@ private:
         if(tpl_path.length == 0)
             tpl_path = "./views/";
         input_path = output_path = buildNormalizedPath(tpl_path) ~ dirSeparator;
-        parser = new Parser();
-        render = new Render();
+        _parser = new Parser();
+        _render = new Render();
     }
 
     this(string global_path)
     {
         input_path = output_path = buildNormalizedPath(global_path) ~ dirSeparator;
         //writeln("input path : ",input_path);
-        parser = new Parser();
-        render = new Render();
+        _parser = new Parser();
+        _render = new Render();
     }
 
     this(string input_path, string output_path)
     {
         this.input_path = buildNormalizedPath(input_path) ~ dirSeparator;
         this.output_path = buildNormalizedPath(output_path) ~ dirSeparator;
-        parser = new Parser();
-        render = new Render();
+        _parser = new Parser();
+        _render = new Render();
     }
 
 public:
@@ -72,32 +72,32 @@ public:
 
     void set_element_notation(ElementNotation element_notation_)
     {
-        parser.element_notation = element_notation_;
+        _parser.element_notation = element_notation_;
     }
 
     ASTNode parse(string input)
     {
-        return parser.parse(input);
+        return _parser.parse(input);
     }
 
     ASTNode parse_template(string filename)
     {
-        return parser.parse_template(input_path ~ filename);
+        return _parser.parse_template(input_path ~ filename);
     }
 
     string render(string input, JSONValue data)
     {
-        return render.render(parse(input), data);
+        return _render.render(parse(input), data);
     }
 
     string render(ASTNode temp, JSONValue data)
     {
-        return render.render(temp, data);
+        return _render.render(temp, data);
     }
 
     string render_file(string filename, JSONValue data)
     {
-        return render.render(parse_template(filename), data);
+        return _render.render(parse_template(filename), data);
     }
 
     string render_file_with_json_file(string filename, string filename_data)
@@ -126,7 +126,7 @@ public:
 
     string load_global_file(string filename)
     {
-        return parser.load_file(input_path ~ filename);
+        return _parser.load_file(input_path ~ filename);
     }
 
     JSONValue load_json(string filename)
