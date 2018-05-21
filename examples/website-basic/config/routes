@@ -7,8 +7,11 @@
 *		/show						index.show
 *		/list						index.list
 *		/index						index.index
-*		/showint					index.showint
-*		/showbool					index.showbool
+*		/showvoid					index.showVoid
+*		/showString					index.showString
+*		/showBool					index.showBool
+*		/showInt					index.showInt
+*		/showJson					index.showJson
 GET		/get						index.getCache
 GET		/set						index.setCache
 
