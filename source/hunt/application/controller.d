@@ -173,6 +173,7 @@ mixin template MakeController(string moduleName = __MODULE__)
 mixin template HuntDynamicCallFun(T, string moduleName)
 {
 public:
+    pragma(msg, __createCallActionFun!(T, moduleName));
     mixin(__createCallActionFun!(T, moduleName));
     shared static this()
     {
@@ -210,42 +211,42 @@ string  __createCallActionFun(T, string moduleName)()
                         }
                     }
 
-                    str ~= "Response res = this.doMiddleware()\n";
-                    str ~= "if(response !is null) {return res;}\n";
+                    str ~= "\tResponse res = this.doMiddleware()\n";
+                    str ~= "\tif(response !is null) {return res;}\n";
 
                     //action
-                    static if (typeof(t) == hunt.http.response.Response)
+                    static if (is(typeof(t) == hunt.http.response.Response))
                     {
-                        str ~= "return this." ~ memberName ~ "();\n";
+                        str ~= "\treturn this." ~ memberName ~ "();\n";
                     }
-                    else static if (typeof(t) == std.json.JSONValue)
+                    else static if (is(typeof(t) == std.json.JSONValue))
                     {
-                        str ~= "return this.response.setContent(this." ~ memberName ~ "().toString());\n";
+                        str ~= "\treturn this.response.setContent(this." ~ memberName ~ "().toString());\n";
                     }
-                    else static if (typeof(t) == string)
+                    else static if (is(typeof(t) == string))
                     {
-                        str ~= "return this.response.setContent(this." ~ memberName ~ "());\n";
+                        str ~= "\treturn this.response.setContent(this." ~ memberName ~ "());\n";
                     }
-                    else static if (typeof(t) == void)
+                    else static if (is(typeof(t) == void))
                     {
                         // nothing to do?!
-                        str ~= "return this.response;\n";
+                        str ~= "\treturn this.response;\n";
                     }
                     else
                     {
                         // What do you want?!
-                        str ~= "import std.conv : to;\n";
-                        str ~= "return this.response.setContent(this." ~ memberName ~ "().to!string);\n";
+                        str ~= "\timport std.conv : to;\n";
+                        str ~= "\treturn this.response.setContent(this." ~ memberName ~ "().to!string);\n";
                     }
 
-                    str ~= "}\n break;";
                 }
+                str ~= "}\nbreak;\n";
             }
         }
     }
 
-    str ~= "default : break;}";
-    str ~= "return this.response;";
+    str ~= "default : break;\n}\n";
+    str ~= "\treturn this.response;\n";
     str ~= "}";
 
     return str;
