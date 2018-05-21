@@ -40,7 +40,6 @@ import hunt.application.dispatcher;
 import hunt.security.acl.Manager;
 
 public import hunt.http;
-public import hunt.view;
 public import hunt.i18n;
 public import hunt.application.config;
 public import hunt.application.middleware;
@@ -68,58 +67,6 @@ final class Application
     }
 
     Address binded(){return addr;}
-
-    /**
-     Add a Router rule
-     Params:
-     method =  the HTTP method. 
-     path   =  the request path.
-     handle =  the delegate that handle the request.
-     group  =  the rule's domain group.
-     */
-    auto addRoute(string method, string path, HandleFunction handle, string group = DEFAULT_ROUTE_GROUP)
-    {
-       logDebug(__FUNCTION__,method, path, handle, group);
-        this._dispatcher.router.addRoute(method, path, handle, group);
-
-        return this;
-    }
-
-	Application GET(string path,HandleFunction handle)
-	{
-        this._dispatcher.router.addRoute("GET", path, handle,DEFAULT_ROUTE_GROUP);
-		return this;
-	}
-	Application POST(string path,HandleFunction handle)
-	{
-        this._dispatcher.router.addRoute("POST", path, handle,DEFAULT_ROUTE_GROUP);
-		return this;
-	}
-	Application DELETE(string path,HandleFunction handle)
-	{
-        this._dispatcher.router.addRoute("DELETE", path, handle,DEFAULT_ROUTE_GROUP);
-		return this;
-	}
-	Application PATCH(string path,HandleFunction handle)
-	{
-        this._dispatcher.router.addRoute("PATCH", path, handle,DEFAULT_ROUTE_GROUP);
-		return this;
-	}
-	Application PUT(string path,HandleFunction handle)
-	{
-        this._dispatcher.router.addRoute("PUT", path, handle,DEFAULT_ROUTE_GROUP);
-		return this;
-	}
-	Application HEAD(string path,HandleFunction handle)
-	{
-        this._dispatcher.router.addRoute("HEAD", path, handle,DEFAULT_ROUTE_GROUP);
-		return this;
-	}
-	Application OPTIONS(string path,HandleFunction handle)
-	{
-        this._dispatcher.router.addRoute("OPTIONS", path, handle,DEFAULT_ROUTE_GROUP);
-		return this;
-	}
 
     // enable i18n
     Application enableLocale(string resPath = DEFAULT_LANGUAGE_PATH, string defaultLocale = "en-us")
