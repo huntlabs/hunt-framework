@@ -43,9 +43,9 @@ class TestController : Controller
     mixin MakeController;
 
     @Action
-    void hello()
+    string hello()
     {
-        response.html("Hello world!");
+        return "Hello world!";
     }
 }
 ```

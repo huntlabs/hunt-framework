@@ -13,7 +13,6 @@ module hunt.application.controller;
 
 import kiss.logger;
 
-public import hunt.view;
 public import hunt.http.response;
 public import hunt.http.request;
 public import hunt.routing;
@@ -39,17 +38,31 @@ abstract class Controller
     {
         Request request;
         ///called before all actions
-        IMiddleware[] middlewares;
-        View _view;
+        Middleware[] middlewares;
     }
+
+    private
+    {
+        Response _response;
+        //View _view;
+    }
+
+    /*
+    // session from request, plaese!
     final @property session()
     {
         return request.getSession();
     }
+    */
+    
     final @property Response response()
     {
-        return request.createResponse();
+        if (this._response is null)
+            request.createResponse();
+
+        return this._response;
     }
+
     /// called before action  return true is continue false is finish
     // bool before(){return true;}
     bool before()
@@ -79,7 +92,7 @@ abstract class Controller
 
     ///add middleware
     ///return true is ok, the named middleware is already exist return false
-    bool addMiddleware(IMiddleware m)
+    bool addMiddleware(Middleware m)
     {
         if(m is null) return false;
         foreach(tmp; this.middlewares)
@@ -95,20 +108,20 @@ abstract class Controller
     }
 
     // get all middleware
-    IMiddleware[] getMiddlewares()
+    Middleware[] getMiddlewares()
     {
         return this.middlewares;
     }
 
     //view render
-    @property View view()
-    {
-        if(_view is null)
-        {
-            _view = new View();
-        }
-        return _view;
-    }
+    // @property View view()
+    // {
+    //     if(_view is null)
+    //     {
+    //         _view = new View();
+    //     }
+    //     return _view;
+    // }
 
     @property UCache cache()
     {
@@ -120,20 +133,14 @@ abstract class Controller
 		return Application.getInstance().getCacheManger();
 	}
 
-    void render(string filename = null)()
-    {
-        this.response.html(this.view.render!filename());
-    }
-	alias show = render;
+    // void render(string filename = null)()
+    // {
+    //     this.response.html(this.view.render!filename());
+    // }
 
-    void done()
+    protected final Response doMiddleware()
     {
-        this.response.done();
-    }
-
-    protected final bool doMiddleware()
-    {
-       logDebug("doMiddlware ..");
+        logDebug("doMiddlware ..");
 
         foreach(m; middlewares)
         {
@@ -145,12 +152,11 @@ abstract class Controller
                 continue;
             }
 
-           logDebugf("Middleware %s is retrun done.", m.name);
-            response.done();
-            return false;
+            logDebugf("Middleware %s is to retrun.", m.name);
+            return response;
         }
 
-        return true;
+        return null;
     }
 
 	@property bool isAsync()
@@ -161,16 +167,16 @@ abstract class Controller
 
 mixin template MakeController(string moduleName = __MODULE__)
 {
-    mixin HuntDynamicCallFun!(typeof(this),moduleName);
+    mixin HuntDynamicCallFun!(typeof(this), moduleName);
 }
 
-mixin template HuntDynamicCallFun(T,string moduleName)
+mixin template HuntDynamicCallFun(T, string moduleName)
 {
 public:
-    mixin(__createCallActionFun!(T,moduleName));
+    mixin(__createCallActionFun!(T, moduleName));
     shared static this()
     {
-        mixin(__createRouteMap!(T,moduleName));
+        mixin(__createRouteMap!(T, moduleName));
     }
 }
 
@@ -227,6 +233,7 @@ string  __createCallActionFun(T, string moduleName)()
                                 str ~= format("ptr.addMiddleware(new %s);", middleware.className);
                             }
                         }
+                    }
 
                         str ~= "if(!ptr.doMiddleware()){return false;}";
 

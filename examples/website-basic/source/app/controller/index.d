@@ -19,18 +19,14 @@ import std.stdio;
 import std.datetime;
 import std.json;
 
-version (USE_ENTITY) import app.model.index;
+version(USE_ENTITY) import app.model.index;
 
-class IpFilterMiddleware : IMiddleware
-{
+class IpFilterMiddleware : Middleware{
 
-	override string name()
-	{
+	override string name() {
 		return IpFilterMiddleware.stringof;
 	}
-
-	override Response onProcess(Request req, Response res)
-	{
+	override Response onProcess(Request req,Response res) {
 		writeln(req.getSession());
 		return null;
 	}
