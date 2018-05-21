@@ -170,32 +170,55 @@ public:
     mixin(__createCallActionFun!(T,moduleName));
     shared static this()
     {
-        mixin(__creteRouteMap!(T,moduleName));
+        mixin(__createRouteMap!(T,moduleName));
     }
 }
+
+
+private
+{
+    enum actionName = "Action";
+    enum actionNameLength = actionName.length;
+
+    bool isActionMember(string name)
+    {
+        return name.length > actionNameLength && name[$-actionNameLength .. $] == actionName;
+    }
+}
+
+alias ActionReturnEventHandler = void delegate(Controller sender, string v);
+
 
 string  __createCallActionFun(T, string moduleName)()
 {
     import std.traits;
     import std.format;
+    import std.string;
+    import std.experimental.logger;
 
-    string str = "bool callAction(string funName, Request req) {";
-    str ~= "\n\tauto ptr = this; ptr.request = req;";
+    string str = "bool callAction(string funName, Request req, ActionReturnEventHandler handler = null) {";
+    str ~= "\n\tauto ptr = this; ptr.request = req; bool r = false; string actionResult=null;";
+    version(HuntDebugMode) str ~= `trace("funName=", funName);`;
     str ~= "\n\tswitch(funName){";
+
+
     foreach(memberName; __traits(allMembers, T))
     {
         static if (is(typeof(__traits(getMember,  T, memberName)) == function) )
         {
+            enum _isActionMember = isActionMember(memberName);
             foreach (t;__traits(getOverloads,T,memberName)) 
             {
+                 version(HuntDebugMode) pragma(msg, "memberName: " ~ memberName);
+
                 //alias pars = ParameterTypeTuple!(t);
-                static if(/*ParameterTypeTuple!(t).length == 0 && */( hasUDA!(t, Action) || hasUDA!(t, Route)))
+                static if( hasUDA!(t, Action) || hasUDA!(t, Route) || _isActionMember)
                 {
-                    str ~= "case \"";
-                    str ~= memberName;
-                    str ~= "\": {\n";
-                    static if(hasUDA!(t, Action))
+                    str ~= "case \"" ~ memberName  ~ "\": {\n";
+
+                    static if(hasUDA!(t, Action) || _isActionMember)
                     {
+                        // middleware
                         enum middlewares = getUDAs!(t, Middleware);
                         static if(middlewares.length)
                         {
@@ -214,9 +237,29 @@ string  __createCallActionFun(T, string moduleName)()
                     }
 
                     //action
-                    str ~= "ptr." ~ memberName ~ "();";
+                    static if(is(ReturnType!t : void))
+                    {
+                        str ~= "ptr." ~ memberName ~ "();";
+                        pragma(msg, "no return value for " ~ memberName);
+                        // version(HuntDebugMode)
+                    }
+                    else 
+                    {
+                        pragma(msg, "return type is: " ~ ReturnType!t.stringof ~ " for " ~ memberName);
+                        str ~= ReturnType!t.stringof ~ " result = ptr." ~ memberName ~ "();";
+                        static if(is(ReturnType!t : Response))
+                        {   
+                            // str ~= "actionResult = result.getContent();";
+                        }
+                        else
+                            str ~= "actionResult = to!string(result);";
+                    }
 
-                    // static if(hasUDA!(t, Action)){
+                    str ~= "if(handler !is null)  handler(this, actionResult);";
+
+                    str ~= "r = true;";
+
+                    // static if(hasUDA!(t, Action) || _isActionMember){
                     //     //after
                     //     str ~= q{
                     //         if(!ptr.after()){return false;}
@@ -229,13 +272,13 @@ string  __createCallActionFun(T, string moduleName)()
     }
 
     str ~= "default : break;}";
-    str ~= "return false;";
+    str ~= "return r;";
     str ~= "}";
 
     return str;
 }
 
-string  __creteRouteMap(T, string moduleName)()
+string  __createRouteMap(T, string moduleName)()
 {
     string str = "";
 
@@ -253,6 +296,11 @@ string  __creteRouteMap(T, string moduleName)()
                 {
                     str ~= "\n\taddRouteList(\"" ~ moduleName ~ "." ~ T.stringof ~ "." ~ memberName  ~ "\",&callHandler!(" ~ T.stringof ~ ",\"" ~ memberName ~ "\"));\n";
                 }
+                else static if(memberName.length > actionNameLength && memberName[$-actionNameLength .. $] == actionName)
+                {   
+                    enum strippedMemberName =  memberName[0 .. $-actionNameLength];
+                    str ~= "\n\taddRouteList(\"" ~ moduleName ~ "." ~ T.stringof ~ "." ~ strippedMemberName  ~ "\",&callHandler!(" ~ T.stringof ~ ",\"" ~ memberName ~ "\"));\n";
+                }
             }
         }
     }
@@ -260,20 +308,27 @@ string  __creteRouteMap(T, string moduleName)()
     return str;
 }
 
-Response callHandler(T, string fun)(Request req) if(is(T == class) || is(T == struct) && hasMember!(T,"__CALLACTION__"))
+void callHandler(T, string fun)(Request req) if(is(T == class) || is(T == struct) && hasMember!(T,"__CALLACTION__"))
 {
+
+    void onActionDone(Controller sender, string result)
+    {
+        sender.response.html(result);
+    }
+
     T controller = new T();
     
-	// import core.memory;
-	// scope(exit){if(!controller.isAsync){controller.destroy(); GC.free(cast(void *)controller);}}
+	import core.memory;
+	scope(exit){if(!controller.isAsync){controller.destroy(); GC.free(cast(void *)controller);}}
 
     //controller.before();		// It's already been called in line 183.
     req.action = fun;
-    controller.callAction(fun, req);
-    controller.after();		// Although the line 193 also has the code that calls after, but where has not executed, so this reservation
+    bool r = controller.callAction(fun, req, &onActionDone);
+    if(r)
+        controller.after();		// Although the line 193 also has the code that calls after, but where has not executed, so this reservation
     controller.done();
 
-    return controller.response;
+    // return controller.response;
 }
 
 HandleFunction getRouteFromList(string str)
@@ -288,7 +343,7 @@ HandleFunction getRouteFromList(string str)
 
 void addRouteList(string str, HandleFunction fun)
 {
-    //trace("add str is .... ", str);
+    trace("add str is .... ", str);
     if(!_init)
     {
         import std.string : toLower;
