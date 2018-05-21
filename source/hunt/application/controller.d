@@ -38,7 +38,7 @@ abstract class Controller
     {
         Request request;
         ///called before all actions
-        Middleware[] middlewares;
+        MiddlewareInterface[] middlewares;
     }
 
     private
@@ -92,7 +92,7 @@ abstract class Controller
 
     ///add middleware
     ///return true is ok, the named middleware is already exist return false
-    bool addMiddleware(Middleware m)
+    bool addMiddleware(MiddlewareInterface m)
     {
         if(m is null) return false;
         foreach(tmp; this.middlewares)
@@ -108,7 +108,7 @@ abstract class Controller
     }
 
     // get all middleware
-    Middleware[] getMiddlewares()
+    MiddlewareInterface[] getMiddlewares()
     {
         return this.middlewares;
     }
@@ -187,7 +187,7 @@ string  __createCallActionFun(T, string moduleName)()
     import std.format;
 
     string str = "Response callAction(string funName, Request req) {";
-    str ~= "\n\tptr.request = req;";
+    str ~= "\n\tthis.request = req;";
     str ~= "\n\tswitch(funName){";
     
     foreach(memberName; __traits(allMembers, T))
