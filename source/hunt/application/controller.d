@@ -173,7 +173,7 @@ mixin template MakeController(string moduleName = __MODULE__)
 mixin template HuntDynamicCallFun(T, string moduleName)
 {
 public:
-    pragma(msg, __createCallActionFun!(T, moduleName));
+    //pragma(msg, __createCallActionFun!(T, moduleName));
     mixin(__createCallActionFun!(T, moduleName));
     shared static this()
     {
@@ -211,7 +211,7 @@ string  __createCallActionFun(T, string moduleName)()
                         }
                     }
 
-                    str ~= "\tResponse res = this.doMiddleware()\n";
+                    str ~= "\tResponse res = this.doMiddleware();\n";
                     str ~= "\tif(response !is null) {return res;}\n";
 
                     //action
