@@ -29,6 +29,7 @@ import std.exception;
 import hunt.application.application;
 import std.parallelism;
 import hunt.security.acl.User;
+import hunt.http.exception;
 
 class Dispatcher
 {
@@ -156,12 +157,9 @@ class Dispatcher
 
 void doRequestHandle(HandleFunction handle, Request request)
 {
-    import hunt.http.exception;
-
     try
     {
-        Response response = handle(request);
-        response.done();
+        handle(request);
     }
     catch (CreateResponseException e)
     {

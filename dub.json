@@ -14,6 +14,13 @@
             "targetType": "library"
         },
         {
+            "name": "debug-mode",
+            "versions": [
+                "HuntDebugMode"
+            ],
+            "targetType": "library"
+        },
+        {
             "name": "full",
             "subConfigurations": {
                 "entity": "mysql"
