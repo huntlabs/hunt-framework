@@ -270,7 +270,7 @@ class Response : ResponseBuilder
 package(hunt.http):
     void clear()
     {
-        _txn = null;
+        // _txn = null;
     }
 private:
     bool _isDone = false;
