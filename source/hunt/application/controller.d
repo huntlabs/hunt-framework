@@ -38,7 +38,7 @@ abstract class Controller
     {
         Request request;
         ///called before all actions
-        Middleware[] middlewares;
+        MiddlewareInterface[] middlewares;
     }
 
     private
@@ -92,7 +92,7 @@ abstract class Controller
 
     ///add middleware
     ///return true is ok, the named middleware is already exist return false
-    bool addMiddleware(Middleware m)
+    bool addMiddleware(MiddlewareInterface m)
     {
         if(m is null) return false;
         foreach(tmp; this.middlewares)
@@ -108,7 +108,7 @@ abstract class Controller
     }
 
     // get all middleware
-    Middleware[] getMiddlewares()
+    MiddlewareInterface[] getMiddlewares()
     {
         return this.middlewares;
     }
@@ -173,6 +173,7 @@ mixin template MakeController(string moduleName = __MODULE__)
 mixin template HuntDynamicCallFun(T, string moduleName)
 {
 public:
+    //pragma(msg, __createCallActionFun!(T, moduleName));
     mixin(__createCallActionFun!(T, moduleName));
     shared static this()
     {
@@ -233,7 +234,6 @@ string  __createCallActionFun(T, string moduleName)()
                                 str ~= format("ptr.addMiddleware(new %s);", middleware.className);
                             }
                         }
-                    }
 
                         str ~= "if(!ptr.doMiddleware()){return false;}";
 
@@ -274,6 +274,7 @@ string  __createCallActionFun(T, string moduleName)()
                     // }
                     str ~= "}\n break;";
                 }
+                str ~= "}\nbreak;\n";
             }
         }
     }
@@ -284,6 +285,7 @@ string  __createCallActionFun(T, string moduleName)()
 
     return str;
 }
+
 
 string  __createRouteMap(T, string moduleName)()
 {

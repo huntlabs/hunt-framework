@@ -316,9 +316,7 @@ final class Request : RequestHandler
 		if (_error != HTTPErrorCode.NO_ERROR)
 			throw new CreateResponseException("http error is : " ~ to!string(_error));
 		if (_res is null)
-		{
 			_res = new Response(_downstream);
-		}
 		return _res;
 	}
 
