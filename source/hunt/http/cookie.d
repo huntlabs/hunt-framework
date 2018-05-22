@@ -667,9 +667,11 @@ unittest
     //assert();
     import std.experimental.logger;
 
-    assert(cookie.output == "Set-Cookie: PHPSESSID=dh5vvosj68hv1raprertnku6s7");
+    trace(cookie.output);
+    assert(cookie.output == "Set-Cookie: PHPSESSID=dh5vvosj68hv1raprertnku6s7;expires=0;path=/;secure=false;httponly=false;raw=true");
     cookie.params = ["expires" : "Fri, 13 May 2016 17:44:17 GMT", "path" : "/",
         "domain" : "putao.com", "secure" : "true", "httponly" : "false"];
 
-    assert( cookie.output == "Set-Cookie: PHPSESSID=dh5vvosj68hv1raprertnku6s7;expires=Fri, 13 May 2016 17:44:17 GMT;domain=putao.com;path=/;secure=true;httponly=false");
+    trace(cookie.output);
+    assert( cookie.output == "Set-Cookie: PHPSESSID=dh5vvosj68hv1raprertnku6s7;expires=Fri, 13 May 2016 17:44:17 GMT;domain=putao.com;path=/;secure=true;httponly=false;raw=true");
 }
