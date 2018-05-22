@@ -162,7 +162,7 @@ final class Application
 		_sessionStorage.setPrefix(config.prefix);
         _sessionStorage.setExpire(config.expire);
 
-		writeln(" initSessionStorage " ,_sessionStorage);
+		// writeln(" initSessionStorage " ,_sessionStorage);
     }
 
     EntityManagerFactory getEntityManagerFactory()
@@ -177,7 +177,7 @@ final class Application
 	
 	SessionStorage getSessionStorage()
 	{
-		writeln(" getSessionStorage " , _sessionStorage);
+		// writeln(" getSessionStorage " , _sessionStorage);
 		return _sessionStorage;
 	}
 	
@@ -222,7 +222,7 @@ final class Application
 
 	void start()
 	{
-		writeln("Try to open http://",addr.toString(),"/");
+		writeln("Try to browse http://",addr.toString());
 		_server.start();
 	}
 
@@ -233,6 +233,7 @@ final class Application
     {
         _server.stop();
     }
+    
     private:
     RequestHandler newHandler(RequestHandler, HTTPMessage msg){
         if(!msg.upgraded)

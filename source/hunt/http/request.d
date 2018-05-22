@@ -195,15 +195,17 @@ final class Request : RequestHandler
 	/**
      * Gets the Session.
      *
-     * @return SessionInterface|null The session
+     * @return Session|null The session
      */
 	Session getSession(string sessionName = "hunt_session")
 	{
-		auto sessionId = getCookieValue(sessionName);
-		if (!sessionId.length)
+		string sessionId = getCookieValue(sessionName);
+		version (HuntDebugMode)  trace("last sessionId =>", sessionId);
+		if (sessionId.empty)
 		{
 			auto _tmp = new Session(Application.getInstance().getSessionStorage());
 			createResponse().setCookie(sessionName, _tmp.sessionId);
+			version (HuntDebugMode) trace("latest sessionId =>", _tmp.sessionId);
 			return _tmp;
 		}
 
@@ -276,11 +278,13 @@ final class Request : RequestHandler
 			return (*obj);
 		}
 	}
+	
 	///get queries
 	@property string[string] queries()
 	{
 		return _httpMessage.queryParam();
 	}
+
 	/// get a query
 	T get(T = string)(string key, T v = T.init)
 	{

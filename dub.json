@@ -4,7 +4,7 @@
     "copyright": "Copyright (C) 2015-2018, Shanghai Putao Technology Co., Ltd",
     "description": "A high performance full-stack Web framework.",
     "dependencies": {
-        "collie": "~>0.10.11",
+    "collie": "~>0.10.11",
 		"entity": "~>1.3.3",
 		"cache": "~>0.0.3"
     },
