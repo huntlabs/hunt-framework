@@ -5,13 +5,13 @@
 
 *		/							index.index
 *		/show						index.show
-*		/list						index.list
 *		/index						index.index
 *		/showvoid					index.showVoid
 *		/showString					index.showString
 *		/showBool					index.showBool
 *		/showInt					index.showInt
 *		/showJson					index.showJson
+GET		/showView					index.showView
 GET		/get						index.getCache
 GET		/set						index.setCache
 

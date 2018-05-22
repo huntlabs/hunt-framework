@@ -1,0 +1,10 @@
+{% include "main.txt" %}
+
+
+<label>Users</label>
+{% for key, value in users %}
+    <p><strong>{{ key }}</strong>: {{ value }}</p>
+{% endfor %}
+
+
+{% include "main.txt" %}
