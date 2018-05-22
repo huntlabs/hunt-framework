@@ -108,30 +108,6 @@ final class Application
             _cbuffer = cbuffer;
     }
 
-    /*void setRedis(AppConfig.RedisConf conf)
-    {
-        version(USE_REDIS){
-            if(conf.enabled == true && conf.host && conf.port)
-            {
-                conRedis.setDefaultHost(conf.host,conf.port,conf.password);    
-            }
-        }
-    }
-
-    void setMemcache(AppConfig.MemcacheConf conf)
-    {
-        version(USE_MEMCACHE){
-            if(conf.enabled == true){
-               logDebug(conf);
-                auto tmp1 = split(conf.servers,","); 
-                auto tmp2 = split(tmp1[0],":"); 
-                if(tmp2[0] && tmp2[1]){
-                    conMemcache.setDefaultHost(tmp2[0],tmp2[1].to!ushort);
-                }
-            }
-        }
-    }*/
-
     private void initDatabase(AppConfig.DBConfig config)
     {
         if(config.url.empty)
@@ -233,7 +209,7 @@ final class Application
     {
         _server.stop();
     }
-    
+
     private:
     RequestHandler newHandler(RequestHandler, HTTPMessage msg){
         if(!msg.upgraded)
