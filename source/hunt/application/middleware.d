@@ -15,7 +15,7 @@ import hunt.http.request;
 import hunt.http.response;
 
 
-interface Middleware
+interface MiddlewareInterface
 {
     ///get the middleware name
     string name();

@@ -58,34 +58,13 @@ abstract class Controller
     final @property Response response()
     {
         if (this._response is null)
-            request.createResponse();
+            _response = request.createResponse();
 
         return this._response;
     }
 
     /// called before action  return true is continue false is finish
-    // bool before(){return true;}
-    bool before()
-	{
-		/**
-		CORS support
-		http://www.cnblogs.com/feihong84/p/5678895.html
-		https://stackoverflow.com/questions/10093053/add-header-in-ajax-request-with-jquery
-		*/
-
-        // FIXME: Needing refactor or cleanup -@zxp at 5/10/2018, 11:33:11 AM
-        // set this through the configuration
-		response.setHeader("Access-Control-Allow-Origin", "*");
-		response.setHeader("Access-Control-Allow-Methods", "*");
-		response.setHeader("Access-Control-Allow-Headers", "*");
-
-		if ( cmp(toUpper(request.method),"OPTIONS") == 0)
-		{
-			return false;
-		}
-			
-		return true;
-	}
+    bool before(){return true;}
 
     /// called after action  return true is continue false is finish
     bool after(){return true;}
@@ -138,7 +117,7 @@ abstract class Controller
     //     this.response.html(this.view.render!filename());
     // }
 
-    protected final Response doMiddleware()
+    protected final bool doMiddleware()
     {
         logDebug("doMiddlware ..");
 
@@ -153,10 +132,10 @@ abstract class Controller
             }
 
             logDebugf("Middleware %s is to retrun.", m.name);
-            return response;
+            return false;
         }
 
-        return null;
+        return true;
     }
 
 	@property bool isAsync()
@@ -204,7 +183,7 @@ string  __createCallActionFun(T, string moduleName)()
     import std.experimental.logger;
 
     string str = "bool callAction(string funName, Request req, ActionReturnEventHandler handler = null) {";
-    str ~= "\n\tauto ptr = this; ptr.request = req; bool r = false; string actionResult=null;";
+    str ~= "\n\tthis.request = req; bool r = false; string actionResult=null;";
     version(HuntDebugMode) str ~= `trace("funName=", funName);`;
     str ~= "\n\tswitch(funName){";
 
@@ -231,29 +210,28 @@ string  __createCallActionFun(T, string moduleName)()
                         {
                             foreach(i, middleware; middlewares)
                             {
-                                str ~= format("ptr.addMiddleware(new %s);", middleware.className);
+                                str ~= format("this.addMiddleware(new %s);", middleware.className);
                             }
                         }
 
-                        str ~= "if(!ptr.doMiddleware()){return false;}";
+                        str ~= "if(!this.doMiddleware()){return false;}";
 
                         //before
                         str ~= q{
-                            if(!ptr.before()){return false;}
+                            if(!this.before()){return false;}
                         };
                     }
 
                     //action
                     static if(is(ReturnType!t : void))
                     {
-                        str ~= "ptr." ~ memberName ~ "();";
-                        pragma(msg, "no return value for " ~ memberName);
-                        // version(HuntDebugMode)
+                        str ~= "this." ~ memberName ~ "();";
+                        version(HuntDebugMode) pragma(msg, "no return value for " ~ memberName);
                     }
                     else 
                     {
-                        pragma(msg, "return type is: " ~ ReturnType!t.stringof ~ " for " ~ memberName);
-                        str ~= ReturnType!t.stringof ~ " result = ptr." ~ memberName ~ "();";
+                        version(HuntDebugMode) pragma(msg, "return type is: " ~ ReturnType!t.stringof ~ " for " ~ memberName);
+                        str ~= ReturnType!t.stringof ~ " result = this." ~ memberName ~ "();";
                         static if(is(ReturnType!t : Response))
                         {   
                             // str ~= "actionResult = result.getContent();";
@@ -269,12 +247,11 @@ string  __createCallActionFun(T, string moduleName)()
                     // static if(hasUDA!(t, Action) || _isActionMember){
                     //     //after
                     //     str ~= q{
-                    //         if(!ptr.after()){return false;}
+                    //         if(!this.after()){return false;}
                     //     };
                     // }
                     str ~= "}\n break;";
                 }
-                str ~= "}\nbreak;\n";
             }
         }
     }
@@ -305,7 +282,7 @@ string  __createRouteMap(T, string moduleName)()
                 {
                     str ~= "\n\taddRouteList(\"" ~ moduleName ~ "." ~ T.stringof ~ "." ~ memberName  ~ "\",&callHandler!(" ~ T.stringof ~ ",\"" ~ memberName ~ "\"));\n";
                 }
-                else static if(memberName.length > actionNameLength && memberName[$-actionNameLength .. $] == actionName)
+                else static if(isActionMember(memberName))
                 {   
                     enum strippedMemberName =  memberName[0 .. $-actionNameLength];
                     str ~= "\n\taddRouteList(\"" ~ moduleName ~ "." ~ T.stringof ~ "." ~ strippedMemberName  ~ "\",&callHandler!(" ~ T.stringof ~ ",\"" ~ memberName ~ "\"));\n";
@@ -317,27 +294,25 @@ string  __createRouteMap(T, string moduleName)()
     return str;
 }
 
-void callHandler(T, string fun)(Request req) if(is(T == class) || is(T == struct) && hasMember!(T,"__CALLACTION__"))
+void callHandler(T, string method)(Request req) if(is(T == class) || is(T == struct) && hasMember!(T,"__CALLACTION__"))
 {
 
     void onActionDone(Controller sender, string result)
     {
-        sender.response.html(result);
+        sender.response.setContent(result);
+        sender.response.done();
     }
 
     T controller = new T();
-    
 	import core.memory;
-	scope(exit){if(!controller.isAsync){controller.destroy(); GC.free(cast(void *)controller);}}
+	// scope(exit){if(!controller.isAsync){controller.destroy(); GC.free(cast(void *)controller);}}
 
     //controller.before();		// It's already been called in line 183.
-    req.action = fun;
-    bool r = controller.callAction(fun, req, &onActionDone);
+    req.action = method;
+    bool r = controller.callAction(method, req, &onActionDone);
     if(r)
         controller.after();		// Although the line 193 also has the code that calls after, but where has not executed, so this reservation
-    controller.done();
-
-    // return controller.response;
+    // controller.done();
 }
 
 HandleFunction getRouteFromList(string str)
@@ -350,14 +325,14 @@ HandleFunction getRouteFromList(string str)
     return __routerList.get(str, null);
 }
 
-void addRouteList(string str, HandleFunction fun)
+void addRouteList(string str, HandleFunction method)
 {
-    trace("add str is .... ", str);
+    version(HuntDebugMode) trace("add router: ", str);
     if(!_init)
     {
         import std.string : toLower;
 
-        __routerList[str.toLower] = fun;
+        __routerList[str.toLower] = method;
     }
 }
 
