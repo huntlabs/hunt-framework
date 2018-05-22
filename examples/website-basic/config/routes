@@ -3,7 +3,7 @@
 #
 
 
-*		/							index.index
+*		/home						index.index
 *		/show						index.show
 *		/index						index.index
 *		/showvoid					index.showVoid
@@ -16,5 +16,5 @@ GET		/get						index.getCache
 GET		/set						index.setCache
 
 
-GET		/public						staticDir:public
-# access: http://127.0.0.1:8080/public/index.html
+GET		/						staticDir:wwwroot
+# access: http://127.0.0.1:8080/index.html

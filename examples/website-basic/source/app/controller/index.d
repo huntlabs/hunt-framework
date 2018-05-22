@@ -32,7 +32,7 @@ class IpFilterMiddleware : MiddlewareInterface
 
 	override Response onProcess(Request req, Response res)
 	{
-		writeln(req.getSession());
+		writeln(req.session());
 		return null;
 	}
 }
@@ -67,7 +67,7 @@ class IndexController : Controller
 		return true;
 	}
 
-	@Action Response index()
+	@Action string index()
 	{
 		Appender!string stringBuilder;
 		stringBuilder.put("Hello world!<br/>");
@@ -83,8 +83,15 @@ class IndexController : Controller
 		stringBuilder.put(`<a href="/set?key=company&value=Putao">set Cache</a><br/>`);
 		stringBuilder.put(`<a href="/get?key=company">get Cache (Use Postman with cookie set)</a><br/>`);
 
-		this.response.html(stringBuilder.data);
-		return response;
+		// this.response.html(stringBuilder.data);
+
+		JSONValue data;
+		data["title"] = "Hunt demo";
+		data["now"] = Clock.currTime.toString();
+
+		string r = Env().render_file("home.dhtml", data);
+
+		return r;
 	}
 
 	Response showAction()
@@ -165,7 +172,7 @@ class IndexController : Controller
 
 	@Action Response setCache()
 	{
-		Session session = request.getSession();
+		Session session = request.session();
 		session.set("test", "current value");
 
 		string key = request.get("key");	
@@ -187,7 +194,7 @@ class IndexController : Controller
 	
 	@Action Response getCache()
 	{
-		Session session = request.getSession();
+		Session session = request.session();
 		string sessionValue = session.get("test");
 
 		string key = request.get("key");	

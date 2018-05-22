@@ -1,1 +1,0 @@
-alert("OK, static file output.");
