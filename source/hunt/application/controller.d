@@ -45,13 +45,6 @@ abstract class Controller
         Response _response;
     }
 
-    /*
-    // session from request, plaese!
-    final @property session()
-    {
-        return request.getSession();
-    }
-    */
 
     final @property Response response()
     {

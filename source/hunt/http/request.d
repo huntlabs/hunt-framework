@@ -192,25 +192,6 @@ final class Request : RequestHandler
 		return _httpMessage.clientAddress();
 	}
 
-	/**
-     * Gets the Session.
-     *
-     * @return Session|null The session
-     */
-	Session getSession(string sessionName = "hunt_session")
-	{
-		string sessionId = getCookieValue(sessionName);
-		version (HuntDebugMode)  trace("last sessionId =>", sessionId);
-		if (sessionId.empty)
-		{
-			auto _tmp = new Session(Application.getInstance().getSessionStorage());
-			createResponse().setCookie(sessionName, _tmp.sessionId);
-			version (HuntDebugMode) trace("latest sessionId =>", _tmp.sessionId);
-			return _tmp;
-		}
-
-		return new Session(sessionId, Application.getInstance().getSessionStorage());
-	}
 
 	@property Cookie[string] cookies()
 	{
@@ -635,17 +616,34 @@ final class Request : RequestHandler
 		this.session().flashInput(null);
 	}
 
-	Session session()
+	private Session getSession(string sessionName = "hunt_session")
 	{
-		if (!hasSession())
+		string sessionId = getCookieValue(sessionName);
+		version (HuntDebugMode)  trace("last sessionId =>", sessionId);
+		if (sessionId.empty)
 		{
-			throw new Exception("Session store not set on request.");
+			auto _tmp = new Session(Application.getInstance().getSessionStorage());
+			createResponse().setCookie(sessionName, _tmp.sessionId);
+			version (HuntDebugMode) trace("latest sessionId =>", _tmp.sessionId);
+			return _tmp;
 		}
 
-		return getSession();
+		return new Session(sessionId, Application.getInstance().getSessionStorage());
+	}
+	
+	/**
+     * Gets the Session.
+     *
+     * @return Session|null The session
+     */
+	@property Session session()
+	{
+		if (!hasSession())
+			_session = getSession();
+		return _session;
 	}
 
-	void setSession(Session session)
+	@property void session(Session session)
 	{
 		this._session = session;
 	}
