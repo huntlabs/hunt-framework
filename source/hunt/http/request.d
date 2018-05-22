@@ -1270,9 +1270,7 @@ final class Request : RequestHandler
 		r ~= _route.getUrlTemplate();
 		r ~= this.ip();
 
-		string s = toHexString(sha1Of(join(r, "|")));
-		// Here is a bug from compiler
-		return s;
+		return toHexString(sha1Of(join(r, "|"))).idup;
 	}
 
 	/**
