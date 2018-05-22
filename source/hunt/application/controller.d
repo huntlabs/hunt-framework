@@ -8,7 +8,7 @@
  * Licensed under the Apache-2.0 License.
  *
  */
- 
+
 module hunt.application.controller;
 
 import kiss.logger;
@@ -31,7 +31,6 @@ struct Middleware
     string className;
 }
 
-
 abstract class Controller
 {
     protected
@@ -44,7 +43,6 @@ abstract class Controller
     private
     {
         Response _response;
-        //View _view;
     }
 
     /*
@@ -54,7 +52,7 @@ abstract class Controller
         return request.getSession();
     }
     */
-    
+
     final @property Response response()
     {
         if (this._response is null)
@@ -64,19 +62,26 @@ abstract class Controller
     }
 
     /// called before action  return true is continue false is finish
-    bool before(){return true;}
+    bool before()
+    {
+        return true;
+    }
 
     /// called after action  return true is continue false is finish
-    bool after(){return true;}
+    bool after()
+    {
+        return true;
+    }
 
     ///add middleware
     ///return true is ok, the named middleware is already exist return false
     bool addMiddleware(MiddlewareInterface m)
     {
-        if(m is null) return false;
-        foreach(tmp; this.middlewares)
+        if (m is null)
+            return false;
+        foreach (tmp; this.middlewares)
         {
-            if(tmp.name == m.name)
+            if (tmp.name == m.name)
             {
                 return false;
             }
@@ -92,41 +97,26 @@ abstract class Controller
         return this.middlewares;
     }
 
-    //view render
-    // @property View view()
-    // {
-    //     if(_view is null)
-    //     {
-    //         _view = new View();
-    //     }
-    //     return _view;
-    // }
-
     @property UCache cache()
     {
-		return Application.getInstance().getCache();
+        return Application.getInstance().getCache();
     }
 
-	@property cacheManger()
-	{
-		return Application.getInstance().getCacheManger();
-	}
-
-    // void render(string filename = null)()
-    // {
-    //     this.response.html(this.view.render!filename());
-    // }
+    @property cacheManger()
+    {
+        return Application.getInstance().getCacheManger();
+    }
 
     protected final bool doMiddleware()
     {
         logDebug("doMiddlware ..");
 
-        foreach(m; middlewares)
+        foreach (m; middlewares)
         {
-           logDebugf("do %s onProcess ..", m.name());
+            logDebugf("do %s onProcess ..", m.name());
 
             auto response = m.onProcess(this.request, this.response);
-            if(response is null)
+            if (response is null)
             {
                 continue;
             }
@@ -138,10 +128,10 @@ abstract class Controller
         return true;
     }
 
-	@property bool isAsync()
-	{
-		return true;
-	}
+    @property bool isAsync()
+    {
+        return true;
+    }
 }
 
 mixin template MakeController(string moduleName = __MODULE__)
@@ -152,14 +142,13 @@ mixin template MakeController(string moduleName = __MODULE__)
 mixin template HuntDynamicCallFun(T, string moduleName)
 {
 public:
-    //pragma(msg, __createCallActionFun!(T, moduleName));
+    version (HuntDebugMode) pragma(msg, __createCallActionFun!(T, moduleName));
     mixin(__createCallActionFun!(T, moduleName));
     shared static this()
     {
         mixin(__createRouteMap!(T, moduleName));
     }
 }
-
 
 private
 {
@@ -168,14 +157,13 @@ private
 
     bool isActionMember(string name)
     {
-        return name.length > actionNameLength && name[$-actionNameLength .. $] == actionName;
+        return name.length > actionNameLength && name[$ - actionNameLength .. $] == actionName;
     }
 }
 
 alias ActionReturnEventHandler = void delegate(Controller sender, string v);
 
-
-string  __createCallActionFun(T, string moduleName)()
+string __createCallActionFun(T, string moduleName)()
 {
     import std.traits;
     import std.format;
@@ -184,31 +172,31 @@ string  __createCallActionFun(T, string moduleName)()
 
     string str = "bool callAction(string funName, Request req, ActionReturnEventHandler handler = null) {";
     str ~= "\n\tthis.request = req; bool r = false; string actionResult=null;";
-    version(HuntDebugMode) str ~= `trace("funName=", funName);`;
+    version (HuntDebugMode)
+        str ~= `trace("funName=", funName);`;
     str ~= "\n\tswitch(funName){";
 
-
-    foreach(memberName; __traits(allMembers, T))
+    foreach (memberName; __traits(allMembers, T))
     {
-        static if (is(typeof(__traits(getMember,  T, memberName)) == function) )
+        static if (is(typeof(__traits(getMember, T, memberName)) == function))
         {
             enum _isActionMember = isActionMember(memberName);
-            foreach (t;__traits(getOverloads,T,memberName)) 
+            foreach (t; __traits(getOverloads, T, memberName))
             {
-                 version(HuntDebugMode) pragma(msg, "memberName: " ~ memberName);
+                version (HuntDebugMode) pragma(msg, "memberName: " ~ memberName);
 
                 //alias pars = ParameterTypeTuple!(t);
-                static if( hasUDA!(t, Action) || hasUDA!(t, Route) || _isActionMember)
+                static if (hasUDA!(t, Action) || hasUDA!(t, Route) || _isActionMember)
                 {
-                    str ~= "case \"" ~ memberName  ~ "\": {\n";
+                    str ~= "case \"" ~ memberName ~ "\": {\n";
 
-                    static if(hasUDA!(t, Action) || _isActionMember)
+                    static if (hasUDA!(t, Action) || _isActionMember)
                     {
                         // middleware
                         enum middlewares = getUDAs!(t, Middleware);
-                        static if(middlewares.length)
+                        static if (middlewares.length)
                         {
-                            foreach(i, middleware; middlewares)
+                            foreach (i, middleware; middlewares)
                             {
                                 str ~= format("this.addMiddleware(new %s);", middleware.className);
                             }
@@ -223,17 +211,18 @@ string  __createCallActionFun(T, string moduleName)()
                     }
 
                     //action
-                    static if(is(ReturnType!t : void))
+                    static if (is(ReturnType!t : void))
                     {
                         str ~= "this." ~ memberName ~ "();";
-                        version(HuntDebugMode) pragma(msg, "no return value for " ~ memberName);
+                        version (HuntDebugMode) pragma(msg, "no return value for " ~ memberName);
                     }
-                    else 
+                    else
                     {
-                        version(HuntDebugMode) pragma(msg, "return type is: " ~ ReturnType!t.stringof ~ " for " ~ memberName);
+                        version (HuntDebugMode) pragma(msg,
+                                "return type is: " ~ ReturnType!t.stringof ~ " for " ~ memberName);
                         str ~= ReturnType!t.stringof ~ " result = this." ~ memberName ~ "();";
-                        static if(is(ReturnType!t : Response))
-                        {   
+                        static if (is(ReturnType!t : Response))
+                        {
                             // str ~= "actionResult = result.getContent();";
                         }
                         else
@@ -241,7 +230,6 @@ string  __createCallActionFun(T, string moduleName)()
                     }
 
                     str ~= "if(handler !is null)  handler(this, actionResult);";
-
                     str ~= "r = true;";
 
                     // static if(hasUDA!(t, Action) || _isActionMember){
@@ -260,32 +248,35 @@ string  __createCallActionFun(T, string moduleName)()
     str ~= "return r;";
     str ~= "}";
 
+    // pragma(msg, str);
+
     return str;
 }
 
-
-string  __createRouteMap(T, string moduleName)()
+string __createRouteMap(T, string moduleName)()
 {
     string str = "";
 
     //pragma(msg, "moduleName", moduleName);
     str ~= "\n\timport hunt.application.staticfile;\n";
     str ~= "\n\taddRouteList(\"hunt.application.staticfile.StaticfileController.doStaticFile\", &callHandler!(StaticfileController, \"doStaticFile\"));\n";
-    
-    foreach(memberName; __traits(allMembers, T))
+
+    foreach (memberName; __traits(allMembers, T))
     {
         static if (is(typeof(__traits(getMember, T, memberName)) == function))
         {
-            foreach (t;__traits(getOverloads, T, memberName))
+            foreach (t; __traits(getOverloads, T, memberName))
             {
-                static if (/*ParameterTypeTuple!(t).length == 0 && */ hasUDA!(t, Action))
+                static if ( /*ParameterTypeTuple!(t).length == 0 && */ hasUDA!(t, Action))
                 {
-                    str ~= "\n\taddRouteList(\"" ~ moduleName ~ "." ~ T.stringof ~ "." ~ memberName  ~ "\",&callHandler!(" ~ T.stringof ~ ",\"" ~ memberName ~ "\"));\n";
+                    str ~= "\n\taddRouteList(\"" ~ moduleName ~ "." ~ T.stringof ~ "." ~ memberName
+                        ~ "\",&callHandler!(" ~ T.stringof ~ ",\"" ~ memberName ~ "\"));\n";
                 }
-                else static if(isActionMember(memberName))
-                {   
-                    enum strippedMemberName =  memberName[0 .. $-actionNameLength];
-                    str ~= "\n\taddRouteList(\"" ~ moduleName ~ "." ~ T.stringof ~ "." ~ strippedMemberName  ~ "\",&callHandler!(" ~ T.stringof ~ ",\"" ~ memberName ~ "\"));\n";
+                else static if (isActionMember(memberName))
+                {
+                    enum strippedMemberName = memberName[0 .. $ - actionNameLength];
+                    str ~= "\n\taddRouteList(\"" ~ moduleName ~ "." ~ T.stringof ~ "." ~ strippedMemberName
+                        ~ "\",&callHandler!(" ~ T.stringof ~ ",\"" ~ memberName ~ "\"));\n";
                 }
             }
         }
@@ -294,7 +285,8 @@ string  __createRouteMap(T, string moduleName)()
     return str;
 }
 
-void callHandler(T, string method)(Request req) if(is(T == class) || is(T == struct) && hasMember!(T,"__CALLACTION__"))
+void callHandler(T, string method)(Request req)
+        if (is(T == class) || is(T == struct) && hasMember!(T, "__CALLACTION__"))
 {
 
     void onActionDone(Controller sender, string result)
@@ -304,14 +296,15 @@ void callHandler(T, string method)(Request req) if(is(T == class) || is(T == str
     }
 
     T controller = new T();
-	import core.memory;
-	// scope(exit){if(!controller.isAsync){controller.destroy(); GC.free(cast(void *)controller);}}
+    import core.memory;
+
+    // scope(exit){if(!controller.isAsync){controller.destroy(); GC.free(cast(void *)controller);}}
 
     //controller.before();		// It's already been called in line 183.
     req.action = method;
     bool r = controller.callAction(method, req, &onActionDone);
-    if(r)
-        controller.after();		// Although the line 193 also has the code that calls after, but where has not executed, so this reservation
+    if (r)
+        controller.after(); // Although the line 193 also has the code that calls after, but where has not executed, so this reservation
     // controller.done();
 }
 
@@ -327,8 +320,9 @@ HandleFunction getRouteFromList(string str)
 
 void addRouteList(string str, HandleFunction method)
 {
-    version(HuntDebugMode) trace("add router: ", str);
-    if(!_init)
+    version (HuntDebugMode)
+        trace("add router: ", str);
+    if (!_init)
     {
         import std.string : toLower;
 
@@ -338,4 +332,4 @@ void addRouteList(string str, HandleFunction method)
 
 private:
 __gshared bool _init = false;
-__gshared HandleFunction[string]  __routerList;
+__gshared HandleFunction[string] __routerList;

@@ -119,14 +119,25 @@ class Response : ResponseBuilder
     ///render html string 
     Response html(string htmlString, string content_type = "text/html;charset=utf-8")
     {
+        if(_isContentSet)
+        {
+            throw new Exception("It can be called only once!");
+        }
+        _isContentSet = true;
         setHeader(HTTPHeaderCode.CONTENT_TYPE, content_type).setContent(htmlString);
 
         return this;
     }
+    private bool _isContentSet=false;
 
     ///render plain text string 
     Response plain(string textString, string content_type = "text/plain;charset=utf-8")
-    {
+    {        
+        if(_isContentSet)
+        {
+            throw new Exception("It can be called only once!");
+        }
+        _isContentSet = true;
         setHeader(HTTPHeaderCode.CONTENT_TYPE, content_type).setContent(textString);
 
         return this;
@@ -267,11 +278,6 @@ class Response : ResponseBuilder
         return originalContent;
     }     
 
-package(hunt.http):
-    void clear()
-    {
-        // _txn = null;
-    }
 private:
     bool _isDone = false;
 }

@@ -79,8 +79,9 @@ class IndexController : Controller
 		stringBuilder.put(`<a href="/showString">show string</a><br/>`);
 		stringBuilder.put(`<a href="/showBool">show bool</a><br/>`);
 		stringBuilder.put(`<a href="/showInt">show int</a><br/>`);
-		stringBuilder.put(`<a href="/showJson">show json</a><br/>`);
-		stringBuilder.put(`<a href="/showView">show View</a><br/>`);
+		stringBuilder.put(`<a href="/showJson">show json</a><br/><br/>`);
+		stringBuilder.put(`<a href="/set?key=company&value=Putao">set Cache</a><br/>`);
+		stringBuilder.put(`<a href="/get?key=company">get Cache (Use Postman with cookie set)</a><br/>`);
 
 		this.response.html(stringBuilder.data);
 		return response;
@@ -89,18 +90,25 @@ class IndexController : Controller
 	Response showAction()
 	{
 		trace("---show Action----");
+		// dfmt off
 		auto response = this.request.createResponse();
-		response.html("Show message(No @Action defined): Hello world<br/>").setCookie("name", "value", 10000)
-			.setCookie("name1", "value", 10000, "/path").setCookie("name2", "value", 10000);
+		response.html("Show message(No @Action defined): Hello world<br/>")
+		.setCookie("name", "value", 10000)
+		.setCookie("name1", "value", 10000, "/path")
+		.setCookie("name2", "value", 10000);
+		// dfmt on
 		return response;
 	}
 
 	Response test_action()
 	{
 		trace("---test_action----");
-		response.html("Show message: Hello world<br/>") //.setHeader("content-type","text/html;charset=UTF-8")
+		// dfmt off
+		response.html("Show message: Hello world<br/>")
 		.setCookie("name", "value", 10000)
-			.setCookie("name1", "value", 10000, "/path").setCookie("name2", "value", 10000);
+		.setCookie("name1", "value", 10000, "/path")
+		.setCookie("name2", "value", 10000);
+		// dfmt on
 
 		return response;
 	}
@@ -157,23 +165,45 @@ class IndexController : Controller
 
 	@Action Response setCache()
 	{
-		// session.set("test", "test");
-		//auto key = request.get("key");	
-		//auto value = request.get("value");	
-		//cache.set(key,value);
-		auto response = this.request.createResponse();
-		//response.html("key : " ~ key ~ " value : " ~ value);
-		// response.html(session.sessionId);
+		Session session = request.getSession();
+		session.set("test", "current value");
+
+		string key = request.get("key");	
+		string value = request.get("value");	
+		cache.put(key,value);
+
+		Appender!string stringBuilder;
+
+		stringBuilder.put("Cache test: <br/>");
+		stringBuilder.put("key : " ~ key ~ " value : " ~ value);
+		stringBuilder.put("<br/><br/>Session Test: ");
+		stringBuilder.put("<br/>SessionId: " ~ session.sessionId);
+		stringBuilder.put("<br/>key: test, value: " ~ session.get("test"));
+
+		Response response = this.request.createResponse();
+		response.html(stringBuilder.data);
 		return response;
 	}
-
+	
 	@Action Response getCache()
 	{
-		//auto key = request.get("key");	
-		//auto value = cache.get(key);
-		auto response = this.request.createResponse();
-		//response.html(session.get("test") ~ " key : " ~ key ~ " value : " ~ value);
-		// response.html(session.get("test"));
+		Session session = request.getSession();
+		string sessionValue = session.get("test");
+
+		string key = request.get("key");	
+		string value = cache.get!(string)(key);
+
+		Appender!string stringBuilder;
+		stringBuilder.put("Cache test:<br/>");
+		stringBuilder.put(" key: " ~ key ~ ", value: " ~ value);
+		
+		stringBuilder.put("<br/><br/>Session Test: ");
+		stringBuilder.put("<br/>  SessionId: " ~ session.sessionId);
+		stringBuilder.put("<br/>  key: test, value: " ~ sessionValue);
+
+		Response response = this.request.createResponse();
+		response.html(stringBuilder.data);
+
 		return response;
 	}
 }
