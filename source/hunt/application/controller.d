@@ -45,7 +45,6 @@ abstract class Controller
         Response _response;
     }
 
-
     final @property Response response()
     {
         if (this._response is null)
@@ -154,20 +153,20 @@ private
     }
 }
 
-alias ActionReturnEventHandler = void delegate(Controller sender, string v);
-
 string __createCallActionFun(T, string moduleName)()
 {
     import std.traits;
     import std.format;
     import std.string;
-    import std.experimental.logger;
+    import kiss.logger;
 
-    string str = "bool callAction(string funName, Request req, ActionReturnEventHandler handler = null) {";
-    str ~= "\n\tthis.request = req; bool r = false; string actionResult=null;";
-    version (HuntDebugMode)
-        str ~= `trace("funName=", funName);`;
-    str ~= "\n\tswitch(funName){";
+    string str = `
+        Response callAction(string funName, Request req) {
+        this.request = req; 
+        Response actionResult=null;
+        version (HuntDebugMode) logDebug("funName=", funName);
+        switch(funName){
+    `;
 
     foreach (memberName; __traits(allMembers, T))
     {
@@ -195,18 +194,17 @@ string __createCallActionFun(T, string moduleName)()
                             }
                         }
 
-                        str ~= "if(!this.doMiddleware()){return false;}";
-
                         //before
                         str ~= q{
-                            if(!this.before()){return false;}
+                            if(!this.doMiddleware()){return null;}
+                            if(!this.before()){return null;}
                         };
                     }
 
                     //action
-                    static if (is(ReturnType!t : void))
+                    static if (is(ReturnType!t == void))
                     {
-                        str ~= "this." ~ memberName ~ "();";
+                        str ~= "this." ~ memberName ~ "(); actionResult = req.createResponse();";
                         version (HuntDebugMode) pragma(msg, "no return value for " ~ memberName);
                     }
                     else
@@ -216,29 +214,28 @@ string __createCallActionFun(T, string moduleName)()
                         str ~= ReturnType!t.stringof ~ " result = this." ~ memberName ~ "();";
                         static if (is(ReturnType!t : Response))
                         {
-                            // str ~= "actionResult = result.getContent();";
+                            str ~= "actionResult = result;";
                         }
                         else
-                            str ~= "actionResult = to!string(result);";
+                        {
+                            str ~= q{
+                                actionResult = this.response;
+                                actionResult.setContent(to!string(result));
+                            };
+                        }
                     }
 
-                    str ~= "if(handler !is null)  handler(this, actionResult);";
-                    str ~= "r = true;";
-
-                    // static if(hasUDA!(t, Action) || _isActionMember){
-                    //     //after
-                    //     str ~= q{
-                    //         if(!this.after()){return false;}
-                    //     };
-                    // }
-                    str ~= "}\n break;";
+                    static if(hasUDA!(t, Action) || _isActionMember){
+                        str ~= `if(!this.after()) { return null; }`;
+                    }
+                    str ~= "} break;";
                 }
             }
         }
     }
 
     str ~= "default : break;}";
-    str ~= "return r;";
+    str ~= "return actionResult;";
     str ~= "}";
 
     // pragma(msg, str);
@@ -278,47 +275,34 @@ string __createRouteMap(T, string moduleName)()
     return str;
 }
 
-void callHandler(T, string method)(Request req)
+Response callHandler(T, string method)(Request req)
         if (is(T == class) || is(T == struct) && hasMember!(T, "__CALLACTION__"))
 {
-
-    void onActionDone(Controller sender, string result)
-    {
-        sender.response.setContent(result);
-        sender.response.done();
-    }
-
     T controller = new T();
     import core.memory;
-
     // scope(exit){if(!controller.isAsync){controller.destroy(); GC.free(cast(void *)controller);}}
 
-    //controller.before();		// It's already been called in line 183.
     req.action = method;
-    bool r = controller.callAction(method, req, &onActionDone);
-    if (r)
-        controller.after(); // Although the line 193 also has the code that calls after, but where has not executed, so this reservation
-    // controller.done();
+    Response r = controller.callAction(method, req);
+    // controller.after(); // The line 193 also has the code that calls after, but where has not executed, so this reservation
+    
+    return r;
 }
 
 HandleFunction getRouteFromList(string str)
 {
     if (!_init)
-    {
         _init = true;
-    }
-
     return __routerList.get(str, null);
 }
 
 void addRouteList(string str, HandleFunction method)
 {
     version (HuntDebugMode)
-        trace("add router: ", str);
+        logDebug("add router: ", str);
     if (!_init)
     {
         import std.string : toLower;
-
         __routerList[str.toLower] = method;
     }
 }

@@ -10,7 +10,6 @@
  */
 module app.controller.index;
 import hunt.application;
-import std.experimental.logger;
 import db;
 import app.config;
 import std.random;

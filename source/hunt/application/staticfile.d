@@ -12,7 +12,7 @@ import hunt;
 import hunt.application.controller;
 import hunt.application.config;
 import hunt.utils.string;
-import hunt.http.code;
+
 
 class StaticfileController : Controller
 {
@@ -62,7 +62,7 @@ class StaticfileController : Controller
         if ((request.headerExists(HTTPHeaderCode.IF_MODIFIED_SINCE) && (request.header(HTTPHeaderCode.IF_MODIFIED_SINCE) == lastModified)) ||
             (request.headerExists(HTTPHeaderCode.IF_NONE_MATCH) && (request.header(HTTPHeaderCode.IF_NONE_MATCH) == etag)))
         {
-                response.setHttpStatusCode(HTTPCodes.NOT_MODIFIED);
+                response.setStatus(HttpCodes.NOT_MODIFIED);
 
                 return response;
 		}
@@ -135,7 +135,7 @@ class StaticfileController : Controller
 			
 			response.setHeader(HTTPHeaderCode.CONTENT_LENGTH, to!string(rangeEnd - rangeStart + 1));
 			response.setHeader(HTTPHeaderCode.CONTENT_RANGE, "bytes %s-%s/%s".format(rangeStart < rangeEnd ? rangeStart : rangeEnd, rangeEnd, fi.size));
-			response.setHttpStatusCode(HTTPCodes.PARTIAL_CONTENT);
+			response.setStatus(HttpCodes.PARTIAL_CONTENT);
 		}
 		else
 		{

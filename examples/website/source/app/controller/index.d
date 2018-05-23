@@ -10,7 +10,6 @@
  */
 module app.controller.index;
 import hunt.application;
-import std.experimental.logger;
 
 version (USE_ENTITY) import app.model.index;
 

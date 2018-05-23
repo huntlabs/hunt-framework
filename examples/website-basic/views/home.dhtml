@@ -66,7 +66,7 @@
             <div class="col-lg-12 text-center">
                 <h1 class="mt-5">Hunt demo</h1>
                 <p class="lead">The time now is {{ now }}</p>
-                <ul class="list-unstyled">
+                <ul class="list-unstyled text-left">
                     <li>
                         <a href="/show">show Response</a>
                     </li>
@@ -83,9 +83,14 @@
                         <a href="/showInt">show int</a>
                     </li>
                     <li>
-                        <a href="/showJson">show json</a>
+                        <a href="/showView">test View</a>
                     </li>
-                    <li></li>
+                    <li>
+                        <a href="/testJson1">test json1</a>
+                    </li>
+                    <li>
+                        <a href="/testJson2">test json2</a><br/><br/>
+                    </li>
                     <li>
                         <a href="/set?key=company&value=Putao">set Cache</a>
                     </li>

@@ -19,10 +19,11 @@ import std.traits;
 
 import core.cpuid;
 import std.string;
-import std.experimental.logger;
 
 const SessionIdLenth = 20;
 
+/**
+*/
 class Session
 {
 	private string _sessionId;
@@ -581,8 +582,8 @@ class Session
      */
 	static bool isValidId(string id)
 	{
-		// if(id.length != SessionIdLenth)
-		// 	return false;
+		if(id.length != SessionIdLenth*2)
+			return false;
 		foreach (char c; id)
 		{
 			if (!isAlphaNum(c))

@@ -10,10 +10,9 @@ import collie.codec.http.server.responsebuilder;
 import collie.codec.http.httpmessage;
 import kiss.logger;
 
-import hunt.http.cookie;
-import hunt.http.code;
 import hunt.utils.string;
 import hunt.versions;
+import hunt.http.cookie;
 import hunt.http.response;
 import hunt.http.request;
 import hunt.http.session;
@@ -90,7 +89,7 @@ class RedirectResponse : Response
     {
         foreach (Cookie v; cookies)
         {
-            _headers.add(HTTPHeaderCode.SET_COOKIE, v.output(""));
+            _httpMessage.getHeaders.add(HTTPHeaderCode.SET_COOKIE, v.output(""));
         }
 
         return this;
