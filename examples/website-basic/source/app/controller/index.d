@@ -74,12 +74,14 @@ class IndexController : Controller
 	{
 		logDebug("---show Action----");
 		// dfmt off
-		auto response = this.request.createResponse();
-		response.setHeader(HttpHeaderCode.CONTENT_TYPE, "text/html;charset=utf-8");
-		response.setContent("Show message(No @Action defined): Hello world<br/>")
+		Response response = new Response("Show message(No @Action defined): Hello world<br/>"); 
+		response.setHeader(HttpHeaderCode.CONTENT_TYPE, "text/html;charset=utf-8")
+		// response.setContent("Show message(No @Action defined): Hello world<br/>")
 		.setCookie("name", "value", 10000)
 		.setCookie("name1", "value", 10000, "/path")
-		.setCookie("name2", "value", 10000);
+		.cookie("name2", "value", 10000)
+		.header("X-Header-One", "Header Value")
+		.withHeaders(["X-Header-Two":"Header Value", "X-Header-Tree": "Header Value"]);
 		// dfmt on
 		return response;
 	}

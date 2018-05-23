@@ -194,7 +194,9 @@ void doRequestHandle(HandleFunction handle, Request request)
 		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setHeader("Access-Control-Allow-Methods", "*");
 		response.setHeader("Access-Control-Allow-Headers", "*");
+        if(response.dataHandler is null)
+            response.dataHandler = request.responseHandler;
 
-        collectException(() { response.done(); }());
+        collectException(() { response.done();  response.clear();  }());
     }
 }

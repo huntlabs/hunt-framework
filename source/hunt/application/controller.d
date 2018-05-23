@@ -47,10 +47,9 @@ abstract class Controller
 
     final @property Response response()
     {
-        if (this._response is null)
+        if (_response is null)
             _response = request.createResponse();
-
-        return this._response;
+        return _response;
     }
 
     /// called before action  return true is continue false is finish
@@ -74,9 +73,7 @@ abstract class Controller
         foreach (tmp; this.middlewares)
         {
             if (tmp.name == m.name)
-            {
                 return false;
-            }
         }
 
         this.middlewares ~= m;
@@ -101,11 +98,11 @@ abstract class Controller
 
     protected final bool doMiddleware()
     {
-        logDebug("doMiddlware ..");
+        debug logDebug("doMiddlware ..");
 
         foreach (m; middlewares)
         {
-            logDebugf("do %s onProcess ..", m.name());
+            debug logDebugf("do %s onProcess ..", m.name());
 
             auto response = m.onProcess(this.request, this.response);
             if (response is null)
@@ -113,7 +110,7 @@ abstract class Controller
                 continue;
             }
 
-            logDebugf("Middleware %s is to retrun.", m.name);
+            debug logDebugf("Middleware %s is to retrun.", m.name);
             return false;
         }
 
