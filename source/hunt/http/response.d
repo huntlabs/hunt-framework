@@ -28,9 +28,23 @@ import hunt.versions;
 
 class Response : ResponseBuilder
 {
-    this(ResponseHandler resp)
+     this(string content, int status = HttpCodes.OK, string[string] headers = null )
     {
-        super(resp);
+        this(cast(const(ubyte)[])content, status, headers);
+    }
+
+    this(in ubyte[] content, int status = HttpCodes.OK, string[string] headers = null )
+    {
+        super(null);
+        if(headers !is null)
+            this.withHeaders(headers);
+        setStatus(status);
+        this.setContent(content);
+    }
+
+    this(ResponseHandler handler)
+    {
+        super(handler);
         setStatus(200);
     }
 
@@ -59,7 +73,7 @@ class Response : ResponseBuilder
     }
 
     // ditto
-    Response setContent(ubyte[] content)
+    Response setContent(in ubyte[] content)
     {
         setBody(cast(ubyte[]) content);
 
@@ -88,9 +102,9 @@ class Response : ResponseBuilder
     }
 
     // ///set http status code eg. 404 200
-    Response setStatus(ushort code)
+    Response setStatus(int code)
     {
-        status(code, HttpMessage.statusText(code));
+        status(cast(ushort)code, HttpMessage.statusText(code));
         return this;
     }
 
@@ -141,6 +155,14 @@ class Response : ResponseBuilder
     Response cookie(Cookie cookie)
     {
         setHeader(HTTPHeaderCode.SET_COOKIE, cookie.output(""));
+        return this;
+    }
+
+    /// ditto
+    Response cookie(string name, string value, int expires = 0,
+            string path = "/", string domain = null)
+    {
+        setCookie(name, value, expires, path, domain);
         return this;
     }
 
