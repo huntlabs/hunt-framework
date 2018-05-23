@@ -11,7 +11,6 @@
 
 import std.stdio;
 import std.functional;
-import std.experimental.logger;
 
 /* use hunt framework */
 import hunt;

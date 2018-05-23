@@ -2,7 +2,7 @@
 module app.middleware.auth;
 
 import hunt;
-import std.experimental.logger;
+import kiss.logger;
 
 class AuthMiddleware : Middleware
 {
@@ -19,11 +19,11 @@ class AuthMiddleware : Middleware
         {
             if (response is null)
             {
-                trace("createResponse");
+                logDebug("createResponse");
                 response = request.createResponse();
             }
 
-            trace("setHttpStatusCode to 403");
+            logDebug("setHttpStatusCode to 403");
             response.setHttpError(403);
 
             return response;

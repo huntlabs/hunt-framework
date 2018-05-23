@@ -9,13 +9,15 @@
  *
  */
 module app.controller.index;
+
+import kiss.logger;
 import hunt.application;
+import hunt.http;
 import hunt.view;
 
 import core.time;
 
 import std.array;
-import std.experimental.logger;
 import std.stdio;
 import std.datetime;
 import std.json;
@@ -47,6 +49,7 @@ class IndexController : Controller
 
 	override bool before()
 	{
+		logDebug("---running before----");
 		/**
 		CORS support
 		http://www.cnblogs.com/feihong84/p/5678895.html
@@ -67,39 +70,27 @@ class IndexController : Controller
 		return true;
 	}
 
+	override bool after()
+	{
+		logDebug("---running after----");
+		return true;
+	}
+
 	@Action string index()
 	{
-		Appender!string stringBuilder;
-		stringBuilder.put("Hello world!<br/>");
-		stringBuilder.put("The time now is " ~ Clock.currTime.toString());
-		stringBuilder.put("<br/>");
-		stringBuilder.put("Test links:<br/>");
-		stringBuilder.put(`<a href="/show">show Response</a><br/>`);
-		stringBuilder.put(`<a href="/showvoid">show void</a><br/>`);
-		stringBuilder.put(`<a href="/showString">show string</a><br/>`);
-		stringBuilder.put(`<a href="/showBool">show bool</a><br/>`);
-		stringBuilder.put(`<a href="/showInt">show int</a><br/>`);
-		stringBuilder.put(`<a href="/showJson">show json</a><br/><br/>`);
-		stringBuilder.put(`<a href="/set?key=company&value=Putao">set Cache</a><br/>`);
-		stringBuilder.put(`<a href="/get?key=company">get Cache (Use Postman with cookie set)</a><br/>`);
-
-		// this.response.html(stringBuilder.data);
-
 		JSONValue data;
 		data["title"] = "Hunt demo";
 		data["now"] = Clock.currTime.toString();
-
-		string r = Env().render_file("home.dhtml", data);
-
-		return r;
+		return Env().render_file("home.dhtml", data);
 	}
 
 	Response showAction()
 	{
-		trace("---show Action----");
+		logDebug("---show Action----");
 		// dfmt off
 		auto response = this.request.createResponse();
-		response.html("Show message(No @Action defined): Hello world<br/>")
+		response.setHeader(HttpHeaderCode.CONTENT_TYPE, "text/html;charset=utf-8");
+		response.setContent("Show message(No @Action defined): Hello world<br/>")
 		.setCookie("name", "value", 10000)
 		.setCookie("name1", "value", 10000, "/path")
 		.setCookie("name2", "value", 10000);
@@ -109,9 +100,10 @@ class IndexController : Controller
 
 	Response test_action()
 	{
-		trace("---test_action----");
+		logDebug("---test_action----");
 		// dfmt off
-		response.html("Show message: Hello world<br/>")
+		response.setContent("Show message: Hello world<br/>")
+		.setHeader(HttpHeaderCode.CONTENT_TYPE, "text/html;charset=utf-8")
 		.setCookie("name", "value", 10000)
 		.setCookie("name1", "value", 10000, "/path")
 		.setCookie("name2", "value", 10000);
@@ -122,33 +114,46 @@ class IndexController : Controller
 
 	@Action void showVoid()
 	{
-		trace("---show void----");
+		logDebug("---show void----");
 	}
 
 	@Action string showString()
 	{
-		trace("---show string----");
+		logDebug("---show string----");
 		return "Hello world.";
 	}
 
 	@Action bool showBool()
 	{
-		trace("---show bool----");
+		logDebug("---show bool----");
 		return true;
 	}
 
 	@Action int showInt()
 	{
-		trace("---show bool----");
+		logDebug("---show bool----");
 		return 2018;
 	}
 
-	@Action JSONValue showJson()
+	@Action JSONValue testJson1()
 	{
-		trace("---show Json----");
+		logDebug("---test Json1----");
 		JSONValue js;
 		js["message"] = "Hello world.";
 		return js;
+	}
+
+	@Action JsonResponse testJson2()
+	{
+		logDebug("---test Json2----");
+		JSONValue company;
+		company["name"] = "Putao";
+		company["city"] = "Shanghai";
+
+		JsonResponse res = new JsonResponse(this.request.responseHandler);
+		res.json(company);
+
+		return res;
 	}
 
 	@Action string showView()
@@ -165,9 +170,7 @@ class IndexController : Controller
 		data["users"] = ["name" : "jeck", "age" : "18"];
 		data["nums"] = [3, 5, 2, 1];
 
-		string r = Env().render_file("index.txt", data);
-
-		return r;
+		return Env().render_file("index.txt", data);
 	}
 
 	@Action Response setCache()
@@ -188,7 +191,8 @@ class IndexController : Controller
 		stringBuilder.put("<br/>key: test, value: " ~ session.get("test"));
 
 		Response response = this.request.createResponse();
-		response.html(stringBuilder.data);
+		response.setHeader(HttpHeaderCode.CONTENT_TYPE, "text/html;charset=utf-8");
+		response.setContent(stringBuilder.data);
 		return response;
 	}
 	
@@ -209,7 +213,7 @@ class IndexController : Controller
 		stringBuilder.put("<br/>  key: test, value: " ~ sessionValue);
 
 		Response response = this.request.createResponse();
-		response.html(stringBuilder.data);
+		response.setContent(stringBuilder.data).setHeader(HttpHeaderCode.CONTENT_TYPE, "text/html;charset=utf-8");
 
 		return response;
 	}

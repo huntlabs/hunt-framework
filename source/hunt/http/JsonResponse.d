@@ -10,7 +10,6 @@ import collie.codec.http.server.responsebuilder;
 import collie.codec.http.httpmessage;
 import kiss.logger;
 import hunt.http.cookie;
-import hunt.http.code;
 import hunt.utils.string;
 import hunt.versions;
 import hunt.http.response;
@@ -27,9 +26,11 @@ import hunt.http.response;
  */
 class JsonResponse : Response
 {
-    this(ResponseHandler resp)
+    this(ResponseHandler handler)
     {
-        super(resp);
+        super(handler);
+
+        setHeader(HTTPHeaderCode.CONTENT_TYPE, "application/json;charset=utf-8");
     }
 
     /**
@@ -39,29 +40,20 @@ class JsonResponse : Response
      */
     JSONValue getData()
     {
-        return parseJSON(cast(string)originalContent);
+        return parseJSON(getContent());
     }
 
-    /**
-     * Sets the data to be sent as JSON.
-     *
-     * @return $this
-     */
-    JsonResponse setData(string data)
-    {
-        return setJson(data);
-    }
 
     /**
      * Sets a raw string containing a JSON document to be sent.
      *
      * @param string data
      *
-     * @return $this
+     * @return this
      */
-    JsonResponse setJson(string data)
+    JsonResponse json(JSONValue data)
     {
-        this.json(data);
+        this.setContent(data.toString());
         return this;
     }
 

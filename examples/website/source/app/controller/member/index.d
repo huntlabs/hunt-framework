@@ -1,6 +1,5 @@
 module app.controller.member.index;
 import hunt.application;
-import std.experimental.logger;
 
 class IndexController : Controller
 {

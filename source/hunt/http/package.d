@@ -14,6 +14,7 @@ module hunt.http;
 public import hunt.http.exception;
 public import hunt.http.request;
 public import hunt.http.response;
+public import hunt.http.JsonResponse;
 public import hunt.http.cookie;
 public import hunt.http.session;
 public import collie.codec.http;

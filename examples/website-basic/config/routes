@@ -10,7 +10,8 @@
 *		/showString					index.showString
 *		/showBool					index.showBool
 *		/showInt					index.showInt
-*		/showJson					index.showJson
+*		/testJson1					index.testJson1
+*		/testJson2					index.testJson2
 GET		/showView					index.showView
 GET		/get						index.getCache
 GET		/set						index.setCache
