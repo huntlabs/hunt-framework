@@ -11,6 +11,7 @@
  
 module hunt.http;
 
+public import hunt.http.core;
 public import hunt.http.exception;
 public import hunt.http.request;
 public import hunt.http.response;
