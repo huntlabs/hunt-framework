@@ -50,23 +50,9 @@ class IndexController : Controller
 	override bool before()
 	{
 		logDebug("---running before----");
-		/**
-		CORS support
-		http://www.cnblogs.com/feihong84/p/5678895.html
-		https://stackoverflow.com/questions/10093053/add-header-in-ajax-request-with-jquery
-		*/
 
-		// FIXME: Needing refactor or cleanup -@zxp at 5/10/2018, 11:33:11 AM
-		// set this through the configuration
-		response.setHeader("Access-Control-Allow-Origin", "*");
-		response.setHeader("Access-Control-Allow-Methods", "*");
-		response.setHeader("Access-Control-Allow-Headers", "*");
-
-		if (cmp(toUpper(request.method), "OPTIONS") == 0)
-		{
+		if (cmp(toUpper(request.method), HttpMethod.Options) == 0)
 			return false;
-		}
-
 		return true;
 	}
 

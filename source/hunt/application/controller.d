@@ -280,13 +280,10 @@ Response callHandler(T, string method)(Request req)
 {
     T controller = new T();
     import core.memory;
-    // scope(exit){if(!controller.isAsync){controller.destroy(); GC.free(cast(void *)controller);}}
+    scope(exit){if(!controller.isAsync){controller.destroy(); GC.free(cast(void *)controller);}}
 
     req.action = method;
-    Response r = controller.callAction(method, req);
-    // controller.after(); // The line 193 also has the code that calls after, but where has not executed, so this reservation
-    
-    return r;
+    return controller.callAction(method, req);
 }
 
 HandleFunction getRouteFromList(string str)

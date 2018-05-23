@@ -160,6 +160,8 @@ void doRequestHandle(HandleFunction handle, Request request)
     try
     {
         response = handle(request);
+        if(response is null)
+            response = request.createResponse;
     }
     catch (CreateResponseException e)
     {
@@ -184,6 +186,15 @@ void doRequestHandle(HandleFunction handle, Request request)
 
     if (response !is null)
     {
+        /**
+		CORS support
+		http://www.cnblogs.com/feihong84/p/5678895.html
+		https://stackoverflow.com/questions/10093053/add-header-in-ajax-request-with-jquery
+		*/
+		response.setHeader("Access-Control-Allow-Origin", "*");
+		response.setHeader("Access-Control-Allow-Methods", "*");
+		response.setHeader("Access-Control-Allow-Headers", "*");
+
         collectException(() { response.done(); }());
     }
 }
