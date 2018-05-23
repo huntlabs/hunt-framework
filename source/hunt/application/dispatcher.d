@@ -47,17 +47,19 @@ class Dispatcher
             {
                 Route route;
 
-                string cacheKey = request.header(HTTPHeaderCode.HOST) ~ "_" ~ request.method ~ "_" ~ request.path;
+                string cacheKey = request.header(
+                        HTTPHeaderCode.HOST) ~ "_" ~ request.method ~ "_" ~ request.path;
                 route = this._cached.get(cacheKey, null);
 
                 if (route is null)
                 {
-                    route = this._router.match(request.header(HTTPHeaderCode.HOST), request.method, request.path);
+                    route = this._router.match(request.header(HTTPHeaderCode.HOST),
+                            request.method, request.path);
 
                     if (route is null)
                     {
                         request.createResponse().do404();
-                        
+
                         return;
                     }
 
@@ -76,55 +78,52 @@ class Dispatcher
 
                 request.route = route;
 
-
                 // hunt.security filter
-				request.user = authenticateUser(request);
+                request.user = authenticateUser(request);
 
-				if (!accessFilter(request))
-				{
-					request.createResponse().do403("no permiss to access: " ~ request.route.getController() ~ "." ~ request.route.getAction() );
-					return;
-				}
+                if (!accessFilter(request))
+                {
+                    request.createResponse()
+                        .do403("no permiss to access: " ~ request.route.getController() ~ "." ~ request.route.getAction());
+                    return;
+                }
 
                 // add handle task to taskPool
                 this._taskPool.put(task!doRequestHandle(route.handle, request));
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 showException(e);
             }
         }
 
-		bool accessFilter(Request request)
-		{
-			Identity identity =  Application.getInstance().getAccessManager().getIdentity(request.route.getGroup());
-			if (identity is null || request.route.getController().length == 0)
-				return true;
+        bool accessFilter(Request request)
+        {
+            Identity identity = Application.getInstance().getAccessManager()
+                .getIdentity(request.route.getGroup());
+            if (identity is null || request.route.getController().length == 0)
+                return true;
 
+            return request.user.can(request.route.getController() ~ "." ~ request.route.getAction());
+        }
 
-			return request.user.can(request.route.getController() ~ "." ~ request.route.getAction());
-		}
+        User authenticateUser(Request request)
+        {
+            User user;
+            Identity identity = Application.getInstance().getAccessManager()
+                .getIdentity(request.route.getGroup());
+            if (identity !is null)
+            {
+                user = identity.login(request);
+            }
 
-		User authenticateUser(Request request)
-		{
-			User user;
-			Identity identity = Application.getInstance().getAccessManager().getIdentity(request.route.getGroup());
-			if (identity !is null)
-			{
-				user = identity.login(request);
-			}
+            if (user is null)
+            {
+                return User.defaultUser;
+            }
 
-
-			
-			if (user is null)
-			{
-				return User.defaultUser;
-			}
-			
-			return user;
-		}
-
-    
+            return user;
+        }
 
         void addRouteGroup(string group, string method, string value)
         {
@@ -157,9 +156,10 @@ class Dispatcher
 
 void doRequestHandle(HandleFunction handle, Request request)
 {
+    Response response;
     try
     {
-        handle(request);
+        response = handle(request);
     }
     catch (CreateResponseException e)
     {
@@ -168,29 +168,22 @@ void doRequestHandle(HandleFunction handle, Request request)
     catch (Exception e)
     {
         showException(e);
-        
-        Response response;
-
-        collectException(request.createResponse, response);
-        
-        if(response)
-        {
-            collectException((){
-                    response.setHttpStatusCode(502);
-                    response.setContent(e.toString());
-                    response.connectionClose();
-                    response.done();
-                }());
-        }
+        response = request.createResponse;
+        response.setStatus(502);
+        response.setContent(e.toString());
+        response.connectionClose();
     }
     catch (Error e)
     {
         import std.stdio : writeln;
-
-        collectException({logError(e.toString); writeln(e.toString());}());
-
         import core.stdc.stdlib : exit;
 
+        collectException({ logError(e.toString); writeln(e.toString()); }());
         exit(-1);
+    }
+
+    if (response !is null)
+    {
+        collectException(() { response.done(); }());
     }
 }

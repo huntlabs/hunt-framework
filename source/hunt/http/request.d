@@ -40,7 +40,7 @@ import std.digest.sha;
 import std.regex;
 import std.string;
 
-alias CreatorBuffer = Buffer delegate(HTTPMessage) nothrow;
+alias CreatorBuffer = Buffer delegate(HttpMessage) nothrow;
 alias DoHandler = void delegate(Request) nothrow;
 
 alias RequestEventHandler = void delegate(Request sender);
@@ -74,7 +74,7 @@ final class Request : RequestHandler
 		return _form;
 	}
 
-	@property HTTPMessage Header()
+	@property HttpMessage Header()
 	{
 		return _httpMessage;
 	}
@@ -1504,7 +1504,7 @@ protected:
 		}());
 	}
 
-	override void onResquest(HTTPMessage message) nothrow
+	override void onResquest(HttpMessage message) nothrow
 	{
 		_httpMessage = message;
 		collectException({ this._httpHeaders = message.getHeaders(); }());
@@ -1526,18 +1526,17 @@ protected:
 			}
 			if (_error == HTTPErrorCode.TIME_OUT)
 			{
-				_res.setHttpStatusCode(408);
+				_res.setStatus(408);
 			}
 			else if (_error == HTTPErrorCode.FRAME_SIZE_ERROR)
 			{
-				_res.setHttpStatusCode(429);
+				_res.setStatus(429);
 			}
 			else
 			{
-				_res.setHttpStatusCode(502);
+				_res.setStatus(502);
 			}
 			_res.done();
-			//_res.clear();
 		}());
 	}
 
@@ -1549,7 +1548,7 @@ private:
 	Buffer _body;
 	JSONValue _json;
 	ubyte[] _uBody;
-	HTTPMessage _httpMessage;
+	HttpMessage _httpMessage;
 	HTTPForm _form;
 	Response _res;
 	HTTPErrorCode _error = HTTPErrorCode.NO_ERROR;
