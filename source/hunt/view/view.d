@@ -23,7 +23,7 @@ class View
 
     this()
     {
-        return new Environment(_templatePath);
+        _env = new Environment(_templatePath);
     }
 
     public View setTemplatePath(string path)
