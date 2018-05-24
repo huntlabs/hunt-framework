@@ -26,11 +26,22 @@ import hunt.http.response;
  */
 class JsonResponse : Response
 {
-    this(ResponseHandler handler)
+    this(string contentType = "application/json;charset=utf-8")
     {
-        super(handler);
+        super();
+        setHeader(HTTPHeaderCode.CONTENT_TYPE, contentType);
+    }
 
-        setHeader(HTTPHeaderCode.CONTENT_TYPE, "application/json;charset=utf-8");
+    this(JSONValue data, string contentType = "application/json;charset=utf-8")
+    {
+        this(data.toString(), contentType);
+    }
+
+    this(string data, string contentType = "application/json;charset=utf-8")
+    {
+        super();
+        setHeader(HTTPHeaderCode.CONTENT_TYPE, contentType);
+        setContent(data);
     }
 
     /**
@@ -42,7 +53,6 @@ class JsonResponse : Response
     {
         return parseJSON(getContent());
     }
-
 
     /**
      * Sets a raw string containing a JSON document to be sent.
