@@ -83,7 +83,7 @@
                         <a href="/showInt">show int</a>
                     </li>
                     <li>
-                        <a href="/showView">test View</a>
+                        <a href="/testView">test View</a>
                     </li>
                     <li>
                         <a href="/testJson1">test json1</a>
@@ -91,6 +91,12 @@
                     <li>
                         <a href="/testJson2">test json2</a><br/><br/>
                     </li>
+                    <li>
+                        <a href="/redirect1">test redirect1</a>
+                    </li>
+                    <!-- <li>
+                        <a href="/redirect2">test redirect2</a><br/><br/>
+                    </li> -->
                     <li>
                         <a href="/set?key=company&value=Putao">set Cache</a>
                     </li>

@@ -178,6 +178,7 @@ class Response : ResponseBuilder
         return this;
     }
 
+
     pragma(inline) final void done()
     {
         if (_isDone)
@@ -188,17 +189,18 @@ class Response : ResponseBuilder
         sendWithEOM();
     }
 
-    void redirect(string url, bool is301 = false)
-    {
-        if (_isDone)
-            return;
+    // void redirect(string url, bool is301 = false)
+    // {
+    //     if (_isDone)
+    //         return;
 
-        setStatus((is301 ? 301 : 302));
-        setHeader(HTTPHeaderCode.LOCATION, url);
+    //     setStatus((is301 ? 301 : 302));
+    //     setHeader(HTTPHeaderCode.LOCATION, url);
 
-        connectionClose();
-        done();
-    }
+    //     connectionClose();
+    //     done();
+    // }
+
 
     void do404(string body_ = "", string contentype = "text/html;charset=UTF-8")
     {
