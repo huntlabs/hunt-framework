@@ -18,6 +18,7 @@ import hunt.routing.config;
 
 import hunt.application.controller;
 
+import std.string : toUpper;
 import std.file;
 import std.path;
 import std.array;
@@ -320,13 +321,8 @@ class Router
         {
 			logDebug(methods,path,mca,group);
             auto route = new Route();
-
-            import std.string : toUpper;
-
             methods = toUpper(methods);
-
             path = this.mendPath(path);
-
 			route.path = path;
 
             route.setGroup(group);
