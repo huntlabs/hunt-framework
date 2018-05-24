@@ -1,4 +1,4 @@
-module hunt.http.BinaryFileResponse;
+module hunt.http.DownloadResponse;
 
 import std.array;
 import std.conv;
@@ -21,22 +21,24 @@ import hunt.versions;
 import hunt.http.response;
 
 /**
- * BinaryFileResponse represents an HTTP response delivering a file.
+ * DownloadResponse represents an HTTP response delivering a file.
  */
-class BinaryFileResponse : Response
+class DownloadResponse : Response
 {
     private string fileName;
 
     this(string fileName, string contentType = OctetStreamContentType)
     {
         super();
+        
         setHeader(HTTPHeaderCode.CONTENT_TYPE, contentType);
         this.fileName = fileName;
     }
 
-    BinaryFileResponse loadData()
+    DownloadResponse loadData()
     {
         string fullName = buildPath(APP_PATH, Config.app.download.path, fileName);
+
         logDebug("downloading file: ", fullName);
         if(exists(fullName) && !isDir(fullName))
         {
@@ -54,17 +56,16 @@ class BinaryFileResponse : Response
         }
         else
             throw new Exception("File does not exist: " ~ fileName);
+
         return this;
     }
 
 
-    BinaryFileResponse setData(in ubyte[] data)
+    DownloadResponse setData(in ubyte[] data)
     {
-        setHeader(HTTPHeaderCode.CONTENT_DISPOSITION,
-                "attachment; filename=" ~ baseName(fileName) ~ "; size=" ~ (to!string(data.length)));
+        setHeader(HTTPHeaderCode.CONTENT_DISPOSITION, "attachment; filename=" ~ baseName(fileName) ~ "; size=" ~ (to!string(data.length)));
+
         setContent(data);
         return this;
     }
-
-
 }

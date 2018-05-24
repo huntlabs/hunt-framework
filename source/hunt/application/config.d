@@ -297,7 +297,7 @@ private:
     this()
     {
         http.workerThreads = totalCPUs;
-        download.path = DEFAULT_Download_Path;
+        download.path = DEFAULT_ATTACHMENT_PATH;
     }
 }
 
