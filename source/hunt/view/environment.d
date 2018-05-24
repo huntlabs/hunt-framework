@@ -16,13 +16,16 @@ import hunt.view.ast;
 
 class Environment
 {
-    string input_path;
-    string output_path;
+    private
+    {
+        string input_path;
+        string output_path;
 
-    Parser _parser;
-    Render _render;
+        Parser _parser;
+        Render _render;
+    }
 
-private:
+public:
     this()
     {
         auto tpl_path = Config.app.config.templates.path.value;
@@ -49,7 +52,6 @@ private:
         _render = new Render();
     }
 
-public:
     void setTemplatePath(string path)
     {
         this.input_path = buildNormalizedPath(path) ~ dirSeparator;
