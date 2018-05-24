@@ -20,14 +20,7 @@ import hunt.view;
 
 
 /**
- * Response represents an HTTP response in JSON format.
- *
- * Note that this class does not force the returned JSON content to be an
- * object. It is however recommended that you do return an object as it
- * protects yourself against XSSI and JSON-JavaScript Hijacking.
- *
- * @see https://www.owasp.org/index.php/OWASP_AJAX_Security_Guidelines#Always_return_JSON_with_an_Object_on_the_outside
- *
+ * Response represents an HTTP response in Html format.
  */
 class ViewResponse : Response
 {

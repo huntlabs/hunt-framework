@@ -42,17 +42,17 @@ final class AppConfig
 
     struct SessionConf
     {
-		string storage = "memory";
+        string storage = "memory";
         string prefix = "huntsession_";
-		string args = "/tmp";
+        string args = "/tmp";
         uint expire = 3600;
     }
 
     struct CacheConf
     {
-		string storage = "memory";
-		string args = "/tmp";
-		bool   enableL2 = false;	
+        string storage = "memory";
+        string args = "/tmp";
+        bool enableL2 = false;
     }
 
     struct HttpConf
@@ -86,9 +86,9 @@ final class AppConfig
         string level = "all";
         string path;
         string file = "";
-		bool   disableConsole = false;
-		string maxSize = "8M";
-		uint   maxNum = 8;
+        bool disableConsole = false;
+        string maxSize = "8M";
+        uint maxNum = 8;
     }
 
     struct MemcacheConf
@@ -113,6 +113,11 @@ final class AppConfig
         uint maxSize = 4 * 1024 * 1024;
     }
 
+    struct DownloadConfig
+    {
+        string path = "downloads";
+    }
+
     struct MailSmtpConf
     {
         string host;
@@ -122,7 +127,7 @@ final class AppConfig
         string user;
         string password;
     }
-    
+
     struct MailConf
     {
         MailSmtpConf smtp;
@@ -152,14 +157,16 @@ final class AppConfig
         string noon;
     }
 
-    struct ServiceConf {
+    struct ServiceConf
+    {
         string address = "127.0.0.1";
         ushort port;
         int workerThreads;
         string password;
     }
 
-    struct RpcConf {
+    struct RpcConf
+    {
         bool enabled = true;
         ServiceConf service;
     }
@@ -180,20 +187,25 @@ final class AppConfig
     RedisConf redis;
     LogConfig log;
     UploadConf upload;
+    DownloadConfig download;
     CornConf cron;
     DateConf date;
     MailConf mail;
     RpcConf rpc;
     Templates templates;
-    
-    @property Configuration config(){return _config;}
+
+    @property Configuration config()
+    {
+        return _config;
+    }
 
     static AppConfig parseAppConfig(Configuration conf)
     {
         AppConfig app = new AppConfig();
 
         app._config = conf;
-        
+
+        // dfmt off
         collectException(conf.application.name.value,    app.application.name);
         collectException(conf.application.baseUrl.value,    app.application.baseUrl);
         collectException(conf.application.defaultCookieDomain.value,    app.application.defaultCookieDomain);
@@ -248,6 +260,8 @@ final class AppConfig
         collectException(conf.upload.path.value(), app.upload.path);
         collectException(conf.upload.maxSize.as!uint(), app.upload.maxSize);
 
+        collectException(conf.download.path.value(), app.download.path);
+
         collectException(conf.cron.noon.value(), app.cron.noon);
 
         collectException(conf.date.format.value(), app.date.format);
@@ -273,6 +287,7 @@ final class AppConfig
 
         collectException(conf.templates.path.value(), app.templates.path);
 
+        // dfmt on
         return app;
     }
 
@@ -282,6 +297,7 @@ private:
     this()
     {
         http.workerThreads = totalCPUs;
+        download.path = DEFAULT_Download_Path;
     }
 }
 
@@ -299,7 +315,7 @@ class ConfigManager
 {
     @property AppConfig app()
     {
-        if(!_app)
+        if (!_app)
         {
             setAppSection("");
         }
@@ -314,10 +330,10 @@ class ConfigManager
 
     void setConfigPath(string path)
     {
-        if(path.empty)
+        if (path.empty)
             return;
 
-        if(path[$-1] == '/')
+        if (path[$ - 1] == '/')
             this._path = path;
         else
             this._path = path ~ "/";
@@ -326,7 +342,7 @@ class ConfigManager
     void setAppSection(string sec, string fileName = "application.conf")
     {
         string fullName = buildPath(path, fileName);
-        if(exists(fullName))
+        if (exists(fullName))
         {
             logDebugf("using config file: %s", fullName);
             auto con = new Configuration(fullName, sec);
@@ -342,10 +358,11 @@ class ConfigManager
     Configuration config(string key)
     {
         import std.format;
+
         Configuration v = null;
-        synchronized(_mutex.reader)
+        synchronized (_mutex.reader)
         {
-            v =  _conf.get(key, null);
+            v = _conf.get(key, null);
         }
 
         enforce!ConfigNotFoundException(v, format(" %s is not in config! ", key));
@@ -356,7 +373,8 @@ class ConfigManager
     void addConfig(string key, Configuration conf)
     {
         _mutex.writer.lock();
-        scope(exit)_mutex.writer.unlock();
+        scope (exit)
+            _mutex.writer.unlock();
         _conf[key] = conf;
     }
 
@@ -364,18 +382,21 @@ class ConfigManager
     {
         return config(s);
     }
-    
+
 private:
     this()
     {
         _mutex = new ReadWriteMutex();
         _path = DEFAULT_CONFIG_PATH;
     }
-    
-    ~this(){_mutex.destroy;}
+
+    ~this()
+    {
+        _mutex.destroy;
+    }
 
     AppConfig _app;
-    
+
     Configuration[string] _conf;
 
     string _path;

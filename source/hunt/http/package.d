@@ -15,6 +15,7 @@ public import hunt.http.core;
 public import hunt.http.exception;
 public import hunt.http.request;
 public import hunt.http.response;
+public import hunt.http.BinaryFileResponse;
 public import hunt.http.JsonResponse;
 public import hunt.http.RedirectResponse;
 public import hunt.http.ViewResponse;
