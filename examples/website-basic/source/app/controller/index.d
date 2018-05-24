@@ -62,12 +62,13 @@ class IndexController : Controller
 		return true;
 	}
 
-	@Action string index()
+	@Action ViewResponse index()
 	{
-		JSONValue data;
-		data["title"] = "Hunt demo";
-		data["now"] = Clock.currTime.toString();
-		return Env().render_file("home.dhtml", data);
+		JSONValue model;
+		model["title"] = "Hunt demo";
+		model["now"] = Clock.currTime.toString();
+		// return Env().render_file("home.dhtml", model);
+		return new ViewResponse("home", model);
 	}
 
 	Response showAction()
@@ -142,7 +143,7 @@ class IndexController : Controller
 		return res;
 	}
 
-	@Action string showView()
+	@Action ViewResponse showView()
 	{
 		JSONValue data;
 		data["name"] = "Cree";
@@ -156,7 +157,8 @@ class IndexController : Controller
 		data["users"] = ["name" : "jeck", "age" : "18"];
 		data["nums"] = [3, 5, 2, 1];
 
-		return Env().render_file("index.txt", data);
+		// return Env().render_file("index.txt", data);
+		return new ViewResponse("index.txt", data);
 	}
 
 	@Action Response setCache()
@@ -164,9 +166,9 @@ class IndexController : Controller
 		Session session = request.session();
 		session.set("test", "current value");
 
-		string key = request.get("key");	
-		string value = request.get("value");	
-		cache.put(key,value);
+		string key = request.get("key");
+		string value = request.get("value");
+		cache.put(key, value);
 
 		Appender!string stringBuilder;
 
@@ -181,25 +183,26 @@ class IndexController : Controller
 		response.setContent(stringBuilder.data);
 		return response;
 	}
-	
+
 	@Action Response getCache()
 	{
 		Session session = request.session();
 		string sessionValue = session.get("test");
 
-		string key = request.get("key");	
+		string key = request.get("key");
 		string value = cache.get!(string)(key);
 
 		Appender!string stringBuilder;
 		stringBuilder.put("Cache test:<br/>");
 		stringBuilder.put(" key: " ~ key ~ ", value: " ~ value);
-		
+
 		stringBuilder.put("<br/><br/>Session Test: ");
 		stringBuilder.put("<br/>  SessionId: " ~ session.sessionId);
 		stringBuilder.put("<br/>  key: test, value: " ~ sessionValue);
 
 		Response response = this.request.createResponse();
-		response.setContent(stringBuilder.data).setHeader(HttpHeaderCode.CONTENT_TYPE, "text/html;charset=utf-8");
+		response.setContent(stringBuilder.data)
+			.setHeader(HttpHeaderCode.CONTENT_TYPE, "text/html;charset=utf-8");
 
 		return response;
 	}
