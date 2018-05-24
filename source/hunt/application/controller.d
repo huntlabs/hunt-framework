@@ -20,16 +20,19 @@ public import hunt.application.middleware;
 
 import huntlabs.cache;
 import hunt.application.application;
+import hunt.view;
 
 import std.exception;
 import std.traits;
 
 enum Action;
 
+/*
 struct Middleware
 {
     string className;
 }
+*/
 
 abstract class Controller
 {
@@ -39,6 +42,11 @@ abstract class Controller
         Response _response;
         ///called before all actions
         MiddlewareInterface[] middlewares;
+    }
+
+    @property View view()
+    {
+        return GetViewInstance();
     }
 
     final @property Response response()
@@ -92,7 +100,7 @@ abstract class Controller
         return Application.getInstance().getCacheManger();
     }
 
-    protected final bool doMiddleware()
+    protected final Response doMiddleware()
     {
         debug logDebug("doMiddlware ..");
 
@@ -107,10 +115,10 @@ abstract class Controller
             }
 
             debug logDebugf("Middleware %s is to retrun.", m.name);
-            return false;
+            return response;
         }
 
-        return true;
+        return null;
     }
 
     @property bool isAsync()
@@ -177,6 +185,7 @@ string __createCallActionFun(T, string moduleName)()
 
                     static if (hasUDA!(t, Action) || _isActionMember)
                     {
+                        /*
                         // middleware
                         enum middlewares = getUDAs!(t, Middleware);
                         static if (middlewares.length)
@@ -186,11 +195,18 @@ string __createCallActionFun(T, string moduleName)()
                                 str ~= format("this.addMiddleware(new %s);", middleware.className);
                             }
                         }
+                        */
 
                         //before
                         str ~= q{
-                            if(!this.doMiddleware()){return null;}
-                            if(!this.before()){return null;}
+                            if(this.getMiddlewares().length){
+                                auto response = this.doMiddleware();
+                                if (response !is null)
+                                {
+                                    return response;
+                                }
+                            }
+                            this.before();
                         };
                     }
 
