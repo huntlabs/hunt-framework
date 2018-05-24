@@ -92,6 +92,10 @@
                         <a href="/testJson2">test json2</a><br/><br/>
                     </li>
                     <li>
+                        <a href="/download?file=putao.png">download file</a><br/><br/>
+                    </li> 
+
+                    <li>
                         <a href="/redirect1">test redirect1</a>
                     </li>
                     <!-- <li>
