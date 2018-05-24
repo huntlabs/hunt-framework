@@ -39,6 +39,8 @@ class IpFilterMiddleware : MiddlewareInterface
 	}
 }
 
+/**
+*/
 class IndexController : Controller
 {
 	mixin MakeController;
@@ -159,6 +161,20 @@ class IndexController : Controller
 
 		// return Env().render_file("index.txt", data);
 		return new ViewResponse("index.txt", data);
+	}
+
+	@Action RedirectResponse testRedirect1()
+	{
+		RedirectResponse r = new RedirectResponse("https://www.putao.com/");
+		return r;
+	}
+
+	@Action RedirectResponse testRedirect2()
+	{
+		// TODO: Tasks pending completion -@zxp at 5/24/2018, 3:09:41 PM
+		// 
+		RedirectResponse r = new RedirectResponse("https://www.putao.com/");
+		return r;
 	}
 
 	@Action Response setCache()

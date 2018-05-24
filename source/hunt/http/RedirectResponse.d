@@ -27,9 +27,13 @@ class RedirectResponse : Response
     protected Request _request;
     protected Session _session;
 
-    this(ResponseHandler resp)
+    this(string targetUrl, bool use301 = true)
     {
-        super(resp);
+        super();
+
+        setStatus((use301 ? 301 : 302));
+        setHeader(HTTPHeaderCode.LOCATION, targetUrl);
+        connectionClose();
     }
 
     /// the request instance
@@ -107,7 +111,6 @@ class RedirectResponse : Response
 
         return this;
     }
-
 
     /**
      * Remove all uploaded files form the given input array.
