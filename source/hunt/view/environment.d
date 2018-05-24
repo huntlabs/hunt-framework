@@ -50,7 +50,7 @@ private:
     }
 
 public:
-    void setTempaltePath(string path)
+    void setTemplatePath(string path)
     {
         this.input_path = buildNormalizedPath(path) ~ dirSeparator;
     }
