@@ -26,18 +26,18 @@ import hunt.http.response;
  */
 class JsonResponse : Response
 {
-    this(string contentType = "application/json;charset=utf-8")
+    this(string contentType = JsonContentType)
     {
         super();
         setHeader(HTTPHeaderCode.CONTENT_TYPE, contentType);
     }
 
-    this(JSONValue data, string contentType = "application/json;charset=utf-8")
+    this(JSONValue data, string contentType = JsonContentType)
     {
         this(data.toString(), contentType);
     }
 
-    this(string data, string contentType = "application/json;charset=utf-8")
+    this(string data, string contentType = JsonContentType)
     {
         super();
         setHeader(HTTPHeaderCode.CONTENT_TYPE, contentType);

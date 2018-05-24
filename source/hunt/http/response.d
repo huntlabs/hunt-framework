@@ -26,11 +26,19 @@ import hunt.http.cookie;
 import hunt.utils.string;
 import hunt.versions;
 
+enum PlainContentType = "text/plain;charset=utf-8";
+enum HtmlContentType = "text/html;charset=utf-8";
+enum JsonContentType = "application/json;charset=utf-8";
+
+
+/**
+*/
 class Response : ResponseBuilder
 {
-    this()
+    this() // string contentType = HtmlContentType
     {
         super();
+        // setHeader(HTTPHeaderCode.CONTENT_TYPE, contentType);
     }
 
     this(string content, int status = HttpStatusCodes.OK, string[string] headers = null )
