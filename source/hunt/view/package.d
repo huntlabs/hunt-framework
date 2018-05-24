@@ -10,3 +10,4 @@ public import hunt.view.parser;
 public import hunt.view.render;
 public import hunt.view.rule;
 public import hunt.view.util;
+public import hunt.view.view;

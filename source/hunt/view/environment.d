@@ -50,6 +50,11 @@ private:
     }
 
 public:
+    void setTempaltePath(string path)
+    {
+        this.input_path = buildNormalizedPath(path) ~ dirSeparator;
+    }
+
     void set_statement(string open, string close)
     {
         regex_map_delimiters[Delimiter.Statement] = open ~ "\\s*(.+?)\\s*" ~ close;
@@ -134,17 +139,3 @@ public:
         return parseJSON(cast(string) std.file.read(input_path ~ filename));
     }
 };
-
-@property Environment Env(string inpath = "")
-{
-    auto tpl_path = Config.app.config.templates.path.value;
-    if(inpath.length != 0)
-            tpl_path = inpath;
-    //writeln("templates path : ",tpl_path);
-    return new Environment(tpl_path);
-}
-
-@property Environment Env(string input, string ouput)
-{
-    return new Environment(input, ouput);
-}
