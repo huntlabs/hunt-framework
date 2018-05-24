@@ -1,15 +1,14 @@
 /*
- * Entity - Entity is an object-relational mapping tool for the D programming language. Referring to the design idea of JPA.
+ * Hunt - Hunt is a high-level D Programming Language Web framework that encourages rapid development and clean, pragmatic design. It lets you build high-performance Web applications quickly and easily.
  *
  * Copyright (C) 2015-2018  Shanghai Putao Technology Co., Ltd
  *
- * Developer: HuntLabs.cn
+ * Website: www.huntframework.com
  *
  * Licensed under the Apache-2.0 License.
  *
  */
- 
+
 module hunt.data.repository;
 
-public import hunt.data.repository.CrudRepository;
-public import hunt.data.repository.EntityRepository;
+public import entity.repository;
