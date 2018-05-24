@@ -305,6 +305,12 @@ final class Request : RequestHandler
 		return _res;
 	}
 
+	// @property void response(Response r)
+	// {
+	// 	r.dataHandler = _downstream;
+	// 	_res = r;
+	// }
+
 	@property void action(string value)
 	{
 		_action = value;

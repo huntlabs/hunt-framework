@@ -28,12 +28,17 @@ import hunt.versions;
 
 class Response : ResponseBuilder
 {
-     this(string content, int status = HttpCodes.OK, string[string] headers = null )
+    this()
+    {
+        super();
+    }
+
+    this(string content, int status = HttpStatusCodes.OK, string[string] headers = null )
     {
         this(cast(const(ubyte)[])content, status, headers);
     }
 
-    this(in ubyte[] content, int status = HttpCodes.OK, string[string] headers = null )
+    this(in ubyte[] content, int status = HttpStatusCodes.OK, string[string] headers = null )
     {
         super(null);
         if(headers !is null)
@@ -89,7 +94,6 @@ class Response : ResponseBuilder
     {
         return cast(T) _body.allData.data();
     }
-
 
     /**
      * Get the original response content.

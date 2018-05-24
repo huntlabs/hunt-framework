@@ -36,13 +36,9 @@ abstract class Controller
     protected
     {
         Request request;
+        Response _response;
         ///called before all actions
         MiddlewareInterface[] middlewares;
-    }
-
-    private
-    {
-        Response _response;
     }
 
     final @property Response response()
@@ -211,12 +207,14 @@ string __createCallActionFun(T, string moduleName)()
                         str ~= ReturnType!t.stringof ~ " result = this." ~ memberName ~ "();";
                         static if (is(ReturnType!t : Response))
                         {
-                            str ~= "actionResult = result;";
+                            str ~= q{
+                                actionResult = result;
+                            };
                         }
                         else
                         {
                             str ~= q{
-                                actionResult = this.response;
+                                actionResult = new Response(); // req.createResponse(); 
                                 actionResult.setContent(to!string(result));
                             };
                         }

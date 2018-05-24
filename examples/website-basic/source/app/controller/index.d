@@ -138,9 +138,7 @@ class IndexController : Controller
 		company["name"] = "Putao";
 		company["city"] = "Shanghai";
 
-		JsonResponse res = new JsonResponse(this.request.responseHandler);
-		res.json(company);
-
+		JsonResponse res = new JsonResponse(company);
 		return res;
 	}
 

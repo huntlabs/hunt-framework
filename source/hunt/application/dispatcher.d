@@ -197,6 +197,6 @@ void doRequestHandle(HandleFunction handle, Request request)
         if(response.dataHandler is null)
             response.dataHandler = request.responseHandler;
 
-        collectException(() { response.done();  response.clear();  }());
+        collectException(() { response.done(); response.clear();  }());
     }
 }
