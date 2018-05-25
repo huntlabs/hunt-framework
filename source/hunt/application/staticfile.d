@@ -25,7 +25,7 @@ class StaticfileController : Controller
     Response doStaticFile()
     {
 		string currentPath = request.route.staticFilePath;
-		staticFilename("currentPath: ", currentPath);
+		logDebug("currentPath: ", currentPath);
         if (currentPath == string.init)
         {
 			// FIXME: Needing refactor or cleanup -@zxp at 5/25/2018, 10:02:46 AM
