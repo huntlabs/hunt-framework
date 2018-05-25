@@ -1,3 +1,0 @@
-﻿
-POST		/user/<groupid:\w+>/tag/<tagid:\w+>		user.tag
-GET		/user/<id:\d+>			user.info

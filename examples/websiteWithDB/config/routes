@@ -1,6 +1,0 @@
-#
-# [GET,POST,PUT...]    path    controller.method
-#
-
-GET		/dbget						index.dbget
-GET		/dbset						index.dbset
