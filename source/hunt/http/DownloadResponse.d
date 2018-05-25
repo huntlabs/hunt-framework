@@ -6,6 +6,7 @@ import std.datetime;
 import std.json;
 import std.path;
 import std.file;
+import std.stdio;
 
 import collie.codec.http.headers.httpcommonheaders;
 import collie.codec.http.server.responsehandler;
