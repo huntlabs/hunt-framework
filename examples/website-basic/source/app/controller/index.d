@@ -26,7 +26,6 @@ version (USE_ENTITY) import app.model.index;
 
 class IpFilterMiddleware : MiddlewareInterface
 {
-
 	override string name()
 	{
 		return IpFilterMiddleware.stringof;
@@ -64,13 +63,13 @@ class IndexController : Controller
 		return true;
 	}
 
-	@Action ViewResponse index()
+	@Action string index()
 	{
 		JSONValue model;
 		model["title"] = "Hunt demo";
 		model["now"] = Clock.currTime.toString();
-		// return Env().render_file("home.dhtml", model);
-		return new ViewResponse("home", model);
+		view.setFileExtension(".dhtml");
+		return view.render("home", model);
 	}
 
 	Response showAction()
@@ -145,7 +144,7 @@ class IndexController : Controller
 		return res;
 	}
 
-	@Action ViewResponse showView()
+	@Action string showView()
 	{
 		JSONValue data;
 		data["name"] = "Cree";
@@ -159,15 +158,13 @@ class IndexController : Controller
 		data["users"] = ["name" : "jeck", "age" : "18"];
 		data["nums"] = [3, 5, 2, 1];
 
-		// return Env().render_file("index.txt", data);
-		return new ViewResponse("index.txt", data);
+		return view.setFileExtension(".txt").render("index", data);
 	}
 
-	@Action BinaryFileResponse testDownload()
+	@Action DownloadResponse testDownload()
 	{
 		string file = request.get("file", "putao.png");
-		BinaryFileResponse r = new BinaryFileResponse(file)
-		.loadData();
+		DownloadResponse r = new DownloadResponse(file).loadData();
 		return r;
 	}
 
