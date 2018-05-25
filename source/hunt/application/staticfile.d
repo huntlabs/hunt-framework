@@ -8,10 +8,13 @@ import std.digest.md;
 import core.time;
 static import std.stdio;
 
+import kiss.logger;
 import hunt;
 import hunt.application.controller;
 import hunt.application.config;
 import hunt.utils.string;
+import std.experimental.logger;
+
 
 
 class StaticfileController : Controller
@@ -21,31 +24,54 @@ class StaticfileController : Controller
     @Action
     Response doStaticFile()
     {
-        if (request.route.staticFilePath == string.init)
+		string currentPath = request.route.staticFilePath;
+		staticFilename("currentPath: ", currentPath);
+        if (currentPath == string.init)
+        {
+			// FIXME: Needing refactor or cleanup -@zxp at 5/25/2018, 10:02:46 AM
+			// get the value from the configuration
+			currentPath = "wwwroot";
+        }
+
+        string staticFilename = mendPath(currentPath);
+		logDebug ("staticFilename: ", staticFilename);
+
+        if (staticFilename == string.init)
         {
             response.do404();
-            
             return response;
         }
 
-        string staticFilename = mendPath(request.route.staticFilePath);
-
-        if ((staticFilename == string.init) || (!std.file.exists(staticFilename)))
+		currentPath = staticFilename;
+		string[] defaultIndexFiles = ["index.html", "index.htm", "default.html", "default.htm", "home.html"];
+		bool isFileExisted = false;
+		if(isDir(currentPath))
+		{
+			if(currentPath[$-1] != '/')
+				currentPath ~= "/";
+			foreach(string f; defaultIndexFiles)
+			{
+				staticFilename = currentPath ~ f;
+				if(exists(staticFilename))
+				{
+					isFileExisted = true;
+					break;
+				}
+			}
+		}
+		else
+		{
+			isFileExisted = exists(staticFilename);
+		}
+        
+        if (!isFileExisted)
         {
+			logWarning("No default index files (like index.html) found in: ", currentPath);
             response.do404();
-            
             return response;
         }
 
         FileInfo fi = makeFileInfo(staticFilename);
-        
-        if (fi.isDirectory)
-        {
-            response.do404();
-            
-            return response;
-        }
-
         auto lastModified = toRFC822DateTimeString(fi.timeModified.toUTC());
         auto etag = "\"" ~ hexDigest!MD5(staticFilename ~ ":" ~ lastModified ~ ":" ~ to!string(fi.size)).idup ~ "\"";
     

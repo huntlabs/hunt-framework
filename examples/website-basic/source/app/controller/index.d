@@ -163,7 +163,6 @@ class IndexController : Controller
 		return new ViewResponse("index.txt", data);
 	}
 
-
 	@Action BinaryFileResponse testDownload()
 	{
 		string file = request.get("file", "putao.png");
