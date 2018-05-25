@@ -29,7 +29,7 @@ class View
     {
         string _templatePath = "./views/";
         string _extName = ".html";
-        string _env;
+        Environment _env;
     }
 
     this()
@@ -37,11 +37,22 @@ class View
         _env = new Environment(_templatePath);
     }
 
+    public Environment env()
+    {
+        return _env;
+    }
+
     public View setTemplatePath(string path)
     {
         _templatePath = path;
         _env.setTemplatePath(path);
 
+        return this;
+    }
+
+    public View setFileExtension(string fileExt)
+    {
+        _extName = fileExt;
         return this;
     }
 
@@ -65,7 +76,8 @@ View GetViewInstance()
         import hunt.application.config;
 
         _viewInstance = new View;
-        _viewInstance.setTemplatePath(Config.app.config.templates.path.value);
+        _viewInstance.setTemplatePath(Config.app.config.templates.path.value)
+                     .setFileExtension(Config.app.config.templates.fileExtension.value);
     }
 
     return _viewInstance;

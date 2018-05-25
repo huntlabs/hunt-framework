@@ -5,6 +5,7 @@ import hunt.view;
 
 void main()
 {
+	auto Env = GetViewInstance().env();
 	JSONValue data;
 	data["name"] = "Cree";
 	data["alias"] = "Cree";
@@ -34,71 +35,71 @@ void main()
 	string input;
 	writeln("------------------IF--------------------------");
 	input="{% if is_happy %}happy{% else %}unhappy{% endif %}";
-	writeln("result : ",Env().render(input, data));
+	writeln("result : ",Env.render(input, data));
 
 	writeln("------------------FOR-------------------------");
 	input = "{% for addr in addrs %}{{addr}} {% endfor %}";
-	writeln("result : ",Env().render(input, data));
+	writeln("result : ",Env.render(input, data));
 
 	writeln("------------------FOR2-------------------------");
 	input = "<ul>{% for addr in addrs %}<li><a href=\"{{ addr }}\">{{ addr }}</a></li>{% endfor %}</ul>";
-	writeln("result : ",Env().render(input, data));
+	writeln("result : ",Env.render(input, data));
 
 	writeln("------------------MAP-------------------------");
 	input = "{% for k,v in users %}{{ k }} -- {{ v }}  {% endfor %}";
-	writeln("result : ",Env().render(input, data));
+	writeln("result : ",Env.render(input, data));
 
 	writeln("------------------FUNC upper------------------");
 	input = "{{ upper(city) }}";
-	writeln("result : ",Env().render(input, data));
+	writeln("result : ",Env.render(input, data));
 
 	writeln("----------------FUNC lower--------------------");
 	input = "{{ lower(city) }}";
-	writeln("result : ",Env().render(input, data));
+	writeln("result : ",Env.render(input, data));
 
 	writeln("-------------FUNC compare operator------------");
 	input = "{% if length(addrs)>=4 %}true{% else %}false{% endif %}";
-	writeln("result : ",Env().render(input, data));
+	writeln("result : ",Env.render(input, data));
 
 	writeln("-------------FUNC compare operator (string)------------");
 	input = "{% if name != \"Peter\" %}true{% else %}false{% endif %}";
-	writeln("result : ",Env().render(input, data));
+	writeln("result : ",Env.render(input, data));
 
 	writeln("---------Render file with `include`-----------");
-	writeln("result : ", Env().render_file("index.txt", data));
+	writeln("result : ", Env.render_file("index.txt", data));
 
 	writeln("---------------Render file--------------------");
-	writeln("result : ", Env().render_file("main.txt", data));
+	writeln("result : ", Env.render_file("main.txt", data));
 
 	writeln("---------Render file with `include` & save to file-----------");
-	Env().write("index.txt", data,"index.html");
+	Env.write("index.txt", data,"index.html");
 
 
 	writeln("------------------Deep for-------------------------");
 	input = "{% for user in userinfo %}{{user.hobby.1}} {% endfor %}";
-	writeln("result : ",Env().render(input, data2));
+	writeln("result : ",Env.render(input, data2));
 
 	writeln("------------------Deep for 2-------------------------");
 	input = "{{userinfo.1.name}}";
-	writeln("result : ",Env().render(input, data2));
+	writeln("result : ",Env.render(input, data2));
 
 	writeln("------------------Deep for-------------------------");
 	input = "{% for user in userinfo %}{% for h in user.hobby %} {{ h }} {% endfor %}{% endfor %}";
-	writeln("result : ",Env().render(input, data2));
+	writeln("result : ",Env.render(input, data2));
 
 	writeln("-------------FUNC  operator------------");
 	input = "{{ 'a' <= '1' }} ~ {{ age >= age1 }} ~ {{ 2 < 1 }} ~ {{ 4 > 3 }} ~ {{ '4' > 3 }}";
-	writeln("result : ",Env().render(input, data));
+	writeln("result : ",Env.render(input, data));
 
 	writeln("-------------Array value------------");
 	input = "{{ addrs.0 }} or {{ users.name }}";
-	writeln("result : ",Env().render(input, data));
+	writeln("result : ",Env.render(input, data));
 
 	 writeln("-------------FUNC length------------");
 	 input = "{{ length(name) }} or {{ length(users) }}";
-	 writeln("result : ",Env().render(input, data));
+	 writeln("result : ",Env.render(input, data));
 
-	//Util.debug_ast(Env().parse(input).parsed_node);
+	//Util.debug_ast(Env.parse(input).parsed_node);
 
 	JSONValue d;
 	d["appname"] = "Vitis";
@@ -114,9 +115,9 @@ void main()
 	d["userinfo"] = userinfo;
 
 	writeln("---------Render file  & save to file-----------");
-	Env().write("detail.txt", d,"detail.html");
+	Env.write("detail.txt", d,"detail.html");
 
 	writeln("------------------FUNCTION range-------------------------");
 	input = "{% for id in range(1,4) %}{{id}} {% endfor %}";
-	writeln("result : ",Env().render(input, data));
+	writeln("result : ",Env.render(input, data));
 }
