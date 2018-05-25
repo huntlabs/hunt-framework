@@ -1,6 +1,0 @@
-#
-# [GET,POST,PUT...]    path    controller.method
-#
-
-*	/items.json	item.list
-*	/item.json	item.detail
