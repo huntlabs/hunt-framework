@@ -50,7 +50,7 @@ class View
         return this;
     }
 
-    public View setFileExtension(string fileExt)
+    public View setTemplateExt(string fileExt)
     {
         _extName = fileExt;
         return this;
@@ -77,7 +77,7 @@ View GetViewInstance()
 
         _viewInstance = new View;
         _viewInstance.setTemplatePath(Config.app.config.templates.path.value)
-                     .setFileExtension(Config.app.config.templates.fileExtension.value);
+                     .setTemplateExt(Config.app.config.templates.ext.value);
     }
 
     return _viewInstance;

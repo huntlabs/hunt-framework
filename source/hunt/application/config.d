@@ -174,7 +174,7 @@ final class AppConfig
     struct Templates
     {
         string path;
-        string fileExtension;
+        string ext;
     }
 
     DBConfig database;
@@ -287,7 +287,7 @@ final class AppConfig
         collectException(conf.rpc.service.password.value(), app.rpc.service.password);
 
         collectException(conf.templates.path.value(), app.templates.path);
-        collectException(conf.templates.fileExtension.value(), app.templates.fileExtension);
+        collectException(conf.templates.ext.value(), app.templates.ext);
 
         // dfmt on
         return app;
