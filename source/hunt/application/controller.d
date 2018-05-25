@@ -249,8 +249,6 @@ string __createCallActionFun(T, string moduleName)()
     str ~= "return actionResult;";
     str ~= "}";
 
-    // pragma(msg, str);
-
     return str;
 }
 
@@ -259,8 +257,11 @@ string __createRouteMap(T, string moduleName)()
     string str = "";
 
     //pragma(msg, "moduleName", moduleName);
-    str ~= "\n\timport hunt.application.staticfile;\n";
-    str ~= "\n\taddRouteList(\"hunt.application.staticfile.StaticfileController.doStaticFile\", &callHandler!(StaticfileController, \"doStaticFile\"));\n";
+    str ~= q{
+        import hunt.application.staticfile;
+        addRouteList("hunt.application.staticfile.StaticfileController.doStaticFile", 
+            &callHandler!(StaticfileController, "doStaticFile"));
+    };
 
     foreach (memberName; __traits(allMembers, T))
     {
