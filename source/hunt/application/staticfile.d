@@ -13,10 +13,9 @@ import hunt;
 import hunt.application.controller;
 import hunt.application.config;
 import hunt.utils.string;
-import std.experimental.logger;
 
-
-
+/**
+*/
 class StaticfileController : Controller
 {
     mixin MakeController;
