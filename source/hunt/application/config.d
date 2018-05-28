@@ -18,7 +18,7 @@ import kiss.logger;
 import std.string;
 
 import hunt.init;
-import hunt.text.configuration;
+import kiss.util.configuration;
 import hunt.application.application : WebSocketFactory;
 import hunt.application.application;
 
