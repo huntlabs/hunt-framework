@@ -173,8 +173,8 @@ final class AppConfig
 
     struct Templates
     {
-        string path;
-        string ext;
+        string path = "./views/";
+        string ext = ".dhtml";
     }
 
     DBConfig database;
