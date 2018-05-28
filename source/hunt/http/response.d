@@ -76,6 +76,12 @@ class Response : ResponseBuilder
         return this;
     }
 
+    Response addHeader(T = string)(HTTPHeaderCode key, T value)
+    {
+        _httpMessage.addHeader(key, value);
+        return this;
+    }
+
     /**
      * Sets the response content.
      *
@@ -145,7 +151,7 @@ class Response : ResponseBuilder
             cookie.params["max-age"] = (expires < 0) ? "0" : to!string(expires);
         }
 
-        setHeader(HTTPHeaderCode.SET_COOKIE, cookie.output(""));
+        addHeader(HTTPHeaderCode.SET_COOKIE, cookie.output(""));
 
         return this;
     }
