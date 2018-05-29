@@ -171,7 +171,7 @@ final class AppConfig
         ServiceConf service;
     }
 
-    struct Templates
+    struct View
     {
         string path = "./views/";
         string ext = ".dhtml";
@@ -193,7 +193,7 @@ final class AppConfig
     DateConf date;
     MailConf mail;
     RpcConf rpc;
-    Templates templates;
+    View view;
 
     @property Configuration config()
     {
@@ -286,8 +286,8 @@ final class AppConfig
         collectException(conf.rpc.service.workerThreads.as!int(), app.rpc.service.workerThreads);.
         collectException(conf.rpc.service.password.value(), app.rpc.service.password);
 
-        collectException(conf.templates.path.value(), app.templates.path);
-        collectException(conf.templates.ext.value(), app.templates.ext);
+        collectException(conf.view.path.value(), app.view.path);
+        collectException(conf.view.ext.value(), app.view.ext);
 
         // dfmt on
         return app;

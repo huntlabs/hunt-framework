@@ -242,33 +242,6 @@ public:
             {
                 try
                 {
-                    //writeln("--read * json --:", element.command);
-                    // if (element.command.length > 0 && element.command in data)
-                    //     result = data[element.command];
-                    // else
-                    // {
-                    //     auto cmds = split(element.command, ".");
-                    //     if (cmds.length > 1)
-                    //     {
-                    //         if (cmds.length == 2)
-                    //         {
-                    //             if (cmds[0] in data)
-                    //             {
-                    //                 if (Util.is_num(cmds[1]))
-                    //                 {
-                    //                     auto idx = to!int(cmds[1]);
-
-                    //                     result = data[cmds[0]][idx];
-                    //                 }
-                    //                 else if (cmds[1] in data[cmds[0]])
-                    //                     result = data[cmds[0]][cmds[1]];
-                    //             }
-
-                    //         }
-                    //     }
-                    //     else
-                    //         result = element.command;
-                    // }
                     result = read_json(data, element.command);
                     return result;
                 }
@@ -313,13 +286,31 @@ public:
             }
         case Function.Sort:
             {
-                // auto res = eval_expression(element.args[0], data);
-                // if (res.type == JSON_TYPE.ARRAY)
-                // {
-                //     import std.algorithm.sorting;
-                //     result = sort!("a > b")(res.array);
-                // }
-                // return result;
+                auto res = eval_expression(element.args[0], data);
+                long[] sa_l;
+                string[] sa_s;
+                if (res.type == JSON_TYPE.ARRAY)
+                {
+                    import std.algorithm.sorting;
+                    foreach(size_t k,v;res)
+                    {
+                        if(v.type == JSON_TYPE.INTEGER)
+                            sa_l ~= v.integer;
+                        else if(v.type == JSON_TYPE.STRING)
+                            sa_s ~= v.str;
+                    }
+                    if(sa_l.length > 0)
+                    {
+                        sort!("a < b")(sa_l);
+                        result = JSONValue(sa_l);
+                    }
+                    else
+                    {
+                        sort!("a < b")(sa_s);
+                        result = JSONValue(sa_s);
+                    }
+                }
+                return result;
             }
         case Function.Default:
             {
