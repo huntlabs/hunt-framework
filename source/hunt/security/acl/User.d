@@ -5,13 +5,17 @@ import hunt.security.acl.permission.Permission;
 
 class User
 {
-    private
-    {
+   
+    
         int 		_id;
 		string 		_name;
         Permission 	_permission;
         Role[] 		roles;
 		__gshared User _default;
+
+	this()
+	{
+
 	}
 
     public this(int id , string name)
