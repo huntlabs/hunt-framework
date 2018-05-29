@@ -14,7 +14,7 @@
             "targetType": "library"
         },
         {
-            "name": "debug-mode",
+            "name": "debug",
             "versions": [
                 "HuntDebugMode"
             ],
