@@ -139,6 +139,7 @@ public:
     mixin(__createCallActionFun!(T, moduleName));
     shared static this()
     {
+        // pragma(msg, __createRouteMap!(T, moduleName));
         mixin(__createRouteMap!(T, moduleName));
     }
 }
@@ -185,17 +186,6 @@ string __createCallActionFun(T, string moduleName)()
 
                     static if (hasUDA!(t, Action) || _isActionMember)
                     {
-                        /*
-                        // middleware
-                        enum middlewares = getUDAs!(t, Middleware);
-                        static if (middlewares.length)
-                        {
-                            foreach (i, middleware; middlewares)
-                            {
-                                str ~= format("this.addMiddleware(new %s);", middleware.className);
-                            }
-                        }
-                        */
 
                         //before
                         str ~= q{
@@ -256,13 +246,17 @@ string __createRouteMap(T, string moduleName)()
 {
     string str = "";
 
-    //pragma(msg, "moduleName", moduleName);
+    // pragma(msg, "moduleName: ", moduleName);
+
     str ~= q{
         import hunt.application.staticfile;
         addRouteList("hunt.application.staticfile.StaticfileController.doStaticFile", 
             &callHandler!(StaticfileController, "doStaticFile"));
     };
 
+    enum len = "Controller".length;
+    string controllerName = moduleName[0..$-len];
+    
     foreach (memberName; __traits(allMembers, T))
     {
         static if (is(typeof(__traits(getMember, T, memberName)) == function))
@@ -271,13 +265,13 @@ string __createRouteMap(T, string moduleName)()
             {
                 static if ( /*ParameterTypeTuple!(t).length == 0 && */ hasUDA!(t, Action))
                 {
-                    str ~= "\n\taddRouteList(\"" ~ moduleName ~ "." ~ T.stringof ~ "." ~ memberName
+                    str ~= "\n\taddRouteList(\"" ~ controllerName ~ "." ~ T.stringof ~ "." ~ memberName
                         ~ "\",&callHandler!(" ~ T.stringof ~ ",\"" ~ memberName ~ "\"));\n";
                 }
                 else static if (isActionMember(memberName))
                 {
                     enum strippedMemberName = memberName[0 .. $ - actionNameLength];
-                    str ~= "\n\taddRouteList(\"" ~ moduleName ~ "." ~ T.stringof ~ "." ~ strippedMemberName
+                    str ~= "\n\taddRouteList(\"" ~ controllerName ~ "." ~ T.stringof ~ "." ~ strippedMemberName
                         ~ "\",&callHandler!(" ~ T.stringof ~ ",\"" ~ memberName ~ "\"));\n";
                 }
             }
