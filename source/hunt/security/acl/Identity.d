@@ -8,5 +8,9 @@ interface Identity
     // route group name, like: default / admin / api
     string group();
 
+	bool isAllowAction(string persident);
+
+	void addAllowAction(string persident);
+
     User login(Request);
 }

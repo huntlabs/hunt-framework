@@ -97,18 +97,22 @@ class Dispatcher
             }
         }
 
-        bool accessFilter(Request request)
-        {
-            Identity identity = Application.getInstance().getAccessManager()
-                .getIdentity(request.route.getGroup());
-            if (identity is null || request.route.getController().length == 0)
-                return true;
+		bool accessFilter(Request request)
+		{
+			//兼容老的.
+			Identity identity =  Application.getInstance().getAccessManager().getIdentity(request.route.getGroup());
+			if (identity is null || request.route.getController().length == 0)
+				return true;
 
-            return request.user.can(request.route.getController() ~ "." ~ request.route.getAction());
-        }
+			string persident = request.route.getController() ~ "." ~ request.route.getAction();
+			if( persident == "staticfile.doStaticFile" || identity.isAllowAction(persident))
+				return true;
 
-        User authenticateUser(Request request)
-        {
+			return request.user.can(persident);
+		}
+
+		User authenticateUser(Request request)
+		{
             User user;
             Identity identity = Application.getInstance().getAccessManager()
                 .getIdentity(request.route.getGroup());
