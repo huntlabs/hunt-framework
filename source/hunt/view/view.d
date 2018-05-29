@@ -76,8 +76,8 @@ View GetViewInstance()
         import hunt.application.config;
 
         _viewInstance = new View;
-        _viewInstance.setTemplatePath(Config.app.templates.path)
-                     .setTemplateExt(Config.app.templates.ext);
+        _viewInstance.setTemplatePath(Config.app.view.path)
+                     .setTemplateExt(Config.app.view.ext);
     }
 
     return _viewInstance;
