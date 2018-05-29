@@ -1,36 +1,35 @@
 module hunt.security.acl.permission.Permission;
 
 import hunt.security.acl.permission.Item;
+import std.algorithm;
+import kiss.logger;
 
 class Permission
 {
-    PermissionItem[string] permissions;
+    PermissionItem[] permissions;
 
     public Permission addPermission(PermissionItem permission)
     {
-		this.permissions[permission.key] = permission;
-
+		this.permissions ~= permission;
         return this;
     }
 
-    public Permission addPermissions(PermissionItem[string] permissions)
+    public Permission addPermissions(PermissionItem[] permissions)
     {
-        foreach(permission; permissions)
-        {
-			addPermission(permission);
-        }
-
-        return this;
+		this.permissions ~= permissions;
+			
+		return this;
     }
 
     public bool hasPermission(string key)
     {
-		return (key in permissions) != null;
+		logInfo(permissions , " key " , key);
+		return find!(" a.key == b")(permissions , key).length > 0;
     }
 
-	public Permission addPermission(string name, string key)
+	public Permission addPermission( string key , string name)
     {
-		addPermission( PermissionItem(name, key));
+		addPermission( PermissionItem( key , name));
         return this;
     }
 }
