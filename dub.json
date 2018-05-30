@@ -4,9 +4,10 @@
     "copyright": "Copyright (C) 2015-2018, Shanghai Putao Technology Co., Ltd",
     "description": "A high performance full-stack Web framework.",
     "dependencies": {
-        "collie": "~>0.10.14",
-		"entity": "~>1.4.1",
-		"cache": "~>0.0.4"
+        "collie": "~>0.10.15",
+        "kiss": "~>0.4.0",
+        "entity": "~>1.4.1",
+        "cache": "~>0.0.5"
     },
     "configurations": [
         {
@@ -26,7 +27,7 @@
                 "entity": "mysql"
             }
         },
-		{
+        {
             "name": "mysql",
             "subConfigurations": {
                 "entity": "mysql"
