@@ -14,16 +14,18 @@ module hunt.application.config;
 import std.exception;
 import std.parallelism : totalCPUs;
 import std.socket : Address, parseAddress;
-import kiss.logger;
+import std.format;
 import std.string;
 
-import hunt.init;
 import kiss.util.configuration;
+import kiss.logger;
+import hunt.init;
 import hunt.application.application : WebSocketFactory;
 import hunt.application.application;
 
 import collie.codec.http.server.httpserveroptions;
 
+@Configuration("hunt")
 final class AppConfig
 {
     alias AddressList = Address[];
@@ -113,10 +115,6 @@ final class AppConfig
         uint maxSize = 4 * 1024 * 1024;
     }
 
-    struct DownloadConfig
-    {
-        string path = "downloads";
-    }
 
     struct MailSmtpConf
     {
@@ -135,14 +133,42 @@ final class AppConfig
 
     struct DbPoolConf
     {
-        uint maxConnection = 10;
-        uint minConnection = 10;
-        uint timeout = 10000;
+        string name = "";
+        int minIdle = 5;
+        int idleTimeout = 30000;
+        int maxPoolSize = 20;
+        int minPoolSize = 5;
+        int maxLifetime = 2000000;
+        int connectionTimeout = 30000;
+        int maxConnection = 20;
+        int minConnection = 5;
     }
 
     struct DBConfig
     {
-        string url;
+        string url()
+        {
+            string s = format("%s://%s:%s@%s:%d/%s?prefix=%s&charset=%s",
+                    driver, username, password, host, port, database, prefix, charset);
+            return s;
+        }
+
+        string driver = "postgresql";
+        string host = "localhost";
+        int port = 5432;
+        string database = "test";
+        string username = "root";
+        string password = "";
+        string charset = "utf8";
+        string prefix = "";
+        bool enabled = true;
+    }
+
+    struct DatabaseConf
+    {
+        @Value("defaults")
+        DBConfig defaultOptions;
+
         DbPoolConf pool;
     }
 
@@ -177,7 +203,7 @@ final class AppConfig
         string ext = ".dhtml";
     }
 
-    DBConfig database;
+    DatabaseConf database;
     ApplicationConf application;
     SessionConf session;
     CacheConf cache;
@@ -188,7 +214,7 @@ final class AppConfig
     RedisConf redis;
     LoggingConfig log;
     UploadConf upload;
-    DownloadConfig download;
+    UploadConf download () { return upload;}
     CornConf cron;
     DateConf date;
     MailConf mail;
@@ -251,7 +277,7 @@ class ConfigManager
         {
             logDebugf("using config file: %s", fullName);
             ConfigBuilder con = new ConfigBuilder(fullName, sec);
-            _app = con.build!(AppConfig)();
+            _app = con.build!(AppConfig, "hunt")();
         }
         else
         {

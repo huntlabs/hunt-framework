@@ -108,19 +108,19 @@ final class Application
             _cbuffer = cbuffer;
     }
 
-    private void initDatabase(AppConfig.DBConfig config)
+    private void initDatabase(AppConfig.DatabaseConf config)
     {
-        if(config.url.empty)
+        if(config.defaultOptions.url.empty)
         {
             logWarning("No database configured!");
         }
         else
         {
-            auto options = new DatabaseOption(config.url);
+            auto options = new DatabaseOption(config.defaultOptions.url);
 
             options.setMaximumConnection(config.pool.maxConnection);
             options.setMinimumConnection(config.pool.minConnection);
-            options.setConnectionTimeout(config.pool.timeout);
+            options.setConnectionTimeout(config.pool.connectionTimeout);
 
             _entityManagerFactory = Persistence.createEntityManagerFactory("default", options);
         }
@@ -191,7 +191,9 @@ final class Application
 		upConfig(config);
 		//setRedis(config.redis);
 		//setMemcache(config.memcache);
-        initDatabase(config.database);
+
+        if(config.database.defaultOptions.enabled)
+            initDatabase(config.database);
 		initCache(config.cache);
 		initSessionStorage(config.session);
 	}
