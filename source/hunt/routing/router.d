@@ -42,36 +42,30 @@ class Router
         {
             // find Route
             RouteGroup routeGroup = this.getGroup(group);
-
             if (routeGroup is null)
             {
                 return "#";
             }
 
             Route route = routeGroup.getRoute("", mca);
-
             if (route is null)
             {
                 return "#";
             }
 
             string url;
-
             if (route.getRegular() == true)
             {
                 if (params.length == 0)
                 {
                     logWarningf("this route need params (%s).", mca);
-
                     return "#";
                 }
 
                 if (route.getParamKeys().length > 0)
                 {
                     url = route.getUrlTemplate();
-
                     import std.array : replaceFirst;
-
                     foreach (i, key; route.getParamKeys())
                     {
                         string value = params.get(key, null);
@@ -84,7 +78,6 @@ class Router
                         }
 
                         params.remove(key);
-
                         url.replaceFirst("{" ~ key ~ "}", value);
                     }
                 }
@@ -214,7 +207,7 @@ class Router
         Route match(string domain, string method, string path)
         {
             Route r;
-            tracef("matching: domain=%s, method=%s, path=%s", domain, method, path);
+            version(HuntDebugMode) tracef("matching: domain=%s, method=%s, path=%s", domain, method, path);
             path = this.mendPath(path);
 
             if (false == this._supportMultipleGroup)
@@ -253,7 +246,7 @@ class Router
                 }
             }
 
-            tracef("matching2: domain=%s, method=%s, path=%s", domain, method, path);
+            version(HuntDebugMode) tracef("matching2: domain=%s, method=%s, path=%s", domain, method, path);
             r = routeGroup.match(method, path);
             if (path == "/" && r is null)
                 return staticRootRoute;
@@ -305,9 +298,12 @@ class Router
             RouteConfig config;
             RouteItem[] items = config.loadConfig(configFile);
 
+            bool haveRootRoute = false;
             Route route;
             foreach (item; items)
             {
+                if(item.path == "/")
+                    haveRootRoute = true;
                 route = this.makeRoute(item.methods, item.path, item.route, group);
                 if (route)
                 {
@@ -316,6 +312,8 @@ class Router
             }
 
             this.staticRootRoute = this.makeRoute("GET", "/", "staticDir:wwwroot/", group);
+            if(!haveRootRoute)
+                routeGroup.addRoute(staticRootRoute);
         }
 
         RouteGroup getGroupByDomain(string domain)
@@ -331,7 +329,7 @@ class Router
         Route makeRoute(T = string)(string methods, string path, T mca,
                 string group = DEFAULT_ROUTE_GROUP)
         {
-            tracef("method: %s, path: %s, mca: %s, group: %s", methods, path, mca, group);
+            version(HuntDebugMode) tracef("method: %s, path: %s, mca: %s, group: %s", methods, path, mca, group);
             auto route = new Route();
             methods = toUpper(methods);
             path = this.mendPath(path);
