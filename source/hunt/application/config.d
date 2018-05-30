@@ -30,7 +30,7 @@ final class AppConfig
 
     struct ApplicationConf
     {
-        string name = "HUNT APPLICATION";
+        string name = "Hunt Application";
         string baseUrl;
         string defaultCookieDomain = ".example.com";
         string defaultLanguage = "zh-CN";
@@ -81,7 +81,7 @@ final class AppConfig
         string groups;
     }
 
-    struct LogConfig
+    struct LoggingConfig
     {
         string level = "all";
         string path;
@@ -160,8 +160,8 @@ final class AppConfig
     struct ServiceConf
     {
         string address = "127.0.0.1";
-        ushort port;
-        int workerThreads;
+        ushort port = 8080;
+        int workerThreads = 1;
         string password;
     }
 
@@ -186,7 +186,7 @@ final class AppConfig
     RouteConf route;
     MemcacheConf memcache;
     RedisConf redis;
-    LogConfig log;
+    LoggingConfig log;
     UploadConf upload;
     DownloadConfig download;
     CornConf cron;
@@ -194,107 +194,6 @@ final class AppConfig
     MailConf mail;
     RpcConf rpc;
     View view;
-
-    @property Configuration config()
-    {
-        return _config;
-    }
-
-    static AppConfig parseAppConfig(Configuration conf)
-    {
-        AppConfig app = new AppConfig();
-
-        app._config = conf;
-
-        // dfmt off
-        collectException(conf.application.name.value,    app.application.name);
-        collectException(conf.application.baseUrl.value,    app.application.baseUrl);
-        collectException(conf.application.defaultCookieDomain.value,    app.application.defaultCookieDomain);
-        collectException(conf.application.defaultLanguage.value,    app.application.defaultLanguage);
-        collectException(conf.application.languages.value,    app.application.languages);
-        collectException(conf.application.secret.value,    app.application.secret);
-        collectException(conf.application.encoding.value,    app.application.encoding);
-        collectException(conf.application.staticFileCacheMinutes.as!int,    app.application.staticFileCacheMinutes);
-
-		collectException(conf.session.storage.value(),    app.session.storage);
-        collectException(conf.session.prefix.value(),    app.session.prefix);
-		collectException(conf.session.args.value(),    app.session.args);
-        collectException(conf.session.expire.as!uint(),     app.session.expire);
-
-		collectException(conf.cache.storage.value(),    app.cache.storage);
-        ///collectException(conf.cache.prefix.value(),    app.cache.prefix);
-		collectException(conf.cache.args.value(),     app.cache.args);
-
-        collectException(conf.http.address.value(), app.http.address);
-        collectException(conf.http.port.as!ushort(), app.http.port);
-        collectException(conf.http.workerThreads.as!uint(), app.http.workerThreads);
-        collectException(conf.http.ioThreads.as!uint(), app.http.ioThreads);
-        collectException(conf.http.maxHeaderSize.as!size_t(), app.http.maxHeaderSize);
-        collectException(conf.http.keepAliveTimeOut.as!size_t(), app.http.keepAliveTimeOut);
-        collectException(conf.http.cacheControl.as!int(), app.http.cacheControl);
-        collectException(conf.http.path.value(), app.http.path);
-
-        collectException(conf.https.enabled.as!bool(), app.https.enabled);
-        collectException(conf.https.protocol.value(), app.https.protocol);
-        collectException(conf.https.keyStore.value(), app.https.keyStore);
-        collectException(conf.https.keyStoreType.value(), app.https.keyStoreType);
-
-        collectException(conf.route.groups.value(), app.route.groups);
-
-        collectException(conf.memcache.enabled.as!bool(), app.memcache.enabled);
-        collectException(conf.memcache.servers.value(), app.memcache.servers);
-
-        collectException(conf.redis.enabled.as!bool(), app.redis.enabled);
-        collectException(conf.redis.host.value(), app.redis.host);
-        collectException(conf.redis.password.value(), app.redis.password);
-        collectException(conf.redis.database.as!ushort(), app.redis.database);
-        collectException(conf.redis.port.as!ushort(), app.redis.port);
-        collectException(conf.redis.timeout.as!uint(), app.redis.timeout);
-
-        collectException(conf.log.level.value(), app.log.level);
-        collectException(conf.log.path.value(), app.log.path);
-        collectException(conf.log.file.value(), app.log.file);
-		collectException(conf.log.disableConsole.as!bool(), app.log.disableConsole);
-		collectException(conf.log.maxSize.value(), app.log.maxSize);
-		collectException(conf.log.maxNum.as!uint(), app.log.maxNum);
-
-        collectException(conf.upload.path.value(), app.upload.path);
-        collectException(conf.upload.maxSize.as!uint(), app.upload.maxSize);
-
-        collectException(conf.download.path.value(), app.download.path);
-
-        collectException(conf.cron.noon.value(), app.cron.noon);
-
-        collectException(conf.date.format.value(), app.date.format);
-        collectException(conf.date.timeZone.value(), app.date.timeZone);
-
-        collectException(conf.database.url.value(), app.database.url);
-        collectException(conf.database.pool.maxConnection.as!uint(), app.database.pool.maxConnection);
-        collectException(conf.database.pool.minConnection.as!uint(), app.database.pool.minConnection);
-        collectException(conf.database.pool.timeout.as!uint(), app.database.pool.timeout);
-
-        collectException(conf.mail.smtp.host.value(), app.mail.smtp.host);
-        collectException(conf.mail.smtp.channel.value(), app.mail.smtp.channel);
-        collectException(conf.mail.smtp.port.as!ushort(), app.mail.smtp.port);
-        collectException(conf.mail.smtp.protocol.value(), app.mail.smtp.protocol);.
-        collectException(conf.mail.smtp.user.value(), app.mail.smtp.user);
-        collectException(conf.mail.smtp.password.value(), app.mail.smtp.password);
-
-        collectException(conf.rpc.enabled.as!bool(), app.rpc.enabled);
-        collectException(conf.rpc.service.address.value(), app.rpc.service.address);
-        collectException(conf.rpc.service.port.as!ushort(), app.rpc.service.port);
-        collectException(conf.rpc.service.workerThreads.as!int(), app.rpc.service.workerThreads);.
-        collectException(conf.rpc.service.password.value(), app.rpc.service.password);
-
-        collectException(conf.view.path.value(), app.view.path);
-        collectException(conf.view.ext.value(), app.view.ext);
-
-        // dfmt on
-        return app;
-    }
-
-private:
-    Configuration _config;
 
     this()
     {
@@ -308,11 +207,15 @@ import core.sync.rwmutex;
 import std.file;
 import std.path;
 
+/**
+*/
 class ConfigNotFoundException : Exception
 {
     mixin basicExceptionCtors;
 }
 
+/**
+*/
 class ConfigManager
 {
     @property AppConfig app()
@@ -347,8 +250,8 @@ class ConfigManager
         if (exists(fullName))
         {
             logDebugf("using config file: %s", fullName);
-            auto con = new Configuration(fullName, sec);
-            _app = AppConfig.parseAppConfig(con);
+            ConfigBuilder con = new ConfigBuilder(fullName, sec);
+            _app = con.build!(AppConfig)();
         }
         else
         {
@@ -357,22 +260,22 @@ class ConfigManager
         }
     }
 
-    Configuration config(string key)
+    ConfigBuilder config(string key)
     {
         import std.format;
 
-        Configuration v = null;
+        ConfigBuilder v = null;
         synchronized (_mutex.reader)
         {
             v = _conf.get(key, null);
         }
 
-        enforce!ConfigNotFoundException(v, format(" %s is not in config! ", key));
+        enforce!ConfigNotFoundException(v, format(" %s is not created! ", key));
 
         return v;
     }
 
-    void addConfig(string key, Configuration conf)
+    void addConfig(string key, ConfigBuilder conf)
     {
         _mutex.writer.lock();
         scope (exit)
@@ -398,11 +301,8 @@ private:
     }
 
     AppConfig _app;
-
-    Configuration[string] _conf;
-
+    ConfigBuilder[string] _conf;
     string _path;
-
     ReadWriteMutex _mutex;
 }
 
