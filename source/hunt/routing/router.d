@@ -35,7 +35,7 @@ class Router
         void setConfigPath(string path)
         {
             // supplemental slash
-            this._configPath = (path[$-1] == '/') ? path : path ~ "/";
+            this._configPath = (path[$ - 1] == '/') ? path : path ~ "/";
         }
 
         string createUrl(string mca, string[string] params, string group = DEFAULT_ROUTE_GROUP)
@@ -48,7 +48,7 @@ class Router
                 return "#";
             }
 
-            Route route = routeGroup.getRoute("",mca);
+            Route route = routeGroup.getRoute("", mca);
 
             if (route is null)
             {
@@ -65,7 +65,7 @@ class Router
 
                     return "#";
                 }
-                
+
                 if (route.getParamKeys().length > 0)
                 {
                     url = route.getUrlTemplate();
@@ -96,8 +96,8 @@ class Router
 
             return url ~ (params.length > 0 ? ("?" ~ buildUriQueryString(params)) : "");
         }
-        
-		string buildUriQueryString(string[string] params)
+
+        string buildUriQueryString(string[string] params)
         {
             if (params.length == 0)
             {
@@ -116,7 +116,8 @@ class Router
 
         void addGroup(string group, string method, string value)
         {
-            RouteGroup routeGroup = ("domain" == method) ? _domainGroups.get(group, null) : _directoryGroups.get(group, null);
+            RouteGroup routeGroup = ("domain" == method) ? _domainGroups.get(group,
+                    null) : _directoryGroups.get(group, null);
 
             if (routeGroup is null)
             {
@@ -160,13 +161,13 @@ class Router
 
             if (!this._supportMultipleGroup)
             {
-               logDebug("Router multiple route group is disabled!");
+                logDebug("Router multiple route group is disabled!");
 
                 return;
             }
             else
             {
-               logDebug("Router multiple route group is enabled..");
+                logDebug("Router multiple route group is enabled..");
             }
 
             // load this group routes from config file
@@ -181,10 +182,10 @@ class Router
             this._supportMultipleGroup = enabled;
         }
 
-        Router addRoute(string method, string path, HandleFunction handle, string group = DEFAULT_ROUTE_GROUP)
+        Router addRoute(string method, string path, HandleFunction handle,
+                string group = DEFAULT_ROUTE_GROUP)
         {
             this.addRoute(this.makeRoute!HandleFunction(method, path, handle, group));
-
             return this;
         }
 
@@ -193,15 +194,13 @@ class Router
             if (group == DEFAULT_ROUTE_GROUP)
             {
                 this._defaultGroup.addRoute(route);
-
                 return this;
             }
 
-            RouteGroup routeGroup = this._groups.get(group,null);
+            RouteGroup routeGroup = this._groups.get(group, null);
             if (!routeGroup)
             {
                 routeGroup = new RouteGroup(group);
-
                 this._groups[group] = routeGroup;
             }
 
@@ -210,33 +209,38 @@ class Router
             return this;
         }
 
+        Route staticRootRoute;
+
         Route match(string domain, string method, string path)
         {
+            Route r;
+            tracef("matching: domain=%s, method=%s, path=%s", domain, method, path);
             path = this.mendPath(path);
 
             if (false == this._supportMultipleGroup)
             {
                 // don't support multiple route group, use defualt group match function
-                return this._defaultGroup.match(method,path);
+                r = this._defaultGroup.match(method, path);
+                if (path == "/" && r is null)
+                    return staticRootRoute;
+                else
+                    return r;
             }
 
-            RouteGroup routeGroup;
-
-            routeGroup = this.getGroupByDomain(domain);
-
+            RouteGroup routeGroup = this.getGroupByDomain(domain);
             if (!routeGroup)
             {
                 if (path.length > 1)
                 {
                     import std.array;
-                    // TODO: this is bug
-                    string directory = split(path, "/")[1];
 
+                    // TODO: Here is a bug
+                    string directory = split(path, "/")[1];
 
                     routeGroup = this.getGroupByDirectory(directory);
                     if (routeGroup)
                     {
-                        path = path[directory.length+1 .. $];
+                        path = path[directory.length + 1 .. $];
                     }
                     else
                     {
@@ -249,7 +253,12 @@ class Router
                 }
             }
 
-            return routeGroup.match(method,path);
+            tracef("matching2: domain=%s, method=%s, path=%s", domain, method, path);
+            r = routeGroup.match(method, path);
+            if (path == "/" && r is null)
+                return staticRootRoute;
+            else
+                return r;
         }
 
         string mendPath(string path)
@@ -271,8 +280,7 @@ class Router
         void loadConfig(string group = DEFAULT_ROUTE_GROUP)
         {
             RouteGroup routeGroup;
-
-           logDebugf("load config for %s", group);
+            logDebugf("load config for %s", group);
 
             if (group == DEFAULT_ROUTE_GROUP)
             {
@@ -288,21 +296,16 @@ class Router
                 }
             }
 
-            string configFile = (DEFAULT_ROUTE_GROUP == group) ? this._configPath ~ "routes" : this._configPath ~ group ~ ".routes";
-			if(!exists(configFile))return;
-            
+            string configFile = (DEFAULT_ROUTE_GROUP == group) ? this._configPath ~ "routes"
+                : this._configPath ~ group ~ ".routes";
+            if (!exists(configFile))
+                return;
+
             // read file content
             RouteConfig config;
             RouteItem[] items = config.loadConfig(configFile);
 
             Route route;
-
-            route = this.makeRoute("GET", "/", "staticDir:wwwroot/", group);
-            if (route)
-            {
-                routeGroup.addRoute(route);
-            }
-
             foreach (item; items)
             {
                 route = this.makeRoute(item.methods, item.path, item.route, group);
@@ -311,6 +314,8 @@ class Router
                     routeGroup.addRoute(route);
                 }
             }
+
+            this.staticRootRoute = this.makeRoute("GET", "/", "staticDir:wwwroot/", group);
         }
 
         RouteGroup getGroupByDomain(string domain)
@@ -323,84 +328,87 @@ class Router
             return this._directoryGroups.get(directory, null);
         }
 
-        Route makeRoute(T = string)(string methods, string path, T mca, string group = DEFAULT_ROUTE_GROUP)
+        Route makeRoute(T = string)(string methods, string path, T mca,
+                string group = DEFAULT_ROUTE_GROUP)
         {
-			logDebug(methods,path,mca,group);
+            tracef("method: %s, path: %s, mca: %s, group: %s", methods, path, mca, group);
             auto route = new Route();
             methods = toUpper(methods);
             path = this.mendPath(path);
-			route.path = path;
+            route.path = path;
 
             route.setGroup(group);
             route.setPattern(path);
-			auto arr = split(methods,",");
-			HTTP_METHODS[] http_methods;
-			foreach(v;arr){
-				http_methods ~= getMethod(v);
-			}
-			route.setMethods(http_methods);
+            auto arr = split(methods, ",");
+            HTTP_METHODS[] http_methods;
+            foreach (v; arr)
+            {
+                http_methods ~= getMethod(v);
+            }
+            route.setMethods(http_methods);
 
-            static if (is (T == string))
+            static if (is(T == string))
             {
                 route.setRoute(mca);
 
-				import std.algorithm;
-				import std.string;
+                import std.algorithm;
+                import std.string;
 
                 if (mca.startsWith("staticDir:"))
-				{
-					route.setModule("hunt.application.staticfile");
-					route.setController("staticfile");
-					route.setAction("doStaticFile");
-					route.staticFilePath = mca.chompPrefix("staticDir:");
-				}
-				else
-				{
-	                string[] mcaArray = split(mca, ".");
+                {
+                    route.setModule("hunt.application.staticfile");
+                    route.setController("staticfile");
+                    route.setAction("doStaticFile");
+                    route.staticFilePath = mca.chompPrefix("staticDir:");
+                }
+                else
+                {
+                    string[] mcaArray = split(mca, ".");
 
-	                if (mcaArray.length > 3 || mcaArray.length < 2)
-	                {
-	                    logWarningf("this route config mca length is: %d (%s)", mcaArray.length, mca);
-	                    return null;
-	                }
-	
-	                if (mcaArray.length == 2)
-	                {
-	                    route.setController(mcaArray[0]);
-	                    route.setAction(mcaArray[1]);
-	                }
-	                else
-	                {
-	                    route.setModule(mcaArray[0]);
-	                    route.setController(mcaArray[1]);
-	                    route.setAction(mcaArray[2]);
-	                }
+                    if (mcaArray.length > 3 || mcaArray.length < 2)
+                    {
+                        logWarningf("this route config mca length is: %d (%s)",
+                                mcaArray.length, mca);
+                        return null;
+                    }
 
-	                import std.regex;
-	                import std.array;
-	
-	                auto matches = path.matchAll(regex(`:(\w+)`));
-	                if (matches)
-	                {
-	                    string[int] paramKeys;
-	                    int paramCount = 0;
-	                    string pattern = path;
-	                    string urlTemplate = path;
-	
-	                    foreach (m; matches)
-	                    {
-	                        paramKeys[paramCount] = m[1];
-	                        pattern = pattern.replaceFirst(m[0], "([^/]*)");
-	                        urlTemplate = urlTemplate.replaceFirst(m[0], "{" ~ m[1] ~ "}");
-	                        paramCount++;
-	                    }
-	
-	                    route.setPattern(pattern);
-	                    route.setParamKeys(paramKeys);
-	                    route.setRegular(true);
-	                    route.setUrlTemplate(urlTemplate);
-	                }
-				}
+                    if (mcaArray.length == 2)
+                    {
+                        route.setController(mcaArray[0]);
+                        route.setAction(mcaArray[1]);
+                    }
+                    else
+                    {
+                        route.setModule(mcaArray[0]);
+                        route.setController(mcaArray[1]);
+                        route.setAction(mcaArray[2]);
+                    }
+
+                    import std.regex;
+                    import std.array;
+
+                    auto matches = path.matchAll(regex(`:(\w+)`));
+                    if (matches)
+                    {
+                        string[int] paramKeys;
+                        int paramCount = 0;
+                        string pattern = path;
+                        string urlTemplate = path;
+
+                        foreach (m; matches)
+                        {
+                            paramKeys[paramCount] = m[1];
+                            pattern = pattern.replaceFirst(m[0], "([^/]*)");
+                            urlTemplate = urlTemplate.replaceFirst(m[0], "{" ~ m[1] ~ "}");
+                            paramCount++;
+                        }
+
+                        route.setPattern(pattern);
+                        route.setParamKeys(paramKeys);
+                        route.setRegular(true);
+                        route.setUrlTemplate(urlTemplate);
+                    }
+                }
 
                 string handleKey = this.makeRequestHandleKey(route);
 
@@ -413,7 +421,7 @@ class Router
 
             if (route.handle is null)
             {
-               logDebugf("handle is null (%s).", route.getPattern());
+                logDebugf("handle is null (%s).", route.getPattern());
                 return null;
             }
 
@@ -423,21 +431,25 @@ class Router
         string makeRequestHandleKey(Route route)
         {
             string handleKey;
-            
+
             if (route.staticFilePath == string.init)
             {
-	            if (route.getModule() == null)
-	            {
-	                handleKey = "app.controller." ~ ((route.getGroup() == DEFAULT_ROUTE_GROUP) ? "" : route.getGroup() ~ ".") ~ route.getController() ~ "." ~ route.getController() ~ "controller." ~ route.getAction();
-	            }
-	            else
-	            {
-	                handleKey = "app." ~ route.getModule() ~ ".controller." ~ ((route.getGroup() == DEFAULT_ROUTE_GROUP) ? "" : route.getGroup() ~ ".") ~ route.getController() ~ "." ~ route.getController() ~ "controller." ~ route.getAction();
-	            }
+                if (route.getModule() == null)
+                {
+                    handleKey = "app.controller." ~ ((route.getGroup() == DEFAULT_ROUTE_GROUP) ? ""
+                            : route.getGroup() ~ ".") ~ route.getController() ~ "." ~ route.getController()
+                        ~ "controller." ~ route.getAction();
+                }
+                else
+                {
+                    handleKey = "app." ~ route.getModule() ~ ".controller." ~ ((route.getGroup() == DEFAULT_ROUTE_GROUP)
+                            ? "" : route.getGroup() ~ ".") ~ route.getController() ~ "." ~ route.getController()
+                        ~ "controller." ~ route.getAction();
+                }
             }
             else
             {
-            	handleKey = "hunt.application.staticfile.StaticfileController.doStaticFile";
+                handleKey = "hunt.application.staticfile.StaticfileController.doStaticFile";
             }
 
             import std.string : toLower;
@@ -457,7 +469,8 @@ class Router
         // enable muiltple route group
         bool _supportMultipleGroup = false;
 
-		import hunt.init;
+        import hunt.init;
+
         alias _configPath = DEFAULT_CONFIG_PATH;
     }
 }
