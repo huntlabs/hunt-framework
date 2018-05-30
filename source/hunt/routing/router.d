@@ -297,6 +297,12 @@ class Router
 
             Route route;
 
+            route = this.makeRoute("GET", "/", "staticDir:wwwroot/", group);
+            if (route)
+            {
+                routeGroup.addRoute(route);
+            }
+
             foreach (item; items)
             {
                 route = this.makeRoute(item.methods, item.path, item.route, group);

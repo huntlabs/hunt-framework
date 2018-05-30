@@ -52,7 +52,7 @@ class DownloadResponse : Response
         
             f.seek(0);
             // logDebug("file size: ", f.size);
-            auto buf = f.rawRead(new ubyte[f.size]);
+            auto buf = f.rawRead(new ubyte[cast(uint)f.size]);
             setData(buf);
         }
         else
