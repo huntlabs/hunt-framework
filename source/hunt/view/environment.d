@@ -39,7 +39,7 @@ class Environment
 public:
     this()
     {
-        auto tpl_path = Config.app.config.templates.path.value;
+        auto tpl_path = Config.app.view.path;
         if(tpl_path.length == 0)
             tpl_path = "./views/";
         input_path = output_path = buildNormalizedPath(tpl_path) ~ dirSeparator;

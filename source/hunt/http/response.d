@@ -127,15 +127,15 @@ class Response : ResponseBuilder
         return this;
     }
 
-    // ///download file 
-    // Response download(string filename, ubyte[] file, string content_type = "binary/octet-stream")
-    // {
-    //     setHeader(HTTPHeaderCode.CONTENT_TYPE, content_type).setHeader(HTTPHeaderCode.CONTENT_DISPOSITION,
-    //             "attachment; filename=" ~ filename ~ "; size=" ~ (file.length.to!string)).setContent(
-    //             file);
+    ///download file 
+    Response download(string filename, ubyte[] file, string content_type = "binary/octet-stream")
+    {
+        setHeader(HTTPHeaderCode.CONTENT_TYPE, content_type).setHeader(HTTPHeaderCode.CONTENT_DISPOSITION,
+                "attachment; filename=" ~ filename ~ "; size=" ~ (file.length.to!string)).setContent(
+                file);
 
-    //     return this;
-    // }
+        return this;
+    }
 
     /**
      * set Cookie

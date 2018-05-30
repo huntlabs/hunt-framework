@@ -341,7 +341,7 @@ final class Application
         this._dispatcher.loadRouteGroups();
     }
 
-    void setLogConfig(ref AppConfig.LogConfig conf)
+    void setLogConfig(ref AppConfig.LoggingConfig conf)
     {
 		int level = 0;
         switch(conf.level)
