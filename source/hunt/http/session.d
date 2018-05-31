@@ -1,7 +1,6 @@
 module hunt.http.session;
 
 import huntlabs.cache;
-import hunt.utils.time;
 import hunt.exception;
 import hunt.utils.random;
 
@@ -654,6 +653,13 @@ class Session
 
 }
 
+int getCurrUnixStramp()
+{
+	return cast(int)(Clock.currTime.toUnixTime);
+}
+
+/**
+*/
 class SessionStorage
 {
 
