@@ -14,9 +14,13 @@ module hunt.routing.routegroup;
 import hunt.routing.define;
 import hunt.routing.route;
 
-import std.algorithm.searching;
+import std.algorithm;
 import std.string;
+import std.regex;
+import std.uri : decode;
 
+/**
+*/
 class RouteInfo
 {
     string mca;
@@ -31,6 +35,8 @@ class RouteInfo
     }
 }
 
+/**
+*/
 class RoutePathInfo
 {
     string path;
@@ -43,6 +49,8 @@ class RoutePathInfo
     }
 }
 
+/**
+*/
 class RouteRegInfo
 {
     HTTP_METHODS[] methods;
@@ -52,6 +60,8 @@ class RouteRegInfo
     }
 }
 
+/**
+*/
 class RouteGroup
 {
     this(string name = DEFAULT_ROUTE_GROUP)
@@ -113,45 +123,23 @@ class RouteGroup
     {
         Route route = null;
 
-        auto http_method = getMethod(toUpper(method));
-        foreach (k, v; _routes)
+        HTTP_METHODS http_method = getMethod(toUpper(method));
+        foreach (RoutePathInfo k, Route v; _routes)
         {
-            if (k.path == path)
+            // tracef("key path: %s, getMethods: %s, request: %s", k.path, v.getMethods(), path);
+            if (k.path == path && (canFind(k.methods, http_method) || k.methods
+                    == [HTTP_METHODS.ALL]))
             {
-                if (canFind(k.methods, http_method) || k.methods == [HTTP_METHODS.ALL])
-                    route = v;
+                return v;
             }
         }
 
-        if (route)
-        {
-            return route.copy();
-        }
-        else
-        {
-            foreach (key, value; this._routes)
-            {
-                import std.string;
-                import std.algorithm.searching;
-
-                if (startsWith(path, key.path) && value.staticFilePath.length > 0
-                        && (canFind(key.methods, http_method) || key.methods == [HTTP_METHODS.ALL]))
-                {
-                    return value;
-                }
-            }
-        }
-
-        import std.regex;
-        import std.uri : decode;
-
+        // 
         foreach (r; this._regexRoutes)
         {
             auto matched = path.match(regex(r.getPattern()));
-            bool matchMethod = false;
-            if (canFind(r.getMethods, http_method) || r.getMethods == [HTTP_METHODS.ALL])
-                matchMethod = true;
-            if (matched && matchMethod)
+
+            if (matched && (canFind(r.getMethods, http_method) || r.getMethods == [HTTP_METHODS.ALL]))
             {
                 route = r.copy();
                 string[string] params;
@@ -162,6 +150,17 @@ class RouteGroup
 
                 route.setParams(params);
                 return route;
+            }
+        }
+
+        //
+        foreach (key, value; _routes)
+        {
+            // tracef("key path: %s, getMethods: %s, request: %s", key.path, value.getMethods(), path);
+            if (startsWith(path, key.path) && value.staticFilePath.length > 0
+                    && (canFind(key.methods, http_method) || key.methods == [HTTP_METHODS.ALL]))
+            {
+                return value;
             }
         }
 
