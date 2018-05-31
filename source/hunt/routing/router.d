@@ -18,12 +18,15 @@ import hunt.routing.config;
 
 import hunt.application.controller;
 
-import std.algorithm.mutation;
+import std.regex;
+import std.array;
+import std.algorithm;
 import std.string;
 import std.file;
 import std.path;
-import std.array;
 
+/**
+*/
 class Router
 {
     public
@@ -238,8 +241,6 @@ class Router
             {
                 if (path.length > 1)
                 {
-                    import std.array;
-
                     // TODO: Here is a bug
                     string directory = split(path, "/")[1];
 
@@ -314,7 +315,7 @@ class Router
             Route route;
             foreach (item; items)
             {
-                if(routeGroup.exists(item.methods, this.mendPath(item.path)))
+                if (routeGroup.exists(item.methods, this.mendPath(item.path)))
                 {
                     throw new Exception("Repeated route: " ~ item.path);
                 }
@@ -332,8 +333,6 @@ class Router
             if (!haveRootRoute)
                 routeGroup.addRoute(staticRootRoute);
         }
-
-
 
         RouteGroup getGroupByDomain(string domain)
         {
@@ -402,9 +401,6 @@ class Router
                         route.setAction(mcaArray[2]);
                     }
 
-                    import std.regex;
-                    import std.array;
-
                     auto matches = path.matchAll(regex(`\{(\w+)(<([^>]+)>)?\}`));
                     if (matches)
                     {
@@ -416,7 +412,7 @@ class Router
                         foreach (m; matches)
                         {
                             paramKeys[paramCount] = m[1];
-			    string reg = m[3].length ? m[3] : "\\w+";
+                            string reg = m[3].length ? m[3] : "\\w+";
                             pattern = pattern.replaceFirst(m[0], "(" ~ reg ~ ")");
                             urlTemplate = urlTemplate.replaceFirst(m[0], "{" ~ m[1] ~ "}");
                             paramCount++;
