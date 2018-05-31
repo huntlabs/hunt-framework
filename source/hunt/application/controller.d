@@ -50,8 +50,7 @@ abstract class Controller
         if (_view is null)
         {
             _view = GetViewObject();
-            // if(request.route.getGroup() != DEFAULT_ROUTE_GROUP)
-            //     _view.setRouteGroup(request.route.getGroup());
+            _view.setRouteGroup(this.request.route.getGroup());
         }
        
         return _view;
