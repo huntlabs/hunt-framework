@@ -135,7 +135,9 @@ mixin template MakeController(string moduleName = __MODULE__)
 mixin template HuntDynamicCallFun(T, string moduleName)
 {
 public:
-    version (HuntDebugMode) pragma(msg, __createCallActionFun!(T, moduleName));
+    //version (HuntDebugMode) 
+    //pragma(msg, __createCallActionFun!(T, moduleName));
+    
     mixin(__createCallActionFun!(T, moduleName));
     shared static this()
     {
@@ -210,7 +212,9 @@ string __createCallActionFun(T, string moduleName)()
                     {
                         version (HuntDebugMode) pragma(msg,
                                 "return type is: " ~ ReturnType!t.stringof ~ " for " ~ memberName);
+
                         str ~= ReturnType!t.stringof ~ " result = this." ~ memberName ~ "();";
+
                         static if (is(ReturnType!t : Response))
                         {
                             str ~= q{
