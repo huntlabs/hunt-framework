@@ -69,7 +69,7 @@ class View
     public View setRouteGroup(string rg)
     {
         _routeGroup = rg;
-        if (_routeGroup != DEFAULT_ROUTE_GROUP)
+        //if (_routeGroup != DEFAULT_ROUTE_GROUP)
             _env.setTemplatePath(buildNormalizedPath(_templatePath) ~ dirSeparator ~ _routeGroup);
 
         return this;
