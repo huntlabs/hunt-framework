@@ -18,7 +18,8 @@ import hunt.routing.config;
 
 import hunt.application.controller;
 
-import std.string : toUpper;
+import std.algorithm.mutation;
+import std.string;
 import std.file;
 import std.path;
 import std.array;
@@ -66,6 +67,7 @@ class Router
                 {
                     url = route.getUrlTemplate();
                     import std.array : replaceFirst;
+
                     foreach (i, key; route.getParamKeys())
                     {
                         string value = params.get(key, null);
@@ -155,7 +157,6 @@ class Router
             if (!this._supportMultipleGroup)
             {
                 logDebug("Router multiple route group is disabled!");
-
                 return;
             }
             else
@@ -178,11 +179,22 @@ class Router
         Router addRoute(string method, string path, HandleFunction handle,
                 string group = DEFAULT_ROUTE_GROUP)
         {
-            this.addRoute(this.makeRoute!HandleFunction(method, path, handle, group));
+            RouteGroup routeGroup = _defaultGroup;
+            if (group != DEFAULT_ROUTE_GROUP)
+                routeGroup = this._groups.get(group, null);
+            if (routeGroup !is null)
+            {
+                Route r = routeGroup.match(method, path);
+                if (r is null)
+                    this.addRoute(this.makeRoute!HandleFunction(method, path, handle, group));
+                else
+                    throw new Exception("Repeated route: " ~ path);
+            }
+
             return this;
         }
 
-        Router addRoute(Route route, string group = DEFAULT_ROUTE_GROUP)
+        private Router addRoute(Route route, string group = DEFAULT_ROUTE_GROUP)
         {
             if (group == DEFAULT_ROUTE_GROUP)
             {
@@ -202,12 +214,13 @@ class Router
             return this;
         }
 
-        Route staticRootRoute;
+        private Route staticRootRoute;
 
         Route match(string domain, string method, string path)
         {
             Route r;
-            version(HuntDebugMode) tracef("matching: domain=%s, method=%s, path=%s", domain, method, path);
+            version (HuntDebugMode)
+                tracef("matching: domain=%s, method=%s, path=%s", domain, method, path);
             path = this.mendPath(path);
 
             if (false == this._supportMultipleGroup)
@@ -246,7 +259,8 @@ class Router
                 }
             }
 
-            version(HuntDebugMode) tracef("matching2: domain=%s, method=%s, path=%s", domain, method, path);
+            version (HuntDebugMode)
+                tracef("matching2: domain=%s, method=%s, path=%s", domain, method, path);
             r = routeGroup.match(method, path);
             if (path == "/" && r is null)
                 return staticRootRoute;
@@ -258,8 +272,6 @@ class Router
         {
             if (path != "/")
             {
-                import std.algorithm.mutation : strip;
-
                 return "/" ~ path.strip('/') ~ "/";
             }
 
@@ -273,7 +285,7 @@ class Router
         void loadConfig(string group = DEFAULT_ROUTE_GROUP)
         {
             RouteGroup routeGroup;
-            logDebugf("load config for %s", group);
+            logDebugf("loading config for %s", group);
 
             if (group == DEFAULT_ROUTE_GROUP)
             {
@@ -302,7 +314,12 @@ class Router
             Route route;
             foreach (item; items)
             {
-                if(item.path == "/")
+                if(routeGroup.exists(item.methods, this.mendPath(item.path)))
+                {
+                    throw new Exception("Repeated route: " ~ item.path);
+                }
+
+                if (item.path == "/")
                     haveRootRoute = true;
                 route = this.makeRoute(item.methods, item.path, item.route, group);
                 if (route)
@@ -312,9 +329,11 @@ class Router
             }
 
             this.staticRootRoute = this.makeRoute("GET", "/", "staticDir:wwwroot/", group);
-            if(!haveRootRoute)
+            if (!haveRootRoute)
                 routeGroup.addRoute(staticRootRoute);
         }
+
+
 
         RouteGroup getGroupByDomain(string domain)
         {
@@ -329,7 +348,8 @@ class Router
         Route makeRoute(T = string)(string methods, string path, T mca,
                 string group = DEFAULT_ROUTE_GROUP)
         {
-            version(HuntDebugMode) tracef("method: %s, path: %s, mca: %s, group: %s", methods, path, mca, group);
+            version (HuntDebugMode)
+                tracef("method: %s, path: %s, mca: %s, group: %s", methods, path, mca, group);
             auto route = new Route();
             methods = toUpper(methods);
             path = this.mendPath(path);

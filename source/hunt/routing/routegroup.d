@@ -103,6 +103,12 @@ class RouteGroup
         return null;
     }
 
+    bool exists(string method, string path)
+    {
+        Route r = match(method, path);
+        return r !is null;
+    }
+
     Route match(string method, string path)
     {
         Route route = null;
