@@ -43,8 +43,8 @@ class StaticfileController : Controller
 
 		currentPath = staticFilename;
 		string[] defaultIndexFiles = ["index.html", "index.htm", "default.html", "default.htm", "home.html"];
-		bool isFileExisted = false;
-		if(isDir(currentPath))
+		bool isFileExisted = exists(currentPath);
+		if(isFileExisted && isDir(currentPath))
 		{
 			if(currentPath[$-1] != '/')
 				currentPath ~= "/";
@@ -58,11 +58,7 @@ class StaticfileController : Controller
 				}
 			}
 		}
-		else
-		{
-			isFileExisted = exists(staticFilename);
-		}
-        
+
         if (!isFileExisted)
         {
 			logWarning("No default index files (like index.html) found in: ", currentPath);
