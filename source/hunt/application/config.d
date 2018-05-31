@@ -33,7 +33,7 @@ final class AppConfig
     struct ApplicationConf
     {
         string name = "Hunt Application";
-        string baseUrl;
+        string baseUrl = "http://localhost:8080/";
         string defaultCookieDomain = ".example.com";
         string defaultLanguage = "zh-CN";
         string languages = "zh-CN,en-US";
@@ -47,7 +47,7 @@ final class AppConfig
         string storage = "memory";
         string prefix = "huntsession_";
         string args = "/tmp";
-        uint expire = 3600;
+        uint expire = 3600; // in seconds
     }
 
     struct CacheConf
@@ -66,7 +66,6 @@ final class AppConfig
         size_t keepAliveTimeOut = 30;
         size_t maxHeaderSize = 60 * 1024;
         int cacheControl;
-        string path;
     }
 
     struct HttpsConf
@@ -166,7 +165,7 @@ final class AppConfig
 
     struct DatabaseConf
     {
-        @Value("defaults")
+        @Value("default")
         DBConfig defaultOptions;
 
         DbPoolConf pool;

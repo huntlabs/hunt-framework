@@ -13,6 +13,7 @@ module hunt.http.request;
 
 import std.exception;
 
+import kiss.logger;
 import kiss.container.ByteBuffer;
 import collie.codec.http;
 import collie.codec.http.server.requesthandler;
@@ -625,12 +626,12 @@ final class Request : RequestHandler
 	private Session getSession(string sessionName = "hunt_session")
 	{
 		string sessionId = getCookieValue(sessionName);
-		version (HuntDebugMode)  trace("last sessionId =>", sessionId);
+		version (HuntDebugMode)  kiss.logger.trace("last sessionId =>", sessionId);
 		if (sessionId.empty)
 		{
 			auto _tmp = new Session(Application.getInstance().getSessionStorage());
 			createResponse().setCookie(sessionName, _tmp.sessionId);
-			version (HuntDebugMode) trace("latest sessionId =>", _tmp.sessionId);
+			version (HuntDebugMode) kiss.logger.trace("latest sessionId =>", _tmp.sessionId);
 			return _tmp;
 		}
 
