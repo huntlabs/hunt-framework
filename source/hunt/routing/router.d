@@ -405,7 +405,7 @@ class Router
                     import std.regex;
                     import std.array;
 
-                    auto matches = path.matchAll(regex(`:(\w+)`));
+                    auto matches = path.matchAll(regex(`\{(\w+):([^\}]+)\}`));
                     if (matches)
                     {
                         string[int] paramKeys;
