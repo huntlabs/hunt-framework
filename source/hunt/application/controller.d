@@ -40,13 +40,21 @@ abstract class Controller
     {
         Request request;
         Response _response;
+        View _view;
         ///called before all actions
         MiddlewareInterface[] middlewares;
     }
 
     @property View view()
     {
-        return GetViewInstance();
+        if (_view is null)
+        {
+            _view = GetViewObject();
+            // if(request.route.getGroup() != DEFAULT_ROUTE_GROUP)
+            //     _view.setRouteGroup(request.route.getGroup());
+        }
+       
+        return _view;
     }
 
     final @property Response response()

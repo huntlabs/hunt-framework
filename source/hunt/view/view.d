@@ -21,7 +21,10 @@ public import hunt.view.render;
 public import hunt.view.rule;
 public import hunt.view.util;
 
+public import kiss.util.serialize;
 import std.json : JSONValue;
+import std.path;
+import hunt.routing;
 
 class View
 {
@@ -30,11 +33,13 @@ class View
         string _templatePath = "./views/";
         string _extName = ".html";
         Environment _env;
+        string _routeGroup = DEFAULT_ROUTE_GROUP;
+        JSONValue _context;
     }
 
-    this()
+    this(Environment env)
     {
-        _env = new Environment(_templatePath);
+        _env = env;
     }
 
     public Environment env()
@@ -61,24 +66,45 @@ class View
         return _templatePath;
     }
 
-    public string render(string tempalteFile, JSONValue values)
+    public View setRouteGroup(string rg)
     {
-        return _env.render_file(tempalteFile ~ _extName, values);
+        _routeGroup = rg;
+        if (_routeGroup != DEFAULT_ROUTE_GROUP)
+            _env.setTemplatePath(buildNormalizedPath(_templatePath) ~ dirSeparator ~ _routeGroup);
+
+        return this;
+    }
+
+    public string render(string tempalteFile)
+    {
+        import std.stdio;
+
+        writeln("---rend context :", _context.toString);
+        return _env.render_file(tempalteFile ~ _extName, _context);
+    }
+
+    public void assign(T)(string key, T t)
+    {
+        this.assign(key, toJSON(t));
+    }
+
+    public void assign(string key, JSONValue t)
+    {
+        _context[key] = t;
     }
 }
 
-private View _viewInstance;
+private Environment _envInstance;
 
-View GetViewInstance()
+View GetViewObject()
 {
-    if (_viewInstance is null)
+    import hunt.application.config;
+    if (_envInstance is null)
     {
-        import hunt.application.config;
-
-        _viewInstance = new View;
-        _viewInstance.setTemplatePath(Config.app.view.path)
-                     .setTemplateExt(Config.app.view.ext);
+        _envInstance = new Environment;
     }
+    auto view = new View(_envInstance);
 
-    return _viewInstance;
+    view.setTemplatePath(Config.app.view.path).setTemplateExt(Config.app.view.ext);
+    return view;
 }
