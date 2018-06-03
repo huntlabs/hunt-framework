@@ -903,7 +903,7 @@ final class Request : RequestHandler
      * @param  string|array|null  default
      * @return string|array
      */
-	string cookie(string key, string defaultValue = "")
+	string cookie(string key, string defaultValue = null)
 	{
 		return cookies.get(key, defaultValue);
 	}
