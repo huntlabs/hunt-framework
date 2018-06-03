@@ -893,8 +893,7 @@ final class Request : RequestHandler
      */
 	bool hasCookie(string key)
 	{
-		string c = cookie(key);
-		return c.length > 0;
+		return cookie(key).length > 0;
 	}
 
 	/**
@@ -904,7 +903,7 @@ final class Request : RequestHandler
      * @param  string|array|null  default
      * @return string|array
      */
-	string cookie(string key, string defaultValue = null)
+	string cookie(string key, string defaultValue = "")
 	{
 		return cookies.get(key, defaultValue);
 	}
