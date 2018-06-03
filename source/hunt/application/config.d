@@ -60,6 +60,7 @@ final class AppConfig
     struct HttpConf
     {
         string address = "0.0.0.0";
+        string path = "wwwroot/";
         ushort port = 8080;
         uint workerThreads = 4;
         uint ioThreads = 2;
