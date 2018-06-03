@@ -600,7 +600,8 @@ final class Request : RequestHandler
 	{
 		if (!hasSession())
 		{
-			string sessionId = getCookieValue(sessionName);
+			string sessionName = "hunt_session"
+			string sessionId = this.cookie(sessionName);
 			
 			version (HuntDebugMode)  kiss.logger.trace("last sessionId =>", sessionId);
 			if (sessionId.empty)
@@ -892,8 +893,8 @@ final class Request : RequestHandler
      */
 	bool hasCookie(string key)
 	{
-		Cookie c = getCookie(key);
-		return c !is null;
+		string c = cookie(key);
+		return c.length > 0;
 	}
 
 	/**
@@ -905,7 +906,7 @@ final class Request : RequestHandler
      */
 	string cookie(string key, string defaultValue = null)
 	{
-		returncookies.get(key, defaultValue);
+		return cookies.get(key, defaultValue);
 	}
 
 	/**
