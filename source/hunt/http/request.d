@@ -160,22 +160,6 @@ final class Request : RequestHandler
 		return _httpMessage.getHeaders.forEachValueOfHeader(code, func);
 	}
 
-	@property string clientIp()
-	{
-		string XFF = header("X-Forwarded-For");
-		string[] xff_arr = split(XFF, ", ");
-		if (xff_arr.length > 0)
-		{
-			return xff_arr[0];
-		}
-		string XRealIP = header("X-Real-IP");
-		if (XRealIP.length > 0)
-		{
-			return XRealIP;
-		}
-		return clientAddress.toAddrString();
-	}
-
 	@property string referer()
 	{
 		string rf = header("Referer");
@@ -202,21 +186,6 @@ final class Request : RequestHandler
 		}
 
 		return _cookies;
-	}
-
-	private Cookie getCookie(string key)
-	{
-		return cookies.get(key, null);
-	}
-
-	string getCookieValue(string key, string defaults = null)
-	{
-		auto cookie = this.getCookie(key);
-		if (cookie is null)
-		{
-			return defaults;
-		}
-		return cookie.value;
 	}
 
 	@property JSONValue json()
@@ -622,21 +591,6 @@ final class Request : RequestHandler
 		this.session().flashInput(null);
 	}
 
-	private Session getSession(string sessionName = "hunt_session")
-	{
-		string sessionId = getCookieValue(sessionName);
-		version (HuntDebugMode)  kiss.logger.trace("last sessionId =>", sessionId);
-		if (sessionId.empty)
-		{
-			auto _tmp = new Session(Application.getInstance().getSessionStorage());
-			createResponse().setCookie(sessionName, _tmp.sessionId);
-			version (HuntDebugMode) kiss.logger.trace("latest sessionId =>", _tmp.sessionId);
-			return _tmp;
-		}
-
-		return new Session(sessionId, Application.getInstance().getSessionStorage());
-	}
-	
 	/**
      * Gets the Session.
      *
@@ -645,7 +599,21 @@ final class Request : RequestHandler
 	@property Session session()
 	{
 		if (!hasSession())
-			_session = getSession();
+		{
+			string sessionId = getCookieValue(sessionName);
+			
+			version (HuntDebugMode)  kiss.logger.trace("last sessionId =>", sessionId);
+			if (sessionId.empty)
+			{
+				auto _tmp = new Session(Application.getInstance().getSessionStorage());
+				createResponse().setCookie(sessionName, _tmp.sessionId);
+				version (HuntDebugMode) kiss.logger.trace("latest sessionId =>", _tmp.sessionId);
+				return _tmp;
+			}
+
+			_session = new Session(sessionId, Application.getInstance().getSessionStorage());
+		}
+
 		return _session;
 	}
 
@@ -935,9 +903,9 @@ final class Request : RequestHandler
      * @param  string|array|null  default
      * @return string|array
      */
-	string cookie(string key, string defaults = null)
+	string cookie(string key, string defaultValue = null)
 	{
-		return getCookieValue(key, defaults);
+		returncookies.get(key, defaultValue);
 	}
 
 	/**
@@ -974,7 +942,6 @@ final class Request : RequestHandler
 	{
 		return httpForm.getFileValue(key);
 	}
-	// 
 
 	@property string method()
 	{
@@ -1461,7 +1428,6 @@ final class Request : RequestHandler
 		throw new NotImplementedException("isFromTrustedProxy");
     }
 	
-
 protected:
 	override void onBody(const ubyte[] data) nothrow
 	{
@@ -1563,17 +1529,13 @@ private:
 	DoHandler _handler;
 	bool fristBody = true;
 	string _action;
-	
 }
-
 
 void setTrustedProxies(string[] proxies, int headerSet)
 {
 	trustedProxies = proxies;
 	trustedHeaderSet = headerSet;
 }
-
-
 
 package
 {
@@ -1588,7 +1550,6 @@ package
     const HEADER_X_FORWARDED_PORT = 0b10000;
     const HEADER_X_FORWARDED_ALL = 0b11110; // All "X-Forwarded-*" headers
     const HEADER_X_FORWARDED_AWS_ELB = 0b11010; // AWS ELB doesn"t send X-Forwarded-Host	
-
 }
 
 static this()
