@@ -600,7 +600,7 @@ final class Request : RequestHandler
 	{
 		if (!hasSession())
 		{
-			string sessionName = "hunt_session"
+			string sessionName = "hunt_session";
 			string sessionId = this.cookie(sessionName);
 			
 			version (HuntDebugMode)  kiss.logger.trace("last sessionId =>", sessionId);
