@@ -29,7 +29,7 @@ class StaticfileController : Controller
         {
 			// FIXME: Needing refactor or cleanup -@zxp at 5/25/2018, 10:02:46 AM
 			// get the value from the configuration
-			currentPath = "wwwroot";
+			currentPath = Config.app.http.path;
         }
 
         string staticFilename = mendPath(currentPath);
