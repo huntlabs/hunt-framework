@@ -440,5 +440,5 @@ final class Application
 
 @property Application app()
 {
-    return Application.getInstace();
+    return Application.getInstance();
 }
