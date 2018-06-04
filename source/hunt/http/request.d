@@ -905,7 +905,10 @@ final class Request : RequestHandler
      */
 	string cookie(string key, string defaultValue = null)
 	{
-		return cookies.get(key, defaultValue);
+		Cookie ck  = cookies.get(key, null);
+		if(ck is null)
+			return defaultValue;
+		return ck.value;
 	}
 
 	/**
