@@ -100,7 +100,7 @@ final class Application
 
     @property loopGroup(){return _server.group;}
 
-    @property AppConfig appConfig(){return Config.app;}
+    @property AppConfig config(){return Config.app;}
 
     void setCreateBuffer(CreatorBuffer cbuffer)
     {
