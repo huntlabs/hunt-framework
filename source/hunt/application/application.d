@@ -437,3 +437,8 @@ final class Application
         __gshared TaskPool _tpool;
     }
 }
+
+@property Application app()
+{
+    return Application.getInstace();
+}
