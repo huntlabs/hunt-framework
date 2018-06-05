@@ -28,8 +28,6 @@ import collie.codec.http.server.httpserveroptions;
 @Configuration("hunt")
 final class AppConfig
 {
-    alias AddressList = Address[];
-
     struct ApplicationConf
     {
         string name = "Hunt Application";
