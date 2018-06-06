@@ -263,7 +263,7 @@ class Router
             version (HuntDebugMode)
                 tracef("matching2: domain=%s, method=%s, path=%s", domain, method, path);
             r = routeGroup.match(method, path);
-            if (path == "/" && r is null)
+            if (path[0] == '/' && r is null)
                 return staticRootRoute;
             else
                 return r;
