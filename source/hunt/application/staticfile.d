@@ -1,12 +1,12 @@
 module hunt.application.staticfile;
 
+import core.time;
 import std.conv;
 import std.string;
 import std.datetime;
 import std.path;
 import std.digest.md;
-import core.time;
-static import std.stdio;
+import std.stdio;
 
 import kiss.logger;
 import hunt;
@@ -24,16 +24,14 @@ class StaticfileController : Controller
     Response doStaticFile()
     {
 		string currentPath = request.route.staticFilePath;
-		logDebug("currentPath: ", currentPath);
+		debug logDebug("currentPath: ", currentPath);
         if (currentPath == string.init)
         {
-			// FIXME: Needing refactor or cleanup -@zxp at 5/25/2018, 10:02:46 AM
-			// get the value from the configuration
 			currentPath = Config.app.http.path;
         }
 
         string staticFilename = mendPath(currentPath);
-		logDebug ("staticFilename: ", staticFilename);
+		debug logDebug ("staticFilename: ", staticFilename);
 
         if (staticFilename == string.init)
         {
@@ -46,6 +44,7 @@ class StaticfileController : Controller
 		bool isFileExisted = exists(currentPath);
 		if(isFileExisted && isDir(currentPath))
 		{
+			isFileExisted = false;
 			if(currentPath[$-1] != '/')
 				currentPath ~= "/";
 			foreach(string f; defaultIndexFiles)
@@ -84,7 +83,6 @@ class StaticfileController : Controller
             (request.headerExists(HTTPHeaderCode.IF_NONE_MATCH) && (request.header(HTTPHeaderCode.IF_NONE_MATCH) == etag)))
         {
                 response.setStatus(HttpStatusCodes.NOT_MODIFIED);
-
                 return response;
 		}
 	
