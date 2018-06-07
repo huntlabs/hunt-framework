@@ -17,6 +17,7 @@ import hunt.routing.route;
 import hunt.routing.config;
 
 import hunt.application.controller;
+import kiss.logger;
 
 import std.regex;
 import std.array;

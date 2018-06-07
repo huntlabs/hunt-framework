@@ -36,10 +36,9 @@ enum OctetStreamContentType = "binary/octet-stream";
 */
 class Response : ResponseBuilder
 {
-    this() // string contentType = HtmlContentType
+    this()
     {
         super();
-        // setHeader(HTTPHeaderCode.CONTENT_TYPE, contentType);
     }
 
     this(string content, int status = HttpStatusCodes.OK, string[string] headers = null )
