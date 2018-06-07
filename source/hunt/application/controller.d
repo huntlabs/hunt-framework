@@ -27,13 +27,6 @@ import std.traits;
 
 enum Action;
 
-/*
-struct Middleware
-{
-    string className;
-}
-*/
-
 abstract class Controller
 {
     protected

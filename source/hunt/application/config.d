@@ -273,13 +273,13 @@ class ConfigManager
         string fullName = buildPath(path, fileName);
         if (exists(fullName))
         {
-            logDebugf("using config file: %s", fullName);
+            logDebugf("using the config file: %s", fullName);
             ConfigBuilder con = new ConfigBuilder(fullName, sec);
             _app = con.build!(AppConfig, "hunt")();
         }
         else
         {
-            logDebug("using default configs.");
+            logDebug("using default settings.");
             _app = new AppConfig();
         }
     }
