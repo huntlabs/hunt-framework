@@ -101,9 +101,9 @@ static this()
 __gshared string[Delimiter] regex_map_delimiters;
 
 enum string[Statement] regex_map_statement_openers = [
-	Statement.Loop : ("for (.+)"),
-	Statement.Condition : ("if (.+)"),
-	Statement.Include : ("include \"(.+)\"")
+	Statement.Loop : ("for \\s*(.+)"),
+	Statement.Condition : ("if \\s*(.+)"),
+	Statement.Include : ("include \\s*\"(.+)\"")
 ];
 
 enum string[Statement] regex_map_statement_closers = [
@@ -117,8 +117,8 @@ enum string[Loop] regex_map_loop = [
 ];
 
 enum string[Condition] regex_map_condition = [
-	Condition.If : ("if (.+)"),
-	Condition.ElseIf : ("else if (.+)"),
+	Condition.If : ("if \\s*(.+)"),
+	Condition.ElseIf : ("else if \\s*(.+)"),
 	Condition.Else : ("else")
 ];
 
