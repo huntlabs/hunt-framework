@@ -230,7 +230,7 @@ public:
                             if (!last_if_match.found())
                             {
                                 writeln("--####- - : ",delimiter_inner);
-                                template_engine_throw("parser_error", "misordered if statement");
+                                template_engine_throw("parser_error", "unknown statement : " ~ delimiter_inner);
                             }
 
                             string last_if_match_inner = last_if_match._open_match.str(1);
@@ -239,7 +239,7 @@ public:
                             if (!match_command.found())
                             {
                                 template_engine_throw("parser_error",
-                                        "unknown if statement: " ~ last_if_match._open_match.str());
+                                        "unknown statement: " ~ last_if_match._open_match.str());
                             }
                             if (match_command.type() == Condition.Else)
                             {
@@ -262,6 +262,7 @@ public:
                     case Statement.Include:
                         {
                             string included_filename = path ~ match_statement.str(1);
+                            writeln("----include file path : ",included_filename);
                             ASTNode included_template = parse_template(included_filename);
                             foreach (element; included_template.parsed_node.children)
                             {
