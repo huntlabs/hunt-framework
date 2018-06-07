@@ -25,6 +25,7 @@ public import kiss.util.serialize;
 import std.json : JSONValue;
 import std.path;
 import hunt.routing;
+enum DEFAULT_LEVEL = 3;
 
 class View
 {
@@ -85,7 +86,7 @@ class View
 
     public void assign(T)(string key, T t)
     {
-        this.assign(key, toJSON(t));
+		this.assign(key, toJSON(t , DEFAULT_LEVEL));
     }
 
     public void assign(string key, JSONValue t)
