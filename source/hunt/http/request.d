@@ -252,13 +252,6 @@ final class Request : RequestHandler
 		}
 		return v;
 	}
-	//	alias _req this;
-
-	/// GET FILE , if return NULL , file is null
-	HTTPForm.FormFile file(string key)
-	{
-		return postForm.getFileValue(key);
-	}
 
 	@property ref string[string] materef()
 	{
