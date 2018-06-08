@@ -346,7 +346,8 @@ final class Application
     void setLogConfig(ref AppConfig.LoggingConfig conf)
     {
 		int level = 0;
-        switch(conf.level)
+        import std.string : toLower;
+        switch(toLower(conf.level))
         {
             case "all":
 			case "trace":
