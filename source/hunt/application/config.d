@@ -210,7 +210,7 @@ final class AppConfig
     RouteConf route;
     MemcacheConf memcache;
     RedisConf redis;
-    LoggingConfig log;
+    LoggingConfig logging;
     UploadConf upload;
     UploadConf download () { return upload;}
     CornConf cron;
