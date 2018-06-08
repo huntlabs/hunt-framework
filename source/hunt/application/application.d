@@ -187,13 +187,15 @@ final class Application
 
 	void setConfig(AppConfig config)
 	{
-		setLogConfig(config.log);
+		setLogConfig(config.logging);
+
 		upConfig(config);
 		//setRedis(config.redis);
 		//setMemcache(config.memcache);
 
         if(config.database.defaultOptions.enabled)
             initDatabase(config.database);
+            
 		initCache(config.cache);
 		initSessionStorage(config.session);
 	}
@@ -346,7 +348,9 @@ final class Application
     void setLogConfig(ref AppConfig.LoggingConfig conf)
     {
 		int level = 0;
+
         import std.string : toLower;
+
         switch(toLower(conf.level))
         {
             case "all":
@@ -373,20 +377,19 @@ final class Application
 			default:
 				level = 0;
         }
+
 		LogConf logconf;
 		logconf.level = level;
 		logconf.disableConsole = conf.disableConsole;
+
         if(!conf.file.empty)
 		    logconf.fileName = buildPath(conf.path, conf.file);
+
 		logconf.maxSize = conf.maxSize;
 		logconf.maxNum = conf.maxNum;
 
 		logLoadConf(logconf);
-
     }
-
-
-
 
     version(USE_KISS_RPC) {
         import kissrpc.RpcManager;
