@@ -123,6 +123,7 @@ final class Application
             options.setConnectionTimeout(config.pool.connectionTimeout);
 
             _entityManagerFactory = Persistence.createEntityManagerFactory("default", options);
+            _entityManagerFactory.setDBPrefix(config.defaultOptions.prefix);
         }
     }
 
