@@ -102,6 +102,12 @@ final class Application
 
     @property AppConfig config(){return Config.app;}
 
+    Application onConfig(string section="", string fileName = "application.conf")
+    {
+        Config.setAppSection(section, fileName);
+        return this;
+    }
+
     void setCreateBuffer(CreatorBuffer cbuffer)
     {
         if(cbuffer)
