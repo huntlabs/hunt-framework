@@ -242,11 +242,11 @@ class ConfigNotFoundException : Exception
 */
 class ConfigManager
 {
-    @property AppConfig app()
+    @property AppConfig app(string section="", string fileName = "application.conf")
     {
         if (!_app)
         {
-            setAppSection("");
+            setAppSection(section, fileName);
         }
 
         return _app;
@@ -276,6 +276,7 @@ class ConfigManager
             logDebugf("using the config file: %s", fullName);
             ConfigBuilder con = new ConfigBuilder(fullName, sec);
             _app = con.build!(AppConfig, "hunt")();
+            addConfig("hunt", con);
         }
         else
         {
