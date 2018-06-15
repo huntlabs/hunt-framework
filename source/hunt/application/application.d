@@ -130,8 +130,8 @@ final class Application
             options.setMinimumConnection(config.pool.minConnection);
             options.setConnectionTimeout(config.pool.connectionTimeout);
 
-            _entityManagerFactory = Persistence.createEntityManagerFactory("default", options);
-            _entityManagerFactory.setDBPrefix(config.defaultOptions.prefix);
+            _entityManagerFactory = Persistence.createEntityManagerFactory("default", options, config.defaultOptions.prefix);
+
         }
     }
 
