@@ -224,7 +224,7 @@ string __createCallActionFun(T, string moduleName)()
                         else
                         {
                             str ~= q{
-                                actionResult = new Response(); // req.createResponse(); 
+                                actionResult = this.response;
                                 actionResult.setContent(to!string(result));
                             };
                         }
