@@ -39,6 +39,8 @@ import hunt.routing;
 import hunt.application.dispatcher;
 import hunt.security.acl.Manager;
 
+public import hunt.task;
+
 public import hunt.http;
 public import hunt.i18n;
 public import hunt.application.config;
@@ -175,6 +177,11 @@ final class Application
 		return _accessManager;
 	}
 
+    @property TaskManager task()
+    {
+        return _taskManager;
+    }
+
     /**
       Start the HTTPServer server , and block current thread.
      */
@@ -210,6 +217,7 @@ final class Application
 	void start()
 	{
 		writeln("Try to browse http://",addr.toString());
+        _taskManager.setEventLoop(mainLoop);
 		_server.start();
 	}
 
@@ -415,6 +423,7 @@ final class Application
         _cbuffer = &defaultBuffer;
 		_accessManager = new AccessManager();
 		_manger = new CacheManger();
+        _taskManager = GetTaskMObject();
 
         this._dispatcher = new Dispatcher();
 		setConfig(Config.app);
@@ -433,6 +442,7 @@ final class Application
     CacheManger _manger;
 	SessionStorage _sessionStorage;
 	AccessManager  _accessManager;
+    TaskManager  _taskManager;
 
     version(NO_TASKPOOL)
     {
