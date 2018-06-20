@@ -39,8 +39,6 @@ import hunt.routing;
 import hunt.application.dispatcher;
 import hunt.security.acl.Manager;
 
-public import hunt.task;
-
 public import hunt.http;
 public import hunt.i18n;
 public import hunt.application.config;
@@ -104,12 +102,6 @@ final class Application
 
     @property AppConfig config(){return Config.app;}
 
-    Application onConfig(string section="", string fileName = "application.conf")
-    {
-        Config.setAppSection(section, fileName);
-        return this;
-    }
-
     void setCreateBuffer(CreatorBuffer cbuffer)
     {
         if(cbuffer)
@@ -124,14 +116,31 @@ final class Application
         }
         else
         {
-            auto options = new DatabaseOption(config.defaultOptions.url);
+            import entity.EntityOption;
 
-            options.setMaximumConnection(config.pool.maxConnection);
-            options.setMinimumConnection(config.pool.minConnection);
-            options.setConnectionTimeout(config.pool.connectionTimeout);
+            auto option = new EntityOption;
+            
+            // database options
+            option.database.driver = config.defaultOptions.driver;
+            option.database.host = config.defaultOptions.host;
+            option.database.username = config.defaultOptions.username;
+            option.database.password = config.defaultOptions.password;
+            option.database.port = config.defaultOptions.port;
+            option.database.database = config.defaultOptions.database;
+            option.database.charset = config.defaultOptions.charset;
+            option.database.prefix = config.defaultOptions.prefix;
+            
+            // database pool options
+            option.minIdle = config.pool.minIdle;
+            option.idleTimeout = config.pool.idleTimeout;
+            option.maxPoolSize = config.pool.maxPoolSize;
+            option.minPoolSize = config.pool.minPoolSize;
+            option.maxLifetime = config.pool.maxLifetime;
+            option.connectionTimeout = config.pool.connectionTimeout;
+            option.maxConnection = config.pool.maxConnection;
+            option.minConnection = config.pool.minConnection;
 
-            _entityManagerFactory = Persistence.createEntityManagerFactory("default", options, config.defaultOptions.prefix);
-
+            _entityManagerFactory = Persistence.createEntityManagerFactory("default", option);
         }
     }
 
@@ -177,11 +186,6 @@ final class Application
 		return _accessManager;
 	}
 
-    @property TaskManager task()
-    {
-        return _taskManager;
-    }
-
     /**
       Start the HTTPServer server , and block current thread.
      */
@@ -201,15 +205,13 @@ final class Application
 
 	void setConfig(AppConfig config)
 	{
-		setLogConfig(config.logging);
-
+		setLogConfig(config.log);
 		upConfig(config);
 		//setRedis(config.redis);
 		//setMemcache(config.memcache);
 
         if(config.database.defaultOptions.enabled)
             initDatabase(config.database);
-            
 		initCache(config.cache);
 		initSessionStorage(config.session);
 	}
@@ -217,7 +219,6 @@ final class Application
 	void start()
 	{
 		writeln("Try to browse http://",addr.toString());
-        _taskManager.setEventLoop(mainLoop);
 		_server.start();
 	}
 
@@ -362,44 +363,47 @@ final class Application
 
     void setLogConfig(ref AppConfig.LoggingConfig conf)
     {
-		kiss.logger.LogLevel level = kiss.logger.LogLevel.LOG_DEBUG;
-
-        import std.string : toLower;
-
-        switch(toLower(conf.level))
+		int level = 0;
+        switch(conf.level)
         {
+            case "all":
+			case "trace":
+			case "debug":
+				level = 0;
+                break;
             case "critical":
             case "error":
-				level = kiss.logger.LogLevel.LOG_ERROR;
+				level = 3;
                 break;
             case "fatal":
-				level = kiss.logger.LogLevel.LOG_FATAL;
+				level = 4;
                 break;
             case "info":
-				level = kiss.logger.LogLevel.LOG_INFO;
+				level = 1;
                 break;
             case "warning":
-				level = kiss.logger.LogLevel.LOG_WARNING;
+				level = 2;
                 break;
             case "off":
-				level = kiss.logger.LogLevel.LOG_Off;
+				level = 5;
                 break;
 			default:
-                break;
+				level = 0;
         }
-
 		LogConf logconf;
 		logconf.level = level;
 		logconf.disableConsole = conf.disableConsole;
-
         if(!conf.file.empty)
 		    logconf.fileName = buildPath(conf.path, conf.file);
-
 		logconf.maxSize = conf.maxSize;
 		logconf.maxNum = conf.maxNum;
 
 		logLoadConf(logconf);
+
     }
+
+
+
 
     version(USE_KISS_RPC) {
         import kissrpc.RpcManager;
@@ -423,7 +427,6 @@ final class Application
         _cbuffer = &defaultBuffer;
 		_accessManager = new AccessManager();
 		_manger = new CacheManger();
-        _taskManager = GetTaskMObject();
 
         this._dispatcher = new Dispatcher();
 		setConfig(Config.app);
@@ -442,7 +445,6 @@ final class Application
     CacheManger _manger;
 	SessionStorage _sessionStorage;
 	AccessManager  _accessManager;
-    TaskManager  _taskManager;
 
     version(NO_TASKPOOL)
     {
