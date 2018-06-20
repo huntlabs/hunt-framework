@@ -631,7 +631,7 @@ private:
 protected:
     void initialize_cookieparams()
     {
-        foreach (key, value; RESERVED_PARAMS)
+        /*foreach (key, value; RESERVED_PARAMS)
         {
             if(key == "expires")
                 _cookieparams[key] = "0";
@@ -641,12 +641,13 @@ protected:
                 _cookieparams[key] = "false";
             else if(key == "httponly")
                 _cookieparams[key] = "false";
+
             else if(key == "raw")
                 _cookieparams[key] = "true";
             else
                  _cookieparams[key] = "";
 
-        }
+        }*/
     }
 
 }
