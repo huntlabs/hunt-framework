@@ -25,6 +25,7 @@ enum TaskStatus : ubyte
 
 class Task
 {
+    alias FinishFunc = void delegate(Task) nothrow;
 
     this()
     {
@@ -36,6 +37,16 @@ class Task
         trace("please override the 'exec' function !");
     }
 
+    final @property size_t tid()
+    {
+        return _taskid;
+    }
+
+    final @property void setFinish(FinishFunc finish)
+    {
+        _finishFunc = finish;
+    }
+
 protected:
     final void setInterval(Duration d)
     {
@@ -45,11 +56,6 @@ protected:
     @property Duration interval()
     {
         return _interval;
-    }
-
-    @property size_t tid()
-    {
-        return _taskid;
     }
 
     @property TaskStatus status()
@@ -70,15 +76,21 @@ protected:
         return true;
     }
 
+    @property void onFinish()
+    {
+        if(_finishFunc)
+            return _finishFunc(this);
+    }
 private:
     Duration _interval;
     size_t _taskid;
     shared TaskStatus _status = TaskStatus.IDLE;
+    FinishFunc _finishFunc;
 }
 
 class TaskManager
 {
-private:
+private :
     EventLoop _taskLoop;
     Task[size_t] _tasks;
     ReadWriteMutex _mutex;
@@ -98,7 +110,7 @@ public :
     {
         _taskLoop = el;
     }
-public:
+public :
 
     void run()
     {
@@ -109,6 +121,7 @@ public:
     {
         trace("--do job ---: ", t.tid);
         t.exec();
+        t.onFinish();
         auto interval = cast(size_t) t.interval.total!("msecs");
         if (interval == 0)
         {
@@ -160,7 +173,7 @@ public:
         return false;
     }
 
-private:
+private :
     bool add(Task t)
     {
         _mutex.writer.lock();
