@@ -205,7 +205,7 @@ final class Application
 
 	void setConfig(AppConfig config)
 	{
-		setLogConfig(config.log);
+		setLogConfig(config.logging);
 		upConfig(config);
 		//setRedis(config.redis);
 		//setMemcache(config.memcache);
@@ -363,38 +363,39 @@ final class Application
 
     void setLogConfig(ref AppConfig.LoggingConfig conf)
     {
-		int level = 0;
-        switch(conf.level)
+       	kiss.logger.LogLevel level = kiss.logger.LogLevel.LOG_DEBUG;
+
+        import std.string : toLower;
+
+        switch(toLower(conf.level))
         {
-            case "all":
-			case "trace":
-			case "debug":
-				level = 0;
-                break;
             case "critical":
             case "error":
-				level = 3;
+				level = kiss.logger.LogLevel.LOG_ERROR;
                 break;
             case "fatal":
-				level = 4;
+				level = kiss.logger.LogLevel.LOG_FATAL;
                 break;
             case "info":
-				level = 1;
+				level = kiss.logger.LogLevel.LOG_INFO;
                 break;
             case "warning":
-				level = 2;
+				level = kiss.logger.LogLevel.LOG_WARNING;
                 break;
             case "off":
-				level = 5;
+				level = kiss.logger.LogLevel.LOG_Off;
                 break;
 			default:
-				level = 0;
+                break;
         }
+
 		LogConf logconf;
 		logconf.level = level;
 		logconf.disableConsole = conf.disableConsole;
+
         if(!conf.file.empty)
 		    logconf.fileName = buildPath(conf.path, conf.file);
+
 		logconf.maxSize = conf.maxSize;
 		logconf.maxNum = conf.maxNum;
 
