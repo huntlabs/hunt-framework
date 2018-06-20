@@ -131,14 +131,14 @@ final class Application
             option.database.prefix = config.defaultOptions.prefix;
             
             // database pool options
-            option.minIdle = config.pool.minIdle;
-            option.idleTimeout = config.pool.idleTimeout;
-            option.maxPoolSize = config.pool.maxPoolSize;
-            option.minPoolSize = config.pool.minPoolSize;
-            option.maxLifetime = config.pool.maxLifetime;
-            option.connectionTimeout = config.pool.connectionTimeout;
-            option.maxConnection = config.pool.maxConnection;
-            option.minConnection = config.pool.minConnection;
+            option.pool.minIdle = config.pool.minIdle;
+            option.pool.idleTimeout = config.pool.idleTimeout;
+            option.pool.maxPoolSize = config.pool.maxPoolSize;
+            option.pool.minPoolSize = config.pool.minPoolSize;
+            option.pool.maxLifetime = config.pool.maxLifetime;
+            option.pool.connectionTimeout = config.pool.connectionTimeout;
+            option.pool.maxConnection = config.pool.maxConnection;
+            option.pool.minConnection = config.pool.minConnection;
 
             _entityManagerFactory = Persistence.createEntityManagerFactory("default", option);
         }

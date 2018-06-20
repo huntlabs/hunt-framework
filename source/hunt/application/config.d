@@ -153,7 +153,7 @@ final class AppConfig
 
         string driver = "postgresql";
         string host = "localhost";
-        int port = 5432;
+        ushort port = 5432;
         string database = "test";
         string username = "root";
         string password = "";
