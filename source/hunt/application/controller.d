@@ -141,7 +141,7 @@ public:
     mixin(__createCallActionFun!(T, moduleName));
     shared static this()
     {
-        // pragma(msg, __createRouteMap!(T, moduleName));
+        pragma(msg, __createRouteMap!(T, moduleName));
         mixin(__createRouteMap!(T, moduleName));
     }
 }
@@ -210,10 +210,34 @@ string __createCallActionFun(T, string moduleName)()
                     }
                     else
                     {
-                        version (HuntDebugMode) pragma(msg,
+                        // version (HuntDebugMode) 
+                        pragma(msg,
                                 "return type is: " ~ ReturnType!t.stringof ~ " for " ~ memberName);
 
-                        str ~= ReturnType!t.stringof ~ " result = this." ~ memberName ~ "();";
+                        auto params = ParameterIdentifierTuple!t;
+                        static if (params.length > 0)
+                        {
+                            import std.conv : to;
+
+                            int i = 0;
+                            string paramString = "";
+
+                            foreach (param; params)
+                            {
+                                enum paramType = Parameters!t[i];
+                                string varName = "var_" ~ i.to!string;
+
+                                str ~= "auto " ~ varName ~ " = request.get(\"" ~ param ~ "\").to!" ~ paramType ~ ";";
+                                
+                                paramString ~= i == 0 ? varName : ", " ~ varName;
+                                i++;
+                            }
+                            str ~= ReturnType!t.stringof ~ " result = this." ~ memberName ~ "(" ~ paramString ~ ");";
+                        }
+                        else
+                        {
+                            str ~= ReturnType!t.stringof ~ " result = this." ~ memberName ~ "();";
+                        }
 
                         static if (is(ReturnType!t : Response))
                         {
