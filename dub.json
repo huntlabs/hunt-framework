@@ -5,8 +5,8 @@
     "description": "A high performance full-stack Web framework.",
     "dependencies": {
         "collie": "~>0.10.15",
-        "kiss": "~>0.4.3",
-        "entity": "~>1.5.0",
+        "kiss": "~>0.4.4",
+        "entity": "~>1.5.1",
         "cache": "~>0.0.6"
     },
     "configurations": [
