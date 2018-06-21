@@ -32,7 +32,7 @@ class Task
         _taskid = toHash();
     }
 
-    void exec()
+    abstract void exec()
     {
         trace("please override the 'exec' function !");
     }
@@ -53,12 +53,12 @@ protected:
         _interval = d;
     }
 
-    @property Duration interval()
+    final @property Duration interval()
     {
         return _interval;
     }
 
-    @property TaskStatus status()
+    final @property TaskStatus status()
     {
         return atomicLoad(_status);
     }
@@ -68,7 +68,7 @@ protected:
         atomicStore(_status, ts);
     }
 
-    @property bool cancel()
+    final @property bool cancel()
     {
         if (atomicLoad(_status) == TaskStatus.RUNNING)
             return false;
@@ -76,7 +76,7 @@ protected:
         return true;
     }
 
-    @property void onFinish()
+    final @property void onFinish()
     {
         if(_finishFunc)
             return _finishFunc(this);
@@ -88,7 +88,7 @@ private:
     FinishFunc _finishFunc;
 }
 
-class TaskManager
+final class TaskManager
 {
 private :
     EventLoop _taskLoop;
