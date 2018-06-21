@@ -136,9 +136,9 @@ mixin template HuntDynamicCallFun(T, string moduleName)
 {
 public:
     // version (HuntDebugMode) 
-    // pragma(msg, __createCallActionFun!(T, moduleName));
+    // pragma(msg, __createCallActionMethod!(T, moduleName));
     
-    mixin(__createCallActionFun!(T, moduleName));
+    mixin(__createCallActionMethod!(T, moduleName));
     shared static this()
     {
         // pragma(msg, __createRouteMap!(T, moduleName));
@@ -157,7 +157,7 @@ private
     }
 }
 
-string __createCallActionFun(T, string moduleName)()
+string __createCallActionMethod(T, string moduleName)()
 {
     import std.traits;
     import std.format;
@@ -165,11 +165,12 @@ string __createCallActionFun(T, string moduleName)()
     import kiss.logger;
 
     string str = `
-        Response callAction(string funName, Request req) {
+        Response callActionMethod(string methodName, Request req) {
         this.request = req; 
         Response actionResult=null;
-        version (HuntDebugMode) logDebug("funName=", funName);
-        switch(funName){
+        version (HuntDebugMode) logDebug("methodName=", methodName);
+
+        switch(methodName){
     `;
 
     foreach (memberName; __traits(allMembers, T))
@@ -182,88 +183,87 @@ string __createCallActionFun(T, string moduleName)()
                 version (HuntDebugMode) pragma(msg, "memberName: " ~ memberName);
 
                 //alias pars = ParameterTypeTuple!(t);
-                static if (hasUDA!(t, Action) || hasUDA!(t, Route) || _isActionMember)
+                static if (hasUDA!(t, Action) || _isActionMember)
                 {
-                    str ~= "case \"" ~ memberName ~ "\": {\n";
+                    str ~= "\tcase \"" ~ memberName ~ "\": {\n";
 
                     static if (hasUDA!(t, Action) || _isActionMember)
                     {
 
-                        //before
-                        str ~= q{
-                            if(this.getMiddlewares().length){
-                                auto response = this.doMiddleware();
-                                if (response !is null)
-                                {
-                                    return response;
-                                }
-                            }
-                            this.before();
-                        };
+            //before
+            str ~= q{
+                if(this.getMiddlewares().length)
+                {
+                    auto response = this.doMiddleware();
+
+                    if (response !is null)
+                    {
+                        return response;
+                    }
+                }
+
+                this.before();
+};
                     }
 
-                    //action
-                    static if (is(ReturnType!t == void))
+                    // Action parameters
+                    auto params = ParameterIdentifierTuple!t;
+                    string paramString = "";
+
+                    static if (params.length > 0)
                     {
-                        str ~= "this." ~ memberName ~ "(); actionResult = req.createResponse();";
-                        version (HuntDebugMode) pragma(msg, "no return value for " ~ memberName);
+                        import std.conv : to;
+
+                        string varName = "";
+                        alias paramsType = Parameters!t;
+
+                        static foreach (int i; 0..params.length)
+                        {
+                            varName = "var" ~ i.to!string;
+
+                            static if (paramsType[i].stringof == "string")
+                            {
+                                str ~= "\t\tstring " ~ varName ~ " = request.get(\"" ~ params[i] ~ "\");\n";
+                            }
+                            else
+                            {
+                                str ~= "\t\tauto " ~ varName ~ " = request.get(\"" ~ params[i] ~ "\").to!" ~ paramsType[i].stringof ~ ";\n";
+                            }
+
+                            paramString ~= i == 0 ? varName : ", " ~ varName;
+
+                            varName = "";
+                        }
+                    }
+                    
+                    // call Action
+                    str ~= "\t\t" ~ ReturnType!t.stringof ~ " result = this." ~ memberName ~ "(" ~ paramString ~ ");\n";
+
+                    static if (is(ReturnType!t : Response))
+                    {
+                        str ~= "\t\tactionResult = result;\n";
                     }
                     else
                     {
-                        version (HuntDebugMode) pragma(msg,
-                                "return type is: " ~ ReturnType!t.stringof ~ " for " ~ memberName);
+                        str ~= "\t\tactionResult = this.response;\n";
 
-                        auto params = ParameterIdentifierTuple!t;
-                        static if (params.length > 0)
+                        static if (!is(ReturnType!t == void))
                         {
-                            import std.conv : to;
-
-                            int i = 0;
-                            string paramString = "";
-
-                            foreach (param; params)
-                            {
-                                enum paramType = Parameters!t[i];
-                                string varName = "var_" ~ i.to!string;
-
-                                str ~= "auto " ~ varName ~ " = request.get(\"" ~ param ~ "\").to!" ~ paramType ~ ";";
-                                
-                                paramString ~= i == 0 ? varName : ", " ~ varName;
-                                i++;
-                            }
-                            str ~= ReturnType!t.stringof ~ " result = this." ~ memberName ~ "(" ~ paramString ~ ");";
-                        }
-                        else
-                        {
-                            str ~= ReturnType!t.stringof ~ " result = this." ~ memberName ~ "();";
-                        }
-
-                        static if (is(ReturnType!t : Response))
-                        {
-                            str ~= q{
-                                actionResult = result;
-                            };
-                        }
-                        else
-                        {
-                            str ~= q{
-                                actionResult = this.response;
-                                actionResult.setContent(to!string(result));
-                            };
+                            str ~= "\t\tactionResult.setContent(to!string(result));\n";
                         }
                     }
 
                     static if(hasUDA!(t, Action) || _isActionMember){
-                        str ~= `if(!this.after()) { return null; }`;
+                        str ~= "\t\tthis.after();\n";
                     }
-                    str ~= "} break;";
+                    str ~= "\n\t\tbreak;\n\t}\n";
                 }
             }
         }
     }
 
-    str ~= "default : break;}";
-    str ~= "return actionResult;";
+    str ~= "\tdefault:\n\tbreak;\n\t}\n\n";
+    str ~= "\treturn actionResult;\n";
     str ~= "}";
 
     return str;
@@ -316,7 +316,7 @@ Response callHandler(T, string method)(Request req)
     scope(exit){if(!controller.isAsync){controller.destroy(); GC.free(cast(void *)controller);}}
 
     req.action = method;
-    return controller.callAction(method, req);
+    return controller.callActionMethod(method, req);
 }
 
 HandleFunction getRouteFromList(string str)
