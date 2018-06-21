@@ -135,13 +135,13 @@ mixin template MakeController(string moduleName = __MODULE__)
 mixin template HuntDynamicCallFun(T, string moduleName)
 {
 public:
-    //version (HuntDebugMode) 
-    //pragma(msg, __createCallActionFun!(T, moduleName));
+    // version (HuntDebugMode) 
+    // pragma(msg, __createCallActionFun!(T, moduleName));
     
     mixin(__createCallActionFun!(T, moduleName));
     shared static this()
     {
-        pragma(msg, __createRouteMap!(T, moduleName));
+        // pragma(msg, __createRouteMap!(T, moduleName));
         mixin(__createRouteMap!(T, moduleName));
     }
 }
@@ -210,8 +210,7 @@ string __createCallActionFun(T, string moduleName)()
                     }
                     else
                     {
-                        // version (HuntDebugMode) 
-                        pragma(msg,
+                        version (HuntDebugMode) pragma(msg,
                                 "return type is: " ~ ReturnType!t.stringof ~ " for " ~ memberName);
 
                         auto params = ParameterIdentifierTuple!t;
