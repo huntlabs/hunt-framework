@@ -22,6 +22,7 @@ public import hunt.view.rule;
 public import hunt.view.util;
 
 public import kiss.util.serialize;
+public import kiss.logger;
 import std.json : JSONValue;
 import std.path;
 import hunt.routing;
@@ -80,7 +81,7 @@ class View
     {
         import std.stdio;
 
-        writeln("---rend context :", _context.toString);
+        trace("---rend context :", _context.toString);
         return _env.render_file(tempalteFile ~ _extName, _context);
     }
 
