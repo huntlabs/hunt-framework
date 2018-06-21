@@ -11,5 +11,5 @@
 
 module hunt.versions;
 
-enum HUNT_VERSION = "1.0.0";
+enum HUNT_VERSION = "1.1.0";
 enum XPoweredBy = "Hunt v" ~ HUNT_VERSION;
