@@ -17,6 +17,7 @@ import std.path;
 import std.conv;
 import std.stdio;
 
+import kiss.logger;
 import hunt.view.rule;
 import hunt.view.element;
 import hunt.view.match;
@@ -229,7 +230,7 @@ public:
                             //MatchClosed last_if_match = RegexObj.search_closed_on_level(input, match_delimiter.pattern(), regex_map_statement_openers[Statement.Condition], regex_map_statement_closers[Statement.Condition], regex_map_statement_closers[Statement.Condition], condition_match);
                             if (!last_if_match.found())
                             {
-                                writeln("--####- - : ",delimiter_inner);
+                                trace("--####- - : ",delimiter_inner);
                                 template_engine_throw("parser_error", "unknown statement : " ~ delimiter_inner);
                             }
 
@@ -262,7 +263,7 @@ public:
                     case Statement.Include:
                         {
                             string included_filename = path ~ match_statement.str(1);
-                            writeln("----include file path : ",included_filename);
+                            trace("----include file path : ",included_filename);
                             ASTNode included_template = parse_template(included_filename);
                             foreach (element; included_template.parsed_node.children)
                             {
