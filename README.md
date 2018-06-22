@@ -28,27 +28,28 @@ config/routes
 GET     /               index.index
 GET     /users          user.list
 POST    /user/login     user.login
-*       /public         staticDir:public
+*       /images         staticDir:public/images
 
 ```
 
 ## Controller example
 ```D
-module app.controller.test;
+module app.controller.index;
 
 import hunt;
 
-class TestController : Controller
+class IndexController : Controller
 {
     mixin MakeController;
 
     @Action
-    string hello()
+    string index()
     {
         return "Hello world!";
     }
 }
 ```
+
 View [hunt-skeleton](https://github.com/huntlabs/hunt-skeleton) example project source code.
 
 ## Component based
@@ -57,10 +58,12 @@ View [hunt-skeleton](https://github.com/huntlabs/hunt-skeleton) example project 
 3. Middleware
 4. Configuration
 5. Validation
-6. Entity
-7. Template
+6. Entity & Repository
+7. Template Engine
+8. Task Worker
+9. Security
 
 ## Community
 QQ Group: 184183224 
 
-[Facebook](https://www.facebook.com/huntframework/)
+[Github](https://github.com/huntlabs/hunt/issues)
