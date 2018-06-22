@@ -10,7 +10,9 @@
  */
 
 module hunt;
- 
+
+public import hunt.versions;
+public import hunt.init;
 public import hunt.application;
 public import hunt.routing;
 public import huntlabs.cache;
