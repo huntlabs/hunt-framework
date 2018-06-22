@@ -53,13 +53,13 @@ class IndexController : Controller
 View [hunt-skeleton](https://github.com/huntlabs/hunt-skeleton) example project source code.
 
 ## Component based
-1. Routing
-2. Caching
-3. Middleware
-4. Configuration
+1. [Routing](https://github.com/huntlabs/hunt/wiki/Routing)
+2. [Caching](https://github.com/huntlabs/hunt/wiki/Cache)
+3. [Middleware](https://github.com/huntlabs/hunt/wiki/Middleware)
+4. [Configuration](https://github.com/huntlabs/hunt/wiki/Configuration)
 5. Validation
-6. Entity & Repository
-7. Template Engine
+6. [Entity & Repository](https://github.com/huntlabs/hunt/wiki/Database)
+7. [Template Engine](https://github.com/huntlabs/hunt/wiki/View)
 8. Task Worker
 9. Security
 
