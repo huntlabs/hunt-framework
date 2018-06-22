@@ -126,6 +126,18 @@ abstract class Controller
         return true;
     }
 
+    string processGetNumericString(string value)
+    {
+        import std.string;
+
+        if (!isNumeric(value))
+        {
+            return "0";
+        }
+
+        return value;
+    }
+
     Response processResponse(Response res)
     {
         // have ResponseHandler binding?
@@ -238,7 +250,12 @@ string __createCallActionMethod(T, string moduleName)()
                             }
                             else
                             {
-                                str ~= "\t\tauto " ~ varName ~ " = request.get(\"" ~ params[i] ~ "\").to!" ~ paramsType[i].stringof ~ ";\n";
+                                static if (paramsType[i].stringof == "int" || paramsType[i].stringof == "long" || paramsType[i].stringof == "short" || paramsType[i].stringof == "float" || paramsType[i].stringof == "double"
+                                || paramsType[i].stringof == "uint" || paramsType[i].stringof == "ulong" || paramsType[i].stringof == "ushort" || paramsType[i].stringof == "ifloat" || paramsType[i].stringof == "idouble"
+                                 || paramsType[i].stringof == "cfloat" || paramsType[i].stringof == "cdouble")
+                                    str ~= "\t\tauto " ~ varName ~ " = this.processGetNumericString(request.get(\"" ~ params[i] ~ "\").to!" ~ paramsType[i].stringof ~ ");\n";
+                                else
+                                    str ~= "\t\tauto " ~ varName ~ " = request.get(\"" ~ params[i] ~ "\").to!" ~ paramsType[i].stringof ~ ";\n";
                             }
 
                             paramString ~= i == 0 ? varName : ", " ~ varName;
