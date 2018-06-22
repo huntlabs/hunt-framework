@@ -24,7 +24,6 @@ import hunt.exception;
  */
 class RedirectResponse : Response
 {
-    protected Request _request;
     protected Session _session;
 
     this(string targetUrl, bool use301 = true)
@@ -34,18 +33,6 @@ class RedirectResponse : Response
         setStatus((use301 ? 301 : 302));
         setHeader(HTTPHeaderCode.LOCATION, targetUrl);
         connectionClose();
-    }
-
-    /// the request instance
-    @property Request request()
-    {
-        return _request;
-    }
-
-    /// ditto
-    @property void request(Request req)
-    {
-        _request = req;
     }
 
     /// the session store implementation.

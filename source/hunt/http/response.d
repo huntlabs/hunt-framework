@@ -22,6 +22,8 @@ import collie.codec.http.server.responsebuilder;
 import collie.codec.http.httpmessage;
 
 import kiss.logger;
+
+import hunt.http.request;
 import hunt.http.cookie;
 import hunt.utils.string;
 import hunt.versions;
@@ -31,11 +33,12 @@ enum HtmlContentType = "text/html;charset=utf-8";
 enum JsonContentType = "application/json;charset=utf-8";
 enum OctetStreamContentType = "binary/octet-stream";
 
-
 /**
 */
 class Response : ResponseBuilder
 {
+    protected Request _request;
+
     this()
     {
         super();
@@ -59,6 +62,19 @@ class Response : ResponseBuilder
     {
         super(handler);
         setStatus(200);
+    }
+
+    /// the request instance
+    @property Request request()
+    {
+        return _request;
+    }
+
+    /// ditto
+    @property void request(Request req)
+    {
+        _request = req;
+        _txn = _request.responseHandler();
     }
 
     Response setHeader(T = string)(string key, T value)
