@@ -126,11 +126,12 @@ abstract class Controller
         return true;
     }
 
-    Response machineRequest(Response res)
+    Response processResponse(Response res)
     {
-        if (res.request is null)
+        // have ResponseHandler binding?
+        if (res.responseHandler() is null)
         {
-            res.request(request);
+            res.setResponseHandler(request.responseHandler());
         }
 
         return res;
@@ -263,7 +264,7 @@ string __createCallActionMethod(T, string moduleName)()
                         }
                     }
 
-                    str ~= "\t\tactionResult = this.machineRequest(actionResult);\n";
+                    str ~= "\t\tactionResult = this.processResponse(actionResult);\n";
 
                     static if(hasUDA!(t, Action) || _isActionMember)
                     {
