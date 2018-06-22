@@ -253,7 +253,10 @@ string __createCallActionMethod(T, string moduleName)()
                         }
                     }
 
-                    static if(hasUDA!(t, Action) || _isActionMember){
+                    str ~= "\t\tif (actionResult.request is null) actionResult.request(request);\n";
+
+                    static if(hasUDA!(t, Action) || _isActionMember)
+                    {
                         str ~= "\t\tthis.after();\n";
                     }
                     str ~= "\n\t\tbreak;\n\t}\n";
