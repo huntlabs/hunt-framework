@@ -64,17 +64,15 @@ class Response : ResponseBuilder
         setStatus(200);
     }
 
-    /// the request instance
-    @property Request request()
-    {
-        return _request;
-    }
+	ResponseHandler responseHandler()
+	{
+		return _txn;
+	}
 
-    /// ditto
-    @property void request(Request req)
+    Response setResponseHandler(ResponseHandler handler)
     {
-        _request = req;
-        _txn = _request.responseHandler();
+        _txn = handler;
+        return this;
     }
 
     Response setHeader(T = string)(string key, T value)
