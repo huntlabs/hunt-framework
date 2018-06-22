@@ -125,6 +125,16 @@ abstract class Controller
     {
         return true;
     }
+
+    Response machineRequest(Response res)
+    {
+        if (res.request is null)
+        {
+            res.request(request);
+        }
+
+        return res;
+    }
 }
 
 mixin template MakeController(string moduleName = __MODULE__)
@@ -253,7 +263,7 @@ string __createCallActionMethod(T, string moduleName)()
                         }
                     }
 
-                    str ~= "\t\tif (actionResult.request is null) actionResult.request(request);\n";
+                    str ~= "\t\tactionResult = this.machineRequest(actionResult);\n";
 
                     static if(hasUDA!(t, Action) || _isActionMember)
                     {
