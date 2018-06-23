@@ -11,5 +11,10 @@
 
 module hunt.versions;
 
-enum HUNT_VERSION = "1.0.0";
-enum XPoweredBy = "Hunt v" ~ HUNT_VERSION;
+// define hunt framework versions
+enum HUNT_MAJOR_VERSION = 1;
+enum HUNT_MINOR_VERSION = 1;
+enum HUNT_PATCH_VERSION = 1;
+
+enum HUNT_VERSION = HUNT_MAJOR_VERSION ~ "." ~ HUNT_MINOR_VERSION ~ "." ~ HUNT_PATCH_VERSION;
+enum XPoweredBy = "Hunt framework v" ~ HUNT_VERSION;

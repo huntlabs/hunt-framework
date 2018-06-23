@@ -73,6 +73,7 @@ enum  Function {
 	Round,
 	Sort,
 	Upper,
+	DateFormat,
 	ReadJson,
 	Default
 }
@@ -163,6 +164,7 @@ enum string[Function] regex_map_functions = [
 	Function.Round : function_regex("round", 2),
 	Function.Sort : function_regex("sort", 1),
 	Function.Upper : function_regex("upper", 1),
+	Function.DateFormat : function_regex("date", 2),
 	Function.ReadJson : "\\s*([^\\(\\)]*\\S)\\s*"
 ];
 
