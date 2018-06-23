@@ -17,6 +17,7 @@ import std.file;
 import std.path;
 import std.stdio;
 
+import kiss.logger;
 import hunt.application.config;
 import hunt.view.match;
 import hunt.view.rule;
@@ -100,7 +101,7 @@ public:
 
     ASTNode parse_template(string filename)
     {
-        writeln("parse file path : ",input_path ~ filename);
+        trace("parse file path : ",input_path ~ filename);
         return _parser.parse_template(input_path ~ filename);
     }
 
