@@ -195,9 +195,11 @@ void doRequestHandle(HandleFunction handle, Request request)
 		http://www.cnblogs.com/feihong84/p/5678895.html
 		https://stackoverflow.com/questions/10093053/add-header-in-ajax-request-with-jquery
 		*/
-		response.setHeader("Access-Control-Allow-Origin", "*");
-		response.setHeader("Access-Control-Allow-Methods", "*");
-		response.setHeader("Access-Control-Allow-Headers", "*");
+
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Methods", "*");
+        response.setHeader("Access-Control-Allow-Headers" ,
+            "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type");
         if(response.dataHandler is null)
             response.dataHandler = request.responseHandler;
 
