@@ -26,7 +26,7 @@ class RedirectResponse : Response
 {
     protected Session _session;
 
-    this(string targetUrl, bool use301 = true)
+    this(string targetUrl, bool use301 = false)
     {
         super();
 
