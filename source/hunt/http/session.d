@@ -443,12 +443,12 @@ class Session
      * @param  string  key
      * @return mixed
      */
-	string remove(string key)
-	{
-		 string r = _sessions[key].toString();
-		 _sessions[key] = JSONValue.init;
-		 return r;
-	}
+	//string remove(string key)
+	//{
+	//	 string r = _sessions[key].toString();
+	//	 _sessions[key] = JSONValue.init;
+	//	 return r;
+	//}
 
     /**
      * Remove one or many items from the session.
