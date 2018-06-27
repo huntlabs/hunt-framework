@@ -72,7 +72,8 @@ class View
     {
         _routeGroup = rg;
         //if (_routeGroup != DEFAULT_ROUTE_GROUP)
-            _env.setTemplatePath(buildNormalizedPath(_templatePath) ~ dirSeparator ~ _routeGroup);
+        _env.setRouteGroup(rg);
+        _env.setTemplatePath(buildNormalizedPath(_templatePath) ~ dirSeparator ~ _routeGroup);
 
         return this;
     }
