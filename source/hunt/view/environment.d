@@ -64,6 +64,11 @@ public:
         _render = new Render();
     }
 
+     void setRouteGroup(string rg)
+     {
+         _render.setRouteGroup(rg);
+     }
+
     void setTemplatePath(string path)
     {
         this.input_path = buildNormalizedPath(path) ~ dirSeparator;

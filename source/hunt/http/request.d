@@ -1566,7 +1566,7 @@ static this()
 	formats["form"] = ["application/x-www-form-urlencoded"];
 }
 
-static private Request _request;
+private Request _request;
 
 Request request()
 {
