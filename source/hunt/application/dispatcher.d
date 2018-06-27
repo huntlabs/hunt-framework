@@ -97,22 +97,35 @@ class Dispatcher
             }
         }
 
-		bool accessFilter(Request request)
-		{
-			//兼容老的.
-			Identity identity =  Application.getInstance().getAccessManager().getIdentity(request.route.getGroup());
-			if (identity is null || request.route.getController().length == 0)
-				return true;
+        bool accessFilter(Request request)
+        {
+            //兼容老的.
+            Identity identity = Application.getInstance().getAccessManager()
+                .getIdentity(request.route.getGroup());
+            if (identity is null || request.route.getController().length == 0)
+                return true;
 
-			string persident = request.route.getController() ~ "." ~ request.route.getAction();
-			if( persident == "staticfile.doStaticFile" || identity.isAllowAction(persident))
-				return true;
+            string persident;
+            if (request.route.getModule().empty)
+            {
+                persident = request.route.getController() ~ "." ~ request.route.getAction();
+                if (persident == "staticfile.doStaticFile" || identity.isAllowAction(persident))
+                    return true;
+            }
+            else
+            {
+                persident = request.route.getModule() ~ "." ~ request.route.getController()
+                    ~ "." ~ request.route.getAction();
+                if (persident == "hunt.application.staticfile.staticfile.doStaticFile"
+                        || identity.isAllowAction(persident))
+                    return true;
+            }
 
-			return request.user.can(persident);
-		}
+            return request.user.can(persident);
+        }
 
-		User authenticateUser(Request request)
-		{
+        User authenticateUser(Request request)
+        {
             User user;
             Identity identity = Application.getInstance().getAccessManager()
                 .getIdentity(request.route.getGroup());
@@ -164,7 +177,7 @@ void doRequestHandle(HandleFunction handle, Request request)
     try
     {
         response = handle(request);
-        if(response is null)
+        if (response is null)
             response = request.createResponse;
     }
     catch (CreateResponseException e)
@@ -198,11 +211,11 @@ void doRequestHandle(HandleFunction handle, Request request)
 
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Methods", "*");
-        response.setHeader("Access-Control-Allow-Headers" ,
-            "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type");
-        if(response.dataHandler is null)
+        response.setHeader("Access-Control-Allow-Headers",
+                "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type");
+        if (response.dataHandler is null)
             response.dataHandler = request.responseHandler;
 
-        collectException(() { response.done(); response.clear();  }());
+        collectException(() { response.done(); response.clear(); }());
     }
 }
