@@ -28,6 +28,9 @@ import hunt.view.match;
 import hunt.view.ast;
 import hunt.view.util;
 
+import hunt;
+import hunt.routing;
+
 class Render
 {
 public:
@@ -197,6 +200,60 @@ public:
         }
     }
 
+    string createUrl(string mca, string args)
+    {
+        // find Route
+        RouteGroup routeGroup = app.router.getGroup(_routeGroup);
+        if (routeGroup is null)
+        {
+            return "#";
+        }
+
+        Route route = routeGroup.getRoute("", mca);
+        if (route is null)
+        {
+            return "#";
+        }
+
+        string url;
+        if (route.getRegular() == true)
+        {
+            auto params = Util.parseFormData(args);
+            if (params.length == 0)
+            {
+                logWarningf("this route need params (%s).", mca);
+                return "#";
+            }
+
+            if (route.getParamKeys().length > 0)
+            {
+                url = route.getUrlTemplate();
+                import std.array : replaceFirst;
+
+                foreach (i, key; route.getParamKeys())
+                {
+                    string value = params.get(key, null);
+
+                    if (value is null)
+                    {
+                        logWarningf("this route template need param (%s).", key);
+
+                        return "#";
+                    }
+
+                    params.remove(key);
+                    url.replaceFirst("{" ~ key ~ "}", value);
+                }
+            }
+        }
+        else
+        {
+            url = route.getPattern();
+        }
+
+        return url ~ (args.length > 0 ? ("?" ~ (args)) : "");
+    }
+
     T eval_expression(T = JSONValue)(ElementExpression element, ref JSONValue data)
     {
         auto var = eval_function!(T)(element, data);
@@ -293,14 +350,15 @@ public:
                 if (res.type == JSON_TYPE.ARRAY)
                 {
                     import std.algorithm.sorting;
-                    foreach(size_t k,v;res)
+
+                    foreach (size_t k, v; res)
                     {
-                        if(v.type == JSON_TYPE.INTEGER)
+                        if (v.type == JSON_TYPE.INTEGER)
                             sa_l ~= v.integer;
-                        else if(v.type == JSON_TYPE.STRING)
+                        else if (v.type == JSON_TYPE.STRING)
                             sa_s ~= v.str;
                     }
-                    if(sa_l.length > 0)
+                    if (sa_l.length > 0)
                     {
                         sort!("a < b")(sa_l);
                         result = JSONValue(sa_l);
@@ -315,14 +373,25 @@ public:
             }
         case Function.DateFormat:
             {
-                   auto format = eval_expression(element.args[0],data);
-                   auto timestamp = eval_expression(element.args[1],data);
-                   if(format.type == JSON_TYPE.STRING && timestamp.type == JSON_TYPE.INTEGER)
-                   {
-                       import kiss.datetime;
-                       result = date(format.str,timestamp.integer);
-                   }
-                   return result;
+                auto format = eval_expression(element.args[0], data);
+                auto timestamp = eval_expression(element.args[1], data);
+                if (format.type == JSON_TYPE.STRING && timestamp.type == JSON_TYPE.INTEGER)
+                {
+                    import kiss.datetime;
+
+                    result = date(format.str, timestamp.integer);
+                }
+                return result;
+            }
+        case Function.Url:
+            {
+                auto mca = eval_expression(element.args[0], data);
+                auto params = eval_expression(element.args[1], data);
+                if (mca.type == JSON_TYPE.STRING && params.type == JSON_TYPE.STRING)
+                {
+                    result = createUrl(mca.str, params.str);
+                }
+                return result;
             }
         case Function.Default:
             {
@@ -454,4 +523,12 @@ public:
         }
         return result;
     }
+
+    public void setRouteGroup(string rg)
+    {
+        _routeGroup = rg;
+    }
+
+private:
+    string _routeGroup = DEFAULT_ROUTE_GROUP;
 }
