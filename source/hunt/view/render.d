@@ -200,60 +200,6 @@ public:
         }
     }
 
-    string createUrl(string mca, string args)
-    {
-        // find Route
-        RouteGroup routeGroup = app.router.getGroup(_routeGroup);
-        if (routeGroup is null)
-        {
-            return "#";
-        }
-
-        Route route = routeGroup.getRoute("", mca);
-        if (route is null)
-        {
-            return "#";
-        }
-
-        string url;
-        if (route.getRegular() == true)
-        {
-            auto params = Util.parseFormData(args);
-            if (params.length == 0)
-            {
-                logWarningf("this route need params (%s).", mca);
-                return "#";
-            }
-
-            if (route.getParamKeys().length > 0)
-            {
-                url = route.getUrlTemplate();
-                import std.array : replaceFirst;
-
-                foreach (i, key; route.getParamKeys())
-                {
-                    string value = params.get(key, null);
-
-                    if (value is null)
-                    {
-                        logWarningf("this route template need param (%s).", key);
-
-                        return "#";
-                    }
-
-                    params.remove(key);
-                    url.replaceFirst("{" ~ key ~ "}", value);
-                }
-            }
-        }
-        else
-        {
-            url = route.getPattern();
-        }
-
-        return url ~ (args.length > 0 ? ("?" ~ (args)) : "");
-    }
-
     T eval_expression(T = JSONValue)(ElementExpression element, ref JSONValue data)
     {
         auto var = eval_function!(T)(element, data);
@@ -389,7 +335,8 @@ public:
                 auto params = eval_expression(element.args[1], data);
                 if (mca.type == JSON_TYPE.STRING && params.type == JSON_TYPE.STRING)
                 {
-                    result = createUrl(mca.str, params.str);
+                    result = app.router.createUrl(mca.str,
+                            Util.parseFormData(params.str), _routeGroup);
                 }
                 return result;
             }
