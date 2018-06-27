@@ -750,3 +750,25 @@ class SessionStorage
 		UCache _cache;
 	}
 }
+
+Session session()
+{
+	import hunt.http.request;
+
+	return request().session();
+}
+
+string session(string key)
+{
+	return session().get(key);
+}
+
+void session(string[string] values)
+{
+	import hunt.http.request;
+	
+	foreach (key, value; values)
+	{
+		session().put(key, value);
+	}
+}

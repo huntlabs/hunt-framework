@@ -158,14 +158,18 @@ class Dispatcher
     }
 }
 
-void doRequestHandle(HandleFunction handle, Request request)
+void doRequestHandle(HandleFunction handle, Request req)
 {
     Response response;
+    
+    // this thread _request
+    request(req);
+
     try
     {
-        response = handle(request);
+        response = handle(req);
         if(response is null)
-            response = request.createResponse;
+            response = req.createResponse;
     }
     catch (CreateResponseException e)
     {
@@ -174,7 +178,7 @@ void doRequestHandle(HandleFunction handle, Request request)
     catch (Exception e)
     {
         showException(e);
-        response = request.createResponse;
+        response = req.createResponse;
         response.setStatus(502);
         response.setContent(e.toString());
         response.connectionClose();
@@ -201,7 +205,7 @@ void doRequestHandle(HandleFunction handle, Request request)
         response.setHeader("Access-Control-Allow-Headers" ,
             "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type");
         if(response.dataHandler is null)
-            response.dataHandler = request.responseHandler;
+            response.dataHandler = req.responseHandler;
 
         collectException(() { response.done(); response.clear();  }());
     }

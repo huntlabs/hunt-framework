@@ -1565,3 +1565,15 @@ static this()
 	formats["rss"] = ["application/rss+xml"];
 	formats["form"] = ["application/x-www-form-urlencoded"];
 }
+
+static private Request _request;
+
+Request request()
+{
+	return _request;
+}
+
+void request(Request request)
+{
+	_request = request;
+}
