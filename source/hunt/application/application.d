@@ -159,29 +159,29 @@ final class Application
 		// writeln(" initSessionStorage " ,_sessionStorage);
     }
 
-    EntityManagerFactory getEntityManagerFactory()
+    EntityManagerFactory entityManagerFactory()
     {
         return _entityManagerFactory;
     }
 
-	CacheManger getCacheManger()
+	CacheManger cacheManger()
 	{
 		return _manger;
 	}
 	
-	SessionStorage getSessionStorage()
+	SessionStorage sessionStorage()
 	{
 		// writeln(" getSessionStorage " , _sessionStorage);
 		return _sessionStorage;
 	}
 	
-	UCache getCache()
+	UCache cache()
 	{
 		return  _manger.getCache("default");
 
 	}
 
-	AccessManager getAccessManager()
+	AccessManager accessManager()
 	{
 		return _accessManager;
 	}
