@@ -149,4 +149,22 @@ public:
         auto m = match(str, regex(`^[0-9]\d*$`));
         return !m.empty;
     }
+
+    static string[string] parseFormData(string idstring)
+	{
+        import std.string;
+		string[string] params;
+		auto idstr = strip(idstring);
+        string[] param_section;
+		param_section = split(idstr, '&');
+        foreach(section; param_section) {
+            auto param = split(section,"=");
+            if(param.length == 2)
+            {
+                params[param[0]] = param[1];
+            }
+        }
+		
+		return params;
+	}
 }
