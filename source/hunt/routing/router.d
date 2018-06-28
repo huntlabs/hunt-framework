@@ -43,19 +43,19 @@ class Router
             this._configPath = (path[$ - 1] == '/') ? path : path ~ "/";
         }
 
-        string createUrl(string mca, string[string] params, string group = DEFAULT_ROUTE_GROUP)
+        string createUrl(string mca, string[string] params = null, string group = DEFAULT_ROUTE_GROUP)
         {
             // find Route
             RouteGroup routeGroup = this.getGroup(group);
             if (routeGroup is null)
             {
-                return "#";
+                return null;
             }
 
             Route route = routeGroup.getRoute("", mca);
             if (route is null)
             {
-                return "#";
+                return null;
             }
 
             string url;
@@ -64,7 +64,7 @@ class Router
                 if (params.length == 0)
                 {
                     logWarningf("this route need params (%s).", mca);
-                    return "#";
+                    return null;
                 }
 
                 if (route.getParamKeys().length > 0)
@@ -80,7 +80,7 @@ class Router
                         {
                             logWarningf("this route template need param (%s).", key);
 
-                            return "#";
+                            return null;
                         }
 
                         params.remove(key);
@@ -491,7 +491,7 @@ class Router
     }
 }
 
-string url(string mca, string[string] params = [], string group = DEFAULT_ROUTE_GROUP)
+string url(string mca, string[string] params = null, string group = DEFAULT_ROUTE_GROUP)
 {
     return app().router().createUrl(mca, params, group);
 }
