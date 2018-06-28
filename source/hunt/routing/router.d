@@ -493,5 +493,7 @@ class Router
 
 string url(string mca, string[string] params = null, string group = DEFAULT_ROUTE_GROUP)
 {
+    import hunt.application.application;
+    
     return app().router().createUrl(mca, params, group);
 }
