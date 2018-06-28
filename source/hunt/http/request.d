@@ -602,13 +602,13 @@ final class Request : RequestHandler
 			version (HuntDebugMode)  kiss.logger.trace("last sessionId =>", sessionId);
 			if (sessionId.empty)
 			{
-				auto _tmp = new Session(Application.getInstance().getSessionStorage());
+				auto _tmp = new Session(app().sessionStorage());
 				createResponse().setCookie(sessionName, _tmp.sessionId);
 				version (HuntDebugMode) kiss.logger.trace("latest sessionId =>", _tmp.sessionId);
 				return _tmp;
 			}
 
-			_session = new Session(sessionId, Application.getInstance().getSessionStorage());
+			_session = new Session(sessionId, app().sessionStorage());
 		}
 
 		return _session;
