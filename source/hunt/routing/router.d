@@ -490,3 +490,8 @@ class Router
         alias _configPath = DEFAULT_CONFIG_PATH;
     }
 }
+
+string url(string mca, string[string] params = [], string group = DEFAULT_ROUTE_GROUP)
+{
+    return app().router().createUrl(mca, params, group);
+}
