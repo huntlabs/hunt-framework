@@ -97,7 +97,7 @@ class View
     }
 }
 
-private Environment _envInstance;
+__gshared private Environment _envInstance;
 
 View GetViewObject()
 {

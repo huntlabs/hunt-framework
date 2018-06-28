@@ -100,7 +100,7 @@ class Dispatcher
         bool accessFilter(Request request)
         {
             //兼容老的.
-            Identity identity = Application.getInstance().getAccessManager()
+            Identity identity = app().accessManager()
                 .getIdentity(request.route.getGroup());
             if (identity is null || request.route.getController().length == 0)
                 return true;
@@ -127,7 +127,7 @@ class Dispatcher
         User authenticateUser(Request request)
         {
             User user;
-            Identity identity = Application.getInstance().getAccessManager()
+            Identity identity = app().accessManager()
                 .getIdentity(request.route.getGroup());
             if (identity !is null)
             {
