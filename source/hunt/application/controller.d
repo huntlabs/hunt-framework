@@ -92,12 +92,12 @@ abstract class Controller
 
     @property UCache cache()
     {
-        return Application.getInstance().getCache();
+        return app().cache();
     }
 
     @property cacheManger()
     {
-        return Application.getInstance().getCacheManger();
+        return app().cacheManger();
     }
 
     protected final Response doMiddleware()

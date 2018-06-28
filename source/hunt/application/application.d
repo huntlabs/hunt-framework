@@ -457,7 +457,7 @@ final class Application
     }
 }
 
-@property Application app()
+Application app()
 {
     return Application.getInstance();
 }
