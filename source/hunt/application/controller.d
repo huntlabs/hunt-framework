@@ -19,7 +19,7 @@ public import hunt.routing;
 public import hunt.application.middleware;
 
 import huntlabs.cache;
-import hunt.application.simplify;
+import hunt.simplify;
 import hunt.view;
 
 import std.exception;

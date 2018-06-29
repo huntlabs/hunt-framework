@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.application.simplify;
+module hunt.simplify;
 
 import hunt.application.application : Application;
 

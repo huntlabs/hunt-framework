@@ -21,7 +21,7 @@ import collie.codec.http.server.requesthandler;
 import collie.codec.http.server.httpform;
 import collie.utils.memory;
 
-import hunt.application.simplify;
+import hunt.simplify;
 import hunt.exception;
 import hunt.http.response;
 import hunt.http.session;
