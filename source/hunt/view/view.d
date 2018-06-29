@@ -23,9 +23,12 @@ public import hunt.view.util;
 
 public import kiss.util.serialize;
 public import kiss.logger;
+
 import std.json : JSONValue;
 import std.path;
+
 import hunt.routing;
+
 enum DEFAULT_LEVEL = 3;
 
 class View

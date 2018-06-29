@@ -43,8 +43,15 @@ class Router
             this._configPath = (path[$ - 1] == '/') ? path : path ~ "/";
         }
 
-        string createUrl(string mca, string[string] params = null, string group = DEFAULT_ROUTE_GROUP)
+        string createUrl(string mca, string[string] params = null, string group = null)
         {
+            if (group is null)
+            {
+                import hunt.http.request;
+
+                group = request().route.getGroup();
+            }
+
             // find Route
             RouteGroup routeGroup = this.getGroup(group);
             if (routeGroup is null)
@@ -491,9 +498,9 @@ class Router
     }
 }
 
-string url(string mca, string[string] params = null, string group = DEFAULT_ROUTE_GROUP)
+string url(string mca, string[string] params = null, string group = null)
 {
     import hunt.application.application;
-    
+
     return app().router().createUrl(mca, params, group);
 }
