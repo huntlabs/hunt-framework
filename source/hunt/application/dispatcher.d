@@ -14,22 +14,24 @@ module hunt.application.dispatcher;
 import hunt.routing;
 import hunt.http.request;
 import hunt.http.response;
+import hunt.http.exception;
 
+import hunt.application.simplify;
 import hunt.application.controller;
 import hunt.application.config;
 
+import hunt.security.acl.Identity;
 import hunt.security.acl.Manager;
+import hunt.security.acl.User;
 
 import collie.utils.exception;
 import collie.codec.http;
 
 import std.stdio;
-
 import std.exception;
-import hunt.application.application;
 import std.parallelism;
-import hunt.security.acl.User;
-import hunt.http.exception;
+
+import kiss.logger;
 
 class Dispatcher
 {
@@ -100,13 +102,13 @@ class Dispatcher
         bool accessFilter(Request request)
         {
             //兼容老的.
-            Identity identity = app().accessManager()
-                .getIdentity(request.route.getGroup());
+            Identity identity = app().accessManager().getIdentity(request.route.getGroup());
+
             if (identity is null || request.route.getController().length == 0)
                 return true;
 
             string persident;
-            if (request.route.getModule().empty)
+            if (request.route.getModule() is null)
             {
                 persident = request.route.getController() ~ "." ~ request.route.getAction();
                 if (persident == "staticfile.doStaticFile" || identity.isAllowAction(persident))

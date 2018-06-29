@@ -456,8 +456,3 @@ final class Application
         __gshared TaskPool _tpool;
     }
 }
-
-Application app()
-{
-    return Application.getInstance();
-}
