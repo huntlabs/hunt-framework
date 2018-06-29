@@ -8,11 +8,17 @@
  * Licensed under the Apache-2.0 License.
  *
  */
- 
-module hunt.application;
 
-public import hunt.application.controller;
-public import hunt.application.config;
-public import hunt.application.application;
-public import hunt.application.middleware;
-public import hunt.application.simplify;
+module hunt.application.simplify;
+
+import hunt.application.application : Application;
+
+Application app()
+{
+    return Application.getInstance();
+}
+
+string CreateUrl(string mca, string[string] params = null, string group = null)
+{
+    return app().router().createUrl(mca, params, group);
+}
