@@ -497,10 +497,3 @@ class Router
         alias _configPath = DEFAULT_CONFIG_PATH;
     }
 }
-
-string url(string mca, string[string] params = null, string group = null)
-{
-    import hunt.application.application;
-
-    return app().router().createUrl(mca, params, group);
-}
