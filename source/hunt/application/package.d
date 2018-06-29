@@ -15,4 +15,4 @@ public import hunt.application.controller;
 public import hunt.application.config;
 public import hunt.application.application;
 public import hunt.application.middleware;
-public import hunt.application.simplify;
+public import hunt.simplify;

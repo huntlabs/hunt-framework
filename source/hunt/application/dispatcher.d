@@ -16,7 +16,7 @@ import hunt.http.request;
 import hunt.http.response;
 import hunt.http.exception;
 
-import hunt.application.simplify;
+import hunt.simplify;
 import hunt.application.controller;
 import hunt.application.config;
 
