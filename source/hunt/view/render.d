@@ -349,7 +349,8 @@ public:
                 }
                 catch (Exception e)
                 {
-                    return eval_expression!(T)(element.args[1], data);
+                    template_engine_throw("render_error",
+                        "function '" ~ to!string(element.func) ~ "' not found");
                 }
             }
         default:
@@ -423,17 +424,29 @@ public:
                         {
                             auto map = eval_expression(element_loop.list, data);
                             //writeln("----Loop type ----: ", map.type," map.toString : ",map.toString);
-                            if (map.type != JSON_TYPE.OBJECT)
+                            if (map.type == JSON_TYPE.OBJECT) 
+                            {
+                                foreach (string k, v; map)
+                                {
+                                    JSONValue data_loop = data;
+                                    data_loop[element_loop.key] = k;
+                                    data_loop[element_loop.value] = v;
+                                    result ~= render(new ASTNode(element_loop), data_loop);
+                                }
+                            }
+                            else if(map.type == JSON_TYPE.ARRAY)
+                            {
+                                foreach(size_t idx,v; map) {
+                                    JSONValue data_loop = data;
+                                    data_loop[element_loop.key] = idx;
+                                    data_loop[element_loop.value] = v;
+                                    result ~= render(new ASTNode(element_loop), data_loop);
+                                }
+                            }
+                            else
                             {
                                 template_engine_throw("render_error",
-                                        map.toString ~ " is not an object");
-                            }
-                            foreach (string k, v; map)
-                            {
-                                JSONValue data_loop = data;
-                                data_loop[element_loop.key] = k;
-                                data_loop[element_loop.value] = v;
-                                result ~= render(new ASTNode(element_loop), data_loop);
+                                        map.toString ~ " is not an array or object");
                             }
                             break;
                         }
