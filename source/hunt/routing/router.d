@@ -103,7 +103,7 @@ class Router
 
 	    if (routeGroup.getType() == "domain")
 	    {
-                url = routeGroup.getValue() ~ url;
+                url = (app().config.https.enabled ? "https://" : "http://" ) ~ routeGroup.getValue() ~ url;
 	    }
 	    else
 	    {
