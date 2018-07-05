@@ -15,8 +15,9 @@ import hunt.routing.define;
 import hunt.routing.routegroup;
 import hunt.routing.route;
 import hunt.routing.config;
-
 import hunt.application.controller;
+import hunt.simplify;
+
 import kiss.logger;
 
 import std.regex;
@@ -59,7 +60,7 @@ class Router
                 return null;
             }
 
-            Route route = routeGroup.getRoute("", mca);
+            Route route = routeGroup.getRoute("GET", mca);
             if (route is null)
             {
                 return null;
@@ -100,6 +101,15 @@ class Router
                 url = route.getPattern();
             }
 
+	    if (routeGroup.getType() == "domain")
+	    {
+                url = routeGroup.getValue() ~ url;
+	    }
+	    else
+	    {
+                url = app().config.application.baseUrl ~  routeGroup.getValue() ~ url;
+	    }
+
             return url ~ (params.length > 0 ? ("?" ~ buildUriQueryString(params)) : "");
         }
 
@@ -133,10 +143,12 @@ class Router
 
                 if ("domain" == method)
                 {
+                    routeGroup.setType("domain").setValue(value);
                     _domainGroups[value] = routeGroup;
                 }
                 else
                 {
+                    routeGroup.setType("path").setValue(value);
                     _directoryGroups[value] = routeGroup;
                 }
 

@@ -55,7 +55,7 @@ HTTP_METHODS getMethod(string method)
     else if (method == "*")
         return ALL;
     else 
-        throw new Exception("unkonw method");
+        throw new Exception("unkonw method: (" ~ method ~")");
 	}
 }
 HTTP_METHODS[] stringToHTTPMethods(string method)
