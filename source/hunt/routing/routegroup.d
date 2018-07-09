@@ -69,14 +69,37 @@ class RouteGroup
         this._name = name;
     }
 
-    void setName(string name)
+    RouteGroup setName(string name)
     {
         this._name = name;
+	return this;
     }
 
     string getName()
     {
         return this._name;
+    }
+
+    RouteGroup setType(string type)
+    {
+        this._type = type;
+	return this;
+    }
+
+    string getType()
+    {
+        return this._type;
+    }
+
+    RouteGroup setValue(string value)
+    {
+        this._value = value;
+	return this;
+    }
+
+    string getValue()
+    {
+        return this._value;
     }
 
     RouteGroup addRoute(Route route)
@@ -170,6 +193,9 @@ class RouteGroup
     private
     {
         string _name;
+	string _type;
+	string _value;
+
         Route[RoutePathInfo] _routes;
         Route[RouteInfo] _mcaRoutes;
         Route[] _regexRoutes;
