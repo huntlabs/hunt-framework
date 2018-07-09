@@ -15,8 +15,9 @@ import hunt.routing.define;
 import hunt.routing.routegroup;
 import hunt.routing.route;
 import hunt.routing.config;
-
 import hunt.application.controller;
+import hunt.simplify;
+
 import kiss.logger;
 
 import std.regex;
@@ -59,7 +60,7 @@ class Router
                 return null;
             }
 
-            Route route = routeGroup.getRoute("", mca);
+            Route route = routeGroup.getRoute("GET", mca);
             if (route is null)
             {
                 return null;
@@ -100,6 +101,15 @@ class Router
                 url = route.getPattern();
             }
 
+	    if (routeGroup.getType() == "domain")
+	    {
+                url = (app().config.https.enabled ? "https://" : "http://" ) ~ routeGroup.getValue() ~ url;
+	    }
+	    else
+	    {
+                url = app().config.application.baseUrl ~  routeGroup.getValue() ~ url;
+	    }
+
             return url ~ (params.length > 0 ? ("?" ~ buildUriQueryString(params)) : "");
         }
 
@@ -133,10 +143,12 @@ class Router
 
                 if ("domain" == method)
                 {
+                    routeGroup.setType("domain").setValue(value);
                     _domainGroups[value] = routeGroup;
                 }
                 else
                 {
+                    routeGroup.setType("path").setValue(value);
                     _directoryGroups[value] = routeGroup;
                 }
 
@@ -331,7 +343,7 @@ class Router
                 if (item.path == "/")
                     haveRootRoute = true;
                 route = this.makeRoute(item.methods, item.path, item.route, group);
-                if (route)
+                if (route !is null)
                 {
                     routeGroup.addRoute(route);
                 }
@@ -352,11 +364,11 @@ class Router
             return this._directoryGroups.get(directory, null);
         }
 
-        Route makeRoute(T = string)(string methods, string path, T mca,
-                string group = DEFAULT_ROUTE_GROUP)
+        Route makeRoute(T = string)(string methods, string path, T mca, string group = DEFAULT_ROUTE_GROUP)
         {
             version (HuntDebugMode)
                 tracef("method: %s, path: %s, mca: %s, group: %s", methods, path, mca, group);
+                
             auto route = new Route();
             methods = toUpper(methods);
             path = this.mendPath(path);
@@ -468,6 +480,13 @@ class Router
                     handleKey = "app." ~ route.getModule() ~ ".controller." ~ ((route.getGroup() == DEFAULT_ROUTE_GROUP)
                             ? "" : route.getGroup() ~ ".") ~ route.getController() ~ "." ~ route.getController()
                         ~ "controller." ~ route.getAction();
+
+                    if (getRouteFromList(handleKey) is null)
+                    {
+                        handleKey = "app.component." ~ route.getModule() ~ ".controller." ~ ((route.getGroup() == DEFAULT_ROUTE_GROUP)
+                                ? "" : route.getGroup() ~ ".") ~ route.getController() ~ "." ~ route.getController()
+                            ~ "controller." ~ route.getAction();
+                    }
                 }
             }
             else

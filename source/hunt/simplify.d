@@ -18,7 +18,8 @@ Application app()
     return Application.getInstance();
 }
 
-string CreateUrl(string mca, string[string] params = null, string group = null)
+string createUrl(string mca, string[string] params = null, string group = null)
 {
     return app().router().createUrl(mca, params, group);
 }
+

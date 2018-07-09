@@ -30,6 +30,7 @@ import collie.codec.http;
 import std.stdio;
 import std.exception;
 import std.parallelism;
+import std.conv : to;
 
 import kiss.logger;
 
@@ -55,8 +56,9 @@ class Dispatcher
 
                 if (route is null)
                 {
-                    route = this._router.match(request.header(HTTPHeaderCode.HOST),
-                            request.method, request.path);
+                    import std.array : split;
+                    string domain = split(request.header(HTTPHeaderCode.HOST), ":")[0];
+                    route = this._router.match(domain, request.method, request.path);
 
                     if (route is null)
                     {
