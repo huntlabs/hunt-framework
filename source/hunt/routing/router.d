@@ -343,7 +343,7 @@ class Router
                 if (item.path == "/")
                     haveRootRoute = true;
                 route = this.makeRoute(item.methods, item.path, item.route, group);
-                if (route)
+                if (route !is null)
                 {
                     routeGroup.addRoute(route);
                 }
@@ -364,11 +364,11 @@ class Router
             return this._directoryGroups.get(directory, null);
         }
 
-        Route makeRoute(T = string)(string methods, string path, T mca,
-                string group = DEFAULT_ROUTE_GROUP)
+        Route makeRoute(T = string)(string methods, string path, T mca, string group = DEFAULT_ROUTE_GROUP)
         {
             version (HuntDebugMode)
                 tracef("method: %s, path: %s, mca: %s, group: %s", methods, path, mca, group);
+                
             auto route = new Route();
             methods = toUpper(methods);
             path = this.mendPath(path);
@@ -480,6 +480,13 @@ class Router
                     handleKey = "app." ~ route.getModule() ~ ".controller." ~ ((route.getGroup() == DEFAULT_ROUTE_GROUP)
                             ? "" : route.getGroup() ~ ".") ~ route.getController() ~ "." ~ route.getController()
                         ~ "controller." ~ route.getAction();
+
+                    if (getRouteFromList(handleKey) is null)
+                    {
+                        handleKey = "app.component." ~ route.getModule() ~ ".controller." ~ ((route.getGroup() == DEFAULT_ROUTE_GROUP)
+                                ? "" : route.getGroup() ~ ".") ~ route.getController() ~ "." ~ route.getController()
+                            ~ "controller." ~ route.getAction();
+                    }
                 }
             }
             else
