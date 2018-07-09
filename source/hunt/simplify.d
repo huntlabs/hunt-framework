@@ -13,6 +13,8 @@ module hunt.simplify;
 
 import hunt.application.application : Application;
 
+public import kiss.datetime;
+
 Application app()
 {
     return Application.getInstance();
@@ -22,4 +24,3 @@ string createUrl(string mca, string[string] params = null, string group = null)
 {
     return app().router().createUrl(mca, params, group);
 }
-
