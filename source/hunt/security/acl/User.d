@@ -6,12 +6,14 @@ import hunt.security.acl.permission.Permission;
 class User
 {
    
-    
-        int 		_id;
-		string 		_name;
-        Permission 	_permission;
-        Role[] 		roles;
+    public
+    {
+        int 		   _id;
+		string 		   _name;
+        Permission 	   _permission;
+        Role[] 		   roles;
 		__gshared User _default;
+    }
 
 	this()
 	{
@@ -25,12 +27,12 @@ class User
 		this._name = name;	
 	}
 
-	static public User defaultUser(){
+	static public User defaultUser()
+    {
 		if(_default is null)
 			_default = new User(0 , "default");
 		return _default;
 	}
-
 
     public int id()
     {

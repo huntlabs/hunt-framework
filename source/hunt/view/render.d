@@ -22,14 +22,15 @@ import std.uni;
 import std.functional;
 
 import kiss.logger;
+
 import hunt.view.rule;
 import hunt.view.element;
 import hunt.view.match;
 import hunt.view.ast;
 import hunt.view.util;
 
-import hunt;
 import hunt.routing;
+import hunt.simplify;
 
 class Render
 {
@@ -350,8 +351,7 @@ public:
                 auto params = eval_expression(element.args[1], data);
                 if (mca.type == JSON_TYPE.STRING && params.type == JSON_TYPE.STRING)
                 {
-                    result = app.router.createUrl(mca.str,
-                            Util.parseFormData(params.str), _routeGroup);
+                    result = createUrl(mca.str, Util.parseFormData(params.str), _routeGroup);
                 }
                 return result;
             }
