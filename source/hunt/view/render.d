@@ -76,7 +76,7 @@ public:
 
     bool cmp(JSONValue a, JSONValue b, Function func)
     {
-        //writeln("--------cmp : ", func, " a type :", a.type ," b type :", b.type );
+       //writeln("--------cmp : ", func, " a type :", a.type, " b type :", b.type);
 
         if (a.type == JSON_TYPE.OBJECT || a.type == JSON_TYPE.ARRAY)
             return false;
@@ -147,7 +147,7 @@ public:
 
     T read_json(T = JSONValue)(JSONValue data, string command)
     {
-        // writeln("------read json---- :", data.toString, "  command : ",command);
+        //writeln("------read json---- :", data.toString, "  command : ", command);
         T result;
         if (data.type == JSON_TYPE.OBJECT)
         {
@@ -242,6 +242,21 @@ public:
                         eval_expression(element.args[1], data), element.func);
                 return result;
             }
+        case Function.Int:
+            {
+                auto res = eval_expression(element.args[0], data);
+                if (res.type == JSON_TYPE.STRING)
+                {
+                    if (Util.is_num(res.str))
+                        result = to!int(res.str);
+                }
+                else
+                {
+                    if (Util.is_num(res.toString))
+                        result = to!int(res.toString);
+                }
+                return result;
+            }
         case Function.ReadJson:
             {
                 try
@@ -258,7 +273,7 @@ public:
             }
         case Function.Result:
             {
-                //writeln("--read result --:", element.result.toString);
+                writeln("--read result --:", element.result.toString);
                 result = element.result;
                 return result;
             }
@@ -350,7 +365,7 @@ public:
                 catch (Exception e)
                 {
                     template_engine_throw("render_error",
-                        "function '" ~ to!string(element.func) ~ "' not found");
+                            "function '" ~ to!string(element.func) ~ "' not found");
                 }
             }
         default:
@@ -424,7 +439,7 @@ public:
                         {
                             auto map = eval_expression(element_loop.list, data);
                             //writeln("----Loop type ----: ", map.type," map.toString : ",map.toString);
-                            if (map.type == JSON_TYPE.OBJECT) 
+                            if (map.type == JSON_TYPE.OBJECT)
                             {
                                 foreach (string k, v; map)
                                 {
@@ -434,9 +449,10 @@ public:
                                     result ~= render(new ASTNode(element_loop), data_loop);
                                 }
                             }
-                            else if(map.type == JSON_TYPE.ARRAY)
+                            else if (map.type == JSON_TYPE.ARRAY)
                             {
-                                foreach(size_t idx,v; map) {
+                                foreach (size_t idx, v; map)
+                                {
                                     JSONValue data_loop = data;
                                     data_loop[element_loop.key] = idx;
                                     data_loop[element_loop.value] = v;
