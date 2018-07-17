@@ -11,10 +11,12 @@
 
 module hunt.versions;
 
-// define hunt framework versions
-enum HUNT_MAJOR_VERSION = 1;
-enum HUNT_MINOR_VERSION = 1;
-enum HUNT_PATCH_VERSION = 1;
+import std.conv;
 
-enum HUNT_VERSION = HUNT_MAJOR_VERSION ~ "." ~ HUNT_MINOR_VERSION ~ "." ~ HUNT_PATCH_VERSION;
+// define hunt framework versions
+enum int HUNT_MAJOR_VERSION = 1;
+enum int HUNT_MINOR_VERSION = 1;
+enum int HUNT_PATCH_VERSION = 1;
+
+enum HUNT_VERSION = HUNT_MAJOR_VERSION.to!string ~ "." ~ to!string(HUNT_MINOR_VERSION) ~ "." ~ to!string(HUNT_PATCH_VERSION);
 enum XPoweredBy = "Hunt framework v" ~ HUNT_VERSION;
