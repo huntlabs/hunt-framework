@@ -240,8 +240,8 @@ class Response : ResponseBuilder
         setStatus(code);
         header(HTTPHeaderCode.CONTENT_TYPE, contentype);
         setContent(errorPageHtml(code, body_));
-        connectionClose();
-        done();
+//       connectionClose();
+//        done();
     }
 
     void setHttpError(ushort code)
