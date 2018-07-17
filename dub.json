@@ -30,7 +30,7 @@
         {
             "name": "full",
             "subConfigurations": {
-                "entity": "default"
+                "entity": "full"
             }
         },
         {
