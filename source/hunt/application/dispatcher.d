@@ -62,8 +62,10 @@ class Dispatcher
 
                     if (route is null)
                     {
-                        request.createResponse().do404();
-
+                        auto response = request.createResponse();
+                        response.do404();
+                        response.connectionClose();
+                        response.done();
                         return;
                     }
 
@@ -87,8 +89,10 @@ class Dispatcher
 
                 if (!accessFilter(request))
                 {
-                    request.createResponse()
-                        .do403("no permiss to access: " ~ request.route.getController() ~ "." ~ request.route.getAction());
+                    auto response = request.createResponse();
+                    response.do403("no permiss to access: " ~ request.route.getController() ~ "." ~ request.route.getAction());
+                    response.connectionClose();
+                    response.done();
                     return;
                 }
 
