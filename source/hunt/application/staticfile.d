@@ -177,11 +177,7 @@ class StaticfileController : Controller
     {
     	if (!path.startsWith("./"))
     	{
-    		if (path.startsWith("/"))
-    		{
-    			path = "." ~ path;
-    		}
-    		else
+    		if (!path.startsWith("/"))
     		{
     			path = "./" ~ path;
     		}
