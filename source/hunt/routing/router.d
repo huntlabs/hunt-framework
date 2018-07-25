@@ -348,8 +348,8 @@ class Router
                     routeGroup.addRoute(route);
                 }
             }
-
-            this.staticRootRoute = this.makeRoute("GET", "/", "staticDir:wwwroot/", group);
+            import hunt.application.config;
+            this.staticRootRoute = this.makeRoute("GET", "/", "staticDir:"~Config.app.http.path, group);
             if (!haveRootRoute)
                 routeGroup.addRoute(staticRootRoute);
         }
