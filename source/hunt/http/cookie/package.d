@@ -9,14 +9,8 @@
  *
  */
 
-module hunt.simplify;
+module hunt.http.cookie;
 
-public import hunt.application.application : app;
-public import hunt.http.cookie.CookieManager : cookie;
-
-public import kiss.datetime;
-
-string createUrl(string mca, string[string] params = null, string group = null)
-{
-    return app().router().createUrl(mca, params, group);
-}
+public import hunt.http.cookie.Cookie;
+public import hunt.http.cookie.CookieManager;
+public import hunt.http.cookie.ResponseCookieEncoder;

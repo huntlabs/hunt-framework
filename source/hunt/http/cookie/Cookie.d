@@ -9,9 +9,10 @@
  *
  */
  
-module hunt.http.cookie;
+module hunt.http.cookie.Cookie;
 
 import hunt.exception;;
+
 import std.regex : regex, Regex;
 import std.string;
 import std.conv;
@@ -273,94 +274,33 @@ string cookie_unquote(string quoted_value)
     return result;
 }
 
-// XXX: Capture possible exceptions
-// Convert a (possibly encoded) client "Cookie: " HTTP header into an
-// list of Cookie objects. This function expects the "Cookie: " or 
-// "Set-Cookie: " header name to be already removed
-Cookie[string] parseCookie(string header)
-{
-    /// if cookie string is not null
-    if (header is null)
-        return null;
-
-    /// parse the cookies
-    Cookie[string] result;
-
-    string[] cookie_parts = header.split(";");
-
-    foreach (idx, part; cookie_parts)
-    {
-        auto cookie = new Cookie();
-        string[] keyvalue = part.split("=");
-        if (keyvalue.length != 2) // WTF!?
-            continue;
-
-        string key = keyvalue[0].strip;
-
-        if (key[0] == '$')
-            continue;
-
-        string quoted_value = keyvalue[1];
-
-        string lkey = toLower(key);
-
-        if (lkey in RESERVED_PARAMS)
-        {
-            // Ignore if we've not set the name yet
-            if (!cookie.is_name_set)
-                continue;
-
-            cookie.set(lkey, cookie_unquote(quoted_value));
-
-            // Add the cookie if this is the last token
-            if (idx == cookie_parts.length - 1)
-            {
-                result[lkey] = cookie;
-            }
-        }
-
-        // It is a name-value, not a reserved param
-        else
-        {
-            cookie.set(key, cookie_unquote(quoted_value));
-            result[key] = cookie;
-        }
-    }
-
-    return result;
-}
 
 // =================================
 // Cookie class
 // =================================
 class Cookie
 {
-    enum DEFAULT_HEADER = "Set-Cookie: ";
-
-    enum SAMESITE_LAX = "lax";
-    enum SAMESITE_STRICT = "strict";
-
-    static bool is_reserved_key(string key)
+    private
     {
-        return (toLower(key) in RESERVED_PARAMS) != null;
+        string _name = null;
+        string _quoted_value = null;
+        string _value = null;
+        string _decodedvalue = null;
+        string _domain;
+        string _path = "/";
+        int _expires = 3600;
+        bool _secure = false;
+        bool _httpOnly = true;
     }
 
-    this(string cname, string cvalue, string[string] cparams)
+    this(string name, string value, int expires, string path = "/", string domain = null, bool secure = false, bool httpOnly = true)
     {
-        this(cname, cvalue);
-        params(cparams);
-
-    }
-
-    this(string cname, string cvalue)
-    {
-        set(cname, cvalue);
-        this();
-    }
-
-    this()
-    {
-        initialize_cookieparams();
+        this.set(name, value);
+        this.expires(expires);
+        this.path(path);
+        this.domain(domain);
+        this.secure(secure);
+        this.httpOnly(httpOnly);
     }
 
     void set(string name, string value)
@@ -374,7 +314,7 @@ class Cookie
         string lname = toLower(name);
         if (lname in RESERVED_PARAMS)
         {
-            _cookieparams[lname] = value;
+            throw new CookieException("Don't use cookie keywords for key.");
         }
         else
         {
@@ -428,7 +368,62 @@ class Cookie
         _quoted_value = newvalue;
         _value = cookie_unquote(_quoted_value);
     }
+    
+    Cookie domain(string domain)
+    {
+        _domain = domain;
+        return this;
+    }
 
+    string domain()
+    {
+        return _domain;
+    }
+
+    Cookie path(string path)
+    {
+        _path = path;
+        return this;
+    }
+
+    string path()
+    {
+        return _path;
+    }
+
+    Cookie expires(int expires)
+    {
+        _expires = expires;
+        return this;
+    }
+
+    int expires()
+    {
+        return _expires;
+    }
+
+    Cookie secure(bool secure)
+    {
+        _secure = secure;
+        return this;
+    }
+
+    bool secure()
+    {
+        return _secure;
+    }
+
+    Cookie httpOnly(bool httpOnly)
+    {
+        _httpOnly = httpOnly;
+        return this;
+    }
+
+    bool httpOnly()
+    {
+        return _httpOnly;
+    }
+/*
     @property string[string] params()
     {
         return _cookieparams;
@@ -520,159 +515,31 @@ class Cookie
     {
         return output();
     }
-
-    /**
-     * Gets the name of the cookie.
-     *
-     * @return string
-     */
-    public string getName()
-    {
-        return name();
-    }
-    /**
-     * Gets the value of the cookie.
-     *
-     * @return string|null
-     */
-    public string getValue()
-    {
-        return value();
-    }
-    /**
-     * Gets the domain that the cookie is available to.
-     *
-     * @return string|null
-     */
-    public string getDomain()
-    {
-        return get("domain");
-    }
-    /**
-     * Gets the time the cookie expires.
-     *
-     * @return string
-     */
-    public string getExpiresTime()
-    {
-        return get("expires");
-    }
-    /**
-     * Gets the max-age attribute.
-     *
-     * @return string
-     */
-    public string getMaxAge()
-    {
-        return get("max-age");
-    }
-    /**
-     * Gets the path on the server in which the cookie will be available on.
-     *
-     * @return string
-     */
-    public string getPath()
-    {
-        return get("path");
-    }
-    /**
-     * Checks whether the cookie should only be transmitted over a secure HTTPS connection from the client.
-     *
-     * @return bool
-     */
-    public bool isSecure()
-    {
-        return get("secure") == "true" ? true : false;
-    }
-    /**
-     * Checks whether the cookie will be made accessible only through the HTTP protocol.
-     *
-     * @return bool
-     */
-    public bool isHttpOnly()
-    {
-        return get("httponly") == "true" ? true : false;
-    }
-    /**
-     * Whether this cookie is about to be cleared.
-     *
-     * @return bool
-     */
-    public bool isCleared()
-    {
-        throw new NotImplementedException("isCleared");
-    }
-    /**
-     * Checks if the cookie value should be sent with no url encoding.
-     *
-     * @return bool
-     */
-    public bool isRaw()
-    {
-        return get("raw") == "true" ? true : false;
-    }
-    /**
-     * Gets the SameSite attribute.
-     *
-     * @return string|null
-     */
-    public string getSameSite()
-    {
-        return get("samesite");
-    }
-
-private:
-    string _name = null;
-    string _quoted_value = null;
-    string _value = null;
-    string _decodedvalue = null;
-    string[string] _cookieparams = null;
-
-protected:
-    void initialize_cookieparams()
-    {
-        /*foreach (key, value; RESERVED_PARAMS)
-        {
-            if(key == "expires")
-                _cookieparams[key] = "0";
-            else if(key == "path")
-                _cookieparams[key] = "/";
-            else if(key == "secure")
-                _cookieparams[key] = "false";
-            else if(key == "httponly")
-                _cookieparams[key] = "false";
-
-            else if(key == "raw")
-                _cookieparams[key] = "true";
-            else
-                 _cookieparams[key] = "";
-
-        }*/
-    }
+*/
 
 }
 
 unittest
 {
-    auto cookies = parseCookie("PHPSESSID=dh5vvosj68hv1raprertnku6s7; LBN=node2; Hm_lvt_9e6c6312b8b64e7e38b0b84c12642b96=1461739077,1461897406,1462760128,1462760222; Hm_lpvt_9e6c6312b8b64e7e38b0b84c12642b96=1463122691; __utmt=1; __utma=233165215.1997191855.1458546658.1463106445.1463122691.5; __utmb=233165215.1.10.1463122691; __utmc=233165215; __utmz=233165215.1458546658.1.1.utmcsr=account.start.wang|utmccn=(referral)|utmcmd=referral|utmcct=/register");
+    auto cookies = parseCookie("HUNTSID=dh5vvosj68hv1raprertnku6s7; LBN=node2; Hm_lvt_9e6c6312b8b64e7e38b0b84c12642b96=1461739077,1461897406,1462760128,1462760222; Hm_lpvt_9e6c6312b8b64e7e38b0b84c12642b96=1463122691; __utmt=1; __utma=233165215.1997191855.1458546658.1463106445.1463122691.5; __utmb=233165215.1.10.1463122691; __utmc=233165215; __utmz=233165215.1458546658.1.1.utmcsr=account.start.wang|utmccn=(referral)|utmcmd=referral|utmcct=/register");
     
-    assert(cookies.get("PHPSESSID", null).value == "dh5vvosj68hv1raprertnku6s7");
+    assert(cookies.get("HUNTSID", null).value == "dh5vvosj68hv1raprertnku6s7");
     assert(cookies["LBN"].value == "node2");
 }
 
 unittest
 {
     //generate cookie
-    auto cookie = new Cookie("PHPSESSID", "dh5vvosj68hv1raprertnku6s7");
+    auto cookie = new Cookie("HUNTSID", "dh5vvosj68hv1raprertnku6s7");
     //assert();
     import kiss.logger;
 
     logDebug(cookie.output);
-    assert(cookie.output == "Set-Cookie: PHPSESSID=dh5vvosj68hv1raprertnku6s7");
+    assert(cookie.output == "Set-Cookie: HUNTSID=dh5vvosj68hv1raprertnku6s7");
     /*cookie.params = ["expires" : "Fri, 13 May 2016 17:44:17 GMT", "path" : "/",
         "domain" : "putao.com", "secure" : "true", "httponly" : "false"];
 
     logDebug(cookie.output);
-    assert( cookie.output == "Set-Cookie: PHPSESSID=dh5vvosj68hv1raprertnku6s7;expires=Fri, 13 May 2016 17:44:17 GMT;domain=putao.com;path=/;secure=true;httponly=false;raw=true");
+    assert( cookie.output == "Set-Cookie: HUNTSID=dh5vvosj68hv1raprertnku6s7;expires=Fri, 13 May 2016 17:44:17 GMT;domain=putao.com;path=/;secure=true;httponly=false;raw=true");
     */
 }

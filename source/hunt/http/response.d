@@ -151,62 +151,50 @@ class Response : ResponseBuilder
     }
 
     /**
-     * set Cookie
-     */
-    Response setCookie(string name, string value, int expires = 0,
-            string path = "/", string domain = null)
-    {
-        auto cookie = scoped!Cookie(name, value, ["path" : path, "domain" : domain]);
-
-        if (expires != 0)
-        {
-            import std.conv;
-            cookie.params["max-age"] = (expires < 0) ? "0" : to!string(expires);
-        }
-
-        addHeader(HTTPHeaderCode.SET_COOKIE, cookie.output(""));
-
-        return this;
-    }
-
-    /**
-	 * delete Cookie
-	 */
-    Response delCookie(string name)
-    {
-        setCookie(name, null, 0);
-        return this;
-    }
-
-    /**
      * Add a cookie to the response.
      *
      * @param  Cookie cookie
      * @return this
      */
-    Response cookie(Cookie cookie)
+    Response withCookie(Cookie cookie)
     {
-        setHeader(HTTPHeaderCode.SET_COOKIE, cookie.output(""));
+        setHeader(HTTPHeaderCode.SET_COOKIE, _cookieEncoder.encode(cookie));
+
         return this;
     }
 
-    /// ditto
-    Response cookie(string name, string value, int expires = 0,
-            string path = "/", string domain = null)
+    void setCookieHeaders()
     {
-        setCookie(name, value, expires, path, domain);
-        return this;
+        auto cookies = cookie().responseCookies();
+        if (cookies.length > 0)
+        {
+            foreach (cookie; cookies)
+            {
+                withCookie(cookie);
+            }
+        }
     }
 
-
+    ResponseCookieEncoder cookieEncoder()
+    {
+        if (_cookieEncoder is null)
+        {
+            _cookieEncoder = new ResponseCookieEncoder;
+        }
+        
+        return _cookieEncoder;
+    }
+    
     pragma(inline) final void done()
     {
         if (_isDone)
             return;
 
-        _isDone = true;
+        setCookieHeaders();
         setHeader(HTTPHeaderCode.X_POWERED_BY, XPoweredBy);
         sendWithEOM();
+
+        _isDone = true;
     }
 
     // void redirect(string url, bool is301 = false)
@@ -253,6 +241,7 @@ class Response : ResponseBuilder
 
 private:
     bool _isDone = false;
+    ResponseCookieEncoder _cookieEncoder;
 }
 
 // dfmt off
