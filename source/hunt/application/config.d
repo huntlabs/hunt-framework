@@ -40,6 +40,15 @@ final class AppConfig
         int staticFileCacheMinutes = 30;
     }
 
+    struct CookieConf
+    {
+        string domain = "";
+        string path = "/";
+        int expires = 3600;
+        bool secure = false;
+        bool httpOnly = true;
+    }
+
     struct SessionConf
     {
         string storage = "memory";
@@ -203,6 +212,7 @@ final class AppConfig
 
     DatabaseConf database;
     ApplicationConf application;
+    CookieConf cookie;
     SessionConf session;
     CacheConf cache;
     HttpConf http;

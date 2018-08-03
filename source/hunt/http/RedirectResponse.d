@@ -69,23 +69,7 @@ class RedirectResponse : Response
         }
         return this;
     }
-
-    /**
-     * Add multiple cookies to the response.
-     *
-     * @param  array  cookies
-     * @return this
-     */
-    RedirectResponse withCookies(Cookie[] cookies)
-    {
-        foreach (Cookie v; cookies)
-        {
-            _httpMessage.getHeaders.add(HTTPHeaderCode.SET_COOKIE, v.output(""));
-        }
-
-        return this;
-    }
-
+    
     /**
      * Flash an array of input to the session.
      *

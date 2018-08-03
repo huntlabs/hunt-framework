@@ -56,6 +56,12 @@ final class Request : RequestHandler
 
 	protected HttpHeaders _httpHeaders;
 	protected Session _session;
+	protected string _sessionId;
+
+	string sessionId()
+	{
+		return this._sessionId;
+	}
 
 	this(CreatorBuffer cuffer, DoHandler handler, uint maxsize = 8 * 1024 * 1024)
 	{
@@ -176,18 +182,6 @@ final class Request : RequestHandler
 	@property Address clientAddress()
 	{
 		return _httpMessage.clientAddress();
-	}
-
-
-	@property Cookie[string] cookies()
-	{
-		if (_cookies.length == 0)
-		{
-			string cookie = header(HTTPHeaderCode.COOKIE);
-			_cookies = parseCookie(cookie);
-		}
-
-		return _cookies;
 	}
 
 	@property JSONValue json()
@@ -598,14 +592,15 @@ final class Request : RequestHandler
 	{
 		if (!hasSession())
 		{
-			string sessionName = "hunt_session";
+			string sessionName = "HUNTSID";
 			string sessionId = this.cookie(sessionName);
 			
 			version (HuntDebugMode)  kiss.logger.trace("last sessionId =>", sessionId);
 			if (sessionId.empty)
 			{
 				auto _tmp = new Session(app().sessionStorage());
-				createResponse().setCookie(sessionName, _tmp.sessionId);
+				// createResponse().setCookie(sessionName, _tmp.sessionId);
+				_sessionId = _tmp.sessionId;
 				version (HuntDebugMode) kiss.logger.trace("latest sessionId =>", _tmp.sessionId);
 				return _tmp;
 			}
@@ -883,6 +878,16 @@ final class Request : RequestHandler
 		return v;
 	}
 
+	CookieManager cookieManager()
+	{
+		if (_cookieManager is null)
+		{
+			_cookieManager = new CookieManager(header(HTTPHeaderCode.COOKIE));
+		}
+
+		return _cookieManager;
+	}
+
 	/**
      * Determine if a cookie is set on the request.
      *
@@ -903,10 +908,17 @@ final class Request : RequestHandler
      */
 	string cookie(string key, string defaultValue = null)
 	{
-		Cookie ck  = cookies.get(key, null);
-		if(ck is null)
-			return defaultValue;
-		return ck.value;
+		return _cookieManager.get(key, defaultValue);
+	}
+
+	/**
+     * Get an array of all cookies.
+     *
+     * @return array
+	 */
+	string[string] cookie()
+	{
+		return _cookieManager.requestCookies();
 	}
 
 	/**
@@ -1518,6 +1530,7 @@ private:
 	Route _route;
 	string[string] _mate;
 	Cookie[string] _cookies;
+	CookieManager _cookieManager;
 	Buffer _body;
 	JSONValue _json;
 	ubyte[] _uBody;
