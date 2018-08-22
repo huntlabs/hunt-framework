@@ -120,7 +120,7 @@ public :
 
     static void doJob(Task t)
     {
-        trace("--do job ---: ", t.tid);
+       // trace("--do job ---: ", t.tid);
         t.exec();
         t.onFinish();
         auto interval = cast(size_t) t.interval.total!("msecs");
