@@ -355,6 +355,12 @@ public:
                 }
                 return result;
             }
+        case Function.IsNull:
+            {
+                auto res = eval_expression(element.args[0], data);
+                result = res.isNull;
+                return result;
+            }
         case Function.Default:
             {
                 //writeln("-----Function.Default----");
