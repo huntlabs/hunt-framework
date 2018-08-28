@@ -11,4 +11,4 @@
 
 module hunt.data.entity;
 
-public import entity;
+public import hunt.entity;

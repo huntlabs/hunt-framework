@@ -18,7 +18,7 @@ public import hunt.http.request;
 public import hunt.routing;
 public import hunt.application.middleware;
 
-import huntlabs.cache;
+import hunt.cache;
 import hunt.simplify;
 import hunt.view;
 
