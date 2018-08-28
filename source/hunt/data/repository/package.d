@@ -11,4 +11,4 @@
 
 module hunt.data.repository;
 
-public import entity.repository;
+public import hunt.entity.repository;
