@@ -6,7 +6,7 @@
     "dependencies": {
         "collie": "~>0.10.15",
         "kiss": "~>0.4.8",
-        "hunt-entity": "~>1.0.0",
+        "hunt-entity": "~>1.6.0",
         "hunt-cache": "~>0.1.0"
     },
     "authors": [
