@@ -1,6 +1,6 @@
 module hunt.http.session;
 
-import huntlabs.cache;
+import hunt.cache;
 import hunt.exception;
 import hunt.utils.random;
 

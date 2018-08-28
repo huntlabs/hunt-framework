@@ -17,7 +17,7 @@ import collie.codec.http.server;
 import collie.codec.http;
 import collie.bootstrap.serversslconfig;
 import collie.utils.exception;
-import huntlabs.cache;
+import hunt.cache;
 
 public import kiss.event;
 public import kiss.event.EventLoopGroup;
@@ -45,7 +45,7 @@ public import hunt.application.config;
 public import hunt.application.middleware;
 public import hunt.security.acl.Identity;
 
-public import entity;
+public import hunt.entity;
 
 
 abstract class WebSocketFactory
@@ -116,7 +116,7 @@ final class Application
         }
         else
         {
-            import entity.EntityOption;
+            import hunt.entity.EntityOption;
 
             auto option = new EntityOption;
             

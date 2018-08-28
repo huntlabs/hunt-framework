@@ -16,7 +16,7 @@ public import hunt.init;
 public import hunt.application;
 public import hunt.security;
 public import hunt.routing;
-public import huntlabs.cache;
+public import hunt.cache;
 public import hunt.http;
 public import hunt.view;
 
