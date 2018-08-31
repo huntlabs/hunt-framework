@@ -1,10 +1,10 @@
-[![Build Status](https://travis-ci.org/huntlabs/hunt.svg?branch=master)](https://travis-ci.org/huntlabs/hunt)
+[![Build Status](https://travis-ci.org/huntlabs/hunt-framework.svg?branch=master)](https://travis-ci.org/huntlabs/hunt-framework)
 
 ## Hunt framework
 [Hunt](http://www.huntframework.com/) is a high-level [D Programming Language](http://dlang.org/) Web framework that encourages rapid development and clean, pragmatic design. It lets you build high-performance Web applications quickly and easily.
 
 ## Documents
-You can read [wiki](https://github.com/huntlabs/hunt/wiki).
+[Start read hunt framework wiki for documents](https://github.com/huntlabs/hunt-framework/wiki).
 
 ## Create project
 ```bash
@@ -53,17 +53,17 @@ class IndexController : Controller
 View [hunt-skeleton](https://github.com/huntlabs/hunt-skeleton) example project source code.
 
 ## Component based
-1. [Routing](https://github.com/huntlabs/hunt/wiki/Routing)
-2. [Caching](https://github.com/huntlabs/hunt/wiki/Cache)
-3. [Middleware](https://github.com/huntlabs/hunt/wiki/Middleware)
-4. [Configuration](https://github.com/huntlabs/hunt/wiki/Configuration)
+1. [Routing](https://github.com/huntlabs/hunt-framework/wiki/Routing)
+2. [Caching](https://github.com/huntlabs/hunt-framework/wiki/Cache)
+3. [Middleware](https://github.com/huntlabs/hunt-framework/wiki/Middleware)
+4. [Configuration](https://github.com/huntlabs/hunt-framework/wiki/Configuration)
 5. Validation
-6. [Entity & Repository](https://github.com/huntlabs/hunt/wiki/Database)
-7. [Template Engine](https://github.com/huntlabs/hunt/wiki/View)
+6. [Entity & Repository](https://github.com/huntlabs/hunt-framework/wiki/Database)
+7. [Template Engine](https://github.com/huntlabs/hunt-framework/wiki/View)
 8. Task Worker
 9. Security
 
 ## Community
 QQ Group: 184183224 
 
-[Github](https://github.com/huntlabs/hunt/issues)
+[Github](https://github.com/huntlabs/hunt-framework/issues)
