@@ -1,12 +1,12 @@
 {
     "name": "hunt-framework",
+    "targetType": "library",
     "license": "Apache-2.0",
     "copyright": "Copyright (C) 2015-2018, Shanghai Putao Technology Co., Ltd",
     "description": "A high performance full-stack Web framework.",
     "dependencies": {
         "collie": "~>0.10.15",
         "kiss": "~>0.4.8",
-        "hunt-entity": "~>1.6.0",
         "hunt-cache": "~>0.1.0"
     },
     "authors": [
@@ -18,37 +18,62 @@
     "configurations": [
         {
             "name": "default",
-            "targetType": "library"
+            "versions": [
+                "WithDataBase"
+            ]
         },
         {
-            "name": "debug",
+            "name": "no-database",
             "versions": [
-                "HuntDebugMode"
-            ],
-            "targetType": "library"
+                "NoDatabase"
+            ]
         },
         {
             "name": "full",
             "subConfigurations": {
                 "entity": "full"
+            },
+            "versions": [
+                "WithDataBase"
+            ],
+            "dependencies": {
+                "hunt-entity": "~>1.6.0"
             }
         },
         {
             "name": "mysql",
             "subConfigurations": {
                 "entity": "mysql"
+            },
+            "versions": [
+                "WithDataBase"
+            ],
+            "dependencies": {
+                "hunt-entity": "~>1.6.0"
             }
         },
         {
             "name": "sqlite",
             "subConfigurations": {
                 "entity": "sqlite"
+            },
+            "versions": [
+                "WithDataBase"
+            ],
+            "dependencies": {
+                "hunt-entity": "~>1.6.0"
             }
         },
         {
             "name": "postgresql",
             "subConfigurations": {
                 "entity": "postgresql"
+            },
+            "versions": [
+                "WithDataBase"
+            ],
+            "dependencies": {
+                "hunt-entity": "~>1.6.0"
             }
         }
     ]
