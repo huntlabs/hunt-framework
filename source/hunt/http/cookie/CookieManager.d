@@ -13,6 +13,7 @@ module hunt.http.cookie.CookieManager;
 
 import hunt.http.cookie.Cookie;
 import hunt.application.application;
+import std.string;
 
 class CookieManager
 {
