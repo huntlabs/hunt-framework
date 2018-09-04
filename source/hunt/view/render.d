@@ -374,6 +374,8 @@ public:
                             "function '" ~ to!string(element.func) ~ "' not found");
                 }
             }
+            break;
+            
         default:
             {
                 template_engine_throw("render_error",

@@ -186,12 +186,14 @@ string __createCallActionMethod(T, string moduleName)()
     import std.format;
     import std.string;
     import kiss.logger;
+    import std.conv;
 
     string str = `
         Response callActionMethod(string methodName, Request req) {
         this.request = req; 
         Response actionResult=null;
         version (HuntDebugMode) logDebug("methodName=", methodName);
+        import std.conv;
 
         switch(methodName){
     `;

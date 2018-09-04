@@ -11,4 +11,5 @@
 
 module hunt.data.entity;
 
+version (WithDatabase)
 public import hunt.entity;
