@@ -9,7 +9,7 @@
  *
  */
 
-module hunt;
+module hunt.framework;
 
 public import hunt.framework.versions;
 public import hunt.framework.init;
