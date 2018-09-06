@@ -36,7 +36,7 @@ POST    /user/login     user.login
 ```D
 module app.controller.index;
 
-import hunt;
+import hunt.framework;
 
 class IndexController : Controller
 {

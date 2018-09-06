@@ -9,7 +9,8 @@ import std.digest.md;
 import std.stdio;
 
 import kiss.logger;
-import hunt;
+
+import hunt.framework;
 import hunt.framework.application.controller;
 import hunt.framework.application.config;
 import hunt.framework.utils.string;
