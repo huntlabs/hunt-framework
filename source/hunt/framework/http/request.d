@@ -908,7 +908,7 @@ final class Request : RequestHandler
      */
 	string cookie(string key, string defaultValue = null)
 	{
-		return _cookieManager.get(key, defaultValue);
+		return cookieManager.get(key, defaultValue);
 	}
 
 	/**
@@ -918,7 +918,7 @@ final class Request : RequestHandler
 	 */
 	string[string] cookie()
 	{
-		return _cookieManager.requestCookies();
+		return cookieManager.requestCookies();
 	}
 
 	/**

@@ -54,6 +54,9 @@ class Dispatcher
                         HTTPHeaderCode.HOST) ~ "_" ~ request.method ~ "_" ~ request.path;
                 route = this._cached.get(cacheKey, null);
 
+                /// init this thread request for error return.
+                hunt.framework.http.request.request(request);
+
                 if (route is null)
                 {
                     import std.array : split;

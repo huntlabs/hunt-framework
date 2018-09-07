@@ -11,5 +11,4 @@
 
 module hunt.framework.data.entity;
 
-version (WithDatabase)
 public import hunt.entity;
