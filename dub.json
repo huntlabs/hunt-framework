@@ -7,7 +7,8 @@
     "dependencies": {
         "collie": "~>0.10.15",
         "kiss": "~>0.4.8",
-        "hunt-cache": "~>0.1.0"
+        "hunt-cache": "~>0.1.0",
+        "hunt-entity": "~>1.6.2"
     },
     "authors": [
         "zoujiaqing",
@@ -17,63 +18,30 @@
     ],
     "configurations": [
         {
-            "name": "default",
-            "versions": [
-                "WithDataBase"
-            ]
-        },
-        {
-            "name": "no-database",
-            "versions": [
-                "NoDatabase"
-            ]
+            "name": "default"
         },
         {
             "name": "full",
             "subConfigurations": {
-                "entity": "full"
-            },
-            "versions": [
-                "WithDataBase"
-            ],
-            "dependencies": {
-                "hunt-entity": "~>1.6.1"
+                "hunt-entity": "full"
             }
         },
         {
             "name": "mysql",
             "subConfigurations": {
-                "entity": "mysql"
-            },
-            "versions": [
-                "WithDataBase"
-            ],
-            "dependencies": {
-                "hunt-entity": "~>1.6.1"
+                "hunt-entity": "mysql"
             }
         },
         {
             "name": "sqlite",
             "subConfigurations": {
-                "entity": "sqlite"
-            },
-            "versions": [
-                "WithDataBase"
-            ],
-            "dependencies": {
-                "hunt-entity": "~>1.6.1"
+                "hunt-entity": "sqlite"
             }
         },
         {
             "name": "postgresql",
             "subConfigurations": {
-                "entity": "postgresql"
-            },
-            "versions": [
-                "WithDataBase"
-            ],
-            "dependencies": {
-                "hunt-entity": "~>1.6.1"
+                "hunt-entity": "postgresql"
             }
         }
     ]
