@@ -45,7 +45,6 @@ public import hunt.framework.application.config;
 public import hunt.framework.application.middleware;
 public import hunt.framework.security.acl.Identity;
 
-version (WithDatabase)
 public import hunt.entity;
 
 
@@ -117,7 +116,6 @@ final class Application
         }
         else
         {
-            version (WithDatabase) {
             import hunt.entity.EntityOption;
 
             auto option = new EntityOption;
@@ -143,7 +141,7 @@ final class Application
             option.pool.minConnection = config.pool.minConnection;
 
             _entityManagerFactory = Persistence.createEntityManagerFactory("default", option);
-            }
+            
         }
     }
 
@@ -162,7 +160,6 @@ final class Application
 		// writeln(" initSessionStorage " ,_sessionStorage);
     }
 
-    version (WithDatabase)
     EntityManagerFactory entityManagerFactory()
     {
         return _entityManagerFactory;
@@ -446,7 +443,7 @@ final class Application
     uint _maxBodySize;
     CreatorBuffer _cbuffer;
     Dispatcher _dispatcher;
-    version (WithDatabase) EntityManagerFactory _entityManagerFactory;
+    EntityManagerFactory _entityManagerFactory;
     CacheManger _manger;
 	SessionStorage _sessionStorage;
 	AccessManager  _accessManager;

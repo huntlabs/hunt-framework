@@ -11,5 +11,5 @@
 
 module hunt.framework.data.repository;
 
-version (WithDatabase)
+
 public import hunt.entity.repository;
