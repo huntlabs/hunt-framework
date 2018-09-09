@@ -158,7 +158,7 @@ class Response : ResponseBuilder
      */
     Response withCookie(Cookie cookie)
     {
-        setHeader(HTTPHeaderCode.SET_COOKIE, _cookieEncoder.encode(cookie));
+        setHeader(HTTPHeaderCode.SET_COOKIE, cookieEncoder().encode(cookie));
 
         return this;
     }
