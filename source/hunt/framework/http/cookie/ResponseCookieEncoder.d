@@ -28,22 +28,34 @@ class ResponseCookieEncoder
 {
     private string _result;
 
-    ResponseCookieEncoder add(string k, string v)
+    ResponseCookieEncoder add(string k, string v = null)
     {
-        _result = ((_result is null) ? "" : "; ") ~ k ~ "=" ~ cookie_quote(v);
-        return this;
+        _result ~= ((_result is null) ? "" : "; ") ~ k ~ (( v is null) ? "" : ("=" ~ cookie_quote(v)));
+	return this;
     }
 
     string encode(Cookie cookie)
     {
         import std.conv : to;
+	import kiss.datetime;
 
         add(cookie.name(), cookie.value());
-        add(CookieHeaders.DOMAIN, cookie.domain());
-        add(CookieHeaders.PATH, cookie.path());
-        add(CookieHeaders.EXPIRES, cookie.expires().to!string);
-        add(CookieHeaders.SECURE, cookie.secure().to!string);
-        add(CookieHeaders.HTTPONLY, cookie.httpOnly().to!string);
+
+	if (cookie.domain() !is null) add(CookieHeaders.DOMAIN, cookie.domain());
+
+	add(CookieHeaders.PATH, cookie.path());
+
+        add(CookieHeaders.EXPIRES, std.datetime.SysTime.fromUnixTime(time() + cookie.expires()).toString());
+        
+	if (cookie.secure())
+	{
+		add(CookieHeaders.SECURE);
+	}
+
+	if (cookie.httpOnly())
+	{
+		add(CookieHeaders.HTTPONLY);
+	}
 
         scope(exit)
         {
