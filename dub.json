@@ -21,6 +21,12 @@
             "name": "default"
         },
         {
+            "name":"empty",
+            "subConfigurations": {
+                "hunt-entity": "empty"
+            }
+        },
+        {
             "name": "full",
             "subConfigurations": {
                 "hunt-entity": "full"
