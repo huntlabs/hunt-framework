@@ -189,8 +189,15 @@ class Response : ResponseBuilder
     {
         if (_isDone)
             return;
-
+        import std.datetime;
+        ///set session
+        if(request.hasSession() && request.session.isStarted())
+        {
+            withCookie(new Cookie("hunt_session" , request.session.getId() ,0 ,"/" ,null,false ,false));
+        }
+        import kiss.datetime;
         setCookieHeaders();
+        setHeader("Date" , date("Y-m-d H:i:s"));
         setHeader(HTTPHeaderCode.X_POWERED_BY, XPoweredBy);
         sendWithEOM();
 
