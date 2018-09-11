@@ -592,17 +592,13 @@ final class Request : RequestHandler
 	{
 		if (!hasSession())
 		{
-			string sessionName = "HUNTSID";
-			string sessionId = this.cookie(sessionName);
 			
-			version (HuntDebugMode)  kiss.logger.trace("last sessionId =>", sessionId);
+			string sessionId = this.cookie("hunt_session");
 			if (sessionId.empty)
 			{
-				auto _tmp = new Session(app().sessionStorage());
-				// createResponse().setCookie(sessionName, _tmp.sessionId);
-				_sessionId = _tmp.sessionId;
-				version (HuntDebugMode) kiss.logger.trace("latest sessionId =>", _tmp.sessionId);
-				return _tmp;
+				_session = new Session(app().sessionStorage());
+				_sessionId = _session.sessionId;
+				return _session;
 			}
 
 			_session = new Session(sessionId, app().sessionStorage());
