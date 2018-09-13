@@ -23,14 +23,17 @@ import hunt.http.codec.http.model;
 import hunt.http.codec.http.stream;
 import hunt.http.server;
 import hunt.io.common;
+import hunt.logging;
 import hunt.util.exception;
 import hunt.util.functional;
+import hunt.http.codec.websocket.frame.Frame;
+import hunt.http.codec.websocket.stream.WebSocketConnection;
+import hunt.http.codec.websocket.stream.WebSocketPolicy;
 
 public import hunt.event;
 public import hunt.event.EventLoopGroup;
 
 public import std.socket;
-public import hunt.logging;
 public import std.file;
 
 import std.string;
@@ -241,6 +244,15 @@ final class Application
         _server.stop();
     }
 
+    Application registerWebSocket(string uri, WebSocketHandler webSocketHandler) {
+        webSocketHandlerMap[uri] = webSocketHandler;
+        return this;
+    }
+
+    Application webSocketPolicy(WebSocketPolicy w) {
+        this._webSocketPolicy = w;
+        return this;
+    }
     
     // RequestHandler newHandler(RequestHandler, HTTPMessage msg){
     //     if(!msg.upgraded)
@@ -365,10 +377,13 @@ final class Application
     private void buildHttpServer(AppConfig conf) {
         logDebug("addr:",conf.http.address, ":", conf.http.port);
 
-        Http2Configuration configuration = new Http2Configuration();
-         // new WebSocketHandler() 
+        SimpleWebSocketHandler webSocketHandler = new SimpleWebSocketHandler();
+        webSocketHandler.setWebSocketPolicy(_webSocketPolicy);
 
-        _server = new HttpServer(conf.http.address, conf.http.port, configuration, buildHttpHandlerAdapter(), null);
+        Http2Configuration configuration = new Http2Configuration();
+
+        _server = new HttpServer(conf.http.address, conf.http.port, configuration, 
+            buildHttpHandlerAdapter(), webSocketHandler);
         // HTTPServerOptions option = new HTTPServerOptions();
         // option.maxHeaderSize = conf.http.maxHeaderSize;
         // //option.listenBacklog = conf.http.listenBacklog;
@@ -500,7 +515,52 @@ final class Application
 
     }
 
+    class SimpleWebSocketHandler : WebSocketHandler
+    {
+           override
+        bool acceptUpgrade(MetaData.Request request, 
+                MetaData.Response response,
+                HttpOutputStream output,
+                HttpConnection connection) {
+            logInfo("The connection %s will upgrade to WebSocket connection", connection.getSessionId());
+            WebSocketHandler handler = webSocketHandlerMap.get(request.getURI().getPath(), null);
+            if (handler is null) {
+                response.setStatus(HttpStatus.BAD_REQUEST_400);
+                try {
+                    output.write(cast(byte[])("The " ~ request.getURI().getPath() ~ " can not upgrade to WebSocket"));
+                } catch (IOException e) {
+                    logErrorf("Write http message exception", e);
+                }
+                return false;
+            } else {
+                return handler.acceptUpgrade(request, response, output, connection);
+            }
+        }
 
+        override
+        void onConnect(WebSocketConnection connection) {
+            string path = connection.getUpgradeRequest().getURI().getPath();
+            WebSocketHandler handler = webSocketHandlerMap.get(path, null);
+            if(handler !is null)
+                handler.onConnect(connection);
+        }
+
+        override
+        void onFrame(Frame frame, WebSocketConnection connection) {
+            string path = connection.getUpgradeRequest().getURI().getPath();
+            WebSocketHandler handler = webSocketHandlerMap.get(path, null);
+            if(handler !is null)
+                handler.onFrame(frame, connection);
+        }
+
+        override
+        void onError(Exception t, WebSocketConnection connection) {
+            string path = connection.getUpgradeRequest().getURI().getPath();
+            WebSocketHandler handler = webSocketHandlerMap.get(path, null);
+            if(handler !is null)
+                handler.onError(t, connection);
+        }
+    }
 
 
     version(USE_KISS_RPC) {
@@ -543,6 +603,8 @@ final class Application
     CacheManger _manger;
 	SessionStorage _sessionStorage;
 	AccessManager  _accessManager;
+    WebSocketPolicy _webSocketPolicy;
+    WebSocketHandler[string] webSocketHandlerMap;
 
     version(NO_TASKPOOL)
     {
