@@ -17,7 +17,7 @@ import std.path;
 import std.conv;
 import std.stdio;
 
-import kiss.logger;
+import hunt.logging;
 import hunt.framework.view.rule;
 import hunt.framework.view.element;
 import hunt.framework.view.match;

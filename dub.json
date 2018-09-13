@@ -5,9 +5,8 @@
     "copyright": "Copyright (C) 2015-2018, Shanghai Putao Technology Co., Ltd",
     "description": "A high performance full-stack Web framework.",
     "dependencies": {
-        "collie": "~>0.10.15",
-        "kiss": "~>0.4.8",
-        "hunt-cache": "~>0.1.0",
+        "hunt-http": "~>0.0.2",
+        "hunt-cache": "~>0.2.0",
         "hunt-entity": "~>1.6.2"
     },
     "authors": [
@@ -19,6 +18,12 @@
     "configurations": [
         {
             "name": "default"
+        },
+        {
+            "name":"empty",
+            "subConfigurations": {
+                "hunt-entity": "empty"
+            }
         },
         {
             "name": "full",

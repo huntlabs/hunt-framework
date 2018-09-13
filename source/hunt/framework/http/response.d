@@ -16,15 +16,23 @@ import std.datetime;
 import std.json;
 import std.typecons;
 
-import collie.codec.http.headers.httpcommonheaders;
-import collie.codec.http.server.responsehandler;
-import collie.codec.http.server.responsebuilder;
-import collie.codec.http.httpmessage;
+// import collie.codec.http.headers.httpcommonheaders;
+// import collie.codec.http.server.HttpResponse;
+// import collie.codec.http.server.responsebuilder;
+// import collie.codec.http.httpmessage;
 
-import kiss.logger;
+import hunt.http.codec.http.model;
+import hunt.http.codec.http.stream.BufferedHttpOutputStream;
+import hunt.http.codec.http.stream.HttpOutputStream;
+
+import hunt.datetime;
+import hunt.io.common;
+import hunt.logging;
+import hunt.util.common;
+import hunt.util.exception;
 
 import hunt.framework.http.request;
-import hunt.framework.http.cookie;
+// import hunt.framework.http.cookie;
 import hunt.framework.utils.string;
 import hunt.framework.versions;
 
@@ -33,65 +41,80 @@ enum HtmlContentType = "text/html;charset=utf-8";
 enum JsonContentType = "application/json;charset=utf-8";
 enum OctetStreamContentType = "binary/octet-stream";
 
+
 /**
 */
-class Response : ResponseBuilder
+class Response : Closeable
 {
-    protected Request _request;
+	protected HttpResponse response;
+    // protected Request _request;
+    HttpOutputStream output;
+    HttpURI uri;
+    BufferedHttpOutputStream bufferedOutputStream;
+    int bufferSize = 8 * 1024;
 
     this()
     {
-        super();
+        // super();
     }
 
-    this(string content, int status = HttpStatusCodes.OK, string[string] headers = null )
-    {
-        this(cast(const(ubyte)[])content, status, headers);
+    this(HttpResponse response, HttpOutputStream output, HttpURI uri, int bufferSize = 8 * 1024) {
+        this.output = output;
+        this.response = response;
+        this.uri = uri;
+        this.bufferSize = bufferSize;
     }
 
-    this(in ubyte[] content, int status = HttpStatusCodes.OK, string[string] headers = null )
-    {
-        super(null);
-        if(headers !is null)
-            this.withHeaders(headers);
-        setStatus(status);
-        this.setContent(content);
-    }
+    // this(string content, int status = HttpStatus.OK_200, string[string] headers = null )
+    // {
+    //     this(cast(const(ubyte)[])content, status, headers);
+    // }
 
-    this(ResponseHandler handler)
-    {
-        super(handler);
-        setStatus(200);
-    }
+    // this(in ubyte[] content, int status = HttpStatus.OK_200, string[string] headers = null )
+    // {
+    //     super(null);
+    //     if(headers !is null)
+    //         this.withHeaders(headers);
+    //     setStatus(status);
+    //     this.setContent(content);
+    // }
 
-	ResponseHandler responseHandler()
+    // this(HttpResponse handler)
+    // {
+    //     super(handler);
+    //     setStatus(HttpStatus.OK_200);
+    // }
+
+	HttpResponse httpResponse()
 	{
-		return _txn;
+		return response;
 	}
 
-    Response setResponseHandler(ResponseHandler handler)
+    Response setHttpResponse(HttpResponse handler)
     {
-        _txn = handler;
+        response = handler;
         return this;
     }
 
-    Response setHeader(T = string)(string key, T value)
+    HttpFields getFields() {
+        return response.getFields();
+    }
+    
+    Response setHeader(T = string)(string header, T value)
     {
-        header!T(key, value);
-
+        getFields().put(header, value);
         return this;
     }
 
-    Response setHeader(T = string)(HTTPHeaderCode key, T value)
+    Response setHeader(T = string)(HttpHeader header, T value)
     {
-        header!T(key, value);
-
+        getFields().put(header, value);
         return this;
     }
 
-    Response addHeader(T = string)(HTTPHeaderCode key, T value)
+    Response addHeader(T = string)(HttpHeader key, T value)
     {
-        _httpMessage.addHeader(key, value);
+        getFields().add(name, value);
         return this;
     }
 
@@ -102,13 +125,14 @@ class Response : ResponseBuilder
      */
     Response setContent(string content)
     {
-        return setContent(cast(ubyte[]) content);
+        return setContent(cast(const(ubyte)[]) content);
     }
 
     // ditto
-    Response setContent(in ubyte[] content)
+    Response setContent(const(ubyte)[] content)
     {
-        setBody(cast(ubyte[]) content);
+        // setBody(cast(ubyte[]) content);
+        getOutputStream().write(cast(byte[])content, 0, cast(int)content.length);
 
         return this;
     }
@@ -118,32 +142,37 @@ class Response : ResponseBuilder
      *
      * @return string
      */
-    T getContent(T = string)()
-    {
-        return cast(T) _body.allData.data();
-    }
+    // T getContent(T = string)()
+    // {
+    //     return cast(T) _body.allData.data();
+    // }
 
     /**
      * Get the original response content.
      *
      * @return mixed
      */
-    const(ubyte)[] getOriginalContent()
-    {
-        return _body.allData.data();
-    }
+    // const(ubyte)[] getOriginalContent()
+    // {
+    //     return _body.allData.data();
+    // }
 
     // ///set http status code eg. 404 200
-    Response setStatus(int code)
+    Response setStatus(int status)
     {
-        status(cast(ushort)code, HttpMessage.statusText(code));
+        response.setStatus(status);
+        return this;
+    }
+    
+    Response setReason(string reason) {
+        response.setReason(reason);
         return this;
     }
 
     ///download file 
     Response download(string filename, ubyte[] file, string content_type = "binary/octet-stream")
     {
-        setHeader(HTTPHeaderCode.CONTENT_TYPE, content_type).setHeader(HTTPHeaderCode.CONTENT_DISPOSITION,
+        setHeader(HttpHeader.CONTENT_TYPE, content_type).setHeader(HttpHeader.CONTENT_DISPOSITION,
                 "attachment; filename=" ~ filename ~ "; size=" ~ (file.length.to!string)).setContent(
                 file);
 
@@ -158,50 +187,53 @@ class Response : ResponseBuilder
      */
     Response withCookie(Cookie cookie)
     {
-        setHeader(HTTPHeaderCode.SET_COOKIE, cookieEncoder().encode(cookie));
-
+        getFields().add(HttpHeader.SET_COOKIE, CookieGenerator.generateSetCookie(cookie));
         return this;
     }
 
     void setCookieHeaders()
     {
-        auto cookies = cookie().responseCookies();
-        if (cookies.length > 0)
-        {
-            foreach (cookie; cookies)
-            {
-                withCookie(cookie);
-            }
-        }
+        // auto cookies = cookie().responseCookies();
+        // if (cookies.length > 0)
+        // {
+        //     foreach (cookie; cookies)
+        //     {
+        //         withCookie(cookie);
+        //     }
+        // }
+
+		implementationMissing(false);
     }
 
-    ResponseCookieEncoder cookieEncoder()
-    {
-        if (_cookieEncoder is null)
-        {
-            _cookieEncoder = new ResponseCookieEncoder;
-        }
+    // ResponseCookieEncoder cookieEncoder()
+    // {
+    //     if (_cookieEncoder is null)
+    //     {
+    //         _cookieEncoder = new ResponseCookieEncoder;
+    //     }
         
-        return _cookieEncoder;
-    }
+    //     return _cookieEncoder;
+    // }
     
     pragma(inline) final void done()
     {
         if (_isDone)
             return;
-        import std.datetime;
         ///set session
-        if(request.hasSession() && request.session.isStarted())
-        {
-            withCookie(new Cookie("hunt_session" , request.session.getId() ,0 ,"/" ,null,false ,false));
-        }
-        import kiss.datetime;
+		implementationMissing(false);
+        // if(request.hasSession() && request.session.isStarted())
+        // {
+        //     withCookie(new Cookie("hunt_session" , request.session.getId() ,0 ,"/" ,null,false ,false));
+        // }
         setCookieHeaders();
         setHeader("Date" , date("Y-m-d H:i:s"));
-        setHeader(HTTPHeaderCode.X_POWERED_BY, XPoweredBy);
-        sendWithEOM();
-
-        _isDone = true;
+        setHeader(HttpHeader.X_POWERED_BY, XPoweredBy);
+        // sendWithEOM();
+        try {
+            this.close();
+        }
+        catch (IOException) {
+		}
     }
 
     // void redirect(string url, bool is301 = false)
@@ -210,7 +242,7 @@ class Response : ResponseBuilder
     //         return;
 
     //     setStatus((is301 ? 301 : 302));
-    //     setHeader(HTTPHeaderCode.LOCATION, url);
+    //     setHeader(HttpHeader.LOCATION, url);
 
     //     connectionClose();
     //     done();
@@ -233,7 +265,7 @@ class Response : ResponseBuilder
             return;
 
         setStatus(code);
-        header(HTTPHeaderCode.CONTENT_TYPE, contentype);
+        getFields().put(HttpHeader.CONTENT_TYPE, contentype);
         setContent(errorPageHtml(code, body_));
 //       connectionClose();
 //        done();
@@ -245,10 +277,30 @@ class Response : ResponseBuilder
         this.setContent(errorPageHtml(code));
     }
 
+    OutputStream getOutputStream() {
+        if (bufferedOutputStream is null) {
+            bufferedOutputStream = new BufferedHttpOutputStream(output, bufferSize);
+        }
+        return bufferedOutputStream;
+    }
+
+    bool isClosed() {
+        return _isDone;
+    }
+
+    void close() {
+        _isDone = true; 
+        if (bufferedOutputStream !is null) {
+            bufferedOutputStream.close();
+        } 
+        else {
+            getOutputStream().close();
+        }
+    }
 
 private:
     bool _isDone = false;
-    ResponseCookieEncoder _cookieEncoder;
+    // ResponseCookieEncoder _cookieEncoder;
 }
 
 // dfmt off
@@ -258,7 +310,7 @@ string errorPageHtml(int code , string _body = "")
 
     string text = code.to!string;
     text ~= " ";
-    text ~= HttpMessage.statusText(code);
+    text ~= HttpStatus.getMessage(code);
 
     string html = `<!doctype html>
 <html lang="en">

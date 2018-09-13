@@ -4,15 +4,17 @@ import std.conv;
 import std.datetime;
 import std.json;
 
-import collie.codec.http.headers.httpcommonheaders;
-import collie.codec.http.server.responsehandler;
-import collie.codec.http.server.responsebuilder;
-import collie.codec.http.httpmessage;
-import kiss.logger;
-import hunt.framework.http.cookie;
+// import collie.codec.http.headers.httpcommonheaders;
+// import collie.codec.http.server.responsehandler;
+// import collie.codec.http.server.responsebuilder;
+// import collie.codec.http.httpmessage;
+import hunt.logging;
+// import hunt.framework.http.cookie;
 import hunt.framework.utils.string;
 import hunt.framework.versions;
 import hunt.framework.http.response;
+
+import hunt.http.codec.http.model.HttpHeader;
 
 /**
  * Response represents an HTTP response in JSON format.
@@ -29,7 +31,7 @@ class JsonResponse : Response
     this(string contentType = JsonContentType)
     {
         super();
-        setHeader(HTTPHeaderCode.CONTENT_TYPE, contentType);
+        setHeader(HttpHeader.CONTENT_TYPE, contentType);
     }
 
     this(JSONValue data, string contentType = JsonContentType)
@@ -40,7 +42,7 @@ class JsonResponse : Response
     this(string data, string contentType = JsonContentType)
     {
         super();
-        setHeader(HTTPHeaderCode.CONTENT_TYPE, contentType);
+        setHeader(HttpHeader.CONTENT_TYPE, contentType);
         setContent(data);
     }
 
@@ -49,10 +51,10 @@ class JsonResponse : Response
      *
      * @return JSONValue
      */
-    JSONValue getData()
-    {
-        return parseJSON(getContent());
-    }
+    // JSONValue getData()
+    // {
+    //     return parseJSON(getContent());
+    // }
 
     /**
      * Sets a raw string containing a JSON document to be sent.

@@ -20,4 +20,4 @@ public import hunt.cache;
 public import hunt.framework.http;
 public import hunt.framework.view;
 
-public import kiss.logger;
+public import hunt.logging;

@@ -18,8 +18,10 @@ import std.traits;
 
 import core.cpuid;
 import std.string;
+import hunt.util.exception;
 
 const SessionIdLenth = 20;
+
 
 /**
 */
@@ -139,7 +141,7 @@ class Session
      */
 	void ageFlashData()
 	{
-		throw new NotImplementedException("ageFlashData");
+		implementationMissing(false);
 	}
 
 	/**
@@ -494,10 +496,10 @@ class Session
      * @param  bool  destroy
      * @return bool
      */
-    public bool regenerate(bool destroy = false)
-    {
-		throw new NotImplementedException("regenerate");
-    }
+    // public bool regenerate(bool destroy = false)
+    // {
+	// 	implementationMissing(false);
+    // }
 
 	/**
      * Generate a new session ID for the session.

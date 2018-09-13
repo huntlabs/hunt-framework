@@ -10,10 +10,10 @@ import std.variant;
 import std.traits;
 import std.exception;
 
-import kiss.event.EventLoop;
-import kiss.core;
-import kiss.util.timer;
-import kiss.logger;
+import hunt.event.EventLoop;
+import hunt.util.common;
+import hunt.util.timer;
+import hunt.logging;
 
 enum TaskStatus : ubyte
 {
@@ -139,7 +139,7 @@ public :
             taskPool.put(std.parallelism.task!(TaskManager.doJob, Task)(t));
             return t.tid;
         }
-        new KissTimer(_taskLoop).interval(d).onTick(delegate void(Object sender) {
+        new Timer(_taskLoop).interval(d).onTick(delegate void(Object sender) {
             //trace("--- on tick ---: ", t.status);
             if (t.status == TaskStatus.FINISH || t.status == TaskStatus.CANCEL)
             {

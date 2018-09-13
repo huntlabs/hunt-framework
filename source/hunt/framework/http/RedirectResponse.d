@@ -4,15 +4,17 @@ import std.conv;
 import std.datetime;
 import std.json;
 
-import collie.codec.http.headers.httpcommonheaders;
-import collie.codec.http.server.responsehandler;
-import collie.codec.http.server.responsebuilder;
-import collie.codec.http.httpmessage;
-import kiss.logger;
+// import collie.codec.http.headers.httpcommonheaders;
+// import collie.codec.http.server.responsehandler;
+// import collie.codec.http.server.responsebuilder;
+// import collie.codec.http.httpmessage;
+import hunt.http.codec.http.model.HttpHeader;
+import hunt.logging;
+import hunt.util.exception;
 
 import hunt.framework.utils.string;
 import hunt.framework.versions;
-import hunt.framework.http.cookie;
+// import hunt.framework.http.cookie;
 import hunt.framework.http.response;
 import hunt.framework.http.request;
 import hunt.framework.http.session;
@@ -31,8 +33,8 @@ class RedirectResponse : Response
         super();
 
         setStatus((use301 ? 301 : 302));
-        setHeader(HTTPHeaderCode.LOCATION, targetUrl);
-        connectionClose();
+        setHeader(HttpHeader.LOCATION, targetUrl);
+        // connectionClose();
     }
 
     /// the session store implementation.
@@ -56,17 +58,19 @@ class RedirectResponse : Response
      */
     RedirectResponse withSession(string key, string value)
     {
-        _session.flash(key, value);
+        // _session.flash(key, value);
+        implementationMissing(false);
         return this;
     }
 
     /// ditto
     RedirectResponse withSession(string[string] sessions)
     {
-        foreach (string key, string value; sessions)
-        {
-            _session.flash(key, value);
-        }
+        implementationMissing(false);
+        // foreach (string key, string value; sessions)
+        // {
+        //     _session.flash(key, value);
+        // }
         return this;
     }
     
@@ -78,7 +82,8 @@ class RedirectResponse : Response
      */
     RedirectResponse withInput(string[string] input = null)
     {
-        _session.flashInput(input is null ? _request.input() : input);
+        // _session.flashInput(input is null ? _request.input() : input);
+        implementationMissing(false);
 
         return this;
     }
@@ -89,10 +94,10 @@ class RedirectResponse : Response
      * @param  array  input
      * @return array
      */
-    protected string[string] removeFilesFromInput(string[string] input)
-    {
-        throw new NotImplementedException("removeFilesFromInput");
-    }
+    // protected string[string] removeFilesFromInput(string[string] input)
+    // {
+    //     throw new NotImplementedException("removeFilesFromInput");
+    // }
 
 
     /**
@@ -100,28 +105,28 @@ class RedirectResponse : Response
      *
      * @return this
      */
-    RedirectResponse onlyInput(string[] keys...)
-    {
-        return withInput(_request.only(keys));
-    }
+    // RedirectResponse onlyInput(string[] keys...)
+    // {
+    //     return withInput(_request.only(keys));
+    // }
 
     /**
      * Flash an array of input to the session.
      *
      * @return this
      */
-    RedirectResponse exceptInput(string[] keys...)
-    {
-        return withInput(_request.except(keys));
-    }
+    // RedirectResponse exceptInput(string[] keys...)
+    // {
+    //     return withInput(_request.except(keys));
+    // }
 
     /**
      * Get the original response content.
      *
      * @return null
      */
-    override const(ubyte)[] getOriginalContent()
-    {
-        return null;
-    }
+    // override const(ubyte)[] getOriginalContent()
+    // {
+    //     return null;
+    // }
 }

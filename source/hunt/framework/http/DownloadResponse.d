@@ -8,18 +8,20 @@ import std.path;
 import std.file;
 import std.stdio;
 
-import collie.codec.http.headers.httpcommonheaders;
-import collie.codec.http.server.responsehandler;
-import collie.codec.http.server.responsebuilder;
-import collie.codec.http.httpmessage;
-import kiss.logger;
+// import collie.codec.http.headers.httpcommonheaders;
+// import collie.codec.http.server.responsehandler;
+// import collie.codec.http.server.responsebuilder;
+// import collie.codec.http.httpmessage;
+import hunt.logging;
 
 import hunt.framework.init;
 import hunt.framework.application.config;
-import hunt.framework.http.cookie;
+// import hunt.framework.http.cookie;
 import hunt.framework.utils.string;
 import hunt.framework.versions;
 import hunt.framework.http.response;
+
+import hunt.http.codec.http.model.HttpHeader;
 
 /**
  * DownloadResponse represents an HTTP response delivering a file.
@@ -32,7 +34,7 @@ class DownloadResponse : Response
     {
         super();
         
-        setHeader(HTTPHeaderCode.CONTENT_TYPE, contentType);
+        setHeader(HttpHeader.CONTENT_TYPE, contentType);
         this.fileName = fileName;
     }
 
@@ -64,7 +66,7 @@ class DownloadResponse : Response
 
     DownloadResponse setData(in ubyte[] data)
     {
-        setHeader(HTTPHeaderCode.CONTENT_DISPOSITION, "attachment; filename=" ~ baseName(fileName) ~ "; size=" ~ (to!string(data.length)));
+        setHeader(HttpHeader.CONTENT_DISPOSITION, "attachment; filename=" ~ baseName(fileName) ~ "; size=" ~ (to!string(data.length)));
 
         setContent(data);
         return this;

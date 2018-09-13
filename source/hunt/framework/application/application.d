@@ -11,19 +11,26 @@
 
 module hunt.framework.application.application;
 
-import collie.codec.http.server.websocket;
-import kiss.container.ByteBuffer;
-import collie.codec.http.server;
-import collie.codec.http;
-import collie.bootstrap.serversslconfig;
-import collie.utils.exception;
-import hunt.cache;
+import hunt.container.ByteBuffer;
+// import collie.codec.http.server;
+// import collie.codec.http;
+// import collie.bootstrap.serversslconfig;
+// import collie.utils.exception;
 
-public import kiss.event;
-public import kiss.event.EventLoopGroup;
+import hunt.cache;
+import hunt.container;
+import hunt.http.codec.http.model;
+import hunt.http.codec.http.stream;
+import hunt.http.server;
+import hunt.io.common;
+import hunt.util.exception;
+import hunt.util.functional;
+
+public import hunt.event;
+public import hunt.event.EventLoopGroup;
 
 public import std.socket;
-public import kiss.logger;
+public import hunt.logging;
 public import std.file;
 
 import std.string;
@@ -47,11 +54,14 @@ public import hunt.framework.security.acl.Identity;
 
 public import hunt.entity;
 
+import hunt.util.exception;
 
-abstract class WebSocketFactory
-{
-    IWebSocket newWebSocket(const HTTPMessage header);
-};
+// abstract class WebSocketFactory
+// {
+//     IWebSocket newWebSocket(const HTTPMessage header);
+// };
+
+
 
 
 final class Application
@@ -79,10 +89,10 @@ final class Application
         return this;
     }
 
-    void setWebSocketFactory(WebSocketFactory webfactory)
-    {
-        _wfactory = webfactory;
-    }
+    // void setWebSocketFactory(WebSocketFactory webfactory)
+    // {
+    //     _wfactory = webfactory;
+    // }
 
     version(NO_TASKPOOL){} else {
         @property TaskPool taskPool(){return _tpool;}
@@ -96,17 +106,17 @@ final class Application
 
     @property server(){return _server;}
 
-    @property mainLoop(){return _server.eventLoop;}
+    // @property mainLoop(){return _server.eventLoop;}
 
-    @property loopGroup(){return _server.group;}
+    // @property loopGroup(){return _server.group;}
 
     @property AppConfig config(){return Config.app;}
 
-    void setCreateBuffer(CreatorBuffer cbuffer)
-    {
-        if(cbuffer)
-            _cbuffer = cbuffer;
-    }
+    // void setCreateBuffer(CreatorBuffer cbuffer)
+    // {
+    //     if(cbuffer)
+    //         _cbuffer = cbuffer;
+    // }
 
     private void initDatabase(AppConfig.DatabaseConf config)
     {
@@ -231,51 +241,158 @@ final class Application
         _server.stop();
     }
 
-    private:
-    RequestHandler newHandler(RequestHandler, HTTPMessage msg){
-        if(!msg.upgraded)
-        {
-            return new Request(_cbuffer,&handleRequest,_maxBodySize);
-        }
-        else if(_wfactory)
-        {
-            return _wfactory.newWebSocket(msg);
-        }
+    
+    // RequestHandler newHandler(RequestHandler, HTTPMessage msg){
+    //     if(!msg.upgraded)
+    //     {
+    //         return new Request(_cbuffer,&handleRequest,_maxBodySize);
+    //     }
+    //     else if(_wfactory)
+    //     {
+    //         return _wfactory.newWebSocket(msg);
+    //     }
 
-        return null;
-    }
+    //     return null;
+    // }
 
-    Buffer defaultBuffer(HTTPMessage msg) nothrow
-    {
-        try{
-            import std.experimental.allocator.gc_allocator;
-            import kiss.container.ByteBuffer;
-            if(msg.chunked == false)
-            {
-                string contign = msg.getHeaders.getSingleOrEmpty(HTTPHeaderCode.CONTENT_LENGTH);
-                if(contign.length > 0)
-                {
-                    import std.conv;
-                    uint len = 0;
-                    collectException(to!(uint)(contign),len);
-                    if(len > _maxBodySize)
-                        return null;
-                }
-            }
+    // Buffer defaultBuffer(HTTPMessage msg) nothrow
+    // {
+    //     try{
+    //         import std.experimental.allocator.gc_allocator;
+    //         import hunt.container.ByteBuffer;
+    //         if(msg.chunked == false)
+    //         {
+    //             string contign = msg.getHeaders.getSingleOrEmpty(HttpHeader.CONTENT_LENGTH);
+    //             if(contign.length > 0)
+    //             {
+    //                 import std.conv;
+    //                 uint len = 0;
+    //                 collectException(to!(uint)(contign),len);
+    //                 if(len > _maxBodySize)
+    //                     return null;
+    //             }
+    //         }
 
-            return new ByteBuffer!(GCAllocator)();
-        }
-        catch(Exception e)
-        {
-            showException(e);
-            return null;
-        }
-    }
+    //         return new ByteBuffer!(GCAllocator)();
+    //     }
+    //     catch(Exception e)
+    //     {
+    //         showException(e);
+    //         return null;
+    //     }
+    // }
 
-    void handleRequest(Request req) nothrow
+    private void handleRequest(Request req) nothrow
     {
         this._dispatcher.dispatch(req);
     }
+
+    private Action1!Request _headerComplete;
+    private Action3!(int, string, Request) _badMessage;
+    private Action1!Request _earlyEof;
+    // private Action1!HttpConnection _acceptConnection;
+    private Action2!(Request, HttpServerConnection) tunnel;
+
+    private ServerHttpHandlerAdapter buildHttpHandlerAdapter() {
+        ServerHttpHandlerAdapter adapter = new ServerHttpHandlerAdapter();
+        adapter.acceptConnection((HttpConnection c) {
+
+            }).acceptHttpTunnelConnection((request, response, ot, connection) {
+                Request r = new Request(request, response, ot, cast(HttpConnection)connection);
+                request.setAttachment(r);
+                if (tunnel !is null) {
+                    tunnel(r, connection);
+                }
+                return true;
+            }).headerComplete((request, response, ot, connection) {
+                Request r = new Request(request, response, ot, connection);
+                request.setAttachment(r);
+                if (_headerComplete != null) {
+                    _headerComplete(r);
+                }
+                // requestMeter.mark();
+                return false;
+            }).content((buffer, request, response, ot, connection) {
+                Request r = cast(Request) request.getAttachment();
+                if (r.content !is null) {
+                    r.content(buffer);
+                } else {
+                    r.requestBody.add(buffer);
+                }
+                return false;
+            }).contentComplete((request, response, ot, connection)  {
+                Request r = cast(Request) request.getAttachment();
+                if (r.contentComplete !is null) {
+                    r.contentComplete(r);
+                }
+
+                handleRequest(r);
+
+                return false;
+            }).messageComplete((request, response, ot, connection)  {
+                Request r = cast(Request) request.getAttachment();
+                if (r.messageComplete != null) {
+                    r.messageComplete(r);
+                }
+                IO.close(r.getResponse());
+                return true;
+            }).badMessage((status, reason, request, response, ot, connection)  {
+                if (_badMessage !is null) {
+                    if (request.getAttachment() !is null) {
+                        Request r = cast(Request) request.getAttachment();
+                        _badMessage(status, reason, r);
+                    } else {
+                        Request r = new Request(request, response, ot, connection);
+                        request.setAttachment(r);
+                        _badMessage(status, reason, r);
+                    }
+                }
+            }).earlyEOF((request, response, ot, connection)  {
+                if (_earlyEof != null) {
+                    if (request.getAttachment() !is null) {
+                        Request r = cast(Request) request.getAttachment();
+                        _earlyEof(r);
+                    } else {
+                        Request r = new Request(request, response, ot, connection);
+                        request.setAttachment(r);
+                        _earlyEof(r);
+                    }
+                }
+            });
+        return adapter;
+    }
+
+    private void buildHttpServer(AppConfig conf) {
+        logDebug("addr:",conf.http.address, ":", conf.http.port);
+
+        Http2Configuration configuration = new Http2Configuration();
+         // new WebSocketHandler() 
+
+        _server = new HttpServer(conf.http.address, conf.http.port, configuration, buildHttpHandlerAdapter(), null);
+        // HTTPServerOptions option = new HTTPServerOptions();
+        // option.maxHeaderSize = conf.http.maxHeaderSize;
+        // //option.listenBacklog = conf.http.listenBacklog;
+
+        // version(NO_TASKPOOL)
+        // {
+        //     option.threads = conf.http.ioThreads + conf.http.workerThreads;
+        // }
+        // else
+        // {
+        //     option.threads = conf.http.ioThreads;
+        // }
+
+        // option.timeOut = conf.http.keepAliveTimeOut;
+        // option.handlerFactories ~= (&newHandler);
+
+        // _server = new HttpServer(option);
+        // addr = parseAddress(conf.http.address,conf.http.port);
+        // HTTPServerOptions.IPConfig ipconf;
+        // ipconf.address = addr;
+
+        // _server.addBind(ipconf);
+    }
+
 
     private:
     void upConfig(AppConfig conf)
@@ -291,28 +408,7 @@ final class Application
             _tpool.isDaemon = true;
         }
 
-        HTTPServerOptions option = new HTTPServerOptions();
-        option.maxHeaderSize = conf.http.maxHeaderSize;
-        //option.listenBacklog = conf.http.listenBacklog;
-
-        version(NO_TASKPOOL)
-        {
-            option.threads = conf.http.ioThreads + conf.http.workerThreads;
-        }
-        else
-        {
-            option.threads = conf.http.ioThreads;
-        }
-
-        option.timeOut = conf.http.keepAliveTimeOut;
-        option.handlerFactories ~= (&newHandler);
-        _server = new HttpServer(option);
-        logDebug("addr:",conf.http.address, ":", conf.http.port);
-        addr = parseAddress(conf.http.address,conf.http.port);
-        HTTPServerOptions.IPConfig ipconf;
-        ipconf.address = addr;
-
-        _server.addBind(ipconf);
+        buildHttpServer(conf);
 
         //if(conf.webSocketFactory)
         //    _wfactory = conf.webSocketFactory;
@@ -364,7 +460,7 @@ final class Application
 
     void setLogConfig(ref AppConfig.LoggingConfig conf)
     {
-       	kiss.logger.LogLevel level = kiss.logger.LogLevel.LOG_DEBUG;
+       	hunt.logging.LogLevel level = hunt.logging.LogLevel.LOG_DEBUG;
 
         import std.string : toLower;
 
@@ -372,19 +468,19 @@ final class Application
         {
             case "critical":
             case "error":
-				level = kiss.logger.LogLevel.LOG_ERROR;
+				level = hunt.logging.LogLevel.LOG_ERROR;
                 break;
             case "fatal":
-				level = kiss.logger.LogLevel.LOG_FATAL;
+				level = hunt.logging.LogLevel.LOG_FATAL;
                 break;
             case "info":
-				level = kiss.logger.LogLevel.LOG_INFO;
+				level = hunt.logging.LogLevel.LOG_INFO;
                 break;
             case "warning":
-				level = kiss.logger.LogLevel.LOG_WARNING;
+				level = hunt.logging.LogLevel.LOG_WARNING;
                 break;
             case "off":
-				level = kiss.logger.LogLevel.LOG_Off;
+				level = hunt.logging.LogLevel.LOG_Off;
                 break;
 			default:
                 break;
@@ -426,7 +522,7 @@ final class Application
 
     this()
     {
-        _cbuffer = &defaultBuffer;
+        // _cbuffer = &defaultBuffer;
 		_accessManager = new AccessManager();
 		_manger = new CacheManger();
 
@@ -439,9 +535,9 @@ final class Application
     private:
     Address addr;
     HttpServer _server;
-    WebSocketFactory _wfactory;
+    // WebSocketFactory _wfactory;
     uint _maxBodySize;
-    CreatorBuffer _cbuffer;
+    // CreatorBuffer _cbuffer;
     Dispatcher _dispatcher;
     EntityManagerFactory _entityManagerFactory;
     CacheManger _manger;

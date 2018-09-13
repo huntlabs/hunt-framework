@@ -21,7 +21,7 @@ import std.stdio;
 import std.uni;
 import std.functional;
 
-import kiss.logger;
+import hunt.logging;
 
 import hunt.framework.view.rule;
 import hunt.framework.view.element;
@@ -339,7 +339,7 @@ public:
                 auto timestamp = eval_expression(element.args[1], data);
                 if (format.type == JSON_TYPE.STRING && timestamp.type == JSON_TYPE.INTEGER)
                 {
-                    import kiss.datetime;
+                    import hunt.datetime;
 
                     result = date(format.str, timestamp.integer);
                 }

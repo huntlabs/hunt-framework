@@ -12,9 +12,9 @@
 module hunt.framework.simplify;
 
 public import hunt.framework.application.application : app;
-public import hunt.framework.http.cookie.CookieManager : cookie;
+// public import hunt.framework.http.cookie.CookieManager : cookie;
 
-public import kiss.datetime;
+public import hunt.datetime;
 
 string createUrl(string mca, string[string] params = null, string group = null)
 {

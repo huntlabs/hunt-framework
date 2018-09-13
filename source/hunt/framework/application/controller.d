@@ -11,7 +11,7 @@
 
 module hunt.framework.application.controller;
 
-import kiss.logger;
+import hunt.logging;
 
 public import hunt.framework.http.response;
 public import hunt.framework.http.request;
@@ -52,7 +52,7 @@ abstract class Controller
     final @property Response response()
     {
         if (_response is null)
-            _response = request.createResponse();
+            _response = request.getResponse();
         return _response;
     }
 
@@ -141,10 +141,10 @@ abstract class Controller
     Response processResponse(Response res)
     {
         // have ResponseHandler binding?
-        if (res.responseHandler() is null)
-        {
-            res.setResponseHandler(request.responseHandler());
-        }
+        // if (res.httpResponse() is null)
+        // {
+        //     res.setHttpResponse(request.responseHandler());
+        // }
 
         return res;
     }
@@ -185,7 +185,7 @@ string __createCallActionMethod(T, string moduleName)()
     import std.traits;
     import std.format;
     import std.string;
-    import kiss.logger;
+    import hunt.logging;
     import std.conv;
 
     string str = `

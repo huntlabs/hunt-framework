@@ -37,6 +37,8 @@ import std.exception;
 pure:
 @safe:
 
+import std.exception : basicExceptionCtors;
+
 /// An exception thrown when something bad happens with URLs.
 class URLException : Exception
 {

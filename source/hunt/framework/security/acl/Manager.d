@@ -4,7 +4,7 @@ import hunt.framework.security.acl.Role;
 import hunt.framework.security.acl.Identity;
 import hunt.framework.security.acl.User;
 import hunt.framework.security.acl.permission.Permission;
-import kiss.logger;
+import hunt.logging;
 
 class AccessManager
 {

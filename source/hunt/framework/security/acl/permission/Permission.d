@@ -2,7 +2,7 @@ module hunt.framework.security.acl.permission.Permission;
 
 import hunt.framework.security.acl.permission.Item;
 import std.algorithm;
-import kiss.logger;
+import hunt.logging;
 
 class Permission
 {

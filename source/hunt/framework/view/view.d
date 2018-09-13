@@ -21,8 +21,8 @@ public import hunt.framework.view.render;
 public import hunt.framework.view.rule;
 public import hunt.framework.view.util;
 
-public import kiss.util.serialize;
-public import kiss.logger;
+public import hunt.util.serialize;
+public import hunt.logging;
 
 import std.json : JSONValue;
 import std.path;

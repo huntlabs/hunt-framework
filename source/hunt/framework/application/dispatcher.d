@@ -14,7 +14,7 @@ module hunt.framework.application.dispatcher;
 import hunt.framework.routing;
 import hunt.framework.http.request;
 import hunt.framework.http.response;
-import hunt.framework.http.exception;
+import hunt.framework.exception;
 
 import hunt.framework.simplify;
 import hunt.framework.application.controller;
@@ -24,15 +24,17 @@ import hunt.framework.security.acl.Identity;
 import hunt.framework.security.acl.Manager;
 import hunt.framework.security.acl.User;
 
-import collie.utils.exception;
-import collie.codec.http;
+import hunt.http.codec.http.model.HttpHeader;
+// import collie.utils.exception;
+// import collie.codec.http;
 
 import std.stdio;
 import std.exception;
 import std.parallelism;
 import std.conv : to;
 
-import kiss.logger;
+import hunt.logging;
+import hunt.util.exception;
 
 class Dispatcher
 {
@@ -42,136 +44,135 @@ class Dispatcher
         this._router.setConfigPath(Config.path);
     }
 
-    public
+    void dispatch(Request request) nothrow
     {
-        void dispatch(Request request) nothrow
+        try
         {
-            try
+            Route route;
+
+            string cacheKey = request.header(
+                    HttpHeader.HOST) ~ "_" ~ request.method ~ "_" ~ request.path;
+            route = this._cached.get(cacheKey, null);
+
+            /// init this thread request for error return.
+            hunt.framework.http.request.request(request);
+
+            if (route is null)
             {
-                Route route;
-
-                string cacheKey = request.header(
-                        HTTPHeaderCode.HOST) ~ "_" ~ request.method ~ "_" ~ request.path;
-                route = this._cached.get(cacheKey, null);
-
-                /// init this thread request for error return.
-                hunt.framework.http.request.request(request);
+                import std.array : split;
+                string domain = split(request.header(HttpHeader.HOST), ":")[0];
+                route = this._router.match(domain, request.method, request.path);
 
                 if (route is null)
                 {
-                    import std.array : split;
-                    string domain = split(request.header(HTTPHeaderCode.HOST), ":")[0];
-                    route = this._router.match(domain, request.method, request.path);
-
-                    if (route is null)
-                    {
-                        auto response = request.createResponse();
-                        response.do404();
-                        response.connectionClose();
-                        response.done();
-                        return;
-                    }
-
-                    this._cached[cacheKey] = route;
-                }
-
-                // add route's params
-                auto params = route.getParams();
-                if (params.length > 0)
-                {
-                    foreach (param, value; params)
-                    {
-                        request.Header().setQueryParam(param, value);
-                    }
-                }
-
-                request.route = route;
-
-                // hunt.security filter
-                request.user = authenticateUser(request);
-
-                if (!accessFilter(request))
-                {
-                    auto response = request.createResponse();
-                    response.do403("no permiss to access: " ~ request.route.getController() ~ "." ~ request.route.getAction());
-                    response.connectionClose();
+                    auto response = request.getResponse();
+                    response.do404();
+                    // response.connectionClose();
                     response.done();
                     return;
                 }
 
-                // add handle task to taskPool
-                this._taskPool.put(task!doRequestHandle(route.handle, request));
+                this._cached[cacheKey] = route;
             }
-            catch (Exception e)
+
+            // add route's params
+            auto params = route.getParams();
+            if (params.length > 0)
             {
-                showException(e);
+                implementationMissing(false);
+                foreach (param, value; params)
+                {
+                    // request.Header().setQueryParam(param, value);
+                    
+                }
             }
+
+            request.route = route;
+
+            // hunt.security filter
+            request.user = authenticateUser(request);
+
+            if (!accessFilter(request))
+            {
+                auto response = request.getResponse();
+                response.do403("no permiss to access: " ~ request.route.getController() ~ "." ~ request.route.getAction());
+                // response.connectionClose();
+                response.done();
+                return;
+            }
+
+            // add handle task to taskPool
+            this._taskPool.put(task!doRequestHandle(route.handle, request));
         }
-
-        bool accessFilter(Request request)
+        catch (Exception e)
         {
-            //兼容老的.
-            Identity identity = app().accessManager().getIdentity(request.route.getGroup());
+            collectException(error(e.toString));
+        }
+    }
 
-            if (identity is null || request.route.getController().length == 0)
+    bool accessFilter(Request request)
+    {
+        //兼容老的.
+        Identity identity = app().accessManager().getIdentity(request.route.getGroup());
+
+        if (identity is null || request.route.getController().length == 0)
+            return true;
+
+        string persident;
+        if (request.route.getModule() is null)
+        {
+            persident = request.route.getController() ~ "." ~ request.route.getAction();
+            if (persident == "staticfile.doStaticFile" || identity.isAllowAction(persident))
                 return true;
-
-            string persident;
-            if (request.route.getModule() is null)
-            {
-                persident = request.route.getController() ~ "." ~ request.route.getAction();
-                if (persident == "staticfile.doStaticFile" || identity.isAllowAction(persident))
-                    return true;
-            }
-            else
-            {
-                persident = request.route.getModule() ~ "." ~ request.route.getController()
-                    ~ "." ~ request.route.getAction();
-                if (persident == "hunt.application.staticfile.staticfile.doStaticFile"
-                        || identity.isAllowAction(persident))
-                    return true;
-            }
-
-            return request.user.can(persident);
         }
-
-        User authenticateUser(Request request)
+        else
         {
-            User user;
-            Identity identity = app().accessManager()
-                .getIdentity(request.route.getGroup());
-            if (identity !is null)
-            {
-                user = identity.login(request);
-            }
-
-            if (user is null)
-            {
-                return User.defaultUser;
-            }
-
-            return user;
+            persident = request.route.getModule() ~ "." ~ request.route.getController()
+                ~ "." ~ request.route.getAction();
+            if (persident == "hunt.application.staticfile.staticfile.doStaticFile"
+                    || identity.isAllowAction(persident))
+                return true;
         }
 
-        void addRouteGroup(string group, string method, string value)
+        return request.user.can(persident);
+    }
+
+    User authenticateUser(Request request)
+    {
+        User user;
+        Identity identity = app().accessManager()
+            .getIdentity(request.route.getGroup());
+        if (identity !is null)
         {
-            this._router.addGroup(group, method, value);
+            user = identity.login(request);
         }
 
-        void setWorkers(TaskPool taskPool)
+        if (user is null)
         {
-            this._taskPool = taskPool;
+            return User.defaultUser;
         }
 
-        void loadRouteGroups()
-        {
-            router.loadConfig();
-        }
+        return user;
+    }
 
-        @property router()
-        {
-            return this._router;
-        }
+    void addRouteGroup(string group, string method, string value)
+    {
+        this._router.addGroup(group, method, value);
+    }
+
+    void setWorkers(TaskPool taskPool)
+    {
+        this._taskPool = taskPool;
+    }
+
+    void loadRouteGroups()
+    {
+        router.loadConfig();
+    }
+
+    @property router()
+    {
+        return this._router;
     }
 
     private
@@ -193,19 +194,20 @@ void doRequestHandle(HandleFunction handle, Request req)
     {
         response = handle(req);
         if (response is null)
-            response = req.createResponse;
+            response = req.getResponse;
     }
     catch (CreateResponseException e)
     {
-        showException(e);
+        collectException(error(e.toString));
     }
     catch (Exception e)
     {
-        showException(e);
-        response = req.createResponse;
+        collectException(error(e.toString));
+        response = req.getResponse;
         response.setStatus(502);
         response.setContent(e.toString());
-        response.connectionClose();
+        // response.connectionClose();
+        response.close();
     }
     catch (Error e)
     {
@@ -229,9 +231,9 @@ void doRequestHandle(HandleFunction handle, Request req)
 
         response.setHeader("Access-Control-Allow-Headers",
                 "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type");
-        if (response.dataHandler is null)
-            response.dataHandler = req.responseHandler;
+        // if (response.dataHandler is null)
+        //     response.dataHandler = req.responseHandler;
 
-        collectException(() { response.done(); response.clear(); }());
+        collectException(() { response.done(); }());
     }
 }

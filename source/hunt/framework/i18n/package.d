@@ -15,7 +15,7 @@ import std.path;
 import std.file;
 import std.algorithm;
 import std.array;
-import kiss.logger;
+import hunt.logging;
 import std.stdio;
 import std.string;
 

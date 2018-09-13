@@ -8,12 +8,15 @@ import std.path;
 import std.digest.md;
 import std.stdio;
 
-import kiss.logger;
+import hunt.logging;
 
 import hunt.framework;
 import hunt.framework.application.controller;
 import hunt.framework.application.config;
 import hunt.framework.utils.string;
+
+import hunt.http.codec.http.model.HttpHeader;
+import hunt.http.codec.http.model.HttpStatus;
 
 /**
 */
@@ -70,35 +73,35 @@ class StaticfileController : Controller
         auto lastModified = toRFC822DateTimeString(fi.timeModified.toUTC());
         auto etag = "\"" ~ hexDigest!MD5(staticFilename ~ ":" ~ lastModified ~ ":" ~ to!string(fi.size)).idup ~ "\"";
     
-        response.setHeader(HTTPHeaderCode.LAST_MODIFIED, lastModified);
-        response.setHeader(HTTPHeaderCode.ETAG, etag);
+        response.setHeader(HttpHeader.LAST_MODIFIED, lastModified);
+        response.setHeader(HttpHeader.ETAG, etag);
 
         if (Config.app.application.staticFileCacheMinutes > 0)
 		{
             auto expireTime = Clock.currTime(UTC()) + dur!"minutes"(Config.app.application.staticFileCacheMinutes);
-            response.setHeader(HTTPHeaderCode.EXPIRES, toRFC822DateTimeString(expireTime));
-            response.setHeader(HTTPHeaderCode.CACHE_CONTROL, "max-age=" ~ to!string(Config.app.application.staticFileCacheMinutes * 60));
+            response.setHeader(HttpHeader.EXPIRES, toRFC822DateTimeString(expireTime));
+            response.setHeader(HttpHeader.CACHE_CONTROL, "max-age=" ~ to!string(Config.app.application.staticFileCacheMinutes * 60));
         }
 
-        if ((request.headerExists(HTTPHeaderCode.IF_MODIFIED_SINCE) && (request.header(HTTPHeaderCode.IF_MODIFIED_SINCE) == lastModified)) ||
-            (request.headerExists(HTTPHeaderCode.IF_NONE_MATCH) && (request.header(HTTPHeaderCode.IF_NONE_MATCH) == etag)))
+        if ((request.headerExists(HttpHeader.IF_MODIFIED_SINCE) && (request.header(HttpHeader.IF_MODIFIED_SINCE) == lastModified)) ||
+            (request.headerExists(HttpHeader.IF_NONE_MATCH) && (request.header(HttpHeader.IF_NONE_MATCH) == etag)))
         {
-                response.setStatus(HttpStatusCodes.NOT_MODIFIED);
+                response.setStatus(HttpStatus.NOT_MODIFIED_304);
                 return response;
 		}
 	
 		auto mimetype = getMimeContentTypeForFile(staticFilename);
-		response.setHeader(HTTPHeaderCode.CONTENT_TYPE, mimetype ~ ";charset=utf-8");
+		response.setHeader(HttpHeader.CONTENT_TYPE, mimetype ~ ";charset=utf-8");
 
-		response.setHeader(HTTPHeaderCode.ACCEPT_RANGES, "bytes");
+		response.setHeader(HttpHeader.ACCEPT_RANGES, "bytes");
 		ulong rangeStart = 0;
 		ulong rangeEnd = 0;
 
-		if (request.headerExists(HTTPHeaderCode.RANGE))
+		if (request.headerExists(HttpHeader.RANGE))
 		{
 			// https://tools.ietf.org/html/rfc7233
 			// Range can be in form "-\d", "\d-" or "\d-\d"
-			auto range = request.header(HTTPHeaderCode.RANGE).chompPrefix("bytes=");
+			auto range = request.header(HttpHeader.RANGE).chompPrefix("bytes=");
 			auto s = range.split("-");
 			
 			if (s.length != 2)
@@ -153,14 +156,14 @@ class StaticfileController : Controller
 			}
 			// potential integer overflow with rangeEnd - rangeStart == size_t.max is intended. This only happens with empty files, the + 1 will then put it back to 0
 			
-			response.setHeader(HTTPHeaderCode.CONTENT_LENGTH, to!string(rangeEnd - rangeStart + 1));
-			response.setHeader(HTTPHeaderCode.CONTENT_RANGE, "bytes %s-%s/%s".format(rangeStart < rangeEnd ? rangeStart : rangeEnd, rangeEnd, fi.size));
-			response.setStatus(HttpStatusCodes.PARTIAL_CONTENT);
+			response.setHeader(HttpHeader.CONTENT_LENGTH, to!string(rangeEnd - rangeStart + 1));
+			response.setHeader(HttpHeader.CONTENT_RANGE, "bytes %s-%s/%s".format(rangeStart < rangeEnd ? rangeStart : rangeEnd, rangeEnd, fi.size));
+			response.setStatus(HttpStatus.PARTIAL_CONTENT_206);
 		}
 		else
 		{
 			rangeEnd = fi.size - 1;
-			response.setHeader(HTTPHeaderCode.CONTENT_LENGTH, fi.size.to!string);
+			response.setHeader(HttpHeader.CONTENT_LENGTH, fi.size.to!string);
 		}
 		
 		// write out the file contents

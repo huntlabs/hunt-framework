@@ -11,7 +11,7 @@
 
 module hunt.framework.routing.define;
 
-import kiss.logger;
+import hunt.logging;
 
 import hunt.framework.http.request;
 import hunt.framework.http.response;

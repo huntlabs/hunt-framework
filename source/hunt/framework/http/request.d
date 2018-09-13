@@ -13,20 +13,28 @@ module hunt.framework.http.request;
 
 import std.exception;
 
-import kiss.logger;
-import kiss.container.ByteBuffer;
+import hunt.logging;
+import hunt.container.ByteBuffer;
 
-import collie.codec.http;
-import collie.codec.http.server.requesthandler;
-import collie.codec.http.server.httpform;
-import collie.utils.memory;
+// import collie.codec.http;
+// import collie.codec.http.server.requesthandler;
+// import collie.codec.http.server.httpform;
+// import collie.utils.memory;
+import hunt.http.codec.http.model;
+// import hunt.http.codec.http.stream;
+import hunt.http.codec.http.stream.HttpConnection;
+import hunt.http.codec.http.stream.HttpOutputStream;
+
+import hunt.container;
+import hunt.util.exception;
+import hunt.util.functional;
 
 import hunt.framework.simplify;
 import hunt.framework.exception;
 import hunt.framework.http.response;
 import hunt.framework.http.session;
-import hunt.framework.http.cookie;
-import hunt.framework.http.exception;
+// import hunt.framework.http.cookie;
+import hunt.framework.exception;
 import hunt.framework.http.nullbuffer;
 import hunt.framework.routing.route;
 import hunt.framework.routing.define;
@@ -42,68 +50,99 @@ import std.regex;
 import std.string;
 import std.socket : Address;
 
-alias CreatorBuffer = Buffer delegate(HttpMessage) nothrow;
-alias DoHandler = void delegate(Request) nothrow;
+
+// alias HttpRequest = MetaData.Request;
+// alias HttpResponse = MetaData.Response;
+
+// alias CreatorBuffer = Buffer delegate(HttpMessage) nothrow;
+// alias DoHandler = void delegate(Request) nothrow;
 
 alias RequestEventHandler = void delegate(Request sender);
 alias Closure = RequestEventHandler;
 
-final class Request : RequestHandler
+final class Request 
 {
+    HttpRequest request;
+    Response response;
+	
+	HttpConnection _connection;
+    Action1!ByteBuffer content;
+    Action1!Request contentComplete;
+    Action1!Request messageComplete;
+    List!(ByteBuffer) requestBody; // = new ArrayList!(ByteBuffer)();
+
+    List!Cookie cookies;
+    string stringBody;
 
 	RequestEventHandler routeResolver;
 	RequestEventHandler userResolver;
 
-	protected HttpHeaders _httpHeaders;
 	protected Session _session;
 	protected string _sessionId;
+
+	// this(CreatorBuffer cuffer, DoHandler handler, uint maxsize = 8 * 1024 * 1024)
+	// {
+	// 	_creatorBuffer = cuffer;
+	// 	_handler = handler;
+	// 	_maxBodySize = maxsize;
+	// }
+	this(HttpRequest request, HttpResponse response,
+                         HttpOutputStream output,
+                         HttpConnection connection,
+						 int bufferSize = 8 * 1024) {
+        requestBody = new ArrayList!(ByteBuffer)();
+        this.request = request;
+        response.setStatus(HttpStatus.OK_200);
+        response.setHttpVersion(HttpVersion.HTTP_1_1);
+        this.response = new Response(response, output, request.getURI(), bufferSize);
+        this._connection = connection;
+    }
+
+	alias request this;
+
+
+    HttpFields getFields() {
+        return request.getFields();
+    }
 
 	string sessionId()
 	{
 		return this._sessionId;
 	}
+	// @property HTTPForm postForm()
+	// {
+	// 	return httpForm();
+	// }
 
-	this(CreatorBuffer cuffer, DoHandler handler, uint maxsize = 8 * 1024 * 1024)
-	{
-		_creatorBuffer = cuffer;
-		_handler = handler;
-		_maxBodySize = maxsize;
-	}
+	// @property HttpForm httpForm()
+	// {
+	// 	if (_body && (_form is null))
+	// 		_form = new HttpForm(header(HttpHeader.CONTENT_TYPE), _body);
+	// 	return _form;
+	// }
 
-	@property HTTPForm postForm()
-	{
-		return httpForm();
-	}
+	// @property HttpMessage Header()
+	// {
+	// 	return _httpMessage;
+	// }
 
-	@property HttpForm httpForm()
-	{
-		if (_body && (_form is null))
-			_form = new HttpForm(header(HTTPHeaderCode.CONTENT_TYPE), _body);
-		return _form;
-	}
+	// @property Buffer Body()
+	// {
+	// 	if (_body)
+	// 		return _body;
+	// 	else
+	// 		return defaultBuffer;
+	// }
 
-	@property HttpMessage Header()
-	{
-		return _httpMessage;
-	}
-
-	@property Buffer Body()
-	{
-		if (_body)
-			return _body;
-		else
-			return defaultBuffer;
-	}
-
-	@property ubyte[] ubyteBody()
-	{
-		if (!_uBody.length)
-		{
-			Body.rest(0);
-			Body.readAll((in ubyte[] data) { _uBody ~= data; });
-		}
-		return _uBody;
-	}
+	// @property ubyte[] ubyteBody()
+	// {
+	// 	if (!_uBody.length)
+	// 	{
+	// 		Body.rest(0);
+	// 		Body.readAll((in ubyte[] data) { _uBody ~= data; });
+	// 	}
+	// 	return _uBody;
+	// }
 
 	/**
      * Custom parameters.
@@ -125,48 +164,48 @@ final class Request : RequestHandler
 
 	@property string host()
 	{
-		return header(HTTPHeaderCode.HOST);
+		return header(HttpHeader.HOST);
 	}
 
-	string header(HTTPHeaderCode code)
+	string header(HttpHeader code)
 	{
-		return _httpMessage.getHeaders.getSingleOrEmpty(code);
+		return getFields().get(code);
 	}
 
 	string header(string key)
 	{
-		return _httpMessage.getHeaders.getSingleOrEmpty(key);
+		return getFields().get(key);
 	}
 
-	bool headerExists(HTTPHeaderCode code)
+	bool headerExists(HttpHeader code)
 	{
-		return _httpMessage.getHeaders.exists(code);
+		return getFields().contains(code);
 	}
 
 	bool headerExists(string key)
 	{
-		return _httpMessage.getHeaders.exists(key);
+		return getFields().containsKey(key);
 	}
 
-	int headersForeach(scope int delegate(string key, string value) each)
-	{
-		return _httpMessage.getHeaders.opApply(each);
-	}
+	// int headersForeach(scope int delegate(string key, string value) each)
+	// {
+	// 	return getFields().opApply(each);
+	// }
 
-	int headersForeach(scope int delegate(HTTPHeaderCode code, string key, string value) each)
-	{
-		return _httpMessage.getHeaders.opApply(each);
-	}
+	// int headersForeach(scope int delegate(HttpHeader code, string key, string value) each)
+	// {
+	// 	return getFields().opApply(each);
+	// }
 
-	bool headerValueForeach(string name, scope bool delegate(string value) func)
-	{
-		return _httpMessage.getHeaders.forEachValueOfHeader(name, func);
-	}
+	// bool headerValueForeach(string name, scope bool delegate(string value) func)
+	// {
+	// 	return getFields().forEachValueOfHeader(name, func);
+	// }
 
-	bool headerValueForeach(HTTPHeaderCode code, scope bool delegate(string value) func)
-	{
-		return _httpMessage.getHeaders.forEachValueOfHeader(code, func);
-	}
+	// bool headerValueForeach(HttpHeader code, scope bool delegate(string value) func)
+	// {
+	// 	return getFields().forEachValueOfHeader(code, func);
+	// }
 
 	@property string referer()
 	{
@@ -181,15 +220,16 @@ final class Request : RequestHandler
 
 	@property Address clientAddress()
 	{
-		return _httpMessage.clientAddress();
+		return _connection.getLocalAddress();
 	}
 
 	@property JSONValue json()
 	{
-		if (_json == JSONValue.init)
-		{
-			_json = parseJSON(cast(string) ubyteBody());
-		}
+		implementationMissing(false);
+		// if (_json == JSONValue.init)
+		// {
+		// 	_json = parseJSON(cast(string) ubyteBody());
+		// }
 		return _json;
 	}
 
@@ -228,7 +268,10 @@ final class Request : RequestHandler
 	///get queries
 	@property string[string] queries()
 	{
-		return _httpMessage.queryParam();
+		implementationMissing(false);
+		return null;
+		// request.getURI().getQuery();
+		// return _httpMessage.queryParam();
 	}
 
 	/// get a query
@@ -254,17 +297,23 @@ final class Request : RequestHandler
 		return _mate;
 	}
 
-	Response createResponse()
-	{
-		if (_error != HTTPErrorCode.NO_ERROR)
-		{
-			// throw new CreateResponseException("http error is : " ~ to!string(_error));
-			kiss.logger.warning("http error is : " ~ to!string(_error));
-		}
-		if (_res is null)
-			_res = new Response(_downstream);
-		return _res;
-	}
+
+    Response getResponse() {
+        return response;
+    }
+
+
+	// Response createResponse()
+	// {
+	// 	if (_error != HTTPErrorCode.NO_ERROR)
+	// 	{
+	// 		// throw new CreateResponseException("http error is : " ~ to!string(_error));
+	// 		hunt.logging.warning("http error is : " ~ to!string(_error));
+	// 	}
+	// 	if (_res is null)
+	// 		_res = new Response(_downstream);
+	// 	return _res;
+	// }
 
 	// @property void response(Response r)
 	// {
@@ -284,7 +333,7 @@ final class Request : RequestHandler
 
 	@property bool isJson()
 	{
-		string s = this.header(HTTPHeaderCode.CONTENT_TYPE);
+		string s = this.header(HttpHeader.CONTENT_TYPE);
 		return canFind(s, "/json") || canFind(s, "+json");
 	}
 
@@ -302,7 +351,7 @@ final class Request : RequestHandler
 	{
 		if (acceptableContentTypes is null)
 		{
-			acceptableContentTypes = _httpHeaders.getValuesByKey("Accept");
+			acceptableContentTypes = getFields().getValuesList("Accept");
 		}
 
 		return acceptableContentTypes;
@@ -529,16 +578,16 @@ final class Request : RequestHandler
      * @param  string|array|null  default
      * @return string|array
      */
-	public string[string] old(string[string] defaults = null)
-	{
-		return this.hasSession() ? this.session().getOldInput(defaults) : defaults;
-	}
+	// public string[string] old(string[string] defaults = null)
+	// {
+	// 	return this.hasSession() ? this.session().getOldInput(defaults) : defaults;
+	// }
 
-	/// ditto
-	public string old(string key, string defaults = null)
-	{
-		return this.hasSession() ? this.session().getOldInput(key, defaults) : defaults;
-	}
+	// /// ditto
+	// public string old(string key, string defaults = null)
+	// {
+	// 	return this.hasSession() ? this.session().getOldInput(key, defaults) : defaults;
+	// }
 
 
 	/**
@@ -546,10 +595,10 @@ final class Request : RequestHandler
      *
      * @return void
      */
-	public void flash()
-	{
-		this.session().flashInput(this.input());
-	}
+	// public void flash()
+	// {
+	// 	this.session().flashInput(this.input());
+	// }
 
 	/**
      * Flash only some of the input to the session.
@@ -557,10 +606,10 @@ final class Request : RequestHandler
      * @param  array|mixed  keys
      * @return void
      */
-	public void flashOnly(string[] keys)
-	{
-		this.session().flashInput(this.only(keys));
-	}
+	// public void flashOnly(string[] keys)
+	// {
+	// 	this.session().flashInput(this.only(keys));
+	// }
 
 	/**
      * Flash only some of the input to the session.
@@ -568,20 +617,20 @@ final class Request : RequestHandler
      * @param  array|mixed  keys
      * @return void
      */
-	public void flashExcept(string[] keys)
-	{
-		this.session().flashInput(this.only(keys));
-	}
+	// public void flashExcept(string[] keys)
+	// {
+	// 	this.session().flashInput(this.only(keys));
+	// }
 
 	/**
      * Flush all of the old input from the session.
      *
      * @return void
      */
-	void flush()
-	{
-		this.session().flashInput(null);
-	}
+	// void flush()
+	// {
+	// 	this.session().flashInput(null);
+	// }
 
 	/**
      * Gets the Session.
@@ -592,16 +641,17 @@ final class Request : RequestHandler
 	{
 		if (!hasSession())
 		{
+			implementationMissing(false);
 			
-			string sessionId = this.cookie("hunt_session");
-			if (sessionId.empty)
-			{
-				_session = new Session(app().sessionStorage());
-				_sessionId = _session.sessionId;
-				return _session;
-			}
+			// string sessionId = this.cookie("hunt_session");
+			// if (sessionId.empty)
+			// {
+			// 	_session = new Session(app().sessionStorage());
+			// 	_sessionId = _session.sessionId;
+			// 	return _session;
+			// }
 
-			_session = new Session(sessionId, app().sessionStorage());
+			// _session = new Session(sessionId, app().sessionStorage());
 		}
 
 		return _session;
@@ -639,7 +689,7 @@ final class Request : RequestHandler
      */
 	bool hasHeader(string key)
 	{
-		return _httpHeaders.exists(key);
+		return getFields().containsKey(key);
 	}
 
 	/**
@@ -651,7 +701,7 @@ final class Request : RequestHandler
      */
 	string[] header(string key = null, string[] defaults = null)
 	{
-		string[] r = _httpHeaders.getValuesByKey(key);
+		string[] r = getFields().getValuesList(key);
 		if (r is null)
 			return defaults;
 		else
@@ -661,7 +711,7 @@ final class Request : RequestHandler
 	// ditto
 	string header(string key = null, string defaults = null)
 	{
-		string r = _httpHeaders.getSingleOrEmpty(key);
+		string r = getFields().get(key);
 		if (r is null)
 			return defaults;
 		else
@@ -752,7 +802,9 @@ final class Request : RequestHandler
      */
 	string[] keys()
 	{
-		return this.input().keys ~ this.httpForm.fileKeys();
+		// return this.input().keys ~ this.httpForm.fileKeys();
+		implementationMissing(false);
+		return this.input().keys;
 	}
 
 	/**
@@ -850,7 +902,9 @@ final class Request : RequestHandler
      */
 	string query(string key, string defaults = null)
 	{
-		return _httpMessage.getQueryParam(key, defaults);
+		// return _httpMessage.getQueryParam(key, defaults);
+		implementationMissing(false);
+		return null;
 	}
 
 	/**
@@ -863,26 +917,28 @@ final class Request : RequestHandler
      */
 	T post(T = string)(string key, T v = T.init)
 	{
-		auto form = postForm();
-		if (form is null)
-			return v;
-		auto _v = postForm.getFromValue(key);
-		if (_v.length)
-		{
-			return to!T(_v);
-		}
+
+		implementationMissing(false);
+		// auto form = postForm();
+		// if (form is null)
+		// 	return v;
+		// auto _v = postForm.getFromValue(key);
+		// if (_v.length)
+		// {
+		// 	return to!T(_v);
+		// }
 		return v;
 	}
 
-	CookieManager cookieManager()
-	{
-		if (_cookieManager is null)
-		{
-			_cookieManager = new CookieManager(header(HTTPHeaderCode.COOKIE));
-		}
+	// CookieManager cookieManager()
+	// {
+	// 	if (_cookieManager is null)
+	// 	{
+	// 		_cookieManager = new CookieManager(header(HttpHeader.COOKIE));
+	// 	}
 
-		return _cookieManager;
-	}
+	// 	return _cookieManager;
+	// }
 
 	/**
      * Determine if a cookie is set on the request.
@@ -904,7 +960,9 @@ final class Request : RequestHandler
      */
 	string cookie(string key, string defaultValue = null)
 	{
-		return cookieManager.get(key, defaultValue);
+		// return cookieManager.get(key, defaultValue);
+		implementationMissing(false);
+		return null;
 	}
 
 	/**
@@ -914,7 +972,10 @@ final class Request : RequestHandler
 	 */
 	string[string] cookie()
 	{
-		return cookieManager.requestCookies();
+		// return cookieManager.requestCookies();
+
+		implementationMissing(false);
+		return null;
 	}
 
 	/**
@@ -922,10 +983,10 @@ final class Request : RequestHandler
      *
      * @return array
      */
-	HttpForm.FormFile[string] allFiles()
-	{
-		return httpForm.fileMap();
-	}
+	// HttpForm.FormFile[string] allFiles()
+	// {
+	// 	return httpForm.fileMap();
+	// }
 
 	/**
      * Determine if the uploaded data contains a file.
@@ -933,12 +994,12 @@ final class Request : RequestHandler
      * @param  string  key
      * @return bool
      */
-	public bool hasFile(string key)
-	{
-		HttpForm.FormFile file = httpForm.getFileValue(key);
+	// public bool hasFile(string key)
+	// {
+	// 	HttpForm.FormFile file = httpForm.getFileValue(key);
 
-		return file !is null;
-	}
+	// 	return file !is null;
+	// }
 
 	/**
      * Retrieve a file from the request.
@@ -947,39 +1008,39 @@ final class Request : RequestHandler
      * @param  mixed default
      * @return HttpForm.FormFile
      */
-	HttpForm.FormFile file(string key)
-	{
-		return httpForm.getFileValue(key);
-	}
+	// HttpForm.FormFile file(string key)
+	// {
+	// 	return httpForm.getFileValue(key);
+	// }
 
 	@property string method()
 	{
-		return _httpMessage.methodString;
+		return request.getMethod();
 	}
 
 	@property string url()
 	{
-		return _httpMessage.getPath();
+		return request.getURIString();
 	}
 
-	@property string fullUrl()
-	{
-		return _httpMessage.url();
-	}
+	// @property string fullUrl()
+	// {
+	// 	return _httpMessage.url();
+	// }
 
-	@property string fullUrlWithQuery()
-	{
-		return _httpMessage.url();
-	}
+	// @property string fullUrlWithQuery()
+	// {
+	// 	return _httpMessage.url();
+	// }
 
 	@property string path()
 	{
-		return _httpMessage.getPath;
+		return request.getURI().getPath();
 	}
 
 	@property string decodedPath()
 	{
-		return percentDecode(_httpMessage.getPath);
+		return request.getURI().getDecodedPath();
 	}
 
 	/**
@@ -1070,18 +1131,18 @@ final class Request : RequestHandler
      * @param  dynamic  patterns
      * @return bool
      */
-	bool fullUrlIs(string[] patterns...)
-	{
-		string r = this.fullUrl();
-		foreach (string pattern; patterns)
-		{
-			auto s = matchAll(r, regex(pattern));
-			if (!s.empty)
-				return true;
-		}
+	// bool fullUrlIs(string[] patterns...)
+	// {
+	// 	string r = this.fullUrl();
+	// 	foreach (string pattern; patterns)
+	// 	{
+	// 		auto s = matchAll(r, regex(pattern));
+	// 		if (!s.empty)
+	// 			return true;
+	// 	}
 
-		return false;
-	}
+	// 	return false;
+	// }
 
     /**
      * Determine if the request is the result of an AJAX call.
@@ -1090,7 +1151,7 @@ final class Request : RequestHandler
      */
 	@property bool ajax()
 	{
-		return _httpHeaders.getSingleOrEmpty("X-Requested-With") == "XMLHttpRequest";
+		return getFields().get("X-Requested-With") == "XMLHttpRequest";
 	}
 
     /**
@@ -1100,7 +1161,7 @@ final class Request : RequestHandler
      */
 	@property bool pjax()
 	{
-		return _httpHeaders.exists("X-PJAX");
+		return getFields().containsKey("X-PJAX");
 	}
 
     /**
@@ -1133,20 +1194,20 @@ final class Request : RequestHandler
      *
      * @return string
      */
-	@property string ip()
-	{
-		return _httpMessage.getClientIP();
-	}
+	// @property string ip()
+	// {
+	// 	return _httpMessage.getClientIP();
+	// }
 
 	/**
      * Get the client IP addresses.
      *
      * @return array
      */
-	@property string[] ips()
-	{
-		throw new NotImplementedException("ips");
-	}
+	// @property string[] ips()
+	// {
+	// 	throw new NotImplementedException("ips");
+	// }
 
 	/**
      * Get the client user agent.
@@ -1155,18 +1216,18 @@ final class Request : RequestHandler
      */
 	@property string userAgent()
 	{
-		return _httpHeaders.getSingleOrEmpty("User-Agent");
+		return getFields().get("User-Agent");
 	}
 
-	Request merge(string[] input)
-	{
-		string[string] inputSource = getInputSource;
-		for (size_t i = 0; i < input.length; i++)
-		{
-			inputSource[to!string(i)] = input[i];
-		}
-		return this;
-	}
+	// Request merge(string[] input)
+	// {
+	// 	string[string] inputSource = getInputSource;
+	// 	for (size_t i = 0; i < input.length; i++)
+	// 	{
+	// 		inputSource[to!string(i)] = input[i];
+	// 	}
+	// 	return this;
+	// }
 
 	/**
      * Replace the input for the current request.
@@ -1174,17 +1235,17 @@ final class Request : RequestHandler
      * @param  array input
      * @return Request
      */
-	Request replace(string[string] input)
-	{
-		if (isContained(this.method, ["GET", "HEAD"]))
-			_httpMessage.queryParam = input;
-		else
-		{
-			httpForm.formData = input;
-		}
+	// Request replace(string[string] input)
+	// {
+	// 	if (isContained(this.method, ["GET", "HEAD"]))
+	// 		_httpMessage.queryParam = input;
+	// 	else
+	// 	{
+	// 		httpForm.formData = input;
+	// 	}
 
-		return this;
-	}
+	// 	return this;
+	// }
 
 	// JSONValue json(string key, string defaults = null)
 	// {
@@ -1195,12 +1256,14 @@ final class Request : RequestHandler
 
 	protected string[string] getInputSource()
 	{
-		if (isContained(this.method, ["GET", "HEAD"]))
-			return _httpMessage.queryParam();
-		else
-		{
-			return httpForm.formData();
-		}
+		implementationMissing(false);
+		return null;
+		// if (isContained(this.method, ["GET", "HEAD"]))
+		// 	return _httpMessage.queryParam();
+		// else
+		// {
+		// 	return httpForm.formData();
+		// }
 	}
 
 	/**
@@ -1243,19 +1306,19 @@ final class Request : RequestHandler
      *
      * @return string
      */
-	string fingerprint()
-	{
-		if(_route is null)
-			throw new Exception("Unable to generate fingerprint. Route unavailable.");
+	// string fingerprint()
+	// {
+	// 	if(_route is null)
+	// 		throw new Exception("Unable to generate fingerprint. Route unavailable.");
 		
-		string[] r ;
-		foreach(HTTP_METHODS m;  _route.getMethods())
-			r ~= to!string(m);
-		r ~= _route.getUrlTemplate();
-		r ~= this.ip();
+	// 	string[] r ;
+	// 	foreach(HTTP_METHODS m;  _route.getMethods())
+	// 		r ~= to!string(m);
+	// 	r ~= _route.getUrlTemplate();
+	// 	r ~= this.ip();
 
-		return toHexString(sha1Of(join(r, "|"))).idup;
-	}
+	// 	return toHexString(sha1Of(join(r, "|"))).idup;
+	// }
 
 	/**
      * Set the JSON payload for the request.
@@ -1421,7 +1484,7 @@ final class Request : RequestHandler
      */
     string getProtocolVersion()
     {
-        return _httpMessage.getProtocolVersion();
+        return request.getHttpVersion().toString();
     }
 
     /**
@@ -1434,109 +1497,110 @@ final class Request : RequestHandler
      */
     bool isFromTrustedProxy()
     {
-		throw new NotImplementedException("isFromTrustedProxy");
+		implementationMissing(false);
+		return false;
     }
 	
-protected:
-	override void onBody(const ubyte[] data) nothrow
-	{
-		collectException(() {
-			if (fristBody)
-			{
-				_body = _creatorBuffer(_httpMessage);
-				fristBody = false;
-				if (_body is null)
-				{
-					onError(HTTPErrorCode.FRAME_SIZE_ERROR);
-					return;
-				}
-			}
-			if (_body)
-			{
-				_body.write(data);
-				if (_body.length > _maxBodySize)
-				{
-					onError(HTTPErrorCode.FRAME_SIZE_ERROR);
-					gcFree(_body);
-					_body = null;
-				}
-			}
-		}());
-	}
+// protected:
+// 	override void onBody(const ubyte[] data) nothrow
+// 	{
+// 		collectException(() {
+// 			if (fristBody)
+// 			{
+// 				_body = _creatorBuffer(_httpMessage);
+// 				fristBody = false;
+// 				if (_body is null)
+// 				{
+// 					onError(HTTPErrorCode.FRAME_SIZE_ERROR);
+// 					return;
+// 				}
+// 			}
+// 			if (_body)
+// 			{
+// 				_body.write(data);
+// 				if (_body.length > _maxBodySize)
+// 				{
+// 					onError(HTTPErrorCode.FRAME_SIZE_ERROR);
+// 					gcFree(_body);
+// 					_body = null;
+// 				}
+// 			}
+// 		}());
+// 	}
 
-	override void onEOM() nothrow
-	{
-		if (_error == HTTPErrorCode.NO_ERROR)
-			_handler(this);
-	}
+// 	override void onEOM() nothrow
+// 	{
+// 		if (_error == HTTPErrorCode.NO_ERROR)
+// 			_handler(this);
+// 	}
 
-	override void requestComplete() nothrow
-	{
-		collectException(() {
-			_error = HTTPErrorCode.STREAM_CLOSED;
-			import collie.utils.memory;
+// 	override void requestComplete() nothrow
+// 	{
+// 		collectException(() {
+// 			_error = HTTPErrorCode.STREAM_CLOSED;
+// 			import collie.utils.memory;
 
-			if (_body)
-				gcFree(_body);
-			if (_httpMessage)
-				gcFree(_httpMessage);
-			if (_res)
-				gcFree(_res);
-		}());
-	}
+// 			if (_body)
+// 				gcFree(_body);
+// 			if (_httpMessage)
+// 				gcFree(_httpMessage);
+// 			if (_res)
+// 				gcFree(_res);
+// 		}());
+// 	}
 
-	override void onResquest(HttpMessage message) nothrow
-	{
-		_httpMessage = message;
-		collectException({ this._httpHeaders = message.getHeaders(); }());
-	}
+// 	override void onResquest(HttpMessage message) nothrow
+// 	{
+// 		_httpMessage = message;
+// 		collectException({ this.getFields = message.getHeaders(); }());
+// 	}
 
-	override void onError(HTTPErrorCode code) nothrow
-	{
-		collectException(() {
-			scope (exit)
-			{
-				_downstream = null;
-			}
-			_error = code;
-			if (_error == HTTPErrorCode.REMOTE_CLOSED)
-				return;
-			if (_res is null)
-			{
-				_res = new Response(_downstream);
-			}
-			if (_error == HTTPErrorCode.TIME_OUT)
-			{
-				_res.setStatus(408);
-			}
-			else if (_error == HTTPErrorCode.FRAME_SIZE_ERROR)
-			{
-				_res.setStatus(429);
-			}
-			else
-			{
-				_res.setStatus(502);
-			}
-			_res.done();
-		}());
-	}
+// 	override void onError(HTTPErrorCode code) nothrow
+// 	{
+// 		collectException(() {
+// 			scope (exit)
+// 			{
+// 				_downstream = null;
+// 			}
+// 			_error = code;
+// 			if (_error == HTTPErrorCode.REMOTE_CLOSED)
+// 				return;
+// 			if (_res is null)
+// 			{
+// 				_res = new Response(_downstream);
+// 			}
+// 			if (_error == HTTPErrorCode.TIME_OUT)
+// 			{
+// 				_res.setStatus(408);
+// 			}
+// 			else if (_error == HTTPErrorCode.FRAME_SIZE_ERROR)
+// 			{
+// 				_res.setStatus(429);
+// 			}
+// 			else
+// 			{
+// 				_res.setStatus(502);
+// 			}
+// 			_res.done();
+// 		}());
+// 	}
 
 private:
 	User _user;
 	Route _route;
 	string[string] _mate;
 	Cookie[string] _cookies;
-	CookieManager _cookieManager;
+	// CookieManager _cookieManager;
 	Buffer _body;
 	JSONValue _json;
 	ubyte[] _uBody;
-	HttpMessage _httpMessage;
-	HTTPForm _form;
+	// HttpMessage _httpMessage;
+	// HTTPForm _form;
 	Response _res;
-	HTTPErrorCode _error = HTTPErrorCode.NO_ERROR;
-	CreatorBuffer _creatorBuffer;
+	// HTTPErrorCode _error = HTTPErrorCode.NO_ERROR;
+	// CreatorBuffer _creatorBuffer;
 	uint _maxBodySize;
-	DoHandler _handler;
+	// DoHandler _handler;
 	bool fristBody = true;
 	string _action;
 }

@@ -17,7 +17,7 @@ import std.file;
 import std.path;
 import std.stdio;
 
-import kiss.logger;
+import hunt.logging;
 import hunt.framework.application.config;
 import hunt.framework.view.match;
 import hunt.framework.view.rule;
