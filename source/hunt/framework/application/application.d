@@ -59,13 +59,6 @@ public import hunt.entity;
 
 import hunt.util.exception;
 
-// abstract class WebSocketFactory
-// {
-//     IWebSocket newWebSocket(const HTTPMessage header);
-// };
-
-
-
 
 final class Application
 {
@@ -401,7 +394,6 @@ final class Application
         // option.handlerFactories ~= (&newHandler);
 
         // _server = new HttpServer(option);
-        // addr = parseAddress(conf.http.address,conf.http.port);
         // HTTPServerOptions.IPConfig ipconf;
         // ipconf.address = addr;
 
@@ -412,6 +404,8 @@ final class Application
     private:
     void upConfig(AppConfig conf)
     {
+        addr = parseAddress(conf.http.address,conf.http.port);
+        
         _maxBodySize = conf.upload.maxSize;
         version(NO_TASKPOOL)
         {
@@ -488,11 +482,11 @@ final class Application
             case "fatal":
 				level = hunt.logging.LogLevel.LOG_FATAL;
                 break;
-            case "info":
-				level = hunt.logging.LogLevel.LOG_INFO;
-                break;
             case "warning":
 				level = hunt.logging.LogLevel.LOG_WARNING;
+                break;
+            case "info":
+				level = hunt.logging.LogLevel.LOG_INFO;
                 break;
             case "off":
 				level = hunt.logging.LogLevel.LOG_Off;

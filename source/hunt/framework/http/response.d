@@ -22,11 +22,11 @@ import std.typecons;
 // import collie.codec.http.httpmessage;
 
 import hunt.http.codec.http.model;
-import hunt.http.codec.http.stream.BufferedHttpOutputStream;
 import hunt.http.codec.http.stream.HttpOutputStream;
 
 import hunt.datetime;
 import hunt.io.common;
+import hunt.io.BufferedOutputStream;
 import hunt.logging;
 import hunt.util.common;
 import hunt.util.exception;
@@ -50,7 +50,7 @@ class Response : Closeable
     // protected Request _request;
     HttpOutputStream output;
     HttpURI uri;
-    BufferedHttpOutputStream bufferedOutputStream;
+    BufferedOutputStream bufferedOutputStream;
     int bufferSize = 8 * 1024;
 
     this()
@@ -220,11 +220,10 @@ class Response : Closeable
         if (_isDone)
             return;
         ///set session
-		implementationMissing(false);
-        // if(request.hasSession() && request.session.isStarted())
-        // {
-        //     withCookie(new Cookie("hunt_session" , request.session.getId() ,0 ,"/" ,null,false ,false));
-        // }
+        if(request.hasSession() && request.session.isStarted())
+        {
+            withCookie(new Cookie("hunt_session" , request.session.getId() ,0 ,"/" ,null,false ,false));
+        }
         setCookieHeaders();
         setHeader("Date" , date("Y-m-d H:i:s"));
         setHeader(HttpHeader.X_POWERED_BY, XPoweredBy);
@@ -232,7 +231,8 @@ class Response : Closeable
         try {
             this.close();
         }
-        catch (IOException) {
+        catch (IOException ex) {
+            error(ex.toString());
 		}
     }
 
@@ -268,7 +268,7 @@ class Response : Closeable
         getFields().put(HttpHeader.CONTENT_TYPE, contentype);
         setContent(errorPageHtml(code, body_));
 //       connectionClose();
-//        done();
+       done();
     }
 
     void setHttpError(ushort code)
@@ -279,7 +279,7 @@ class Response : Closeable
 
     OutputStream getOutputStream() {
         if (bufferedOutputStream is null) {
-            bufferedOutputStream = new BufferedHttpOutputStream(output, bufferSize);
+            bufferedOutputStream = new BufferedOutputStream(output, bufferSize);
         }
         return bufferedOutputStream;
     }

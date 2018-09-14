@@ -11,7 +11,6 @@
  
 module hunt.framework.http;
 
-public import hunt.framework.http.core;
 public import hunt.framework.exception;
 public import hunt.framework.http.request;
 public import hunt.framework.http.response;
