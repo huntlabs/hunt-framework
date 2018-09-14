@@ -101,8 +101,15 @@ class Dispatcher
                 return;
             }
 
-            // add handle task to taskPool
-            this._taskPool.put(task!doRequestHandle(route.handle, request));
+            // FIXME: Needing refactor or cleanup -@zxp at 9/14/2018, 5:17:25 PM
+            version(NO_TASKPOOL)
+            {
+                doRequestHandle(route.handle, request);
+            }
+            else {
+                // add handle task to taskPool
+                this._taskPool.put(task!doRequestHandle(route.handle, request));
+            }            
         }
         catch (Exception e)
         {
@@ -179,7 +186,7 @@ class Dispatcher
     {
         Router _router;
         Route[string] _cached;
-        __gshared TaskPool _taskPool;
+        TaskPool _taskPool;
     }
 }
 

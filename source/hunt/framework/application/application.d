@@ -331,15 +331,16 @@ final class Application
                     r.contentComplete(r);
                 }
 
-                handleRequest(r);
-
                 return false;
             }).messageComplete((request, response, ot, connection)  {
                 Request r = cast(Request) request.getAttachment();
                 if (r.messageComplete != null) {
                     r.messageComplete(r);
                 }
-                IO.close(r.getResponse());
+
+                handleRequest(r);
+
+                // IO.close(r.getResponse());
                 return true;
             }).badMessage((status, reason, request, response, ot, connection)  {
                 if (_badMessage !is null) {
