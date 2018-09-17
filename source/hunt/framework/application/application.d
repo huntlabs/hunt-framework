@@ -33,8 +33,11 @@ import hunt.http.codec.websocket.stream.WebSocketPolicy;
 public import hunt.event;
 public import hunt.event.EventLoopGroup;
 
-public import std.socket;
-public import std.file;
+import hunt.net.NetUtil;
+import hunt.util.exception;
+
+import std.socket;
+import std.file;
 
 import std.string;
 import std.conv;
@@ -57,7 +60,6 @@ public import hunt.framework.security.acl.Identity;
 
 public import hunt.entity;
 
-import hunt.util.exception;
 
 
 final class Application
@@ -72,7 +74,7 @@ final class Application
         return _app;
     }
 
-    Address binded(){return addr;}
+    Address binded() { return addr;}
 
     // enable i18n
     Application enableLocale(string resPath = DEFAULT_LANGUAGE_PATH, string defaultLocale = "en-us")
@@ -91,28 +93,22 @@ final class Application
     // }
 
     version(NO_TASKPOOL){} else {
-        @property TaskPool taskPool(){return _tpool;}
+        @property TaskPool taskPool() { return _tpool;}
     }
 
     /// get the router.
-    @property router()
+    @property Router router()
     {
         return this._dispatcher.router();
     }
 
-    @property server(){return _server;}
+    @property HttpServer server() {return _server;}
 
-    // @property mainLoop(){return _server.eventLoop;}
+    @property EventLoop mainLoop() { return _server.eventLoop;}
 
-    // @property loopGroup(){return _server.group;}
+    @property EventLoopGroup loopGroup() { return NetUtil.defaultEventLoopGroup();}
 
     @property AppConfig config(){return Config.app;}
-
-    // void setCreateBuffer(CreatorBuffer cbuffer)
-    // {
-    //     if(cbuffer)
-    //         _cbuffer = cbuffer;
-    // }
 
     private void initDatabase(AppConfig.DatabaseConf config)
     {
@@ -201,15 +197,6 @@ final class Application
 		start();
 	}
 
-	/*
-	void run(Address addr)
-	{
-		Config.app.http.address = addr.toAddrString;
-		Config.app.http.port = addr.toPortString.to!ushort;
-		setConfig(Config.app);
-		start();
-	}*/
-
 	void setConfig(AppConfig config)
 	{
 		setLogConfig(config.logging);
@@ -225,7 +212,10 @@ final class Application
 
 	void start()
 	{
-		writeln("Try to browse http://",addr.toString());
+        if(_server.getHttp2Configuration.isSecureConnectionEnabled())
+		    writeln("Try to browse https://",addr.toString());
+        else
+		    writeln("Try to browse http://",addr.toString());
 		_server.start();
 	}
 
@@ -247,46 +237,6 @@ final class Application
         return this;
     }
     
-    // RequestHandler newHandler(RequestHandler, HTTPMessage msg){
-    //     if(!msg.upgraded)
-    //     {
-    //         return new Request(_cbuffer,&handleRequest,_maxBodySize);
-    //     }
-    //     else if(_wfactory)
-    //     {
-    //         return _wfactory.newWebSocket(msg);
-    //     }
-
-    //     return null;
-    // }
-
-    // Buffer defaultBuffer(HTTPMessage msg) nothrow
-    // {
-    //     try{
-    //         import std.experimental.allocator.gc_allocator;
-    //         import hunt.container.ByteBuffer;
-    //         if(msg.chunked == false)
-    //         {
-    //             string contign = msg.getHeaders.getSingleOrEmpty(HttpHeader.CONTENT_LENGTH);
-    //             if(contign.length > 0)
-    //             {
-    //                 import std.conv;
-    //                 uint len = 0;
-    //                 collectException(to!(uint)(contign),len);
-    //                 if(len > _maxBodySize)
-    //                     return null;
-    //             }
-    //         }
-
-    //         return new ByteBuffer!(GCAllocator)();
-    //     }
-    //     catch(Exception e)
-    //     {
-    //         showException(e);
-    //         return null;
-    //     }
-    // }
-
     private void handleRequest(Request req) nothrow
     {
         this._dispatcher.dispatch(req);
@@ -296,26 +246,27 @@ final class Application
     private Action3!(int, string, Request) _badMessage;
     private Action1!Request _earlyEof;
     // private Action1!HttpConnection _acceptConnection;
-    private Action2!(Request, HttpServerConnection) tunnel;
+    // private Action2!(Request, HttpServerConnection) tunnel;
 
     private ServerHttpHandlerAdapter buildHttpHandlerAdapter() {
         ServerHttpHandlerAdapter adapter = new ServerHttpHandlerAdapter();
         adapter.acceptConnection((HttpConnection c) {
+            version(HuntDebugMode)
+            logDebugf("new request from: %s", c.getRemoteAddress.toString());
 
-            }).acceptHttpTunnelConnection((request, response, ot, connection) {
-                Request r = new Request(request, response, ot, cast(HttpConnection)connection);
-                request.setAttachment(r);
-                if (tunnel !is null) {
-                    tunnel(r, connection);
-                }
-                return true;
+            // }).acceptHttpTunnelConnection((request, response, ot, connection) {
+            //     Request r = new Request(request, response, ot, cast(HttpConnection)connection);
+            //     request.setAttachment(r);
+            //     if (tunnel !is null) {
+            //         tunnel(r, connection);
+            //     }
+            //     return true;
             }).headerComplete((request, response, ot, connection) {
                 Request r = new Request(request, response, ot, connection);
                 request.setAttachment(r);
                 if (_headerComplete != null) {
                     _headerComplete(r);
                 }
-                // requestMeter.mark();
                 return false;
             }).content((buffer, request, response, ot, connection) {
                 Request r = cast(Request) request.getAttachment();
@@ -325,13 +276,13 @@ final class Application
                     r.requestBody.add(buffer);
                 }
                 return false;
-            }).contentComplete((request, response, ot, connection)  {
-                Request r = cast(Request) request.getAttachment();
-                if (r.contentComplete !is null) {
-                    r.contentComplete(r);
-                }
+            // }).contentComplete((request, response, ot, connection)  {
+            //     Request r = cast(Request) request.getAttachment();
+            //     if (r.contentComplete !is null) {
+            //         r.contentComplete(r);
+            //     }
 
-                return false;
+            //     return false;
             }).messageComplete((request, response, ot, connection)  {
                 Request r = cast(Request) request.getAttachment();
                 if (r.messageComplete != null) {
@@ -512,7 +463,7 @@ final class Application
 
     class SimpleWebSocketHandler : WebSocketHandler
     {
-           override
+        override
         bool acceptUpgrade(MetaData.Request request, 
                 MetaData.Response response,
                 HttpOutputStream output,
@@ -577,7 +528,6 @@ final class Application
 
     this()
     {
-        // _cbuffer = &defaultBuffer;
 		_accessManager = new AccessManager();
 		_manger = new CacheManger();
 
@@ -588,11 +538,11 @@ final class Application
     __gshared static Application _app;
 
     private:
+
     Address addr;
     HttpServer _server;
     // WebSocketFactory _wfactory;
     uint _maxBodySize;
-    // CreatorBuffer _cbuffer;
     Dispatcher _dispatcher;
     EntityManagerFactory _entityManagerFactory;
     CacheManger _manger;

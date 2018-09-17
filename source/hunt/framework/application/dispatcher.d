@@ -177,7 +177,7 @@ class Dispatcher
         router.loadConfig();
     }
 
-    @property router()
+    @property Router router()
     {
         return this._router;
     }

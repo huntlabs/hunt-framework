@@ -29,7 +29,7 @@ import hunt.container;
 import hunt.util.exception;
 import hunt.util.functional;
 
-import hunt.framework.simplify;
+// import hunt.framework.simplify;
 import hunt.framework.exception;
 import hunt.framework.http.response;
 import hunt.framework.http.session;

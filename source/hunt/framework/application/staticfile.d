@@ -12,7 +12,7 @@ import hunt.logging;
 
 import hunt.framework;
 import hunt.framework.application.controller;
-import hunt.framework.application.config;
+// import hunt.framework.application.config;
 import hunt.framework.utils.string;
 
 import hunt.http.codec.http.model.HttpHeader;

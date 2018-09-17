@@ -29,6 +29,8 @@ enum Action;
 
 abstract class Controller
 {
+    // mixin MakeController;
+
     protected
     {
         Request request;
