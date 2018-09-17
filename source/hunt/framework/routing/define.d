@@ -13,8 +13,8 @@ module hunt.framework.routing.define;
 
 import hunt.logging;
 
-import hunt.framework.http.request;
-import hunt.framework.http.response;
+import hunt.framework.http.Request;
+import hunt.framework.http.Response;
 
 import std.exception;
 

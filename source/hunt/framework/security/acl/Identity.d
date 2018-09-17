@@ -1,6 +1,6 @@
 module hunt.framework.security.acl.Identity;
 
-import hunt.framework.http.request;
+import hunt.framework.http.Request;
 import hunt.framework.security.acl.User;
 
 interface Identity

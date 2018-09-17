@@ -11,8 +11,8 @@
 
 module hunt.framework.application.middleware;
 
-import hunt.framework.http.request;
-import hunt.framework.http.response;
+import hunt.framework.http.Request;
+import hunt.framework.http.Response;
 
 
 interface MiddlewareInterface

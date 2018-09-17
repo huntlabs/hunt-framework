@@ -12,8 +12,8 @@
 module hunt.framework.application.dispatcher;
 
 import hunt.framework.routing;
-import hunt.framework.http.request;
-import hunt.framework.http.response;
+import hunt.framework.http.Request;
+import hunt.framework.http.Response;
 import hunt.framework.exception;
 
 import hunt.framework.simplify;
@@ -55,7 +55,7 @@ class Dispatcher
             route = this._cached.get(cacheKey, null);
 
             /// init this thread request for error return.
-            hunt.framework.http.request.request(request);
+            hunt.framework.http.Request.request(request);
 
             if (route is null)
             {

@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.framework.http.request;
+module hunt.framework.http.Request;
 
 import std.exception;
 
@@ -31,11 +31,10 @@ import hunt.util.functional;
 
 // import hunt.framework.simplify;
 import hunt.framework.exception;
-import hunt.framework.http.response;
+import hunt.framework.http.Response;
 import hunt.framework.http.session;
 // import hunt.framework.http.cookie;
 import hunt.framework.exception;
-import hunt.framework.http.nullbuffer;
 import hunt.framework.routing.route;
 import hunt.framework.routing.define;
 import hunt.framework.utils.url : percentDecode;
@@ -69,7 +68,7 @@ final class Request
     Action1!ByteBuffer content;
     Action1!Request contentComplete;
     Action1!Request messageComplete;
-    List!(ByteBuffer) requestBody; // = new ArrayList!(ByteBuffer)();
+    List!(ByteBuffer) requestBody;
 
     List!Cookie cookies;
     string stringBody;

@@ -755,7 +755,7 @@ class SessionStorage
 
 Session session()
 {
-	import hunt.framework.http.request;
+	import hunt.framework.http.Request;
 
 	return request().session();
 }
@@ -767,7 +767,7 @@ string session(string key)
 
 void session(string[string] values)
 {
-	import hunt.framework.http.request;
+	import hunt.framework.http.Request;
 	
 	foreach (key, value; values)
 	{

@@ -13,8 +13,8 @@ module hunt.framework.application.controller;
 
 import hunt.logging;
 
-public import hunt.framework.http.response;
-public import hunt.framework.http.request;
+public import hunt.framework.http.Response;
+public import hunt.framework.http.Request;
 public import hunt.framework.routing;
 public import hunt.framework.application.middleware;
 

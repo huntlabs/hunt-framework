@@ -48,7 +48,7 @@ class Router
         {
             if (group is null)
             {
-                import hunt.framework.http.request;
+                import hunt.framework.http.Request;
 
                 group = request().route.getGroup();
             }

@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.framework.http.response;
+module hunt.framework.http.Response;
 
 import std.conv;
 import std.datetime;
@@ -31,7 +31,7 @@ import hunt.logging;
 import hunt.util.common;
 import hunt.util.exception;
 
-import hunt.framework.http.request;
+import hunt.framework.http.Request;
 // import hunt.framework.http.cookie;
 import hunt.framework.utils.string;
 import hunt.framework.versions;
@@ -106,15 +106,40 @@ class Response : Closeable
         return this;
     }
 
-    Response setHeader(T = string)(HttpHeader header, T value)
+    Response setHeader(T)(HttpHeader header, T value)
     {
         getFields().put(header, value);
         return this;
     }
 
-    Response addHeader(T = string)(HttpHeader key, T value)
+    Response header(T)(string header, T value)
     {
-        getFields().add(name, value);
+        getFields().put(header, value);
+        return this;
+    }
+
+    Response header(T)(HttpHeader header, T value)
+    {
+        getFields().put(header, value);
+        return this;
+    }
+
+    Response addHeader(T = string)(string header, T value)
+    {
+        getFields().add(header, value);
+        return this;
+    }
+
+    Response addHeader(T = string)(HttpHeader header, T value)
+    {
+        getFields().add(header, value);
+        return this;
+    }
+
+    Response withHeaders(T = string)(T[string] headers)
+    {
+        foreach(string k, T v; headers)
+            getFields().add(k, v);
         return this;
     }
 
@@ -131,7 +156,6 @@ class Response : Closeable
     // ditto
     Response setContent(const(ubyte)[] content)
     {
-        // setBody(cast(ubyte[]) content);
         getOutputStream().write(cast(byte[])content, 0, cast(int)content.length);
 
         return this;
@@ -157,7 +181,7 @@ class Response : Closeable
     //     return _body.allData.data();
     // }
 
-    // ///set http status code eg. 404 200
+    ///set http status code eg. 404 200
     Response setStatus(int status)
     {
         response.setStatus(status);
