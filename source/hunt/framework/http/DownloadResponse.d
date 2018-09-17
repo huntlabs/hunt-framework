@@ -20,6 +20,7 @@ import hunt.framework.application.config;
 import hunt.framework.utils.string;
 import hunt.framework.versions;
 import hunt.framework.http.Response;
+import hunt.framework.http.Request;
 
 import hunt.http.codec.http.model.HttpHeader;
 
@@ -30,9 +31,9 @@ class DownloadResponse : Response
 {
     private string fileName;
 
-    this(string fileName, string contentType = OctetStreamContentType)
+    this(Request request, string fileName, string contentType = OctetStreamContentType)
     {
-        super();
+        super(request);
         
         setHeader(HttpHeader.CONTENT_TYPE, contentType);
         this.fileName = fileName;

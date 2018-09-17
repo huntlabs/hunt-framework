@@ -65,7 +65,7 @@ class Dispatcher
 
                 if (route is null)
                 {
-                    auto response = request.getResponse();
+                    auto response = new Response(request);
                     response.do404();
                     // response.connectionClose();
                     response.done();
@@ -94,7 +94,7 @@ class Dispatcher
 
             if (!accessFilter(request))
             {
-                auto response = request.getResponse();
+                auto response = new Response(request);
                 response.do403("no permiss to access: " ~ request.route.getController() ~ "." ~ request.route.getAction());
                 // response.connectionClose();
                 response.done();
@@ -201,7 +201,7 @@ void doRequestHandle(HandleFunction handle, Request req)
     {
         response = handle(req);
         if (response is null)
-            response = req.getResponse;
+            response = new Response(req);
     }
     catch (CreateResponseException e)
     {
@@ -210,7 +210,7 @@ void doRequestHandle(HandleFunction handle, Request req)
     catch (Exception e)
     {
         collectException(error(e.toString));
-        response = req.getResponse;
+        response = new Response(req);
         response.setStatus(502);
         response.setContent(e.toString());
         // response.connectionClose();

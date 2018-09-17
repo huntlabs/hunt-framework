@@ -47,23 +47,31 @@ enum OctetStreamContentType = "binary/octet-stream";
 class Response : Closeable
 {
 	protected HttpResponse response;
-    // protected Request _request;
+    protected Request _request;
     HttpOutputStream output;
     HttpURI uri;
     BufferedOutputStream bufferedOutputStream;
     int bufferSize = 8 * 1024;
 
-    this()
-    {
-        // super();
+    // this()
+    // {
+    //     // super();
+    // }
+
+    this(Request request, int bufferSize = 8 * 1024) {
+        initialize(request, bufferSize);
+        
+        this.response.setStatus(HttpStatus.OK_200);
+        this.response.setHttpVersion(HttpVersion.HTTP_1_1);
+
     }
 
-    this(HttpResponse response, HttpOutputStream output, HttpURI uri, int bufferSize = 8 * 1024) {
-        this.output = output;
-        this.response = response;
-        this.uri = uri;
-        this.bufferSize = bufferSize;
-    }
+    // this(HttpResponse response, HttpOutputStream output, HttpURI uri, int bufferSize = 8 * 1024) {
+    //     this.output = output;
+    //     this.response = response;
+    //     this.uri = uri;
+    //     this.bufferSize = bufferSize;
+    // }
 
     // this(string content, int status = HttpStatus.OK_200, string[string] headers = null )
     // {
@@ -90,11 +98,34 @@ class Response : Closeable
 		return response;
 	}
 
-    Response setHttpResponse(HttpResponse handler)
-    {
-        response = handler;
-        return this;
+    void setRequest(Request request, bool isFore = false) {
+        assert(request !is null);
+        if(isFore) 
+            initialize(request);
+        else if(_request is null)
+            initialize(request);
     }
+
+    private void initialize(Request request, int bufferSize = 8 * 1024) {
+        this._request = request;
+        this.output = request.outputStream;
+        this.response = request.getResponse();
+        this.uri = request.getURI();
+        this.bufferSize = bufferSize;
+        _isInitilized = true;
+    }
+    private bool _isInitilized = false;
+
+    private void validateHandler() {
+        if(_request is null)
+            throw new Exception("The request handler is null!");
+    }
+
+    // Response setHttpResponse(HttpResponse handler)
+    // {
+    //     response = handler;
+    //     return this;
+    // }
 
     HttpFields getFields() {
         return response.getFields();

@@ -13,6 +13,7 @@ import hunt.logging;
 import hunt.framework.utils.string;
 import hunt.framework.versions;
 import hunt.framework.http.Response;
+import hunt.framework.http.Request;
 
 import hunt.http.codec.http.model.HttpHeader;
 
@@ -28,20 +29,20 @@ import hunt.http.codec.http.model.HttpHeader;
  */
 class JsonResponse : Response
 {
-    this(string contentType = JsonContentType)
+    this(Request request, string contentType = JsonContentType)
     {
-        super();
+        super(request);
         setHeader(HttpHeader.CONTENT_TYPE, contentType);
     }
 
-    this(JSONValue data, string contentType = JsonContentType)
+    this(Request request, JSONValue data, string contentType = JsonContentType)
     {
-        this(data.toString(), contentType);
+        this(request, data.toString(), contentType);
     }
 
-    this(string data, string contentType = JsonContentType)
+    this(Request request, string data, string contentType = JsonContentType)
     {
-        super();
+        super(request);
         setHeader(HttpHeader.CONTENT_TYPE, contentType);
         setContent(data);
     }

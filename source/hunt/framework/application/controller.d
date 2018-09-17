@@ -54,7 +54,7 @@ abstract class Controller
     final @property Response response()
     {
         if (_response is null)
-            _response = request.getResponse();
+            _response = new Response(request);
         return _response;
     }
 

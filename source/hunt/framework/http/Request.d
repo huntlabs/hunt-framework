@@ -31,7 +31,7 @@ import hunt.util.functional;
 
 // import hunt.framework.simplify;
 import hunt.framework.exception;
-import hunt.framework.http.Response;
+// import hunt.framework.http.Response;
 import hunt.framework.http.session;
 // import hunt.framework.http.cookie;
 import hunt.framework.exception;
@@ -62,7 +62,8 @@ alias Closure = RequestEventHandler;
 final class Request 
 {
     HttpRequest request;
-    Response response;
+    HttpResponse response;
+	HttpOutputStream outputStream;
 	
 	HttpConnection _connection;
     Action1!ByteBuffer content;
@@ -91,9 +92,11 @@ final class Request
 						 int bufferSize = 8 * 1024) {
         requestBody = new ArrayList!(ByteBuffer)();
         this.request = request;
-        response.setStatus(HttpStatus.OK_200);
-        response.setHttpVersion(HttpVersion.HTTP_1_1);
-        this.response = new Response(response, output, request.getURI(), bufferSize);
+        // response.setStatus(HttpStatus.OK_200);
+        // response.setHttpVersion(HttpVersion.HTTP_1_1);
+		this.outputStream = output;
+		this.response = response;
+        // this.response = new Response(response, output, request.getURI(), bufferSize);
         this._connection = connection;
     }
 
@@ -120,10 +123,6 @@ final class Request
 	// 	return _form;
 	// }
 
-	// @property HttpMessage Header()
-	// {
-	// 	return _httpMessage;
-	// }
 
 	// @property Buffer Body()
 	// {
@@ -297,7 +296,7 @@ final class Request
 	}
 
 
-    Response getResponse() {
+    HttpResponse getResponse() {
         return response;
     }
 
@@ -314,11 +313,6 @@ final class Request
 	// 	return _res;
 	// }
 
-	// @property void response(Response r)
-	// {
-	// 	r.dataHandler = _downstream;
-	// 	_res = r;
-	// }
 
 	@property void action(string value)
 	{
@@ -1595,7 +1589,7 @@ private:
 	ubyte[] _uBody;
 	// HttpMessage _httpMessage;
 	// HTTPForm _form;
-	Response _res;
+	// Response _res;
 	// HTTPErrorCode _error = HTTPErrorCode.NO_ERROR;
 	// CreatorBuffer _creatorBuffer;
 	uint _maxBodySize;

@@ -28,9 +28,9 @@ class RedirectResponse : Response
 {
     protected Session _session;
 
-    this(string targetUrl, bool use301 = false)
+    this(Request request, string targetUrl, bool use301 = false)
     {
-        super();
+        super(request);
 
         setStatus((use301 ? 301 : 302));
         setHeader(HttpHeader.LOCATION, targetUrl);
