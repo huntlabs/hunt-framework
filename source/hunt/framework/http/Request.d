@@ -12,6 +12,7 @@
 module hunt.framework.http.Request;
 
 import hunt.http.codec.http.model;
+
 // import hunt.http.codec.http.stream;
 import hunt.http.codec.http.stream.HttpConnection;
 import hunt.http.codec.http.stream.HttpOutputStream;
@@ -40,24 +41,22 @@ import std.regex;
 import std.string;
 import std.socket : Address;
 
-
 alias RequestEventHandler = void delegate(Request sender);
 alias Closure = RequestEventHandler;
 
-final class Request 
-{
-    private HttpRequest _request;
-    private HttpResponse _response;
+final class Request {
+	private HttpRequest _request;
+	private HttpResponse _response;
 	package(hunt.framework.http) HttpOutputStream outputStream;
-	
-	HttpConnection _connection;
-    Action1!ByteBuffer content;
-    Action1!Request contentComplete;
-    Action1!Request messageComplete;
-    List!(ByteBuffer) requestBody;
 
-    private Cookie[] cookies;
-    string stringBody;
+	HttpConnection _connection;
+	Action1!ByteBuffer content;
+	Action1!Request contentComplete;
+	Action1!Request messageComplete;
+	List!(ByteBuffer) requestBody;
+
+	private Cookie[] _cookies;
+	string stringBody;
 
 	RequestEventHandler routeResolver;
 	RequestEventHandler userResolver;
@@ -65,18 +64,17 @@ final class Request
 	protected Session _session;
 	protected string _sessionId;
 
-
 	this(HttpRequest request, HttpResponse response, HttpOutputStream output,
-		HttpConnection connection, int bufferSize = 8 * 1024) {
-        requestBody = new ArrayList!(ByteBuffer)();
-        this._request = request;
+			HttpConnection connection) {
+		requestBody = new ArrayList!(ByteBuffer)();
+		this._request = request;
 		this.outputStream = output;
 		this._response = response;
-        this._connection = connection;
-        // response.setStatus(HttpStatus.OK_200);
-        // response.setHttpVersion(HttpVersion.HTTP_1_1);
-        // this._response = new Response(response, output, request.getURI(), bufferSize);
-    }
+		this._connection = connection;
+		// response.setStatus(HttpStatus.OK_200);
+		// response.setHttpVersion(HttpVersion.HTTP_1_1);
+		// this._response = new Response(response, output, request.getURI(), bufferSize);
+	}
 
 	// alias _request this;
 
@@ -84,55 +82,46 @@ final class Request
 		return _request.getURI();
 	}
 
-    HttpFields getFields() {
-        return _request.getFields();
-    }
+	HttpFields getFields() {
+		return _request.getFields();
+	}
 
-	string sessionId()
-	{
+	string sessionId() {
 		return this._sessionId;
 	}
 
 	/**
      * Custom parameters.
      */
-	@property string[string] mate()
-	{
+	@property string[string] mate() {
 		return _mate;
 	}
 
-	string getMate(string key, string value = null)
-	{
+	string getMate(string key, string value = null) {
 		return _mate.get(key, value);
 	}
 
-	void addMate(string key, string value)
-	{
+	void addMate(string key, string value) {
 		_mate[key] = value;
 	}
 
-	@property string host()
-	{
+	@property string host() {
 		return header(HttpHeader.HOST);
 	}
 
-	string header(HttpHeader code)
-	{
+	string header(HttpHeader code) {
 		return getFields().get(code);
 	}
 
-	string header(string key)
-	{
+	string header(string key) {
 		return getFields().get(key);
 	}
 
-	bool headerExists(HttpHeader code)
-	{
+	bool headerExists(HttpHeader code) {
 		return getFields().contains(code);
 	}
 
-	bool headerExists(string key)
-	{
+	bool headerExists(string key) {
 		return getFields().containsKey(key);
 	}
 
@@ -156,31 +145,26 @@ final class Request
 	// 	return getFields().forEachValueOfHeader(code, func);
 	// }
 
-	@property string referer()
-	{
+	@property string referer() {
 		string rf = header("Referer");
 		string[] rfarr = split(rf, ", ");
-		if (rfarr.length)
-		{
+		if (rfarr.length) {
 			return rfarr[0];
 		}
 		return "";
 	}
 
-	@property Address clientAddress()
-	{
+	@property Address clientAddress() {
 		return _connection.getLocalAddress();
 	}
 
-	@property JSONValue json()
-	{
+	@property JSONValue json() {
 		if (_json == JSONValue.init)
 			_json = parseJSON(getStringBody());
 		return _json;
 	}
 
-	T json(T = string)(string key, T defaults = T.init)
-	{
+	T json(T = string)(string key, T defaults = T.init) {
 		import std.traits;
 
 		auto obj = (key in (json().objectNoRef));
@@ -193,83 +177,72 @@ final class Request
 			return (*obj).str;
 		else static if (is(FloatingPointTypeOf!T X))
 			return cast(T)((*obj).floating);
-		else static if (is(T == bool))
-		{
+		else static if (is(T == bool)) {
 			if (obj.type == JSON_TYPE.TRUE)
 				return true;
 			else if (obj.type == JSON_TYPE.FALSE)
 				return false;
-			else
-			{
+			else {
 				throw new Exception("json error");
 				return false;
 			}
 		}
-		else
-		{
+		else {
 			return (*obj);
 		}
 	}
-	
+
 	///get queries
-	@property string[string] queries()
-	{
+	@property string[string] queries() {
 		return _queryParams;
 	}
-	private string[string] _queryParams;
 
+	private string[string] _queryParams;
 
 	/**
    * Sets the query parameter with the specified name to the specified value.
    *
    * Returns true if the query parameter was successfully set.
    */
-	void setQueryParameter(string name, string value)
-	{
+	void setQueryParameter(string name, string value) {
 		// parseQueryParams();
 		auto keyPtr = name in _queryParams;
-		if(keyPtr !is null)
+		if (keyPtr !is null)
 			logWarningf("A query is rewritten: %s", name);
 		_queryParams[name] = value;
 	}
 
 	/// get a query
-	T get(T = string)(string key, T v = T.init)
-	{
+	T get(T = string)(string key, T v = T.init) {
 		auto tmp = _queryParams;
-		if (tmp is null)
-		{
+		if (tmp is null) {
 			return v;
 		}
 		auto _v = tmp.get(key, "");
-		if (_v.length)
-		{
+		if (_v.length) {
 			return to!T(_v);
 		}
 		return v;
 	}
 
-	@property ref string[string] materef()
-	{
+	@property ref string[string] materef() {
 		return _mate;
 	}
 
+	HttpResponse getResponse() {
+		return _response;
+	}
 
-    HttpResponse getResponse() {
-        return _response;
-    }
-
-
-    string getStringBody() {
-        if (stringBody is null) {
-            Appender!string buffer;
-            foreach(ByteBuffer b; requestBody) {
-                buffer.put(cast(string)b.array);
-            }
-            stringBody = buffer.data;
-        } 
-        return stringBody;
-    }
+	string getStringBody() {
+		if (stringBody is null) {
+			Appender!string buffer;
+			foreach (ByteBuffer b; requestBody) {
+				buffer.put(cast(string) b.array);
+			}
+			stringBody = buffer.data;
+		}
+		return stringBody;
+	}
 
 	// Response createResponse()
 	// {
@@ -283,25 +256,20 @@ final class Request
 	// 	return _res;
 	// }
 
-
-	@property void action(string value)
-	{
+	@property void action(string value) {
 		_action = value;
 	}
 
-	@property string action()
-	{
+	@property string action() {
 		return _action;
 	}
 
-	@property bool isJson()
-	{
+	@property bool isJson() {
 		string s = this.header(HttpHeader.CONTENT_TYPE);
 		return canFind(s, "/json") || canFind(s, "+json");
 	}
 
-	@property bool expectsJson()
-	{
+	@property bool expectsJson() {
 		return (this.ajax && !this.pjax) || this.wantsJson();
 	}
 
@@ -310,10 +278,8 @@ final class Request
      *
      * @return array List of content types in preferable order
      */
-	public string[] getAcceptableContentTypes()
-	{
-		if (acceptableContentTypes is null)
-		{
+	public string[] getAcceptableContentTypes() {
+		if (acceptableContentTypes is null) {
 			acceptableContentTypes = getFields().getValuesList("Accept");
 		}
 
@@ -322,38 +288,32 @@ final class Request
 
 	protected string[] acceptableContentTypes = null;
 
-	@property bool wantsJson()
-	{
+	@property bool wantsJson() {
 		string[] acceptable = getAcceptableContentTypes();
 		if (acceptable is null)
 			return false;
 		return canFind(acceptable[0], "/json") || canFind(acceptable[0], "+json");
 	}
 
-	private static bool isContained(string source, string[] keys)
-	{
-		foreach (string k; keys)
-		{
+	private static bool isContained(string source, string[] keys) {
+		foreach (string k; keys) {
 			if (canFind(source, k))
 				return true;
 		}
 		return false;
 	}
 
-	@property bool accepts(string[] contentTypes)
-	{
+	@property bool accepts(string[] contentTypes) {
 		string[] acceptTypes = getAcceptableContentTypes();
 		if (acceptTypes is null)
 			return true;
 
 		string[] types = contentTypes;
-		foreach (string accept; acceptTypes)
-		{
+		foreach (string accept; acceptTypes) {
 			if (accept == "*/*" || accept == "*")
 				return true;
 
-			foreach (string type; types)
-			{
+			foreach (string type; types) {
 				size_t index = indexOf(type, "/");
 				string name = type[0 .. index] ~ "/*";
 				if (matchesType(accept, type) || accept == name)
@@ -363,10 +323,8 @@ final class Request
 		return false;
 	}
 
-	static bool matchesType(string actual, string type)
-	{
-		if (actual == type)
-		{
+	static bool matchesType(string actual, string type) {
+		if (actual == type) {
 			return true;
 		}
 
@@ -377,17 +335,14 @@ final class Request
 		return split.length >= 2; // && preg_match('#'.preg_quote(split[0], '#').'/.+\+'.preg_quote(split[1], '#').'#', type);
 	}
 
-	@property string prefers(string[] contentTypes)
-	{
+	@property string prefers(string[] contentTypes) {
 		string[] acceptTypes = getAcceptableContentTypes();
 
-		foreach (string accept; acceptTypes)
-		{
+		foreach (string accept; acceptTypes) {
 			if (accept == "*/*" || accept == "*")
 				return acceptTypes[0];
 
-			foreach (string contentType; contentTypes)
-			{
+			foreach (string contentType; contentTypes) {
 				string type = contentType;
 				string mimeType = getMimeType(contentType);
 				if (!mimeType.empty)
@@ -409,24 +364,22 @@ final class Request
      *
      * @return string The associated mime type (null if not found)
      */
-	string getMimeType(string format)
-	{
+	string getMimeType(string format) {
 		string[] r = getMimeTypes(format);
-		if(r is null)
+		if (r is null)
 			return null;
 		else
 			return r[0];
 	}
 
-    /**
+	/**
      * Gets the mime types associated with the format.
      *
      * @param stringformat The format
      *
      * @return array The associated mime types
      */
-	string[] getMimeTypes(string format)
-	{
+	string[] getMimeTypes(string format) {
 		return formats.get(format, null);
 	}
 
@@ -437,14 +390,12 @@ final class Request
      *
      * @return string|null The format (null if not found)
      */
-	string getFormat(string mimeType)
-	{
+	string getFormat(string mimeType) {
 		string canonicalMimeType = "";
 		ptrdiff_t index = indexOf(mimeType, ";");
 		if (index >= 0)
 			canonicalMimeType = mimeType[0 .. index];
-		foreach (string key, string[] value; formats)
-		{
+		foreach (string key, string[] value; formats) {
 			if (canFind(value, mimeType))
 				return key;
 			if (!canonicalMimeType.empty && canFind(canonicalMimeType, mimeType))
@@ -460,8 +411,7 @@ final class Request
      * @param string      format    The format
      * @param string|arraymimeTypes The associated mime types (the preferred one must be the first as it will be used as the content type)
      */
-	void setFormat(string format, string[] mimeTypes)
-	{
+	void setFormat(string format, string[] mimeTypes) {
 		formats[format] = mimeTypes;
 	}
 
@@ -478,8 +428,7 @@ final class Request
      *
      * @return string The request format
      */
-	string getRequestFormat(string defaults = "html")
-	{
+	string getRequestFormat(string defaults = "html") {
 		if (_format.empty)
 			_format = this.mate.get("_format", null);
 
@@ -491,8 +440,7 @@ final class Request
      *
      * @param stringformat The request format
      */
-	void setRequestFormat(string format)
-	{
+	void setRequestFormat(string format) {
 		_format = format;
 	}
 
@@ -503,30 +451,25 @@ final class Request
      *
      * @return bool
      */
-	@property bool acceptsAnyContentType()
-	{
+	@property bool acceptsAnyContentType() {
 		string[] acceptable = getAcceptableContentTypes();
 
 		return acceptable.length == 0 || (acceptable[0] == "*/*" || acceptable[0] == "*");
 
 	}
 
-	@property bool acceptsJson()
-	{
+	@property bool acceptsJson() {
 		return accepts(["application/json"]);
 	}
 
-	@property bool acceptsHtml()
-	{
+	@property bool acceptsHtml() {
 		return accepts(["text/html"]);
 	}
 
-	string format(string defaults = "html")
-	{
+	string format(string defaults = "html") {
 		string[] acceptTypes = getAcceptableContentTypes();
 
-		foreach (string type; acceptTypes)
-		{
+		foreach (string type; acceptTypes) {
 			string r = getFormat(type);
 			if (!r.empty)
 				return r;
@@ -552,14 +495,12 @@ final class Request
 	// 	return this.hasSession() ? this.session().getOldInput(key, defaults) : defaults;
 	// }
 
-
 	/**
      * Flash the input for the current request to the session.
      *
      * @return void
      */
-	public void flash()
-	{
+	public void flash() {
 		this.session().flashInput(this.input());
 	}
 
@@ -569,8 +510,7 @@ final class Request
      * @param  array|mixed  keys
      * @return void
      */
-	public void flashOnly(string[] keys)
-	{
+	public void flashOnly(string[] keys) {
 		this.session().flashInput(this.only(keys));
 	}
 
@@ -580,8 +520,7 @@ final class Request
      * @param  array|mixed  keys
      * @return void
      */
-	public void flashExcept(string[] keys)
-	{
+	public void flashExcept(string[] keys) {
 		this.session().flashInput(this.only(keys));
 	}
 
@@ -590,8 +529,7 @@ final class Request
      *
      * @return void
      */
-	void flush()
-	{
+	void flush() {
 		this.session().flashInput(null);
 	}
 
@@ -600,12 +538,10 @@ final class Request
      *
      * @return Session|null The session
      */
-	@property Session session()
-	{
-		if (!hasSession())
-		{
+	@property Session session() {
+		if (!hasSession()) {
 			implementationMissing(false);
-			
+
 			// string sessionId = this.cookie("hunt_session");
 			// if (sessionId.empty)
 			// {
@@ -620,8 +556,7 @@ final class Request
 		return _session;
 	}
 
-	@property void session(Session session)
-	{
+	@property void session(Session session) {
 		this._session = session;
 	}
 
@@ -634,13 +569,11 @@ final class Request
      *
      * @return bool true when the Request contains a Session object, false otherwise
      */
-	bool hasSession()
-	{
+	bool hasSession() {
 		return _session !is null;
 	}
 
-	string[] server(string key = null, string[] defaults = null)
-	{
+	string[] server(string key = null, string[] defaults = null) {
 		throw new NotImplementedException("server");
 	}
 
@@ -650,8 +583,7 @@ final class Request
      * @param  string key
      * @return bool
      */
-	bool hasHeader(string key)
-	{
+	bool hasHeader(string key) {
 		return getFields().containsKey(key);
 	}
 
@@ -662,8 +594,7 @@ final class Request
      * @param  string|array|null default
      * @return string|array
      */
-	string[] header(string key = null, string[] defaults = null)
-	{
+	string[] header(string key = null, string[] defaults = null) {
 		string[] r = getFields().getValuesList(key);
 		if (r is null)
 			return defaults;
@@ -672,8 +603,7 @@ final class Request
 	}
 
 	// ditto
-	string header(string key = null, string defaults = null)
-	{
+	string header(string key = null, string defaults = null) {
 		string r = getFields().get(key);
 		if (r is null)
 			return defaults;
@@ -686,8 +616,7 @@ final class Request
      *
      * @return string|null
      */
-	string bearerToken()
-	{
+	string bearerToken() {
 		string v = header("Authorization", "");
 		if (startsWith(v, "Bearer ") >= 0)
 			return v[7 .. $];
@@ -700,8 +629,7 @@ final class Request
      * @param  string|array key
      * @return bool
      */
-	bool exists(string key)
-	{
+	bool exists(string key) {
 		return has([key]);
 	}
 
@@ -711,11 +639,9 @@ final class Request
      * @param  string|array  key
      * @return bool
      */
-	bool has(string[] keys)
-	{
+	bool has(string[] keys) {
 		string[string] dict = this.all();
-		foreach (string k; keys)
-		{
+		foreach (string k; keys) {
 			string* p = (k in dict);
 			if (p is null)
 				return false;
@@ -729,11 +655,9 @@ final class Request
      * @param  dynamic  key
      * @return bool
      */
-	bool hasAny(string[] keys...)
-	{
+	bool hasAny(string[] keys...) {
 		string[string] dict = this.all();
-		foreach (string k; keys)
-		{
+		foreach (string k; keys) {
 			string* p = (k in dict);
 			if (p is null)
 				return true;
@@ -747,10 +671,8 @@ final class Request
      * @param  string|array  key
      * @return bool
      */
-	bool filled(string[] keys)
-	{
-		foreach (string k; keys)
-		{
+	bool filled(string[] keys) {
+		foreach (string k; keys) {
 			if (k.empty)
 				return false;
 		}
@@ -763,8 +685,7 @@ final class Request
      *
      * @return array
      */
-	string[] keys()
-	{
+	string[] keys() {
 		// return this.input().keys ~ this.httpForm.fileKeys();
 		implementationMissing(false);
 		return this.input().keys;
@@ -776,11 +697,9 @@ final class Request
      * @param  array|mixed  keys
      * @return array
      */
-	string[string] all(string[] keys = null)
-	{
+	string[string] all(string[] keys = null) {
 		string[string] inputs = this.input();
-		if (keys is null)
-		{
+		if (keys is null) {
 			// HttpForm.FormFile[string]  files = this.allFiles;
 			// foreach(string k; files.byKey)
 			// {
@@ -790,8 +709,7 @@ final class Request
 		}
 
 		string[string] results;
-		foreach (string k; keys)
-		{
+		foreach (string k; keys) {
 			string* v = (k in inputs);
 			if (v !is null)
 				results[k] = *v;
@@ -806,14 +724,12 @@ final class Request
      * @param  string|array|null  default
      * @return string|array
      */
-	string input(string key, string defaults = null)
-	{
+	string input(string key, string defaults = null) {
 		return getInputSource().get(key, defaults);
 	}
 
 	/// ditto
-	string[string] input()
-	{
+	string[string] input() {
 		return getInputSource();
 	}
 
@@ -823,12 +739,10 @@ final class Request
      * @param  array|mixed  keys
      * @return array
      */
-	string[string] only(string[] keys)
-	{
+	string[string] only(string[] keys) {
 		string[string] inputs = this.all();
 		string[string] results;
-		foreach (string k; keys)
-		{
+		foreach (string k; keys) {
 			string* v = (k in inputs);
 			if (v !is null)
 				results[k] = *v;
@@ -843,11 +757,9 @@ final class Request
      * @param  array|mixed  keys
      * @return array
      */
-	string[string] except(string[] keys)
-	{
+	string[string] except(string[] keys) {
 		string[string] results = this.all();
-		foreach (string k; keys)
-		{
+		foreach (string k; keys) {
 			string* v = (k in results);
 			if (v !is null)
 				results.remove(k);
@@ -863,8 +775,7 @@ final class Request
      * @param  string|array|null  default
      * @return string|array
      */
-	string query(string key, string defaults = null)
-	{
+	string query(string key, string defaults = null) {
 		return _queryParams.get(key, defaults);
 	}
 
@@ -876,8 +787,7 @@ final class Request
      *
      * @return string|array
      */
-	T post(T = string)(string key, T v = T.init)
-	{
+	T post(T = string)(string key, T v = T.init) {
 
 		implementationMissing(false);
 		// auto form = postForm();
@@ -910,16 +820,16 @@ final class Request
 	// bool hasCookie(string key)
 	// {
 	// 	// return cookie(key).length > 0;
-	// 	foreach(Cookie c; cookies) {
+	// 	foreach(Cookie c; _cookies) {
 	// 		if(c.getName == key)
 	// 			return true;
 	// 	}
 	// 	return false;
 	// }
-	
+
 	// bool hasCookie()
 	// {
-	// 	return cookies.length > 0;
+	// 	return _cookies.length > 0;
 	// }
 
 	/**
@@ -929,29 +839,28 @@ final class Request
      * @param  string|array|null  default
      * @return string|array
      */
-	string cookie(string key, string defaultValue = null)
-	{
+	string cookie(string key, string defaultValue = null) {
 		// return cookieManager.get(key, defaultValue);
-		foreach(Cookie c; cookies) {
-			if(c.getName == key)
+		foreach (Cookie c; _cookies) {
+			if (c.getName == key)
 				return c.getValue();
 		}
 		return defaultValue;
 	}
 
-
-    Cookie[] getCookies() {
-        if (cookies is null) {
+	Cookie[] getCookies() {
+		if (_cookies is null) {
 			Array!(Cookie) list;
-			foreach(string v; getFields().getValuesList(HttpHeader.COOKIE)) {
-				if(v.empty) continue;
-				foreach(Cookie c; CookieParser.parseCookie(v))
+			foreach (string v; getFields().getValuesList(HttpHeader.COOKIE)) {
+				if (v.empty)
+					continue;
+				foreach (Cookie c; CookieParser.parseCookie(v))
 					list.insertBack(c);
 			}
-			cookies = list.array();
-        }
-        return cookies;
-    }
+			_cookies = list.array();
+		}
+		return _cookies;
+	}
 
 	/**
      * Get an array of all cookies.
@@ -1001,13 +910,11 @@ final class Request
 	// 	return httpForm.getFileValue(key);
 	// }
 
-	@property string method()
-	{
+	@property string method() {
 		return _request.getMethod();
 	}
 
-	@property string url()
-	{
+	@property string url() {
 		return _request.getURIString();
 	}
 
@@ -1021,13 +928,11 @@ final class Request
 	// 	return _httpMessage.url();
 	// }
 
-	@property string path()
-	{
+	@property string path() {
 		return _request.getURI().getPath();
 	}
 
-	@property string decodedPath()
-	{
+	@property string decodedPath() {
 		return _request.getURI().getDecodedPath();
 	}
 
@@ -1036,8 +941,7 @@ final class Request
      *
      * @return string
      */
-	public string getScheme()
-	{
+	public string getScheme() {
 		return isSecure() ? "https" : "http";
 	}
 
@@ -1048,8 +952,7 @@ final class Request
      * @param  string|null  default
      * @return string|null
      */
-	string segment(int index, string defaults = null)
-	{
+	string segment(int index, string defaults = null) {
 		string[] s = segments();
 		if (s.length <= index || index <= 0)
 			return defaults;
@@ -1061,12 +964,10 @@ final class Request
      *
      * @return array
      */
-	string[] segments()
-	{
+	string[] segments() {
 		string[] t = decodedPath().split("/");
 		string[] r;
-		foreach (string v; t)
-		{
+		foreach (string v; t) {
 			if (!v.empty)
 				r ~= v;
 		}
@@ -1079,12 +980,10 @@ final class Request
      * @param  patterns
      * @return bool
      */
-	bool uriIs(string[] patterns...)
-	{
+	bool uriIs(string[] patterns...) {
 		string path = decodedPath();
 
-		foreach (string pattern; patterns)
-		{
+		foreach (string pattern; patterns) {
 			auto s = matchAll(path, regex(pattern));
 			if (!s.empty)
 				return true;
@@ -1098,13 +997,10 @@ final class Request
      * @param  dynamic  patterns
      * @return bool
      */
-	bool routeIs(string[] patterns...)
-	{
-		if (_route !is null)
-		{
+	bool routeIs(string[] patterns...) {
+		if (_route !is null) {
 			string r = _route.getRoute();
-			foreach (string pattern; patterns)
-			{
+			foreach (string pattern; patterns) {
 				auto s = matchAll(r, regex(pattern));
 				if (!s.empty)
 					return true;
@@ -1132,37 +1028,34 @@ final class Request
 	// 	return false;
 	// }
 
-    /**
+	/**
      * Determine if the request is the result of an AJAX call.
      *
      * @return bool
      */
-	@property bool ajax()
-	{
+	@property bool ajax() {
 		return getFields().get("X-Requested-With") == "XMLHttpRequest";
 	}
 
-    /**
+	/**
      * Determine if the request is the result of an PJAX call.
      *
      * @return bool
      */
-	@property bool pjax()
-	{
+	@property bool pjax() {
 		return getFields().containsKey("X-PJAX");
 	}
 
-    /**
+	/**
      * Determine if the request is over HTTPS.
      *
      * @return bool
      */
-	@property bool secure()
-	{
+	@property bool secure() {
 		return isSecure();
 	}
 
-    /**
+	/**
      * Checks whether the request is secure or not.
      *
      * This method can read the client protocol from the "X-Forwarded-Proto" header
@@ -1172,8 +1065,7 @@ final class Request
      *
      * @return bool
      */
-	@property bool isSecure()
-	{
+	@property bool isSecure() {
 		throw new NotImplementedException("isSecure");
 	}
 
@@ -1202,8 +1094,7 @@ final class Request
      *
      * @return string
      */
-	@property string userAgent()
-	{
+	@property string userAgent() {
 		return getFields().get("User-Agent");
 	}
 
@@ -1242,8 +1133,7 @@ final class Request
 	// 	return parseJSON(content);
 	// }
 
-	protected string[string] getInputSource()
-	{
+	protected string[string] getInputSource() {
 		implementationMissing(false);
 		return null;
 		// if (isContained(this.method, ["GET", "HEAD"]))
@@ -1260,14 +1150,12 @@ final class Request
      * @param  string|null guard
      * @return User
      */
-	@property User user()
-	{
+	@property User user() {
 		return this._user;
 	}
 
 	// ditto
-	@property void user(User user)
-	{
+	@property void user(User user) {
 		this._user = user;
 	}
 
@@ -1278,14 +1166,12 @@ final class Request
      *
      * @return Route
      */
-	@property Route route()
-	{
+	@property Route route() {
 		return _route;
 	}
 
 	// ditto
-	@property void route(Route value)
-	{
+	@property void route(Route value) {
 		_route = value;
 	}
 
@@ -1298,7 +1184,7 @@ final class Request
 	// {
 	// 	if(_route is null)
 	// 		throw new Exception("Unable to generate fingerprint. Route unavailable.");
-		
+
 	// 	string[] r ;
 	// 	foreach(HTTP_METHODS m;  _route.getMethods())
 	// 		r ~= to!string(m);
@@ -1314,8 +1200,7 @@ final class Request
      * @param json
      * @returnthis
      */
-	Request setJson(string[string] json)
-	{
+	Request setJson(string[string] json) {
 		_json = JSONValue(json);
 		return this;
 	}
@@ -1325,8 +1210,7 @@ final class Request
      *
      * @return Closure
      */
-	Closure getUserResolver()
-	{
+	Closure getUserResolver() {
 		if (userResolver is null)
 			return (Request) {  };
 
@@ -1339,8 +1223,7 @@ final class Request
      * @param  Closure callback
      * @returnthis
      */
-	Request setUserResolver(Closure callback)
-	{
+	Request setUserResolver(Closure callback) {
 		userResolver = callback;
 		return this;
 	}
@@ -1350,8 +1233,7 @@ final class Request
      *
      * @return Closure
      */
-	public Closure getRouteResolver()
-	{
+	public Closure getRouteResolver() {
 		if (routeResolver is null)
 			return (Request) {  };
 
@@ -1364,8 +1246,7 @@ final class Request
      * @param  Closure callback
      * @returnthis
      */
-	Request setRouteResolver(Closure callback)
-	{
+	Request setRouteResolver(Closure callback) {
 		routeResolver = callback;
 		return this;
 	}
@@ -1375,8 +1256,7 @@ final class Request
      *
      * @return array
      */
-	string[string] toArray()
-	{
+	string[string] toArray() {
 		return this.all();
 	}
 
@@ -1386,8 +1266,7 @@ final class Request
      * @param  string offset
      * @return bool
      */
-	bool offsetExists(string offset)
-	{
+	bool offsetExists(string offset) {
 		string[string] a = this.all();
 		string* p = (offset in a);
 
@@ -1398,8 +1277,7 @@ final class Request
 
 	}
 
-	string offsetGet(string offset)
-	{
+	string offsetGet(string offset) {
 		return __get(offset);
 	}
 
@@ -1410,8 +1288,7 @@ final class Request
      * @param  mixed value
      * @return void
      */
-	void offsetSet(string offset, string value)
-	{
+	void offsetSet(string offset, string value) {
 		string[string] dict = this.getInputSource();
 		dict[offset] = value;
 	}
@@ -1422,8 +1299,7 @@ final class Request
      * @param  string offset
      * @return void
      */
-	void offsetUnset(string offset)
-	{
+	void offsetUnset(string offset) {
 		string[string] dict = this.getInputSource();
 		dict.remove(offset);
 	}
@@ -1434,8 +1310,7 @@ final class Request
      * @param  string  key
      * @return bool
      */
-	protected bool __isset(string key)
-	{
+	protected bool __isset(string key) {
 		string v = __get(key);
 		return !v.empty;
 	}
@@ -1446,13 +1321,11 @@ final class Request
      * @param  string  key
      * @return string
      */
-	protected string __get(string key)
-	{
+	protected string __get(string key) {
 		string[string] a = this.all();
 		string* p = (key in a);
 
-		if (p is null)
-		{
+		if (p is null) {
 			return this.route.getParameter(key);
 		}
 		else
@@ -1470,12 +1343,11 @@ final class Request
      *
      * @return string
      */
-    string getProtocolVersion()
-    {
-        return _request.getHttpVersion().toString();
-    }
+	string getProtocolVersion() {
+		return _request.getHttpVersion().toString();
+	}
 
-    /**
+	/**
      * Indicates whether this request originated from a trusted proxy.
      *
      * This can be useful to determine whether or not to trust the
@@ -1483,17 +1355,15 @@ final class Request
      *
      * @return bool true if the request came from a trusted proxy, false otherwise
      */
-    bool isFromTrustedProxy()
-    {
+	bool isFromTrustedProxy() {
 		implementationMissing(false);
 		return false;
-    }
-	
+	}
 
 private:
 	User _user;
 	Route _route;
-    string _stringBody;
+	string _stringBody;
 	string[string] _mate;
 	// CookieManager _cookieManager;
 	JSONValue _json;
@@ -1501,29 +1371,26 @@ private:
 	string _action;
 }
 
-void setTrustedProxies(string[] proxies, int headerSet)
-{
+void setTrustedProxies(string[] proxies, int headerSet) {
 	trustedProxies = proxies;
 	trustedHeaderSet = headerSet;
 }
 
-package
-{
+package {
 	string[][string] formats;
 	string[] trustedProxies;
 	int trustedHeaderSet;
 
-    const HEADER_FORWARDED = 0b00001; // When using RFC 7239
-    const HEADER_X_FORWARDED_FOR = 0b00010;
-    const HEADER_X_FORWARDED_HOST = 0b00100;
-    const HEADER_X_FORWARDED_PROTO = 0b01000;
-    const HEADER_X_FORWARDED_PORT = 0b10000;
-    const HEADER_X_FORWARDED_ALL = 0b11110; // All "X-Forwarded-*" headers
-    const HEADER_X_FORWARDED_AWS_ELB = 0b11010; // AWS ELB doesn"t send X-Forwarded-Host	
+	const HEADER_FORWARDED = 0b00001; // When using RFC 7239
+	const HEADER_X_FORWARDED_FOR = 0b00010;
+	const HEADER_X_FORWARDED_HOST = 0b00100;
+	const HEADER_X_FORWARDED_PROTO = 0b01000;
+	const HEADER_X_FORWARDED_PORT = 0b10000;
+	const HEADER_X_FORWARDED_ALL = 0b11110; // All "X-Forwarded-*" headers
+	const HEADER_X_FORWARDED_AWS_ELB = 0b11010; // AWS ELB doesn"t send X-Forwarded-Host	
 }
 
-static this()
-{
+static this() {
 	formats["html"] = ["text/html", "application/xhtml+xml"];
 	formats["txt"] = ["text/plain"];
 	formats["js"] = ["application/javascript", "application/x-javascript", "text/javascript"];
@@ -1539,12 +1406,10 @@ static this()
 
 private Request _request;
 
-Request request()
-{
+Request request() {
 	return _request;
 }
 
-void request(Request request)
-{
+void request(Request request) {
 	_request = request;
 }

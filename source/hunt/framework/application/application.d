@@ -50,25 +50,19 @@ public import hunt.entity;
 public import hunt.event;
 public import hunt.event.EventLoopGroup;
 
-
-
-final class Application
-{
-    static Application getInstance() @property 
-    {
-        if(_app is null)
-        {
+final class Application {
+    static Application getInstance() @property {
+        if (_app is null)
             _app = new Application();
-        }
-
         return _app;
     }
 
-    Address binded() { return addr;}
+    Address binded() {
+        return addr;
+    }
 
     // enable i18n
-    Application enableLocale(string resPath = DEFAULT_LANGUAGE_PATH, string defaultLocale = "en-us")
-    {
+    Application enableLocale(string resPath = DEFAULT_LANGUAGE_PATH, string defaultLocale = "en-us") {
         I18n i18n = I18n.instance();
 
         i18n.loadLangResources(resPath);
@@ -82,36 +76,44 @@ final class Application
     //     _wfactory = webfactory;
     // }
 
-    version(NO_TASKPOOL){} else {
-        @property TaskPool taskPool() { return _tpool;}
+    version (NO_TASKPOOL) {
+    }
+    else {
+        @property TaskPool taskPool() {
+            return _tpool;
+        }
     }
 
     /// get the router.
-    @property Router router()
-    {
+    @property Router router() {
         return this._dispatcher.router();
     }
 
-    @property HttpServer server() {return _server;}
+    @property HttpServer server() {
+        return _server;
+    }
 
-    @property EventLoop mainLoop() { return _server.eventLoop;}
+    @property EventLoop mainLoop() {
+        return _server.eventLoop;
+    }
 
-    @property EventLoopGroup loopGroup() { return NetUtil.defaultEventLoopGroup();}
+    @property EventLoopGroup loopGroup() {
+        return NetUtil.defaultEventLoopGroup();
+    }
 
-    @property AppConfig config(){return Config.app;}
+    @property AppConfig config() {
+        return Config.app;
+    }
 
-    private void initDatabase(AppConfig.DatabaseConf config)
-    {
-        if(config.defaultOptions.url.empty)
-        {
+    private void initDatabase(AppConfig.DatabaseConf config) {
+        if (config.defaultOptions.url.empty) {
             logWarning("No database configured!");
         }
-        else
-        {
+        else {
             import hunt.entity.EntityOption;
 
             auto option = new EntityOption;
-            
+
             // database options
             option.database.driver = config.defaultOptions.driver;
             option.database.host = config.defaultOptions.host;
@@ -121,7 +123,7 @@ final class Application
             option.database.database = config.defaultOptions.database;
             option.database.charset = config.defaultOptions.charset;
             option.database.prefix = config.defaultOptions.prefix;
-            
+
             // database pool options
             option.pool.minIdle = config.pool.minIdle;
             option.pool.idleTimeout = config.pool.idleTimeout;
@@ -133,87 +135,76 @@ final class Application
             option.pool.minConnection = config.pool.minConnection;
 
             _entityManagerFactory = Persistence.createEntityManagerFactory("default", option);
-            
+
         }
     }
 
-    private void initCache(AppConfig.CacheConf config)
-    {
-		_manger.createCache("default" , config.storage , config.args , config.enableL2);
-	}
-    
-    private void initSessionStorage(AppConfig.SessionConf config)
-    {
-		_sessionStorage = new SessionStorage(UCache.CreateUCache(config.storage , config.args , false));
-      
-		_sessionStorage.setPrefix(config.prefix);
-        _sessionStorage.setExpire(config.expire);
-
-		// writeln(" initSessionStorage " ,_sessionStorage);
+    private void initCache(AppConfig.CacheConf config) {
+        _manger.createCache("default", config.storage, config.args, config.enableL2);
     }
 
-    EntityManagerFactory entityManagerFactory()
-    {
+    private void initSessionStorage(AppConfig.SessionConf config) {
+        _sessionStorage = new SessionStorage(UCache.CreateUCache(config.storage,
+                config.args, false));
+
+        _sessionStorage.setPrefix(config.prefix);
+        _sessionStorage.setExpire(config.expire);
+
+        // writeln(" initSessionStorage " ,_sessionStorage);
+    }
+
+    EntityManagerFactory entityManagerFactory() {
         return _entityManagerFactory;
     }
 
-	CacheManger cacheManger()
-	{
-		return _manger;
-	}
-	
-	SessionStorage sessionStorage()
-	{
-		// writeln(" getSessionStorage " , _sessionStorage);
-		return _sessionStorage;
-	}
-	
-	UCache cache()
-	{
-		return  _manger.getCache("default");
+    CacheManger cacheManger() {
+        return _manger;
+    }
 
-	}
+    SessionStorage sessionStorage() {
+        // writeln(" getSessionStorage " , _sessionStorage);
+        return _sessionStorage;
+    }
 
-	AccessManager accessManager()
-	{
-		return _accessManager;
-	}
+    UCache cache() {
+        return _manger.getCache("default");
+    }
+
+    AccessManager accessManager() {
+        return _accessManager;
+    }
 
     /**
       Start the HTTPServer server , and block current thread.
      */
-    void run()
-	{
-		start();
-	}
+    void run() {
+        start();
+    }
 
-	void setConfig(AppConfig config)
-	{
-		setLogConfig(config.logging);
-		upConfig(config);
-		//setRedis(config.redis);
-		//setMemcache(config.memcache);
+    void setConfig(AppConfig config) {
+        setLogConfig(config.logging);
+        upConfig(config);
+        //setRedis(config.redis);
+        //setMemcache(config.memcache);
 
-        if(config.database.defaultOptions.enabled)
+        if (config.database.defaultOptions.enabled)
             initDatabase(config.database);
-		initCache(config.cache);
-		initSessionStorage(config.session);
-	}
+        initCache(config.cache);
+        initSessionStorage(config.session);
+    }
 
-	void start()
-	{
-        if(_server.getHttp2Configuration.isSecureConnectionEnabled())
-		    writeln("Try to browse https://",addr.toString());
+    void start() {
+        if (_server.getHttp2Configuration.isSecureConnectionEnabled())
+            writeln("Try to browse https://", addr.toString());
         else
-		    writeln("Try to browse http://",addr.toString());
-		_server.start();
-	}
+            writeln("Try to browse http://", addr.toString());
+        _server.start();
+    }
 
     /**
       Stop the server.
      */
-    void stop()
-    {
+    void stop() {
         _server.stop();
     }
 
@@ -226,9 +217,8 @@ final class Application
         this._webSocketPolicy = w;
         return this;
     }
-    
-    private void handleRequest(Request req) nothrow
-    {
+
+    private void handleRequest(Request req) nothrow {
         this._dispatcher.dispatch(req);
     }
 
@@ -241,8 +231,8 @@ final class Application
     private ServerHttpHandlerAdapter buildHttpHandlerAdapter() {
         ServerHttpHandlerAdapter adapter = new ServerHttpHandlerAdapter();
         adapter.acceptConnection((HttpConnection c) {
-            version(HuntDebugMode)
-            logDebugf("new request from: %s", c.getRemoteAddress.toString());
+            version (HuntDebugMode)
+                logDebugf("new request from: %s", c.getRemoteAddress.toString());
 
             // }).acceptHttpTunnelConnection((request, response, ot, connection) {
             //     Request r = new Request(request, response, ot, cast(HttpConnection)connection);
@@ -251,21 +241,22 @@ final class Application
             //         tunnel(r, connection);
             //     }
             //     return true;
-            }).headerComplete((request, response, ot, connection) {
-                Request r = new Request(request, response, ot, connection);
-                request.setAttachment(r);
-                if (_headerComplete != null) {
-                    _headerComplete(r);
-                }
-                return false;
-            }).content((buffer, request, response, ot, connection) {
-                Request r = cast(Request) request.getAttachment();
-                if (r.content !is null) {
-                    r.content(buffer);
-                } else {
-                    r.requestBody.add(buffer);
-                }
-                return false;
+        }).headerComplete((request, response, ot, connection) {
+            Request r = new Request(request, response, ot, connection);
+            request.setAttachment(r);
+            if (_headerComplete != null) {
+                _headerComplete(r);
+            }
+            return false;
+        }).content((buffer, request, response, ot, connection) {
+            Request r = cast(Request) request.getAttachment();
+            if (r.content !is null) {
+                r.content(buffer);
+            }
+            else {
+                r.requestBody.add(buffer);
+            }
+            return false;
             // }).contentComplete((request, response, ot, connection)  {
             //     Request r = cast(Request) request.getAttachment();
             //     if (r.contentComplete !is null) {
@@ -273,52 +264,54 @@ final class Application
             //     }
 
             //     return false;
-            }).messageComplete((request, response, ot, connection)  {
-                Request r = cast(Request) request.getAttachment();
-                if (r.messageComplete != null) {
-                    r.messageComplete(r);
-                }
+        }).messageComplete((request, response, ot, connection) {
+            Request r = cast(Request) request.getAttachment();
+            if (r.messageComplete != null) {
+                r.messageComplete(r);
+            }
 
-                handleRequest(r);
+            handleRequest(r);
 
-                // IO.close(r.getResponse());
-                return true;
-            }).badMessage((status, reason, request, response, ot, connection)  {
-                if (_badMessage !is null) {
-                    if (request.getAttachment() !is null) {
-                        Request r = cast(Request) request.getAttachment();
-                        _badMessage(status, reason, r);
-                    } else {
-                        Request r = new Request(request, response, ot, connection);
-                        request.setAttachment(r);
-                        _badMessage(status, reason, r);
-                    }
+            // IO.close(r.getResponse());
+            return true;
+        }).badMessage((status, reason, request, response, ot, connection) {
+            if (_badMessage !is null) {
+                if (request.getAttachment() !is null) {
+                    Request r = cast(Request) request.getAttachment();
+                    _badMessage(status, reason, r);
                 }
-            }).earlyEOF((request, response, ot, connection)  {
-                if (_earlyEof != null) {
-                    if (request.getAttachment() !is null) {
-                        Request r = cast(Request) request.getAttachment();
-                        _earlyEof(r);
-                    } else {
-                        Request r = new Request(request, response, ot, connection);
-                        request.setAttachment(r);
-                        _earlyEof(r);
-                    }
+                else {
+                    Request r = new Request(request, response, ot, connection);
+                    request.setAttachment(r);
+                    _badMessage(status, reason, r);
                 }
-            });
+            }
+        }).earlyEOF((request, response, ot, connection) {
+            if (_earlyEof != null) {
+                if (request.getAttachment() !is null) {
+                    Request r = cast(Request) request.getAttachment();
+                    _earlyEof(r);
+                }
+                else {
+                    Request r = new Request(request, response, ot, connection);
+                    request.setAttachment(r);
+                    _earlyEof(r);
+                }
+            }
+        });
         return adapter;
     }
 
     private void buildHttpServer(AppConfig conf) {
-        logDebug("addr:",conf.http.address, ":", conf.http.port);
+        logDebug("addr:", conf.http.address, ":", conf.http.port);
 
         SimpleWebSocketHandler webSocketHandler = new SimpleWebSocketHandler();
         webSocketHandler.setWebSocketPolicy(_webSocketPolicy);
 
         Http2Configuration configuration = new Http2Configuration();
 
-        _server = new HttpServer(conf.http.address, conf.http.port, configuration, 
-            buildHttpHandlerAdapter(), webSocketHandler);
+        _server = new HttpServer(conf.http.address, conf.http.port,
+                configuration, buildHttpHandlerAdapter(), webSocketHandler);
         // HTTPServerOptions option = new HTTPServerOptions();
         // option.maxHeaderSize = conf.http.maxHeaderSize;
         // //option.listenBacklog = conf.http.listenBacklog;
@@ -342,19 +335,15 @@ final class Application
         // _server.addBind(ipconf);
     }
 
+private:
+    void upConfig(AppConfig conf) {
+        addr = parseAddress(conf.http.address, conf.http.port);
 
-    private:
-    void upConfig(AppConfig conf)
-    {
-        addr = parseAddress(conf.http.address,conf.http.port);
-        
         _maxBodySize = conf.upload.maxSize;
-        version(NO_TASKPOOL)
-        {
+        version (NO_TASKPOOL) {
             // NOTHING
         }
-        else
-        {
+        else {
             _tpool = new TaskPool(conf.http.workerThreads);
             _tpool.isDaemon = true;
         }
@@ -364,40 +353,34 @@ final class Application
         //if(conf.webSocketFactory)
         //    _wfactory = conf.webSocketFactory;
 
-       logDebug(conf.route.groups);
+        logDebug(conf.route.groups);
 
-        version(NO_TASKPOOL)
-        {
+        version (NO_TASKPOOL) {
         }
-        else
-        {
+        else {
             this._dispatcher.setWorkers(_tpool);
         }
         // init dispatcer and routes
-        if (conf.route.groups)
-        {
+        if (conf.route.groups) {
             import std.array : split;
             import std.string : strip;
 
             string[] groupConfig;
 
-            foreach (v; split(conf.route.groups, ','))
-            {
+            foreach (v; split(conf.route.groups, ',')) {
                 groupConfig = split(v, ":");
 
-                if (groupConfig.length == 3 || groupConfig.length == 4)
-                {
+                if (groupConfig.length == 3 || groupConfig.length == 4) {
                     string value = groupConfig[2];
 
-                    if (groupConfig.length == 4)
-                    {
-                        if (std.conv.to!int(groupConfig[3]) > 0)
-                        {
-                            value ~= ":"~groupConfig[3];
+                    if (groupConfig.length == 4) {
+                        if (std.conv.to!int(groupConfig[3]) > 0) {
+                            value ~= ":" ~ groupConfig[3];
                         }
                     }
 
-                    this._dispatcher.addRouteGroup(strip(groupConfig[0]), strip(groupConfig[1]), strip(value));
+                    this._dispatcher.addRouteGroup(strip(groupConfig[0]),
+                            strip(groupConfig[1]), strip(value));
 
                     continue;
                 }
@@ -409,103 +392,99 @@ final class Application
         this._dispatcher.loadRouteGroups();
     }
 
-    void setLogConfig(ref AppConfig.LoggingConfig conf)
-    {
-       	hunt.logging.LogLevel level = hunt.logging.LogLevel.LOG_DEBUG;
+    void setLogConfig(ref AppConfig.LoggingConfig conf) {
+        hunt.logging.LogLevel level = hunt.logging.LogLevel.LOG_DEBUG;
 
-        switch(toLower(conf.level))
-        {
-            case "critical":
-            case "error":
-				level = hunt.logging.LogLevel.LOG_ERROR;
-                break;
-            case "fatal":
-				level = hunt.logging.LogLevel.LOG_FATAL;
-                break;
-            case "warning":
-				level = hunt.logging.LogLevel.LOG_WARNING;
-                break;
-            case "info":
-				level = hunt.logging.LogLevel.LOG_INFO;
-                break;
-            case "off":
-				level = hunt.logging.LogLevel.LOG_Off;
-                break;
-			default:
-                break;
+        switch (toLower(conf.level)) {
+        case "critical":
+        case "error":
+            level = hunt.logging.LogLevel.LOG_ERROR;
+            break;
+        case "fatal":
+            level = hunt.logging.LogLevel.LOG_FATAL;
+            break;
+        case "warning":
+            level = hunt.logging.LogLevel.LOG_WARNING;
+            break;
+        case "info":
+            level = hunt.logging.LogLevel.LOG_INFO;
+            break;
+        case "off":
+            level = hunt.logging.LogLevel.LOG_Off;
+            break;
+        default:
+            break;
         }
 
-		LogConf logconf;
-		logconf.level = level;
-		logconf.disableConsole = conf.disableConsole;
+        LogConf logconf;
+        logconf.level = level;
+        logconf.disableConsole = conf.disableConsole;
 
-        if(!conf.file.empty)
-		    logconf.fileName = buildPath(conf.path, conf.file);
+        if (!conf.file.empty)
+            logconf.fileName = buildPath(conf.path, conf.file);
 
-		logconf.maxSize = conf.maxSize;
-		logconf.maxNum = conf.maxNum;
+        logconf.maxSize = conf.maxSize;
+        logconf.maxNum = conf.maxNum;
 
-		logLoadConf(logconf);
+        logLoadConf(logconf);
     }
 
-    class SimpleWebSocketHandler : WebSocketHandler
-    {
-        override
-        bool acceptUpgrade(MetaData.Request request, 
-                MetaData.Response response,
-                HttpOutputStream output,
-                HttpConnection connection) {
-            logInfo("The connection %s will upgrade to WebSocket connection", connection.getSessionId());
+    class SimpleWebSocketHandler : WebSocketHandler {
+        override bool acceptUpgrade(MetaData.Request request,
+                MetaData.Response response, HttpOutputStream output, HttpConnection connection) {
+            logInfo("The connection %s will upgrade to WebSocket connection",
+                    connection.getSessionId());
             WebSocketHandler handler = webSocketHandlerMap.get(request.getURI().getPath(), null);
             if (handler is null) {
                 response.setStatus(HttpStatus.BAD_REQUEST_400);
                 try {
-                    output.write(cast(byte[])("The " ~ request.getURI().getPath() ~ " can not upgrade to WebSocket"));
-                } catch (IOException e) {
+                    output.write(cast(byte[])("The " ~ request.getURI()
+                            .getPath() ~ " can not upgrade to WebSocket"));
+                }
+                catch (IOException e) {
                     logErrorf("Write http message exception", e);
                 }
                 return false;
-            } else {
+            }
+            else {
                 return handler.acceptUpgrade(request, response, output, connection);
             }
         }
 
-        override
-        void onConnect(WebSocketConnection connection) {
+        override void onConnect(WebSocketConnection connection) {
             string path = connection.getUpgradeRequest().getURI().getPath();
             WebSocketHandler handler = webSocketHandlerMap.get(path, null);
-            if(handler !is null)
+            if (handler !is null)
                 handler.onConnect(connection);
         }
 
-        override
-        void onFrame(Frame frame, WebSocketConnection connection) {
+        override void onFrame(Frame frame, WebSocketConnection connection) {
             string path = connection.getUpgradeRequest().getURI().getPath();
             WebSocketHandler handler = webSocketHandlerMap.get(path, null);
-            if(handler !is null)
+            if (handler !is null)
                 handler.onFrame(frame, connection);
         }
 
-        override
-        void onError(Exception t, WebSocketConnection connection) {
+        override void onError(Exception t, WebSocketConnection connection) {
             string path = connection.getUpgradeRequest().getURI().getPath();
             WebSocketHandler handler = webSocketHandlerMap.get(path, null);
-            if(handler !is null)
+            if (handler !is null)
                 handler.onError(t, connection);
         }
     }
 
-
-    version(USE_KISS_RPC) {
+    version (USE_KISS_RPC) {
         import kissrpc.RpcManager;
-        public void startRpcService(T,A...)() {
+
+        public void startRpcService(T, A...)() {
             if (Config.app.rpc.enabled == false)
                 return;
             string ip = Config.app.rpc.service.address;
             ushort port = Config.app.rpc.service.port;
             int threadNum = Config.app.rpc.service.workerThreads;
-            RpcManager.getInstance().startService!(T,A)(ip, port, threadNum);
+            RpcManager.getInstance().startService!(T, A)(ip, port, threadNum);
         }
+
         public void startRpcClient(T)(string ip, ushort port, int threadNum = 1) {
             if (Config.app.rpc.enabled == false)
                 return;
@@ -513,19 +492,18 @@ final class Application
         }
     }
 
-    this()
-    {
+    this() {
         setDefaultLogging();
-		_accessManager = new AccessManager();
-		_manger = new CacheManger();
+        _accessManager = new AccessManager();
+        _manger = new CacheManger();
 
         this._dispatcher = new Dispatcher();
-		setConfig(Config.app);
+        setConfig(Config.app);
     }
 
     __gshared static Application _app;
 
-    private:
+private:
 
     Address addr;
     HttpServer _server;
@@ -534,26 +512,22 @@ final class Application
     Dispatcher _dispatcher;
     EntityManagerFactory _entityManagerFactory;
     CacheManger _manger;
-	SessionStorage _sessionStorage;
-	AccessManager  _accessManager;
+    SessionStorage _sessionStorage;
+    AccessManager _accessManager;
     WebSocketPolicy _webSocketPolicy;
     WebSocketHandler[string] webSocketHandlerMap;
 
-    version(NO_TASKPOOL)
-    {
+    version (NO_TASKPOOL) {
         // NOTHING TODO
     }
-    else
-    {
+    else {
         __gshared TaskPool _tpool;
     }
 }
 
-Application app()
-{
+Application app() {
     return Application.getInstance();
 }
-
 
 void setDefaultLogging() {
     LogConf logconf;
@@ -565,4 +539,3 @@ void setDefaultLogging() {
 shared static this() {
     setDefaultLogging();
 }
-
