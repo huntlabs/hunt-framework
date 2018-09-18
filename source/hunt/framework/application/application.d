@@ -235,14 +235,14 @@ final class Application {
                 logDebugf("new request from: %s", c.getRemoteAddress.toString());
 
             // }).acceptHttpTunnelConnection((request, response, ot, connection) {
-            //     Request r = new Request(request, response, ot, cast(HttpConnection)connection);
+            //     Request r = new Request(request, response, ot, cast(HttpConnection)connection, _sessionStorage);
             //     request.setAttachment(r);
             //     if (tunnel !is null) {
             //         tunnel(r, connection);
             //     }
             //     return true;
         }).headerComplete((request, response, ot, connection) {
-            Request r = new Request(request, response, ot, connection);
+            Request r = new Request(request, response, ot, connection, _sessionStorage);
             request.setAttachment(r);
             if (_headerComplete != null) {
                 _headerComplete(r);
@@ -281,7 +281,7 @@ final class Application {
                     _badMessage(status, reason, r);
                 }
                 else {
-                    Request r = new Request(request, response, ot, connection);
+                    Request r = new Request(request, response, ot, connection, _sessionStorage);
                     request.setAttachment(r);
                     _badMessage(status, reason, r);
                 }
@@ -293,7 +293,7 @@ final class Application {
                     _earlyEof(r);
                 }
                 else {
-                    Request r = new Request(request, response, ot, connection);
+                    Request r = new Request(request, response, ot, connection, _sessionStorage);
                     request.setAttachment(r);
                     _earlyEof(r);
                 }

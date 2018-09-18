@@ -47,6 +47,7 @@ alias Closure = RequestEventHandler;
 final class Request {
 	private HttpRequest _request;
 	private HttpResponse _response;
+	private SessionStorage _sessionStorage;
 	package(hunt.framework.http) HttpOutputStream outputStream;
 
 	HttpConnection _connection;
@@ -65,12 +66,13 @@ final class Request {
 	protected string _sessionId;
 
 	this(HttpRequest request, HttpResponse response, HttpOutputStream output,
-			HttpConnection connection) {
+			HttpConnection connection, SessionStorage sessionStorage) {
 		requestBody = new ArrayList!(ByteBuffer)();
 		this._request = request;
 		this.outputStream = output;
 		this._response = response;
 		this._connection = connection;
+		this._sessionStorage = sessionStorage;
 		// response.setStatus(HttpStatus.OK_200);
 		// response.setHttpVersion(HttpVersion.HTTP_1_1);
 		// this._response = new Response(response, output, request.getURI(), bufferSize);
@@ -540,17 +542,14 @@ final class Request {
      */
 	@property Session session() {
 		if (!hasSession()) {
-			implementationMissing(false);
+			string sessionId = this.cookie("hunt_session");
+			if (sessionId.empty) {
+				_session = new Session(_sessionStorage);
+				_sessionId = _session.sessionId;
+				return _session;
+			}
 
-			// string sessionId = this.cookie("hunt_session");
-			// if (sessionId.empty)
-			// {
-			// 	_session = new Session(app().sessionStorage());
-			// 	_sessionId = _session.sessionId;
-			// 	return _session;
-			// }
-
-			// _session = new Session(sessionId, app().sessionStorage());
+			_session = new Session(sessionId, _sessionStorage);
 		}
 
 		return _session;
@@ -841,7 +840,7 @@ final class Request {
      */
 	string cookie(string key, string defaultValue = null) {
 		// return cookieManager.get(key, defaultValue);
-		foreach (Cookie c; _cookies) {
+		foreach (Cookie c; getCookies()) {
 			if (c.getName == key)
 				return c.getValue();
 		}
