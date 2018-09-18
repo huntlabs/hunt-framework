@@ -192,6 +192,14 @@ class Response : Closeable
         return this;
     }
 
+    void writeContent(string content) {
+        writeContent(cast(const(ubyte)[]) content);
+    }
+
+    void writeContent(const(ubyte)[] content) {
+        getOutputStream().write(cast(byte[])content, 0, cast(int)content.length);
+    }
+
     /**
      * Get the content of the response.
      *
@@ -246,19 +254,19 @@ class Response : Closeable
         return this;
     }
 
-    void setCookieHeaders()
-    {
-        // auto cookies = cookie().responseCookies();
-        // if (cookies.length > 0)
-        // {
-        //     foreach (cookie; cookies)
-        //     {
-        //         withCookie(cookie);
-        //     }
-        // }
+    // void setCookieHeaders()
+    // {
+    //     // auto cookies = cookie().responseCookies();
+    //     // if (cookies.length > 0)
+    //     // {
+    //     //     foreach (cookie; cookies)
+    //     //     {
+    //     //         withCookie(cookie);
+    //     //     }
+    //     // }
 
-		implementationMissing(false);
-    }
+	// 	implementationMissing(false);
+    // }
 
     // ResponseCookieEncoder cookieEncoder()
     // {
@@ -279,7 +287,7 @@ class Response : Closeable
         {
             withCookie(new Cookie("hunt_session" , request.session.getId() ,0 ,"/" ,null,false ,false));
         }
-        setCookieHeaders();
+        // setCookieHeaders();
         setHeader("Date" , date("Y-m-d H:i:s"));
         setHeader(HttpHeader.X_POWERED_BY, XPoweredBy);
         // sendWithEOM();

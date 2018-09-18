@@ -11,25 +11,17 @@
 
 module hunt.framework.http.Request;
 
-import std.exception;
 
-import hunt.logging;
-import hunt.container.ByteBuffer;
-
-// import collie.codec.http;
-// import collie.codec.http.server.requesthandler;
-// import collie.codec.http.server.httpform;
-// import collie.utils.memory;
 import hunt.http.codec.http.model;
 // import hunt.http.codec.http.stream;
 import hunt.http.codec.http.stream.HttpConnection;
 import hunt.http.codec.http.stream.HttpOutputStream;
 
 import hunt.container;
+import hunt.logging;
 import hunt.util.exception;
 import hunt.util.functional;
 
-// import hunt.framework.simplify;
 import hunt.framework.exception;
 // import hunt.framework.http.Response;
 import hunt.framework.http.session;
@@ -37,23 +29,22 @@ import hunt.framework.http.session;
 import hunt.framework.exception;
 import hunt.framework.routing.route;
 import hunt.framework.routing.define;
-import hunt.framework.utils.url : percentDecode;
+// import hunt.framework.utils.url : percentDecode;
 import hunt.framework.security.acl.User;
 
 import std.algorithm;
+import std.array;
+import std.container.array;
 import std.conv;
-import std.json;
 import std.digest;
 import std.digest.sha;
+import std.exception;
+import std.json;
 import std.regex;
 import std.string;
 import std.socket : Address;
 
 
-// alias HttpRequest = MetaData.Request;
-// alias HttpResponse = MetaData.Response;
-
-// alias CreatorBuffer = Buffer delegate(HttpMessage) nothrow;
 // alias DoHandler = void delegate(Request) nothrow;
 
 alias RequestEventHandler = void delegate(Request sender);
@@ -71,7 +62,7 @@ final class Request
     Action1!Request messageComplete;
     List!(ByteBuffer) requestBody;
 
-    List!Cookie cookies;
+    private Cookie[] cookies;
     string stringBody;
 
 	RequestEventHandler routeResolver;
@@ -80,12 +71,7 @@ final class Request
 	protected Session _session;
 	protected string _sessionId;
 
-	// this(CreatorBuffer cuffer, DoHandler handler, uint maxsize = 8 * 1024 * 1024)
-	// {
-	// 	_creatorBuffer = cuffer;
-	// 	_handler = handler;
-	// 	_maxBodySize = maxsize;
-	// }
+
 	this(HttpRequest request, HttpResponse response,
                          HttpOutputStream output,
                          HttpConnection connection,
@@ -266,18 +252,29 @@ final class Request
 	///get queries
 	@property string[string] queries()
 	{
-		implementationMissing(false);
-		return null;
-		// request.getURI().getQuery();
-		// return _httpMessage.queryParam();
+		return _queryParams;
+	}
+	private string[string] _queryParams;
+
+
+	/**
+   * Sets the query parameter with the specified name to the specified value.
+   *
+   * Returns true if the query parameter was successfully set.
+   */
+	void setQueryParameter(string name, string value)
+	{
+		// parseQueryParams();
+		auto keyPtr = name in _queryParams;
+		if(keyPtr !is null)
+			logWarningf("A query is rewritten: %s", name);
+		_queryParams[name] = value;
 	}
 
 	/// get a query
 	T get(T = string)(string key, T v = T.init)
 	{
-		import std.conv;
-
-		auto tmp = queries();
+		auto tmp = _queryParams;
 		if (tmp is null)
 		{
 			return v;
@@ -588,10 +585,10 @@ final class Request
      *
      * @return void
      */
-	// public void flash()
-	// {
-	// 	this.session().flashInput(this.input());
-	// }
+	public void flash()
+	{
+		this.session().flashInput(this.input());
+	}
 
 	/**
      * Flash only some of the input to the session.
@@ -599,10 +596,10 @@ final class Request
      * @param  array|mixed  keys
      * @return void
      */
-	// public void flashOnly(string[] keys)
-	// {
-	// 	this.session().flashInput(this.only(keys));
-	// }
+	public void flashOnly(string[] keys)
+	{
+		this.session().flashInput(this.only(keys));
+	}
 
 	/**
      * Flash only some of the input to the session.
@@ -610,20 +607,20 @@ final class Request
      * @param  array|mixed  keys
      * @return void
      */
-	// public void flashExcept(string[] keys)
-	// {
-	// 	this.session().flashInput(this.only(keys));
-	// }
+	public void flashExcept(string[] keys)
+	{
+		this.session().flashInput(this.only(keys));
+	}
 
 	/**
      * Flush all of the old input from the session.
      *
      * @return void
      */
-	// void flush()
-	// {
-	// 	this.session().flashInput(null);
-	// }
+	void flush()
+	{
+		this.session().flashInput(null);
+	}
 
 	/**
      * Gets the Session.
@@ -895,9 +892,7 @@ final class Request
      */
 	string query(string key, string defaults = null)
 	{
-		// return _httpMessage.getQueryParam(key, defaults);
-		implementationMissing(false);
-		return null;
+		return _queryParams.get(key, defaults);
 	}
 
 	/**
@@ -939,10 +934,20 @@ final class Request
      * @param  string  key
      * @return bool
      */
-	bool hasCookie(string key)
-	{
-		return cookie(key).length > 0;
-	}
+	// bool hasCookie(string key)
+	// {
+	// 	// return cookie(key).length > 0;
+	// 	foreach(Cookie c; cookies) {
+	// 		if(c.getName == key)
+	// 			return true;
+	// 	}
+	// 	return false;
+	// }
+	
+	// bool hasCookie()
+	// {
+	// 	return cookies.length > 0;
+	// }
 
 	/**
      * Retrieve a cookie from the request.
@@ -954,22 +959,39 @@ final class Request
 	string cookie(string key, string defaultValue = null)
 	{
 		// return cookieManager.get(key, defaultValue);
-		implementationMissing(false);
-		return null;
+		foreach(Cookie c; cookies) {
+			if(c.getName == key)
+				return c.getValue();
+		}
+		return defaultValue;
 	}
+
+
+    Cookie[] getCookies() {
+        if (cookies == null) {
+			Array!(Cookie) list;
+			foreach(string v; getFields().getValuesList(HttpHeader.COOKIE)) {
+				if(v.empty) continue;
+				foreach(Cookie c; CookieParser.parseCookie(v))
+					list.insertBack(c);
+			}
+			cookies = list.array();
+        }
+        return cookies;
+    }
 
 	/**
      * Get an array of all cookies.
      *
      * @return array
 	 */
-	string[string] cookie()
-	{
-		// return cookieManager.requestCookies();
+	// string[string] cookie()
+	// {
+	// 	// return cookieManager.requestCookies();
 
-		implementationMissing(false);
-		return null;
-	}
+	// 	implementationMissing(false);
+	// 	return null;
+	// }
 
 	/**
      * Get an array of all of the files on the request.

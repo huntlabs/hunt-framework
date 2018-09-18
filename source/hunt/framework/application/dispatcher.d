@@ -79,11 +79,10 @@ class Dispatcher
             auto params = route.getParams();
             if (params.length > 0)
             {
-                implementationMissing(false);
                 foreach (param, value; params)
                 {
-                    // request.Header().setQueryParam(param, value);
-                    
+                    // tracef("param=%s, value=%s", param, value);
+                    request.setQueryParameter(param, value);
                 }
             }
 
