@@ -23,7 +23,6 @@ import hunt.framework.init;
 // import hunt.framework.application.application : WebSocketFactory;
 // import hunt.framework.application.application;
 
-// import collie.codec.http.server.httpserveroptions;
 
 @Configuration("hunt")
 final class AppConfig
@@ -256,9 +255,7 @@ class ConfigManager
     @property AppConfig app(string section="", string fileName = "application.conf")
     {
         if (!_app)
-        {
             setAppSection(section, fileName);
-        }
 
         return _app;
     }

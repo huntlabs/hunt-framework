@@ -363,8 +363,7 @@ HandleFunction getRouteFromList(string str)
 
 void addRouteList(string str, HandleFunction method)
 {
-    version (HuntDebugMode)
-        logDebug("add router: ", str);
+    version (HuntDebugMode) logDebug("add router: ", str);
     if (!_init)
     {
         import std.string : toLower;

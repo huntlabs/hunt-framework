@@ -11,7 +11,6 @@
 
 module hunt.framework.http.Request;
 
-
 import hunt.http.codec.http.model;
 // import hunt.http.codec.http.stream;
 import hunt.http.codec.http.stream.HttpConnection;
@@ -23,13 +22,10 @@ import hunt.util.exception;
 import hunt.util.functional;
 
 import hunt.framework.exception;
-// import hunt.framework.http.Response;
 import hunt.framework.http.session;
-// import hunt.framework.http.cookie;
 import hunt.framework.exception;
 import hunt.framework.routing.route;
 import hunt.framework.routing.define;
-// import hunt.framework.utils.url : percentDecode;
 import hunt.framework.security.acl.User;
 
 import std.algorithm;
@@ -45,16 +41,14 @@ import std.string;
 import std.socket : Address;
 
 
-// alias DoHandler = void delegate(Request) nothrow;
-
 alias RequestEventHandler = void delegate(Request sender);
 alias Closure = RequestEventHandler;
 
 final class Request 
 {
-    HttpRequest request;
-    HttpResponse response;
-	HttpOutputStream outputStream;
+    private HttpRequest _request;
+    private HttpResponse _response;
+	package(hunt.framework.http) HttpOutputStream outputStream;
 	
 	HttpConnection _connection;
     Action1!ByteBuffer content;
@@ -72,61 +66,32 @@ final class Request
 	protected string _sessionId;
 
 
-	this(HttpRequest request, HttpResponse response,
-                         HttpOutputStream output,
-                         HttpConnection connection,
-						 int bufferSize = 8 * 1024) {
+	this(HttpRequest request, HttpResponse response, HttpOutputStream output,
+		HttpConnection connection, int bufferSize = 8 * 1024) {
         requestBody = new ArrayList!(ByteBuffer)();
-        this.request = request;
+        this._request = request;
+		this.outputStream = output;
+		this._response = response;
+        this._connection = connection;
         // response.setStatus(HttpStatus.OK_200);
         // response.setHttpVersion(HttpVersion.HTTP_1_1);
-		this.outputStream = output;
-		this.response = response;
-        // this.response = new Response(response, output, request.getURI(), bufferSize);
-        this._connection = connection;
+        // this._response = new Response(response, output, request.getURI(), bufferSize);
     }
 
-	alias request this;
+	// alias _request this;
 
+	HttpURI getURI() {
+		return _request.getURI();
+	}
 
     HttpFields getFields() {
-        return request.getFields();
+        return _request.getFields();
     }
 
 	string sessionId()
 	{
 		return this._sessionId;
 	}
-	// @property HTTPForm postForm()
-	// {
-	// 	return httpForm();
-	// }
-
-	// @property HttpForm httpForm()
-	// {
-	// 	if (_body && (_form is null))
-	// 		_form = new HttpForm(header(HttpHeader.CONTENT_TYPE), _body);
-	// 	return _form;
-	// }
-
-
-	// @property Buffer Body()
-	// {
-	// 	if (_body)
-	// 		return _body;
-	// 	else
-	// 		return defaultBuffer;
-	// }
-
-	// @property ubyte[] ubyteBody()
-	// {
-	// 	if (!_uBody.length)
-	// 	{
-	// 		Body.rest(0);
-	// 		Body.readAll((in ubyte[] data) { _uBody ~= data; });
-	// 	}
-	// 	return _uBody;
-	// }
 
 	/**
      * Custom parameters.
@@ -209,11 +174,8 @@ final class Request
 
 	@property JSONValue json()
 	{
-		implementationMissing(false);
-		// if (_json == JSONValue.init)
-		// {
-		// 	_json = parseJSON(cast(string) ubyteBody());
-		// }
+		if (_json == JSONValue.init)
+			_json = parseJSON(getStringBody());
 		return _json;
 	}
 
@@ -294,9 +256,20 @@ final class Request
 
 
     HttpResponse getResponse() {
-        return response;
+        return _response;
     }
 
+
+    string getStringBody() {
+        if (stringBody is null) {
+            Appender!string buffer;
+            foreach(ByteBuffer b; requestBody) {
+                buffer.put(cast(string)b.array);
+            }
+            stringBody = buffer.data;
+        } 
+        return stringBody;
+    }
 
 	// Response createResponse()
 	// {
@@ -968,7 +941,7 @@ final class Request
 
 
     Cookie[] getCookies() {
-        if (cookies == null) {
+        if (cookies is null) {
 			Array!(Cookie) list;
 			foreach(string v; getFields().getValuesList(HttpHeader.COOKIE)) {
 				if(v.empty) continue;
@@ -1030,12 +1003,12 @@ final class Request
 
 	@property string method()
 	{
-		return request.getMethod();
+		return _request.getMethod();
 	}
 
 	@property string url()
 	{
-		return request.getURIString();
+		return _request.getURIString();
 	}
 
 	// @property string fullUrl()
@@ -1050,12 +1023,12 @@ final class Request
 
 	@property string path()
 	{
-		return request.getURI().getPath();
+		return _request.getURI().getPath();
 	}
 
 	@property string decodedPath()
 	{
-		return request.getURI().getDecodedPath();
+		return _request.getURI().getDecodedPath();
 	}
 
 	/**
@@ -1499,7 +1472,7 @@ final class Request
      */
     string getProtocolVersion()
     {
-        return request.getHttpVersion().toString();
+        return _request.getHttpVersion().toString();
     }
 
     /**
@@ -1516,107 +1489,15 @@ final class Request
 		return false;
     }
 	
-// protected:
-// 	override void onBody(const ubyte[] data) nothrow
-// 	{
-// 		collectException(() {
-// 			if (fristBody)
-// 			{
-// 				_body = _creatorBuffer(_httpMessage);
-// 				fristBody = false;
-// 				if (_body is null)
-// 				{
-// 					onError(HTTPErrorCode.FRAME_SIZE_ERROR);
-// 					return;
-// 				}
-// 			}
-// 			if (_body)
-// 			{
-// 				_body.write(data);
-// 				if (_body.length > _maxBodySize)
-// 				{
-// 					onError(HTTPErrorCode.FRAME_SIZE_ERROR);
-// 					gcFree(_body);
-// 					_body = null;
-// 				}
-// 			}
-// 		}());
-// 	}
-
-// 	override void onEOM() nothrow
-// 	{
-// 		if (_error == HTTPErrorCode.NO_ERROR)
-// 			_handler(this);
-// 	}
-
-// 	override void requestComplete() nothrow
-// 	{
-// 		collectException(() {
-// 			_error = HTTPErrorCode.STREAM_CLOSED;
-// 			import collie.utils.memory;
-
-// 			if (_body)
-// 				gcFree(_body);
-// 			if (_httpMessage)
-// 				gcFree(_httpMessage);
-// 			if (_res)
-// 				gcFree(_res);
-// 		}());
-// 	}
-
-// 	override void onResquest(HttpMessage message) nothrow
-// 	{
-// 		_httpMessage = message;
-// 		collectException({ this.getFields = message.getHeaders(); }());
-// 	}
-
-// 	override void onError(HTTPErrorCode code) nothrow
-// 	{
-// 		collectException(() {
-// 			scope (exit)
-// 			{
-// 				_downstream = null;
-// 			}
-// 			_error = code;
-// 			if (_error == HTTPErrorCode.REMOTE_CLOSED)
-// 				return;
-// 			if (_res is null)
-// 			{
-// 				_res = new Response(_downstream);
-// 			}
-// 			if (_error == HTTPErrorCode.TIME_OUT)
-// 			{
-// 				_res.setStatus(408);
-// 			}
-// 			else if (_error == HTTPErrorCode.FRAME_SIZE_ERROR)
-// 			{
-// 				_res.setStatus(429);
-// 			}
-// 			else
-// 			{
-// 				_res.setStatus(502);
-// 			}
-// 			_res.done();
-// 		}());
-// 	}
 
 private:
 	User _user;
 	Route _route;
+    string _stringBody;
 	string[string] _mate;
-	Cookie[string] _cookies;
 	// CookieManager _cookieManager;
-	Buffer _body;
 	JSONValue _json;
-	ubyte[] _uBody;
-	// HttpMessage _httpMessage;
-	// HTTPForm _form;
-	// Response _res;
-	// HTTPErrorCode _error = HTTPErrorCode.NO_ERROR;
-	// CreatorBuffer _creatorBuffer;
 	uint _maxBodySize;
-	// DoHandler _handler;
-	bool fristBody = true;
 	string _action;
 }
 

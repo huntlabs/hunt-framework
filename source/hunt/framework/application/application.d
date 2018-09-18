@@ -11,12 +11,6 @@
 
 module hunt.framework.application.application;
 
-import hunt.container.ByteBuffer;
-// import collie.codec.http.server;
-// import collie.codec.http;
-// import collie.bootstrap.serversslconfig;
-// import collie.utils.exception;
-
 import hunt.cache;
 import hunt.container;
 import hunt.http.codec.http.model;
@@ -24,28 +18,22 @@ import hunt.http.codec.http.stream;
 import hunt.http.server;
 import hunt.io.common;
 import hunt.logging;
+import hunt.net.NetUtil;
 import hunt.util.exception;
 import hunt.util.functional;
 import hunt.http.codec.websocket.frame.Frame;
 import hunt.http.codec.websocket.stream.WebSocketConnection;
 import hunt.http.codec.websocket.stream.WebSocketPolicy;
 
-public import hunt.event;
-public import hunt.event.EventLoopGroup;
-
-import hunt.net.NetUtil;
-import hunt.util.exception;
-
-import std.socket;
-import std.file;
-
-import std.string;
+import std.exception;
 import std.conv;
-import std.stdio;
-import std.uni;
+import std.file;
 import std.path;
 import std.parallelism;
-import std.exception;
+import std.socket;
+import std.stdio;
+import std.string;
+import std.uni;
 
 import hunt.framework.init;
 import hunt.framework.routing;
@@ -59,12 +47,14 @@ public import hunt.framework.application.middleware;
 public import hunt.framework.security.acl.Identity;
 
 public import hunt.entity;
+public import hunt.event;
+public import hunt.event.EventLoopGroup;
 
 
 
 final class Application
 {
-    static @property Application getInstance()
+    static Application getInstance() @property 
     {
         if(_app is null)
         {
@@ -423,8 +413,6 @@ final class Application
     {
        	hunt.logging.LogLevel level = hunt.logging.LogLevel.LOG_DEBUG;
 
-        import std.string : toLower;
-
         switch(toLower(conf.level))
         {
             case "critical":
@@ -458,7 +446,6 @@ final class Application
 		logconf.maxNum = conf.maxNum;
 
 		logLoadConf(logconf);
-
     }
 
     class SimpleWebSocketHandler : WebSocketHandler
@@ -528,6 +515,7 @@ final class Application
 
     this()
     {
+        setDefaultLogging();
 		_accessManager = new AccessManager();
 		_manger = new CacheManger();
 
@@ -565,3 +553,16 @@ Application app()
 {
     return Application.getInstance();
 }
+
+
+void setDefaultLogging() {
+    LogConf logconf;
+    logconf.level = hunt.logging.LogLevel.LOG_Off;
+    logconf.disableConsole = true;
+    logLoadConf(logconf);
+}
+
+shared static this() {
+    setDefaultLogging();
+}
+

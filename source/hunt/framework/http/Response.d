@@ -16,15 +16,9 @@ import std.datetime;
 import std.json;
 import std.typecons;
 
-// import collie.codec.http.headers.httpcommonheaders;
-// import collie.codec.http.server.HttpResponse;
-// import collie.codec.http.server.responsebuilder;
-// import collie.codec.http.httpmessage;
-
+import hunt.datetime;
 import hunt.http.codec.http.model;
 import hunt.http.codec.http.stream.HttpOutputStream;
-
-import hunt.datetime;
 import hunt.io.common;
 import hunt.io.BufferedOutputStream;
 import hunt.logging;
@@ -32,7 +26,6 @@ import hunt.util.common;
 import hunt.util.exception;
 
 import hunt.framework.http.Request;
-// import hunt.framework.http.cookie;
 import hunt.framework.utils.string;
 import hunt.framework.versions;
 
@@ -46,23 +39,19 @@ enum OctetStreamContentType = "binary/octet-stream";
 */
 class Response : Closeable
 {
-	protected HttpResponse response;
+	protected HttpResponse _response;
     protected Request _request;
     HttpOutputStream output;
     HttpURI uri;
     BufferedOutputStream bufferedOutputStream;
     int bufferSize = 8 * 1024;
 
-    // this()
-    // {
-    //     // super();
-    // }
 
     this(Request request, int bufferSize = 8 * 1024) {
         initialize(request, bufferSize);
         
-        this.response.setStatus(HttpStatus.OK_200);
-        this.response.setHttpVersion(HttpVersion.HTTP_1_1);
+        this._response.setStatus(HttpStatus.OK_200);
+        this._response.setHttpVersion(HttpVersion.HTTP_1_1);
 
     }
 
@@ -73,29 +62,23 @@ class Response : Closeable
     //     this.bufferSize = bufferSize;
     // }
 
-    // this(string content, int status = HttpStatus.OK_200, string[string] headers = null )
-    // {
-    //     this(cast(const(ubyte)[])content, status, headers);
-    // }
+    this(Request request, string content, int status = HttpStatus.OK_200 , int bufferSize = 8 * 1024)
+    {
+        this(request, cast(const(ubyte)[])content, status, bufferSize);
+    }
 
-    // this(in ubyte[] content, int status = HttpStatus.OK_200, string[string] headers = null )
-    // {
-    //     super(null);
-    //     if(headers !is null)
-    //         this.withHeaders(headers);
-    //     setStatus(status);
-    //     this.setContent(content);
-    // }
-
-    // this(HttpResponse handler)
-    // {
-    //     super(handler);
-    //     setStatus(HttpStatus.OK_200);
-    // }
+    this(Request request, const(ubyte)[] content, int status = HttpStatus.OK_200, int bufferSize = 8 * 1024)
+    {
+        initialize(request, bufferSize);
+        this._response.setStatus(status);
+        this._response.setHttpVersion(HttpVersion.HTTP_1_1);
+        this.setContent(content);
+        
+    }
 
 	HttpResponse httpResponse()
 	{
-		return response;
+		return _response;
 	}
 
     void setRequest(Request request, bool isFore = false) {
@@ -108,8 +91,8 @@ class Response : Closeable
 
     private void initialize(Request request, int bufferSize = 8 * 1024) {
         this._request = request;
+        this._response = request.getResponse();
         this.output = request.outputStream;
-        this.response = request.getResponse();
         this.uri = request.getURI();
         this.bufferSize = bufferSize;
         _isInitilized = true;
@@ -121,14 +104,8 @@ class Response : Closeable
             throw new Exception("The request handler is null!");
     }
 
-    // Response setHttpResponse(HttpResponse handler)
-    // {
-    //     response = handler;
-    //     return this;
-    // }
-
     HttpFields getFields() {
-        return response.getFields();
+        return _response.getFields();
     }
     
     Response setHeader(T = string)(string header, T value)
@@ -223,12 +200,12 @@ class Response : Closeable
     ///set http status code eg. 404 200
     Response setStatus(int status)
     {
-        response.setStatus(status);
+        _response.setStatus(status);
         return this;
     }
     
     Response setReason(string reason) {
-        response.setReason(reason);
+        _response.setReason(reason);
         return this;
     }
 
@@ -254,30 +231,7 @@ class Response : Closeable
         return this;
     }
 
-    // void setCookieHeaders()
-    // {
-    //     // auto cookies = cookie().responseCookies();
-    //     // if (cookies.length > 0)
-    //     // {
-    //     //     foreach (cookie; cookies)
-    //     //     {
-    //     //         withCookie(cookie);
-    //     //     }
-    //     // }
-
-	// 	implementationMissing(false);
-    // }
-
-    // ResponseCookieEncoder cookieEncoder()
-    // {
-    //     if (_cookieEncoder is null)
-    //     {
-    //         _cookieEncoder = new ResponseCookieEncoder;
-    //     }
-        
-    //     return _cookieEncoder;
-    // }
-    
+ 
     pragma(inline) final void done()
     {
         if (_isDone)
