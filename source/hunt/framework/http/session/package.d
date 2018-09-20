@@ -1,28 +1,11 @@
 module hunt.framework.http.session;
 
-import hunt.cache;
-import hunt.framework.exception;
-import hunt.framework.utils.random;
+public import hunt.framework.http.session.HttpSession;
+public import hunt.framework.http.session.SessionStorage;
 
-import std.array;
-import std.algorithm;
-import std.ascii;
-import std.json;
-import std.conv;
-import std.digest.sha;
-import std.format;
-import std.datetime;
-import std.random;
-import std.conv;
-import std.traits;
+enum int SessionIdLenth = 20;
 
-import core.cpuid;
-import std.string;
-import hunt.util.exception;
-
-const SessionIdLenth = 20;
-
-
+/++
 /**
 */
 class Session
@@ -654,123 +637,5 @@ class Session
 	}
 
 }
+++/
 
-int getCurrUnixStramp()
-{
-	return cast(int)(Clock.currTime.toUnixTime);
-}
-
-/**
-*/
-class SessionStorage
-{
-
-	this(UCache cache)
-	{
-		_cache = cache;
-	}
-
-	alias set = put;
-
-	bool put(string key, string value, int expire)
-	{
-		_cache.put!string(getRealAddr(key), value, expire);
-		return true;
-	}
-
-	bool put(string key, string value)
-	{
-		return set(key, value, _expire);
-	}
-
-	string get(string key)
-	{
-		return cast(string) _cache.get!string(getRealAddr(key));
-	}
-
-	alias isset = containsKey;
-	bool containsKey(string key)
-	{
-		return _cache.containsKey(key);
-	}
-
-	alias del = erase;
-	alias remove = erase;
-	bool erase(string key)
-	{
-		return _cache.remove(getRealAddr(key));
-	}
-
-	string generateSessionId(string sessionName = "hunt_session")
-	{
-		SHA1 hash;
-		hash.start();
-		hash.put(getRandom);
-		ubyte[20] result = hash.finish();
-		string str = toLower(toHexString(result));
-
-		JSONValue json;
-		json[sessionName] = str;
-		json["_time"] = getCurrUnixStramp + _expire;
-
-		set(str, json.toString, _expire);
-
-		return str;
-	}
-
-	void setPrefix(string prefix)
-	{
-		_prefix = prefix;
-	}
-
-	void setExpire(int expire)
-	{
-		_expire = expire;
-	}
-
-	string getRealAddr(string key)
-	{
-		return _prefix ~ key;
-	}
-
-	int expire()
-	{
-		return _expire;
-	}
-
-	void clear()
-	{
-		_cache.clear();
-	}
-
-	private
-	{
-		string _prefix;
-		string _sessionId;
-
-		int _expire;
-		UCache _cache;
-	}
-}
-
-Session session()
-{
-	import hunt.framework.http.Request;
-
-	return request().session();
-}
-
-string session(string key)
-{
-	return session().get(key);
-}
-
-void session(string[string] values)
-{
-	import hunt.framework.http.Request;
-	
-	foreach (key, value; values)
-	{
-		session().put(key, value);
-	}
-}

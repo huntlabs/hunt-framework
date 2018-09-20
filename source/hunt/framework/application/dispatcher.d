@@ -77,7 +77,7 @@ class Dispatcher
                 foreach (param, value; params)
                 {
                     // tracef("param=%s, value=%s", param, value);
-                    request.setQueryParameter(param, value);
+                    request.queries()[param] = value;
                 }
             }
 

@@ -21,7 +21,7 @@ import hunt.framework.exception;
  */
 class RedirectResponse : Response
 {
-    protected Session _session;
+    protected HttpSession _session;
 
     this(Request request, string targetUrl, bool use301 = false)
     {
@@ -33,13 +33,13 @@ class RedirectResponse : Response
     }
 
     /// the session store implementation.
-    @property Session session()
+    @property HttpSession session()
     {
         return _session;
     }
 
     /// ditto
-    @property void session(Session se)
+    @property void session(HttpSession se)
     {
         _session = se;
     }

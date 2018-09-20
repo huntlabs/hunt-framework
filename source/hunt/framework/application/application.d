@@ -148,7 +148,7 @@ final class Application {
                 config.args, false));
 
         _sessionStorage.setPrefix(config.prefix);
-        _sessionStorage.setExpire(config.expire);
+        _sessionStorage.expire = config.expire;
 
         // writeln(" initSessionStorage " ,_sessionStorage);
     }

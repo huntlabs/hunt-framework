@@ -24,7 +24,6 @@ import hunt.util.functional;
 
 import hunt.framework.exception;
 import hunt.framework.http.session;
-import hunt.framework.exception;
 import hunt.framework.routing.route;
 import hunt.framework.routing.define;
 import hunt.framework.security.acl.User;
@@ -44,6 +43,7 @@ import std.socket : Address;
 alias RequestEventHandler = void delegate(Request sender);
 alias Closure = RequestEventHandler;
 
+
 final class Request {
 	private HttpRequest _request;
 	private HttpResponse _response;
@@ -62,8 +62,8 @@ final class Request {
 	RequestEventHandler routeResolver;
 	RequestEventHandler userResolver;
 
-	protected Session _session;
-	protected string _sessionId;
+	protected HttpSession _session;
+	// protected string _sessionId;
 
 	this(HttpRequest request, HttpResponse response, HttpOutputStream output,
 			HttpConnection connection, SessionStorage sessionStorage) {
@@ -88,9 +88,9 @@ final class Request {
 		return _request.getFields();
 	}
 
-	string sessionId() {
-		return this._sessionId;
-	}
+	// string sessionId() {
+	// 	return this._sessionId;
+	// }
 
 	/**
      * Custom parameters.
@@ -196,6 +196,13 @@ final class Request {
 
 	///get queries
 	@property string[string] queries() {
+		if(_queryParams is null) {
+			MultiMap!string map = new MultiMap!string();
+			getURI().decodeQueryTo(map);
+			foreach(string key; map.byKey()) {
+				_queryParams[key] = map.getValue(key, 0);
+			}
+		}
 		return _queryParams;
 	}
 
@@ -206,17 +213,17 @@ final class Request {
    *
    * Returns true if the query parameter was successfully set.
    */
-	void setQueryParameter(string name, string value) {
-		// parseQueryParams();
-		auto keyPtr = name in _queryParams;
-		if (keyPtr !is null)
-			logWarningf("A query is rewritten: %s", name);
-		_queryParams[name] = value;
-	}
+	// void setQueryParameter(string name, string value) {
+	// 	// parseQueryParams();
+	// 	auto keyPtr = name in _queryParams;
+	// 	if (keyPtr !is null)
+	// 		logWarningf("A query is rewritten: %s", name);
+	// 	_queryParams[name] = value;
+	// }
 
 	/// get a query
 	T get(T = string)(string key, T v = T.init) {
-		auto tmp = _queryParams;
+		auto tmp = queries();
 		if (tmp is null) {
 			return v;
 		}
@@ -503,7 +510,8 @@ final class Request {
      * @return void
      */
 	public void flash() {
-		this.session().flashInput(this.input());
+		// this.session().flashInput(this.input());
+		implementationMissing(false);
 	}
 
 	/**
@@ -513,7 +521,9 @@ final class Request {
      * @return void
      */
 	public void flashOnly(string[] keys) {
-		this.session().flashInput(this.only(keys));
+		// this.session().flashInput(this.only(keys));
+
+		implementationMissing(false);
 	}
 
 	/**
@@ -523,7 +533,9 @@ final class Request {
      * @return void
      */
 	public void flashExcept(string[] keys) {
-		this.session().flashInput(this.only(keys));
+		// this.session().flashInput(this.only(keys));
+
+		implementationMissing(false);
 	}
 
 	/**
@@ -532,49 +544,55 @@ final class Request {
      * @return void
      */
 	void flush() {
-		this.session().flashInput(null);
+		if(hasSession())
+			_sessionStorage.put(_session);
 	}
 
 	/**
-     * Gets the Session.
+     * Gets the HttpSession.
      *
-     * @return Session|null The session
+     * @return HttpSession|null The session
      */
-	@property Session session() {
-		if (!hasSession()) {
-			string sessionId = this.cookie("hunt_session");
-			if (sessionId.empty) {
-				_session = new Session(_sessionStorage);
-				_sessionId = _session.sessionId;
-				return _session;
-			}
+	@property HttpSession session(bool canCreate = false) {
+		if (_session !is null || isSessionRetrieved) 
+			return _session;
 
-			_session = new Session(sessionId, _sessionStorage);
+		string sessionId = this.cookie(DefaultSessionIdName);
+		isSessionRetrieved = true;
+		if (!sessionId.empty) {
+			_session = _sessionStorage.get(sessionId);
+		}
+
+		if(_session is null && canCreate) {
+			sessionId = HttpSession.generateSessionId();
+			_session = HttpSession.create(sessionId, _sessionStorage.expire);
+			// _sessionStorage.put(sessionId, _session);
 		}
 
 		return _session;
 	}
+	private bool isSessionRetrieved = false;
 
-	@property void session(Session session) {
-		this._session = session;
-	}
+	// @property void session(HttpSession session) {
+	// 	this._session = session;
+	// }
 
 	/**
-     * Whether the request contains a Session object.
+     * Whether the request contains a HttpSession object.
      *
      * This method does not give any information about the state of the session object,
      * like whether the session is started or not. It is just a way to check if this Request
-     * is associated with a Session instance.
+     * is associated with a HttpSession instance.
      *
-     * @return bool true when the Request contains a Session object, false otherwise
+     * @return bool true when the Request contains a HttpSession object, false otherwise
      */
 	bool hasSession() {
-		return _session !is null;
+		return session() !is null;
 	}
 
-	string[] server(string key = null, string[] defaults = null) {
-		throw new NotImplementedException("server");
-	}
+	// string[] server(string key = null, string[] defaults = null) {
+	// 	throw new NotImplementedException("server");
+	// }
 
 	/**
      * Determine if a header is set on the request.
@@ -775,7 +793,7 @@ final class Request {
      * @return string|array
      */
 	string query(string key, string defaults = null) {
-		return _queryParams.get(key, defaults);
+		return queries().get(key, defaults);
 	}
 
 	/**
@@ -1412,3 +1430,22 @@ Request request() {
 void request(Request request) {
 	_request = request;
 }
+
+
+// HttpSession session()
+// {
+// 	return request().session();
+// }
+
+// string session(string key)
+// {
+// 	return session().attributes.get(key);
+// }
+
+// void session(string[string] values)
+// {
+// 	foreach (key, value; values)
+// 	{
+// 		session().put(key, value);
+// 	}
+// }

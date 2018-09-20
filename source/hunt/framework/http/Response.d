@@ -26,6 +26,7 @@ import hunt.util.common;
 import hunt.util.exception;
 
 import hunt.framework.http.Request;
+import hunt.framework.http.session;
 import hunt.framework.utils.string;
 import hunt.framework.versions;
 
@@ -219,14 +220,13 @@ class Response : Closeable {
         if (_isDone)
             return;
         ///set session
-        if (request.hasSession() && request.session.isStarted()) {
-            withCookie(new Cookie("hunt_session", request.session.getId(), 0,
+        HttpSession session = _request.session();
+        if (session !is null && session.isNewSession()) {
+            withCookie(new Cookie(DefaultSessionIdName, session.getId(), session.getMaxInactiveInterval(),
                     "/", null, false, false));
         }
-        // setCookieHeaders();
         setHeader("Date", date("Y-m-d H:i:s"));
         setHeader(HttpHeader.X_POWERED_BY, XPoweredBy);
-        // sendWithEOM();
         try {
             this.close();
         }
