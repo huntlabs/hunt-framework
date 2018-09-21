@@ -11,11 +11,12 @@
 
 module hunt.framework.http.Request;
 
-import hunt.http.codec.http.model;
 
+import hunt.http.codec.http.model;
 // import hunt.http.codec.http.stream;
 import hunt.http.codec.http.stream.HttpConnection;
 import hunt.http.codec.http.stream.HttpOutputStream;
+import hunt.http.util.UrlEncoded;
 
 import hunt.container;
 import hunt.logging;
@@ -48,22 +49,21 @@ final class Request {
 	private HttpRequest _request;
 	private HttpResponse _response;
 	private SessionStorage _sessionStorage;
-	package(hunt.framework.http) HttpOutputStream outputStream;
+
+	private UrlEncoded urlEncodedMap;
+	private Cookie[] _cookies;
+	private HttpSession _session;
 
 	HttpConnection _connection;
-	Action1!ByteBuffer content;
-	Action1!Request contentComplete;
-	Action1!Request messageComplete;
-	List!(ByteBuffer) requestBody;
+	// Action1!ByteBuffer content;
+	// Action1!Request contentComplete;
+	// Action1!Request messageComplete;
+	package(hunt.framework.http) HttpOutputStream outputStream;
+	package(hunt.framework) List!(ByteBuffer) requestBody;
 
-	private Cookie[] _cookies;
-	string stringBody;
 
 	RequestEventHandler routeResolver;
 	RequestEventHandler userResolver;
-
-	protected HttpSession _session;
-	// protected string _sessionId;
 
 	this(HttpRequest request, HttpResponse response, HttpOutputStream output,
 			HttpConnection connection, SessionStorage sessionStorage) {
@@ -73,9 +73,11 @@ final class Request {
 		this._response = response;
 		this._connection = connection;
 		this._sessionStorage = sessionStorage;
+		this.urlEncodedMap = new UrlEncoded();
 		// response.setStatus(HttpStatus.OK_200);
 		// response.setHttpVersion(HttpVersion.HTTP_1_1);
 		// this._response = new Response(response, output, request.getURI(), bufferSize);
+		handleQueryParameters();
 	}
 
 	// alias _request this;
@@ -85,12 +87,40 @@ final class Request {
 	}
 
 	HttpFields getFields() {
-		return _request.getFields();
+		return _httpFields;
+	}
+	private HttpFields _httpFields;
+
+	protected void handleQueryParameters(){
+		string q = getURI().getQuery();
+		if(!q.empty)
+			urlEncodedMap.decode(q);
 	}
 
-	// string sessionId() {
-	// 	return this._sessionId;
-	// }
+	package(hunt.framework) void onHeaderCompleted() {
+		_httpFields = _request.getFields();
+		string transferEncoding = _httpFields.get(HttpHeader.TRANSFER_ENCODING);
+		
+		_isChunked = ( HttpHeaderValue.CHUNKED.asString() == transferEncoding
+                || (_request.getHttpVersion() == HttpVersion.HTTP_2 
+					&& _request.getContentLength() < 0));
+	}
+
+	package(hunt.framework) void onMessageCompleted() {
+		string contentType = MimeTypes.getContentTypeMIMEType(_httpFields.get(HttpHeader.CONTENT_TYPE));
+		_isXFormUrlencoded = std.string.icmp("application/x-www-form-urlencoded", contentType) == 0;
+		if (_isXFormUrlencoded) {
+			urlEncodedMap.decode(getStringBody());
+			// version(HuntDebugMode) info(urlEncodedMap.toString());
+		}
+	}
+	private bool _isXFormUrlencoded = false;
+
+
+	bool isChunked() {
+		return _isChunked;
+	}
+	private bool _isChunked = false;
 
 	/**
      * Custom parameters.
@@ -194,7 +224,7 @@ final class Request {
 		}
 	}
 
-	///get queries
+	// get queries
 	@property string[string] queries() {
 		if(_queryParams is null) {
 			MultiMap!string map = new MultiMap!string();
@@ -207,6 +237,20 @@ final class Request {
 	}
 
 	private string[string] _queryParams;
+
+
+	@property string[string] xFormData() {
+		if(_xFormData is null && _isXFormUrlencoded) {
+			UrlEncoded map = new UrlEncoded();
+			map.decode(stringBody);
+			foreach(string key; map.byKey()) {
+				_xFormData[key] = map.getValue(key, 0);
+			}
+		}
+		return _xFormData;
+	}
+
+	private string[string] _xFormData;
 
 	/**
    * Sets the query parameter with the specified name to the specified value.
@@ -246,12 +290,14 @@ final class Request {
 		if (stringBody is null) {
 			Appender!string buffer;
 			foreach (ByteBuffer b; requestBody) {
-				buffer.put(cast(string) b.array);
+				buffer.put(BufferUtils.toString(b));
 			}
 			stringBody = buffer.data;
+			version(HuntDebugMode) trace("body content: ", stringBody);
 		}
 		return stringBody;
 	}
+	private string stringBody;
 
 	// Response createResponse()
 	// {
@@ -573,9 +619,6 @@ final class Request {
 	}
 	private bool isSessionRetrieved = false;
 
-	// @property void session(HttpSession session) {
-	// 	this._session = session;
-	// }
 
 	/**
      * Whether the request contains a HttpSession object.
@@ -1106,15 +1149,15 @@ final class Request {
 		return getFields().get("User-Agent");
 	}
 
-	// Request merge(string[] input)
-	// {
-	// 	string[string] inputSource = getInputSource;
-	// 	for (size_t i = 0; i < input.length; i++)
-	// 	{
-	// 		inputSource[to!string(i)] = input[i];
-	// 	}
-	// 	return this;
-	// }
+	Request merge(string[] input)
+	{
+		string[string] inputSource = getInputSource;
+		for (size_t i = 0; i < input.length; i++)
+		{
+			inputSource[to!string(i)] = input[i];
+		}
+		return this;
+	}
 
 	/**
      * Replace the input for the current request.
@@ -1122,28 +1165,22 @@ final class Request {
      * @param  array input
      * @return Request
      */
-	// Request replace(string[string] input)
-	// {
-	// 	if (isContained(this.method, ["GET", "HEAD"]))
-	// 		_httpMessage.queryParam = input;
-	// 	else
-	// 	{
-	// 		httpForm.formData = input;
-	// 	}
+	Request replace(string[string] input)
+	{
+		if (isContained(this.method, ["GET", "HEAD"]))
+			_queryParams = input;
+		else
+			_xFormData = input;
 
-	// 	return this;
-	// }
+		return this;
+	}
 
 
 	protected string[string] getInputSource() {
 		if (isContained(this.method, ["GET", "HEAD"]))
 			return queries();
 		else
-		{
-			// return httpForm.formData();
-			implementationMissing(false);
-			return null;
-		}
+			return xFormData();
 	}
 
 	/**

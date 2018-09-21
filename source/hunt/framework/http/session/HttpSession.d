@@ -13,13 +13,12 @@ import std.json;
 import std.string;
 import std.traits;
 
-
 __gshared string DefaultSessionIdName = "hunt_session";
 
 /**
  * 
  */
-class HttpSession  {
+class HttpSession {
 
     private string id;
     private long creationTime;
@@ -87,7 +86,8 @@ class HttpSession  {
     }
 
     bool isValid() {
-        long currentTime = convert!(TimeUnits.HectoNanosecond, TimeUnits.Millisecond)(Clock.currStdTime);
+        long currentTime = convert!(TimeUnits.HectoNanosecond, TimeUnits.Millisecond)(
+                Clock.currStdTime);
         return (currentTime - lastAccessedTime) < (maxInactiveInterval * 1000);
     }
 
@@ -95,280 +95,226 @@ class HttpSession  {
         this.attributes[name] = JSONValue(value);
     }
 
-    T get(T=string)(string name, T defaultValue = T.init) {
-        const(JSONValue)* itemPtr = name in attributes;
-        if(itemPtr is null)
+    T get(T = string)(string name, T defaultValue = T.init) {
+        if(attributes.isNull)
             return defaultValue;
-        static if(!is(T == string) && isDynamicArray!T && is(T : U[], U)) {
+
+        const(JSONValue)* itemPtr = name in attributes;
+        if (itemPtr is null)
+            return defaultValue;
+        static if (!is(T == string) && isDynamicArray!T && is(T : U[], U)) {
             U[] r;
-            foreach(JSONValue jv; itemPtr.array)  {
+            foreach (JSONValue jv; itemPtr.array) {
                 r ~= get!U(jv);
             }
             return r;
-        } else {
+        }
+        else {
             return get!T(*itemPtr);
         }
     }
 
-    private static T get(T=string)(JSONValue itemPtr) {
-        static if(is(T == string))
+    private static T get(T = string)(JSONValue itemPtr) {
+        static if (is(T == string)) {
             return itemPtr.str;
-        else static if(isIntegral!T) {
-            return cast(T)itemPtr.integer;
-        } else static if(isFloatingPoint!T) {
-            return cast(T)itemPtr.floating;
-        } else {
+        }
+        else static if (isIntegral!T) {
+            return cast(T) itemPtr.integer;
+        }
+        else static if (isFloatingPoint!T) {
+            return cast(T) itemPtr.floating;
+        }
+        else {
             static assert(false, "Unsupported type: " ~ typeid(T).name);
         }
     }
 
+    void remove(string key) {
+        JSONValue json;
 
-	/**
-     * Get an item from the session.
-     *
-     * @param  string  key
-     * @param  mixed  default
-     * @return mixed
-     */
-	// T get(T = string)(string key)
-	// {
-	// 	if (attributes.isNull)
-	// 		return T.init;
+        foreach (string _key, ref value; attributes) {
+            if (_key != key) {
+                json[_key] = value;
+            }
+        }
 
-	// 	auto item = key in attributes;
-	// 	if (item is null)
-	// 		return T.init;
+        attributes = json;
+    }
 
-	// 	static if (is(T : string))
-	// 		return item.str;
-	// 	else static if (is(T: U[], U))
-	// 	{
-	// 		U[] r;
-	// 		foreach(ref const(JSONValue) v; item.array)
-	// 		{
-	// 			static if(is(U:string))
-	// 			{
-	// 				r ~= v.str;
-	// 			}
-	// 			else static if(isNumeric(U))
-	// 			{
-	// 				r ~= cast(U) v.integer;
-	// 			}
-	// 			else
-	// 			 static assert(false, "unsupported type: " ~ U.stringof);
-	// 		}
-	// 		return r;
-	// 	}
-	// 	else
-	// 		item.toString();
-	// }
+    string[] keys() {
+        string[] ret;
 
-    void remove(string key)
-	{
-		JSONValue json;
+        foreach (string key, value; attributes) {
+            ret ~= key;
+        }
 
-		foreach (string _key, ref value; attributes)
-		{
-			if (_key != key)
-			{
-				json[_key] = value;
-			}
-		}
-
-		attributes = json;
-	}
-
-	string[] keys()
-	{
-		string[] ret;
-
-		foreach (string key, value; attributes)
-		{
-			ret ~= key;
-		}
-
-		return ret;
-	}
+        return ret;
+    }
 
     /**
      * Get all of the session data.
      *
      * @return array
      */
-	string[string] all()
-	{
-		if(attributes.isNull)
-			return null;
+    string[string] all() {
+        if (attributes.isNull)
+            return null;
 
-		string[string] v;
-		foreach (string key, ref JSONValue value; attributes)
-		{
-			if(value.type == JSON_TYPE.STRING)
-				v[key] = value.str;
-			else
-				v[key] = value.toString();
-		}
+        string[string] v;
+        foreach (string key, ref JSONValue value; attributes) {
+            if (value.type == JSON_TYPE.STRING)
+                v[key] = value.str;
+            else
+                v[key] = value.toString();
+        }
 
-		return v;
-	}
+        return v;
+    }
 
-	/**
+    /**
      * Checks if a key exists.
      *
      * @param  string|array  key
      * @return bool
      */
-	bool exists(string key)
-	{
-		if (attributes.isNull)
-			return false;
-		const(JSONValue)* item = key in attributes;
-		return item !is null;
-	}
+    bool exists(string key) {
+        if (attributes.isNull)
+            return false;
+        const(JSONValue)* item = key in attributes;
+        return item !is null;
+    }
 
-	/**
+    /**
      * Checks if a key is present and not null.
      *
      * @param  string|array  key
      * @return bool
      */
-	bool has(string key)
-	{
-		if (attributes.isNull)
-			return false;
+    bool has(string key) {
+        if (attributes.isNull)
+            return false;
 
-		auto item = key in attributes;
-		if ((item !is null) && (!item.str.empty))
-			return true;
-		else
-			return false;
-	}
+        auto item = key in attributes;
+        if ((item !is null) && (!item.str.empty))
+            return true;
+        else
+            return false;
+    }
 
-/**
+    /**
      * Get the value of a given key and then forget it.
      *
      * @param  string  key
      * @param  string  default
      * @return mixed
      */
-	void pull(string key, string value)
-	{
-		attributes[key] = value;
-	}
+    void pull(string key, string value) {
+        attributes[key] = value;
+    }
 
-	/**
+    /**
      * Determine if the session contains old input.
      *
      * @param  string  key
      * @return bool
      */
-	bool hasOldInput(string key)
-	{
-		string old = getOldInput(key);
-		return !old.empty;
-	}
+    bool hasOldInput(string key) {
+        string old = getOldInput(key);
+        return !old.empty;
+    }
 
-	/**
+    /**
      * Get the requested item from the flashed input array.
      *
      * @param  string  key
      * @param  mixed   default
      * @return mixed
      */
-	string[string] getOldInput(string[string] defaults = null)
-	{
-		string v = get("_old_input");
-		if (v.empty)
-			return defaults;
-		else
-			return to!(string[string])(v);
-	}
+    string[string] getOldInput(string[string] defaults = null) {
+        string v = get("_old_input");
+        if (v.empty)
+            return defaults;
+        else
+            return to!(string[string])(v);
+    }
 
-	/// ditto
-	string getOldInput(string key, string defaults = null)
-	{
-		string old = get("_old_input");
-		string[string] v = to!(string[string])(old);
-		return v.get(key, defaults);
-	}
+    /// ditto
+    string getOldInput(string key, string defaults = null) {
+        string old = get("_old_input");
+        string[string] v = to!(string[string])(old);
+        return v.get(key, defaults);
+    }
 
-	/**
+    /**
      * Replace the given session attributes entirely.
      *
      * @param  array  attributes
      * @return void
      */
-	void replace(string[string] attributes)
-	{
-		this.attributes = JSONValue.init;
-		put(attributes);
-	}
+    void replace(string[string] attributes) {
+        this.attributes = JSONValue.init;
+        put(attributes);
+    }
 
-	/**
+    /**
      * Put a key / value pair or array of key / value pairs in the session.
      *
      * @param  string|array  key
      * @param  mixed       value
      * @return void
      */
-	void put(T=string)(string key, T value)
-	{
-		attributes[key] = value;
-	}
+    void put(T = string)(string key, T value) {
+        attributes[key] = value;
+    }
 
-	/// ditto
-	void put(string[string] pairs)
-	{
-		foreach (string key, string value; pairs)
-			attributes[key] = value;
-	}
+    /// ditto
+    void put(string[string] pairs) {
+        foreach (string key, string value; pairs)
+            attributes[key] = value;
+    }
 
-
-	/**
+    /**
      * Get an item from the session, or store the default value.
      *
      * @param  string  key
      * @param  \Closure  callback
      * @return mixed
      */
-	string remember(string key, string value)
-	{
-		string v = this.get(key);
-		if (!v.empty)
-			return v;
+    string remember(string key, string value) {
+        string v = this.get(key);
+        if (!v.empty)
+            return v;
 
-		this.put(key, value);
-		return value;
-	}
+        this.put(key, value);
+        return value;
+    }
 
-	/**
+    /**
      * Push a value onto a session array.
      *
      * @param  string  key
      * @param  mixed   value
      * @return void
      */
-	void push(T=string)(string key, T value)
-	{
-		T[] array = this.get!(T[])(key);
-		array ~= value;
+    void push(T = string)(string key, T value) {
+        T[] array = this.get!(T[])(key);
+        array ~= value;
 
-		this.put(key, array);
-	}
+        this.put(key, array);
+    }
 
-	/**
+    /**
      * Flash a key / value pair to the session.
      *
      * @param  string  key
      * @param  mixed   value
      * @return void
      */
-	void flash(T = string)(string key, T value)
-	{
-		this.put(key, value);
-		this.push("_flash.new", key);
-		this.removeFromOldFlashData([key]);
-	}
+    void flash(T = string)(string key, T value) {
+        this.put(key, value);
+        this.push("_flash.new", key);
+        this.removeFromOldFlashData([key]);
+    }
 
     /**
      * Flash a key / value pair to the session for immediate use.
@@ -377,8 +323,7 @@ class HttpSession  {
      * @param  mixed value
      * @return void
      */
-    void now(T = string)(string key, T value)
-    {
+    void now(T = string)(string key, T value) {
         this.put(key, value);
         this.push("_flash.old", key);
     }
@@ -388,8 +333,7 @@ class HttpSession  {
      *
      * @return void
      */
-    public void reflash()
-    {
+    public void reflash() {
         this.mergeNewFlashes(this.get!(string[])("_flash.old"));
         this.put!(string[])("_flash.old", []);
     }
@@ -400,70 +344,65 @@ class HttpSession  {
      * @param  array|mixed  keys
      * @return void
      */
-	 void keep(string[] keys...)
-	 {
-		 mergeNewFlashes(keys);
-		 removeFromOldFlashData(keys);
-	 }
+    void keep(string[] keys...) {
+        mergeNewFlashes(keys);
+        removeFromOldFlashData(keys);
+    }
 
-	/**
+    /**
      * Merge new flash keys into the new flash array.
      *
      * @param  array  keys
      * @return void
      */
-    protected void mergeNewFlashes(string[] keys)
-    {
-		string[] oldKeys = this.get!(string[])("_flash.new");
+    protected void mergeNewFlashes(string[] keys) {
+        string[] oldKeys = this.get!(string[])("_flash.new");
         string[] values = oldKeys ~ keys;
-		values = values.sort().uniq().array;
+        values = values.sort().uniq().array;
 
         this.put("_flash.new", values);
     }
 
-	/**
+    /**
      * Remove the given keys from the old flash data.
      *
      * @param  array  keys
      * @return void
      */
-	protected void removeFromOldFlashData(string[] keys)
-	{
-		string[] olds = this.get!(string[])("_flash.old");
-		string[] news = olds.remove!(x => keys.canFind(x));
-		this.put("_flash.old", news);
-	}
+    protected void removeFromOldFlashData(string[] keys) {
+        string[] olds = this.get!(string[])("_flash.old");
+        string[] news = olds.remove!(x => keys.canFind(x));
+        this.put("_flash.old", news);
+    }
 
-	/**
+    /**
      * Flash an input array to the session.
      *
      * @param  array  value
      * @return void
      */
-	void flashInput(string[string] value)
-	{
-		flash("_old_input", to!string(value));
-	}
+    void flashInput(string[string] value) {
+        flash("_old_input", to!string(value));
+    }
 
-
-	/**
+    /**
      * Flush the session data and regenerate the ID.
      *
      * @return bool
      */
-	// bool invalidate()
-	// {
-	// 	flush();
+    // bool invalidate()
+    // {
+    // 	flush();
 
-	// 	return migrate(true);
-	// }
-
-
+    // 	return migrate(true);
+    // }
 
     override bool opEquals(Object o) {
-        if (this is o) return true;
+        if (this is o)
+            return true;
         HttpSession that = cast(HttpSession) o;
-        if(that is null) return false;
+        if (that is null)
+            return false;
         return id == that.id;
     }
 
@@ -472,7 +411,8 @@ class HttpSession  {
     }
 
     static HttpSession create(string id, int maxInactiveInterval) {
-        long currentTime = convert!(TimeUnits.HectoNanosecond, TimeUnits.Millisecond)(Clock.currStdTime);
+        long currentTime = convert!(TimeUnits.HectoNanosecond, TimeUnits.Millisecond)(
+                Clock.currStdTime);
         HttpSession session = new HttpSession();
         session.setId(id);
         session.setMaxInactiveInterval(maxInactiveInterval);
@@ -492,7 +432,8 @@ class HttpSession  {
 
     static HttpSession fromJson(string id, string json) {
         JSONValue j = parseJSON(json);
-        long currentTime = convert!(TimeUnits.HectoNanosecond, TimeUnits.Millisecond)(Clock.currStdTime);
+        long currentTime = convert!(TimeUnits.HectoNanosecond, TimeUnits.Millisecond)(
+                Clock.currStdTime);
         HttpSession session = new HttpSession();
         session.setId(id);
         session.setCreationTime(j["CreationTime"].integer);
@@ -503,25 +444,16 @@ class HttpSession  {
         return session;
     }
 
-	static string generateSessionId(string sessionName = DefaultSessionIdName) {
-		SHA1 hash;
-		hash.start();
-		hash.put(getRandom);
-		ubyte[20] result = hash.finish();
-		string str = toLower(toHexString(result));
+    static string generateSessionId(string sessionName = DefaultSessionIdName) {
+        SHA1 hash;
+        hash.start();
+        hash.put(getRandom);
+        ubyte[20] result = hash.finish();
+        string str = toLower(toHexString(result));
 
-		// JSONValue json;
-		// json[sessionName] = str;
-		// json["_time"] = cast(int)(Clock.currTime.toUnixTime) + _expire;
-
-		// put(str, json.toString, _expire);
-
-		return str;
-	}
+        return str;
+    }
 }
-
-
-
 
 /**
  * 

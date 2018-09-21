@@ -247,29 +247,23 @@ final class Application {
             if (_headerComplete != null) {
                 _headerComplete(r);
             }
+            r.onHeaderCompleted();
             return false;
         }).content((buffer, request, response, ot, connection) {
             Request r = cast(Request) request.getAttachment();
-            if (r.content !is null) {
-                r.content(buffer);
-            }
-            else {
-                r.requestBody.add(buffer);
-            }
+            // logInfo(BufferUtils.toString(buffer));
+            r.requestBody.add(buffer);
             return false;
-            // }).contentComplete((request, response, ot, connection)  {
-            //     Request r = cast(Request) request.getAttachment();
-            //     if (r.contentComplete !is null) {
-            //         r.contentComplete(r);
-            //     }
+        // }).contentComplete((request, response, ot, connection)  {
+        //     Request r = cast(Request) request.getAttachment();
+        //     if (r.contentComplete !is null) {
+        //         r.contentComplete(r);
+        //     }
 
-            //     return false;
+        //     return false;
         }).messageComplete((request, response, ot, connection) {
             Request r = cast(Request) request.getAttachment();
-            if (r.messageComplete != null) {
-                r.messageComplete(r);
-            }
-
+            r.onMessageCompleted();
             handleRequest(r);
 
             // IO.close(r.getResponse());
