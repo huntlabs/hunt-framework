@@ -510,8 +510,8 @@ final class Request {
      * @return void
      */
 	public void flash() {
-		// this.session().flashInput(this.input());
-		implementationMissing(false);
+		if(hasSession())
+			_session.flashInput(this.input());
 	}
 
 	/**
@@ -521,9 +521,9 @@ final class Request {
      * @return void
      */
 	public void flashOnly(string[] keys) {
-		// this.session().flashInput(this.only(keys));
+		if(hasSession())
+			_session.flashInput(this.only(keys));
 
-		implementationMissing(false);
 	}
 
 	/**
@@ -533,9 +533,9 @@ final class Request {
      * @return void
      */
 	public void flashExcept(string[] keys) {
-		// this.session().flashInput(this.only(keys));
+		if(hasSession())
+			_session.flashInput(this.only(keys));
 
-		implementationMissing(false);
 	}
 
 	/**
@@ -818,15 +818,6 @@ final class Request {
 		return v;
 	}
 
-	// CookieManager cookieManager()
-	// {
-	// 	if (_cookieManager is null)
-	// 	{
-	// 		_cookieManager = new CookieManager(header(HttpHeader.COOKIE));
-	// 	}
-
-	// 	return _cookieManager;
-	// }
 
 	/**
      * Determine if a cookie is set on the request.
@@ -1143,22 +1134,16 @@ final class Request {
 	// 	return this;
 	// }
 
-	// JSONValue json(string key, string defaults = null)
-	// {
-	// 	string content = cast(string) ubyteBody();
-
-	// 	return parseJSON(content);
-	// }
 
 	protected string[string] getInputSource() {
-		implementationMissing(false);
-		return null;
-		// if (isContained(this.method, ["GET", "HEAD"]))
-		// 	return _httpMessage.queryParam();
-		// else
-		// {
-		// 	return httpForm.formData();
-		// }
+		if (isContained(this.method, ["GET", "HEAD"]))
+			return queries();
+		else
+		{
+			// return httpForm.formData();
+			implementationMissing(false);
+			return null;
+		}
 	}
 
 	/**
@@ -1372,10 +1357,10 @@ final class Request {
      *
      * @return bool true if the request came from a trusted proxy, false otherwise
      */
-	bool isFromTrustedProxy() {
-		implementationMissing(false);
-		return false;
-	}
+	// bool isFromTrustedProxy() {
+	// 	implementationMissing(false);
+	// 	return false;
+	// }
 
 private:
 	User _user;
