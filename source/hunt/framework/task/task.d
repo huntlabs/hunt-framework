@@ -111,7 +111,6 @@ public :
     {
         _taskLoop = el;
     }
-public :
 
     void run()
     {
@@ -197,14 +196,14 @@ private :
 
 }
 
-private TaskManager _taskMInstance;
+__gshared private TaskManager _taskMInstance;
 
 TaskManager GetTaskMObject()
 {
-
-    if (_taskMInstance is null)
-    {
+    if (_taskMInstance is null) {
+        import hunt.framework.application.application;
         _taskMInstance = new TaskManager();
+        _taskMInstance.setEventLoop(app().mainLoop());
     }
     return _taskMInstance;
 }

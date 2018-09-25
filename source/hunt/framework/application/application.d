@@ -306,6 +306,7 @@ final class Application {
 
         _server = new HttpServer(conf.http.address, conf.http.port,
                 configuration, buildHttpHandlerAdapter(), webSocketHandler);
+        
         // HTTPServerOptions option = new HTTPServerOptions();
         // option.maxHeaderSize = conf.http.maxHeaderSize;
         // //option.listenBacklog = conf.http.listenBacklog;
