@@ -160,7 +160,7 @@ mixin template MakeController(string moduleName = __MODULE__)
 mixin template HuntDynamicCallFun(T, string moduleName)
 {
 public:
-    // version (HuntDebugMode) 
+    // version (HUNT_DEBUG) 
     // pragma(msg, __createCallActionMethod!(T, moduleName));
     
     mixin(__createCallActionMethod!(T, moduleName));
@@ -194,7 +194,7 @@ string __createCallActionMethod(T, string moduleName)()
         Response callActionMethod(string methodName, Request req) {
         this.request = req; 
         Response actionResult=null;
-        version (HuntDebugMode) logDebug("methodName=", methodName);
+        version (HUNT_DEBUG) logDebug("methodName=", methodName);
         import std.conv;
 
         switch(methodName){
@@ -207,7 +207,7 @@ string __createCallActionMethod(T, string moduleName)()
             enum _isActionMember = isActionMember(memberName);
             foreach (t; __traits(getOverloads, T, memberName))
             {
-                // version (HuntDebugMode) pragma(msg, "memberName: " ~ memberName);
+                // version (HUNT_DEBUG) pragma(msg, "memberName: " ~ memberName);
 
                 //alias pars = ParameterTypeTuple!(t);
                 static if (hasUDA!(t, Action) || _isActionMember)
@@ -363,7 +363,7 @@ HandleFunction getRouteFromList(string str)
 
 void addRouteList(string str, HandleFunction method)
 {
-    version (HuntDebugMode) logDebug("add router: ", str);
+    version (HUNT_DEBUG) logDebug("add router: ", str);
     if (!_init)
     {
         import std.string : toLower;

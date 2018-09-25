@@ -11,8 +11,8 @@
 
 module hunt.framework.http.Request;
 
-
 import hunt.http.codec.http.model;
+
 // import hunt.http.codec.http.stream;
 import hunt.http.codec.http.stream.HttpConnection;
 import hunt.http.codec.http.stream.HttpOutputStream;
@@ -44,7 +44,6 @@ import std.socket : Address;
 alias RequestEventHandler = void delegate(Request sender);
 alias Closure = RequestEventHandler;
 
-
 final class Request {
 	private HttpRequest _request;
 	private HttpResponse _response;
@@ -60,7 +59,6 @@ final class Request {
 	// Action1!Request messageComplete;
 	package(hunt.framework.http) HttpOutputStream outputStream;
 	package(hunt.framework) List!(ByteBuffer) requestBody;
-
 
 	RequestEventHandler routeResolver;
 	RequestEventHandler userResolver;
@@ -78,6 +76,8 @@ final class Request {
 		// response.setHttpVersion(HttpVersion.HTTP_1_1);
 		// this._response = new Response(response, output, request.getURI(), bufferSize);
 		handleQueryParameters();
+
+		.request(this);
 	}
 
 	// alias _request this;
@@ -89,37 +89,40 @@ final class Request {
 	HttpFields getFields() {
 		return _httpFields;
 	}
+
 	private HttpFields _httpFields;
 
-	protected void handleQueryParameters(){
+	protected void handleQueryParameters() {
 		string q = getURI().getQuery();
-		if(!q.empty)
+		if (!q.empty)
 			urlEncodedMap.decode(q);
 	}
 
 	package(hunt.framework) void onHeaderCompleted() {
 		_httpFields = _request.getFields();
 		string transferEncoding = _httpFields.get(HttpHeader.TRANSFER_ENCODING);
-		
-		_isChunked = ( HttpHeaderValue.CHUNKED.asString() == transferEncoding
-                || (_request.getHttpVersion() == HttpVersion.HTTP_2 
+
+		_isChunked = (HttpHeaderValue.CHUNKED.asString() == transferEncoding
+				|| (_request.getHttpVersion() == HttpVersion.HTTP_2
 					&& _request.getContentLength() < 0));
 	}
 
 	package(hunt.framework) void onMessageCompleted() {
-		string contentType = MimeTypes.getContentTypeMIMEType(_httpFields.get(HttpHeader.CONTENT_TYPE));
+		string contentType = MimeTypes.getContentTypeMIMEType(
+				_httpFields.get(HttpHeader.CONTENT_TYPE));
 		_isXFormUrlencoded = std.string.icmp("application/x-www-form-urlencoded", contentType) == 0;
 		if (_isXFormUrlencoded) {
 			urlEncodedMap.decode(getStringBody());
-			// version(HuntDebugMode) info(urlEncodedMap.toString());
+			// version(HUNT_DEBUG) info(urlEncodedMap.toString());
 		}
 	}
-	private bool _isXFormUrlencoded = false;
 
+	private bool _isXFormUrlencoded = false;
 
 	bool isChunked() {
 		return _isChunked;
 	}
+
 	private bool _isChunked = false;
 
 	/**
@@ -226,10 +229,10 @@ final class Request {
 
 	// get queries
 	@property string[string] queries() {
-		if(_queryParams is null) {
+		if (_queryParams is null) {
 			MultiMap!string map = new MultiMap!string();
 			getURI().decodeQueryTo(map);
-			foreach(string key; map.byKey()) {
+			foreach (string key; map.byKey()) {
 				_queryParams[key] = map.getValue(key, 0);
 			}
 		}
@@ -238,12 +241,11 @@ final class Request {
 
 	private string[string] _queryParams;
 
-
 	@property string[string] xFormData() {
-		if(_xFormData is null && _isXFormUrlencoded) {
+		if (_xFormData is null && _isXFormUrlencoded) {
 			UrlEncoded map = new UrlEncoded();
 			map.decode(stringBody);
-			foreach(string key; map.byKey()) {
+			foreach (string key; map.byKey()) {
 				_xFormData[key] = map.getValue(key, 0);
 			}
 		}
@@ -293,10 +295,12 @@ final class Request {
 				buffer.put(BufferUtils.toString(b));
 			}
 			stringBody = buffer.data;
-			version(HuntDebugMode) trace("body content: ", stringBody);
+			version (HUNT_DEBUG)
+				trace("body content: ", stringBody);
 		}
 		return stringBody;
 	}
+
 	private string stringBody;
 
 	// Response createResponse()
@@ -556,7 +560,7 @@ final class Request {
      * @return void
      */
 	public void flash() {
-		if(hasSession())
+		if (hasSession())
 			_session.flashInput(this.input());
 	}
 
@@ -567,7 +571,7 @@ final class Request {
      * @return void
      */
 	public void flashOnly(string[] keys) {
-		if(hasSession())
+		if (hasSession())
 			_session.flashInput(this.only(keys));
 
 	}
@@ -579,7 +583,7 @@ final class Request {
      * @return void
      */
 	public void flashExcept(string[] keys) {
-		if(hasSession())
+		if (hasSession())
 			_session.flashInput(this.only(keys));
 
 	}
@@ -590,7 +594,7 @@ final class Request {
      * @return void
      */
 	void flush() {
-		if(hasSession())
+		if (hasSession())
 			_sessionStorage.put(_session);
 	}
 
@@ -600,7 +604,7 @@ final class Request {
      * @return HttpSession|null The session
      */
 	@property HttpSession session(bool canCreate = false) {
-		if (_session !is null || isSessionRetrieved) 
+		if (_session !is null || isSessionRetrieved)
 			return _session;
 
 		string sessionId = this.cookie(DefaultSessionIdName);
@@ -609,7 +613,7 @@ final class Request {
 			_session = _sessionStorage.get(sessionId);
 		}
 
-		if(_session is null && canCreate) {
+		if (_session is null && canCreate) {
 			sessionId = HttpSession.generateSessionId();
 			_session = HttpSession.create(sessionId, _sessionStorage.expire);
 			// _sessionStorage.put(sessionId, _session);
@@ -617,8 +621,8 @@ final class Request {
 
 		return _session;
 	}
-	private bool isSessionRetrieved = false;
 
+	private bool isSessionRetrieved = false;
 
 	/**
      * Whether the request contains a HttpSession object.
@@ -860,7 +864,6 @@ final class Request {
 		// }
 		return v;
 	}
-
 
 	/**
      * Determine if a cookie is set on the request.
@@ -1149,11 +1152,9 @@ final class Request {
 		return getFields().get("User-Agent");
 	}
 
-	Request merge(string[] input)
-	{
+	Request merge(string[] input) {
 		string[string] inputSource = getInputSource;
-		for (size_t i = 0; i < input.length; i++)
-		{
+		for (size_t i = 0; i < input.length; i++) {
 			inputSource[to!string(i)] = input[i];
 		}
 		return this;
@@ -1165,8 +1166,7 @@ final class Request {
      * @param  array input
      * @return Request
      */
-	Request replace(string[string] input)
-	{
+	Request replace(string[string] input) {
 		if (isContained(this.method, ["GET", "HEAD"]))
 			_queryParams = input;
 		else
@@ -1174,7 +1174,6 @@ final class Request {
 
 		return this;
 	}
-
 
 	protected string[string] getInputSource() {
 		if (isContained(this.method, ["GET", "HEAD"]))
@@ -1453,21 +1452,16 @@ void request(Request request) {
 	_request = request;
 }
 
+HttpSession session() {
+	return request().session();
+}
 
-// HttpSession session()
-// {
-// 	return request().session();
-// }
+string session(string key) {
+	return session().get(key);
+}
 
-// string session(string key)
-// {
-// 	return session().attributes.get(key);
-// }
-
-// void session(string[string] values)
-// {
-// 	foreach (key, value; values)
-// 	{
-// 		session().put(key, value);
-// 	}
-// }
+void session(string[string] values) {
+	foreach (key, value; values) {
+		session().put(key, value);
+	}
+}

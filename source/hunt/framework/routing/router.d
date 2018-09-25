@@ -242,7 +242,7 @@ class Router
         Route match(string domain, string method, string path)
         {
             Route r;
-            version (HuntDebugMode)
+            version (HUNT_DEBUG)
                 tracef("matching: domain=%s, method=%s, path=%s", domain, method, path);
             path = this.mendPath(path);
 
@@ -280,7 +280,7 @@ class Router
                 }
             }
 
-            version (HuntDebugMode)
+            version (HUNT_DEBUG)
                 tracef("matching2: domain=%s, method=%s, path=%s", domain, method, path);
             r = routeGroup.match(method, path);
             if (path[0] == '/' && r is null)
@@ -366,7 +366,7 @@ class Router
 
         Route makeRoute(T = string)(string methods, string path, T mca, string group = DEFAULT_ROUTE_GROUP)
         {
-            version (HuntDebugMode)
+            version (HUNT_DEBUG)
                 tracef("method: %s, path: %s, mca: %s, group: %s", methods, path, mca, group);
                 
             auto route = new Route();

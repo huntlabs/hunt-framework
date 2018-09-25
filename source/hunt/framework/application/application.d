@@ -231,7 +231,7 @@ final class Application {
     private ServerHttpHandlerAdapter buildHttpHandlerAdapter() {
         ServerHttpHandlerAdapter adapter = new ServerHttpHandlerAdapter();
         adapter.acceptConnection((HttpConnection c) {
-            version (HuntDebugMode)
+            version (HUNT_DEBUG)
                 logDebugf("new request from: %s", c.getRemoteAddress.toString());
 
             // }).acceptHttpTunnelConnection((request, response, ot, connection) {
