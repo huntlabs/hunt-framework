@@ -18,6 +18,7 @@ import std.algorithm;
 import std.string;
 import std.regex;
 import std.uri : decode;
+import kiss.logger;
 
 /**
 */
@@ -164,6 +165,8 @@ class RouteGroup
 
             if (matched && (canFind(r.getMethods, http_method) || r.getMethods == [HTTP_METHODS.ALL]))
             {
+                if(matched.captures[0] != path)
+                    continue;
                 route = r.copy();
                 string[string] params;
                 foreach (i, key; route.getParamKeys())
@@ -186,6 +189,7 @@ class RouteGroup
                 return value;
             }
         }
+
 
         return null;
     }
