@@ -72,6 +72,7 @@ final class Request : RequestHandler
 		_creatorBuffer = cuffer;
 		_handler = handler;
 		_maxBodySize = maxsize;
+		_monoCreated = MonoTime.currTime;
 	}
 
 	@property int elapsed()
