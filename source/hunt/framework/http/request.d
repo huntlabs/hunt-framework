@@ -42,6 +42,8 @@ import std.regex;
 import std.string;
 import std.socket : Address;
 
+import core.time : MonoTime, Duration;
+
 alias CreatorBuffer = Buffer delegate(HttpMessage) nothrow;
 alias DoHandler = void delegate(Request) nothrow;
 
@@ -58,6 +60,8 @@ final class Request : RequestHandler
 	protected Session _session;
 	protected string _sessionId;
 
+	private MonoTime _monoCreated;
+
 	string sessionId()
 	{
 		return this._sessionId;
@@ -68,6 +72,13 @@ final class Request : RequestHandler
 		_creatorBuffer = cuffer;
 		_handler = handler;
 		_maxBodySize = maxsize;
+	}
+
+	@property int elapsed()
+	{
+		Duration timeElapsed = MonoTime.currTime - _monoCreated;
+
+		return cast(int)timeElapsed.total!"msecs";
 	}
 
 	@property HTTPForm postForm()
