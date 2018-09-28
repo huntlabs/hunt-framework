@@ -18,6 +18,7 @@ import std.algorithm;
 import std.string;
 import std.regex;
 import std.uri : decode;
+import kiss.logger;
 
 /**
 */
@@ -186,6 +187,7 @@ class RouteGroup
                 return value;
             }
         }
+
 
         return null;
     }
