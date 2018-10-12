@@ -16,23 +16,27 @@
 
 module hunt.framework.messaging.simp.stomp.StompDecoder;
 
-import java.io.ByteArrayOutputStream;
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-
-import hunt.logging;
-
 
 import hunt.framework.messaging.Message;
-import hunt.framework.messaging.simp.SimpLogging;
+// import hunt.framework.messaging.simp.SimpLogging;
 import hunt.framework.messaging.support.MessageBuilder;
-import hunt.framework.messaging.support.MessageHeaderInitializer;
 import hunt.framework.messaging.support.NativeMessageHeaderAccessor;
-import org.springframework.util.InvalidMimeTypeException;
-import org.springframework.util.MultiValueMap;
+
+// import java.io.ByteArrayOutputStream;
+// import java.nio.Buffer;
+// import java.nio.ByteBuffer;
+// import java.nio.charset.StandardCharsets;
+// import java.util.ArrayList;
+// import java.util.List;
+
+import hunt.container;
+import hunt.io.ByteArrayOutputStream;
+import hunt.logging;
+import hunt.util.exception;
+
+
+// import org.springframework.util.InvalidMimeTypeException;
+// import org.springframework.util.MultiValueMap;
 
 /**
  * Decodes one or more STOMP frames contained in a {@link ByteBuffer}.
@@ -47,13 +51,12 @@ import org.springframework.util.MultiValueMap;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class StompDecoder {
+class StompDecoder {
 
-	static final byte[] HEARTBEAT_PAYLOAD = new byte[] {'\n'};
+	alias ByteMessage = Message!(byte[]);
 
+	enum byte[] HEARTBEAT_PAYLOAD = ['\n'];
 
-
-	
 	private MessageHeaderInitializer headerInitializer;
 
 
@@ -61,7 +64,7 @@ public class StompDecoder {
 	 * Configure a {@link MessageHeaderInitializer} to apply to the headers of
 	 * {@link Message Messages} from decoded STOMP frames.
 	 */
-	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
+	void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
 		this.headerInitializer = headerInitializer;
 	}
 
@@ -69,7 +72,7 @@ public class StompDecoder {
 	 * Return the configured {@code MessageHeaderInitializer}, if any.
 	 */
 	
-	public MessageHeaderInitializer getHeaderInitializer() {
+	MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;
 	}
 
@@ -83,7 +86,7 @@ public class StompDecoder {
 	 * @return the decoded messages, or an empty list if none
 	 * @throws StompConversionException raised in case of decoding issues
 	 */
-	public List<Message<byte[]>> decode(ByteBuffer byteBuffer) {
+	List!(ByteMessage) decode(ByteBuffer byteBuffer) {
 		return decode(byteBuffer, null);
 	}
 
@@ -106,12 +109,12 @@ public class StompDecoder {
 	 * @return the decoded messages, or an empty list if none
 	 * @throws StompConversionException raised in case of decoding issues
 	 */
-	public List<Message<byte[]>> decode(ByteBuffer byteBuffer,
-			MultiValueMap<string, string> partialMessageHeaders) {
+	List!(ByteMessage) decode(ByteBuffer byteBuffer,
+			MultiMap!(string) partialMessageHeaders) {
 
-		List<Message<byte[]>> messages = new ArrayList<>();
+		List!(ByteMessage) messages = new ArrayList!(ByteMessage)();
 		while (byteBuffer.hasRemaining()) {
-			Message<byte[]> message = decodeMessage(byteBuffer, partialMessageHeaders);
+			ByteMessage message = decodeMessage(byteBuffer, partialMessageHeaders);
 			if (message !is null) {
 				messages.add(message);
 			}
@@ -126,8 +129,8 @@ public class StompDecoder {
 	 * Decode a single STOMP frame from the given {@code buffer} into a {@link Message}.
 	 */
 	
-	private Message<byte[]> decodeMessage(ByteBuffer byteBuffer, MultiValueMap<string, string> headers) {
-		Message<byte[]> decodedMessage = null;
+	private ByteMessage decodeMessage(ByteBuffer byteBuffer, MultiMap!(string) headers) {
+		ByteMessage decodedMessage = null;
 		skipLeadingEol(byteBuffer);
 
 		// Explicit mark/reset access via Buffer base type for compatibility
@@ -166,7 +169,7 @@ public class StompDecoder {
 				if (headers !is null && headerAccessor !is null) {
 					string name = NativeMessageHeaderAccessor.NATIVE_HEADERS;
 					
-					MultiValueMap<string, string> map = (MultiValueMap<string, string>) headerAccessor.getHeader(name);
+					MultiMap!(string) map = (MultiMap!(string)) headerAccessor.getHeader(name);
 					if (map !is null) {
 						headers.putAll(map);
 					}

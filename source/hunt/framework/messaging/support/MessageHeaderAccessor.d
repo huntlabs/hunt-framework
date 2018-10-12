@@ -37,6 +37,23 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.util.StringUtils;
 
+
+/**
+ * Callback interface for initializing a {@link MessageHeaderAccessor}.
+ *
+ * @author Rossen Stoyanchev
+ * @since 4.1
+ */
+interface MessageHeaderInitializer {
+
+	/**
+	 * Initialize the given {@code MessageHeaderAccessor}.
+	 * @param headerAccessor the MessageHeaderAccessor to initialize
+	 */
+	void initHeaders(MessageHeaderAccessor headerAccessor);
+
+}
+
 /**
  * A base for classes providing strongly typed getters and setters as well as
  * behavior around specific categories of headers (e.g. STOMP headers).

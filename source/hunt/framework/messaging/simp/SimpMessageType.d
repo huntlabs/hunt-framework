@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,33 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.support.MessageHeaderInitializer;
-
-import hunt.framework.messaging.support.MessageHeaderAccessor;
+module hunt.framework.messaging.simp.SimpMessageType;
 
 /**
- * Callback interface for initializing a {@link MessageHeaderAccessor}.
+ * A generic representation of different kinds of messages found in simple messaging
+ * protocols like STOMP.
  *
  * @author Rossen Stoyanchev
- * @since 4.1
+ * @since 4.0
  */
-interface MessageHeaderInitializer {
+enum SimpMessageType {
 
-	/**
-	 * Initialize the given {@code MessageHeaderAccessor}.
-	 * @param headerAccessor the MessageHeaderAccessor to initialize
-	 */
-	void initHeaders(MessageHeaderAccessor headerAccessor);
+	CONNECT,
+
+	CONNECT_ACK,
+
+	MESSAGE,
+
+	SUBSCRIBE,
+
+	UNSUBSCRIBE,
+
+	HEARTBEAT,
+
+	DISCONNECT,
+
+	DISCONNECT_ACK,
+
+	OTHER;
 
 }
