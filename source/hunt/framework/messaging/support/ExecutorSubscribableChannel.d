@@ -167,8 +167,8 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 				messageToUse = interceptor.beforeHandle(messageToUse, ExecutorSubscribableChannel.this, this.messageHandler);
 				if (messageToUse is null) {
 					string name = interceptor.getClass().getSimpleName();
-					if (logger.isDebugEnabled()) {
-						logger.debug(name ~ " returned null from beforeHandle, i.e. precluding the send.");
+					version(HUNT_DEBUG) {
+						trace(name ~ " returned null from beforeHandle, i.e. precluding the send.");
 					}
 					triggerAfterMessageHandled(message, null);
 					return null;

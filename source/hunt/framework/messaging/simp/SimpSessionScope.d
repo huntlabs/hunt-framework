@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.simp;
+module hunt.framework.messaging.simp.SimpSessionScope;
 
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.Scope;
@@ -30,7 +30,7 @@ import org.springframework.beans.factory.config.Scope;
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public class SimpSessionScope implements Scope {
+public class SimpSessionScope : Scope {
 
 	override
 	public Object get(string name, ObjectFactory<?> objectFactory) {

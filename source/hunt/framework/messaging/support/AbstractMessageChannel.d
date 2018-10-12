@@ -160,8 +160,8 @@ public abstract class AbstractMessageChannel(T) : MessageChannel, InterceptableC
 				Message!(T) resolvedMessage = interceptor.preSend(messageToUse, channel);
 				if (resolvedMessage is null) {
 					string name = interceptor.getClass().getSimpleName();
-					if (logger.isDebugEnabled()) {
-						logger.debug(name ~ " returned null from preSend, i.e. precluding the send.");
+					version(HUNT_DEBUG) {
+						trace(name ~ " returned null from preSend, i.e. precluding the send.");
 					}
 					triggerAfterSendCompletion(messageToUse, channel, false, null);
 					return null;

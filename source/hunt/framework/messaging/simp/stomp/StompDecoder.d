@@ -16,9 +16,10 @@
 
 module hunt.framework.messaging.simp.stomp.StompDecoder;
 
-
+import hunt.framework.messaging.exception;
 import hunt.framework.messaging.Message;
-// import hunt.framework.messaging.simp.SimpLogging;
+import hunt.framework.messaging.simp.stomp.StompCommand;
+import hunt.framework.messaging.simp.SimpMessageType;
 import hunt.framework.messaging.support.MessageBuilder;
 import hunt.framework.messaging.support.NativeMessageHeaderAccessor;
 
@@ -33,10 +34,10 @@ import hunt.container;
 import hunt.io.ByteArrayOutputStream;
 import hunt.logging;
 import hunt.util.exception;
+import hunt.string;
 
+import std.conv;
 
-// import org.springframework.util.InvalidMimeTypeException;
-// import org.springframework.util.MultiValueMap;
 
 /**
  * Decodes one or more STOMP frames contained in a {@link ByteBuffer}.
@@ -153,8 +154,9 @@ class StompDecoder {
 				if (payload.length > 0) {
 					StompCommand stompCommand = headerAccessor.getCommand();
 					if (stompCommand !is null && !stompCommand.isBodyAllowed()) {
-						throw new StompConversionException(stompCommand +
-								" shouldn't have a payload: length=" ~ payload.length ~ ", headers=" ~ headers);
+						throw new StompConversionException(stompCommand ~
+								" shouldn't have a payload: length=" ~ 
+								to!string(payload.length) ~ ", headers=" ~ headers);
 					}
 				}
 				headerAccessor.updateSimpMessageHeadersFromStompHeaders();
@@ -169,7 +171,7 @@ class StompDecoder {
 				if (headers !is null && headerAccessor !is null) {
 					string name = NativeMessageHeaderAccessor.NATIVE_HEADERS;
 					
-					MultiMap!(string) map = (MultiMap!(string)) headerAccessor.getHeader(name);
+					MultiMap!(string) map = cast(MultiMap!(string)) headerAccessor.getHeader(name);
 					if (map !is null) {
 						headers.putAll(map);
 					}
@@ -214,7 +216,7 @@ class StompDecoder {
 		while (byteBuffer.remaining() > 0 && !tryConsumeEndOfLine(byteBuffer)) {
 			command.write(byteBuffer.get());
 		}
-		return new string(command.toByteArray(), StandardCharsets.UTF_8);
+		return cast(string) (command.toByteArray());
 	}
 
 	private void readHeaders(ByteBuffer byteBuffer, StompHeaderAccessor headerAccessor) {
@@ -229,11 +231,11 @@ class StompDecoder {
 				headerStream.write(byteBuffer.get());
 			}
 			if (headerStream.size() > 0 && headerComplete) {
-				string header = new string(headerStream.toByteArray(), StandardCharsets.UTF_8);
+				string header = cast(string)(headerStream.toByteArray());
 				int colonIndex = header.indexOf(':');
 				if (colonIndex <= 0) {
 					if (byteBuffer.remaining() > 0) {
-						throw new StompConversionException("Illegal header: '" ~ header +
+						throw new StompConversionException("Illegal header: '" ~ header ~
 								"'. A header must be of the form <name>:[<value>].");
 					}
 				}
@@ -302,8 +304,8 @@ class StompDecoder {
 			contentLength = headerAccessor.getContentLength();
 		}
 		catch (NumberFormatException ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Ignoring invalid content-length: '" ~ headerAccessor);
+			version(HUNT_DEBUG) {
+				trace("Ignoring invalid content-length: '" ~ headerAccessor);
 			}
 			contentLength = null;
 		}
@@ -340,7 +342,7 @@ class StompDecoder {
 	 * Try to read an EOL incrementing the buffer position if successful.
 	 * @return whether an EOL was consumed
 	 */
-	private  tryConsumeEndOfLine(ByteBuffer byteBuffer) {
+	private bool tryConsumeEndOfLine(ByteBuffer byteBuffer) {
 		if (byteBuffer.remaining() > 0) {
 			byte b = byteBuffer.get();
 			if (b == '\n') {
@@ -355,7 +357,7 @@ class StompDecoder {
 				}
 			}
 			// Explicit cast for compatibility with covariant return type on JDK 9's ByteBuffer
-			((Buffer) byteBuffer).position(byteBuffer.position() - 1);
+			(cast(Buffer) byteBuffer).position(byteBuffer.position() - 1);
 		}
 		return false;
 	}

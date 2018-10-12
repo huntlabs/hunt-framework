@@ -19,14 +19,7 @@ module hunt.framework.messaging;
 import hunt.framework.messaging.exception;
 import hunt.framework.messaging.Message;
 
-import hunt.util.exception;
-
-
-class NestedRuntimeException : Exception
-{
-    mixin BasicExceptionCtors;
-}
-
+// import hunt.util.exception;
 
 
 /**

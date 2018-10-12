@@ -17,6 +17,9 @@
 module hunt.framework.messaging.simp.stomp.StompCommand;
 
 import hunt.framework.messaging.simp.SimpMessageType;
+import hunt.util.traits;
+
+import std.string;
 
 /**
  * Represents a STOMP command.
@@ -25,67 +28,84 @@ import hunt.framework.messaging.simp.SimpMessageType;
  * @author Juergen Hoeller
  * @since 4.0
  */
-public enum StompCommand {
+struct StompCommand {
+
+	enum StompCommand Null = StompCommand("Null", SimpMessageType.OTHER);
 
 	// client
-	STOMP(SimpMessageType.CONNECT),
-	CONNECT(SimpMessageType.CONNECT),
-	DISCONNECT(SimpMessageType.DISCONNECT),
-	SUBSCRIBE(SimpMessageType.SUBSCRIBE, true, true, false),
-	UNSUBSCRIBE(SimpMessageType.UNSUBSCRIBE, false, true, false),
-	SEND(SimpMessageType.MESSAGE, true, false, true),
-	ACK(SimpMessageType.OTHER),
-	NACK(SimpMessageType.OTHER),
-	BEGIN(SimpMessageType.OTHER),
-	COMMIT(SimpMessageType.OTHER),
-	ABORT(SimpMessageType.OTHER),
+	enum StompCommand STOMP = StompCommand("STOMP", SimpMessageType.CONNECT);
+	enum StompCommand CONNECT = StompCommand("CONNECT", SimpMessageType.CONNECT);
+	enum StompCommand DISCONNECT = StompCommand("DISCONNECT", SimpMessageType.DISCONNECT);
+	enum StompCommand SUBSCRIBE = StompCommand("SUBSCRIBE", SimpMessageType.SUBSCRIBE, true, true, false);
+	enum StompCommand UNSUBSCRIBE = StompCommand("UNSUBSCRIBE", SimpMessageType.UNSUBSCRIBE, false, true, false);
+	enum StompCommand SEND = StompCommand("SEND", SimpMessageType.MESSAGE, true, false, true);
+	enum StompCommand ACK = StompCommand("ACK", SimpMessageType.OTHER);
+	enum StompCommand NACK = StompCommand("NACK", SimpMessageType.OTHER);
+	enum StompCommand BEGIN = StompCommand("BEGIN", SimpMessageType.OTHER);
+	enum StompCommand COMMIT = StompCommand("COMMIT", SimpMessageType.OTHER);
+	enum StompCommand ABORT = StompCommand("ABORT", SimpMessageType.OTHER);
 
 	// server
-	CONNECTED(SimpMessageType.OTHER),
-	RECEIPT(SimpMessageType.OTHER),
-	MESSAGE(SimpMessageType.MESSAGE, true, true, true),
-	ERROR(SimpMessageType.OTHER, false, false, true);
+	enum StompCommand CONNECTED = StompCommand("CONNECTED", SimpMessageType.OTHER);
+	enum StompCommand RECEIPT = StompCommand("RECEIPT", SimpMessageType.OTHER);
+	enum StompCommand MESSAGE = StompCommand("MESSAGE", SimpMessageType.MESSAGE, true, true, true);
+	enum StompCommand ERROR = StompCommand("ERROR", SimpMessageType.OTHER, false, false, true);
+
+	mixin GetConstantValues!(StompCommand);
+
+	private string _name;
+	private SimpMessageType messageType;
+	private bool destination;
+	private bool subscriptionId;
+	private bool hasBody;
 
 
-	private final SimpMessageType messageType;
-
-	private final  destination;
-
-	private final  subscriptionId;
-
-	private final  body;
-
-
-	StompCommand(SimpMessageType messageType) {
-		this(messageType, false, false, false);
+	this(string name, SimpMessageType messageType) {
+		this(name, messageType, false, false, false);
 	}
 
-	StompCommand(SimpMessageType messageType,  destination,  subscriptionId,  body) {
+	this(string name, SimpMessageType messageType, 
+		bool destination, bool subscriptionId, bool hasBody) {
+		this._name = toUpper(name);
+		
 		this.messageType = messageType;
 		this.destination = destination;
 		this.subscriptionId = subscriptionId;
-		this.body = body;
+		this.hasBody = hasBody;
 	}
 
+	static StompCommand valueOf(string name) {
+		string n = toUpper(name);
+		foreach(ref StompCommand s; values) {
+			if(n == s._name) {
+				return s;
+			}
+		}
+		return Null;
+	}
 
-	public SimpMessageType getMessageType() {
+	string name() {
+		return _name;
+	}
+
+	SimpMessageType getMessageType() {
 		return this.messageType;
 	}
 
-	public  requiresDestination() {
+	bool requiresDestination() {
 		return this.destination;
 	}
 
-	public  requiresSubscriptionId() {
+	bool requiresSubscriptionId() {
 		return this.subscriptionId;
 	}
 
-	public  requiresContentLength() {
-		return this.body;
+	bool requiresContentLength() {
+		return this.hasBody;
 	}
 
-	public  isBodyAllowed() {
-		return this.body;
+	bool isBodyAllowed() {
+		return this.hasBody;
 	}
 
 }

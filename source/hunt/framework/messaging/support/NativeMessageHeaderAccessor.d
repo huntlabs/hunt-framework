@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.support;
+module hunt.framework.messaging.support.NativeMessageHeaderAccessor;
 
 import hunt.container.Collections;
 import java.util.LinkedList;
@@ -47,12 +47,12 @@ import org.springframework.util.ObjectUtils;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
+class NativeMessageHeaderAccessor : MessageHeaderAccessor {
 
 	/**
 	 * The header name used to store native headers.
 	 */
-	public static final string NATIVE_HEADERS = "nativeHeaders";
+	static final string NATIVE_HEADERS = "nativeHeaders";
 
 
 	/**
@@ -97,13 +97,13 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	/**
 	 * Return a copy of the native header values or an empty map.
 	 */
-	public Map<string, List!(string)> toNativeHeaderMap() {
+	Map<string, List!(string)> toNativeHeaderMap() {
 		Map<string, List!(string)> map = getNativeHeaders();
 		return (map !is null ? new LinkedMultiValueMap<>(map) : Collections.emptyMap());
 	}
 
 	override
-	public void setImmutable() {
+	void setImmutable() {
 		if (isMutable()) {
 			Map<string, List!(string)> map = getNativeHeaders();
 			if (map !is null) {
@@ -118,7 +118,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	/**
 	 * Whether the native header map contains the give header name.
 	 */
-	public  containsNativeHeader(string headerName) {
+	 containsNativeHeader(string headerName) {
 		Map<string, List!(string)> map = getNativeHeaders();
 		return (map !is null && map.containsKey(headerName));
 	}
@@ -128,7 +128,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	 * or {@code null} if none.
 	 */
 	
-	public List!(string) getNativeHeader(string headerName) {
+	List!(string) getNativeHeader(string headerName) {
 		Map<string, List!(string)> map = getNativeHeaders();
 		return (map !is null ? map.get(headerName) : null);
 	}
@@ -138,7 +138,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	 * or {@code null} if none.
 	 */
 	
-	public string getFirstNativeHeader(string headerName) {
+	string getFirstNativeHeader(string headerName) {
 		Map<string, List!(string)> map = getNativeHeaders();
 		if (map !is null) {
 			List!(string) values = map.get(headerName);
@@ -152,7 +152,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	/**
 	 * Set the specified native header value replacing existing values.
 	 */
-	public void setNativeHeader(string name, string value) {
+	void setNativeHeader(string name, string value) {
 		Assert.state(isMutable(), "Already immutable");
 		Map<string, List!(string)> map = getNativeHeaders();
 		if (value is null) {
@@ -177,7 +177,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	/**
 	 * Add the specified native header value to existing values.
 	 */
-	public void addNativeHeader(string name, string value) {
+	void addNativeHeader(string name, string value) {
 		Assert.state(isMutable(), "Already immutable");
 		if (value is null) {
 			return;
@@ -192,7 +192,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		setModified(true);
 	}
 
-	public void addNativeHeaders(MultiValueMap<string, string> headers) {
+	void addNativeHeaders(MultiValueMap<string, string> headers) {
 		if (headers is null) {
 			return;
 		}
@@ -200,7 +200,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	}
 
 	
-	public List!(string) removeNativeHeader(string name) {
+	List!(string) removeNativeHeader(string name) {
 		Assert.state(isMutable(), "Already immutable");
 		Map<string, List!(string)> nativeHeaders = getNativeHeaders();
 		if (nativeHeaders is null) {
@@ -211,7 +211,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 
 	
 	
-	public static string getFirstNativeHeader(string headerName, Map!(string, Object) headers) {
+	static string getFirstNativeHeader(string headerName, Map!(string, Object) headers) {
 		Map<string, List!(string)> map = (Map<string, List!(string)>) headers.get(NATIVE_HEADERS);
 		if (map !is null) {
 			List!(string) values = map.get(headerName);

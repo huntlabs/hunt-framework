@@ -312,8 +312,8 @@ class MessageHeaders : Map!(string, Object) {
 	// 	}
 	// 	else {
 	// 		// Some non-serializable entries -> serialize a temporary MessageHeaders copy
-	// 		if (logger.isDebugEnabled()) {
-	// 			logger.debug("Ignoring non-serializable message headers: " ~ keysToIgnore);
+	// 		version(HUNT_DEBUG) {
+	// 			trace("Ignoring non-serializable message headers: " ~ keysToIgnore);
 	// 		}
 	// 		out.writeObject(new MessageHeaders(this, keysToIgnore));
 	// 	}

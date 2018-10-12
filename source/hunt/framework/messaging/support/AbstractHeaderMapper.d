@@ -99,8 +99,8 @@ abstract class AbstractHeaderMapper(T) : HeaderMapper!(T) {
 		}
 
 		// if (!type.isAssignableFrom(value.getClass())) {
-		// 	if (logger.isDebugEnabled()) {
-		// 		logger.debug("Skipping header '" ~ name ~ "': expected type [" ~ type ~ "], but got [" ~
+		// 	version(HUNT_DEBUG) {
+		// 		trace("Skipping header '" ~ name ~ "': expected type [" ~ type ~ "], but got [" ~
 		// 				value.getClass() ~ "]");
 		// 	}
 		// 	return null;
