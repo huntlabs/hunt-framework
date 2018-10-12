@@ -14,28 +14,26 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.simp.stomp;
-
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import hunt.container.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import hunt.container.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-
-import hunt.logging;
-
+module hunt.framework.messaging.simp.stomp.StompEncoder;
 
 import hunt.framework.messaging.Message;
-import hunt.framework.messaging.simp.SimpLogging;
+import hunt.framework.messaging.simp.stomp.StompCommand;
 import hunt.framework.messaging.simp.SimpMessageHeaderAccessor;
 import hunt.framework.messaging.simp.SimpMessageType;
 import hunt.framework.messaging.support.NativeMessageHeaderAccessor;
-import org.springframework.util.Assert;
+
+import hunt.io.ByteArrayOutputStream;
+import hunt.io.DataOutputStream;
+// import java.util.concurrent.ConcurrentHashMap;
+
+import hunt.container;
+import hunt.logging;
+import hunt.util.exception;
+
+import std.conv;
+
+
+alias DataOutputStream = BufferedOutputStream;
 
 /**
  * An encoder for STOMP frames.
@@ -79,7 +77,7 @@ public class StompEncoder  {
 	 * @param message the message to encode
 	 * @return the encoded message
 	 */
-	public byte[] encode(Message<byte[]> message) {
+	public byte[] encode(Message!(byte[]) message) {
 		return encode(message.getHeaders(), message.getPayload());
 	}
 
@@ -90,8 +88,8 @@ public class StompEncoder  {
 	 * @return the encoded message
 	 */
 	public byte[] encode(Map!(string, Object) headers, byte[] payload) {
-		Assert.notNull(headers, "'headers' is required");
-		Assert.notNull(payload, "'payload' is required");
+		assert(headers !is null, "'headers' is required");
+		assert(payload !is null, "'payload' is required");
 
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream(128 + payload.length);
@@ -108,12 +106,12 @@ public class StompEncoder  {
 					throw new IllegalStateException("Missing STOMP command: " ~ headers);
 				}
 
-				output.write(command.toString().getBytes(StandardCharsets.UTF_8));
+				output.write( cast(byte[]) command.toString());
 				output.write(LF);
 				writeHeaders(command, headers, payload, output);
 				output.write(LF);
 				writeBody(payload, output);
-				output.write((byte) 0);
+				output.write(0);
 			}
 
 			return baos.toByteArray();
@@ -124,13 +122,13 @@ public class StompEncoder  {
 	}
 
 	private void writeHeaders(StompCommand command, Map!(string, Object) headers, byte[] payload,
-			DataOutputStream output) throws IOException {
+			DataOutputStream output) {
 
 		
-		Map<string,List!(string)> nativeHeaders =
+		Map!(string,List!(string)) nativeHeaders =
 				(Map<string, List!(string)>) headers.get(NativeMessageHeaderAccessor.NATIVE_HEADERS);
 
-		if (logger.isTraceEnabled()) {
+		version(HUNT_DEBUG) {
 			logger.trace("Encoding STOMP " ~ command ~ ", headers=" ~ nativeHeaders);
 		}
 
@@ -140,19 +138,18 @@ public class StompEncoder  {
 
 		 shouldEscape = (command != StompCommand.CONNECT && command != StompCommand.CONNECTED);
 
-		for (Entry<string, List!(string)> entry : nativeHeaders.entrySet()) {
-			if (command.requiresContentLength() && "content-length".equals(entry.getKey())) {
+		foreach (string key, List!(string) values ; nativeHeaders) {
+			if (command.requiresContentLength() && "content-length".equals(key)) {
 				continue;
 			}
 
-			List!(string) values = entry.getValue();
 			if (StompCommand.CONNECT.equals(command) &&
-					StompHeaderAccessor.STOMP_PASSCODE_HEADER.equals(entry.getKey())) {
+					StompHeaderAccessor.STOMP_PASSCODE_HEADER.equals(key)) {
 				values = Collections.singletonList(StompHeaderAccessor.getPasscode(headers));
 			}
 
-			byte[] encodedKey = encodeHeaderKey(entry.getKey(), shouldEscape);
-			for (string value : values) {
+			byte[] encodedKey = encodeHeaderKey(key, shouldEscape);
+			foreach (string value ; values) {
 				output.write(encodedKey);
 				output.write(COLON);
 				output.write(encodeHeaderValue(value, shouldEscape));
@@ -161,9 +158,9 @@ public class StompEncoder  {
 		}
 
 		if (command.requiresContentLength()) {
-			int contentLength = payload.length;
-			output.write("content-length:".getBytes(StandardCharsets.UTF_8));
-			output.write(Integer.toString(contentLength).getBytes(StandardCharsets.UTF_8));
+			size_t contentLength = payload.length;
+			output.write("content-length:");
+			output.write(contentLength.to!string());
 			output.write(LF);
 		}
 	}
@@ -228,7 +225,7 @@ public class StompEncoder  {
 		return sb;
 	}
 
-	private void writeBody(byte[] payload, DataOutputStream output) throws IOException {
+	private void writeBody(byte[] payload, DataOutputStream output) {
 		output.write(payload);
 	}
 

@@ -16,8 +16,8 @@
 
 module hunt.framework.messaging.MessageHeaders;
 
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import hunt.io.ObjectInputStream;
+import hunt.io.ObjectOutputStream;
 
 // import hunt.container.Collection;
 // import hunt.container.Collections;

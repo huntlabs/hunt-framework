@@ -23,7 +23,7 @@ import hunt.framework.messaging.simp.SimpMessageType;
 import hunt.framework.messaging.support.MessageBuilder;
 import hunt.framework.messaging.support.NativeMessageHeaderAccessor;
 
-// import java.io.ByteArrayOutputStream;
+// import hunt.io.ByteArrayOutputStream;
 // import java.nio.Buffer;
 // import java.nio.ByteBuffer;
 // import java.nio.charset.StandardCharsets;
@@ -162,7 +162,7 @@ class StompDecoder {
 				headerAccessor.updateSimpMessageHeadersFromStompHeaders();
 				headerAccessor.setLeaveMutable(true);
 				decodedMessage = MessageBuilder.createMessage(payload, headerAccessor.getMessageHeaders());
-				if (logger.isTraceEnabled()) {
+				version(HUNT_DEBUG) {
 					logger.trace("Decoded " ~ headerAccessor.getDetailedLogMessage(payload));
 				}
 			}
@@ -184,7 +184,7 @@ class StompDecoder {
 			initHeaders(headerAccessor);
 			headerAccessor.setLeaveMutable(true);
 			decodedMessage = MessageBuilder.createMessage(HEARTBEAT_PAYLOAD, headerAccessor.getMessageHeaders());
-			if (logger.isTraceEnabled()) {
+			version(HUNT_DEBUG) {
 				logger.trace("Decoded " ~ headerAccessor.getDetailedLogMessage(null));
 			}
 		}
