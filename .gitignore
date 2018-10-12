@@ -20,6 +20,7 @@ core
 dub.userprefs
 *.lib
 *.exe
+*.zip
 .DS_Store
 .project
 libhunt.a
@@ -31,3 +32,5 @@ tmp.conf
 tmp.saveas.conf
 web
 examples/simplest/hunt-web
+
+/java

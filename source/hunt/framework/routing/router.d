@@ -469,7 +469,7 @@ class Router
 
             if (route.staticFilePath == string.init)
             {
-                if (route.getModule() == null)
+                if (route.getModule() is null)
                 {
                     handleKey = "app.controller." ~ ((route.getGroup() == DEFAULT_ROUTE_GROUP) ? ""
                             : route.getGroup() ~ ".") ~ route.getController() ~ "." ~ route.getController()

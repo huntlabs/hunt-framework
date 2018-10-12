@@ -244,7 +244,7 @@ final class Application {
         }).headerComplete((request, response, ot, connection) {
             Request r = new Request(request, response, ot, connection, _sessionStorage);
             request.setAttachment(r);
-            if (_headerComplete != null) {
+            if (_headerComplete !is null) {
                 _headerComplete(r);
             }
             r.onHeaderCompleted();
@@ -281,7 +281,7 @@ final class Application {
                 }
             }
         }).earlyEOF((request, response, ot, connection) {
-            if (_earlyEof != null) {
+            if (_earlyEof !is null) {
                 if (request.getAttachment() !is null) {
                     Request r = cast(Request) request.getAttachment();
                     _earlyEof(r);
