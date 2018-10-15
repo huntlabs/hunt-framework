@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.simp;
+module hunt.framework.messaging.simp.SimpMessageMappingInfo;
 
 
 import hunt.framework.messaging.Message;
@@ -32,88 +32,88 @@ import hunt.framework.messaging.handler.MessageCondition;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class SimpMessageMappingInfo implements MessageCondition<SimpMessageMappingInfo> {
+// class SimpMessageMappingInfo : MessageCondition<SimpMessageMappingInfo> {
 
-	private final SimpMessageTypeMessageCondition messageTypeMessageCondition;
+// 	private final SimpMessageTypeMessageCondition messageTypeMessageCondition;
 
-	private final DestinationPatternsMessageCondition destinationConditions;
-
-
-	public SimpMessageMappingInfo(SimpMessageTypeMessageCondition messageTypeMessageCondition,
-			DestinationPatternsMessageCondition destinationConditions) {
-
-		this.messageTypeMessageCondition = messageTypeMessageCondition;
-		this.destinationConditions = destinationConditions;
-	}
+// 	private final DestinationPatternsMessageCondition destinationConditions;
 
 
-	public SimpMessageTypeMessageCondition getMessageTypeMessageCondition() {
-		return this.messageTypeMessageCondition;
-	}
+// 	SimpMessageMappingInfo(SimpMessageTypeMessageCondition messageTypeMessageCondition,
+// 			DestinationPatternsMessageCondition destinationConditions) {
 
-	public DestinationPatternsMessageCondition getDestinationConditions() {
-		return this.destinationConditions;
-	}
+// 		this.messageTypeMessageCondition = messageTypeMessageCondition;
+// 		this.destinationConditions = destinationConditions;
+// 	}
 
 
-	override
-	public SimpMessageMappingInfo combine(SimpMessageMappingInfo other) {
-		SimpMessageTypeMessageCondition typeCond =
-				this.getMessageTypeMessageCondition().combine(other.getMessageTypeMessageCondition());
-		DestinationPatternsMessageCondition destCond =
-				this.destinationConditions.combine(other.getDestinationConditions());
-		return new SimpMessageMappingInfo(typeCond, destCond);
-	}
+// 	SimpMessageTypeMessageCondition getMessageTypeMessageCondition() {
+// 		return this.messageTypeMessageCondition;
+// 	}
 
-	override
+// 	DestinationPatternsMessageCondition getDestinationConditions() {
+// 		return this.destinationConditions;
+// 	}
+
+
+// 	override
+// 	SimpMessageMappingInfo combine(SimpMessageMappingInfo other) {
+// 		SimpMessageTypeMessageCondition typeCond =
+// 				this.getMessageTypeMessageCondition().combine(other.getMessageTypeMessageCondition());
+// 		DestinationPatternsMessageCondition destCond =
+// 				this.destinationConditions.combine(other.getDestinationConditions());
+// 		return new SimpMessageMappingInfo(typeCond, destCond);
+// 	}
+
+// 	override
 	
-	public SimpMessageMappingInfo getMatchingCondition(Message<?> message) {
-		SimpMessageTypeMessageCondition typeCond = this.messageTypeMessageCondition.getMatchingCondition(message);
-		if (typeCond is null) {
-			return null;
-		}
-		DestinationPatternsMessageCondition destCond = this.destinationConditions.getMatchingCondition(message);
-		if (destCond is null) {
-			return null;
-		}
-		return new SimpMessageMappingInfo(typeCond, destCond);
-	}
+// 	SimpMessageMappingInfo getMatchingCondition(Message<?> message) {
+// 		SimpMessageTypeMessageCondition typeCond = this.messageTypeMessageCondition.getMatchingCondition(message);
+// 		if (typeCond is null) {
+// 			return null;
+// 		}
+// 		DestinationPatternsMessageCondition destCond = this.destinationConditions.getMatchingCondition(message);
+// 		if (destCond is null) {
+// 			return null;
+// 		}
+// 		return new SimpMessageMappingInfo(typeCond, destCond);
+// 	}
 
-	override
-	public int compareTo(SimpMessageMappingInfo other, Message<?> message) {
-		int result = this.messageTypeMessageCondition.compareTo(other.messageTypeMessageCondition, message);
-		if (result != 0) {
-			return result;
-		}
-		result = this.destinationConditions.compareTo(other.destinationConditions, message);
-		if (result != 0) {
-			return result;
-		}
-		return 0;
-	}
+// 	override
+// 	int compareTo(SimpMessageMappingInfo other, Message<?> message) {
+// 		int result = this.messageTypeMessageCondition.compareTo(other.messageTypeMessageCondition, message);
+// 		if (result != 0) {
+// 			return result;
+// 		}
+// 		result = this.destinationConditions.compareTo(other.destinationConditions, message);
+// 		if (result != 0) {
+// 			return result;
+// 		}
+// 		return 0;
+// 	}
 
 
-	override
-	public bool opEquals(Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof SimpMessageMappingInfo)) {
-			return false;
-		}
-		SimpMessageMappingInfo otherInfo = (SimpMessageMappingInfo) other;
-		return (this.destinationConditions.equals(otherInfo.destinationConditions) &&
-				this.messageTypeMessageCondition.equals(otherInfo.messageTypeMessageCondition));
-	}
+// 	override
+// 	bool opEquals(Object other) {
+// 		if (this == other) {
+// 			return true;
+// 		}
+// 		if (!(other instanceof SimpMessageMappingInfo)) {
+// 			return false;
+// 		}
+// 		SimpMessageMappingInfo otherInfo = (SimpMessageMappingInfo) other;
+// 		return (this.destinationConditions.equals(otherInfo.destinationConditions) &&
+// 				this.messageTypeMessageCondition.equals(otherInfo.messageTypeMessageCondition));
+// 	}
 
-	override
-	public size_t toHash() @trusted nothrow {
-		return (this.destinationConditions.toHash() * 31 + this.messageTypeMessageCondition.toHash());
-	}
+// 	override
+// 	size_t toHash() @trusted nothrow {
+// 		return (this.destinationConditions.toHash() * 31 + this.messageTypeMessageCondition.toHash());
+// 	}
 
-	override
-	public string toString() {
-		return "{" ~ this.destinationConditions ~ ",messageType=" ~ this.messageTypeMessageCondition + '}';
-	}
+// 	override
+// 	string toString() {
+// 		return "{" ~ this.destinationConditions ~ ",messageType=" ~ this.messageTypeMessageCondition + '}';
+// 	}
 
-}
+// }

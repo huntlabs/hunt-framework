@@ -14,54 +14,58 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.support;
+module hunt.framework.messaging.support.AbstractSubscribableChannel;
 
-import hunt.container.Collections;
-import hunt.container.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
+// import hunt.container.Collections;
+// import hunt.container.Set;
+// import java.util.concurrent.CopyOnWriteArraySet;
 
-import hunt.framework.messaging.MessageHandler;
-import hunt.framework.messaging.SubscribableChannel;
+// import hunt.framework.messaging.MessageHandler;
+// import hunt.framework.messaging.SubscribableChannel;
 
-/**
- * Abstract base class for {@link SubscribableChannel} implementations.
- *
- * @author Rossen Stoyanchev
- * @since 4.0
- */
-public abstract class AbstractSubscribableChannel extends AbstractMessageChannel implements SubscribableChannel {
+// /**
+//  * Abstract base class for {@link SubscribableChannel} implementations.
+//  *
+//  * @author Rossen Stoyanchev
+//  * @since 4.0
+//  */
+// abstract class AbstractSubscribableChannel : AbstractMessageChannel, SubscribableChannel {
 
-	private final Set<MessageHandler> handlers = new CopyOnWriteArraySet<>();
+// 	private final Set!(MessageHandler) handlers;
+
+// 	this() {
+// 		handlers = new CopyOnWriteArraySet!(MessageHandler)();
+// 	}
 
 
-	public Set<MessageHandler> getSubscribers() {
-		return Collections.<MessageHandler>unmodifiableSet(this.handlers);
-	}
+// 	Set!(MessageHandler) getSubscribers() {
+// 		return Collections.unmodifiableSet!(MessageHandler)(this.handlers);
+// 	}
 
-	public  hasSubscription(MessageHandler handler) {
-		return this.handlers.contains(handler);
-	}
+// 	bool hasSubscription(MessageHandler handler) {
+// 		return this.handlers.contains(handler);
+// 	}
 
-	override
-	public  subscribe(MessageHandler handler) {
-		 result = this.handlers.add(handler);
-		if (result) {
-			version(HUNT_DEBUG) {
-				trace(getBeanName() ~ " added " ~ handler);
-			}
-		}
-		return result;
-	}
+// 	override
+// 	bool subscribe(MessageHandler handler) {
+// 		 result = this.handlers.add(handler);
+// 		if (result) {
+// 			version(HUNT_DEBUG) {
+// 				trace(getBeanName() ~ " added " ~ handler);
+// 			}
+// 		}
+// 		return result;
+// 	}
 
-	override
-	public  unsubscribe(MessageHandler handler) {
-		 result = this.handlers.remove(handler);
-		if (result) {
-			version(HUNT_DEBUG) {
-				trace(getBeanName() ~ " removed " ~ handler);
-			}
-		}
-		return result;
-	}
+// 	override
+// 	bool unsubscribe(MessageHandler handler) {
+// 		 result = this.handlers.remove(handler);
+// 		if (result) {
+// 			version(HUNT_DEBUG) {
+// 				trace(getBeanName() ~ " removed " ~ handler);
+// 			}
+// 		}
+// 		return result;
+// 	}
 
-}
+// }

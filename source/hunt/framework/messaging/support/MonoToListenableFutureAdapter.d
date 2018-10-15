@@ -16,29 +16,29 @@
 
 module hunt.framework.messaging.support;
 
-import reactor.core.publisher.Mono;
+// import reactor.core.publisher.Mono;
 
 
 
-/**
- * A Mono-to-ListenableFuture adapter where the source and the target from
- * the Promise and the ListenableFuture respectively are of the same type.
- *
- * @author Rossen Stoyanchev
- * @author Stephane Maldini
- * @since 5.0
- * @param (T) the object type
- */
-public class MonoToListenableFutureAdapter!(T) extends AbstractMonoToListenableFutureAdapter<T, T> {
+// /**
+//  * A Mono-to-ListenableFuture adapter where the source and the target from
+//  * the Promise and the ListenableFuture respectively are of the same type.
+//  *
+//  * @author Rossen Stoyanchev
+//  * @author Stephane Maldini
+//  * @since 5.0
+//  * @param (T) the object type
+//  */
+// class MonoToListenableFutureAdapter(T) : AbstractMonoToListenableFutureAdapter<T, T> {
 
-	public MonoToListenableFutureAdapter(Mono!(T) mono) {
-		super(mono);
-	}
+// 	MonoToListenableFutureAdapter(Mono!(T) mono) {
+// 		super(mono);
+// 	}
 
-	override
+// 	override
 	
-	protected T adapt(T result) {
-		return result;
-	}
+// 	protected T adapt(T result) {
+// 		return result;
+// 	}
 
-}
+// }

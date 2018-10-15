@@ -41,19 +41,17 @@ import hunt.framework.messaging.MessageHeaders;
  * @since 4.0
  * @see MessageBuilder
  */
-public class ErrorMessage : GenericMessage<Throwable> {
-
-	private static final long serialVersionUID = -5470210965279837728L;
+class ErrorMessage(T) : GenericMessage!(Throwable) {
 
 	// 
-	private final Message<?> originalMessage;
+	private final Message!(T) originalMessage;
 
 
 	/**
 	 * Create a new message with the given payload.
 	 * @param payload the message payload (never {@code null})
 	 */
-	public ErrorMessage(Throwable payload) {
+	this(Throwable payload) {
 		super(payload);
 		this.originalMessage = null;
 	}
@@ -64,7 +62,7 @@ public class ErrorMessage : GenericMessage<Throwable> {
 	 * @param payload the message payload (never {@code null})
 	 * @param headers message headers to use for initialization
 	 */
-	public ErrorMessage(Throwable payload, Map!(string, Object) headers) {
+	this(Throwable payload, Map!(string, Object) headers) {
 		super(payload, headers);
 		this.originalMessage = null;
 	}
@@ -76,7 +74,7 @@ public class ErrorMessage : GenericMessage<Throwable> {
 	 * @param payload the message payload (never {@code null})
 	 * @param headers message headers
 	 */
-	public ErrorMessage(Throwable payload, MessageHeaders headers) {
+	this(Throwable payload, MessageHeaders headers) {
 		super(payload, headers);
 		this.originalMessage = null;
 	}
@@ -88,7 +86,7 @@ public class ErrorMessage : GenericMessage<Throwable> {
 	 * in the stack where the ErrorMessage was created
 	 * @since 5.0
 	 */
-	public ErrorMessage(Throwable payload, Message<?> originalMessage) {
+	this(Throwable payload, Message!(T) originalMessage) {
 		super(payload);
 		this.originalMessage = originalMessage;
 	}
@@ -102,7 +100,7 @@ public class ErrorMessage : GenericMessage<Throwable> {
 	 * in the stack where the ErrorMessage was created
 	 * @since 5.0
 	 */
-	public ErrorMessage(Throwable payload, Map!(string, Object) headers, Message<?> originalMessage) {
+	this(Throwable payload, Map!(string, Object) headers, Message!(T) originalMessage) {
 		super(payload, headers);
 		this.originalMessage = originalMessage;
 	}
@@ -117,7 +115,7 @@ public class ErrorMessage : GenericMessage<Throwable> {
 	 * in the stack where the ErrorMessage was created
 	 * @since 5.0
 	 */
-	public ErrorMessage(Throwable payload, MessageHeaders headers, Message<?> originalMessage) {
+	this(Throwable payload, MessageHeaders headers, Message!(T) originalMessage) {
 		super(payload, headers);
 		this.originalMessage = originalMessage;
 	}
@@ -129,12 +127,12 @@ public class ErrorMessage : GenericMessage<Throwable> {
 	 * @since 5.0
 	 */
 	
-	public Message<?> getOriginalMessage() {
+	Message!(T) getOriginalMessage() {
 		return this.originalMessage;
 	}
 
 	override
-	public string toString() {
+	string toString() {
 		if (this.originalMessage is null) {
 			return super.toString();
 		}

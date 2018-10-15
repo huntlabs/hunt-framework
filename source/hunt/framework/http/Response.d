@@ -22,7 +22,7 @@ import hunt.http.codec.http.stream.HttpOutputStream;
 import hunt.io.common;
 import hunt.io.BufferedOutputStream;
 import hunt.logging;
-import hunt.util.common;
+import hunt.lang.common;
 import hunt.util.exception;
 
 import hunt.framework.http.Request;

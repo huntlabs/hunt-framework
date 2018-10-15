@@ -16,6 +16,7 @@
 
 module hunt.framework.messaging.support;
 
+import hunt.framework.messaging.support.ChannelInterceptor;
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageChannel;
 
@@ -30,15 +31,15 @@ import hunt.framework.messaging.MessageChannel;
  * @author Rossen Stoyanchev
  * @since 4.1.2
  */
-public class ImmutableMessageChannelInterceptor implements ChannelInterceptor {
+class ImmutableMessageChannelInterceptor : ChannelInterceptor {
 
-	override
-	public Message<?> preSend(Message<?> message, MessageChannel channel) {
-		MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
-		if (accessor !is null && accessor.isMutable()) {
-			accessor.setImmutable();
-		}
-		return message;
-	}
+	// override
+	// Message<?> preSend(Message<?> message, MessageChannel channel) {
+	// 	MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
+	// 	if (accessor !is null && accessor.isMutable()) {
+	// 		accessor.setImmutable();
+	// 	}
+	// 	return message;
+	// }
 
 }

@@ -16,69 +16,69 @@
 
 module hunt.framework.messaging.simp.SimpSessionScope;
 
-import org.springframework.beans.factory.ObjectFactory;
-import org.springframework.beans.factory.config.Scope;
+// import org.springframework.beans.factory.ObjectFactory;
+// import org.springframework.beans.factory.config.Scope;
 
 
-/**
- * A {@link Scope} implementation exposing the attributes of a SiMP session
- * (e.g. WebSocket session).
- *
- * <p>Relies on a thread-bound {@link SimpAttributes} instance exported by
- * {@link hunt.framework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler}.
- *
- * @author Rossen Stoyanchev
- * @since 4.1
- */
-public class SimpSessionScope : Scope {
+// /**
+//  * A {@link Scope} implementation exposing the attributes of a SiMP session
+//  * (e.g. WebSocket session).
+//  *
+//  * <p>Relies on a thread-bound {@link SimpAttributes} instance exported by
+//  * {@link hunt.framework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler}.
+//  *
+//  * @author Rossen Stoyanchev
+//  * @since 4.1
+//  */
+// class SimpSessionScope : Scope {
 
-	override
-	public Object get(string name, ObjectFactory<?> objectFactory) {
-		SimpAttributes simpAttributes = SimpAttributesContextHolder.currentAttributes();
-		Object scopedObject = simpAttributes.getAttribute(name);
-		if (scopedObject !is null) {
-			return scopedObject;
-		}
-		synchronized (simpAttributes.getSessionMutex()) {
-			scopedObject = simpAttributes.getAttribute(name);
-			if (scopedObject is null) {
-				scopedObject = objectFactory.getObject();
-				simpAttributes.setAttribute(name, scopedObject);
-			}
-			return scopedObject;
-		}
-	}
+// 	override
+// 	Object get(string name, ObjectFactory<?> objectFactory) {
+// 		SimpAttributes simpAttributes = SimpAttributesContextHolder.currentAttributes();
+// 		Object scopedObject = simpAttributes.getAttribute(name);
+// 		if (scopedObject !is null) {
+// 			return scopedObject;
+// 		}
+// 		synchronized (simpAttributes.getSessionMutex()) {
+// 			scopedObject = simpAttributes.getAttribute(name);
+// 			if (scopedObject is null) {
+// 				scopedObject = objectFactory.getObject();
+// 				simpAttributes.setAttribute(name, scopedObject);
+// 			}
+// 			return scopedObject;
+// 		}
+// 	}
 
-	override
+// 	override
 	
-	public Object remove(string name) {
-		SimpAttributes simpAttributes = SimpAttributesContextHolder.currentAttributes();
-		synchronized (simpAttributes.getSessionMutex()) {
-			Object value = simpAttributes.getAttribute(name);
-			if (value !is null) {
-				simpAttributes.removeAttribute(name);
-				return value;
-			}
-			else {
-				return null;
-			}
-		}
-	}
+// 	Object remove(string name) {
+// 		SimpAttributes simpAttributes = SimpAttributesContextHolder.currentAttributes();
+// 		synchronized (simpAttributes.getSessionMutex()) {
+// 			Object value = simpAttributes.getAttribute(name);
+// 			if (value !is null) {
+// 				simpAttributes.removeAttribute(name);
+// 				return value;
+// 			}
+// 			else {
+// 				return null;
+// 			}
+// 		}
+// 	}
 
-	override
-	public void registerDestructionCallback(string name, Runnable callback) {
-		SimpAttributesContextHolder.currentAttributes().registerDestructionCallback(name, callback);
-	}
+// 	override
+// 	void registerDestructionCallback(string name, Runnable callback) {
+// 		SimpAttributesContextHolder.currentAttributes().registerDestructionCallback(name, callback);
+// 	}
 
-	override
+// 	override
 	
-	public Object resolveContextualObject(string key) {
-		return null;
-	}
+// 	Object resolveContextualObject(string key) {
+// 		return null;
+// 	}
 
-	override
-	public string getConversationId() {
-		return SimpAttributesContextHolder.currentAttributes().getSessionId();
-	}
+// 	override
+// 	string getConversationId() {
+// 		return SimpAttributesContextHolder.currentAttributes().getSessionId();
+// 	}
 
-}
+// }

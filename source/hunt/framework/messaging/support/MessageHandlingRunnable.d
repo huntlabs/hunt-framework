@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.support;
+module hunt.framework.messaging.support.MessageHandlingRunnable;
+
 
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageHandler;
+
+import hunt.lang.common;
 
 /**
  * Extension of the {@link Runnable} interface with methods to obtain the
@@ -26,12 +29,12 @@ import hunt.framework.messaging.MessageHandler;
  * @author Rossen Stoyanchev
  * @since 4.1.1
  */
-public interface MessageHandlingRunnable extends Runnable {
+interface MessageHandlingRunnable(T) : Runnable {
 
 	/**
 	 * Return the Message that will be handled.
 	 */
-	Message<?> getMessage();
+	Message!T getMessage();
 
 	/**
 	 * Return the MessageHandler that will be used to handle the message.

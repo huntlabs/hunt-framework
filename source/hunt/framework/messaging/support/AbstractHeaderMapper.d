@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.support;
+module hunt.framework.messaging.support.AbstractHeaderMapper;
 
 import hunt.framework.messaging.MessageHeaders;
 import hunt.container.Map;

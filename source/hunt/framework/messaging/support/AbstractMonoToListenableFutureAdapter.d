@@ -14,107 +14,107 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.support;
+module hunt.framework.messaging.support.AbstractMonoToListenableFutureAdapter;
 
-import java.time.Duration;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+// import java.time.Duration;
+// import java.util.concurrent.ExecutionException;
+// import java.util.concurrent.TimeUnit;
+// import java.util.concurrent.TimeoutException;
 
-import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
-
-
-import org.springframework.util.Assert;
-import org.springframework.util.concurrent.FailureCallback;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
-import org.springframework.util.concurrent.ListenableFutureCallbackRegistry;
-import org.springframework.util.concurrent.SuccessCallback;
-
-/**
- * Adapts {@link Mono} to {@link ListenableFuture} optionally converting the
- * result Object type {@code <S>} to the expected target type {@code !(T)}.
- *
- * @author Rossen Stoyanchev
- * @since 5.0
- * @param <S> the type of object expected from the {@link Mono}
- * @param (T) the type of object expected from the {@link ListenableFuture}
- */
-abstract class AbstractMonoToListenableFutureAdapter<S, T> implements ListenableFuture!(T) {
-
-	private final MonoProcessor<S> monoProcessor;
-
-	private final ListenableFutureCallbackRegistry!(T) registry = new ListenableFutureCallbackRegistry<>();
+// import reactor.core.publisher.Mono;
+// import reactor.core.publisher.MonoProcessor;
 
 
-	protected AbstractMonoToListenableFutureAdapter(Mono<S> mono) {
-		Assert.notNull(mono, "Mono must not be null");
-		this.monoProcessor = mono
-				.doOnSuccess(result -> {
-					T adapted;
-					try {
-						adapted = adapt(result);
-					}
-					catch (Throwable ex) {
-						this.registry.failure(ex);
-						return;
-					}
-					this.registry.success(adapted);
-				})
-				.doOnError(this.registry::failure)
-				.toProcessor();
-	}
+// import org.springframework.util.Assert;
+// import org.springframework.util.concurrent.FailureCallback;
+// import org.springframework.util.concurrent.ListenableFuture;
+// import org.springframework.util.concurrent.ListenableFutureCallback;
+// import org.springframework.util.concurrent.ListenableFutureCallbackRegistry;
+// import org.springframework.util.concurrent.SuccessCallback;
+
+// /**
+//  * Adapts {@link Mono} to {@link ListenableFuture} optionally converting the
+//  * result Object type {@code <S>} to the expected target type {@code !(T)}.
+//  *
+//  * @author Rossen Stoyanchev
+//  * @since 5.0
+//  * @param <S> the type of object expected from the {@link Mono}
+//  * @param (T) the type of object expected from the {@link ListenableFuture}
+//  */
+// abstract class AbstractMonoToListenableFutureAdapter<S, T> implements ListenableFuture!(T) {
+
+// 	private final MonoProcessor<S> monoProcessor;
+
+// 	private final ListenableFutureCallbackRegistry!(T) registry = new ListenableFutureCallbackRegistry<>();
 
 
-	override
+// 	protected AbstractMonoToListenableFutureAdapter(Mono<S> mono) {
+// 		Assert.notNull(mono, "Mono must not be null");
+// 		this.monoProcessor = mono
+// 				.doOnSuccess(result -> {
+// 					T adapted;
+// 					try {
+// 						adapted = adapt(result);
+// 					}
+// 					catch (Throwable ex) {
+// 						this.registry.failure(ex);
+// 						return;
+// 					}
+// 					this.registry.success(adapted);
+// 				})
+// 				.doOnError(this.registry::failure)
+// 				.toProcessor();
+// 	}
+
+
+// 	override
 	
-	public T get() throws InterruptedException {
-		S result = this.monoProcessor.block();
-		return adapt(result);
-	}
+// 	public T get() throws InterruptedException {
+// 		S result = this.monoProcessor.block();
+// 		return adapt(result);
+// 	}
 
-	override
+// 	override
 	
-	public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-		Assert.notNull(unit, "TimeUnit must not be null");
-		Duration duration = Duration.ofMillis(TimeUnit.MILLISECONDS.convert(timeout, unit));
-		S result = this.monoProcessor.block(duration);
-		return adapt(result);
-	}
+// 	public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+// 		Assert.notNull(unit, "TimeUnit must not be null");
+// 		Duration duration = Duration.ofMillis(TimeUnit.MILLISECONDS.convert(timeout, unit));
+// 		S result = this.monoProcessor.block(duration);
+// 		return adapt(result);
+// 	}
 
-	override
-	public  cancel( mayInterruptIfRunning) {
-		if (isCancelled()) {
-			return false;
-		}
-		this.monoProcessor.cancel();
-		return true;
-	}
+// 	override
+// 	public  cancel( mayInterruptIfRunning) {
+// 		if (isCancelled()) {
+// 			return false;
+// 		}
+// 		this.monoProcessor.cancel();
+// 		return true;
+// 	}
 
-	override
-	public  isCancelled() {
-		return this.monoProcessor.isCancelled();
-	}
+// 	override
+// 	public  isCancelled() {
+// 		return this.monoProcessor.isCancelled();
+// 	}
 
-	override
-	public  isDone() {
-		return this.monoProcessor.isTerminated();
-	}
+// 	override
+// 	public  isDone() {
+// 		return this.monoProcessor.isTerminated();
+// 	}
 
-	override
-	public void addCallback(ListenableFutureCallback<? super T> callback) {
-		this.registry.addCallback(callback);
-	}
+// 	override
+// 	public void addCallback(ListenableFutureCallback<? super T> callback) {
+// 		this.registry.addCallback(callback);
+// 	}
 
-	override
-	public void addCallback(SuccessCallback<? super T> successCallback, FailureCallback failureCallback) {
-		this.registry.addSuccessCallback(successCallback);
-		this.registry.addFailureCallback(failureCallback);
-	}
+// 	override
+// 	public void addCallback(SuccessCallback<? super T> successCallback, FailureCallback failureCallback) {
+// 		this.registry.addSuccessCallback(successCallback);
+// 		this.registry.addFailureCallback(failureCallback);
+// 	}
 
 
 	
-	protected abstract T adapt(S result);
+// 	protected abstract T adapt(S result);
 
-}
+// }

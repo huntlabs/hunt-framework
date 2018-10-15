@@ -40,11 +40,11 @@ import org.springframework.util.CollectionUtils;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
+class SimpMessageHeaderAccessor : NativeMessageHeaderAccessor {
 
-	private static final IdTimestampMessageHeaderInitializer headerInitializer;
+	private __gshared IdTimestampMessageHeaderInitializer headerInitializer;
 
-	static {
+	shared static this() {
 		headerInitializer = new IdTimestampMessageHeaderInitializer();
 		headerInitializer.setDisableIdGeneration();
 		headerInitializer.setEnableTimestamp(false);
@@ -52,36 +52,36 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
 	// SiMP header names
 
-	public static final string DESTINATION_HEADER = "simpDestination";
+	enum string DESTINATION_HEADER = "simpDestination";
 
-	public static final string MESSAGE_TYPE_HEADER = "simpMessageType";
+	enum string MESSAGE_TYPE_HEADER = "simpMessageType";
 
-	public static final string SESSION_ID_HEADER = "simpSessionId";
+	enum string SESSION_ID_HEADER = "simpSessionId";
 
-	public static final string SESSION_ATTRIBUTES = "simpSessionAttributes";
+	enum string SESSION_ATTRIBUTES = "simpSessionAttributes";
 
-	public static final string SUBSCRIPTION_ID_HEADER = "simpSubscriptionId";
+	enum string SUBSCRIPTION_ID_HEADER = "simpSubscriptionId";
 
-	public static final string USER_HEADER = "simpUser";
+	enum string USER_HEADER = "simpUser";
 
-	public static final string CONNECT_MESSAGE_HEADER = "simpConnectMessage";
+	enum string CONNECT_MESSAGE_HEADER = "simpConnectMessage";
 
-	public static final string DISCONNECT_MESSAGE_HEADER = "simpDisconnectMessage";
+	enum string DISCONNECT_MESSAGE_HEADER = "simpDisconnectMessage";
 
-	public static final string HEART_BEAT_HEADER = "simpHeartbeat";
+	enum string HEART_BEAT_HEADER = "simpHeartbeat";
 
 
 	/**
 	 * A header for internal use with "user" destinations where we need to
 	 * restore the destination prior to sending messages to clients.
 	 */
-	public static final string ORIGINAL_DESTINATION = "simpOrigDestination";
+	enum string ORIGINAL_DESTINATION = "simpOrigDestination";
 
 	/**
 	 * A header that indicates to the broker that the sender will ignore errors.
 	 * The header is simply checked for presence or absence.
 	 */
-	public static final string IGNORE_ERROR = "simpIgnoreError";
+	enum string IGNORE_ERROR = "simpIgnoreError";
 
 
 	/**
@@ -89,7 +89,7 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	 * This constructor is protected. See factory methods in this and sub-classes.
 	 */
 	protected SimpMessageHeaderAccessor(SimpMessageType messageType,
-			Map<string, List!(string)> externalSourceHeaders) {
+			Map<string, List!cast(string)> externalSourceHeaders) {
 
 		super(externalSourceHeaders);
 		Assert.notNull(messageType, "MessageType must not be null");
@@ -112,36 +112,36 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 		return wrap(message);
 	}
 
-	public void setMessageTypeIfNotSet(SimpMessageType messageType) {
+	void setMessageTypeIfNotSet(SimpMessageType messageType) {
 		if (getMessageType() is null) {
 			setHeader(MESSAGE_TYPE_HEADER, messageType);
 		}
 	}
 
 	
-	public SimpMessageType getMessageType() {
-		return (SimpMessageType) getHeader(MESSAGE_TYPE_HEADER);
+	SimpMessageType getMessageType() {
+		return cast(SimpMessageType) getHeader(MESSAGE_TYPE_HEADER);
 	}
 
-	public void setDestination(string destination) {
+	void setDestination(string destination) {
 		setHeader(DESTINATION_HEADER, destination);
 	}
 
 	
-	public string getDestination() {
-		return (string) getHeader(DESTINATION_HEADER);
+	string getDestination() {
+		return cast(string) getHeader(DESTINATION_HEADER);
 	}
 
-	public void setSubscriptionId(string subscriptionId) {
+	void setSubscriptionId(string subscriptionId) {
 		setHeader(SUBSCRIPTION_ID_HEADER, subscriptionId);
 	}
 
 	
-	public string getSubscriptionId() {
-		return (string) getHeader(SUBSCRIPTION_ID_HEADER);
+	string getSubscriptionId() {
+		return cast(string) getHeader(SUBSCRIPTION_ID_HEADER);
 	}
 
-	public void setSessionId(string sessionId) {
+	void setSessionId(string sessionId) {
 		setHeader(SESSION_ID_HEADER, sessionId);
 	}
 
@@ -149,14 +149,14 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	 * Return the id of the current session.
 	 */
 	
-	public string getSessionId() {
-		return (string) getHeader(SESSION_ID_HEADER);
+	string getSessionId() {
+		return cast(string) getHeader(SESSION_ID_HEADER);
 	}
 
 	/**
 	 * A static alternative for access to the session attributes header.
 	 */
-	public void setSessionAttributes(Map!(string, Object) attributes) {
+	void setSessionAttributes(Map!(string, Object) attributes) {
 		setHeader(SESSION_ATTRIBUTES, attributes);
 	}
 
@@ -165,11 +165,11 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	 */
 	
 	
-	public Map!(string, Object) getSessionAttributes() {
+	Map!(string, Object) getSessionAttributes() {
 		return (Map!(string, Object)) getHeader(SESSION_ATTRIBUTES);
 	}
 
-	public void setUser(Principal principal) {
+	void setUser(Principal principal) {
 		setHeader(USER_HEADER, principal);
 	}
 
@@ -177,12 +177,12 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	 * Return the user associated with the current session.
 	 */
 	
-	public Principal getUser() {
+	Principal getUser() {
 		return (Principal) getHeader(USER_HEADER);
 	}
 
 	override
-	public string getShortLogMessage(Object payload) {
+	string getShortLogMessage(Object payload) {
 		if (getMessageType() is null) {
 			return super.getDetailedLogMessage(payload);
 		}
@@ -196,7 +196,7 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
 	
 	override
-	public string getDetailedLogMessage(Object payload) {
+	string getDetailedLogMessage(Object payload) {
 		if (getMessageType() is null) {
 			return super.getDetailedLogMessage(payload);
 		}
@@ -204,7 +204,7 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 		if (!CollectionUtils.isEmpty(getSessionAttributes())) {
 			sb.append(" attributes=").append(getSessionAttributes());
 		}
-		if (!CollectionUtils.isEmpty((Map<string, List!(string)>) getHeader(NATIVE_HEADERS))) {
+		if (!CollectionUtils.isEmpty((Map<string, List!cast(string)>) getHeader(NATIVE_HEADERS))) {
 			sb.append(" nativeHeaders=").append(getHeader(NATIVE_HEADERS));
 		}
 		sb.append(getDetailedPayloadLogMessage(payload));
@@ -238,7 +238,7 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	 * Create an instance with
 	 * {@link hunt.framework.messaging.simp.SimpMessageType} {@code MESSAGE}.
 	 */
-	public static SimpMessageHeaderAccessor create() {
+	static SimpMessageHeaderAccessor create() {
 		return new SimpMessageHeaderAccessor(SimpMessageType.MESSAGE, null);
 	}
 
@@ -246,50 +246,50 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	 * Create an instance with the given
 	 * {@link hunt.framework.messaging.simp.SimpMessageType}.
 	 */
-	public static SimpMessageHeaderAccessor create(SimpMessageType messageType) {
+	static SimpMessageHeaderAccessor create(SimpMessageType messageType) {
 		return new SimpMessageHeaderAccessor(messageType, null);
 	}
 
 	/**
 	 * Create an instance from the payload and headers of the given Message.
 	 */
-	public static SimpMessageHeaderAccessor wrap(Message<?> message) {
+	static SimpMessageHeaderAccessor wrap(Message<?> message) {
 		return new SimpMessageHeaderAccessor(message);
 	}
 
 	
-	public static SimpMessageType getMessageType(Map!(string, Object) headers) {
+	static SimpMessageType getMessageType(Map!(string, Object) headers) {
 		return (SimpMessageType) headers.get(MESSAGE_TYPE_HEADER);
 	}
 
 	
-	public static string getDestination(Map!(string, Object) headers) {
-		return (string) headers.get(DESTINATION_HEADER);
+	static string getDestination(Map!(string, Object) headers) {
+		return cast(string) headers.get(DESTINATION_HEADER);
 	}
 
 	
-	public static string getSubscriptionId(Map!(string, Object) headers) {
-		return (string) headers.get(SUBSCRIPTION_ID_HEADER);
+	static string getSubscriptionId(Map!(string, Object) headers) {
+		return cast(string) headers.get(SUBSCRIPTION_ID_HEADER);
 	}
 
 	
-	public static string getSessionId(Map!(string, Object) headers) {
-		return (string) headers.get(SESSION_ID_HEADER);
+	static string getSessionId(Map!(string, Object) headers) {
+		return cast(string) headers.get(SESSION_ID_HEADER);
 	}
 
 	
 	
-	public static Map!(string, Object) getSessionAttributes(Map!(string, Object) headers) {
+	static Map!(string, Object) getSessionAttributes(Map!(string, Object) headers) {
 		return (Map!(string, Object)) headers.get(SESSION_ATTRIBUTES);
 	}
 
 	
-	public static Principal getUser(Map!(string, Object) headers) {
+	static Principal getUser(Map!(string, Object) headers) {
 		return (Principal) headers.get(USER_HEADER);
 	}
 
 	
-	public static long[] getHeartbeat(Map!(string, Object) headers) {
+	static long[] getHeartbeat(Map!(string, Object) headers) {
 		return (long[]) headers.get(HEART_BEAT_HEADER);
 	}
 

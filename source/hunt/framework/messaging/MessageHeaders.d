@@ -31,7 +31,7 @@ import hunt.datetime;
 import hunt.logging;
 import hunt.math.Long;
 import hunt.util.exception;
-import hunt.util.object;
+import hunt.lang.object;
 
 import std.uuid;
 
@@ -147,7 +147,7 @@ class MessageHeaders : Map!(string, Object) {
 			this.headers.remove(ID);
 		}
 		else {
-			this.headers.put(ID, new Nullable!UUID(id));
+			this.headers.put(ID, new Nullable!UUID(*id));
 		}
 
 		if (timestamp is null) {

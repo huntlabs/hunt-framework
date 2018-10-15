@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.support;
+module hunt.framework.messaging.support.HeaderMapper;
 
 import hunt.framework.messaging.MessageHeaders;
 
@@ -27,7 +27,7 @@ import hunt.framework.messaging.MessageHeaders;
  * @since 4.1
  * @param (T) type of the instance to and from which headers will be mapped
  */
-public interface HeaderMapper!(T) {
+interface HeaderMapper(T) {
 
 	/**
 	 * Map from the given {@link MessageHeaders} to the specified target message.

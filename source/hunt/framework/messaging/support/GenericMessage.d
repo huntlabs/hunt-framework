@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.support;
+module hunt.framework.messaging.support.GenericMessage;
 
 
 import hunt.container.Map;
 
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageHeaders;
-import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
+
+import hunt.string;
+import hunt.util.ObjectUtils;
+
 
 /**
  * An implementation of {@link Message} with a generic payload.
@@ -33,21 +35,18 @@ import org.springframework.util.ObjectUtils;
  * @param (T) the payload type
  * @see MessageBuilder
  */
-public class GenericMessage!(T) implements Message!(T), Serializable {
+class GenericMessage(T) : Message!(T) {
 
-	private static final long serialVersionUID = 4268801052358035098L;
+	private T payload;
 
-
-	private final T payload;
-
-	private final MessageHeaders headers;
+	private MessageHeaders headers;
 
 
 	/**
 	 * Create a new message with the given payload.
 	 * @param payload the message payload (never {@code null})
 	 */
-	public GenericMessage(T payload) {
+	this(T payload) {
 		this(payload, new MessageHeaders(null));
 	}
 
@@ -57,7 +56,7 @@ public class GenericMessage!(T) implements Message!(T), Serializable {
 	 * @param payload the message payload (never {@code null})
 	 * @param headers message headers to use for initialization
 	 */
-	public GenericMessage(T payload, Map!(string, Object) headers) {
+	this(T payload, Map!(string, Object) headers) {
 		this(payload, new MessageHeaders(headers));
 	}
 
@@ -68,47 +67,46 @@ public class GenericMessage!(T) implements Message!(T), Serializable {
 	 * @param payload the message payload (never {@code null})
 	 * @param headers message headers
 	 */
-	public GenericMessage(T payload, MessageHeaders headers) {
-		Assert.notNull(payload, "Payload must not be null");
-		Assert.notNull(headers, "MessageHeaders must not be null");
+	this(T payload, MessageHeaders headers) {
+		assert(payload, "Payload must not be null");
+		assert(headers, "MessageHeaders must not be null");
 		this.payload = payload;
 		this.headers = headers;
 	}
 
 
-	public T getPayload() {
+	T getPayload() {
 		return this.payload;
 	}
 
-	public MessageHeaders getHeaders() {
+	MessageHeaders getHeaders() {
 		return this.headers;
 	}
 
 
-	public bool opEquals(Object other) {
-		if (this == other) {
+	override bool opEquals(Object other) {
+		if (this is other) {
 			return true;
 		}
-		if (!(other instanceof GenericMessage)) {
+
+		GenericMessage!T otherMsg = cast(GenericMessage!T) other;
+		if (otherMsg is null) {
 			return false;
 		}
-		GenericMessage<?> otherMsg = (GenericMessage<?>) other;
-		// Using nullSafeEquals for proper array equals comparisons
-		return (ObjectUtils.nullSafeEquals(this.payload, otherMsg.payload) && this.headers.equals(otherMsg.headers));
+		return this.payload == otherMsg.payload && this.headers == otherMsg.headers;
 	}
 
-	public size_t toHash() @trusted nothrow {
+	size_t toHash() @trusted nothrow {
 		// Using nullSafeHashCode for proper array toHash handling
-		return (ObjectUtils.nullSafeHashCode(this.payload) * 23 + this.headers.toHash());
+		return hashOf(this.payload) * 23 + this.headers.toHash();
 	}
 
-	public string toString() {
-		StringBuilder sb = new StringBuilder(getClass().getSimpleName());
+	override string toString() {
+		StringBuilder sb = new StringBuilder(typeid(this).name);
 		sb.append(" [payload=");
-		if (this.payload instanceof byte[]) {
-			sb.append("byte[").append(((byte[]) this.payload).length).append("]");
-		}
-		else {
+		static if(is(T == byte[])) {
+			sb.append("byte[").append((cast(byte[]) this.payload).length).append("]");
+		} else {
 			sb.append(this.payload);
 		}
 		sb.append(", headers=").append(this.headers).append("]");

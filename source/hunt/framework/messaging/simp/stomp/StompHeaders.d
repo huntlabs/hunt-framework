@@ -17,6 +17,8 @@
 module hunt.framework.messaging.simp.stomp;
 
 import hunt.container;
+import hunt.math.Long;
+import hunt.string;
 
 
 // import org.springframework.util.Assert;
@@ -24,8 +26,7 @@ import hunt.container;
 // import org.springframework.util.MimeType;
 // import org.springframework.util.MimeTypeUtils;
 // import org.springframework.util.MultiValueMap;
-// import org.springframework.util.ObjectUtils;
-// import org.springframework.util.StringUtils;
+// import hunt.util.ObjectUtils;
 
 /**
  * Represents STOMP frame headers.
@@ -43,7 +44,9 @@ import hunt.container;
  * @see <a href="http://stomp.github.io/stomp-specification-1.2.html#Frames_and_Headers">
  * http://stomp.github.io/stomp-specification-1.2.html#Frames_and_Headers</a>
  */
-class StompHeaders : MultiValueMap<string, string>, Serializable {
+class StompHeaders : MultiMap!(string) {
+
+	alias MultiValuesMap = Map!(string, List!(string));
 
 
 	// Standard headers (as defined in the spec)
@@ -93,20 +96,20 @@ class StompHeaders : MultiValueMap<string, string>, Serializable {
 	enum string RECEIPT_ID = "receipt-id";
 
 
-	private Map<string, List!(string)> headers;
+	private MultiValuesMap headers;
 
 
 	/**
 	 * Create a new instance to be populated with new header values.
 	 */
 	this() {
-		this(new LinkedMultiValueMap<>(4), false);
+		this(new LinkedMultiValueMap!(string, List!(string))(4), false);
 	}
 
-	private this(Map<string, List!(string)> headers,  readOnly) {
+	private this(MultiValuesMap headers,  readOnly) {
 		Assert.notNull(headers, "'headers' must not be null");
 		if (readOnly) {
-			Map<string, List!(string)> map = new LinkedMultiValueMap<>(headers.size());
+			MultiValuesMap map = new LinkedMultiValueMap!(string, List!(string))(headers.size());
 			headers.forEach((key, value) -> map.put(key, Collections.unmodifiableList(value)));
 			this.headers = Collections.unmodifiableMap(map);
 		}
@@ -122,8 +125,8 @@ class StompHeaders : MultiValueMap<string, string>, Serializable {
 	 */
 	void setContentType(MimeType mimeType) {
 		if (mimeType !is null) {
-			Assert.isTrue(!mimeType.isWildcardType(), "'Content-Type' cannot contain wildcard type '*'");
-			Assert.isTrue(!mimeType.isWildcardSubtype(), "'Content-Type' cannot contain wildcard subtype '*'");
+			assert(!mimeType.isWildcardType(), "'Content-Type' cannot contain wildcard type '*'");
+			assert(!mimeType.isWildcardSubtype(), "'Content-Type' cannot contain wildcard subtype '*'");
 			set(CONTENT_TYPE, mimeType.toString());
 		}
 		else {
@@ -193,13 +196,13 @@ class StompHeaders : MultiValueMap<string, string>, Serializable {
 	 * Applies to the CONNECT frame.
 	 * @since 5.0.7
 	 */
-	void setAcceptVersion(string... acceptVersions) {
+	void setAcceptVersion(string[] acceptVersions...) {
 		if (ObjectUtils.isEmpty(acceptVersions)) {
 			set(ACCEPT_VERSION, null);
 			return;
 		}
 		Arrays.stream(acceptVersions).forEach(version ->
-				Assert.isTrue(version !is null && (version.equals("1.1") || version.equals("1.2")),
+				assert(version !is null && (version.equals("1.1") || version.equals("1.2")),
 						"Invalid version: " ~ version));
 		set(ACCEPT_VERSION, StringUtils.arrayToCommaDelimitedString(acceptVersions));
 	}
@@ -272,14 +275,14 @@ class StompHeaders : MultiValueMap<string, string>, Serializable {
 		if (rawValues is null) {
 			return null;
 		}
-		return new long[] {Long.valueOf(rawValues[0]), Long.valueOf(rawValues[1])};
+		return [Long.valueOf(rawValues[0]), Long.valueOf(rawValues[1])];
 	}
 
 	/**
 	 * Whether heartbeats are enabled. Returns {@code false} if
 	 * {@link #setHeartbeat} is set to "0,0", and {@code true} otherwise.
 	 */
-	 isHeartbeatEnabled() {
+	bool isHeartbeatEnabled() {
 		long[] heartbeat = getHeartbeat();
 		return (heartbeat !is null && heartbeat[0] != 0 && heartbeat[1] != 0);
 	}
@@ -435,19 +438,20 @@ class StompHeaders : MultiValueMap<string, string>, Serializable {
 	 */
 	override
 	void add(string headerName, string headerValue) {
-		List!(string) headerValues = this.headers.computeIfAbsent(headerName, k -> new LinkedList<>());
+		List!(string) headerValues = this.headers.computeIfAbsent(headerName, k => new LinkedList!string());
 		headerValues.add(headerValue);
 	}
 
 	override
-	void addAll(string headerName, List<string> headerValues) {
-		List!(string) currentValues = this.headers.computeIfAbsent(headerName, k -> new LinkedList<>());
+	void addAll(string headerName, List!(string) headerValues) {
+		List!(string) currentValues = this.headers.computeIfAbsent(headerName, k => new LinkedList!string());
 		currentValues.addAll(headerValues);
 	}
 
 	override
-	void addAll(MultiValueMap<string, string> values) {
-		values.forEach(this::addAll);
+	void addAll(MultiMap!(string) values) {
+		foreach(string s; values) 
+			this.addAll(s);
 	}
 
 	/**
@@ -466,14 +470,17 @@ class StompHeaders : MultiValueMap<string, string>, Serializable {
 	}
 
 	override
-	void setAll(Map<string, string> values) {
-		values.forEach(this::set);
+	void setAll(Map!(string, string) values) {
+		foreach(string s; values) 
+			this.set(s);
 	}
 
 	override
-	Map<string, string> toSingleValueMap() {
-		LinkedHashMap<string, string> singleValueMap = new LinkedHashMap<>(this.headers.size());
-		this.headers.forEach((key, value) -> singleValueMap.put(key, value.get(0)));
+	Map!(string, string) toSingleValueMap() {
+		LinkedHashMap!(string, string) singleValueMap = new LinkedHashMap!(string, string)(this.headers.size());
+		foreach(string key, List!(string) value; this.headers) {
+			singleValueMap.put(key, value.get(0));
+		}
 		return singleValueMap;
 	}
 
@@ -491,17 +498,17 @@ class StompHeaders : MultiValueMap<string, string>, Serializable {
 	}
 
 	override
-	 containsKey(Object key) {
+	 containsKey(string key) {
 		return this.headers.containsKey(key);
 	}
 
 	override
-	 containsValue(Object value) {
+	 containsValue(List!(string) value) {
 		return this.headers.containsValue(value);
 	}
 
 	override
-	List!(string) get(Object key) {
+	List!(string) get(string key) {
 		return this.headers.get(key);
 	}
 
@@ -511,12 +518,12 @@ class StompHeaders : MultiValueMap<string, string>, Serializable {
 	}
 
 	override
-	List!(string) remove(Object key) {
+	List!(string) remove(string key) {
 		return this.headers.remove(key);
 	}
 
 	override
-	void putAll(Map<string, List!(string)> map) {
+	void putAll(MultiValuesMap map) {
 		this.headers.putAll(map);
 	}
 
@@ -531,20 +538,23 @@ class StompHeaders : MultiValueMap<string, string>, Serializable {
 	}
 
 	override
-	Collection<List!(string)> values() {
+	Collection!(List!(string)) values() {
 		return this.headers.values();
 	}
 
-	override
-	Set<Entry<string, List!(string)>> entrySet() {
-		return this.headers.entrySet();
-	}
+	// override
+	// Set<Entry!(string, List!(string))> entrySet() {
+	// 	return this.headers.entrySet();
+	// }
 
 
 	override
 	bool opEquals(Object other) {
-		return (this == other || (other instanceof StompHeaders &&
-				this.headers.equals(((StompHeaders) other).headers)));
+		if(this is other)
+			return true;
+		StompHeaders sh = cast(StompHeaders) other;
+		if(sh is null)	return false;
+		return this.headers == sh.headers;
 	}
 
 	override
@@ -561,7 +571,7 @@ class StompHeaders : MultiValueMap<string, string>, Serializable {
 	/**
 	 * Return a {@code StompHeaders} object that can only be read, not written to.
 	 */
-	static StompHeaders readOnlyStompHeaders(Map<string, List!(string)> headers) {
+	static StompHeaders readOnlyStompHeaders(MultiValuesMap headers) {
 		return new StompHeaders((headers !is null ? headers : Collections.emptyMap()), true);
 	}
 

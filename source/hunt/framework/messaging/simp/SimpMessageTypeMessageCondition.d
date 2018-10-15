@@ -14,87 +14,87 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.simp;
+module hunt.framework.messaging.simp.SimpMessageTypeMessageCondition;
 
 import hunt.container.Collection;
 import hunt.container.Collections;
 import hunt.container.Map;
 
 
-import hunt.framework.messaging.Message;
-import hunt.framework.messaging.handler.AbstractMessageCondition;
-import org.springframework.util.Assert;
+// import hunt.framework.messaging.Message;
+// import hunt.framework.messaging.handler.AbstractMessageCondition;
+// import org.springframework.util.Assert;
 
-/**
- * {@code MessageCondition} that matches by the message type obtained via
- * {@link SimpMessageHeaderAccessor#getMessageType(Map)}.
- *
- * @author Rossen Stoyanchev
- * @since 4.0
- */
-public class SimpMessageTypeMessageCondition extends AbstractMessageCondition<SimpMessageTypeMessageCondition> {
+// /**
+//  * {@code MessageCondition} that matches by the message type obtained via
+//  * {@link SimpMessageHeaderAccessor#getMessageType(Map)}.
+//  *
+//  * @author Rossen Stoyanchev
+//  * @since 4.0
+//  */
+// class SimpMessageTypeMessageCondition : AbstractMessageCondition!(SimpMessageTypeMessageCondition) {
 
-	public static final SimpMessageTypeMessageCondition MESSAGE =
-			new SimpMessageTypeMessageCondition(SimpMessageType.MESSAGE);
+// 	static final SimpMessageTypeMessageCondition MESSAGE =
+// 			new SimpMessageTypeMessageCondition(SimpMessageType.MESSAGE);
 
-	public static final SimpMessageTypeMessageCondition SUBSCRIBE =
-			new SimpMessageTypeMessageCondition(SimpMessageType.SUBSCRIBE);
-
-
-	private final SimpMessageType messageType;
+// 	static final SimpMessageTypeMessageCondition SUBSCRIBE =
+// 			new SimpMessageTypeMessageCondition(SimpMessageType.SUBSCRIBE);
 
 
-	/**
-	 * A constructor accepting a message type.
-	 * @param messageType the message type to match messages to
-	 */
-	public SimpMessageTypeMessageCondition(SimpMessageType messageType) {
-		Assert.notNull(messageType, "MessageType must not be null");
-		this.messageType = messageType;
-	}
+// 	private final SimpMessageType messageType;
 
 
-	public SimpMessageType getMessageType() {
-		return this.messageType;
-	}
+// 	/**
+// 	 * A constructor accepting a message type.
+// 	 * @param messageType the message type to match messages to
+// 	 */
+// 	this(SimpMessageType messageType) {
+// 		Assert.notNull(messageType, "MessageType must not be null");
+// 		this.messageType = messageType;
+// 	}
 
-	override
-	protected Collection<?> getContent() {
-		return Collections.singletonList(this.messageType);
-	}
 
-	override
-	protected string getToStringInfix() {
-		return " || ";
-	}
+// 	SimpMessageType getMessageType() {
+// 		return this.messageType;
+// 	}
 
-	override
-	public SimpMessageTypeMessageCondition combine(SimpMessageTypeMessageCondition other) {
-		return other;
-	}
+// 	override
+// 	protected Collection<?> getContent() {
+// 		return Collections.singletonList(this.messageType);
+// 	}
 
-	override
+// 	override
+// 	protected string getToStringInfix() {
+// 		return " || ";
+// 	}
+
+// 	override
+// 	SimpMessageTypeMessageCondition combine(SimpMessageTypeMessageCondition other) {
+// 		return other;
+// 	}
+
+// 	override
 	
-	public SimpMessageTypeMessageCondition getMatchingCondition(Message<?> message) {
-		SimpMessageType actual = SimpMessageHeaderAccessor.getMessageType(message.getHeaders());
-		return (actual !is null && actual.equals(this.messageType) ? this : null);
-	}
+// 	SimpMessageTypeMessageCondition getMatchingCondition(Message<?> message) {
+// 		SimpMessageType actual = SimpMessageHeaderAccessor.getMessageType(message.getHeaders());
+// 		return (actual !is null && actual.equals(this.messageType) ? this : null);
+// 	}
 
-	override
-	public int compareTo(SimpMessageTypeMessageCondition other, Message<?> message) {
-		Object actual = SimpMessageHeaderAccessor.getMessageType(message.getHeaders());
-		if (actual !is null) {
-			if (actual.equals(this.messageType) && actual.equals(other.getMessageType())) {
-				return 0;
-			}
-			else if (actual.equals(this.messageType)) {
-				return -1;
-			}
-			else if (actual.equals(other.getMessageType())) {
-				return 1;
-			}
-		}
-		return 0;
-	}
+// 	override
+// 	int compareTo(SimpMessageTypeMessageCondition other, Message<?> message) {
+// 		Object actual = SimpMessageHeaderAccessor.getMessageType(message.getHeaders());
+// 		if (actual !is null) {
+// 			if (actual.equals(this.messageType) && actual.equals(other.getMessageType())) {
+// 				return 0;
+// 			}
+// 			else if (actual.equals(this.messageType)) {
+// 				return -1;
+// 			}
+// 			else if (actual.equals(other.getMessageType())) {
+// 				return 1;
+// 			}
+// 		}
+// 		return 0;
+// 	}
 
-}
+// }

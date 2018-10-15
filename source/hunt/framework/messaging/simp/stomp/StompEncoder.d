@@ -45,22 +45,32 @@ alias DataOutputStream = BufferedOutputStream;
  */
 public class StompEncoder  {
 
-	private static final byte LF = '\n';
+	alias ByteArrayMap = Map!(string, byte[]);
 
-	private static final byte COLON = ':';
+	private enum byte LF = '\n';
+
+	private enum byte COLON = ':';
+
+	private enum int HEADER_KEY_CACHE_LIMIT = 32;
 
 
-
-	private static final int HEADER_KEY_CACHE_LIMIT = 32;
-
-
-	private final Map<string, byte[]> headerKeyAccessCache = new ConcurrentHashMap<>(HEADER_KEY_CACHE_LIMIT);
+	private ByteArrayMap headerKeyAccessCache; // = new ConcurrentHashMap<>(HEADER_KEY_CACHE_LIMIT);
 
 	
-	private final Map<string, byte[]> headerKeyUpdateCache =
-			new LinkedHashMap<string, byte[]>(HEADER_KEY_CACHE_LIMIT, 0.75f, true) {
+	private ByteArrayMap headerKeyUpdateCache;
+	
+	this() {
+		headerKeyAccessCache = new HashMap!(ByteArrayMap)(HEADER_KEY_CACHE_LIMIT);
+
+		headerKeyUpdateCache =
+			new class LinkedHashMap!(string, byte[]) {
+				
+				this() {
+					super(HEADER_KEY_CACHE_LIMIT, 0.75f, true);
+				}
+
 				override
-				protected  removeEldestEntry(Map.Entry<string, byte[]> eldest) {
+				protected  removeEldestEntry(LinkedHashMapEntry!(string, byte[]) eldest) {
 					if (size() > HEADER_KEY_CACHE_LIMIT) {
 						headerKeyAccessCache.remove(eldest.getKey());
 						return true;
@@ -70,7 +80,7 @@ public class StompEncoder  {
 					}
 				}
 			};
-
+	}
 
 	/**
 	 * Encodes the given STOMP {@code message} into a {@code byte[]}.
@@ -126,7 +136,7 @@ public class StompEncoder  {
 
 		
 		Map!(string,List!(string)) nativeHeaders =
-				(Map<string, List!(string)>) headers.get(NativeMessageHeaderAccessor.NATIVE_HEADERS);
+				(Map!(string, List!(string))) headers.get(NativeMessageHeaderAccessor.NATIVE_HEADERS);
 
 		version(HUNT_DEBUG) {
 			logger.trace("Encoding STOMP " ~ command ~ ", headers=" ~ nativeHeaders);

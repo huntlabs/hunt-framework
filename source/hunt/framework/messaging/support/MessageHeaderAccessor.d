@@ -16,26 +16,24 @@
 
 module hunt.framework.messaging.support.MessageHeaderAccessor;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import hunt.container.HashMap;
-import java.util.List;
-import hunt.container.Map;
-import java.util.UUID;
-
-
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageChannel;
 import hunt.framework.messaging.MessageHeaders;
-import org.springframework.util.Assert;
-import org.springframework.util.IdGenerator;
-import org.springframework.util.MimeType;
-import org.springframework.util.MimeTypeUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.PatternMatchUtils;
-import org.springframework.util.StringUtils;
+
+import hunt.http.codec.http.model.MimeTypes;
+
+import hunt.lang.Charset;
+import hunt.lang.object;
+import hunt.math.Long;
+import hunt.container;
+import hunt.datetime;
+import hunt.string.PatternMatchUtils;
+import hunt.util.exception;
+import hunt.util.ObjectUtils;
+
+import std.range.primitives;
+import std.string;
+import std.uuid;
 
 
 /**
@@ -53,6 +51,8 @@ interface MessageHeaderInitializer {
 	void initHeaders(MessageHeaderAccessor headerAccessor);
 
 }
+
+alias Charset = string;
 
 /**
  * A base for classes providing strongly typed getters and setters as well as
@@ -129,35 +129,41 @@ interface MessageHeaderInitializer {
  * @author Juergen Hoeller
  * @since 4.0
  */
-public class MessageHeaderAccessor {
+class MessageHeaderAccessor(T) {
 
 	/**
 	 * The default charset used for headers.
 	 */
-	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+	enum Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-	private static final MimeType[] READABLE_MIME_TYPES = new MimeType[] {
-			MimeTypeUtils.APPLICATION_JSON, MimeTypeUtils.APPLICATION_XML,
-			new MimeType("text", "*"), new MimeType("application", "*+json"), new MimeType("application", "*+xml")
-	};
+	private __gshared MimeType[] READABLE_MIME_TYPES;
 
 
-	private final MutableMessageHeaders headers;
+	private MutableMessageHeaders headers;
 
-	private  leaveMutable = false;
+	private bool leaveMutable = false;
 
-	private  modified = false;
+	private bool modified = false;
 
-	private  enableTimestamp = false;
+	private bool enableTimestamp = false;
 
 	
-	private IdGenerator idGenerator;
+	// private IdGenerator idGenerator;
+
+	shared static this() {
+		READABLE_MIME_TYPES = [
+			MimeType.APPLICATION_JSON, MimeType.APPLICATION_XML,
+			new MimeType("text", new MimeType("*")), 
+			new MimeType("application", new MimeType("*+json")), 
+			new MimeType("application", new MimeType("*+xml"))
+		];
+	}
 
 
 	/**
 	 * A constructor to create new headers.
 	 */
-	public MessageHeaderAccessor() {
+	this() {
 		this(null);
 	}
 
@@ -165,7 +171,7 @@ public class MessageHeaderAccessor {
 	 * A constructor accepting the headers of an existing message to copy.
 	 * @param message a message to copy the headers from, or {@code null} if none
 	 */
-	public MessageHeaderAccessor(Message<?> message) {
+	this(Message!(T) message) {
 		this.headers = new MutableMessageHeaders(message !is null ? message.getHeaders() : null);
 	}
 
@@ -175,8 +181,8 @@ public class MessageHeaderAccessor {
 	 * @param message the message to build a new accessor for
 	 * @return the nested accessor (typically a specific subclass)
 	 */
-	protected MessageHeaderAccessor createAccessor(Message<?> message) {
-		return new MessageHeaderAccessor(message);
+	static protected MessageHeaderAccessor!T createAccessor(T)(Message!T message) {
+		return new MessageHeaderAccessor!T(message);
 	}
 
 
@@ -197,8 +203,8 @@ public class MessageHeaderAccessor {
 	 * <p>By default this is set to {@code false}.
 	 * @since 4.1
 	 */
-	public void setLeaveMutable( leaveMutable) {
-		Assert.state(this.headers.isMutable(), "Already immutable");
+	void setLeaveMutable( leaveMutable) {
+		assert(this.headers.isMutable(), "Already immutable");
 		this.leaveMutable = leaveMutable;
 	}
 
@@ -210,7 +216,7 @@ public class MessageHeaderAccessor {
 	 * {@code MessageHeaders} instance should no longer be modified.
 	 * @since 4.1
 	 */
-	public void setImmutable() {
+	void setImmutable() {
 		this.headers.setImmutable();
 	}
 
@@ -218,7 +224,7 @@ public class MessageHeaderAccessor {
 	 * Whether the underlying headers can still be modified.
 	 * @since 4.1
 	 */
-	public  isMutable() {
+	bool isMutable() {
 		return this.headers.isMutable();
 	}
 
@@ -235,7 +241,7 @@ public class MessageHeaderAccessor {
 	 * Check whether the underlying message headers have been marked as modified.
 	 * @return {@code true} if the flag has been set, {@code false} otherwise
 	 */
-	public  isModified() {
+	bool isModified() {
 		return this.modified;
 	}
 
@@ -245,7 +251,7 @@ public class MessageHeaderAccessor {
 	 * <p>By default, this property is set to {@code false}.
 	 * @see IdTimestampMessageHeaderInitializer
 	 */
-	void setEnableTimestamp( enableTimestamp) {
+	void setEnableTimestamp(bool enableTimestamp) {
 		this.enableTimestamp = enableTimestamp;
 	}
 
@@ -255,9 +261,9 @@ public class MessageHeaderAccessor {
 	 * in {@link hunt.framework.messaging.MessageHeaders} is used.
 	 * @see IdTimestampMessageHeaderInitializer
 	 */
-	void setIdGenerator(IdGenerator idGenerator) {
-		this.idGenerator = idGenerator;
-	}
+	// void setIdGenerator(IdGenerator idGenerator) {
+	// 	this.idGenerator = idGenerator;
+	// }
 
 
 	// Accessors for the resulting MessageHeaders
@@ -272,7 +278,7 @@ public class MessageHeaderAccessor {
 	 * {@link #toMessageHeaders()} or {@link #toMap()} instead.
 	 * @since 4.1
 	 */
-	public MessageHeaders getMessageHeaders() {
+	MessageHeaders getMessageHeaders() {
 		if (!this.leaveMutable) {
 			setImmutable();
 		}
@@ -285,7 +291,7 @@ public class MessageHeaderAccessor {
 	 * where each new call returns a fresh copy of the current header values.
 	 * @since 4.1
 	 */
-	public MessageHeaders toMessageHeaders() {
+	MessageHeaders toMessageHeaders() {
 		return new MessageHeaders(this.headers);
 	}
 
@@ -294,8 +300,8 @@ public class MessageHeaderAccessor {
 	 * <p>This method can be invoked many times, with modifications in between
 	 * where each new call returns a fresh copy of the current header values.
 	 */
-	public Map!(string, Object) toMap() {
-		return new HashMap<>(this.headers);
+	Map!(string, Object) toMap() {
+		return new HashMap!(string, Object)(this.headers);
 	}
 
 
@@ -307,7 +313,7 @@ public class MessageHeaderAccessor {
 	 * @return the associated value, or {@code null} if none found
 	 */
 	
-	public Object getHeader(string headerName) {
+	Object getHeader(string headerName) {
 		return this.headers.get(headerName);
 	}
 
@@ -315,7 +321,7 @@ public class MessageHeaderAccessor {
 	 * Set the value for the given header name.
 	 * <p>If the provided value is {@code null}, the header will be removed.
 	 */
-	public void setHeader(string name, Object value) {
+	void setHeader(string name, Object value) {
 		if (isReadOnly(name)) {
 			throw new IllegalArgumentException("'" ~ name ~ "' header is read-only");
 		}
@@ -337,10 +343,13 @@ public class MessageHeaderAccessor {
 	}
 
 	protected void verifyType(string headerName, Object headerValue) {
-		if (headerName !is null && headerValue !is null) {
-			if (MessageHeaders.ERROR_CHANNEL.equals(headerName) ||
+		if (!headerName.empty && headerValue !is null) {
+			if (MessageHeaders.ERROR_CHANNEL == headerName ||
 					MessageHeaders.REPLY_CHANNEL.endsWith(headerName)) {
-				if (!(headerValue instanceof MessageChannel || headerValue instanceof string)) {
+				MessageChannel!string mc = cast(MessageChannel)headerValue;
+				Nullable!string str = cast(Nullable!string)headerValue;
+				
+				if (mc is null && str is null) {
 					throw new IllegalArgumentException(
 							"'" ~ headerName ~ "' header value must be a MessageChannel or string");
 				}
@@ -352,7 +361,7 @@ public class MessageHeaderAccessor {
 	 * Set the value for the given header name only if the header name is not
 	 * already associated with a value.
 	 */
-	public void setHeaderIfAbsent(string name, Object value) {
+	void setHeaderIfAbsent(string name, Object value) {
 		if (getHeader(name) is null) {
 			setHeader(name, value);
 		}
@@ -361,8 +370,8 @@ public class MessageHeaderAccessor {
 	/**
 	 * Remove the value for the given header name.
 	 */
-	public void removeHeader(string headerName) {
-		if (StringUtils.hasLength(headerName) && !isReadOnly(headerName)) {
+	void removeHeader(string headerName) {
+		if (!headerName.empty && !isReadOnly(headerName)) {
 			setHeader(headerName, null);
 		}
 	}
@@ -372,9 +381,9 @@ public class MessageHeaderAccessor {
 	 * <p>As the name suggests, array may contain simple matching patterns for header
 	 * names. Supported pattern styles are: "xxx*", "*xxx", "*xxx*" and "xxx*yyy".
 	 */
-	public void removeHeaders(string... headerPatterns) {
-		List!(string) headersToRemove = new ArrayList<>();
-		for (string pattern : headerPatterns) {
+	void removeHeaders(string[] headerPatterns...) {
+		List!(string) headersToRemove = new ArrayList!string();
+		foreach (string pattern ; headerPatterns) {
 			if (StringUtils.hasLength(pattern)){
 				if (pattern.contains("*")){
 					headersToRemove.addAll(getMatchingHeaderNames(pattern, this.headers));
@@ -384,15 +393,15 @@ public class MessageHeaderAccessor {
 				}
 			}
 		}
-		for (string headerToRemove : headersToRemove) {
+		foreach (string headerToRemove ; headersToRemove) {
 			removeHeader(headerToRemove);
 		}
 	}
 
 	private List!(string) getMatchingHeaderNames(string pattern, Map!(string, Object) headers) {
-		List!(string) matchingHeaderNames = new ArrayList<>();
+		List!(string) matchingHeaderNames = new ArrayList!string();
 		if (headers !is null) {
-			for (string key : headers.keySet()) {
+			foreach (string key ; headers.byKey) {
 				if (PatternMatchUtils.simpleMatch(pattern, key)) {
 					matchingHeaderNames.add(key);
 				}
@@ -406,97 +415,130 @@ public class MessageHeaderAccessor {
 	 * <p>This operation will overwrite any existing values. Use
 	 * {@link #copyHeadersIfAbsent(Map)} to avoid overwriting values.
 	 */
-	public void copyHeaders(Map<string, ?> headersToCopy) {
-		if (headersToCopy !is null) {
-			headersToCopy.forEach((key, value) -> {
-				if (!isReadOnly(key)) {
-					setHeader(key, value);
-				}
-			});
-		}
-	}
+	// void copyHeaders(Map<string, ?> headersToCopy) {
+	// 	if (headersToCopy !is null) {
+	// 		headersToCopy.forEach((key, value) -> {
+	// 			if (!isReadOnly(key)) {
+	// 				setHeader(key, value);
+	// 			}
+	// 		});
+	// 	}
+	// }
 
 	/**
 	 * Copy the name-value pairs from the provided Map.
 	 * <p>This operation will <em>not</em> overwrite any existing values.
 	 */
-	public void copyHeadersIfAbsent(Map<string, ?> headersToCopy) {
-		if (headersToCopy !is null) {
-			headersToCopy.forEach((key, value) -> {
-				if (!isReadOnly(key)) {
-					setHeaderIfAbsent(key, value);
-				}
-			});
-		}
-	}
+	// void copyHeadersIfAbsent(Map<string, ?> headersToCopy) {
+	// 	if (headersToCopy !is null) {
+	// 		headersToCopy.forEach((key, value) -> {
+	// 			if (!isReadOnly(key)) {
+	// 				setHeaderIfAbsent(key, value);
+	// 			}
+	// 		});
+	// 	}
+	// }
 
-	protected  isReadOnly(string headerName) {
-		return (MessageHeaders.ID.equals(headerName) || MessageHeaders.TIMESTAMP.equals(headerName));
+	protected bool isReadOnly(string headerName) {
+		return (MessageHeaders.ID == (headerName) || MessageHeaders.TIMESTAMP == (headerName));
 	}
 
 
 	// Specific header accessors
 
 	
-	public UUID getId() {
+	UUID getId() {
 		Object value = getHeader(MessageHeaders.ID);
 		if (value is null) {
-			return null;
+			return UUID.init;
 		}
-		return (value instanceof UUID ? (UUID) value : UUID.fromString(value.toString()));
+
+		auto uu = cast(Nullable!UUID)value;
+		if(uu is null) {
+			auto us = cast(Nullable!string)value;
+			if(us is null)
+				throw new Exception("bad type");
+			else 
+				return UUID(us.value);
+		} else {
+			return uu.value;
+		}
+
+		// return (value instanceof UUID ? (UUID) value : UUID.fromString(value.toString()));
 	}
 
 	
-	public Long getTimestamp() {
+	Long getTimestamp() {
 		Object value = getHeader(MessageHeaders.TIMESTAMP);
 		if (value is null) {
 			return null;
 		}
-		return (value instanceof Long ? (Long) value : Long.parseLong(value.toString()));
+
+		auto vl = cast(Long)value;
+		if(vl is null) {
+			auto vs = cast(Nullable!string)value;
+			if(vs is null)
+				throw new Exception("bad type");
+			else 
+				return Long.parseLong(vs.value);
+		} else {
+			return vl;
+		}
+
+		// return (value instanceof Long ? (Long) value : Long.parseLong(value.toString()));
 	}
 
-	public void setContentType(MimeType contentType) {
+	void setContentType(MimeType contentType) {
 		setHeader(MessageHeaders.CONTENT_TYPE, contentType);
 	}
 
 	
-	public MimeType getContentType() {
+	MimeType getContentType() {
 		Object value = getHeader(MessageHeaders.CONTENT_TYPE);
 		if (value is null) {
 			return null;
 		}
-		return (value instanceof MimeType ? (MimeType) value : MimeType.valueOf(value.toString()));
+		MimeType mt = cast(MimeType) value;
+		if(mt !is null)
+			return mt;
+
+		auto vs = cast(Nullable!string)value;
+		if(vs is null)
+			throw new Exception("bad type");
+		else 
+			return Long.parseLong(vs.value);
+		// return (value instanceof MimeType ? (MimeType) value : MimeType.valueOf(value.toString()));
 	}
 
 	private Charset getCharset() {
 		MimeType contentType = getContentType();
-		Charset charset = (contentType !is null ? contentType.getCharset() : null);
+		Charset charset = (contentType !is null ? contentType.getCharsetString() : null);
 		return (charset !is null ? charset : DEFAULT_CHARSET);
 	}
 
-	public void setReplyChannelName(string replyChannelName) {
+	void setReplyChannelName(string replyChannelName) {
 		setHeader(MessageHeaders.REPLY_CHANNEL, replyChannelName);
 	}
 
-	public void setReplyChannel(MessageChannel replyChannel) {
+	void setReplyChannel(MessageChannel replyChannel) {
 		setHeader(MessageHeaders.REPLY_CHANNEL, replyChannel);
 	}
 
 	
-	public Object getReplyChannel() {
+	Object getReplyChannel() {
 		return getHeader(MessageHeaders.REPLY_CHANNEL);
 	}
 
-	public void setErrorChannelName(string errorChannelName) {
+	void setErrorChannelName(string errorChannelName) {
 		setHeader(MessageHeaders.ERROR_CHANNEL, errorChannelName);
 	}
 
-	public void setErrorChannel(MessageChannel errorChannel) {
+	void setErrorChannel(MessageChannel errorChannel) {
 		setHeader(MessageHeaders.ERROR_CHANNEL, errorChannel);
 	}
 
 	
-	public Object getErrorChannel() {
+	Object getErrorChannel() {
 		return getHeader(MessageHeaders.ERROR_CHANNEL);
 	}
 
@@ -508,8 +550,8 @@ public class MessageHeaderAccessor {
 	 * @param payload the payload that corresponds to the headers.
 	 * @return the message
 	 */
-	public string getShortLogMessage(Object payload) {
-		return "headers=" ~ this.headers.toString() + getShortPayloadLogMessage(payload);
+	string getShortLogMessage(Object payload) {
+		return "headers=" ~ this.headers.toString() ~ getShortPayloadLogMessage(payload);
 	}
 
 	/**
@@ -517,23 +559,26 @@ public class MessageHeaderAccessor {
 	 * @param payload the payload that corresponds to the headers.
 	 * @return the message
 	 */
-	public string getDetailedLogMessage(Object payload) {
-		return "headers=" ~ this.headers.toString() + getDetailedPayloadLogMessage(payload);
+	string getDetailedLogMessage(Object payload) {
+		return "headers=" ~ this.headers.toString() ~ getDetailedPayloadLogMessage(payload);
 	}
 
 	protected string getShortPayloadLogMessage(Object payload) {
-		if (payload instanceof string) {
-			string payloadText = (string) payload;
-			return (payloadText.length() < 80) ?
+		auto textPayload = cast(Nullable!string)payload;
+		if (textPayload !is null) {
+			string payloadText = textPayload.value;
+			return (payloadText.length < 80) ?
 				" payload=" ~ payloadText :
 				" payload=" ~ payloadText.substring(0, 80) ~ "...(truncated)";
 		}
-		else if (payload instanceof byte[]) {
-			byte[] bytes = (byte[]) payload;
+		
+		auto bytesPayload = cast(Nullable!(byte[]))payload;
+		if (bytesPayload !is null) {
+			byte[] bytes = bytesPayload.value;
 			if (isReadableContentType()) {
 				return (bytes.length < 80) ?
-						" payload=" ~ new string(bytes, getCharset()) :
-						" payload=" ~ new string(Arrays.copyOf(bytes, 80), getCharset()) ~ "...(truncated)";
+						" payload=" ~ cast(string)(bytes) :
+						" payload=" ~ cast(string)(bytes[0..80]) ~ "...(truncated)";
 			}
 			else {
 				return " payload=byte[" ~ bytes.length ~ "]";
@@ -548,36 +593,39 @@ public class MessageHeaderAccessor {
 	}
 
 	protected string getDetailedPayloadLogMessage(Object payload) {
-		if (payload instanceof string) {
-			return " payload=" ~ payload;
+		auto textPayload = cast(Nullable!string)payload;
+		if (textPayload !is null) {
+			return " payload=" ~ textPayload.value;
 		}
-		else if (payload instanceof byte[]) {
-			byte[] bytes = (byte[]) payload;
+		
+		auto bytesPayload = cast(Nullable!(byte[]))payload;
+		if (bytesPayload !is null) {
+			byte[] bytes = bytesPayload.value;
 			if (isReadableContentType()) {
-				return " payload=" ~ new string(bytes, getCharset());
-			}
-			else {
-				return " payload=byte[" ~ bytes.length ~ "]";
+				return " payload=" ~ cast(string)(bytes);
+			} else {
+				return " payload=byte[" ~ to!string(bytes.length) ~ "]";
 			}
 		}
 		else {
-			return " payload=" ~ payload;
+			return " payload=" ~ payload.toString();
 		}
 	}
 
-	protected  isReadableContentType() {
+	protected bool isReadableContentType() {
 		MimeType contentType = getContentType();
-		for (MimeType mimeType : READABLE_MIME_TYPES) {
-			if (mimeType.includes(contentType)) {
-				return true;
-			}
+		implementationMissing(false);
+		foreach (MimeType mimeType ; READABLE_MIME_TYPES) {
+			// if (mimeType.includes(contentType)) {
+			// 	return true;
+			// }
 		}
 		return false;
 	}
 
 	override
-	public string toString() {
-		return getClass().getSimpleName() ~ " [headers=" ~ this.headers ~ "]";
+	string toString() {
+		return getClass().getSimpleName() ~ " [headers=" ~ this.headers.toString() ~ "]";
 	}
 
 
@@ -595,9 +643,9 @@ public class MessageHeaderAccessor {
 	 * @since 4.1
 	 */
 	
-	public static <T extends MessageHeaderAccessor> T getAccessor(Message<?> message, Class!(T) requiredType) {
-		return getAccessor(message.getHeaders(), requiredType);
-	}
+	// static U getAccessor(U)(Message!(U) message, Class!(U) requiredType) {
+	// 	return getAccessor(message.getHeaders(), requiredType);
+	// }
 
 	/**
 	 * A variation of {@link #getAccessor(hunt.framework.messaging.Message, Class)}
@@ -610,18 +658,18 @@ public class MessageHeaderAccessor {
 	 */
 	
 	
-	public static <T extends MessageHeaderAccessor> T getAccessor(
-			MessageHeaders messageHeaders, Class!(T) requiredType) {
+	// static <T extends MessageHeaderAccessor> T getAccessor(
+	// 		MessageHeaders messageHeaders, Class!(T) requiredType) {
 
-		if (messageHeaders instanceof MutableMessageHeaders) {
-			MutableMessageHeaders mutableHeaders = (MutableMessageHeaders) messageHeaders;
-			MessageHeaderAccessor headerAccessor = mutableHeaders.getAccessor();
-			if (requiredType is null || requiredType.isInstance(headerAccessor))  {
-				return (T) headerAccessor;
-			}
-		}
-		return null;
-	}
+	// 	if (messageHeaders instanceof MutableMessageHeaders) {
+	// 		MutableMessageHeaders mutableHeaders = (MutableMessageHeaders) messageHeaders;
+	// 		MessageHeaderAccessor headerAccessor = mutableHeaders.getAccessor();
+	// 		if (requiredType is null || requiredType.isInstance(headerAccessor))  {
+	// 			return (T) headerAccessor;
+	// 		}
+	// 	}
+	// 	return null;
+	// }
 
 	/**
 	 * Return a mutable {@code MessageHeaderAccessor} for the given message attempting
@@ -632,9 +680,9 @@ public class MessageHeaderAccessor {
 	 * @return an accessor of the required type (never {@code null})
 	 * @since 4.1
 	 */
-	public static MessageHeaderAccessor getMutableAccessor(Message<?> message) {
-		if (message.getHeaders() instanceof MutableMessageHeaders) {
-			MutableMessageHeaders mutableHeaders = (MutableMessageHeaders) message.getHeaders();
+	static MessageHeaderAccessor getMutableAccessor(Message!(T) message) {
+			MutableMessageHeaders mutableHeaders = cast(MutableMessageHeaders) message.getHeaders();
+		if (mutableHeaders !is null) {
 			MessageHeaderAccessor accessor = mutableHeaders.getAccessor();
 			return (accessor.isMutable() ? accessor : accessor.createAccessor(message));
 		}
@@ -643,49 +691,48 @@ public class MessageHeaderAccessor {
 
 
 	
-	private class MutableMessageHeaders extends MessageHeaders {
+	private class MutableMessageHeaders : MessageHeaders {
 
-		private  mutable = true;
+		private bool mutable = true;
 
-		public MutableMessageHeaders(Map!(string, Object) headers) {
+		this(Map!(string, Object) headers) {
 			super(headers, MessageHeaders.ID_VALUE_NONE, -1L);
 		}
 
 		override
-		public Map!(string, Object) getRawHeaders() {
-			Assert.state(this.mutable, "Already immutable");
+		Map!(string, Object) getRawHeaders() {
+			assert(this.mutable, "Already immutable");
 			return super.getRawHeaders();
 		}
 
-		public void setImmutable() {
+		void setImmutable() {
 			if (!this.mutable) {
 				return;
 			}
 
-			if (getId() is null) {
-				IdGenerator idGenerator = (MessageHeaderAccessor.this.idGenerator !is null ?
-						MessageHeaderAccessor.this.idGenerator : MessageHeaders.getIdGenerator());
-				UUID id = idGenerator.generateId();
+			if (getId() == UUID.init ) {
+				UUID id = randomUUID();
 				if (id != MessageHeaders.ID_VALUE_NONE) {
-					getRawHeaders().put(ID, id);
+					getRawHeaders().put(ID, new Nullable!UUID(id));
 				}
 			}
 
 			if (getTimestamp() is null) {
-				if (MessageHeaderAccessor.this.enableTimestamp) {
-					getRawHeaders().put(TIMESTAMP, System.currentTimeMillis());
+				if (this.outer.enableTimestamp) {
+					Long timestamp = new Long(DateTimeHelper.currentTimeMillis());
+					getRawHeaders().put(TIMESTAMP, timestamp);
 				}
 			}
 
 			this.mutable = false;
 		}
 
-		public  isMutable() {
+		bool isMutable() {
 			return this.mutable;
 		}
 
-		public MessageHeaderAccessor getAccessor() {
-			return MessageHeaderAccessor.this;
+		MessageHeaderAccessor!T getAccessor() {
+			return this.outer;
 		}
 
 		protected Object writeReplace() {

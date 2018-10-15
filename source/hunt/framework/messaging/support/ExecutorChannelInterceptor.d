@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.support;
+module hunt.framework.messaging.support.ExecutorChannelInterceptor;
 
 
 import hunt.framework.messaging.Message;
@@ -34,36 +34,36 @@ import hunt.framework.messaging.MessageHandler;
  * @see MessageChannel
  * @see MessageHandler
  */
-public interface ExecutorChannelInterceptor extends ChannelInterceptor {
+interface ExecutorChannelInterceptor : ChannelInterceptor {
 
-	/**
-	 * Invoked inside the {@link Runnable} submitted to the Executor just before
-	 * calling the target MessageHandler to handle the message. Allows for
-	 * modification of the Message if necessary or when {@code null} is returned
-	 * the MessageHandler is not invoked.
-	 * @param message the message to be handled
-	 * @param channel the channel on which the message was sent to
-	 * @param handler the target handler to handle the message
-	 * @return the input message, or a new instance, or {@code null}
-	 */
+	// /**
+	//  * Invoked inside the {@link Runnable} submitted to the Executor just before
+	//  * calling the target MessageHandler to handle the message. Allows for
+	//  * modification of the Message if necessary or when {@code null} is returned
+	//  * the MessageHandler is not invoked.
+	//  * @param message the message to be handled
+	//  * @param channel the channel on which the message was sent to
+	//  * @param handler the target handler to handle the message
+	//  * @return the input message, or a new instance, or {@code null}
+	//  */
 	
-	default Message<?> beforeHandle(Message<?> message, MessageChannel channel, MessageHandler handler) {
-		return message;
-	}
+	// default Message<?> beforeHandle(Message<?> message, MessageChannel channel, MessageHandler handler) {
+	// 	return message;
+	// }
 
-	/**
-	 * Invoked inside the {@link Runnable} submitted to the Executor after calling
-	 * the target MessageHandler regardless of the outcome (i.e. Exception raised
-	 * or not) thus allowing for proper resource cleanup.
-	 * <p>Note that this will be invoked only if beforeHandle successfully completed
-	 * and returned a Message, i.e. it did not return {@code null}.
-	 * @param message the message handled
-	 * @param channel the channel on which the message was sent to
-	 * @param handler the target handler that handled the message
-	 * @param ex any exception that may been raised by the handler
-	 */
-	default void afterMessageHandled(Message<?> message, MessageChannel channel, MessageHandler handler,
-			Exception ex) {
-	}
+	// /**
+	//  * Invoked inside the {@link Runnable} submitted to the Executor after calling
+	//  * the target MessageHandler regardless of the outcome (i.e. Exception raised
+	//  * or not) thus allowing for proper resource cleanup.
+	//  * <p>Note that this will be invoked only if beforeHandle successfully completed
+	//  * and returned a Message, i.e. it did not return {@code null}.
+	//  * @param message the message handled
+	//  * @param channel the channel on which the message was sent to
+	//  * @param handler the target handler that handled the message
+	//  * @param ex any exception that may been raised by the handler
+	//  */
+	// default void afterMessageHandled(Message<?> message, MessageChannel channel, MessageHandler handler,
+	// 		Exception ex) {
+	// }
 
 }

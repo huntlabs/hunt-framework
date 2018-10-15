@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.simp;
+module hunt.framework.messaging.simp.SimpMessageSendingOperations;
 
 import hunt.container.Map;
 

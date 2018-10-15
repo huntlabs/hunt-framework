@@ -11,7 +11,7 @@ import std.traits;
 import std.exception;
 
 import hunt.event.EventLoop;
-import hunt.util.common;
+import hunt.lang.common;
 import hunt.util.timer;
 import hunt.logging;
 

@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.support;
-
+module hunt.framework.messaging.support.IdTimestampMessageHeaderInitializer;
 
 import hunt.framework.messaging.MessageHeaders;
-import org.springframework.util.IdGenerator;
 
 /**
  * A {@link hunt.framework.messaging.support.MessageHeaderInitializer MessageHeaderInitializer}
@@ -27,7 +25,7 @@ import org.springframework.util.IdGenerator;
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public class IdTimestampMessageHeaderInitializer implements MessageHeaderInitializer {
+public class IdTimestampMessageHeaderInitializer : MessageHeaderInitializer {
 
 	private static final IdGenerator ID_VALUE_NONE_GENERATOR = () -> MessageHeaders.ID_VALUE_NONE;
 

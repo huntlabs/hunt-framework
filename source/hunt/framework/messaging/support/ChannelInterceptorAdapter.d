@@ -14,50 +14,50 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.support;
+module hunt.framework.messaging.support.ChannelInterceptorAdapter;
 
 
-import hunt.framework.messaging.Message;
-import hunt.framework.messaging.MessageChannel;
+// import hunt.framework.messaging.Message;
+// import hunt.framework.messaging.MessageChannel;
 
-/**
- * A {@link ChannelInterceptor} base class with empty method implementations
- * as a convenience.
- *
- * @author Mark Fisher
- * @author Rossen Stoyanchev
- * @since 4.0
- * @deprecated as of 5.0.7 {@link ChannelInterceptor} has default methods (made
- * possible by a Java 8 baseline) and can be implemented directly without the
- * need for this no-op adapter
- */
-@Deprecated
-public abstract class ChannelInterceptorAdapter implements ChannelInterceptor {
+// /**
+//  * A {@link ChannelInterceptor} base class with empty method implementations
+//  * as a convenience.
+//  *
+//  * @author Mark Fisher
+//  * @author Rossen Stoyanchev
+//  * @since 4.0
+//  * @deprecated as of 5.0.7 {@link ChannelInterceptor} has default methods (made
+//  * possible by a Java 8 baseline) and can be implemented directly without the
+//  * need for this no-op adapter
+//  */
+// @Deprecated
+// abstract class ChannelInterceptorAdapter : ChannelInterceptor {
 
-	override
-	public Message<?> preSend(Message<?> message, MessageChannel channel) {
-		return message;
-	}
+// 	override
+// 	Message<?> preSend(Message<?> message, MessageChannel channel) {
+// 		return message;
+// 	}
 
-	override
-	public void postSend(Message<?> message, MessageChannel channel,  sent) {
-	}
+// 	override
+// 	void postSend(Message<?> message, MessageChannel channel,  sent) {
+// 	}
 
-	override
-	public void afterSendCompletion(Message<?> message, MessageChannel channel,  sent, Exception ex) {
-	}
+// 	override
+// 	void afterSendCompletion(Message<?> message, MessageChannel channel,  sent, Exception ex) {
+// 	}
 
-	public  preReceive(MessageChannel channel) {
-		return true;
-	}
+// 	 preReceive(MessageChannel channel) {
+// 		return true;
+// 	}
 
-	override
-	public Message<?> postReceive(Message<?> message, MessageChannel channel) {
-		return message;
-	}
+// 	override
+// 	Message<?> postReceive(Message<?> message, MessageChannel channel) {
+// 		return message;
+// 	}
 
-	override
-	public void afterReceiveCompletion(Message<?> message, MessageChannel channel, Exception ex) {
-	}
+// 	override
+// 	void afterReceiveCompletion(Message<?> message, MessageChannel channel, Exception ex) {
+// 	}
 
-}
+// }
