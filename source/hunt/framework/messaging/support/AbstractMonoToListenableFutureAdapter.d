@@ -49,7 +49,7 @@ module hunt.framework.messaging.support.AbstractMonoToListenableFutureAdapter;
 
 
 // 	protected AbstractMonoToListenableFutureAdapter(Mono<S> mono) {
-// 		Assert.notNull(mono, "Mono must not be null");
+// 		assert(mono, "Mono must not be null");
 // 		this.monoProcessor = mono
 // 				.doOnSuccess(result -> {
 // 					T adapted;
@@ -77,7 +77,7 @@ module hunt.framework.messaging.support.AbstractMonoToListenableFutureAdapter;
 // 	override
 	
 // 	public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-// 		Assert.notNull(unit, "TimeUnit must not be null");
+// 		assert(unit, "TimeUnit must not be null");
 // 		Duration duration = Duration.ofMillis(TimeUnit.MILLISECONDS.convert(timeout, unit));
 // 		S result = this.monoProcessor.block(duration);
 // 		return adapt(result);

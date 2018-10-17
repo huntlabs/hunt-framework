@@ -1,7 +1,7 @@
 module hunt.framework.http.session.HttpSession;
 
 import hunt.datetime;
-import hunt.util.exception;
+import hunt.lang.exception;
 import hunt.framework.utils.random;
 
 import std.algorithm;

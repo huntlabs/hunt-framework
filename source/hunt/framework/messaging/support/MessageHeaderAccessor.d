@@ -28,7 +28,7 @@ import hunt.math.Long;
 import hunt.container;
 import hunt.datetime;
 import hunt.string.PatternMatchUtils;
-import hunt.util.exception;
+import hunt.lang.exception;
 import hunt.util.ObjectUtils;
 
 import std.range.primitives;

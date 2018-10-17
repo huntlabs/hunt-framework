@@ -33,7 +33,7 @@ import hunt.framework.messaging.support.NativeMessageHeaderAccessor;
 import hunt.container;
 import hunt.io.ByteArrayOutputStream;
 import hunt.logging;
-import hunt.util.exception;
+import hunt.lang.exception;
 import hunt.string;
 
 import std.conv;

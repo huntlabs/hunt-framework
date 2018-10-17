@@ -63,7 +63,7 @@ import hunt.container.Map;
 // 	 * @param messageChannel the message channel (never {@code null})
 // 	 */
 // 	this(MessageChannel messageChannel) {
-// 		Assert.notNull(messageChannel, "MessageChannel must not be null");
+// 		assert(messageChannel, "MessageChannel must not be null");
 // 		this.messageChannel = messageChannel;
 // 	}
 
@@ -138,7 +138,7 @@ import hunt.container.Map;
 // 	 */
 // 	override
 // 	void send(Message<?> message) {
-// 		Assert.notNull(message, "Message is required");
+// 		assert(message, "Message is required");
 // 		string destination = SimpMessageHeaderAccessor.getDestination(message.getHeaders());
 // 		if (destination !is null) {
 // 			sendInternal(message);
@@ -149,7 +149,7 @@ import hunt.container.Map;
 
 // 	override
 // 	protected void doSend(string destination, Message<?> message) {
-// 		Assert.notNull(destination, "Destination must not be null");
+// 		assert(destination, "Destination must not be null");
 
 // 		SimpMessageHeaderAccessor simpAccessor =
 // 				MessageHeaderAccessor.getAccessor(message, SimpMessageHeaderAccessor.class);
@@ -181,7 +181,7 @@ import hunt.container.Map;
 
 // 	private void sendInternal(Message<?> message) {
 // 		string destination = SimpMessageHeaderAccessor.getDestination(message.getHeaders());
-// 		Assert.notNull(destination, "Destination header required");
+// 		assert(destination, "Destination header required");
 
 // 		long timeout = this.sendTimeout;
 // 		 sent = (timeout >= 0 ? this.messageChannel.send(message, timeout) : this.messageChannel.send(message));
@@ -223,7 +223,7 @@ import hunt.container.Map;
 // 			Map!(string, Object) headers, MessagePostProcessor postProcessor)
 // 			throws MessagingException {
 
-// 		Assert.notNull(user, "User must not be null");
+// 		assert(user, "User must not be null");
 // 		user = StringUtils.replace(user, "/", "%2F");
 // 		destination = destination.startsWith("/") ? destination : "/" ~ destination;
 // 		super.convertAndSend(this.destinationPrefix + user + destination, payload, headers, postProcessor);

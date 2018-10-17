@@ -30,7 +30,7 @@ import hunt.container;
 import hunt.datetime;
 import hunt.logging;
 import hunt.math.Long;
-import hunt.util.exception;
+import hunt.lang.exception;
 import hunt.lang.object;
 
 import std.uuid;

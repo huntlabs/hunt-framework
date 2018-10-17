@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging;
+module hunt.framework.messaging.MessagingException;
 
 import hunt.framework.messaging.exception;
 import hunt.framework.messaging.Message;
 
-// import hunt.util.exception;
+// import hunt.lang.exception;
 
 
 /**

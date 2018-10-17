@@ -49,7 +49,7 @@ import hunt.container.Map;
 // 	 * @param messageType the message type to match messages to
 // 	 */
 // 	this(SimpMessageType messageType) {
-// 		Assert.notNull(messageType, "MessageType must not be null");
+// 		assert(messageType, "MessageType must not be null");
 // 		this.messageType = messageType;
 // 	}
 

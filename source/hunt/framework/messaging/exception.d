@@ -1,6 +1,6 @@
 module hunt.framework.messaging.exception;
 
-import hunt.util.exception;
+import hunt.lang.exception;
 
 class NestedRuntimeException: Exception
 {

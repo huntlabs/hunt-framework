@@ -19,7 +19,7 @@ import hunt.http.server;
 import hunt.io.common;
 import hunt.logging;
 import hunt.net.NetUtil;
-import hunt.util.exception;
+import hunt.lang.exception;
 import hunt.util.functional;
 import hunt.http.codec.websocket.frame.Frame;
 import hunt.http.codec.websocket.stream.WebSocketConnection;

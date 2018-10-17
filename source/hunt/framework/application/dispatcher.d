@@ -23,7 +23,7 @@ import hunt.framework.security.acl.User;
 import hunt.framework.simplify;
 
 import hunt.logging;
-import hunt.util.exception;
+import hunt.lang.exception;
 import hunt.http.codec.http.model.HttpHeader;
 
 import std.stdio;

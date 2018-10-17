@@ -106,7 +106,7 @@ module hunt.framework.messaging.support.AbstractMessageChannel;
 
 // 	override
 // 	final  send(Message!(T) message, long timeout) {
-// 		Assert.notNull(message, "Message must not be null");
+// 		assert(message, "Message must not be null");
 // 		Message!(T) messageToUse = message;
 // 		ChannelInterceptorChain chain = new ChannelInterceptorChain();
 // 		 sent = false;

@@ -18,7 +18,7 @@ import std.traits;
 
 import core.cpuid;
 import std.string;
-import hunt.util.exception;
+import hunt.lang.exception;
 
 import hunt.framework.http.session.HttpSession;
 

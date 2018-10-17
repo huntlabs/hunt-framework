@@ -28,7 +28,7 @@ import hunt.io.DataOutputStream;
 
 import hunt.container;
 import hunt.logging;
-import hunt.util.exception;
+import hunt.lang.exception;
 
 import std.conv;
 

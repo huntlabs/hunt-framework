@@ -47,15 +47,15 @@ public final class MessageBuilder!(T) {
 
 
 	private MessageBuilder(Message!(T) originalMessage) {
-		Assert.notNull(originalMessage, "Message must not be null");
+		assert(originalMessage, "Message must not be null");
 		this.payload = originalMessage.getPayload();
 		this.originalMessage = originalMessage;
 		this.headerAccessor = new MessageHeaderAccessor(originalMessage);
 	}
 
 	private MessageBuilder(T payload, MessageHeaderAccessor accessor) {
-		Assert.notNull(payload, "Payload must not be null");
-		Assert.notNull(accessor, "MessageHeaderAccessor must not be null");
+		assert(payload, "Payload must not be null");
+		assert(accessor, "MessageHeaderAccessor must not be null");
 		this.payload = payload;
 		this.originalMessage = null;
 		this.headerAccessor = accessor;
@@ -67,7 +67,7 @@ public final class MessageBuilder!(T) {
 	 * @param accessor the headers to use
 	 */
 	public MessageBuilder!(T) setHeaders(MessageHeaderAccessor accessor) {
-		Assert.notNull(accessor, "MessageHeaderAccessor must not be null");
+		assert(accessor, "MessageHeaderAccessor must not be null");
 		this.headerAccessor = accessor;
 		return this;
 	}
@@ -191,8 +191,8 @@ public final class MessageBuilder!(T) {
 	 */
 	
 	public static !(T) Message!(T) createMessage(T payload, MessageHeaders messageHeaders) {
-		Assert.notNull(payload, "Payload must not be null");
-		Assert.notNull(messageHeaders, "MessageHeaders must not be null");
+		assert(payload, "Payload must not be null");
+		assert(messageHeaders, "MessageHeaders must not be null");
 		if (payload instanceof Throwable) {
 			return (Message!(T)) new ErrorMessage((Throwable) payload, messageHeaders);
 		}

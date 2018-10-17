@@ -44,7 +44,7 @@ import hunt.string;
  * @see <a href="http://stomp.github.io/stomp-specification-1.2.html#Frames_and_Headers">
  * http://stomp.github.io/stomp-specification-1.2.html#Frames_and_Headers</a>
  */
-class StompHeaders : MultiMap!(string) {
+class StompHeaders : MultiValueMap!(string, string) {
 
 	alias MultiValuesMap = Map!(string, List!(string));
 
@@ -107,10 +107,11 @@ class StompHeaders : MultiMap!(string) {
 	}
 
 	private this(MultiValuesMap headers,  readOnly) {
-		Assert.notNull(headers, "'headers' must not be null");
+		assert(headers, "'headers' must not be null");
 		if (readOnly) {
 			MultiValuesMap map = new LinkedMultiValueMap!(string, List!(string))(headers.size());
-			headers.forEach((key, value) -> map.put(key, Collections.unmodifiableList(value)));
+			foreach(string key, List!(string) value; map)
+				map.put(key, Collections.unmodifiableList(value));
 			this.headers = Collections.unmodifiableMap(map);
 		}
 		else {
@@ -140,7 +141,7 @@ class StompHeaders : MultiMap!(string) {
 	
 	MimeType getContentType() {
 		string value = getFirst(CONTENT_TYPE);
-		return (StringUtils.hasLength(value) ? MimeTypeUtils.parseMimeType(value) : null);
+		return value.empty ? null : MimeTypeUtils.parseMimeType(value);
 	}
 
 	/**
@@ -532,21 +533,37 @@ class StompHeaders : MultiMap!(string) {
 		this.headers.clear();
 	}
 
-	override
-	Set!(string) keySet() {
-		return this.headers.keySet();
-	}
+	// override
+	// Set!(string) keySet() {
+	// 	return this.headers.keySet();
+	// }
 
-	override
-	Collection!(List!(string)) values() {
-		return this.headers.values();
-	}
+	// override
+	// Collection!(List!(string)) values() {
+	// 	return this.headers.values();
+	// }
 
 	// override
 	// Set<Entry!(string, List!(string))> entrySet() {
 	// 	return this.headers.entrySet();
 	// }
 
+
+    int opApply(scope int delegate(ref K, ref V) dg)  {
+        return this.headers.opApply(dg);
+    }
+    
+    int opApply(scope int delegate(MapEntry!(K, V) entry) dg) {
+        return this.headers.opApply(dg);
+    }
+    
+    InputRange!K byKey() {
+        return this.headers.byKey();
+    }
+
+    InputRange!V byValue() {
+        return this.headers.byValue();
+    }
 
 	override
 	bool opEquals(Object other) {

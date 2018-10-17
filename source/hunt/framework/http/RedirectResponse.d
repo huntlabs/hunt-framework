@@ -6,7 +6,7 @@ import std.json;
 
 import hunt.http.codec.http.model.HttpHeader;
 import hunt.logging;
-import hunt.util.exception;
+import hunt.lang.exception;
 
 import hunt.framework.utils.string;
 import hunt.framework.versions;
