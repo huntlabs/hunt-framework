@@ -16,6 +16,7 @@
 
 module hunt.framework.messaging.support.MessageHeaderAccessor;
 
+import hunt.framework.messaging.IdGenerator;
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageChannel;
 import hunt.framework.messaging.MessageHeaders;
@@ -24,7 +25,7 @@ import hunt.http.codec.http.model.MimeTypes;
 
 import hunt.lang.Charset;
 import hunt.lang.object;
-import hunt.math.Long;
+import hunt.lang.Long;
 import hunt.container;
 import hunt.datetime;
 import hunt.string.PatternMatchUtils;
@@ -148,7 +149,7 @@ class MessageHeaderAccessor(T) {
 	private bool enableTimestamp = false;
 
 	
-	// private IdGenerator idGenerator;
+	private IdGenerator idGenerator;
 
 	shared static this() {
 		READABLE_MIME_TYPES = [
@@ -261,9 +262,9 @@ class MessageHeaderAccessor(T) {
 	 * in {@link hunt.framework.messaging.MessageHeaders} is used.
 	 * @see IdTimestampMessageHeaderInitializer
 	 */
-	// void setIdGenerator(IdGenerator idGenerator) {
-	// 	this.idGenerator = idGenerator;
-	// }
+	void setIdGenerator(IdGenerator idGenerator) {
+		this.idGenerator = idGenerator;
+	}
 
 
 	// Accessors for the resulting MessageHeaders
@@ -710,8 +711,13 @@ class MessageHeaderAccessor(T) {
 				return;
 			}
 
-			if (getId() == UUID.init ) {
-				UUID id = randomUUID();
+			if (getId().empty) {
+				// UUID id = randomUUID();
+
+				IdGenerator idGenerator = this.outer.idGenerator;
+				if(idGenerator is null)
+					idGenerator = MessageHeaders.getIdGenerator();
+				UUID id = idGenerator.generateId();
 				if (id != MessageHeaders.ID_VALUE_NONE) {
 					getRawHeaders().put(ID, new Nullable!UUID(id));
 				}

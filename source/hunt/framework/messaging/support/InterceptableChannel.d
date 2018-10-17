@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.support;
+module hunt.framework.messaging.support.InterceptableChannel;
 
-import java.util.List;
+import hunt.container.List;
 
 /**
  * A {@link hunt.framework.messaging.MessageChannel MessageChannel} that
@@ -26,12 +26,12 @@ import java.util.List;
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public interface InterceptableChannel {
+interface InterceptableChannel {
 
 	/**
 	 * Set the list of channel interceptors clearing any existing interceptors.
 	 */
-	void setInterceptors(List<ChannelInterceptor> interceptors);
+	void setInterceptors(List!(ChannelInterceptor) interceptors);
 
 	/**
 	 * Add a channel interceptor to the end of the list.
@@ -46,12 +46,12 @@ public interface InterceptableChannel {
 	/**
 	 * Return the list of configured interceptors.
 	 */
-	List<ChannelInterceptor> getInterceptors();
+	List!(ChannelInterceptor) getInterceptors();
 
 	/**
 	 * Remove the given interceptor.
 	 */
-	 removeInterceptor(ChannelInterceptor interceptor);
+	bool removeInterceptor(ChannelInterceptor interceptor);
 
 	/**
 	 * Remove the interceptor at the given index.

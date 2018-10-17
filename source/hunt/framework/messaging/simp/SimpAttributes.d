@@ -21,7 +21,7 @@ import hunt.framework.messaging.MessageHeaders;
 
 import hunt.container.Map;
 import hunt.logging;
-import hunt.math.Boolean;
+import hunt.lang.Boolean;
 import hunt.string;
 
 import std.traits;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.support;
+module hunt.framework.messaging.support.ImmutableMessageChannelInterceptor;
 
 import hunt.framework.messaging.support.ChannelInterceptor;
 import hunt.framework.messaging.Message;

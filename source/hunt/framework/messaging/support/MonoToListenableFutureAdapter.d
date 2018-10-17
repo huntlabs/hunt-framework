@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.support;
+module hunt.framework.messaging.support.MonoToListenableFutureAdapter;
 
 // import reactor.core.publisher.Mono;
 

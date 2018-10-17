@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.support;
+module hunt.framework.messaging.support.MessageBuilder;
 
-import hunt.container.Map;
-
+import hunt.framework.messaging.support.ErrorMessage;
+import hunt.framework.messaging.support.GenericMessage;
+import hunt.framework.messaging.support.MessageHeaderAccessor;
 
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageChannel;
 import hunt.framework.messaging.MessageHeaders;
-import org.springframework.util.Assert;
+
+import hunt.container.Map;
 
 /**
  * A builder for creating a {@link GenericMessage}
@@ -36,24 +38,23 @@ import org.springframework.util.Assert;
  * @see GenericMessage
  * @see ErrorMessage
  */
-public final class MessageBuilder!(T) {
+final class MessageBuilder(T) {
 
-	private final T payload;
-
+	private T payload;
 	
-	private final Message!(T) originalMessage;
+	private Message!(T) originalMessage;
 
 	private MessageHeaderAccessor headerAccessor;
 
 
-	private MessageBuilder(Message!(T) originalMessage) {
+	private this(Message!(T) originalMessage) {
 		assert(originalMessage, "Message must not be null");
 		this.payload = originalMessage.getPayload();
 		this.originalMessage = originalMessage;
 		this.headerAccessor = new MessageHeaderAccessor(originalMessage);
 	}
 
-	private MessageBuilder(T payload, MessageHeaderAccessor accessor) {
+	private this(T payload, MessageHeaderAccessor accessor) {
 		assert(payload, "Payload must not be null");
 		assert(accessor, "MessageHeaderAccessor must not be null");
 		this.payload = payload;
@@ -66,7 +67,7 @@ public final class MessageBuilder!(T) {
 	 * Set the message headers to use by providing a {@code MessageHeaderAccessor}.
 	 * @param accessor the headers to use
 	 */
-	public MessageBuilder!(T) setHeaders(MessageHeaderAccessor accessor) {
+	MessageBuilder!(T) setHeaders(MessageHeaderAccessor accessor) {
 		assert(accessor, "MessageHeaderAccessor must not be null");
 		this.headerAccessor = accessor;
 		return this;
@@ -76,7 +77,7 @@ public final class MessageBuilder!(T) {
 	 * Set the value for the given header name. If the provided value is {@code null},
 	 * the header will be removed.
 	 */
-	public MessageBuilder!(T) setHeader(string headerName, Object headerValue) {
+	MessageBuilder!(T) setHeader(string headerName, Object headerValue) {
 		this.headerAccessor.setHeader(headerName, headerValue);
 		return this;
 	}
@@ -85,7 +86,7 @@ public final class MessageBuilder!(T) {
 	 * Set the value for the given header name only if the header name is not already
 	 * associated with a value.
 	 */
-	public MessageBuilder!(T) setHeaderIfAbsent(string headerName, Object headerValue) {
+	MessageBuilder!(T) setHeaderIfAbsent(string headerName, Object headerValue) {
 		this.headerAccessor.setHeaderIfAbsent(headerName, headerValue);
 		return this;
 	}
@@ -95,14 +96,14 @@ public final class MessageBuilder!(T) {
 	 * the array may contain simple matching patterns for header names. Supported pattern
 	 * styles are: "xxx*", "*xxx", "*xxx*" and "xxx*yyy".
 	 */
-	public MessageBuilder!(T) removeHeaders(string... headerPatterns) {
+	MessageBuilder!(T) removeHeaders(string[] headerPatterns... ) {
 		this.headerAccessor.removeHeaders(headerPatterns);
 		return this;
 	}
 	/**
 	 * Remove the value for the given header name.
 	 */
-	public MessageBuilder!(T) removeHeader(string headerName) {
+	MessageBuilder!(T) removeHeader(string headerName) {
 		this.headerAccessor.removeHeader(headerName);
 		return this;
 	}
@@ -112,51 +113,51 @@ public final class MessageBuilder!(T) {
 	 * existing values. Use { {@link #copyHeadersIfAbsent(Map)} to avoid overwriting
 	 * values. Note that the 'id' and 'timestamp' header values will never be overwritten.
 	 */
-	public MessageBuilder!(T) copyHeaders(Map<string, ?> headersToCopy) {
-		this.headerAccessor.copyHeaders(headersToCopy);
-		return this;
-	}
+	// MessageBuilder!(T) copyHeaders(Map<string, ?> headersToCopy) {
+	// 	this.headerAccessor.copyHeaders(headersToCopy);
+	// 	return this;
+	// }
 
 	/**
 	 * Copy the name-value pairs from the provided Map. This operation will <em>not</em>
 	 * overwrite any existing values.
 	 */
-	public MessageBuilder!(T) copyHeadersIfAbsent(Map<string, ?> headersToCopy) {
-		this.headerAccessor.copyHeadersIfAbsent(headersToCopy);
-		return this;
-	}
+	// MessageBuilder!(T) copyHeadersIfAbsent(Map<string, ?> headersToCopy) {
+	// 	this.headerAccessor.copyHeadersIfAbsent(headersToCopy);
+	// 	return this;
+	// }
 
-	public MessageBuilder!(T) setReplyChannel(MessageChannel replyChannel) {
+	MessageBuilder!(T) setReplyChannel(MessageChannel replyChannel) {
 		this.headerAccessor.setReplyChannel(replyChannel);
 		return this;
 	}
 
-	public MessageBuilder!(T) setReplyChannelName(string replyChannelName) {
+	MessageBuilder!(T) setReplyChannelName(string replyChannelName) {
 		this.headerAccessor.setReplyChannelName(replyChannelName);
 		return this;
 	}
 
-	public MessageBuilder!(T) setErrorChannel(MessageChannel errorChannel) {
+	MessageBuilder!(T) setErrorChannel(MessageChannel errorChannel) {
 		this.headerAccessor.setErrorChannel(errorChannel);
 		return this;
 	}
 
-	public MessageBuilder!(T) setErrorChannelName(string errorChannelName) {
+	MessageBuilder!(T) setErrorChannelName(string errorChannelName) {
 		this.headerAccessor.setErrorChannelName(errorChannelName);
 		return this;
 	}
 
 	
-	public Message!(T) build() {
+	Message!(T) build() {
 		if (this.originalMessage !is null && !this.headerAccessor.isModified()) {
 			return this.originalMessage;
 		}
 		MessageHeaders headersToUse = this.headerAccessor.toMessageHeaders();
-		if (this.payload instanceof Throwable) {
-			return (Message!(T)) new ErrorMessage((Throwable) this.payload, headersToUse);
-		}
-		else {
-			return new GenericMessage<>(this.payload, headersToUse);
+		Throwable th = cast(Throwable) this.payload;
+		if (th !is null) {
+			return cast(Message!(T)) new ErrorMessage(th, headersToUse);
+		} else {
+			return new GenericMessage!(T)(this.payload, headersToUse);
 		}
 	}
 
@@ -167,16 +168,16 @@ public final class MessageBuilder!(T) {
 	 * also be used as the payload for the new message.
 	 * @param message the Message from which the payload and all headers will be copied
 	 */
-	public static !(T) MessageBuilder!(T) fromMessage(Message!(T) message) {
-		return new MessageBuilder<>(message);
+	static MessageBuilder!(U) fromMessage(U)(Message!(U) message) {
+		return new MessageBuilder!(U)(message);
 	}
 
 	/**
 	 * Create a new builder for a message with the given payload.
 	 * @param payload the payload
 	 */
-	public static !(T) MessageBuilder!(T) withPayload(T payload) {
-		return new MessageBuilder<>(payload, new MessageHeaderAccessor());
+	static MessageBuilder!(U) withPayload(U)(T payload) {
+		return new MessageBuilder!(U)(payload, new MessageHeaderAccessor());
 	}
 
 	/**
@@ -190,14 +191,14 @@ public final class MessageBuilder!(T) {
 	 * @since 4.1
 	 */
 	
-	public static !(T) Message!(T) createMessage(T payload, MessageHeaders messageHeaders) {
+	static Message!(U) createMessage(U)(T payload, MessageHeaders messageHeaders) {
 		assert(payload, "Payload must not be null");
 		assert(messageHeaders, "MessageHeaders must not be null");
-		if (payload instanceof Throwable) {
-			return (Message!(T)) new ErrorMessage((Throwable) payload, messageHeaders);
-		}
-		else {
-			return new GenericMessage<>(payload, messageHeaders);
+		Throwable th = cast(Throwable) payload;
+		if (th !is null) {
+			return new ErrorMessage(th, messageHeaders);
+		} else {
+			return new GenericMessage!(U)(payload, messageHeaders);
 		}
 	}
 

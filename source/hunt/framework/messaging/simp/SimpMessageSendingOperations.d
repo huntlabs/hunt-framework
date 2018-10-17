@@ -20,8 +20,8 @@ import hunt.container.Map;
 
 
 import hunt.framework.messaging.MessagingException;
-import hunt.framework.messaging.core.MessagePostProcessor;
-import hunt.framework.messaging.core.MessageSendingOperations;
+// import hunt.framework.messaging.core.MessagePostProcessor;
+// import hunt.framework.messaging.core.MessageSendingOperations;
 
 /**
  * A specialization of {@link MessageSendingOperations} with methods for use with
@@ -43,7 +43,7 @@ import hunt.framework.messaging.core.MessageSendingOperations;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface SimpMessageSendingOperations extends MessageSendingOperations!(string) {
+interface SimpMessageSendingOperations : MessageSendingOperations!(string) {
 
 	/**
 	 * Send a message to the given user.
@@ -51,7 +51,7 @@ public interface SimpMessageSendingOperations extends MessageSendingOperations!(
 	 * @param destination the destination to send the message to.
 	 * @param payload the payload to send
 	 */
-	void convertAndSendToUser(string user, string destination, Object payload) throws MessagingException;
+	void convertAndSendToUser(string user, string destination, Object payload);
 
 	/**
 	 * Send a message to the given user.
@@ -84,8 +84,8 @@ public interface SimpMessageSendingOperations extends MessageSendingOperations!(
 	 * @param payload the payload to send (may be {@code null})
 	 * @param headers the message headers (may be {@code null})
 	 */
-	void convertAndSendToUser(string user, string destination, Object payload, Map!(string, Object) headers)
-			throws MessagingException;
+	void convertAndSendToUser(string user, string destination, 
+		Object payload, Map!(string, Object) headers);
 
 	/**
 	 * Send a message to the given user.
@@ -94,8 +94,8 @@ public interface SimpMessageSendingOperations extends MessageSendingOperations!(
 	 * @param payload the payload to send (may be {@code null})
 	 * @param postProcessor a postProcessor to post-process or modify the created message
 	 */
-	void convertAndSendToUser(string user, string destination, Object payload, MessagePostProcessor postProcessor)
-			throws MessagingException;
+	void convertAndSendToUser(string user, string destination, 
+		Object payload, MessagePostProcessor postProcessor);
 
 	/**
 	 * Send a message to the given user.
@@ -107,7 +107,7 @@ public interface SimpMessageSendingOperations extends MessageSendingOperations!(
 	 * @param headers the message headers
 	 * @param postProcessor a postProcessor to post-process or modify the created message
 	 */
-	void convertAndSendToUser(string user, string destination, Object payload, Map!(string, Object) headers,
-			MessagePostProcessor postProcessor) throws MessagingException;
+	void convertAndSendToUser(string user, string destination, 
+		Object payload, Map!(string, Object) headers, MessagePostProcessor postProcessor);
 
 }

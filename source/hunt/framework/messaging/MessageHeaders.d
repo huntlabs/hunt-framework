@@ -16,8 +16,10 @@
 
 module hunt.framework.messaging.MessageHeaders;
 
-import hunt.io.ObjectInputStream;
-import hunt.io.ObjectOutputStream;
+import hunt.framework.messaging.IdGenerator;
+
+// import hunt.io.ObjectInputStream;
+// import hunt.io.ObjectOutputStream;
 
 // import hunt.container.Collection;
 // import hunt.container.Collections;
@@ -29,7 +31,7 @@ import hunt.io.ObjectOutputStream;
 import hunt.container;
 import hunt.datetime;
 import hunt.logging;
-import hunt.math.Long;
+import hunt.lang.Long;
 import hunt.lang.exception;
 import hunt.lang.object;
 
@@ -106,16 +108,21 @@ class MessageHeaders : Map!(string, Object) {
 	enum string ERROR_CHANNEL = "errorChannel";
 
 
-	// private __gshared static IdGenerator defaultIdGenerator;
+	private __gshared static IdGenerator defaultIdGenerator;
 
 	
-	// private static IdGenerator idGenerator;
+	private static IdGenerator idGenerator;
 
 
 	private Map!(string, Object) headers;
 
 	shared static this() {
 		ID_VALUE_NONE = UUID.init;
+		defaultIdGenerator = new class IdGenerator {
+			UUID generateId() {
+				return randomUUID();
+			}
+		};
 		// defaultIdGenerator = new AlternativeJdkIdGenerator();
 	}
 
@@ -181,10 +188,10 @@ class MessageHeaders : Map!(string, Object) {
 		return this.headers;
 	}
 
-	// protected static IdGenerator getIdGenerator() {
-	// 	IdGenerator generator = idGenerator;
-	// 	return (generator !is null ? generator : defaultIdGenerator);
-	// }
+	protected static IdGenerator getIdGenerator() {
+		IdGenerator generator = idGenerator;
+		return (generator !is null ? generator : defaultIdGenerator);
+	}
 
 	
 	UUID getId() {

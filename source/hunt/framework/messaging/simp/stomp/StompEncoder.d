@@ -23,12 +23,13 @@ import hunt.framework.messaging.simp.SimpMessageType;
 import hunt.framework.messaging.support.NativeMessageHeaderAccessor;
 
 import hunt.io.ByteArrayOutputStream;
-import hunt.io.DataOutputStream;
+// import hunt.io.DataOutputStream;
 // import java.util.concurrent.ConcurrentHashMap;
 
 import hunt.container;
 import hunt.logging;
 import hunt.lang.exception;
+impott hunt.string;
 
 import std.conv;
 
@@ -70,7 +71,7 @@ public class StompEncoder  {
 				}
 
 				override
-				protected  removeEldestEntry(LinkedHashMapEntry!(string, byte[]) eldest) {
+				protected bool removeEldestEntry(LinkedHashMapEntry!(string, byte[]) eldest) {
 					if (size() > HEADER_KEY_CACHE_LIMIT) {
 						headerKeyAccessCache.remove(eldest.getKey());
 						return true;
@@ -133,10 +134,9 @@ public class StompEncoder  {
 
 	private void writeHeaders(StompCommand command, Map!(string, Object) headers, byte[] payload,
 			DataOutputStream output) {
-
 		
 		Map!(string,List!(string)) nativeHeaders =
-				(Map!(string, List!(string))) headers.get(NativeMessageHeaderAccessor.NATIVE_HEADERS);
+				cast(Map!(string, List!(string))) headers.get(NativeMessageHeaderAccessor.NATIVE_HEADERS);
 
 		version(HUNT_DEBUG) {
 			logger.trace("Encoding STOMP " ~ command ~ ", headers=" ~ nativeHeaders);

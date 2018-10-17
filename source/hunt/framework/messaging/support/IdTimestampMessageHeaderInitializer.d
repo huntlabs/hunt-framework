@@ -16,6 +16,9 @@
 
 module hunt.framework.messaging.support.IdTimestampMessageHeaderInitializer;
 
+import hunt.framework.messaging.support.MessageHeaderAccessor;
+
+import hunt.framework.messaging.IdGenerator;
 import hunt.framework.messaging.MessageHeaders;
 
 /**
@@ -27,14 +30,19 @@ import hunt.framework.messaging.MessageHeaders;
  */
 public class IdTimestampMessageHeaderInitializer : MessageHeaderInitializer {
 
-	private static final IdGenerator ID_VALUE_NONE_GENERATOR = () -> MessageHeaders.ID_VALUE_NONE;
+	private __gshared IdGenerator ID_VALUE_NONE_GENERATOR;
 
-
+	shared static this() {
+		ID_VALUE_NONE_GENERATOR = new class IdGenerator {
+			UUID generateId() {
+				return MessageHeaders.ID_VALUE_NONE;
+			}
+		};
+	}
 	
 	private IdGenerator idGenerator;
 
-	private  enableTimestamp;
-
+	private bool enableTimestamp;
 
 	/**
 	 * Configure the IdGenerator strategy to initialize {@code MessageHeaderAccessor}
@@ -76,7 +84,7 @@ public class IdTimestampMessageHeaderInitializer : MessageHeaderInitializer {
 	/**
 	 * Return whether the timestamp header is enabled or not.
 	 */
-	public  isEnableTimestamp() {
+	public bool isEnableTimestamp() {
 		return this.enableTimestamp;
 	}
 

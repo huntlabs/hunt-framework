@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.simp.stomp;
+module hunt.framework.messaging.simp.stomp.StompHeaders;
 
 import hunt.container;
-import hunt.math.Long;
+import hunt.lang.Long;
 import hunt.string;
 
 
@@ -202,9 +202,10 @@ class StompHeaders : MultiValueMap!(string, string) {
 			set(ACCEPT_VERSION, null);
 			return;
 		}
-		Arrays.stream(acceptVersions).forEach(version ->
-				assert(version !is null && (version.equals("1.1") || version.equals("1.2")),
-						"Invalid version: " ~ version));
+		foreach(string ver; acceptVersions) {
+			assert(ver !is null && (ver == ("1.1") || ver == ("1.2")),
+						"Invalid version: " ~ ver);
+		}
 		set(ACCEPT_VERSION, StringUtils.arrayToCommaDelimitedString(acceptVersions));
 	}
 

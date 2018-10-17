@@ -19,7 +19,6 @@ module hunt.framework.messaging.support.ExecutorChannelInterceptor;
 
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageChannel;
-import hunt.framework.messaging.MessageHandler;
 
 /**
  * An extension of {@link ChannelInterceptor} with callbacks to intercept the

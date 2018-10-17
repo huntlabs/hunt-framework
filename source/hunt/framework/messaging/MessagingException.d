@@ -86,7 +86,7 @@ class MessagingException(T) : NestedRuntimeException {
  * @since 4.0
  */
 
-class MessageHandlingException : MessagingException {
+class MessageHandlingException(T) : MessagingException!(T) {
 
 	this(Message!(T) failedMessage) {
 		super(failedMessage);

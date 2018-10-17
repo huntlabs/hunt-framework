@@ -16,11 +16,13 @@
 
 module hunt.framework.messaging.support.ErrorMessage;
 
-import hunt.container.Map;
-
+import hunt.framework.messaging.support.GenericMessage;
 
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageHeaders;
+
+import hunt.container.Map;
+
 
 /**
  * A {@link GenericMessage} with a {@link Throwable} payload.

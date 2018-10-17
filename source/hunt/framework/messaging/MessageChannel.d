@@ -58,3 +58,58 @@ interface MessageChannel(T) {
 	bool send(Message!(T) message, long timeout);
 
 }
+
+
+
+/**
+ * A {@link MessageChannel} from which messages may be actively received through polling.
+ *
+ * @author Mark Fisher
+ * @since 4.0
+ */
+interface PollableChannel(T) : MessageChannel!(T) {
+
+	/**
+	 * Receive a message from this channel, blocking indefinitely if necessary.
+	 * @return the next available {@link Message} or {@code null} if interrupted
+	 */
+	
+	Message!T receive();
+
+	/**
+	 * Receive a message from this channel, blocking until either a message is available
+	 * or the specified timeout period elapses.
+	 * @param timeout the timeout in milliseconds or {@link MessageChannel#INDEFINITE_TIMEOUT}.
+	 * @return the next available {@link Message} or {@code null} if the specified timeout
+	 * period elapses or the message reception is interrupted
+	 */
+	
+	Message!(T) receive(long timeout);
+}
+
+
+
+/**
+ * A {@link MessageChannel} that maintains a registry of subscribers and invokes
+ * them to handle messages sent through this channel.
+ *
+ * @author Mark Fisher
+ * @since 4.0
+ */
+interface SubscribableChannel(T) : MessageChannel!(T) {
+
+	/**
+	 * Register a message handler.
+	 * @return {@code true} if the handler was subscribed or {@code false} if it
+	 * was already subscribed.
+	 */
+	bool subscribe(MessageHandler handler);
+
+	/**
+	 * Un-register a message handler.
+	 * @return {@code true} if the handler was un-registered, or {@code false}
+	 * if was not registered.
+	 */
+	bool unsubscribe(MessageHandler handler);
+
+}

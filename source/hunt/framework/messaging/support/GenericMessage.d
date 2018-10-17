@@ -16,7 +16,6 @@
 
 module hunt.framework.messaging.support.GenericMessage;
 
-
 import hunt.container.Map;
 
 import hunt.framework.messaging.Message;

@@ -21,7 +21,7 @@ import hunt.http.util.UrlEncoded;
 import hunt.container;
 import hunt.logging;
 import hunt.lang.exception;
-import hunt.util.functional;
+import hunt.lang.common;
 
 import hunt.framework.exception;
 import hunt.framework.http.session;
