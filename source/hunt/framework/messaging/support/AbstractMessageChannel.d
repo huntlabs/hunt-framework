@@ -25,7 +25,7 @@ module hunt.framework.messaging.support.AbstractMessageChannel;
 // import hunt.container;
 // import hunt.logging;
 
-// // import org.springframework.util.Assert;
+// // 
 // // import hunt.util.ObjectUtils;
 
 // /**
@@ -36,7 +36,7 @@ module hunt.framework.messaging.support.AbstractMessageChannel;
 //  */
 // abstract class AbstractMessageChannel(T) : MessageChannel, InterceptableChannel { // , BeanNameAware
 
-// 	private final List<ChannelInterceptor> interceptors = new ArrayList<>(5);
+// 	private final List!(ChannelInterceptor) interceptors = new ArrayList<>(5);
 
 // 	private string beanName;
 
@@ -68,7 +68,7 @@ module hunt.framework.messaging.support.AbstractMessageChannel;
 
 
 // 	override
-// 	void setInterceptors(List<ChannelInterceptor> interceptors) {
+// 	void setInterceptors(List!(ChannelInterceptor) interceptors) {
 // 		this.interceptors.clear();
 // 		this.interceptors.addAll(interceptors);
 // 	}
@@ -84,7 +84,7 @@ module hunt.framework.messaging.support.AbstractMessageChannel;
 // 	}
 
 // 	override
-// 	List<ChannelInterceptor> getInterceptors() {
+// 	List!(ChannelInterceptor) getInterceptors() {
 // 		return Collections.unmodifiableList(this.interceptors);
 // 	}
 

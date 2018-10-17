@@ -25,12 +25,12 @@ module hunt.framework.messaging.support.AbstractMonoToListenableFutureAdapter;
 // import reactor.core.publisher.MonoProcessor;
 
 
-// import org.springframework.util.Assert;
-// import org.springframework.util.concurrent.FailureCallback;
-// import org.springframework.util.concurrent.ListenableFuture;
-// import org.springframework.util.concurrent.ListenableFutureCallback;
-// import org.springframework.util.concurrent.ListenableFutureCallbackRegistry;
-// import org.springframework.util.concurrent.SuccessCallback;
+// 
+// import hunt.framework.util.concurrent.FailureCallback;
+// import hunt.framework.util.concurrent.ListenableFuture;
+// import hunt.framework.util.concurrent.ListenableFutureCallback;
+// import hunt.framework.util.concurrent.ListenableFutureCallbackRegistry;
+// import hunt.framework.util.concurrent.SuccessCallback;
 
 // /**
 //  * Adapts {@link Mono} to {@link ListenableFuture} optionally converting the
@@ -41,14 +41,14 @@ module hunt.framework.messaging.support.AbstractMonoToListenableFutureAdapter;
 //  * @param <S> the type of object expected from the {@link Mono}
 //  * @param (T) the type of object expected from the {@link ListenableFuture}
 //  */
-// abstract class AbstractMonoToListenableFutureAdapter<S, T> implements ListenableFuture!(T) {
+// abstract class AbstractMonoToListenableFutureAdapter!(S, T) implements ListenableFuture!(T) {
 
-// 	private final MonoProcessor<S> monoProcessor;
+// 	private final MonoProcessor!(S) monoProcessor;
 
 // 	private final ListenableFutureCallbackRegistry!(T) registry = new ListenableFutureCallbackRegistry<>();
 
 
-// 	protected AbstractMonoToListenableFutureAdapter(Mono<S> mono) {
+// 	protected AbstractMonoToListenableFutureAdapter(Mono!(S) mono) {
 // 		assert(mono, "Mono must not be null");
 // 		this.monoProcessor = mono
 // 				.doOnSuccess(result -> {

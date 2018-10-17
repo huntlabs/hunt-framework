@@ -43,13 +43,13 @@ import std.uuid;
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-interface MessageHeaderInitializer {
+interface MessageHeaderInitializer(T) {
 
 	/**
 	 * Initialize the given {@code MessageHeaderAccessor}.
 	 * @param headerAccessor the MessageHeaderAccessor to initialize
 	 */
-	void initHeaders(MessageHeaderAccessor headerAccessor);
+	void initHeaders(MessageHeaderAccessor!(T) headerAccessor);
 
 }
 
@@ -182,8 +182,8 @@ class MessageHeaderAccessor(T) {
 	 * @param message the message to build a new accessor for
 	 * @return the nested accessor (typically a specific subclass)
 	 */
-	static protected MessageHeaderAccessor!T createAccessor(T)(Message!T message) {
-		return new MessageHeaderAccessor!T(message);
+	static protected MessageHeaderAccessor!U createAccessor(U)(Message!U message) {
+		return new MessageHeaderAccessor!U(message);
 	}
 
 

@@ -32,7 +32,7 @@ import hunt.framework.messaging.Message;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-// class SimpMessageMappingInfo : MessageCondition<SimpMessageMappingInfo> {
+// class SimpMessageMappingInfo : MessageCondition!(SimpMessageMappingInfo) {
 
 // 	private final SimpMessageTypeMessageCondition messageTypeMessageCondition;
 

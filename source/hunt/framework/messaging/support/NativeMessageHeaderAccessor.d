@@ -16,6 +16,9 @@
 
 module hunt.framework.messaging.support.NativeMessageHeaderAccessor;
 
+import hunt.framework.messaging.support.MessageHeaderAccessor;
+
+
 // import hunt.container.Collections;
 // import java.util.LinkedList;
 // import java.util.List;
@@ -23,31 +26,31 @@ module hunt.framework.messaging.support.NativeMessageHeaderAccessor;
 
 
 // import hunt.framework.messaging.Message;
-// import org.springframework.util.Assert;
-// import org.springframework.util.CollectionUtils;
-// import org.springframework.util.LinkedMultiValueMap;
-// import org.springframework.util.MultiValueMap;
+// 
+// import hunt.framework.util.CollectionUtils;
+// import hunt.framework.util.LinkedMultiValueMap;
+// import hunt.framework.util.MultiValueMap;
 // import hunt.util.ObjectUtils;
 
-// /**
-//  * An extension of {@link MessageHeaderAccessor} that also stores and provides read/write
-//  * access to message headers from an external source -- e.g. a Spring {@link Message}
-//  * created to represent a STOMP message received from a STOMP client or message broker.
-//  * Native message headers are kept in a {@code Map<string, List!(string)>} under the key
-//  * {@link #NATIVE_HEADERS}.
-//  *
-//  * <p>This class is not intended for direct use but is rather expected to be used
-//  * indirectly through protocol-specific sub-classes such as
-//  * {@link hunt.framework.messaging.simp.stomp.StompHeaderAccessor StompHeaderAccessor}.
-//  * Such sub-classes may provide factory methods to translate message headers from
-//  * an external messaging source (e.g. STOMP) to Spring {@link Message} headers and
-//  * reversely to translate Spring {@link Message} headers to a message to send to an
-//  * external source.
-//  *
-//  * @author Rossen Stoyanchev
-//  * @since 4.0
-//  */
-// class NativeMessageHeaderAccessor : MessageHeaderAccessor {
+/**
+ * An extension of {@link MessageHeaderAccessor} that also stores and provides read/write
+ * access to message headers from an external source -- e.g. a Spring {@link Message}
+ * created to represent a STOMP message received from a STOMP client or message broker.
+ * Native message headers are kept in a {@code Map!(string, List!(string))} under the key
+ * {@link #NATIVE_HEADERS}.
+ *
+ * <p>This class is not intended for direct use but is rather expected to be used
+ * indirectly through protocol-specific sub-classes such as
+ * {@link hunt.framework.messaging.simp.stomp.StompHeaderAccessor StompHeaderAccessor}.
+ * Such sub-classes may provide factory methods to translate message headers from
+ * an external messaging source (e.g. STOMP) to Spring {@link Message} headers and
+ * reversely to translate Spring {@link Message} headers to a message to send to an
+ * external source.
+ *
+ * @author Rossen Stoyanchev
+ * @since 4.0
+ */
+class NativeMessageHeaderAccessor(T) : MessageHeaderAccessor!(T) {
 
 // 	/**
 // 	 * The header name used to store native headers.
@@ -59,14 +62,14 @@ module hunt.framework.messaging.support.NativeMessageHeaderAccessor;
 // 	 * A protected constructor to create new headers.
 // 	 */
 // 	protected this() {
-// 		this((Map<string, List!(string)>) null);
+// 		this((Map!(string, List!(string))) null);
 // 	}
 
 // 	/**
 // 	 * A protected constructor to create new headers.
 // 	 * @param nativeHeaders native headers to create the message with (may be {@code null})
 // 	 */
-// 	protected this(Map<string, List!(string)> nativeHeaders) {
+// 	protected this(Map!(string, List!(string)) nativeHeaders) {
 // 		if (!CollectionUtils.isEmpty(nativeHeaders)) {
 // 			setHeader(NATIVE_HEADERS, new LinkedMultiValueMap<>(nativeHeaders));
 // 		}
@@ -79,7 +82,7 @@ module hunt.framework.messaging.support.NativeMessageHeaderAccessor;
 // 		super(message);
 // 		if (message !is null) {
 			
-// 			Map<string, List!(string)> map = (Map<string, List!(string)>) getHeader(NATIVE_HEADERS);
+// 			Map!(string, List!(string)) map = (Map!(string, List!(string))) getHeader(NATIVE_HEADERS);
 // 			if (map !is null) {
 // 				// Force removal since setHeader checks for equality
 // 				removeHeader(NATIVE_HEADERS);
@@ -90,22 +93,22 @@ module hunt.framework.messaging.support.NativeMessageHeaderAccessor;
 
 	
 	
-// 	protected Map<string, List!(string)> getNativeHeaders() {
-// 		return (Map<string, List!(string)>) getHeader(NATIVE_HEADERS);
+// 	protected Map!(string, List!(string)) getNativeHeaders() {
+// 		return (Map!(string, List!(string))) getHeader(NATIVE_HEADERS);
 // 	}
 
 // 	/**
 // 	 * Return a copy of the native header values or an empty map.
 // 	 */
-// 	Map<string, List!(string)> toNativeHeaderMap() {
-// 		Map<string, List!(string)> map = getNativeHeaders();
+// 	Map!(string, List!(string)) toNativeHeaderMap() {
+// 		Map!(string, List!(string)) map = getNativeHeaders();
 // 		return (map !is null ? new LinkedMultiValueMap<>(map) : Collections.emptyMap());
 // 	}
 
 // 	override
 // 	void setImmutable() {
 // 		if (isMutable()) {
-// 			Map<string, List!(string)> map = getNativeHeaders();
+// 			Map!(string, List!(string)) map = getNativeHeaders();
 // 			if (map !is null) {
 // 				// Force removal since setHeader checks for equality
 // 				removeHeader(NATIVE_HEADERS);
@@ -119,7 +122,7 @@ module hunt.framework.messaging.support.NativeMessageHeaderAccessor;
 // 	 * Whether the native header map contains the give header name.
 // 	 */
 // 	 containsNativeHeader(string headerName) {
-// 		Map<string, List!(string)> map = getNativeHeaders();
+// 		Map!(string, List!(string)) map = getNativeHeaders();
 // 		return (map !is null && map.containsKey(headerName));
 // 	}
 
@@ -129,7 +132,7 @@ module hunt.framework.messaging.support.NativeMessageHeaderAccessor;
 // 	 */
 	
 // 	List!(string) getNativeHeader(string headerName) {
-// 		Map<string, List!(string)> map = getNativeHeaders();
+// 		Map!(string, List!(string)) map = getNativeHeaders();
 // 		return (map !is null ? map.get(headerName) : null);
 // 	}
 
@@ -139,7 +142,7 @@ module hunt.framework.messaging.support.NativeMessageHeaderAccessor;
 // 	 */
 	
 // 	string getFirstNativeHeader(string headerName) {
-// 		Map<string, List!(string)> map = getNativeHeaders();
+// 		Map!(string, List!(string)) map = getNativeHeaders();
 // 		if (map !is null) {
 // 			List!(string) values = map.get(headerName);
 // 			if (values !is null) {
@@ -154,7 +157,7 @@ module hunt.framework.messaging.support.NativeMessageHeaderAccessor;
 // 	 */
 // 	void setNativeHeader(string name, string value) {
 // 		Assert.state(isMutable(), "Already immutable");
-// 		Map<string, List!(string)> map = getNativeHeaders();
+// 		Map!(string, List!(string)) map = getNativeHeaders();
 // 		if (value is null) {
 // 			if (map !is null && map.get(name) !is null) {
 // 				setModified(true);
@@ -182,7 +185,7 @@ module hunt.framework.messaging.support.NativeMessageHeaderAccessor;
 // 		if (value is null) {
 // 			return;
 // 		}
-// 		Map<string, List!(string)> nativeHeaders = getNativeHeaders();
+// 		Map!(string, List!(string)) nativeHeaders = getNativeHeaders();
 // 		if (nativeHeaders is null) {
 // 			nativeHeaders = new LinkedMultiValueMap<>(4);
 // 			setHeader(NATIVE_HEADERS, nativeHeaders);
@@ -192,7 +195,7 @@ module hunt.framework.messaging.support.NativeMessageHeaderAccessor;
 // 		setModified(true);
 // 	}
 
-// 	void addNativeHeaders(MultiValueMap<string, string> headers) {
+// 	void addNativeHeaders(MultiValueMap!(string, string) headers) {
 // 		if (headers is null) {
 // 			return;
 // 		}
@@ -202,7 +205,7 @@ module hunt.framework.messaging.support.NativeMessageHeaderAccessor;
 	
 // 	List!(string) removeNativeHeader(string name) {
 // 		Assert.state(isMutable(), "Already immutable");
-// 		Map<string, List!(string)> nativeHeaders = getNativeHeaders();
+// 		Map!(string, List!(string)) nativeHeaders = getNativeHeaders();
 // 		if (nativeHeaders is null) {
 // 			return null;
 // 		}
@@ -212,7 +215,7 @@ module hunt.framework.messaging.support.NativeMessageHeaderAccessor;
 	
 	
 // 	static string getFirstNativeHeader(string headerName, Map!(string, Object) headers) {
-// 		Map<string, List!(string)> map = (Map<string, List!(string)>) headers.get(NATIVE_HEADERS);
+// 		Map!(string, List!(string)) map = (Map!(string, List!(string))) headers.get(NATIVE_HEADERS);
 // 		if (map !is null) {
 // 			List!(string) values = map.get(headerName);
 // 			if (values !is null) {
@@ -222,4 +225,4 @@ module hunt.framework.messaging.support.NativeMessageHeaderAccessor;
 // 		return null;
 // 	}
 
-// }
+}

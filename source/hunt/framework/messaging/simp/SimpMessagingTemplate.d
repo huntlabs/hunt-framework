@@ -30,8 +30,8 @@ import hunt.container.Map;
 // import hunt.framework.messaging.support.MessageHeaderAccessor;
 // import hunt.framework.messaging.support.MessageHeaderInitializer;
 // import hunt.framework.messaging.support.NativeMessageHeaderAccessor;
-// import org.springframework.util.Assert;
-// import org.springframework.util.StringUtils;
+// 
+// import hunt.framework.util.StringUtils;
 
 // /**
 //  * An implementation of

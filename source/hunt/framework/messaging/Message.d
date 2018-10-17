@@ -48,7 +48,7 @@ interface Message(T) {
  * @author Iwein Fuld
  * @since 4.0
  */
-// // @FunctionalInterface
+// // 
 interface MessageHandler(T) {
 
 	/**

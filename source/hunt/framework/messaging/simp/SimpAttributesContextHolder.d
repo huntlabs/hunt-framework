@@ -18,7 +18,7 @@ module hunt.framework.messaging.simp.SimpAttributesContextHolder;
 
 import hunt.framework.messaging.Message;
 
-// import org.springframework.core.NamedThreadLocal;
+// import hunt.framework.core.NamedThreadLocal;
 
 // /**
 //  * Holder class to expose SiMP attributes associated with a session (e.g. WebSocket)
@@ -27,9 +27,9 @@ import hunt.framework.messaging.Message;
 //  * @author Rossen Stoyanchev
 //  * @since 4.1
 //  */
-// public abstract class SimpAttributesContextHolder {
+// abstract class SimpAttributesContextHolder {
 
-// 	private static final ThreadLocal<SimpAttributes> attributesHolder =
+// 	private static final ThreadLocal!(SimpAttributes) attributesHolder =
 // 			new NamedThreadLocal<>("SiMP session attributes");
 
 

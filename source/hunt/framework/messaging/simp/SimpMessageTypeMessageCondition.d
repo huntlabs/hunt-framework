@@ -23,7 +23,7 @@ import hunt.container.Map;
 
 // import hunt.framework.messaging.Message;
 // import hunt.framework.messaging.handler.AbstractMessageCondition;
-// import org.springframework.util.Assert;
+// 
 
 // /**
 //  * {@code MessageCondition} that matches by the message type obtained via

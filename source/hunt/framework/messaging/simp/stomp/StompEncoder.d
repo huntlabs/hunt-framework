@@ -29,7 +29,7 @@ import hunt.io.ByteArrayOutputStream;
 import hunt.container;
 import hunt.logging;
 import hunt.lang.exception;
-impott hunt.string;
+import hunt.string;
 
 import std.conv;
 
@@ -149,12 +149,12 @@ public class StompEncoder  {
 		 shouldEscape = (command != StompCommand.CONNECT && command != StompCommand.CONNECTED);
 
 		foreach (string key, List!(string) values ; nativeHeaders) {
-			if (command.requiresContentLength() && "content-length".equals(key)) {
+			if (command.requiresContentLength() && "content-length" == key) {
 				continue;
 			}
 
-			if (StompCommand.CONNECT.equals(command) &&
-					StompHeaderAccessor.STOMP_PASSCODE_HEADER.equals(key)) {
+			if (StompCommand.CONNECT == command &&
+					StompHeaderAccessor.STOMP_PASSCODE_HEADER == key) {
 				values = Collections.singletonList(StompHeaderAccessor.getPasscode(headers));
 			}
 

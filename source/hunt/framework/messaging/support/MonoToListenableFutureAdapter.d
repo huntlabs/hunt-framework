@@ -29,7 +29,7 @@ module hunt.framework.messaging.support.MonoToListenableFutureAdapter;
 //  * @since 5.0
 //  * @param (T) the object type
 //  */
-// class MonoToListenableFutureAdapter(T) : AbstractMonoToListenableFutureAdapter<T, T> {
+// class MonoToListenableFutureAdapter(T) : AbstractMonoToListenableFutureAdapter!(T, T) {
 
 // 	MonoToListenableFutureAdapter(Mono!(T) mono) {
 // 		super(mono);

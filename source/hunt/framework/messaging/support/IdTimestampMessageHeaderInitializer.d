@@ -28,7 +28,7 @@ import hunt.framework.messaging.MessageHeaders;
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public class IdTimestampMessageHeaderInitializer : MessageHeaderInitializer {
+class IdTimestampMessageHeaderInitializer(T) : MessageHeaderInitializer!(T) {
 
 	private __gshared IdGenerator ID_VALUE_NONE_GENERATOR;
 
@@ -77,7 +77,7 @@ public class IdTimestampMessageHeaderInitializer : MessageHeaderInitializer {
 	 * {@code MessageHeaderAccessor} instances being initialized.
 	 * <p>By default this property is set to false.
 	 */
-	public void setEnableTimestamp( enableTimestamp) {
+	public void setEnableTimestamp(bool enableTimestamp) {
 		this.enableTimestamp = enableTimestamp;
 	}
 

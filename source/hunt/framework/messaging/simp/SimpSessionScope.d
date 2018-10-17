@@ -16,8 +16,8 @@
 
 module hunt.framework.messaging.simp.SimpSessionScope;
 
-// import org.springframework.beans.factory.ObjectFactory;
-// import org.springframework.beans.factory.config.Scope;
+// import hunt.framework.beans.factory.ObjectFactory;
+// import hunt.framework.beans.factory.config.Scope;
 
 
 // /**

@@ -21,11 +21,11 @@ import hunt.lang.Long;
 import hunt.string;
 
 
-// import org.springframework.util.Assert;
-// import org.springframework.util.LinkedMultiValueMap;
-// import org.springframework.util.MimeType;
-// import org.springframework.util.MimeTypeUtils;
-// import org.springframework.util.MultiValueMap;
+// 
+// import hunt.framework.util.LinkedMultiValueMap;
+// import hunt.framework.util.MimeType;
+// import hunt.framework.util.MimeTypeUtils;
+// import hunt.framework.util.MultiValueMap;
 // import hunt.util.ObjectUtils;
 
 /**
@@ -545,7 +545,7 @@ class StompHeaders : MultiValueMap!(string, string) {
 	// }
 
 	// override
-	// Set<Entry!(string, List!(string))> entrySet() {
+	// Set!(Entry!(string, List!(string))) entrySet() {
 	// 	return this.headers.entrySet();
 	// }
 

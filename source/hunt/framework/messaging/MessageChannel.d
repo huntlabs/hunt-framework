@@ -24,7 +24,7 @@ import hunt.framework.messaging.Message;
  * @author Mark Fisher
  * @since 4.0
  */
-// @FunctionalInterface
+// 
 interface MessageChannel(T) {
 
 	/**

@@ -37,7 +37,7 @@ class ExecutorSubscribableChannel : AbstractSubscribableChannel {
 	
 	// private final Executor executor;
 
-	// private final List<ExecutorChannelInterceptor> executorInterceptors = new ArrayList<>(4);
+	// private final List!(ExecutorChannelInterceptor) executorInterceptors = new ArrayList<>(4);
 
 
 	// /**
@@ -65,7 +65,7 @@ class ExecutorSubscribableChannel : AbstractSubscribableChannel {
 	// }
 
 	// override
-	// void setInterceptors(List<ChannelInterceptor> interceptors) {
+	// void setInterceptors(List!(ChannelInterceptor) interceptors) {
 	// 	super.setInterceptors(interceptors);
 	// 	this.executorInterceptors.clear();
 	// 	interceptors.forEach(this::updateExecutorInterceptorsFor);

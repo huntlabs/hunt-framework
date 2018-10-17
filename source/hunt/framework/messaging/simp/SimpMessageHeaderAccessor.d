@@ -37,7 +37,7 @@ import hunt.framework.messaging.support.NativeMessageHeaderAccessor;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-class SimpMessageHeaderAccessor : NativeMessageHeaderAccessor {
+class SimpMessageHeaderAccessor(T) : NativeMessageHeaderAccessor!(T) {
 
 	private __gshared IdTimestampMessageHeaderInitializer headerInitializer;
 
