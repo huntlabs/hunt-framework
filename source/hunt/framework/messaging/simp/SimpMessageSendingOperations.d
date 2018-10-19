@@ -20,8 +20,8 @@ import hunt.container.Map;
 
 
 import hunt.framework.messaging.MessagingException;
-// import hunt.framework.messaging.core.MessagePostProcessor;
-// import hunt.framework.messaging.core.MessageSendingOperations;
+import hunt.framework.messaging.core.MessagePostProcessor;
+import hunt.framework.messaging.core.MessageSendingOperations;
 
 /**
  * A specialization of {@link MessageSendingOperations} with methods for use with
@@ -95,7 +95,7 @@ interface SimpMessageSendingOperations : MessageSendingOperations!(string) {
 	 * @param postProcessor a postProcessor to post-process or modify the created message
 	 */
 	void convertAndSendToUser(string user, string destination, 
-		Object payload, MessagePostProcessor postProcessor);
+		Object payload, MessagePostProcessor!string postProcessor);
 
 	/**
 	 * Send a message to the given user.
@@ -108,6 +108,6 @@ interface SimpMessageSendingOperations : MessageSendingOperations!(string) {
 	 * @param postProcessor a postProcessor to post-process or modify the created message
 	 */
 	void convertAndSendToUser(string user, string destination, 
-		Object payload, Map!(string, Object) headers, MessagePostProcessor postProcessor);
+		Object payload, Map!(string, Object) headers, MessagePostProcessor!string postProcessor);
 
 }

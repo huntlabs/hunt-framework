@@ -16,6 +16,8 @@
 
 module hunt.framework.messaging.support.ExecutorSubscribableChannel;
 
+import hunt.framework.messaging.support.AbstractSubscribableChannel;
+
 import hunt.container.ArrayList;
 import hunt.container.List;
 
@@ -32,7 +34,7 @@ import hunt.framework.messaging.MessageChannel;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-class ExecutorSubscribableChannel : AbstractSubscribableChannel {
+class ExecutorSubscribableChannel(T) : AbstractSubscribableChannel!T {
 
 	
 	// private final Executor executor;

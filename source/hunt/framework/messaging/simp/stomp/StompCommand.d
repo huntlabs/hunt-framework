@@ -108,4 +108,8 @@ struct StompCommand {
 		return this.hasBody;
 	}
 
+	string toString() {
+		return _name;
+	}
+
 }

@@ -16,6 +16,8 @@
 
 module hunt.framework.messaging.support.InterceptableChannel;
 
+import hunt.framework.messaging.support.ChannelInterceptor;
+
 import hunt.container.List;
 
 /**

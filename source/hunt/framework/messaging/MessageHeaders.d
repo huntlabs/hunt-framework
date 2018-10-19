@@ -32,10 +32,12 @@ import hunt.container;
 import hunt.datetime;
 import hunt.logging;
 import hunt.lang.Long;
+import hunt.lang.Nullable;
 import hunt.lang.exception;
 import hunt.lang.object;
 
 import std.uuid;
+import std.range;
 
 
 /**
@@ -72,7 +74,7 @@ import std.uuid;
  * @see hunt.framework.messaging.support.MessageBuilder
  * @see hunt.framework.messaging.support.MessageHeaderAccessor
  */
-class MessageHeaders : Map!(string, Object) {
+class MessageHeaders : AbstractMap!(string, Object) {
 
 	/**
 	 * UUID for none.
@@ -195,12 +197,12 @@ class MessageHeaders : Map!(string, Object) {
 
 	
 	UUID getId() {
-		return get!(UUID)(ID);
+		return getAs!(UUID)(ID);
 	}
 
 	
 	Long getTimestamp() {
-		return get!(Long)(TIMESTAMP);
+		return getAs!(Long)(TIMESTAMP);
 	}
 
 	
@@ -214,7 +216,7 @@ class MessageHeaders : Map!(string, Object) {
 	}
 
 	
-	T get(T=Object)(string key) {
+	T getAs(T=Object)(string key) {
 		Object value = this.headers.get(key);
 		if (value is null) {
 			return T.init;
@@ -223,22 +225,33 @@ class MessageHeaders : Map!(string, Object) {
 		// 	throw new IllegalArgumentException("Incorrect type specified for header '" ~
 		// 			key ~ "'. Expected [" ~ type ~ "] but actual type is [" ~ value.getClass() ~ "]");
 		// }
-		static if(is(T == Nullable!T)) {
-			Nullable!T o = cast(Nullable!T)value;
-			return o.payload;
-		} else {
-			return cast(T) value;
+		// static if(is(T == Nullable!T)) {
+		// 	Nullable!T o = cast(Nullable!T)value;
+		// 	return o.value;
+		// } else {
+		// 	return cast(T) value;
+		// }
+		Nullable!T o = cast(Nullable!T)value;
+		if(o is null) {
+			static if(is(T == class)) {
+				return cast(T) value;
+			} else {
+				assert(false, "erro type");
+			}
+		}
+		else{
+			return o.value;
 		}
 	}
 
 
 	// Delegating Map implementation
 
-	bool containsKey(Object key) {
+	override bool containsKey(string key) {
 		return this.headers.containsKey(key);
 	}
 
-	bool containsValue(Object value) {
+	override bool containsValue(Object value) {
 		return this.headers.containsValue(value);
 	}
 
@@ -247,26 +260,33 @@ class MessageHeaders : Map!(string, Object) {
 	// }
 
 	
-	Object get(string key) {
+	override Object get(string key) {
 		return this.headers.get(key);
 	}
 
-	bool isEmpty() {
+	override bool isEmpty() {
 		return this.headers.isEmpty();
 	}
 
-	// Set!(string) keySet() {
-	// 	return Collections.unmodifiableSet(this.headers.keySet());
-	// }
-
-	int size() {
+	override int size() {
 		return this.headers.size();
 	}
 
-	// Collection!(Object) values() {
-	// 	return Collections.unmodifiableCollection(this.headers.values());
-	// }
+    override int opApply(scope int delegate(ref string, ref Object) dg)  {
+        return this.headers.opApply(dg);
+    }
+    
+    override int opApply(scope int delegate(MapEntry!(string, Object) entry) dg) {
+        return this.headers.opApply(dg);
+    }
+    
+    override InputRange!string byKey() {
+        return this.headers.byKey();
+    }
 
+    override InputRange!Object byValue() {
+        return this.headers.byValue();
+    }	
 
 	// Unsupported Map operations
 
@@ -274,7 +294,7 @@ class MessageHeaders : Map!(string, Object) {
 	 * Since MessageHeaders are immutable, the call to this method
 	 * will result in {@link UnsupportedOperationException}.
 	 */
-	Object put(string key, Object value) {
+	override Object put(string key, Object value) {
 		throw new UnsupportedOperationException("MessageHeaders is immutable");
 	}
 
@@ -282,7 +302,7 @@ class MessageHeaders : Map!(string, Object) {
 	 * Since MessageHeaders are immutable, the call to this method
 	 * will result in {@link UnsupportedOperationException}.
 	 */
-	void putAll(Map!(string, Object) map) {
+	override void putAll(Map!(string, Object) map) {
 		throw new UnsupportedOperationException("MessageHeaders is immutable");
 	}
 
@@ -290,7 +310,7 @@ class MessageHeaders : Map!(string, Object) {
 	 * Since MessageHeaders are immutable, the call to this method
 	 * will result in {@link UnsupportedOperationException}.
 	 */
-	Object remove(string key) {
+	override Object remove(string key) {
 		throw new UnsupportedOperationException("MessageHeaders is immutable");
 	}
 
@@ -298,37 +318,9 @@ class MessageHeaders : Map!(string, Object) {
 	 * Since MessageHeaders are immutable, the call to this method
 	 * will result in {@link UnsupportedOperationException}.
 	 */
-	void clear() {
+	override void clear() {
 		throw new UnsupportedOperationException("MessageHeaders is immutable");
 	}
-
-
-	// Serialization methods
-
-	// private void writeObject(ObjectOutputStream out) throws IOException {
-	// 	Set!(string) keysToIgnore = new HashSet<>();
-	// 	this.headers.forEach((key, value) -> {
-	// 		if (!(value instanceof Serializable)) {
-	// 			keysToIgnore.add(key);
-	// 		}
-	// 	});
-
-	// 	if (keysToIgnore.isEmpty()) {
-	// 		// All entries are serializable -> serialize the regular MessageHeaders instance
-	// 		out.defaultWriteObject();
-	// 	}
-	// 	else {
-	// 		// Some non-serializable entries -> serialize a temporary MessageHeaders copy
-	// 		version(HUNT_DEBUG) {
-	// 			trace("Ignoring non-serializable message headers: " ~ keysToIgnore);
-	// 		}
-	// 		out.writeObject(new MessageHeaders(this, keysToIgnore));
-	// 	}
-	// }
-
-	// private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-	// 	in.defaultReadObject();
-	// }
 
 
 	// equals, toHash, toString

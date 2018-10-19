@@ -17,13 +17,17 @@
 module hunt.framework.messaging.simp.stomp.StompHeaderAccessor;
 
 import hunt.framework.messaging.Message;
+import hunt.framework.messaging.simp.stomp.StompCommand;
 import hunt.framework.messaging.simp.SimpMessageHeaderAccessor;
 import hunt.framework.messaging.simp.SimpMessageType;
 import hunt.framework.messaging.support.MessageHeaderAccessor;
 
+import hunt.http.codec.http.model.MimeTypes;
+
 import hunt.container;
 import hunt.lang.Charset;
 import hunt.lang.exception;
+import hunt.lang.Integer;
 import hunt.lang.Nullable;
 import hunt.string;
 
@@ -32,7 +36,7 @@ import std.conv;
 
 // import hunt.framework.util.ClassUtils;
 // import hunt.framework.util.CollectionUtils;
-// import hunt.framework.util.MimeType;
+import hunt.http.codec.http.model.MimeTypes;
 // import hunt.framework.util.MimeTypeUtils;
 // import hunt.framework.util.StringUtils;
 
@@ -180,7 +184,7 @@ class StompHeaderAccessor(T) : SimpMessageHeaderAccessor!(T) {
 
 
 	override
-	protected MessageHeaderAccessor createAccessor(Message!(T) message) {
+	protected MessageHeaderAccessor!T createAccessor(Message!(T) message) {
 		return wrap(message);
 	}
 

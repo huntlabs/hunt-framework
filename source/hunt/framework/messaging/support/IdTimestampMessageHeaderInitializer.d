@@ -90,7 +90,7 @@ class IdTimestampMessageHeaderInitializer(T) : MessageHeaderInitializer!(T) {
 
 
 	override
-	public void initHeaders(MessageHeaderAccessor headerAccessor) {
+	public void initHeaders(MessageHeaderAccessor!(T) headerAccessor) {
 		IdGenerator idGenerator = getIdGenerator();
 		if (idGenerator !is null) {
 			headerAccessor.setIdGenerator(idGenerator);

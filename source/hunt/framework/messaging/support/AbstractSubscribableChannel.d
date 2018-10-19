@@ -16,56 +16,57 @@
 
 module hunt.framework.messaging.support.AbstractSubscribableChannel;
 
-// import hunt.container.Collections;
-// import hunt.container.Set;
+import hunt.framework.messaging.support.AbstractMessageChannel;
+import hunt.framework.messaging.Message;
+import hunt.framework.messaging.MessageChannel;
+
+import hunt.container.Collections;
+import hunt.container.Set;
 // import java.util.concurrent.CopyOnWriteArraySet;
 
-// import hunt.framework.messaging.MessageHandler;
-// import hunt.framework.messaging.SubscribableChannel;
+/**
+ * Abstract base class for {@link SubscribableChannel} implementations.
+ *
+ * @author Rossen Stoyanchev
+ * @since 4.0
+ */
+abstract class AbstractSubscribableChannel(T) : AbstractMessageChannel!T, SubscribableChannel!T {
 
-// /**
-//  * Abstract base class for {@link SubscribableChannel} implementations.
-//  *
-//  * @author Rossen Stoyanchev
-//  * @since 4.0
-//  */
-// abstract class AbstractSubscribableChannel : AbstractMessageChannel, SubscribableChannel {
+	private final Set!(MessageHandler) handlers;
 
-// 	private final Set!(MessageHandler) handlers;
-
-// 	this() {
-// 		handlers = new CopyOnWriteArraySet!(MessageHandler)();
-// 	}
+	this() {
+		handlers = new CopyOnWriteArraySet!(MessageHandler)();
+	}
 
 
-// 	Set!(MessageHandler) getSubscribers() {
-// 		return Collections.unmodifiableSet!(MessageHandler)(this.handlers);
-// 	}
+	Set!(MessageHandler) getSubscribers() {
+		return Collections.unmodifiableSet!(MessageHandler)(this.handlers);
+	}
 
-// 	bool hasSubscription(MessageHandler handler) {
-// 		return this.handlers.contains(handler);
-// 	}
+	bool hasSubscription(MessageHandler handler) {
+		return this.handlers.contains(handler);
+	}
 
-// 	override
-// 	bool subscribe(MessageHandler handler) {
-// 		 result = this.handlers.add(handler);
-// 		if (result) {
-// 			version(HUNT_DEBUG) {
-// 				trace(getBeanName() ~ " added " ~ handler);
-// 			}
-// 		}
-// 		return result;
-// 	}
+	override
+	bool subscribe(MessageHandler handler) {
+		 result = this.handlers.add(handler);
+		if (result) {
+			version(HUNT_DEBUG) {
+				trace(getBeanName() ~ " added " ~ handler);
+			}
+		}
+		return result;
+	}
 
-// 	override
-// 	bool unsubscribe(MessageHandler handler) {
-// 		 result = this.handlers.remove(handler);
-// 		if (result) {
-// 			version(HUNT_DEBUG) {
-// 				trace(getBeanName() ~ " removed " ~ handler);
-// 			}
-// 		}
-// 		return result;
-// 	}
+	override
+	bool unsubscribe(MessageHandler handler) {
+		 result = this.handlers.remove(handler);
+		if (result) {
+			version(HUNT_DEBUG) {
+				trace(getBeanName() ~ " removed " ~ handler);
+			}
+		}
+		return result;
+	}
 
-// }
+}

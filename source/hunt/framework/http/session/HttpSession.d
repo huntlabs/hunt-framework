@@ -86,8 +86,7 @@ class HttpSession {
     }
 
     bool isValid() {
-        long currentTime = convert!(TimeUnits.HectoNanosecond, TimeUnits.Millisecond)(
-                Clock.currStdTime);
+        long currentTime = DateTimeHelper.currentTimeMillis();
         return (currentTime - lastAccessedTime) < (maxInactiveInterval * 1000);
     }
 
@@ -411,8 +410,7 @@ class HttpSession {
     }
 
     static HttpSession create(string id, int maxInactiveInterval) {
-        long currentTime = convert!(TimeUnits.HectoNanosecond, TimeUnits.Millisecond)(
-                Clock.currStdTime);
+        long currentTime = DateTimeHelper.currentTimeMillis();
         HttpSession session = new HttpSession();
         session.setId(id);
         session.setMaxInactiveInterval(maxInactiveInterval);
@@ -432,8 +430,7 @@ class HttpSession {
 
     static HttpSession fromJson(string id, string json) {
         JSONValue j = parseJSON(json);
-        long currentTime = convert!(TimeUnits.HectoNanosecond, TimeUnits.Millisecond)(
-                Clock.currStdTime);
+        long currentTime = DateTimeHelper.currentTimeMillis();
         HttpSession session = new HttpSession();
         session.setId(id);
         session.setCreationTime(j["CreationTime"].integer);

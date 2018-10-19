@@ -25,13 +25,6 @@ import hunt.framework.messaging.support.MessageHeaderAccessor;
 import hunt.framework.messaging.support.MessageBuilder;
 import hunt.framework.messaging.support.NativeMessageHeaderAccessor;
 
-// import hunt.io.ByteArrayOutputStream;
-// import java.nio.Buffer;
-// import java.nio.ByteBuffer;
-// 
-// import java.util.ArrayList;
-// import java.util.List;
-
 import hunt.container;
 import hunt.io.ByteArrayOutputStream;
 import hunt.logging;
@@ -54,20 +47,20 @@ import std.conv;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-class StompDecoder {
+class StompDecoder(T) {
 
 	alias ByteMessage = Message!(byte[]);
 
 	enum byte[] HEARTBEAT_PAYLOAD = ['\n'];
 
-	private MessageHeaderInitializer headerInitializer;
+	private MessageHeaderInitializer!(byte[]) headerInitializer;
 
 
 	/**
 	 * Configure a {@link MessageHeaderInitializer} to apply to the headers of
 	 * {@link Message Messages} from decoded STOMP frames.
 	 */
-	void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
+	void setHeaderInitializer(MessageHeaderInitializer!(byte[]) headerInitializer) {
 		this.headerInitializer = headerInitializer;
 	}
 
@@ -75,7 +68,7 @@ class StompDecoder {
 	 * Return the configured {@code MessageHeaderInitializer}, if any.
 	 */
 	
-	MessageHeaderInitializer getHeaderInitializer() {
+	MessageHeaderInitializer!(byte[]) getHeaderInitializer() {
 		return this.headerInitializer;
 	}
 
@@ -113,7 +106,7 @@ class StompDecoder {
 	 * @throws StompConversionException raised in case of decoding issues
 	 */
 	List!(ByteMessage) decode(ByteBuffer byteBuffer,
-			MultiMap!(string) partialMessageHeaders) {
+			MultiStringsMap partialMessageHeaders) {
 
 		List!(ByteMessage) messages = new ArrayList!(ByteMessage)();
 		while (byteBuffer.hasRemaining()) {
@@ -132,7 +125,7 @@ class StompDecoder {
 	 * Decode a single STOMP frame from the given {@code buffer} into a {@link Message}.
 	 */
 	
-	private ByteMessage decodeMessage(ByteBuffer byteBuffer, MultiMap!(string) headers) {
+	private ByteMessage decodeMessage(ByteBuffer byteBuffer, MultiStringsMap headers) {
 		ByteMessage decodedMessage = null;
 		skipLeadingEol(byteBuffer);
 
@@ -173,7 +166,7 @@ class StompDecoder {
 				if (headers !is null && headerAccessor !is null) {
 					string name = NativeMessageHeaderAccessor.NATIVE_HEADERS;
 					
-					MultiMap!(string) map = cast(MultiMap!(string)) headerAccessor.getHeader(name);
+					MultiStringsMap map = cast(MultiStringsMap) headerAccessor.getHeader(name);
 					if (map !is null) {
 						headers.putAll(map);
 					}
@@ -194,7 +187,7 @@ class StompDecoder {
 		return decodedMessage;
 	}
 
-	private void initHeaders(StompHeaderAccessor headerAccessor) {
+	private void initHeaders(StompHeaderAccessor!(byte[]) headerAccessor) {
 		MessageHeaderInitializer initializer = getHeaderInitializer();
 		if (initializer !is null) {
 			initializer.initHeaders(headerAccessor);
@@ -221,7 +214,7 @@ class StompDecoder {
 		return cast(string) (command.toByteArray());
 	}
 
-	private void readHeaders(ByteBuffer byteBuffer, StompHeaderAccessor headerAccessor) {
+	private void readHeaders(ByteBuffer byteBuffer, StompHeaderAccessor!(byte[]) headerAccessor) {
 		while (true) {
 			ByteArrayOutputStream headerStream = new ByteArrayOutputStream(256);
 			 headerComplete = false;
@@ -300,7 +293,7 @@ class StompDecoder {
 	}
 
 	
-	private byte[] readPayload(ByteBuffer byteBuffer, StompHeaderAccessor headerAccessor) {
+	private byte[] readPayload(ByteBuffer byteBuffer, StompHeaderAccessor!(byte[]) headerAccessor) {
 		Integer contentLength;
 		try {
 			contentLength = headerAccessor.getContentLength();

@@ -23,10 +23,11 @@ import hunt.container.Map;
 import hunt.logging;
 import hunt.lang.Boolean;
 import hunt.lang.common;
+import hunt.lang.exception;
 import hunt.string;
 
+import std.string;
 import std.traits;
-
 
 
 /**
@@ -119,7 +120,7 @@ class SimpAttributes {
 			if (isSessionCompleted()) {
 				throw new IllegalStateException("Session id=" ~ getSessionId() ~ " already completed");
 			}
-			this.attributes.put(DESTRUCTION_CALLBACK_NAME_PREFIX ~ name, callback);
+			this.attributes.put(DESTRUCTION_CALLBACK_NAME_PREFIX ~ name, cast(Object)callback);
 		}
 	}
 
@@ -144,7 +145,7 @@ class SimpAttributes {
 	Object getSessionMutex() {
 		Object mutex = this.attributes.get(SESSION_MUTEX_NAME);
 		if (mutex is null) {
-			mutex = this.attributes;
+			mutex = cast(Object)this.attributes;
 		}
 		return mutex;
 	}

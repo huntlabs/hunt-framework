@@ -17,15 +17,16 @@
 module hunt.framework.messaging.simp.stomp.StompHeaders;
 
 import hunt.container;
+import hunt.lang.exception;
 import hunt.lang.Long;
 import hunt.string;
 
+import std.conv;
+import std.range;
 
 // 
-// import hunt.framework.util.LinkedMultiValueMap;
-// import hunt.framework.util.MimeType;
-// import hunt.framework.util.MimeTypeUtils;
-// import hunt.framework.util.MultiValueMap;
+import hunt.http.codec.http.model.AcceptMimeType;
+import hunt.http.codec.http.model.MimeTypes;
 // import hunt.util.ObjectUtils;
 
 /**
@@ -45,9 +46,6 @@ import hunt.string;
  * http://stomp.github.io/stomp-specification-1.2.html#Frames_and_Headers</a>
  */
 class StompHeaders : MultiValueMap!(string, string) {
-
-	alias MultiValuesMap = Map!(string, List!(string));
-
 
 	// Standard headers (as defined in the spec)
 
@@ -96,7 +94,7 @@ class StompHeaders : MultiValueMap!(string, string) {
 	enum string RECEIPT_ID = "receipt-id";
 
 
-	private MultiValuesMap headers;
+	private MultiStringsMap headers;
 
 
 	/**
@@ -106,13 +104,14 @@ class StompHeaders : MultiValueMap!(string, string) {
 		this(new LinkedMultiValueMap!(string, List!(string))(4), false);
 	}
 
-	private this(MultiValuesMap headers,  readOnly) {
+	private this(MultiStringsMap headers, bool readOnly) {
 		assert(headers, "'headers' must not be null");
 		if (readOnly) {
-			MultiValuesMap map = new LinkedMultiValueMap!(string, List!(string))(headers.size());
+			MultiStringsMap map = new LinkedMultiValueMap!(string, List!(string))(headers.size());
 			foreach(string key, List!(string) value; map)
-				map.put(key, Collections.unmodifiableList(value));
-			this.headers = Collections.unmodifiableMap(map);
+				map.put(key, value);
+				// map.put(key, Collections.unmodifiableList(value));
+			this.headers = map; // Collections.unmodifiableMap(map);
 		}
 		else {
 			this.headers = headers;
@@ -126,8 +125,8 @@ class StompHeaders : MultiValueMap!(string, string) {
 	 */
 	void setContentType(MimeType mimeType) {
 		if (mimeType !is null) {
-			assert(!mimeType.isWildcardType(), "'Content-Type' cannot contain wildcard type '*'");
-			assert(!mimeType.isWildcardSubtype(), "'Content-Type' cannot contain wildcard subtype '*'");
+			// assert(!mimeType.isWildcardType(), "'Content-Type' cannot contain wildcard type '*'");
+			// assert(!mimeType.isWildcardSubtype(), "'Content-Type' cannot contain wildcard subtype '*'");
 			set(CONTENT_TYPE, mimeType.toString());
 		}
 		else {
@@ -139,9 +138,11 @@ class StompHeaders : MultiValueMap!(string, string) {
 	 * Return the content-type header value.
 	 */
 	
-	MimeType getContentType() {
+	AcceptMimeType[] getContentType() {
 		string value = getFirst(CONTENT_TYPE);
-		return value.empty ? null : MimeTypeUtils.parseMimeType(value);
+		// AcceptMimeType[] list = MimeTypes.parseAcceptMIMETypes(value);
+		// return value.empty ? null : MimeTypeUtils.parseMimeType(value);
+		return value.empty ? null : MimeTypes.parseAcceptMIMETypes(value);
 	}
 
 	/**
@@ -149,7 +150,7 @@ class StompHeaders : MultiValueMap!(string, string) {
 	 * Applies to the SEND, MESSAGE, and ERROR frames.
 	 */
 	void setContentLength(long contentLength) {
-		set(CONTENT_LENGTH, Long.toString(contentLength));
+		set(CONTENT_LENGTH, to!string(contentLength));
 	}
 
 	/**
@@ -198,7 +199,7 @@ class StompHeaders : MultiValueMap!(string, string) {
 	 * @since 5.0.7
 	 */
 	void setAcceptVersion(string[] acceptVersions...) {
-		if (ObjectUtils.isEmpty(acceptVersions)) {
+		if (acceptVersions.length == 0) {
 			set(ACCEPT_VERSION, null);
 			return;
 		}
@@ -258,9 +259,9 @@ class StompHeaders : MultiValueMap!(string, string) {
 	void setHeartbeat(long[] heartbeat) {
 		if (heartbeat is null || heartbeat.length != 2) {
 			throw new IllegalArgumentException("Heart-beat array must be of length 2, not " ~
-					(heartbeat !is null ? heartbeat.length : "null"));
+					(heartbeat !is null ? to!string(heartbeat.length) : "null"));
 		}
-		string value = heartbeat[0] ~ "," ~ heartbeat[1];
+		string value = heartbeat[0].to!string() ~ "," ~ heartbeat[1].to!string();
 		if (heartbeat[0] < 0 || heartbeat[1] < 0) {
 			throw new IllegalArgumentException("Heart-beat values cannot be negative: " ~ value);
 		}
@@ -277,7 +278,8 @@ class StompHeaders : MultiValueMap!(string, string) {
 		if (rawValues is null) {
 			return null;
 		}
-		return [Long.valueOf(rawValues[0]), Long.valueOf(rawValues[1])];
+		// return [Long.valueOf(rawValues[0]), Long.valueOf(rawValues[1])];
+		return [rawValues[0].to!long(), rawValues[1].to!long()];
 	}
 
 	/**
@@ -450,8 +452,8 @@ class StompHeaders : MultiValueMap!(string, string) {
 		currentValues.addAll(headerValues);
 	}
 
-	override
-	void addAll(MultiMap!(string) values) {
+	// override
+	void addAll(MultiStringsMap values) {
 		foreach(string s; values) 
 			this.addAll(s);
 	}
@@ -495,17 +497,17 @@ class StompHeaders : MultiValueMap!(string, string) {
 	}
 
 	override
-	 isEmpty() {
+	bool isEmpty() {
 		return this.headers.isEmpty();
 	}
 
 	override
-	 containsKey(string key) {
+	bool containsKey(string key) {
 		return this.headers.containsKey(key);
 	}
 
 	override
-	 containsValue(List!(string) value) {
+	bool containsValue(List!(string) value) {
 		return this.headers.containsValue(value);
 	}
 
@@ -525,7 +527,7 @@ class StompHeaders : MultiValueMap!(string, string) {
 	}
 
 	override
-	void putAll(MultiValuesMap map) {
+	void putAll(MultiStringsMap map) {
 		this.headers.putAll(map);
 	}
 
@@ -550,19 +552,19 @@ class StompHeaders : MultiValueMap!(string, string) {
 	// }
 
 
-    int opApply(scope int delegate(ref K, ref V) dg)  {
+    int opApply(scope int delegate(ref string, ref string) dg)  {
         return this.headers.opApply(dg);
     }
     
-    int opApply(scope int delegate(MapEntry!(K, V) entry) dg) {
+    int opApply(scope int delegate(MapEntry!(string, string) entry) dg) {
         return this.headers.opApply(dg);
     }
     
-    InputRange!K byKey() {
+    InputRange!string byKey() {
         return this.headers.byKey();
     }
 
-    InputRange!V byValue() {
+    InputRange!string byValue() {
         return this.headers.byValue();
     }
 
@@ -589,7 +591,7 @@ class StompHeaders : MultiValueMap!(string, string) {
 	/**
 	 * Return a {@code StompHeaders} object that can only be read, not written to.
 	 */
-	static StompHeaders readOnlyStompHeaders(MultiValuesMap headers) {
+	static StompHeaders readOnlyStompHeaders(MultiStringsMap headers) {
 		return new StompHeaders((headers !is null ? headers : Collections.emptyMap()), true);
 	}
 

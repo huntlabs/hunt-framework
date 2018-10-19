@@ -19,10 +19,11 @@ module hunt.framework.messaging.converter.StringMessageConverter;
 import hunt.lang.Charset;
 import hunt.lang.exception;
 
+import hunt.framework.messaging.converter.AbstractMessageConverter;
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageHeaders;
 
-// import hunt.framework.util.MimeType;
+import hunt.http.codec.http.model.MimeTypes;
 
 /**
  * A {@link MessageConverter} that supports MIME type "text/plain" with the
@@ -31,9 +32,9 @@ import hunt.framework.messaging.MessageHeaders;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-class StringMessageConverter : AbstractMessageConverter {
+class StringMessageConverter(T) : AbstractMessageConverter!T {
 
-	private final Charset defaultCharset;
+	private Charset defaultCharset;
 
 
 	this() {

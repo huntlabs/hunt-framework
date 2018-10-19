@@ -16,14 +16,18 @@
 
 module hunt.framework.messaging.simp.stomp.StompEncoder;
 
+
+import hunt.framework.messaging.exception;
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.simp.stomp.StompCommand;
+import hunt.framework.messaging.simp.stomp.StompDecoder;
+import hunt.framework.messaging.simp.stomp.StompHeaderAccessor;
 import hunt.framework.messaging.simp.SimpMessageHeaderAccessor;
 import hunt.framework.messaging.simp.SimpMessageType;
 import hunt.framework.messaging.support.NativeMessageHeaderAccessor;
 
 import hunt.io.ByteArrayOutputStream;
-// import hunt.io.DataOutputStream;
+import hunt.io.BufferedOutputStream;
 // import java.util.concurrent.ConcurrentHashMap;
 
 import hunt.container;
@@ -35,6 +39,7 @@ import std.conv;
 
 
 alias DataOutputStream = BufferedOutputStream;
+alias ByteArrayMap = Map!(string, byte[]);
 
 /**
  * An encoder for STOMP frames.
@@ -46,8 +51,6 @@ alias DataOutputStream = BufferedOutputStream;
  */
 public class StompEncoder  {
 
-	alias ByteArrayMap = Map!(string, byte[]);
-
 	private enum byte LF = '\n';
 
 	private enum byte COLON = ':';
@@ -57,11 +60,10 @@ public class StompEncoder  {
 
 	private ByteArrayMap headerKeyAccessCache; // = new ConcurrentHashMap<>(HEADER_KEY_CACHE_LIMIT);
 
-	
 	private ByteArrayMap headerKeyUpdateCache;
 	
 	this() {
-		headerKeyAccessCache = new HashMap!(ByteArrayMap)(HEADER_KEY_CACHE_LIMIT);
+		headerKeyAccessCache = new HashMap!(string, byte[])(HEADER_KEY_CACHE_LIMIT);
 
 		headerKeyUpdateCache =
 			new class LinkedHashMap!(string, byte[]) {
@@ -107,14 +109,14 @@ public class StompEncoder  {
 			DataOutputStream output = new DataOutputStream(baos);
 
 			if (SimpMessageType.HEARTBEAT.equals(SimpMessageHeaderAccessor.getMessageType(headers))) {
-				logger.trace("Encoding heartbeat");
+				trace("Encoding heartbeat");
 				output.write(StompDecoder.HEARTBEAT_PAYLOAD);
 			}
 
 			else {
 				StompCommand command = StompHeaderAccessor.getCommand(headers);
-				if (command is null) {
-					throw new IllegalStateException("Missing STOMP command: " ~ headers);
+				if (command == StompCommand.Null) {
+					throw new IllegalStateException("Missing STOMP command: " ~ (cast(Object)headers).toString());
 				}
 
 				output.write( cast(byte[]) command.toString());
@@ -139,14 +141,14 @@ public class StompEncoder  {
 				cast(Map!(string, List!(string))) headers.get(NativeMessageHeaderAccessor.NATIVE_HEADERS);
 
 		version(HUNT_DEBUG) {
-			logger.trace("Encoding STOMP " ~ command ~ ", headers=" ~ nativeHeaders);
+			trace("Encoding STOMP " ~ command ~ ", headers=" ~ nativeHeaders);
 		}
 
 		if (nativeHeaders is null) {
 			return;
 		}
 
-		 shouldEscape = (command != StompCommand.CONNECT && command != StompCommand.CONNECTED);
+		bool shouldEscape = (command != StompCommand.CONNECT && command != StompCommand.CONNECTED);
 
 		foreach (string key, List!(string) values ; nativeHeaders) {
 			if (command.requiresContentLength() && "content-length" == key) {
@@ -175,15 +177,15 @@ public class StompEncoder  {
 		}
 	}
 
-	private byte[] encodeHeaderKey(string input,  escape) {
-		string inputToUse = (escape ? escape(input) : input);
+	private byte[] encodeHeaderKey(string input, bool canEscape) {
+		string inputToUse = (canEscape ? escape(input) : input);
 		if (this.headerKeyAccessCache.containsKey(inputToUse)) {
 			return this.headerKeyAccessCache.get(inputToUse);
 		}
 		synchronized (this.headerKeyUpdateCache) {
 			byte[] bytes = this.headerKeyUpdateCache.get(inputToUse);
 			if (bytes is null) {
-				bytes = inputToUse.getBytes(StandardCharsets.UTF_8);
+				bytes = cast(byte[])inputToUse.dup;
 				this.headerKeyAccessCache.put(inputToUse, bytes);
 				this.headerKeyUpdateCache.put(inputToUse, bytes);
 			}
@@ -191,9 +193,9 @@ public class StompEncoder  {
 		}
 	}
 
-	private byte[] encodeHeaderValue(string input,  escape) {
-		string inputToUse = (escape ? escape(input) : input);
-		return inputToUse.getBytes(StandardCharsets.UTF_8);
+	private byte[] encodeHeaderValue(string input, bool canEscape) {
+		string inputToUse = (canEscape ? escape(input) : input);
+		return cast(byte[])inputToUse.dup;
 	}
 
 	/**
@@ -202,7 +204,7 @@ public class StompEncoder  {
 	 */
 	private string escape(string inString) {
 		StringBuilder sb = null;
-		for (int i = 0; i < inString.length(); i++) {
+		for (int i = 0; i < inString.length; i++) {
 			char c = inString.charAt(i);
 			if (c == '\\') {
 				sb = getStringBuilder(sb, inString, i);
@@ -229,7 +231,7 @@ public class StompEncoder  {
 
 	private StringBuilder getStringBuilder(StringBuilder sb, string inString, int i) {
 		if (sb is null) {
-			sb = new StringBuilder(inString.length());
+			sb = new StringBuilder(inString.length);
 			sb.append(inString.substring(0, i));
 		}
 		return sb;

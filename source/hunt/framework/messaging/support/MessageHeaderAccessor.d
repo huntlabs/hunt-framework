@@ -204,7 +204,7 @@ class MessageHeaderAccessor(T) {
 	 * <p>By default this is set to {@code false}.
 	 * @since 4.1
 	 */
-	void setLeaveMutable( leaveMutable) {
+	void setLeaveMutable(bool leaveMutable) {
 		assert(this.headers.isMutable(), "Already immutable");
 		this.leaveMutable = leaveMutable;
 	}
@@ -234,7 +234,7 @@ class MessageHeaderAccessor(T) {
 	 * @param modified typically {@code true}, or {@code false} to reset the flag
 	 * @since 4.1
 	 */
-	protected void setModified( modified) {
+	protected void setModified(bool modified) {
 		this.modified = modified;
 	}
 
@@ -521,7 +521,7 @@ class MessageHeaderAccessor(T) {
 		setHeader(MessageHeaders.REPLY_CHANNEL, replyChannelName);
 	}
 
-	void setReplyChannel(MessageChannel replyChannel) {
+	void setReplyChannel(MessageChannel!T replyChannel) {
 		setHeader(MessageHeaders.REPLY_CHANNEL, replyChannel);
 	}
 
@@ -534,7 +534,7 @@ class MessageHeaderAccessor(T) {
 		setHeader(MessageHeaders.ERROR_CHANNEL, errorChannelName);
 	}
 
-	void setErrorChannel(MessageChannel errorChannel) {
+	void setErrorChannel(MessageChannel!T errorChannel) {
 		setHeader(MessageHeaders.ERROR_CHANNEL, errorChannel);
 	}
 

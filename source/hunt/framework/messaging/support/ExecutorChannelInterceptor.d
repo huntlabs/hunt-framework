@@ -16,7 +16,7 @@
 
 module hunt.framework.messaging.support.ExecutorChannelInterceptor;
 
-
+import hunt.framework.messaging.support.ChannelInterceptor;
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageChannel;
 
