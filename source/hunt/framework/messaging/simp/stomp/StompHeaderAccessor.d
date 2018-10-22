@@ -67,7 +67,7 @@ alias Charset = string;
  */
 class StompHeaderAccessor : SimpMessageHeaderAccessor {
 
-	private __gshared long messageIdCounter = 0;
+	private static shared(long) messageIdCounter = 0;
 
 	private enum long[] DEFAULT_HEARTBEAT = [0, 0];
 
@@ -152,7 +152,7 @@ class StompHeaderAccessor : SimpMessageHeaderAccessor {
 		if (value !is null) {
 			super.setContentType(MimeTypeUtils.parseMimeType(value));
 		}
-		StompCommand command = getCommand();
+		Nullable!StompCommand command = getCommand();
 		if (StompCommand.MESSAGE == command) {
 			value = getFirstNativeHeader(STOMP_SUBSCRIPTION_HEADER);
 			if (value !is null) {
@@ -195,27 +195,27 @@ class StompHeaderAccessor : SimpMessageHeaderAccessor {
 	}
 
 	StompCommand updateStompCommandAsClientMessage() {
-		SimpMessageType messageType = getMessageType();
+		Nullable!SimpMessageType messageType = getMessageType();
 		if (messageType != SimpMessageType.MESSAGE) {
-			throw new IllegalStateException("Unexpected message type " ~ messageType);
+			throw new IllegalStateException("Unexpected message type " ~ messageType.toString());
 		}
-		StompCommand command = getCommand();
+		Nullable!StompCommand command = getCommand();
 		if (command is null) {
-			command = StompCommand.SEND;
+			command = new Nullable!StompCommand(StompCommand.SEND);
 			setHeader(COMMAND_HEADER, command);
 		}
-		else if (!command.equals(StompCommand.SEND)) {
-			throw new IllegalStateException("Unexpected STOMP command " ~ command);
+		else if (command != (StompCommand.SEND)) {
+			throw new IllegalStateException("Unexpected STOMP command " ~ command.toString());
 		}
 		return command;
 	}
 
 	void updateStompCommandAsServerMessage() {
-		SimpMessageType messageType = getMessageType();
+		Nullable!SimpMessageType messageType = getMessageType();
 		if (messageType != SimpMessageType.MESSAGE) {
-			throw new IllegalStateException("Unexpected message type " ~ messageType);
+			throw new IllegalStateException("Unexpected message type " ~ messageType.toString());
 		}
-		StompCommand command = getCommand();
+		Nullable!StompCommand command = getCommand();
 		if ((command is null) || StompCommand.SEND == command) {
 			setHeader(COMMAND_HEADER, StompCommand.MESSAGE);
 		}
@@ -224,7 +224,7 @@ class StompHeaderAccessor : SimpMessageHeaderAccessor {
 		}
 		trySetStompHeaderForSubscriptionId();
 		if (getMessageId() is null) {
-			string messageId = getSessionId() + '-' + messageIdCounter.getAndIncrement();
+			string messageId = getSessionId() ~ "-" ~ messageIdCounter.getAndIncrement();
 			setNativeHeader(STOMP_MESSAGE_ID_HEADER, messageId);
 		}
 	}
@@ -233,8 +233,8 @@ class StompHeaderAccessor : SimpMessageHeaderAccessor {
 	 * Return the STOMP command, or {@code null} if not yet set.
 	 */
 	
-	StompCommand getCommand() {
-		return cast(StompCommand) getHeader(COMMAND_HEADER);
+	Nullable!StompCommand getCommand() {
+		return cast(Nullable!StompCommand) getHeader(COMMAND_HEADER);
 	}
 
 	bool isHeartbeat() {
@@ -289,7 +289,7 @@ class StompHeaderAccessor : SimpMessageHeaderAccessor {
 	private void trySetStompHeaderForSubscriptionId() {
 		string subscriptionId = getSubscriptionId();
 		if (subscriptionId !is null) {
-			StompCommand command = getCommand();
+			Nullable!StompCommand command = getCommand();
 			if (command !is null && StompCommand.MESSAGE == command) {
 				setNativeHeader(STOMP_SUBSCRIPTION_HEADER, subscriptionId);
 			}
@@ -415,7 +415,7 @@ class StompHeaderAccessor : SimpMessageHeaderAccessor {
 
 	override
 	string getShortLogMessage(Object payload) {
-		StompCommand command = getCommand();
+		Nullable!StompCommand command = getCommand();
 		if (StompCommand.SUBSCRIBE == command) {
 			return "SUBSCRIBE " ~ getDestination() ~ " id=" ~ getSubscriptionId() ~ appendSession();
 		}
@@ -426,8 +426,9 @@ class StompHeaderAccessor : SimpMessageHeaderAccessor {
 			return "SEND " ~ getDestination() ~ appendSession() ~ appendPayload(payload);
 		}
 		else if (StompCommand.CONNECT == command) {
-			Principal user = getUser();
-			return "CONNECT" ~ (user !is null ? " user=" ~ user.getName() : "") ~ appendSession();
+			// Principal user = getUser();
+			// return "CONNECT" ~ (user !is null ? " user=" ~ user.getName() : "") ~ appendSession();
+			return "CONNECT" ~ appendSession();
 		}
 		else if (StompCommand.CONNECTED == command) {
 			return "CONNECTED heart-beat=" ~ Arrays.toString(getHeartbeat()) ~ appendSession();
@@ -447,7 +448,7 @@ class StompHeaderAccessor : SimpMessageHeaderAccessor {
 			string sessionId = getSessionId();
 			return "heart-beat" ~ (sessionId !is null ? " in session " ~ sessionId : "");
 		}
-		StompCommand command = getCommand();
+		Nullable!StompCommand command = getCommand();
 		if (command is null) {
 			return super.getDetailedLogMessage(payload);
 		}
@@ -455,12 +456,12 @@ class StompHeaderAccessor : SimpMessageHeaderAccessor {
 		sb.append(command.name()).append(" ");
 		Map!(string, List!(string)) nativeHeaders = getNativeHeaders();
 		if (nativeHeaders !is null) {
-			sb.append(nativeHeaders);
+			sb.append(nativeHeaders.toString());
 		}
 		sb.append(appendSession());
-		if (getUser() !is null) {
-			sb.append(", user=").append(getUser().getName());
-		}
+		// if (getUser() !is null) {
+		// 	sb.append(", user=").append(getUser().getName());
+		// }
 		if (payload !is null && command.isBodyAllowed()) {
 			sb.append(appendPayload(payload));
 		}
@@ -526,8 +527,8 @@ class StompHeaderAccessor : SimpMessageHeaderAccessor {
 	 * Return the STOMP command from the given headers, or {@code null} if not set.
 	 */
 	
-	static StompCommand getCommand(Map!(string, Object) headers) {
-		return cast(StompCommand) headers.get(COMMAND_HEADER);
+	static Nullable!StompCommand getCommand(Map!(string, Object) headers) {
+		return cast(Nullable!StompCommand) headers.get(COMMAND_HEADER);
 	}
 
 	/**

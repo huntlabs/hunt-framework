@@ -21,6 +21,8 @@ import hunt.framework.messaging.support.MessageHeaderAccessor;
 import hunt.framework.messaging.IdGenerator;
 import hunt.framework.messaging.MessageHeaders;
 
+import std.uuid;
+
 /**
  * A {@link hunt.framework.messaging.support.MessageHeaderInitializer MessageHeaderInitializer}
  * to customize the strategy for ID and TIMESTAMP message header generation.

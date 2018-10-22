@@ -95,7 +95,7 @@ class GenericMessage(T) : Message!(T) {
 		return this.payload == otherMsg.payload && this.headers == otherMsg.headers;
 	}
 
-	size_t toHash() @trusted nothrow {
+	override size_t toHash() @trusted nothrow {
 		// Using nullSafeHashCode for proper array toHash handling
 		return hashOf(this.payload) * 23 + this.headers.toHash();
 	}
@@ -108,7 +108,7 @@ class GenericMessage(T) : Message!(T) {
 		} else {
 			sb.append(this.payload);
 		}
-		sb.append(", headers=").append(this.headers).append("]");
+		sb.append(", headers=").append(this.headers.toString()).append("]");
 		return sb.toString();
 	}
 

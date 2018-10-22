@@ -29,9 +29,12 @@ import hunt.container;
 import hunt.io.ByteArrayOutputStream;
 import hunt.logging;
 import hunt.lang.exception;
+import hunt.lang.Integer;
+import hunt.lang.Nullable;
 import hunt.string;
 
 import std.conv;
+import std.string;
 
 
 /**
@@ -53,14 +56,14 @@ class StompDecoder {
 
 	enum byte[] HEARTBEAT_PAYLOAD = ['\n'];
 
-	private MessageHeaderInitializer!(byte[]) headerInitializer;
+	private MessageHeaderInitializer headerInitializer;
 
 
 	/**
 	 * Configure a {@link MessageHeaderInitializer} to apply to the headers of
 	 * {@link Message Messages} from decoded STOMP frames.
 	 */
-	void setHeaderInitializer(MessageHeaderInitializer!(byte[]) headerInitializer) {
+	void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
 		this.headerInitializer = headerInitializer;
 	}
 
@@ -68,7 +71,7 @@ class StompDecoder {
 	 * Return the configured {@code MessageHeaderInitializer}, if any.
 	 */
 	
-	MessageHeaderInitializer!(byte[]) getHeaderInitializer() {
+	MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;
 	}
 
@@ -135,7 +138,7 @@ class StompDecoder {
 		buffer.mark();
 
 		string command = readCommand(byteBuffer);
-		if (command.length() > 0) {
+		if (command.length > 0) {
 			StompHeaderAccessor headerAccessor = null;
 			byte[] payload = null;
 			if (byteBuffer.remaining() > 0) {
@@ -147,22 +150,25 @@ class StompDecoder {
 			}
 			if (payload !is null) {
 				if (payload.length > 0) {
-					StompCommand stompCommand = headerAccessor.getCommand();
-					if (stompCommand !is null && !stompCommand.isBodyAllowed()) {
-						throw new StompConversionException(stompCommand ~
-								" shouldn't have a payload: length=" ~ 
-								to!string(payload.length) ~ ", headers=" ~ headers);
+					Nullable!StompCommand stompCommand = headerAccessor.getCommand();
+					if (stompCommand !is null) {
+						StompCommand cmd = stompCommand.value;
+						if(!cmd.isBodyAllowed()) {
+							throw new StompConversionException(stompCommand.toString() ~
+									" shouldn't have a payload: length=" ~ 
+									to!string(payload.length) ~ ", headers=" ~ headers.toString());
+						}
 					}
 				}
 				headerAccessor.updateSimpMessageHeadersFromStompHeaders();
 				headerAccessor.setLeaveMutable(true);
-				decodedMessage = MessageBuilder.createMessage(payload, headerAccessor.getMessageHeaders());
+				decodedMessage = MessageHelper.createMessage(payload, headerAccessor.getMessageHeaders());
 				version(HUNT_DEBUG) {
-					logger.trace("Decoded " ~ headerAccessor.getDetailedLogMessage(payload));
+					trace("Decoded " ~ headerAccessor.getDetailedLogMessage(payload));
 				}
 			}
 			else {
-				logger.trace("Incomplete frame, resetting input buffer...");
+				trace("Incomplete frame, resetting input buffer...");
 				if (headers !is null && headerAccessor !is null) {
 					string name = NativeMessageHeaderAccessor.NATIVE_HEADERS;
 					
@@ -178,16 +184,16 @@ class StompDecoder {
 			StompHeaderAccessor headerAccessor = StompHeaderAccessor.createForHeartbeat();
 			initHeaders(headerAccessor);
 			headerAccessor.setLeaveMutable(true);
-			decodedMessage = MessageBuilder.createMessage(HEARTBEAT_PAYLOAD, headerAccessor.getMessageHeaders());
+			decodedMessage = MessageHelper.createMessage(HEARTBEAT_PAYLOAD, headerAccessor.getMessageHeaders());
 			version(HUNT_DEBUG) {
-				logger.trace("Decoded " ~ headerAccessor.getDetailedLogMessage(null));
+				trace("Decoded " ~ headerAccessor.getDetailedLogMessage(null));
 			}
 		}
 
 		return decodedMessage;
 	}
 
-	private void initHeaders(StompHeaderAccessor!(byte[]) headerAccessor) {
+	private void initHeaders(StompHeaderAccessor headerAccessor) {
 		MessageHeaderInitializer initializer = getHeaderInitializer();
 		if (initializer !is null) {
 			initializer.initHeaders(headerAccessor);
@@ -214,10 +220,10 @@ class StompDecoder {
 		return cast(string) (command.toByteArray());
 	}
 
-	private void readHeaders(ByteBuffer byteBuffer, StompHeaderAccessor!(byte[]) headerAccessor) {
+	private void readHeaders(ByteBuffer byteBuffer, StompHeaderAccessor headerAccessor) {
 		while (true) {
 			ByteArrayOutputStream headerStream = new ByteArrayOutputStream(256);
-			 headerComplete = false;
+			bool headerComplete = false;
 			while (byteBuffer.hasRemaining()) {
 				if (tryConsumeEndOfLine(byteBuffer)) {
 					headerComplete = true;
@@ -227,7 +233,7 @@ class StompDecoder {
 			}
 			if (headerStream.size() > 0 && headerComplete) {
 				string header = cast(string)(headerStream.toByteArray());
-				int colonIndex = header.indexOf(':');
+				int colonIndex = cast(int)header.indexOf(":");
 				if (colonIndex <= 0) {
 					if (byteBuffer.remaining() > 0) {
 						throw new StompConversionException("Illegal header: '" ~ header ~
@@ -258,16 +264,17 @@ class StompDecoder {
 	 * <a href="http://stomp.github.io/stomp-specification-1.2.html#Value_Encoding">"Value Encoding"</a>.
 	 */
 	private string unescape(string inString) {
-		StringBuilder sb = new StringBuilder(inString.length());
+		StringBuilder sb = new StringBuilder(inString.length);
 		int pos = 0;  // position in the old string
-		int index = inString.indexOf('\\');
+		int index = cast(int)inString.indexOf("\\");
 
 		while (index >= 0) {
 			sb.append(inString.substring(pos, index));
-			if (index + 1 >= inString.length()) {
-				throw new StompConversionException("Illegal escape sequence at index " ~ index ~ ": " ~ inString);
+			if (index + 1 >= inString.length) {
+				throw new StompConversionException("Illegal escape sequence at index " ~ 
+					index.to!string() ~ ": " ~ inString);
 			}
-			Character c = inString.charAt(index + 1);
+			char c = inString[index + 1];
 			if (c == 'r') {
 				sb.append('\r');
 			}
@@ -282,10 +289,11 @@ class StompDecoder {
 			}
 			else {
 				// should never happen
-				throw new StompConversionException("Illegal escape sequence at index " ~ index ~ ": " ~ inString);
+				throw new StompConversionException("Illegal escape sequence at index " ~ 
+					index.to!string() ~ ": " ~ inString);
 			}
 			pos = index + 2;
-			index = inString.indexOf('\\', pos);
+			index = cast(int)inString.indexOf("\\", pos);
 		}
 
 		sb.append(inString.substring(pos));
@@ -293,7 +301,7 @@ class StompDecoder {
 	}
 
 	
-	private byte[] readPayload(ByteBuffer byteBuffer, StompHeaderAccessor!(byte[]) headerAccessor) {
+	private byte[] readPayload(ByteBuffer byteBuffer, StompHeaderAccessor headerAccessor) {
 		Integer contentLength;
 		try {
 			contentLength = headerAccessor.getContentLength();
@@ -307,7 +315,7 @@ class StompDecoder {
 
 		if (contentLength !is null && contentLength >= 0) {
 			if (byteBuffer.remaining() > contentLength) {
-				byte[] payload = new byte[contentLength];
+				byte[] payload = new byte[contentLength.value];
 				byteBuffer.get(payload);
 				if (byteBuffer.get() != 0) {
 					throw new StompConversionException("Frame must be terminated with a null octet");

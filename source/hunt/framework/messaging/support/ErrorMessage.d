@@ -43,10 +43,10 @@ import hunt.container.Map;
  * @since 4.0
  * @see MessageBuilder
  */
-class ErrorMessage(T) : GenericMessage!(Throwable) {
+class ErrorMessage : GenericMessage!(Throwable) {
 
 	// 
-	private final Message!(T) originalMessage;
+	private immutable MessageBase originalMessage;
 
 
 	/**
@@ -88,7 +88,7 @@ class ErrorMessage(T) : GenericMessage!(Throwable) {
 	 * in the stack where the ErrorMessage was created
 	 * @since 5.0
 	 */
-	this(Throwable payload, Message!(T) originalMessage) {
+	this(Throwable payload, MessageBase originalMessage) {
 		super(payload);
 		this.originalMessage = originalMessage;
 	}
@@ -102,7 +102,7 @@ class ErrorMessage(T) : GenericMessage!(Throwable) {
 	 * in the stack where the ErrorMessage was created
 	 * @since 5.0
 	 */
-	this(Throwable payload, Map!(string, Object) headers, Message!(T) originalMessage) {
+	this(Throwable payload, Map!(string, Object) headers, MessageBase originalMessage) {
 		super(payload, headers);
 		this.originalMessage = originalMessage;
 	}
@@ -117,7 +117,7 @@ class ErrorMessage(T) : GenericMessage!(Throwable) {
 	 * in the stack where the ErrorMessage was created
 	 * @since 5.0
 	 */
-	this(Throwable payload, MessageHeaders headers, Message!(T) originalMessage) {
+	this(Throwable payload, MessageHeaders headers, MessageBase originalMessage) {
 		super(payload, headers);
 		this.originalMessage = originalMessage;
 	}
@@ -129,7 +129,7 @@ class ErrorMessage(T) : GenericMessage!(Throwable) {
 	 * @since 5.0
 	 */
 	
-	Message!(T) getOriginalMessage() {
+	MessageBase getOriginalMessage() {
 		return this.originalMessage;
 	}
 

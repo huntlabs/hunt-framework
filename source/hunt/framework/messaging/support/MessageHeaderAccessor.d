@@ -30,8 +30,11 @@ import hunt.container;
 import hunt.datetime;
 import hunt.string.PatternMatchUtils;
 import hunt.lang.exception;
+import hunt.lang.Nullable;
 import hunt.util.ObjectUtils;
 
+import std.algorithm;
+import std.conv;
 import std.range.primitives;
 import std.string;
 import std.uuid;
@@ -182,8 +185,8 @@ class MessageHeaderAccessor {
 	 * @param message the message to build a new accessor for
 	 * @return the nested accessor (typically a specific subclass)
 	 */
-	static protected MessageHeaderAccessor!U createAccessor(U)(Message!U message) {
-		return new MessageHeaderAccessor!U(message);
+	protected MessageHeaderAccessor createAccessor(MessageBase message) {
+		return new MessageHeaderAccessor(message);
 	}
 
 
@@ -318,6 +321,14 @@ class MessageHeaderAccessor {
 		return this.headers.get(headerName);
 	}
 
+	T getHeaderAs(T)(string headerName) {
+		return this.headers.getAs!(T)(headerName);
+	}
+
+	void setHeader(T)(string name, T value) if(!is(T == class)) {
+		setHeader(name, new Nullable!T(value));
+	}
+
 	/**
 	 * Set the value for the given header name.
 	 * <p>If the provided value is {@code null}, the header will be removed.
@@ -347,7 +358,7 @@ class MessageHeaderAccessor {
 		if (!headerName.empty && headerValue !is null) {
 			if (MessageHeaders.ERROR_CHANNEL == headerName ||
 					MessageHeaders.REPLY_CHANNEL.endsWith(headerName)) {
-				MessageChannel!string mc = cast(MessageChannel)headerValue;
+				MessageChannel mc = cast(MessageChannel)headerValue;
 				Nullable!string str = cast(Nullable!string)headerValue;
 				
 				if (mc is null && str is null) {
@@ -385,8 +396,8 @@ class MessageHeaderAccessor {
 	void removeHeaders(string[] headerPatterns...) {
 		List!(string) headersToRemove = new ArrayList!string();
 		foreach (string pattern ; headerPatterns) {
-			if (StringUtils.hasLength(pattern)){
-				if (pattern.contains("*")){
+			if (!pattern.empty()){
+				if (pattern.canFind("*")){
 					headersToRemove.addAll(getMatchingHeaderNames(pattern, this.headers));
 				}
 				else {
@@ -481,7 +492,7 @@ class MessageHeaderAccessor {
 			if(vs is null)
 				throw new Exception("bad type");
 			else 
-				return Long.parseLong(vs.value);
+				return new Long(vs.value);
 		} else {
 			return vl;
 		}
@@ -507,7 +518,7 @@ class MessageHeaderAccessor {
 		if(vs is null)
 			throw new Exception("bad type");
 		else 
-			return Long.parseLong(vs.value);
+			return new MimeType(vs.value);
 		// return (value instanceof MimeType ? (MimeType) value : MimeType.valueOf(value.toString()));
 	}
 
@@ -518,11 +529,11 @@ class MessageHeaderAccessor {
 	}
 
 	void setReplyChannelName(string replyChannelName) {
-		setHeader(MessageHeaders.REPLY_CHANNEL, replyChannelName);
+		setHeader(MessageHeaders.REPLY_CHANNEL, new Nullable!string(replyChannelName));
 	}
 
 	void setReplyChannel(MessageChannel replyChannel) {
-		setHeader(MessageHeaders.REPLY_CHANNEL, replyChannel);
+		setHeader(MessageHeaders.REPLY_CHANNEL, cast(Object)replyChannel);
 	}
 
 	
@@ -531,11 +542,11 @@ class MessageHeaderAccessor {
 	}
 
 	void setErrorChannelName(string errorChannelName) {
-		setHeader(MessageHeaders.ERROR_CHANNEL, errorChannelName);
+		setHeader(MessageHeaders.ERROR_CHANNEL, new Nullable!string(errorChannelName));
 	}
 
 	void setErrorChannel(MessageChannel errorChannel) {
-		setHeader(MessageHeaders.ERROR_CHANNEL, errorChannel);
+		setHeader(MessageHeaders.ERROR_CHANNEL, cast(Object)errorChannel);
 	}
 
 	
@@ -570,7 +581,7 @@ class MessageHeaderAccessor {
 			string payloadText = textPayload.value;
 			return (payloadText.length < 80) ?
 				" payload=" ~ payloadText :
-				" payload=" ~ payloadText.substring(0, 80) ~ "...(truncated)";
+				" payload=" ~ payloadText[0 ..80] ~ "...(truncated)";
 		}
 		
 		auto bytesPayload = cast(Nullable!(byte[]))payload;
@@ -582,12 +593,12 @@ class MessageHeaderAccessor {
 						" payload=" ~ cast(string)(bytes[0..80]) ~ "...(truncated)";
 			}
 			else {
-				return " payload=byte[" ~ bytes.length ~ "]";
+				return " payload=byte[" ~ to!string(bytes.length) ~ "]";
 			}
 		}
 		else {
 			string payloadText = payload.toString();
-			return (payloadText.length() < 80) ?
+			return (payloadText.length < 80) ?
 					" payload=" ~ payloadText :
 					" payload=" ~ ObjectUtils.identityToString(payload);
 		}
@@ -626,7 +637,7 @@ class MessageHeaderAccessor {
 
 	override
 	string toString() {
-		return getClass().getSimpleName() ~ " [headers=" ~ this.headers.toString() ~ "]";
+		return typeid(this).name ~ " [headers=" ~ this.headers.toString() ~ "]";
 	}
 
 
@@ -697,7 +708,7 @@ class MessageHeaderAccessor {
 		private bool mutable = true;
 
 		this(Map!(string, Object) headers) {
-			super(headers, MessageHeaders.ID_VALUE_NONE, -1L);
+			super(headers, &MessageHeaders.ID_VALUE_NONE, Long.valueOf(-1L));
 		}
 
 		override

@@ -20,6 +20,7 @@ import hunt.framework.messaging.support.MessageHeaderAccessor;
 import hunt.framework.messaging.Message;
 
 import hunt.container;
+import hunt.util.ObjectUtils;
 
 // 
 // import hunt.framework.util.CollectionUtils;
@@ -28,11 +29,6 @@ import hunt.container;
 // import hunt.util.ObjectUtils;
 
 
-
-	/**
-	 * The header name used to store native headers.
-	 */
-	enum string NATIVE_HEADERS = "nativeHeaders";
 
 
 /**
@@ -56,6 +52,12 @@ import hunt.container;
 class NativeMessageHeaderAccessor : MessageHeaderAccessor {
 
 	/**
+	 * The header name used to store native headers.
+	 */
+	enum string NATIVE_HEADERS = "nativeHeaders";
+
+
+	/**
 	 * A protected constructor to create new headers.
 	 */
 	protected this() {
@@ -67,7 +69,7 @@ class NativeMessageHeaderAccessor : MessageHeaderAccessor {
 	 * @param nativeHeaders native headers to create the message with (may be {@code null})
 	 */
 	protected this(MultiStringsMap nativeHeaders) {
-		if (!CollectionUtils.isEmpty(nativeHeaders)) {
+		if (nativeHeaders !is null && nativeHeaders.size() > 0) {
 			setHeader(NATIVE_HEADERS, new LinkedMultiValueMap!(string, string)(nativeHeaders));
 		}
 	}
@@ -99,7 +101,8 @@ class NativeMessageHeaderAccessor : MessageHeaderAccessor {
 	 */
 	MultiStringsMap toNativeHeaderMap() {
 		MultiStringsMap map = getNativeHeaders();
-		return (map !is null ? new LinkedMultiValueMap!(string, string)(map) : Collections.emptyMap());
+		return (map !is null ? new LinkedMultiValueMap!(string, string)(map) : 
+			Collections.emptyMap!(string, List!(string))());
 	}
 
 	override
@@ -109,7 +112,8 @@ class NativeMessageHeaderAccessor : MessageHeaderAccessor {
 			if (map !is null) {
 				// Force removal since setHeader checks for equality
 				removeHeader(NATIVE_HEADERS);
-				setHeader(NATIVE_HEADERS, Collections.unmodifiableMap(map));
+				setHeader(NATIVE_HEADERS, cast(Object)map);
+				// setHeader(NATIVE_HEADERS, Collections.unmodifiableMap(map));
 			}
 			super.setImmutable();
 		}
@@ -153,7 +157,7 @@ class NativeMessageHeaderAccessor : MessageHeaderAccessor {
 	 * Set the specified native header value replacing existing values.
 	 */
 	void setNativeHeader(string name, string value) {
-		Assert.state(isMutable(), "Already immutable");
+		assert(isMutable(), "Already immutable");
 		MultiStringsMap map = getNativeHeaders();
 		if (value is null) {
 			if (map !is null && map.get(name) !is null) {
@@ -164,11 +168,11 @@ class NativeMessageHeaderAccessor : MessageHeaderAccessor {
 		}
 		if (map is null) {
 			map = new LinkedMultiValueMap!(string, string)(4);
-			setHeader(NATIVE_HEADERS, map);
+			setHeader(NATIVE_HEADERS, cast(Object)map);
 		}
 		List!(string) values = new LinkedList!(string)();
 		values.add(value);
-		if (!ObjectUtils.nullSafeEquals(values, getHeader(name))) {
+		if (!ObjectUtils.nullSafeEquals(cast(Object)values, getHeader(name))) {
 			setModified(true);
 			map.put(name, values);
 		}
@@ -178,14 +182,14 @@ class NativeMessageHeaderAccessor : MessageHeaderAccessor {
 	 * Add the specified native header value to existing values.
 	 */
 	void addNativeHeader(string name, string value) {
-		Assert.state(isMutable(), "Already immutable");
+		assert(isMutable(), "Already immutable");
 		if (value is null) {
 			return;
 		}
 		MultiStringsMap nativeHeaders = getNativeHeaders();
 		if (nativeHeaders is null) {
 			nativeHeaders = new LinkedMultiValueMap!(string, string)(4);
-			setHeader(NATIVE_HEADERS, nativeHeaders);
+			setHeader(NATIVE_HEADERS, cast(Object)nativeHeaders);
 		}
 		List!(string) values = nativeHeaders.computeIfAbsent(name, k => new LinkedList!(string)());
 		values.add(value);
@@ -205,7 +209,7 @@ class NativeMessageHeaderAccessor : MessageHeaderAccessor {
 
 	
 	List!(string) removeNativeHeader(string name) {
-		Assert.state(isMutable(), "Already immutable");
+		assert(isMutable(), "Already immutable");
 		MultiStringsMap nativeHeaders = getNativeHeaders();
 		if (nativeHeaders is null) {
 			return null;

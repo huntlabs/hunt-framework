@@ -114,7 +114,7 @@ public class StompEncoder  {
 			}
 
 			else {
-				StompCommand command = StompHeaderAccessor!(string).getCommand(headers);
+				StompCommand command = StompHeaderAccessor.getCommand(headers);
 				if (command == StompCommand.Null) {
 					throw new IllegalStateException("Missing STOMP command: " ~ (cast(Object)headers).toString());
 				}
@@ -130,7 +130,8 @@ public class StompEncoder  {
 			return baos.toByteArray();
 		}
 		catch (IOException ex) {
-			throw new StompConversionException("Failed to encode STOMP frame, headers=" ~ headers,  ex);
+			throw new StompConversionException(
+					"Failed to encode STOMP frame, headers=" ~ headers.toString(), ex);
 		}
 	}
 
@@ -138,7 +139,7 @@ public class StompEncoder  {
 			DataOutputStream output) {
 		
 		Map!(string,List!(string)) nativeHeaders =
-				cast(Map!(string, List!(string))) headers.get(NATIVE_HEADERS);
+				cast(Map!(string, List!(string))) headers.get(NativeMessageHeaderAccessor.NATIVE_HEADERS);
 
 		version(HUNT_DEBUG) {
 			trace("Encoding STOMP " ~ command ~ ", headers=" ~ nativeHeaders);

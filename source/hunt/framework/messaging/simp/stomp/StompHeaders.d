@@ -511,6 +511,10 @@ class StompHeaders : MultiValueMap!(string, string) {
 		return this.headers.containsValue(value);
 	}
 
+    List!(string) opIndex(string key) {
+        return get(key);
+    }
+
 	override
 	List!(string) get(string key) {
 		return this.headers.get(key);
@@ -522,29 +526,68 @@ class StompHeaders : MultiValueMap!(string, string) {
 	}
 
 	override
-	List!(string) remove(string key) {
-		return this.headers.remove(key);
-	}
-
-	override
 	void putAll(MultiStringsMap map) {
 		this.headers.putAll(map);
 	}
+
+    List!(string) putIfAbsent(string key, List!(string) value) {
+        List!(string) v;
+
+        if(!containsKey(key))
+            v = put(key, value);
+
+        return v;
+    }
+
+	override
+	List!(string) remove(string key) {
+		return this.headers.remove(key);
+	}
+	
+    bool remove(string key, List!(string) value){
+        List!(string) curValue = get(key);
+        if(curValue != value || !containsKey(key))
+            return false;
+        remove(key);
+        return true;
+    }
 
 	override
 	void clear() {
 		this.headers.clear();
 	}
 
+	
+    bool replace(string key, List!(string) oldValue, List!(string) newValue) {
+        List!(string) curValue = get(key);
+         if(curValue != oldValue || !containsKey(key)){
+            return false;
+        }
+        put(key, newValue);
+        return true;
+    }
+
+    List!(string) replace(string key, List!(string) value) {
+        List!(string) curValue;
+        if (containsKey(key)) {
+            curValue = put(key, value);
+        }
+        return curValue;
+    }
+
 	// override
 	// Set!(string) keySet() {
 	// 	return this.headers.keySet();
 	// }
 
-	// override
-	// Collection!(List!(string)) values() {
-	// 	return this.headers.values();
-	// }
+
+	List!(string)[] values() {
+        List!(string)[] arr;
+        foreach(List!(string) value; byValue()) {
+            arr ~= value;
+        }
+        return arr;
+    }
 
 	// override
 	// Set!(Entry!(string, List!(string))) entrySet() {

@@ -190,7 +190,7 @@ class MessageHeaders : AbstractMap!(string, Object) {
 		return this.headers;
 	}
 
-	protected static IdGenerator getIdGenerator() {
+	static IdGenerator getIdGenerator() {
 		IdGenerator generator = idGenerator;
 		return (generator !is null ? generator : defaultIdGenerator);
 	}

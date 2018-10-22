@@ -161,6 +161,12 @@ final class MessageBuilder(T) {
 		}
 	}
 
+}
+
+
+/**
+*/
+class MessageHelper {
 
 	/**
 	 * Create a builder for a new {@link Message} instance pre-populated with all of the
@@ -191,15 +197,14 @@ final class MessageBuilder(T) {
 	 * @since 4.1
 	 */
 	
-	static Message!(U) createMessage(U)(T payload, MessageHeaders messageHeaders) {
+	static Message!(U) createMessage(U)(U payload, MessageHeaders messageHeaders) {
 		assert(payload, "Payload must not be null");
 		assert(messageHeaders, "MessageHeaders must not be null");
-		Throwable th = cast(Throwable) payload;
-		if (th !is null) {
-			return new ErrorMessage(th, messageHeaders);
-		} else {
-			return new GenericMessage!(U)(payload, messageHeaders);
+		static if(is(U == class) || is(U == interface)) {
+			Throwable th = cast(Throwable) payload;
+			if (th !is null) 
+				return new ErrorMessage(th, messageHeaders);
 		}
+		return new GenericMessage!(U)(payload, messageHeaders);
 	}
-
 }
