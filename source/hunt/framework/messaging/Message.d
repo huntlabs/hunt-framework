@@ -18,6 +18,17 @@ module hunt.framework.messaging.Message;
 
 import hunt.framework.messaging.MessageHeaders;
 
+interface MessageBase {
+
+	TypeInfo  payloadType();
+
+	/**
+	 * Return message headers for the message (never {@code null} but may be empty).
+	 */
+	MessageHeaders getHeaders();
+
+}
+
 /**
  * A generic message representation with headers and body.
  *
@@ -27,7 +38,7 @@ import hunt.framework.messaging.MessageHeaders;
  * @param (T) the payload type
  * @see hunt.framework.messaging.support.MessageBuilder
  */
-interface Message(T) {
+interface Message(T) : MessageBase {
 
 	/**
 	 * Return the message payload.
@@ -37,8 +48,7 @@ interface Message(T) {
 	/**
 	 * Return message headers for the message (never {@code null} but may be empty).
 	 */
-	MessageHeaders getHeaders();
-
+	// MessageHeaders getHeaders();
 }
 
 /**
@@ -49,13 +59,13 @@ interface Message(T) {
  * @since 4.0
  */
 // // 
-interface MessageHandler(T) {
+interface MessageHandler {
 
 	/**
 	 * Handle the given message.
 	 * @param message the message to be handled
 	 * @throws MessagingException if the handler failed to process the message
 	 */
-	void handleMessage(Message!T message);
+	void handleMessage(MessageBase message);
 
 }

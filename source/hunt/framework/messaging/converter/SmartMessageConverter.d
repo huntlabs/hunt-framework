@@ -45,7 +45,7 @@ interface SmartMessageConverter(T) : MessageConverter!(T) {
 	 * @see #fromMessage(Message, Class)
 	 */
 	
-	// Object fromMessage(Message!(T) message, Class!(T) targetClass, Object conversionHint);
+	// Object fromMessage(MessageBase message, Class!(T) targetClass, Object conversionHint);
 
 	/**
 	 * A variant of {@link #toMessage(Object, MessageHeaders)} which takes an extra

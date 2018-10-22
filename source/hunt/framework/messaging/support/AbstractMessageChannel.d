@@ -99,12 +99,12 @@ abstract class AbstractMessageChannel(T) : MessageChannel!T { // , Interceptable
 
 
 	// override
-	// final  send(Message!(T) message) {
+	// final  send(MessageBase message) {
 	// 	return send(message, INDEFINITE_TIMEOUT);
 	// }
 
 	// override
-	// final  send(Message!(T) message, long timeout) {
+	// final  send(MessageBase message, long timeout) {
 	// 	assert(message, "Message must not be null");
 	// 	Message!(T) messageToUse = message;
 	// 	ChannelInterceptorChain chain = new ChannelInterceptorChain();
@@ -134,7 +134,7 @@ abstract class AbstractMessageChannel(T) : MessageChannel!T { // , Interceptable
 	// 	}
 	// }
 
-	// protected abstract  sendInternal(Message!(T) message, long timeout);
+	// protected abstract  sendInternal(MessageBase message, long timeout);
 
 
 	// override
@@ -153,7 +153,7 @@ abstract class AbstractMessageChannel(T) : MessageChannel!T { // , Interceptable
 	// 	private int receiveInterceptorIndex = -1;
 
 		
-	// 	Message!(T) applyPreSend(Message!(T) message, MessageChannel channel) {
+	// 	Message!(T) applyPreSend(MessageBase message, MessageChannel channel) {
 	// 		Message!(T) messageToUse = message;
 	// 		for (ChannelInterceptor interceptor : interceptors) {
 	// 			Message!(T) resolvedMessage = interceptor.preSend(messageToUse, channel);
@@ -171,13 +171,13 @@ abstract class AbstractMessageChannel(T) : MessageChannel!T { // , Interceptable
 	// 		return messageToUse;
 	// 	}
 
-	// 	void applyPostSend(Message!(T) message, MessageChannel channel,  sent) {
+	// 	void applyPostSend(MessageBase message, MessageChannel channel,  sent) {
 	// 		for (ChannelInterceptor interceptor : interceptors) {
 	// 			interceptor.postSend(message, channel, sent);
 	// 		}
 	// 	}
 
-	// 	void triggerAfterSendCompletion(Message!(T) message, MessageChannel channel,
+	// 	void triggerAfterSendCompletion(MessageBase message, MessageChannel channel,
 	// 			 sent, Exception ex) {
 
 	// 		for (int i = this.sendInterceptorIndex; i >= 0; i--) {
@@ -203,7 +203,7 @@ abstract class AbstractMessageChannel(T) : MessageChannel!T { // , Interceptable
 	// 	}
 
 		
-	// 	Message!(T) applyPostReceive(Message!(T) message, MessageChannel channel) {
+	// 	Message!(T) applyPostReceive(MessageBase message, MessageChannel channel) {
 	// 		Message!(T) messageToUse = message;
 	// 		for (ChannelInterceptor interceptor : interceptors) {
 	// 			messageToUse = interceptor.postReceive(messageToUse, channel);
@@ -215,7 +215,7 @@ abstract class AbstractMessageChannel(T) : MessageChannel!T { // , Interceptable
 	// 	}
 
 	// 	void triggerAfterReceiveCompletion(
-	// 			Message!(T) message, MessageChannel channel, Exception ex) {
+	// 			MessageBase message, MessageChannel channel, Exception ex) {
 
 	// 		for (int i = this.receiveInterceptorIndex; i >= 0; i--) {
 	// 			ChannelInterceptor interceptor = interceptors.get(i);

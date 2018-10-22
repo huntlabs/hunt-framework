@@ -10,6 +10,7 @@ import std.variant;
 import std.traits;
 import std.exception;
 
+import hunt.event.timer.common;
 import hunt.event.EventLoop;
 import hunt.lang.common;
 import hunt.util.timer;

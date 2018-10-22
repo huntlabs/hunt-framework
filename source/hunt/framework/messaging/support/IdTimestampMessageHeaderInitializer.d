@@ -28,7 +28,7 @@ import hunt.framework.messaging.MessageHeaders;
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-class IdTimestampMessageHeaderInitializer(T) : MessageHeaderInitializer!(T) {
+class IdTimestampMessageHeaderInitializer : MessageHeaderInitializer {
 
 	private __gshared IdGenerator ID_VALUE_NONE_GENERATOR;
 
@@ -90,7 +90,7 @@ class IdTimestampMessageHeaderInitializer(T) : MessageHeaderInitializer!(T) {
 
 
 	override
-	public void initHeaders(MessageHeaderAccessor!(T) headerAccessor) {
+	public void initHeaders(MessageHeaderAccessor headerAccessor) {
 		IdGenerator idGenerator = getIdGenerator();
 		if (idGenerator !is null) {
 			headerAccessor.setIdGenerator(idGenerator);

@@ -30,13 +30,13 @@ import hunt.framework.messaging.Message;
  * @since 4.0
  */
 
-class MessagingException(T) : NestedRuntimeException {
+class MessagingException : NestedRuntimeException {
 	
-	private Message!(T) failedMessage;
+	private MessageBase failedMessage;
 
 
-	this(Message!(T) message) {
-		super(null, null);
+	this(MessageBase message) {
+		super("");
 		this.failedMessage = message;
 	}
 
@@ -50,29 +50,29 @@ class MessagingException(T) : NestedRuntimeException {
 		this.failedMessage = null;
 	}
 
-	this(Message!(T) message, string description) {
+	this(MessageBase message, string description) {
 		super(description);
 		this.failedMessage = message;
 	}
 
-	this(Message!(T) message, Throwable cause) {
+	this(MessageBase message, Throwable cause) {
 		super(null, cause);
 		this.failedMessage = message;
 	}
 
-	this(Message!(T) message, string description, Throwable cause) {
+	this(MessageBase message, string description, Throwable cause) {
 		super(description, cause);
 		this.failedMessage = message;
 	}
 	
-	Message!(T) getFailedMessage() {
+	MessageBase getFailedMessage() {
 		return this.failedMessage;
 	}
 
 	override
 	string toString() {
 		return super.toString() ~ (this.failedMessage is null ? ""
-				: (", failedMessage=" ~ this.failedMessage));
+				: (", failedMessage=" ~ (cast(Object)this.failedMessage).toString()));
 	}
 
 }
@@ -86,21 +86,21 @@ class MessagingException(T) : NestedRuntimeException {
  * @since 4.0
  */
 
-class MessageHandlingException(T) : MessagingException!(T) {
+class MessageHandlingException : MessagingException {
 
-	this(Message!(T) failedMessage) {
+	this(MessageBase failedMessage) {
 		super(failedMessage);
 	}
 
-	this(Message!(T) message, string description) {
+	this(MessageBase message, string description) {
 		super(message, description);
 	}
 
-	this(Message!(T) failedMessage, Throwable cause) {
+	this(MessageBase failedMessage, Throwable cause) {
 		super(failedMessage, cause);
 	}
 
-	this(Message!(T) message, string description, Throwable cause) {
+	this(MessageBase message, string description, Throwable cause) {
 		super(message, description, cause);
 	}
 
@@ -114,25 +114,25 @@ class MessageHandlingException(T) : MessagingException!(T) {
  * @since 4.0
  */
 
-class MessageDeliveryException(T) : MessagingException!T {
+class MessageDeliveryException : MessagingException {
 
 	this(string description) {
 		super(description);
 	}
 
-	this(Message!(T) undeliveredMessage) {
+	this(MessageBase undeliveredMessage) {
 		super(undeliveredMessage);
 	}
 
-	this(Message!(T) undeliveredMessage, string description) {
+	this(MessageBase undeliveredMessage, string description) {
 		super(undeliveredMessage, description);
 	}
 
-	this(Message!(T) message, Throwable cause) {
+	this(MessageBase message, Throwable cause) {
 		super(message, cause);
 	}
 
-	this(Message!(T) undeliveredMessage, string description, Throwable cause) {
+	this(MessageBase undeliveredMessage, string description, Throwable cause) {
 		super(undeliveredMessage, description, cause);
 	}
 

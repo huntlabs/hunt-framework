@@ -73,7 +73,7 @@ public class StompEncoder  {
 				}
 
 				override
-				protected bool removeEldestEntry(LinkedHashMapEntry!(string, byte[]) eldest) {
+				protected bool removeEldestEntry(MapEntry!(string, byte[]) eldest) {
 					if (size() > HEADER_KEY_CACHE_LIMIT) {
 						headerKeyAccessCache.remove(eldest.getKey());
 						return true;
@@ -105,16 +105,16 @@ public class StompEncoder  {
 		assert(payload !is null, "'payload' is required");
 
 		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream(128 + payload.length);
+			ByteArrayOutputStream baos = new ByteArrayOutputStream(128 + cast(int)payload.length);
 			DataOutputStream output = new DataOutputStream(baos);
 
-			if (SimpMessageType.HEARTBEAT.equals(SimpMessageHeaderAccessor.getMessageType(headers))) {
+			if (SimpMessageType.HEARTBEAT == SimpMessageHeaderAccessor.getMessageType(headers)) {
 				trace("Encoding heartbeat");
 				output.write(StompDecoder.HEARTBEAT_PAYLOAD);
 			}
 
 			else {
-				StompCommand command = StompHeaderAccessor.getCommand(headers);
+				StompCommand command = StompHeaderAccessor!(string).getCommand(headers);
 				if (command == StompCommand.Null) {
 					throw new IllegalStateException("Missing STOMP command: " ~ (cast(Object)headers).toString());
 				}
@@ -138,7 +138,7 @@ public class StompEncoder  {
 			DataOutputStream output) {
 		
 		Map!(string,List!(string)) nativeHeaders =
-				cast(Map!(string, List!(string))) headers.get(NativeMessageHeaderAccessor.NATIVE_HEADERS);
+				cast(Map!(string, List!(string))) headers.get(NATIVE_HEADERS);
 
 		version(HUNT_DEBUG) {
 			trace("Encoding STOMP " ~ command ~ ", headers=" ~ nativeHeaders);
@@ -156,8 +156,8 @@ public class StompEncoder  {
 			}
 
 			if (StompCommand.CONNECT == command &&
-					StompHeaderAccessor.STOMP_PASSCODE_HEADER == key) {
-				values = Collections.singletonList(StompHeaderAccessor.getPasscode(headers));
+					StompHeaderAccessor!(string).STOMP_PASSCODE_HEADER == key) {
+				values = Collections.singletonList(StompHeaderAccessor!(string).getPasscode(headers));
 			}
 
 			byte[] encodedKey = encodeHeaderKey(key, shouldEscape);

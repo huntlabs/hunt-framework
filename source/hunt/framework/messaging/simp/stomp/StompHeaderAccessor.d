@@ -65,7 +65,7 @@ alias Charset = string;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-class StompHeaderAccessor(T) : SimpMessageHeaderAccessor!(T) {
+class StompHeaderAccessor : SimpMessageHeaderAccessor {
 
 	private __gshared long messageIdCounter = 0;
 
@@ -130,7 +130,7 @@ class StompHeaderAccessor(T) : SimpMessageHeaderAccessor!(T) {
 	 * but may have rather originated from using the more generic
 	 * {@link hunt.framework.messaging.simp.SimpMessageHeaderAccessor}.
 	 */
-	this(Message!(T) message) {
+	this(MessageBase message) {
 		super(message);
 		updateStompHeadersFromSimpMessageHeaders();
 	}
@@ -184,7 +184,7 @@ class StompHeaderAccessor(T) : SimpMessageHeaderAccessor!(T) {
 
 
 	override
-	protected MessageHeaderAccessor!T createAccessor(Message!(T) message) {
+	protected MessageHeaderAccessor createAccessor(MessageBase message) {
 		return wrap(message);
 	}
 
@@ -518,7 +518,7 @@ class StompHeaderAccessor(T) : SimpMessageHeaderAccessor!(T) {
 	/**
 	 * Create an instance from the payload and headers of the given Message.
 	 */
-	static StompHeaderAccessor wrap(Message!(T) message) {
+	static StompHeaderAccessor wrap(MessageBase message) {
 		return new StompHeaderAccessor(message);
 	}
 

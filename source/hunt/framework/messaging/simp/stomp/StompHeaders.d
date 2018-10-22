@@ -101,13 +101,13 @@ class StompHeaders : MultiValueMap!(string, string) {
 	 * Create a new instance to be populated with new header values.
 	 */
 	this() {
-		this(new LinkedMultiValueMap!(string, List!(string))(4), false);
+		this(new LinkedMultiValueMap!(string, string)(4), false);
 	}
 
 	private this(MultiStringsMap headers, bool readOnly) {
 		assert(headers, "'headers' must not be null");
 		if (readOnly) {
-			MultiStringsMap map = new LinkedMultiValueMap!(string, List!(string))(headers.size());
+			MultiStringsMap map = new LinkedMultiValueMap!(string, string)(headers.size());
 			foreach(string key, List!(string) value; map)
 				map.put(key, value);
 				// map.put(key, Collections.unmodifiableList(value));
@@ -454,8 +454,8 @@ class StompHeaders : MultiValueMap!(string, string) {
 
 	// override
 	void addAll(MultiStringsMap values) {
-		foreach(string s; values) 
-			this.addAll(s);
+		foreach(string k, List!(string) v; values) 
+			this.addAll(k, v);
 	}
 
 	/**
@@ -475,8 +475,8 @@ class StompHeaders : MultiValueMap!(string, string) {
 
 	override
 	void setAll(Map!(string, string) values) {
-		foreach(string s; values) 
-			this.set(s);
+		foreach(string k, string v; values) 
+			this.set(k, v);
 	}
 
 	override
@@ -552,11 +552,11 @@ class StompHeaders : MultiValueMap!(string, string) {
 	// }
 
 
-    int opApply(scope int delegate(ref string, ref string) dg)  {
+    int opApply(scope int delegate(ref string, ref List!(string)) dg)  {
         return this.headers.opApply(dg);
     }
     
-    int opApply(scope int delegate(MapEntry!(string, string) entry) dg) {
+    int opApply(scope int delegate(MapEntry!(string, List!(string)) entry) dg) {
         return this.headers.opApply(dg);
     }
     
@@ -564,7 +564,7 @@ class StompHeaders : MultiValueMap!(string, string) {
         return this.headers.byKey();
     }
 
-    InputRange!string byValue() {
+    InputRange!(List!(string)) byValue() {
         return this.headers.byValue();
     }
 
@@ -592,7 +592,7 @@ class StompHeaders : MultiValueMap!(string, string) {
 	 * Return a {@code StompHeaders} object that can only be read, not written to.
 	 */
 	static StompHeaders readOnlyStompHeaders(MultiStringsMap headers) {
-		return new StompHeaders((headers !is null ? headers : Collections.emptyMap()), true);
+		return new StompHeaders((headers !is null ? headers : Collections.emptyMap!(string, List!(string))()), true);
 	}
 
 }

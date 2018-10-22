@@ -43,13 +43,13 @@ import std.uuid;
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-interface MessageHeaderInitializer(T) {
+interface MessageHeaderInitializer {
 
 	/**
 	 * Initialize the given {@code MessageHeaderAccessor}.
 	 * @param headerAccessor the MessageHeaderAccessor to initialize
 	 */
-	void initHeaders(MessageHeaderAccessor!(T) headerAccessor);
+	void initHeaders(MessageHeaderAccessor headerAccessor);
 
 }
 
@@ -130,7 +130,7 @@ alias Charset = string;
  * @author Juergen Hoeller
  * @since 4.0
  */
-class MessageHeaderAccessor(T) {
+class MessageHeaderAccessor {
 
 	/**
 	 * The default charset used for headers.
@@ -172,7 +172,7 @@ class MessageHeaderAccessor(T) {
 	 * A constructor accepting the headers of an existing message to copy.
 	 * @param message a message to copy the headers from, or {@code null} if none
 	 */
-	this(Message!(T) message) {
+	this(MessageBase message) {
 		this.headers = new MutableMessageHeaders(message !is null ? message.getHeaders() : null);
 	}
 
@@ -521,7 +521,7 @@ class MessageHeaderAccessor(T) {
 		setHeader(MessageHeaders.REPLY_CHANNEL, replyChannelName);
 	}
 
-	void setReplyChannel(MessageChannel!T replyChannel) {
+	void setReplyChannel(MessageChannel replyChannel) {
 		setHeader(MessageHeaders.REPLY_CHANNEL, replyChannel);
 	}
 
@@ -534,7 +534,7 @@ class MessageHeaderAccessor(T) {
 		setHeader(MessageHeaders.ERROR_CHANNEL, errorChannelName);
 	}
 
-	void setErrorChannel(MessageChannel!T errorChannel) {
+	void setErrorChannel(MessageChannel errorChannel) {
 		setHeader(MessageHeaders.ERROR_CHANNEL, errorChannel);
 	}
 
@@ -681,7 +681,7 @@ class MessageHeaderAccessor(T) {
 	 * @return an accessor of the required type (never {@code null})
 	 * @since 4.1
 	 */
-	static MessageHeaderAccessor getMutableAccessor(Message!(T) message) {
+	static MessageHeaderAccessor getMutableAccessor(MessageBase message) {
 			MutableMessageHeaders mutableHeaders = cast(MutableMessageHeaders) message.getHeaders();
 		if (mutableHeaders !is null) {
 			MessageHeaderAccessor accessor = mutableHeaders.getAccessor();
@@ -737,7 +737,7 @@ class MessageHeaderAccessor(T) {
 			return this.mutable;
 		}
 
-		MessageHeaderAccessor!T getAccessor() {
+		MessageHeaderAccessor getAccessor() {
 			return this.outer;
 		}
 

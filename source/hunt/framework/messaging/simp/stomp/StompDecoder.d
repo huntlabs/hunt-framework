@@ -47,7 +47,7 @@ import std.conv;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-class StompDecoder(T) {
+class StompDecoder {
 
 	alias ByteMessage = Message!(byte[]);
 

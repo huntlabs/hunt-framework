@@ -25,7 +25,7 @@ import hunt.framework.messaging.Message;
  * @since 4.0
  */
 // 
-interface MessageChannel(T) {
+interface MessageChannel {
 
 	/**
 	 * Constant for sending a message without a prescribed timeout.
@@ -43,7 +43,7 @@ interface MessageChannel(T) {
 	 * @param message the message to send
 	 * @return whether or not the message was sent
 	 */
-	final bool send(Message!T message) {
+	final bool send(MessageBase message) {
 		return send(message, INDEFINITE_TIMEOUT);
 	}
 
@@ -55,7 +55,7 @@ interface MessageChannel(T) {
 	 * @return {@code true} if the message is sent, {@code false} if not
 	 * including a timeout of an interrupt of the send
 	 */
-	bool send(Message!(T) message, long timeout);
+	bool send(MessageBase message, long timeout);
 
 }
 
@@ -67,14 +67,14 @@ interface MessageChannel(T) {
  * @author Mark Fisher
  * @since 4.0
  */
-interface PollableChannel(T) : MessageChannel!(T) {
+interface PollableChannel : MessageChannel {
 
 	/**
 	 * Receive a message from this channel, blocking indefinitely if necessary.
 	 * @return the next available {@link Message} or {@code null} if interrupted
 	 */
 	
-	Message!T receive();
+	MessageBase receive();
 
 	/**
 	 * Receive a message from this channel, blocking until either a message is available
@@ -84,7 +84,7 @@ interface PollableChannel(T) : MessageChannel!(T) {
 	 * period elapses or the message reception is interrupted
 	 */
 	
-	Message!(T) receive(long timeout);
+	MessageBase receive(long timeout);
 }
 
 
@@ -96,7 +96,7 @@ interface PollableChannel(T) : MessageChannel!(T) {
  * @author Mark Fisher
  * @since 4.0
  */
-interface SubscribableChannel(T) : MessageChannel!(T) {
+interface SubscribableChannel : MessageChannel {
 
 	/**
 	 * Register a message handler.

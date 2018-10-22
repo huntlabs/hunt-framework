@@ -27,6 +27,14 @@ import hunt.container;
 // import hunt.framework.util.MultiValueMap;
 // import hunt.util.ObjectUtils;
 
+
+
+	/**
+	 * The header name used to store native headers.
+	 */
+	enum string NATIVE_HEADERS = "nativeHeaders";
+
+
 /**
  * An extension of {@link MessageHeaderAccessor} that also stores and provides read/write
  * access to message headers from an external source -- e.g. a Spring {@link Message}
@@ -45,13 +53,7 @@ import hunt.container;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-class NativeMessageHeaderAccessor(T) : MessageHeaderAccessor!(T) {
-
-	/**
-	 * The header name used to store native headers.
-	 */
-	enum string NATIVE_HEADERS = "nativeHeaders";
-
+class NativeMessageHeaderAccessor : MessageHeaderAccessor {
 
 	/**
 	 * A protected constructor to create new headers.
@@ -73,7 +75,7 @@ class NativeMessageHeaderAccessor(T) : MessageHeaderAccessor!(T) {
 	/**
 	 * A protected constructor accepting the headers of an existing message to copy.
 	 */
-	protected this(Message!(T) message) {
+	protected this(MessageBase message) {
 		super(message);
 		if (message !is null) {
 			

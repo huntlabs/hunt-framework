@@ -37,7 +37,7 @@ public class SimpleMessageConverter(T) : MessageConverter!(T) {
 
 	// override
 	
-	// public Object fromMessage(Message!(T) message, Class!(T) targetClass) {
+	// public Object fromMessage(MessageBase message, Class!(T) targetClass) {
 	// 	Object payload = message.getPayload();
 	// 	return (ClassUtils.isAssignableValue(targetClass, payload) ? payload : null);
 	// }
