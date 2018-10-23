@@ -46,7 +46,7 @@ import hunt.container.Map;
 class ErrorMessage : GenericMessage!(Throwable) {
 
 	// 
-	private immutable MessageBase originalMessage;
+	private MessageBase originalMessage;
 
 
 	/**
@@ -138,7 +138,7 @@ class ErrorMessage : GenericMessage!(Throwable) {
 		if (this.originalMessage is null) {
 			return super.toString();
 		}
-		return super.toString() ~ " for original " ~ this.originalMessage;
+		return super.toString() ~ " for original " ~ (cast(Object)this.originalMessage).toString();
 	}
 
 }

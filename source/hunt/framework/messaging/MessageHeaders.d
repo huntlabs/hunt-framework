@@ -138,13 +138,17 @@ class MessageHeaders : AbstractMap!(string, Object) {
 		this(headers, null, null);
 	}
 
+	this(Map!(string, Object) headers, UUID* id, long timestamp) {
+		this(headers, id, Long.valueOf(timestamp));
+	}
+
 	/**
 	 * Constructor providing control over the ID and TIMESTAMP header values.
 	 * @param headers a map with headers to add
 	 * @param id the {@link #ID} header value
 	 * @param timestamp the {@link #TIMESTAMP} header value
 	 */
-	protected this(Map!(string, Object) headers, UUID* id, Long timestamp) {
+	this(Map!(string, Object) headers, UUID* id, Long timestamp) {
 		this.headers = (headers !is null ? 
 			new HashMap!(string, Object)(headers) 
 			: new HashMap!(string, Object)());

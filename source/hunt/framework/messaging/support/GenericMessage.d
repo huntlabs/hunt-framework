@@ -73,6 +73,9 @@ class GenericMessage(T) : Message!(T) {
 		this.headers = headers;
 	}
 
+	TypeInfo  payloadType() {
+		return typeid(T);
+	}
 
 	T getPayload() {
 		return this.payload;
@@ -81,7 +84,6 @@ class GenericMessage(T) : Message!(T) {
 	MessageHeaders getHeaders() {
 		return this.headers;
 	}
-
 
 	override bool opEquals(Object other) {
 		if (this is other) {
@@ -106,7 +108,7 @@ class GenericMessage(T) : Message!(T) {
 		static if(is(T == byte[])) {
 			sb.append("byte[").append((cast(byte[]) this.payload).length).append("]");
 		} else {
-			sb.append(this.payload);
+			sb.append(this.payload.toString());
 		}
 		sb.append(", headers=").append(this.headers.toString()).append("]");
 		return sb.toString();

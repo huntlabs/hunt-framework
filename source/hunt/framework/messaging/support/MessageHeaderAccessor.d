@@ -708,7 +708,7 @@ class MessageHeaderAccessor {
 		private bool mutable = true;
 
 		this(Map!(string, Object) headers) {
-			super(headers, &MessageHeaders.ID_VALUE_NONE, Long.valueOf(-1L));
+			super(headers, &MessageHeaders.ID_VALUE_NONE, (-1L));
 		}
 
 		override

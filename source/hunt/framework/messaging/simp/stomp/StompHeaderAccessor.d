@@ -32,6 +32,7 @@ import hunt.lang.Nullable;
 import hunt.string;
 
 import std.conv;
+import std.string;
 
 
 // import hunt.framework.util.ClassUtils;
@@ -150,7 +151,8 @@ class StompHeaderAccessor : SimpMessageHeaderAccessor {
 		}
 		value = getFirstNativeHeader(STOMP_CONTENT_TYPE_HEADER);
 		if (value !is null) {
-			super.setContentType(MimeTypeUtils.parseMimeType(value));
+			// super.setContentType(MimeTypeUtils.parseMimeType(value));
+			super.setContentType(new MimeType(value));
 		}
 		Nullable!StompCommand command = getCommand();
 		if (StompCommand.MESSAGE == command) {
@@ -219,12 +221,14 @@ class StompHeaderAccessor : SimpMessageHeaderAccessor {
 		if ((command is null) || StompCommand.SEND == command) {
 			setHeader(COMMAND_HEADER, StompCommand.MESSAGE);
 		}
-		else if (!StompCommand.MESSAGE == command) {
-			throw new IllegalStateException("Unexpected STOMP command " ~ command);
+		else if (StompCommand.MESSAGE != command) {
+			throw new IllegalStateException("Unexpected STOMP command " ~ command.toString());
 		}
 		trySetStompHeaderForSubscriptionId();
 		if (getMessageId() is null) {
-			string messageId = getSessionId() ~ "-" ~ messageIdCounter.getAndIncrement();
+			import core.atomic;
+			long c = atomicOp!"+="(messageIdCounter, 1);
+			string messageId = getSessionId() ~ "-" ~ (c-1).to!string();
 			setNativeHeader(STOMP_MESSAGE_ID_HEADER, messageId);
 		}
 	}
@@ -247,23 +251,23 @@ class StompHeaderAccessor : SimpMessageHeaderAccessor {
 		if (rawValues is null) {
 			return DEFAULT_HEARTBEAT.dup;
 		}
-		return [cast(long)rawValues[0], cast(long)rawValues[1]];
+		return [rawValues[0].to!long(), rawValues[1].to!long()];
 	}
 
 	void setAcceptVersion(string acceptVersion) {
 		setNativeHeader(STOMP_ACCEPT_VERSION_HEADER, acceptVersion);
 	}
 
-	Set!(string) getAcceptVersion() {
+	string[] getAcceptVersion() {
 		string rawValue = getFirstNativeHeader(STOMP_ACCEPT_VERSION_HEADER);
-		return (rawValue !is null ? StringUtils.commaDelimitedListToSet(rawValue) : Collections.emptySet());
+		return split(rawValue, ",");
+		// return (rawValue !is null ? StringUtils.commaDelimitedListToSet(rawValue) : Collections.emptySet!string());
 	}
 
 	void setHost(string host) {
 		setNativeHeader(STOMP_HOST_HEADER, host);
 	}
 
-	
 	string getHost() {
 		return getFirstNativeHeader(STOMP_HOST_HEADER);
 	}
@@ -305,15 +309,15 @@ class StompHeaderAccessor : SimpMessageHeaderAccessor {
 	
 	Integer getContentLength() {
 		string header = getFirstNativeHeader(STOMP_CONTENT_LENGTH_HEADER);
-		return (header !is null ? Integer.valueOf(header) : null);
+		return (header is null ? null : Integer.valueOf(header));
 	}
 
 	void setContentLength(int contentLength) {
-		setNativeHeader(STOMP_CONTENT_LENGTH_HEADER, string.valueOf(contentLength));
+		setNativeHeader(STOMP_CONTENT_LENGTH_HEADER, contentLength.to!string());
 	}
 
 	void setHeartbeat(long cx, long cy) {
-		setNativeHeader(STOMP_HEARTBEAT_HEADER, cx ~ "," ~ cy);
+		setNativeHeader(STOMP_HEARTBEAT_HEADER, cx.to!string() ~ "," ~ cy.to!string());
 	}
 
 	void setAck(string ack) {
@@ -350,7 +354,7 @@ class StompHeaderAccessor : SimpMessageHeaderAccessor {
 
 	private void protectPasscode() {
 		string value = getFirstNativeHeader(STOMP_PASSCODE_HEADER);
-		if (value !is null && !"PROTECTED" == value) {
+		if (value !is null && "PROTECTED" != value) {
 			setHeader(CREDENTIALS_HEADER, new StompPasscode(value));
 			setNativeHeader(STOMP_PASSCODE_HEADER, "PROTECTED");
 		}
@@ -431,7 +435,7 @@ class StompHeaderAccessor : SimpMessageHeaderAccessor {
 			return "CONNECT" ~ appendSession();
 		}
 		else if (StompCommand.CONNECTED == command) {
-			return "CONNECTED heart-beat=" ~ Arrays.toString(getHeartbeat()) ~ appendSession();
+			return "CONNECTED heart-beat=" ~ to!string(getHeartbeat()) ~ appendSession();
 		}
 		else if (StompCommand.DISCONNECT == command) {
 			string receipt = getReceipt();
@@ -484,11 +488,11 @@ class StompHeaderAccessor : SimpMessageHeaderAccessor {
 		if (bytes.length == 0 || mimeType is null || !isReadableContentType()) {
 			return contentType;
 		}
-		Charset charset = mimeType.getCharset();
-		charset = (charset !is null ? charset : StandardCharsets.UTF_8);
+		// Charset charset = mimeType.getCharset();
+		// charset = (charset !is null ? charset : StandardCharsets.UTF_8);
 		return (bytes.length < 80) ?
-				contentType ~ " payload=" ~ new string(bytes, charset) :
-				contentType ~ " payload=" ~ new string(Arrays.copyOf(bytes, 80), charset) ~ "...(truncated)";
+				contentType ~ " payload=" ~ cast(string)(bytes) :
+				contentType ~ " payload=" ~ cast(string)(bytes[0..80]) ~ "...(truncated)";
 	}
 
 
@@ -541,9 +545,10 @@ class StompHeaderAccessor : SimpMessageHeaderAccessor {
 	}
 
 	
-	static int getContentLength(Map!(string, List!(string)) nativeHeaders) {
+	static Integer getContentLength(Map!(string, List!(string)) nativeHeaders) {
 		List!(string) values = nativeHeaders.get(STOMP_CONTENT_LENGTH_HEADER);
-		return (!CollectionUtils.isEmpty(values) ? to!int(values.get(0)) : null);
+		bool isEmpty = values is null || values.isEmpty();
+		return (isEmpty ? null : Integer.valueOf(values.get(0)));
 	}
 
 }

@@ -142,7 +142,8 @@ public class StompEncoder  {
 				cast(Map!(string, List!(string))) headers.get(NativeMessageHeaderAccessor.NATIVE_HEADERS);
 
 		version(HUNT_DEBUG) {
-			trace("Encoding STOMP " ~ command ~ ", headers=" ~ nativeHeaders);
+			trace("Encoding STOMP " ~ command.toString() ~ 
+				", headers=" ~ nativeHeaders.toString());
 		}
 
 		if (nativeHeaders is null) {
@@ -157,8 +158,8 @@ public class StompEncoder  {
 			}
 
 			if (StompCommand.CONNECT == command &&
-					StompHeaderAccessor!(string).STOMP_PASSCODE_HEADER == key) {
-				values = Collections.singletonList(StompHeaderAccessor!(string).getPasscode(headers));
+					StompHeaderAccessor.STOMP_PASSCODE_HEADER == key) {
+				values = Collections.singletonList(StompHeaderAccessor.getPasscode(headers));
 			}
 
 			byte[] encodedKey = encodeHeaderKey(key, shouldEscape);

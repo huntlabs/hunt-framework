@@ -164,7 +164,7 @@ class StompDecoder {
 				headerAccessor.setLeaveMutable(true);
 				decodedMessage = MessageHelper.createMessage(payload, headerAccessor.getMessageHeaders());
 				version(HUNT_DEBUG) {
-					trace("Decoded " ~ headerAccessor.getDetailedLogMessage(payload));
+					trace("Decoded " ~ headerAccessor.getDetailedLogMessage(new Nullable!(byte[])(payload)));
 				}
 			}
 			else {
@@ -308,7 +308,7 @@ class StompDecoder {
 		}
 		catch (NumberFormatException ex) {
 			version(HUNT_DEBUG) {
-				trace("Ignoring invalid content-length: '" ~ headerAccessor);
+				trace("Ignoring invalid content-length: '" ~ headerAccessor.toString());
 			}
 			contentLength = null;
 		}
