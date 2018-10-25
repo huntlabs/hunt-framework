@@ -84,7 +84,7 @@ module hunt.framework.messaging.support.AbstractMonoToListenableFutureAdapter;
 // 	}
 
 // 	override
-// 	public  cancel( mayInterruptIfRunning) {
+// 	bool cancel( mayInterruptIfRunning) {
 // 		if (isCancelled()) {
 // 			return false;
 // 		}
@@ -93,12 +93,12 @@ module hunt.framework.messaging.support.AbstractMonoToListenableFutureAdapter;
 // 	}
 
 // 	override
-// 	public  isCancelled() {
+// 	bool isCancelled() {
 // 		return this.monoProcessor.isCancelled();
 // 	}
 
 // 	override
-// 	public  isDone() {
+// 	bool isDone() {
 // 		return this.monoProcessor.isTerminated();
 // 	}
 

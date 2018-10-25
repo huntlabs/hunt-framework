@@ -52,7 +52,7 @@ class IndexController : Controller
 
 View [hunt-skeleton](https://github.com/huntlabs/hunt-skeleton) example project source code.
 
-## Component based
+## Components
 1. [Routing](https://github.com/huntlabs/hunt-framework/wiki/Routing)
 2. [Caching](https://github.com/huntlabs/hunt-framework/wiki/Cache)
 3. [Middleware](https://github.com/huntlabs/hunt-framework/wiki/Middleware)
@@ -62,6 +62,7 @@ View [hunt-skeleton](https://github.com/huntlabs/hunt-skeleton) example project 
 7. [Template Engine](https://github.com/huntlabs/hunt-framework/wiki/View)
 8. Task Worker
 9. Security
+10. WebSocket (with STOMP)
 
 ## Community
 QQ Group: 184183224 

@@ -137,7 +137,7 @@ import hunt.container.Map;
 // 	 * @param message the message to send (never {@code null})
 // 	 */
 // 	override
-// 	void send(Message<?> message) {
+// 	void send(MessageBase message) {
 // 		assert(message, "Message is required");
 // 		string destination = SimpMessageHeaderAccessor.getDestination(message.getHeaders());
 // 		if (destination !is null) {
@@ -148,7 +148,7 @@ import hunt.container.Map;
 // 	}
 
 // 	override
-// 	protected void doSend(string destination, Message<?> message) {
+// 	protected void doSend(string destination, MessageBase message) {
 // 		assert(destination, "Destination must not be null");
 
 // 		SimpMessageHeaderAccessor simpAccessor =
@@ -179,7 +179,7 @@ import hunt.container.Map;
 // 		sendInternal(message);
 // 	}
 
-// 	private void sendInternal(Message<?> message) {
+// 	private void sendInternal(MessageBase message) {
 // 		string destination = SimpMessageHeaderAccessor.getDestination(message.getHeaders());
 // 		assert(destination, "Destination header required");
 

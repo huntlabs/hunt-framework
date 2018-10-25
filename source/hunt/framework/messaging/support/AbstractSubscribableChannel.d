@@ -30,7 +30,7 @@ import hunt.container.Set;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-abstract class AbstractSubscribableChannel(T) : AbstractMessageChannel!T, SubscribableChannel!T {
+abstract class AbstractSubscribableChannel : AbstractMessageChannel, SubscribableChannel {
 
 	private final Set!(MessageHandler) handlers;
 

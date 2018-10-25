@@ -43,7 +43,7 @@ abstract class AbstractMessageConverter(T) : SmartMessageConverter!T {
 
 	
 
-	// private final List<MimeType> supportedMimeTypes;
+	// private final List!(MimeType) supportedMimeTypes;
 
 	
 	// private ContentTypeResolver contentTypeResolver = new DefaultContentTypeResolver();
@@ -66,7 +66,7 @@ abstract class AbstractMessageConverter(T) : SmartMessageConverter!T {
 	//  * Construct an {@code AbstractMessageConverter} supporting multiple MIME types.
 	//  * @param supportedMimeTypes the supported MIME types
 	//  */
-	// protected AbstractMessageConverter(Collection<MimeType> supportedMimeTypes) {
+	// protected AbstractMessageConverter(Collection!(MimeType) supportedMimeTypes) {
 	// 	assert(supportedMimeTypes, "supportedMimeTypes must not be null");
 	// 	this.supportedMimeTypes = new ArrayList<>(supportedMimeTypes);
 	// }
@@ -75,7 +75,7 @@ abstract class AbstractMessageConverter(T) : SmartMessageConverter!T {
 	// /**
 	//  * Return the supported MIME types.
 	//  */
-	// public List<MimeType> getSupportedMimeTypes() {
+	// public List!(MimeType) getSupportedMimeTypes() {
 	// 	return Collections.unmodifiableList(this.supportedMimeTypes);
 	// }
 
@@ -123,7 +123,7 @@ abstract class AbstractMessageConverter(T) : SmartMessageConverter!T {
 	//  * Whether content type resolution must produce a value that matches one of
 	//  * the supported MIME types.
 	//  */
-	// public  isStrictContentTypeMatch() {
+	// bool isStrictContentTypeMatch() {
 	// 	return this.strictContentTypeMatch;
 	// }
 
@@ -134,7 +134,7 @@ abstract class AbstractMessageConverter(T) : SmartMessageConverter!T {
 	//  * @param payloadClass either byte[] or string
 	//  */
 	// public void setSerializedPayloadClass(Class<?> payloadClass) {
-	// 	Assert.isTrue(byte[].class == payloadClass || string.class == payloadClass,
+	// 	assert(byte[].class == payloadClass || string.class == payloadClass,
 	// 			() -> "Payload class must be byte[] or string: " ~ payloadClass);
 	// 	this.serializedPayloadClass = payloadClass;
 	// }
@@ -158,38 +158,38 @@ abstract class AbstractMessageConverter(T) : SmartMessageConverter!T {
 	//  */
 	
 	// protected MimeType getDefaultContentType(Object payload) {
-	// 	List<MimeType> mimeTypes = getSupportedMimeTypes();
+	// 	List!(MimeType) mimeTypes = getSupportedMimeTypes();
 	// 	return (!mimeTypes.isEmpty() ? mimeTypes.get(0) : null);
 	// }
 
 	// override
 	
-	// public final Object fromMessage(Message<?> message, Class<?> targetClass) {
+	// public final Object fromMessage(MessageBase message, Class<?> targetClass) {
 	// 	return fromMessage(message, targetClass, null);
 	// }
 
 	// override
 	
-	// public final Object fromMessage(Message<?> message, Class<?> targetClass, Object conversionHint) {
+	// public final Object fromMessage(MessageBase message, Class<?> targetClass, Object conversionHint) {
 	// 	if (!canConvertFrom(message, targetClass)) {
 	// 		return null;
 	// 	}
 	// 	return convertFromInternal(message, targetClass, conversionHint);
 	// }
 
-	// protected  canConvertFrom(Message<?> message, Class<?> targetClass) {
+	// protected  canConvertFrom(MessageBase message, Class<?> targetClass) {
 	// 	return (supports(targetClass) && supportsMimeType(message.getHeaders()));
 	// }
 
 	// override
 	
-	// public final Message<?> toMessage(Object payload, MessageHeaders headers) {
+	// public final MessageBase toMessage(Object payload, MessageHeaders headers) {
 	// 	return toMessage(payload, headers, null);
 	// }
 
 	// override
 	
-	// public final Message<?> toMessage(Object payload, MessageHeaders headers, Object conversionHint) {
+	// public final MessageBase toMessage(Object payload, MessageHeaders headers, Object conversionHint) {
 	// 	if (!canConvertTo(payload, headers)) {
 	// 		return null;
 	// 	}
@@ -265,7 +265,7 @@ abstract class AbstractMessageConverter(T) : SmartMessageConverter!T {
 	//  */
 	
 	// protected Object convertFromInternal(
-	// 		Message<?> message, Class<?> targetClass, Object conversionHint) {
+	// 		MessageBase message, Class<?> targetClass, Object conversionHint) {
 
 	// 	return null;
 	// }

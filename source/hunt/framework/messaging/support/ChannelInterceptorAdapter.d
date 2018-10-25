@@ -35,16 +35,16 @@ module hunt.framework.messaging.support.ChannelInterceptorAdapter;
 // abstract class ChannelInterceptorAdapter : ChannelInterceptor {
 
 // 	override
-// 	Message<?> preSend(Message<?> message, MessageChannel channel) {
+// 	MessageBase preSend(MessageBase message, MessageChannel channel) {
 // 		return message;
 // 	}
 
 // 	override
-// 	void postSend(Message<?> message, MessageChannel channel,  sent) {
+// 	void postSend(MessageBase message, MessageChannel channel,  sent) {
 // 	}
 
 // 	override
-// 	void afterSendCompletion(Message<?> message, MessageChannel channel,  sent, Exception ex) {
+// 	void afterSendCompletion(MessageBase message, MessageChannel channel,  sent, Exception ex) {
 // 	}
 
 // 	 preReceive(MessageChannel channel) {
@@ -52,12 +52,12 @@ module hunt.framework.messaging.support.ChannelInterceptorAdapter;
 // 	}
 
 // 	override
-// 	Message<?> postReceive(Message<?> message, MessageChannel channel) {
+// 	MessageBase postReceive(MessageBase message, MessageChannel channel) {
 // 		return message;
 // 	}
 
 // 	override
-// 	void afterReceiveCompletion(Message<?> message, MessageChannel channel, Exception ex) {
+// 	void afterReceiveCompletion(MessageBase message, MessageChannel channel, Exception ex) {
 // 	}
 
 // }

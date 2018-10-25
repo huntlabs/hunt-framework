@@ -93,7 +93,7 @@ class ExecutorSubscribableChannel(T) : AbstractSubscribableChannel!T {
 
 
 	// override
-	//  sendInternal(Message<?> message, long timeout) {
+	//  sendInternal(MessageBase message, long timeout) {
 	// 	for (MessageHandler handler : getSubscribers()) {
 	// 		SendTask sendTask = new SendTask(message, handler);
 	// 		if (this.executor is null) {
@@ -112,19 +112,19 @@ class ExecutorSubscribableChannel(T) : AbstractSubscribableChannel!T {
 	//  */
 	// private class SendTask implements MessageHandlingRunnable {
 
-	// 	private final Message<?> inputMessage;
+	// 	private final MessageBase inputMessage;
 
 	// 	private final MessageHandler messageHandler;
 
 	// 	private int interceptorIndex = -1;
 
-	// 	SendTask(Message<?> message, MessageHandler messageHandler) {
+	// 	SendTask(MessageBase message, MessageHandler messageHandler) {
 	// 		this.inputMessage = message;
 	// 		this.messageHandler = messageHandler;
 	// 	}
 
 	// 	override
-	// 	Message<?> getMessage() {
+	// 	MessageBase getMessage() {
 	// 		return this.inputMessage;
 	// 	}
 
@@ -135,7 +135,7 @@ class ExecutorSubscribableChannel(T) : AbstractSubscribableChannel!T {
 
 	// 	override
 	// 	void run() {
-	// 		Message<?> message = this.inputMessage;
+	// 		MessageBase message = this.inputMessage;
 	// 		try {
 	// 			message = applyBeforeHandle(message);
 	// 			if (message is null) {
@@ -161,12 +161,12 @@ class ExecutorSubscribableChannel(T) : AbstractSubscribableChannel!T {
 	// 	}
 
 		
-	// 	private Message<?> applyBeforeHandle(Message<?> message) {
-	// 		Message<?> messageToUse = message;
+	// 	private MessageBase applyBeforeHandle(MessageBase message) {
+	// 		MessageBase messageToUse = message;
 	// 		for (ExecutorChannelInterceptor interceptor : executorInterceptors) {
 	// 			messageToUse = interceptor.beforeHandle(messageToUse, ExecutorSubscribableChannel.this, this.messageHandler);
 	// 			if (messageToUse is null) {
-	// 				string name = interceptor.getClass().getSimpleName();
+	// 				string name = interceptor.TypeUtils.getSimpleName(typeid(this));
 	// 				version(HUNT_DEBUG) {
 	// 					trace(name ~ " returned null from beforeHandle, i.e. precluding the send.");
 	// 				}
@@ -178,7 +178,7 @@ class ExecutorSubscribableChannel(T) : AbstractSubscribableChannel!T {
 	// 		return messageToUse;
 	// 	}
 
-	// 	private void triggerAfterMessageHandled(Message<?> message, Exception ex) {
+	// 	private void triggerAfterMessageHandled(MessageBase message, Exception ex) {
 	// 		for (int i = this.interceptorIndex; i >= 0; i--) {
 	// 			ExecutorChannelInterceptor interceptor = executorInterceptors.get(i);
 	// 			try {

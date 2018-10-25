@@ -46,7 +46,7 @@ interface ExecutorChannelInterceptor : ChannelInterceptor {
 	//  * @return the input message, or a new instance, or {@code null}
 	//  */
 	
-	// default Message<?> beforeHandle(Message<?> message, MessageChannel channel, MessageHandler handler) {
+	// default MessageBase beforeHandle(MessageBase message, MessageChannel channel, MessageHandler handler) {
 	// 	return message;
 	// }
 
@@ -61,7 +61,7 @@ interface ExecutorChannelInterceptor : ChannelInterceptor {
 	//  * @param handler the target handler that handled the message
 	//  * @param ex any exception that may been raised by the handler
 	//  */
-	// default void afterMessageHandled(Message<?> message, MessageChannel channel, MessageHandler handler,
+	// default void afterMessageHandled(MessageBase message, MessageChannel channel, MessageHandler handler,
 	// 		Exception ex) {
 	// }
 

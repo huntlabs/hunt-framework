@@ -58,7 +58,7 @@ import hunt.framework.messaging.Message;
 // 	 * a {@link SimpAttributes} instance and bind it to the current thread.
 // 	 * @param message the message to extract session attributes from
 // 	 */
-// 	public static void setAttributesFromMessage(Message<?> message) {
+// 	public static void setAttributesFromMessage(MessageBase message) {
 // 		setAttributes(SimpAttributes.fromMessage(message));
 // 	}
 

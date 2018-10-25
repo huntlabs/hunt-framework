@@ -16,16 +16,17 @@
 
 module hunt.framework.messaging.support.AbstractMessageChannel;
 
+import hunt.framework.messaging.support.InterceptableChannel;
 
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageChannel;
 import hunt.framework.messaging.MessagingException;
 
+import hunt.lang.object;
 import hunt.container;
 import hunt.logging;
-
-// 
-// import hunt.util.ObjectUtils;
+import hunt.util.ObjectUtils;
+import hunt.util.TypeUtils;
 
 /**
  * Abstract base class for {@link MessageChannel} implementations.
@@ -33,202 +34,201 @@ import hunt.logging;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-abstract class AbstractMessageChannel(T) : MessageChannel!T { // , InterceptableChannel , BeanNameAware
+abstract class AbstractMessageChannel : MessageChannel, InterceptableChannel { // , BeanNameAware
 
-	// private final List!(ChannelInterceptor) interceptors = new ArrayList<>(5);
+	private List!(ChannelInterceptor) interceptors;
 
-	// private string beanName;
-
-
-	// this() {
-	// 	// this.beanName = getClass().getSimpleName() ~ "@" ~ ObjectUtils.getIdentityHexString(this);
-	// }
-
-	// private void initialize() {
-
-	// }
+	private string beanName;
 
 
+	this() {
+		this.beanName = TypeUtils.getSimpleName(typeid(this)) ~ "@" ~ ObjectUtils.getIdentityHexString(this);
+	}
 
-	// /**
-	//  * A message channel uses the bean name primarily for logging purposes.
-	//  */
-	// override
-	// void setBeanName(string name) {
-	// 	this.beanName = name;
-	// }
-
-	// /**
-	//  * Return the bean name for this message channel.
-	//  */
-	// string getBeanName() {
-	// 	return this.beanName;
-	// }
+	private void initialize() {
+		interceptors = new ArrayList!ChannelInterceptor(5);
+	}
 
 
-	// override
-	// void setInterceptors(List!(ChannelInterceptor) interceptors) {
-	// 	this.interceptors.clear();
-	// 	this.interceptors.addAll(interceptors);
-	// }
 
-	// override
-	// void addInterceptor(ChannelInterceptor interceptor) {
-	// 	this.interceptors.add(interceptor);
-	// }
+	/**
+	 * A message channel uses the bean name primarily for logging purposes.
+	 */
+	override
+	void setBeanName(string name) {
+		this.beanName = name;
+	}
 
-	// override
-	// void addInterceptor(int index, ChannelInterceptor interceptor) {
-	// 	this.interceptors.add(index, interceptor);
-	// }
-
-	// override
-	// List!(ChannelInterceptor) getInterceptors() {
-	// 	return Collections.unmodifiableList(this.interceptors);
-	// }
-
-	// override
-	//  removeInterceptor(ChannelInterceptor interceptor) {
-	// 	return this.interceptors.remove(interceptor);
-	// }
-
-	// override
-	// ChannelInterceptor removeInterceptor(int index) {
-	// 	return this.interceptors.remove(index);
-	// }
+	/**
+	 * Return the bean name for this message channel.
+	 */
+	string getBeanName() {
+		return this.beanName;
+	}
 
 
-	// override
-	// final  send(MessageBase message) {
-	// 	return send(message, INDEFINITE_TIMEOUT);
-	// }
+	override
+	void setInterceptors(List!(ChannelInterceptor) interceptors) {
+		this.interceptors.clear();
+		this.interceptors.addAll(interceptors);
+	}
 
-	// override
-	// final  send(MessageBase message, long timeout) {
-	// 	assert(message, "Message must not be null");
-	// 	Message!(T) messageToUse = message;
-	// 	ChannelInterceptorChain chain = new ChannelInterceptorChain();
-	// 	 sent = false;
-	// 	try {
-	// 		messageToUse = chain.applyPreSend(messageToUse, this);
-	// 		if (messageToUse is null) {
-	// 			return false;
-	// 		}
-	// 		sent = sendInternal(messageToUse, timeout);
-	// 		chain.applyPostSend(messageToUse, this, sent);
-	// 		chain.triggerAfterSendCompletion(messageToUse, this, sent, null);
-	// 		return sent;
-	// 	}
-	// 	catch (Exception ex) {
-	// 		chain.triggerAfterSendCompletion(messageToUse, this, sent, ex);
-	// 		if (ex instanceof MessagingException) {
-	// 			throw (MessagingException) ex;
-	// 		}
-	// 		throw new MessageDeliveryException(messageToUse,"Failed to send message to " ~ this, ex);
-	// 	}
-	// 	catch (Throwable err) {
-	// 		MessageDeliveryException ex2 =
-	// 				new MessageDeliveryException(messageToUse, "Failed to send message to " ~ this, err);
-	// 		chain.triggerAfterSendCompletion(messageToUse, this, sent, ex2);
-	// 		throw ex2;
-	// 	}
-	// }
+	override
+	void addInterceptor(ChannelInterceptor interceptor) {
+		this.interceptors.add(interceptor);
+	}
 
-	// protected abstract  sendInternal(MessageBase message, long timeout);
+	override
+	void addInterceptor(int index, ChannelInterceptor interceptor) {
+		this.interceptors.add(index, interceptor);
+	}
+
+	override
+	List!(ChannelInterceptor) getInterceptors() {
+		return Collections.unmodifiableList(this.interceptors);
+	}
+
+	override
+	bool removeInterceptor(ChannelInterceptor interceptor) {
+		return this.interceptors.remove(interceptor);
+	}
+
+	override
+	ChannelInterceptor removeInterceptor(int index) {
+		return this.interceptors.remove(index);
+	}
 
 
-	// override
-	// string toString() {
-	// 	return getClass().getSimpleName() ~ "[" ~ this.beanName ~ "]";
-	// }
+	override
+	bool send(MessageBase message) {
+		return send(message, INDEFINITE_TIMEOUT);
+	}
+
+	override
+	bool send(MessageBase message, long timeout) {
+		assert(message !is null, "Message must not be null");
+		Message!(T) messageToUse = message;
+		ChannelInterceptorChain chain = new ChannelInterceptorChain();
+		 sent = false;
+		try {
+			messageToUse = chain.applyPreSend(messageToUse, this);
+			if (messageToUse is null) {
+				return false;
+			}
+			sent = sendInternal(messageToUse, timeout);
+			chain.applyPostSend(messageToUse, this, sent);
+			chain.triggerAfterSendCompletion(messageToUse, this, sent, null);
+			return sent;
+		}
+		catch (Exception ex) {
+			chain.triggerAfterSendCompletion(messageToUse, this, sent, ex);
+			MessagingException mex = cast(MessagingException) ex;
+			if (mex !is null) 
+				throw mex;
+			throw new MessageDeliveryException(messageToUse,"Failed to send message to " ~ this.toString(), ex);
+		}
+		catch (Throwable err) {
+			MessageDeliveryException ex2 =
+					new MessageDeliveryException(messageToUse, "Failed to send message to " ~ this.toString(), err);
+			chain.triggerAfterSendCompletion(messageToUse, this, sent, ex2);
+			throw ex2;
+		}
+	}
+
+	protected abstract bool sendInternal(MessageBase message, long timeout);
 
 
-	// /**
-	//  * Assists with the invocation of the configured channel interceptors.
-	//  */
-	// protected class ChannelInterceptorChain {
+	override
+	string toString() {
+		return TypeUtils.getSimpleName(typeid(this)) ~ "[" ~ this.beanName ~ "]";
+	}
 
-	// 	private int sendInterceptorIndex = -1;
 
-	// 	private int receiveInterceptorIndex = -1;
+	/**
+	 * Assists with the invocation of the configured channel interceptors.
+	 */
+	protected class ChannelInterceptorChain {
 
-		
-	// 	Message!(T) applyPreSend(MessageBase message, MessageChannel channel) {
-	// 		Message!(T) messageToUse = message;
-	// 		for (ChannelInterceptor interceptor : interceptors) {
-	// 			Message!(T) resolvedMessage = interceptor.preSend(messageToUse, channel);
-	// 			if (resolvedMessage is null) {
-	// 				string name = interceptor.getClass().getSimpleName();
-	// 				version(HUNT_DEBUG) {
-	// 					trace(name ~ " returned null from preSend, i.e. precluding the send.");
-	// 				}
-	// 				triggerAfterSendCompletion(messageToUse, channel, false, null);
-	// 				return null;
-	// 			}
-	// 			messageToUse = resolvedMessage;
-	// 			this.sendInterceptorIndex++;
-	// 		}
-	// 		return messageToUse;
-	// 	}
+		private int sendInterceptorIndex = -1;
 
-	// 	void applyPostSend(MessageBase message, MessageChannel channel,  sent) {
-	// 		for (ChannelInterceptor interceptor : interceptors) {
-	// 			interceptor.postSend(message, channel, sent);
-	// 		}
-	// 	}
-
-	// 	void triggerAfterSendCompletion(MessageBase message, MessageChannel channel,
-	// 			 sent, Exception ex) {
-
-	// 		for (int i = this.sendInterceptorIndex; i >= 0; i--) {
-	// 			ChannelInterceptor interceptor = interceptors.get(i);
-	// 			try {
-	// 				interceptor.afterSendCompletion(message, channel, sent, ex);
-	// 			}
-	// 			catch (Throwable ex2) {
-	// 				errorf("Exception from afterSendCompletion in " ~ interceptor, ex2);
-	// 			}
-	// 		}
-	// 	}
-
-	// 	 applyPreReceive(MessageChannel channel) {
-	// 		for (ChannelInterceptor interceptor : interceptors) {
-	// 			if (!interceptor.preReceive(channel)) {
-	// 				triggerAfterReceiveCompletion(null, channel, null);
-	// 				return false;
-	// 			}
-	// 			this.receiveInterceptorIndex++;
-	// 		}
-	// 		return true;
-	// 	}
+		private int receiveInterceptorIndex = -1;
 
 		
-	// 	Message!(T) applyPostReceive(MessageBase message, MessageChannel channel) {
-	// 		Message!(T) messageToUse = message;
-	// 		for (ChannelInterceptor interceptor : interceptors) {
-	// 			messageToUse = interceptor.postReceive(messageToUse, channel);
-	// 			if (messageToUse is null) {
-	// 				return null;
-	// 			}
-	// 		}
-	// 		return messageToUse;
-	// 	}
+		Message!(T) applyPreSend(MessageBase message, MessageChannel channel) {
+			Message!(T) messageToUse = message;
+			foreach (ChannelInterceptor interceptor ; interceptors) {
+				Message!(T) resolvedMessage = interceptor.preSend(messageToUse, channel);
+				if (resolvedMessage is null) {
+					string name = TypeUtils.getSimpleName(typeid(interceptor));
+					version(HUNT_DEBUG) {
+						trace(name ~ " returned null from preSend, i.e. precluding the send.");
+					}
+					triggerAfterSendCompletion(messageToUse, channel, false, null);
+					return null;
+				}
+				messageToUse = resolvedMessage;
+				this.sendInterceptorIndex++;
+			}
+			return messageToUse;
+		}
 
-	// 	void triggerAfterReceiveCompletion(
-	// 			MessageBase message, MessageChannel channel, Exception ex) {
+		void applyPostSend(MessageBase message, MessageChannel channel, bool sent) {
+			foreach (ChannelInterceptor interceptor ; interceptors) {
+				interceptor.postSend(message, channel, sent);
+			}
+		}
 
-	// 		for (int i = this.receiveInterceptorIndex; i >= 0; i--) {
-	// 			ChannelInterceptor interceptor = interceptors.get(i);
-	// 			try {
-	// 				interceptor.afterReceiveCompletion(message, channel, ex);
-	// 			}
-	// 			catch (Throwable ex2) {
-	// 				if (logger.isErrorEnabled()) {
-	// 					errorf("Exception from afterReceiveCompletion in " ~ interceptor, ex2);
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// }
+		void triggerAfterSendCompletion(MessageBase message, MessageChannel channel,
+				bool sent, Exception ex) {
+			for (int i = this.sendInterceptorIndex; i >= 0; i--) {
+				ChannelInterceptor interceptor = interceptors.get(i);
+				try {
+					interceptor.afterSendCompletion(message, channel, sent, ex);
+				}
+				catch (Throwable ex2) {
+					errorf("Exception from afterSendCompletion in " ~ interceptor, ex2);
+				}
+			}
+		}
+
+		bool applyPreReceive(MessageChannel channel) {
+			foreach (ChannelInterceptor interceptor ; interceptors) {
+				if (!interceptor.preReceive(channel)) {
+					triggerAfterReceiveCompletion(null, channel, null);
+					return false;
+				}
+				this.receiveInterceptorIndex++;
+			}
+			return true;
+		}
+
+		
+		Message!(T) applyPostReceive(MessageBase message, MessageChannel channel) {
+			Message!(T) messageToUse = message;
+			foreach (ChannelInterceptor interceptor ; interceptors) {
+				messageToUse = interceptor.postReceive(messageToUse, channel);
+				if (messageToUse is null) {
+					return null;
+				}
+			}
+			return messageToUse;
+		}
+
+		void triggerAfterReceiveCompletion(MessageBase message, 
+			MessageChannel channel, Exception ex) {
+
+			for (int i = this.receiveInterceptorIndex; i >= 0; i--) {
+				ChannelInterceptor interceptor = interceptors.get(i);
+				try {
+					interceptor.afterReceiveCompletion(message, channel, ex);
+				}
+				catch (Throwable ex2) {
+					version(HUNT_DEBUG) {
+						errorf("Exception from afterReceiveCompletion in " ~ interceptor, ex2);
+					}
+				}
+			}
+		}
+	}
 
 }

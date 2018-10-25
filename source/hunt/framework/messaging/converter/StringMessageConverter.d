@@ -55,7 +55,7 @@ class StringMessageConverter(T) : AbstractMessageConverter!T {
 	// }
 
 	// override
-	// protected Object convertFromInternal(Message<?> message, Class<?> targetClass, Object conversionHint) {
+	// protected Object convertFromInternal(MessageBase message, Class<?> targetClass, Object conversionHint) {
 	// 	Charset charset = getContentTypeCharset(getMimeType(message.getHeaders()));
 	// 	Object payload = message.getPayload();
 	// 	return (payload instanceof string ? payload : new string((byte[]) payload, charset));

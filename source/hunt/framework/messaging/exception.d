@@ -2,18 +2,18 @@ module hunt.framework.messaging.exception;
 
 import hunt.lang.exception;
 
-class NestedRuntimeException: Exception
-{
+class NestedRuntimeException : Exception {
     mixin BasicExceptionCtors;
 }
 
-class StompConversionException: NestedRuntimeException
-{
+class StompConversionException : NestedRuntimeException {
     mixin BasicExceptionCtors;
 }
 
+class InvalidMimeTypeException : IllegalArgumentException {
+    mixin BasicExceptionCtors;
+}
 
-class InvalidMimeTypeException: IllegalArgumentException
-{
+class ConnectionLostException : RuntimeException {
     mixin BasicExceptionCtors;
 }

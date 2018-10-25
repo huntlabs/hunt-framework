@@ -67,7 +67,7 @@ import hunt.framework.messaging.Message;
 
 // 	override
 	
-// 	SimpMessageMappingInfo getMatchingCondition(Message<?> message) {
+// 	SimpMessageMappingInfo getMatchingCondition(MessageBase message) {
 // 		SimpMessageTypeMessageCondition typeCond = this.messageTypeMessageCondition.getMatchingCondition(message);
 // 		if (typeCond is null) {
 // 			return null;
@@ -80,7 +80,7 @@ import hunt.framework.messaging.Message;
 // 	}
 
 // 	override
-// 	int compareTo(SimpMessageMappingInfo other, Message<?> message) {
+// 	int compareTo(SimpMessageMappingInfo other, MessageBase message) {
 // 		int result = this.messageTypeMessageCondition.compareTo(other.messageTypeMessageCondition, message);
 // 		if (result != 0) {
 // 			return result;

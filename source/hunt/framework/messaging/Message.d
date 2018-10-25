@@ -18,6 +18,11 @@ module hunt.framework.messaging.Message;
 
 import hunt.framework.messaging.MessageHeaders;
 
+
+/**
+* See_also:
+*	https://docs.spring.io/spring/docs/current/spring-framework-reference/web.html#websocket-stomp-message-flow
+*/
 interface MessageBase {
 
 	TypeInfo  payloadType();

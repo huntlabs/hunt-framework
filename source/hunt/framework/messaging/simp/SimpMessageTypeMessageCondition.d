@@ -75,13 +75,13 @@ import hunt.container.Map;
 
 // 	override
 	
-// 	SimpMessageTypeMessageCondition getMatchingCondition(Message<?> message) {
+// 	SimpMessageTypeMessageCondition getMatchingCondition(MessageBase message) {
 // 		SimpMessageType actual = SimpMessageHeaderAccessor.getMessageType(message.getHeaders());
 // 		return (actual !is null && actual.equals(this.messageType) ? this : null);
 // 	}
 
 // 	override
-// 	int compareTo(SimpMessageTypeMessageCondition other, Message<?> message) {
+// 	int compareTo(SimpMessageTypeMessageCondition other, MessageBase message) {
 // 		Object actual = SimpMessageHeaderAccessor.getMessageType(message.getHeaders());
 // 		if (actual !is null) {
 // 			if (actual.equals(this.messageType) && actual.equals(other.getMessageType())) {
