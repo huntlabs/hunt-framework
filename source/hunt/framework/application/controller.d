@@ -354,14 +354,14 @@ Response callHandler(T, string method)(Request req)
     return controller.callActionMethod(method, req);
 }
 
-HandleFunction getRouteFromList(string str)
+RoutingHandler getRouteFromList(string str)
 {
     if (!_init)
         _init = true;
     return __routerList.get(str, null);
 }
 
-void addRouteList(string str, HandleFunction method)
+void addRouteList(string str, RoutingHandler method)
 {
     version (HUNT_DEBUG) logDebug("add router: ", str);
     if (!_init)
@@ -373,4 +373,4 @@ void addRouteList(string str, HandleFunction method)
 
 private:
 __gshared bool _init = false;
-__gshared HandleFunction[string] __routerList;
+__gshared RoutingHandler[string] __routerList;

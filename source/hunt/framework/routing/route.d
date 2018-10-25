@@ -173,12 +173,12 @@ class Route
             return this._methods;
         }
 
-        @property HandleFunction handle()
+        @property RoutingHandler handle()
         {
             return this._handle;
         }
 
-        @property Route handle(HandleFunction handle)
+        @property Route handle(RoutingHandler handle)
         {
             this._handle = handle;
             return this;
@@ -228,7 +228,7 @@ class Route
         string _action;
 
         // handle function
-        HandleFunction _handle;
+        RoutingHandler _handle;
 
         // allowd http methods
         HTTP_METHODS[] _methods = [ HTTP_METHODS.GET, HTTP_METHODS.POST, HTTP_METHODS.PUT, HTTP_METHODS.DELETE ];

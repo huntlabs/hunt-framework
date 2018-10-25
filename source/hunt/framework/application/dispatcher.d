@@ -184,7 +184,7 @@ class Dispatcher
     }
 }
 
-void doRequestHandle(HandleFunction handle, Request req)
+void doRequestHandle(RoutingHandler handle, Request req)
 {
     Response response;
     

@@ -22,6 +22,7 @@ import hunt.net.NetUtil;
 import hunt.lang.exception;
 import hunt.lang.common;
 import hunt.http.codec.websocket.frame.Frame;
+import hunt.http.codec.websocket.stream.AbstractWebSocketBuilder;
 import hunt.http.codec.websocket.stream.WebSocketConnection;
 import hunt.http.codec.websocket.stream.WebSocketPolicy;
 
@@ -175,7 +176,7 @@ final class Application {
     }
 
     /**
-      Start the HTTPServer server , and block current thread.
+      Start the HttpServer , and block current thread.
      */
     void run() {
         start();
@@ -198,6 +199,10 @@ final class Application {
             writeln("Try to browse https://", addr.toString());
         else
             writeln("Try to browse http://", addr.toString());
+        
+        foreach(WebSocketBuilder b; webSocketBuilders) {
+            b.listenWebSocket();
+        }
         _server.start();
     }
 
@@ -216,6 +221,12 @@ final class Application {
     Application webSocketPolicy(WebSocketPolicy w) {
         this._webSocketPolicy = w;
         return this;
+    }
+
+    WebSocketBuilder webSocket(string path) {
+        WebSocketBuilder webSocketBuilder = new WebSocketBuilder(path);
+        webSocketBuilders.insertBack(webSocketBuilder);
+        return webSocketBuilder;
     }
 
     private void handleRequest(Request req) nothrow {
@@ -424,19 +435,78 @@ private:
         logLoadConf(logconf);
     }
 
+    /**
+    */
+    class WebSocketBuilder : AbstractWebSocketBuilder {
+        protected string path;
+        protected Action1!(WebSocketConnection) _connectHandler;
+
+        this(string path) {
+            this.path = path;
+        }
+
+        WebSocketBuilder onConnect(Action1!(WebSocketConnection) handler) {
+            this._connectHandler = handler;
+            return this;
+        }
+
+        override WebSocketBuilder onText(Action2!(string, WebSocketConnection) handler) {
+            super.onText(handler);
+            return this;
+        }
+
+        override WebSocketBuilder onData(Action2!(ByteBuffer, WebSocketConnection) handler) {
+            super.onData(handler);
+            return this;
+        }
+
+        override WebSocketBuilder onError(Action2!(Throwable, WebSocketConnection) handler) {
+            super.onError(handler);
+            return this;
+        }
+
+        alias onError = AbstractWebSocketBuilder.onError;
+
+        void start() {
+            this.outer.start();
+        }
+
+        private void listenWebSocket() {
+            this.outer.registerWebSocket(path, new class WebSocketHandler {
+
+                override void onConnect(WebSocketConnection webSocketConnection) {
+                    if(_connectHandler !is null) 
+                        _connectHandler(webSocketConnection);
+                }
+
+                override void onFrame(Frame frame, WebSocketConnection connection) {
+                    this.outer.onFrame(frame, connection);
+                }
+
+                override void onError(Exception t, WebSocketConnection connection) {
+                    this.outer.onError(t, connection);
+                }
+            });
+
+            // router().addRoute("*", path, handler( (ctx) { })); 
+        }
+    }
+
     class SimpleWebSocketHandler : WebSocketHandler {
-        override bool acceptUpgrade(MetaData.Request request,
-                MetaData.Response response, HttpOutputStream output, HttpConnection connection) {
-            logInfo("The connection %s will upgrade to WebSocket connection",
-                    connection.getSessionId());
-            WebSocketHandler handler = webSocketHandlerMap.get(request.getURI().getPath(), null);
+        override bool acceptUpgrade(HttpRequest request, HttpResponse response, 
+            HttpOutputStream output, HttpConnection connection) {
+            version(HUNT_DEBUG) {
+                logInfo("The connection %s will upgrade to WebSocket connection",
+                        connection.getSessionId());
+            }
+            string path = request.getURI().getPath();
+            WebSocketHandler handler = webSocketHandlerMap.get(path, null);
             if (handler is null) {
                 response.setStatus(HttpStatus.BAD_REQUEST_400);
                 try {
-                    output.write(cast(byte[])("The " ~ request.getURI()
-                            .getPath() ~ " can not upgrade to WebSocket"));
-                }
-                catch (IOException e) {
+                    output.write(cast(byte[])("The " ~ path 
+                        ~ " can not upgrade to WebSocket"));
+                }catch (IOException e) {
                     logErrorf("Write http message exception", e);
                 }
                 return false;
@@ -502,7 +572,6 @@ private:
 
     Address addr;
     HttpServer _server;
-    // WebSocketFactory _wfactory;
     uint _maxBodySize;
     Dispatcher _dispatcher;
     EntityManagerFactory _entityManagerFactory;
@@ -511,6 +580,7 @@ private:
     AccessManager _accessManager;
     WebSocketPolicy _webSocketPolicy;
     WebSocketHandler[string] webSocketHandlerMap;
+    Array!WebSocketBuilder webSocketBuilders; 
 
     version (NO_TASKPOOL) {
         // NOTHING TODO

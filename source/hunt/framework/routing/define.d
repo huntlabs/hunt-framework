@@ -21,7 +21,7 @@ import std.exception;
 // default route group name
 enum DEFAULT_ROUTE_GROUP = "default";
 
-alias HandleFunction = Response function(Request);
+alias RoutingHandler = Response function(Request);
 
 // support methods
 enum HTTP_METHODS {

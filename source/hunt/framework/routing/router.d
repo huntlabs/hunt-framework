@@ -199,7 +199,7 @@ class Router
             this._supportMultipleGroup = enabled;
         }
 
-        Router addRoute(string method, string path, HandleFunction handle,
+        Router addRoute(string method, string path, RoutingHandler handle,
                 string group = DEFAULT_ROUTE_GROUP)
         {
             RouteGroup routeGroup = _defaultGroup;
@@ -209,9 +209,9 @@ class Router
             {
                 Route r = routeGroup.match(method, path);
                 if (r is null)
-                    this.addRoute(this.makeRoute!HandleFunction(method, path, handle, group));
+                    this.addRoute(this.makeRoute!RoutingHandler(method, path, handle, group));
                 else
-                    throw new Exception("Repeated route: " ~ path);
+                    throw new Exception("Route collision: " ~ path);
             }
 
             return this;
