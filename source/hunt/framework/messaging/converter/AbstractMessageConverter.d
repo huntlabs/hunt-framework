@@ -48,7 +48,7 @@ abstract class AbstractMessageConverter(T) : SmartMessageConverter!T {
 	
 	// private ContentTypeResolver contentTypeResolver = new DefaultContentTypeResolver();
 
-	// private  strictContentTypeMatch = false;
+	// private bool strictContentTypeMatch = false;
 
 	// private Class<?> serializedPayloadClass = byte[].class;
 
@@ -177,7 +177,7 @@ abstract class AbstractMessageConverter(T) : SmartMessageConverter!T {
 	// 	return convertFromInternal(message, targetClass, conversionHint);
 	// }
 
-	// protected  canConvertFrom(MessageBase message, Class<?> targetClass) {
+	// protected bool canConvertFrom(MessageBase message, Class<?> targetClass) {
 	// 	return (supports(targetClass) && supportsMimeType(message.getHeaders()));
 	// }
 
@@ -220,11 +220,11 @@ abstract class AbstractMessageConverter(T) : SmartMessageConverter!T {
 	// 	return builder.build();
 	// }
 
-	// protected  canConvertTo(Object payload, MessageHeaders headers) {
+	// protected bool canConvertTo(Object payload, MessageHeaders headers) {
 	// 	return (supports(payload.getClass()) && supportsMimeType(headers));
 	// }
 
-	// protected  supportsMimeType(MessageHeaders headers) {
+	// protected bool supportsMimeType(MessageHeaders headers) {
 	// 	if (getSupportedMimeTypes().isEmpty()) {
 	// 		return true;
 	// 	}

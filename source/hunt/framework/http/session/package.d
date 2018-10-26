@@ -476,7 +476,7 @@ class Session
     /**
      * Generate a new session identifier.
      *
-     * @param  bool  destroy
+     * @param  bool destroy
      * @return bool
      */
     // public bool regenerate(bool destroy = false)
@@ -487,7 +487,7 @@ class Session
 	/**
      * Generate a new session ID for the session.
      *
-     * @param  bool  destroy
+     * @param  bool destroy
      * @return bool
      */
 	bool migrate(bool destroy = false)

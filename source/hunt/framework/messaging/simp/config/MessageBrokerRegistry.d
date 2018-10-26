@@ -16,17 +16,14 @@
 
 module hunt.framework.messaging.simp.config;
 
-import java.util.Arrays;
-import hunt.container.Collection;
-
-import hunt.framework.context.event.SmartApplicationListener;
+// import hunt.framework.context.event.SmartApplicationListener;
 
 import hunt.framework.messaging.MessageChannel;
 import hunt.framework.messaging.SubscribableChannel;
 import hunt.framework.messaging.simp.broker.SimpleBrokerMessageHandler;
 import hunt.framework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 
-import hunt.framework.util.PathMatcher;
+import hunt.framework.utils.PathMatcher;
 
 /**
  * A registry for configuring message broker options.
@@ -35,41 +32,36 @@ import hunt.framework.util.PathMatcher;
  * @author Sebastien Deleuze
  * @since 4.0
  */
-public class MessageBrokerRegistry {
+class MessageBrokerRegistry {
 
-	private final SubscribableChannel clientInboundChannel;
+	private SubscribableChannel clientInboundChannel;
 
-	private final MessageChannel clientOutboundChannel;
-
+	private MessageChannel clientOutboundChannel;
 	
 	private SimpleBrokerRegistration simpleBrokerRegistration;
-
 	
 	private StompBrokerRelayRegistration brokerRelayRegistration;
 
-	private final ChannelRegistration brokerChannelRegistration = new ChannelRegistration();
-
+	private ChannelRegistration brokerChannelRegistration;
 	
 	private string[] applicationDestinationPrefixes;
-
 	
 	private string userDestinationPrefix;
-
 	
-	private Integer userRegistryOrder;
+	private int userRegistryOrder;
 
-	
 	private PathMatcher pathMatcher;
-
 	
-	private Integer cacheLimit;
+	private int cacheLimit;
 
-	private  preservePublishOrder;
+	private bool preservePublishOrder;
 
 
-	public MessageBrokerRegistry(SubscribableChannel clientInboundChannel, MessageChannel clientOutboundChannel) {
+	this(SubscribableChannel clientInboundChannel, MessageChannel clientOutboundChannel) {
 		assert(clientInboundChannel, "Inbound channel must not be null");
 		assert(clientOutboundChannel, "Outbound channel must not be null");
+
+		brokerChannelRegistration = new ChannelRegistration();
 		this.clientInboundChannel = clientInboundChannel;
 		this.clientOutboundChannel = clientOutboundChannel;
 	}
@@ -79,7 +71,7 @@ public class MessageBrokerRegistry {
 	 * Enable a simple message broker and configure one or more prefixes to filter
 	 * destinations targeting the broker (e.g. destinations prefixed with "/topic").
 	 */
-	public SimpleBrokerRegistration enableSimpleBroker(string... destinationPrefixes) {
+	SimpleBrokerRegistration enableSimpleBroker(string[] destinationPrefixes... ) {
 		this.simpleBrokerRegistration = new SimpleBrokerRegistration(
 				this.clientInboundChannel, this.clientOutboundChannel, destinationPrefixes);
 		return this.simpleBrokerRegistration;
@@ -90,7 +82,7 @@ public class MessageBrokerRegistry {
 	 * message broker. Check the STOMP documentation of the message broker for supported
 	 * destinations.
 	 */
-	public StompBrokerRelayRegistration enableStompBrokerRelay(string... destinationPrefixes) {
+	StompBrokerRelayRegistration enableStompBrokerRelay(string[] destinationPrefixes... ) {
 		this.brokerRelayRegistration = new StompBrokerRelayRegistration(
 				this.clientInboundChannel, this.clientOutboundChannel, destinationPrefixes);
 		return this.brokerRelayRegistration;
@@ -103,7 +95,7 @@ public class MessageBrokerRegistry {
 	 * if the message cannot be sent through an exception. However, this can be changed
 	 * if the broker channel is configured here with task executor properties.
 	 */
-	public ChannelRegistration configureBrokerChannel() {
+	ChannelRegistration configureBrokerChannel() {
 		return this.brokerChannelRegistration;
 	}
 
@@ -133,15 +125,15 @@ public class MessageBrokerRegistry {
 	 * destination prefix.
 	 * <p>Prefixes that do not have a trailing slash will have one automatically appended.
 	 */
-	public MessageBrokerRegistry setApplicationDestinationPrefixes(string... prefixes) {
+	MessageBrokerRegistry setApplicationDestinationPrefixes(string[] prefixes... ) {
 		this.applicationDestinationPrefixes = prefixes;
 		return this;
 	}
 
 	
-	protected Collection!(string) getApplicationDestinationPrefixes() {
+	protected string[] getApplicationDestinationPrefixes() {
 		return (this.applicationDestinationPrefixes !is null ?
-				Arrays.asList(this.applicationDestinationPrefixes) : null);
+				this.applicationDestinationPrefixes : null);
 	}
 
 	/**
@@ -156,7 +148,7 @@ public class MessageBrokerRegistry {
 	 * the destination is translated to "/queue/position-updatesi9oqdfzo".
 	 * <p>The default prefix used to identify such destinations is "/user/".
 	 */
-	public MessageBrokerRegistry setUserDestinationPrefix(string destinationPrefix) {
+	MessageBrokerRegistry setUserDestinationPrefix(string destinationPrefix) {
 		this.userDestinationPrefix = destinationPrefix;
 		return this;
 	}
@@ -173,12 +165,12 @@ public class MessageBrokerRegistry {
 	 * @param order the order value
 	 * @since 5.0.8
 	 */
-	public void setUserRegistryOrder(int order) {
+	void setUserRegistryOrder(int order) {
 		this.userRegistryOrder = order;
 	}
 
 	
-	protected Integer getUserRegistryOrder() {
+	protected int getUserRegistryOrder() {
 		return this.userRegistryOrder;
 	}
 
@@ -199,7 +191,7 @@ public class MessageBrokerRegistry {
 	 * @since 4.1
 	 * @see hunt.framework.messaging.simp.broker.DefaultSubscriptionRegistry#setPathMatcher
 	 */
-	public MessageBrokerRegistry setPathMatcher(PathMatcher pathMatcher) {
+	MessageBrokerRegistry setPathMatcher(PathMatcher pathMatcher) {
 		this.pathMatcher = pathMatcher;
 		return this;
 	}
@@ -216,7 +208,7 @@ public class MessageBrokerRegistry {
 	 * @since 4.3.2
 	 * @see hunt.framework.messaging.simp.broker.DefaultSubscriptionRegistry#setCacheLimit
 	 */
-	public MessageBrokerRegistry setCacheLimit(int cacheLimit) {
+	MessageBrokerRegistry setCacheLimit(int cacheLimit) {
 		this.cacheLimit = cacheLimit;
 		return this;
 	}
@@ -232,7 +224,7 @@ public class MessageBrokerRegistry {
 	 * since there is some performance overhead to keep messages in order.
 	 * @since 5.1
 	 */
-	public MessageBrokerRegistry setPreservePublishOrder( preservePublishOrder) {
+	MessageBrokerRegistry setPreservePublishOrder( preservePublishOrder) {
 		this.preservePublishOrder = preservePublishOrder;
 		return this;
 	}
@@ -253,13 +245,13 @@ public class MessageBrokerRegistry {
 	}
 
 	
-	protected StompBrokerRelayMessageHandler getStompBrokerRelay(SubscribableChannel brokerChannel) {
-		if (this.brokerRelayRegistration !is null) {
-			StompBrokerRelayMessageHandler relay = this.brokerRelayRegistration.getMessageHandler(brokerChannel);
-			relay.setPreservePublishOrder(this.preservePublishOrder);
-			return relay;
-		}
-		return null;
-	}
+	// protected StompBrokerRelayMessageHandler getStompBrokerRelay(SubscribableChannel brokerChannel) {
+	// 	if (this.brokerRelayRegistration !is null) {
+	// 		StompBrokerRelayMessageHandler relay = this.brokerRelayRegistration.getMessageHandler(brokerChannel);
+	// 		relay.setPreservePublishOrder(this.preservePublishOrder);
+	// 		return relay;
+	// 	}
+	// 	return null;
+	// }
 
 }

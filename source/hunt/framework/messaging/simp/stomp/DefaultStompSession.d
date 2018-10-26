@@ -93,7 +93,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	private long receiptTimeLimit = TimeUnit.SECONDS.toMillis(15);
 
-	private  autoReceiptEnabled;
+	private bool autoReceiptEnabled;
 
 
 	
@@ -111,7 +111,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	private final Map!(string, ReceiptHandler) receiptHandlers = new ConcurrentHashMap<>(4);
 
 	/* Whether the client is willfully closing the connection */
-	private  closing = false;
+	private bool closing = false;
 
 
 	/**
@@ -377,7 +377,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	override
 	public void afterConnected(TcpConnection!(byte[]) connection) {
 		this.connection = connection;
-		if (logger.isDebugEnabled()) {
+		version(HUNT_DEBUG) {
 			trace("Connection established in session id=" ~ this.sessionId);
 		}
 		StompHeaderAccessor accessor = createHeaderAccessor(StompCommand.CONNECT);
@@ -391,7 +391,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	override
 	public void afterConnectFailure(Throwable ex) {
-		if (logger.isDebugEnabled()) {
+		version(HUNT_DEBUG) {
 			trace("Failed to connect session id=" ~ this.sessionId, ex);
 		}
 		this.sessionFuture.setException(ex);
@@ -418,7 +418,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 				if (subscription !is null) {
 					invokeHandler(subscription.getHandler(), message, headers);
 				}
-				else if (logger.isDebugEnabled()) {
+				else version(HUNT_DEBUG) {
 					trace("No handler for: " ~ accessor.getDetailedLogMessage(message.getPayload()) +
 							". Perhaps just unsubscribed?");
 				}
@@ -430,7 +430,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 					if (handler !is null) {
 						handler.handleReceiptReceived();
 					}
-					else if (logger.isDebugEnabled()) {
+					else version(HUNT_DEBUG) {
 						trace("No matching receipt: " ~ accessor.getDetailedLogMessage(message.getPayload()));
 					}
 				}
@@ -497,7 +497,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 			this.sessionHandler.handleTransportError(this, ex);
 		}
 		catch (Throwable ex2) {
-			if (logger.isDebugEnabled()) {
+			version(HUNT_DEBUG) {
 				trace("Uncaught failure while handling transport failure", ex2);
 			}
 		}
@@ -505,7 +505,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	override
 	public void afterConnectionClosed() {
-		if (logger.isDebugEnabled()) {
+		version(HUNT_DEBUG) {
 			trace("Connection closed in session id=" ~ this.sessionId);
 		}
 		if (!this.closing) {
@@ -704,7 +704,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		public void run() {
 			closing = true;
 			string error = "Server has gone quiet. Closing connection in session id=" ~ sessionId ~ ".";
-			if (logger.isDebugEnabled()) {
+			version(HUNT_DEBUG) {
 				trace(error);
 			}
 			resetConnection();

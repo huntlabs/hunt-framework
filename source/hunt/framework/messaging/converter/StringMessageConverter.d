@@ -50,7 +50,7 @@ class StringMessageConverter(T) : AbstractMessageConverter!T {
 
 
 	// override
-	// protected  supports(Class<?> clazz) {
+	// protected bool supports(Class<?> clazz) {
 	// 	return (string.class == clazz);
 	// }
 

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.simp.config;
+module hunt.framework.messaging.simp.config.SimpleBrokerRegistration;
 
+import hunt.framework.messaging.simp.config.AbstractBrokerRegistration;
 
 import hunt.framework.messaging.MessageChannel;
 import hunt.framework.messaging.SubscribableChannel;
 import hunt.framework.messaging.simp.broker.SimpleBrokerMessageHandler;
-import hunt.framework.scheduling.TaskScheduler;
+// import hunt.framework.scheduling.TaskScheduler;
 
 /**
  * Registration class for configuring a {@link SimpleBrokerMessageHandler}.
@@ -28,10 +29,10 @@ import hunt.framework.scheduling.TaskScheduler;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class SimpleBrokerRegistration extends AbstractBrokerRegistration {
+class SimpleBrokerRegistration : AbstractBrokerRegistration {
 
 	
-	private TaskScheduler taskScheduler;
+	// private TaskScheduler taskScheduler;
 
 	
 	private long[] heartbeat;
@@ -40,7 +41,7 @@ public class SimpleBrokerRegistration extends AbstractBrokerRegistration {
 	private string selectorHeaderName = "selector";
 
 
-	public SimpleBrokerRegistration(SubscribableChannel inChannel, MessageChannel outChannel, string[] prefixes) {
+	this(SubscribableChannel inChannel, MessageChannel outChannel, string[] prefixes) {
 		super(inChannel, outChannel, prefixes);
 	}
 
@@ -52,10 +53,10 @@ public class SimpleBrokerRegistration extends AbstractBrokerRegistration {
 	 * <p>By default this is not set.
 	 * @since 4.2
 	 */
-	public SimpleBrokerRegistration setTaskScheduler(TaskScheduler taskScheduler) {
-		this.taskScheduler = taskScheduler;
-		return this;
-	}
+	// SimpleBrokerRegistration setTaskScheduler(TaskScheduler taskScheduler) {
+	// 	this.taskScheduler = taskScheduler;
+	// 	return this;
+	// }
 
 	/**
 	 * Configure the value for the heartbeat settings. The first number
@@ -66,7 +67,7 @@ public class SimpleBrokerRegistration extends AbstractBrokerRegistration {
 	 * (in milliseconds).
 	 * @since 4.2
 	 */
-	public SimpleBrokerRegistration setHeartbeatValue(long[] heartbeat) {
+	SimpleBrokerRegistration setHeartbeatValue(long[] heartbeat) {
 		this.heartbeat = heartbeat;
 		return this;
 	}
@@ -85,7 +86,7 @@ public class SimpleBrokerRegistration extends AbstractBrokerRegistration {
 	 * @param selectorHeaderName the name to use for a selector header
 	 * @since 4.3.17
 	 */
-	public void setSelectorHeaderName(string selectorHeaderName) {
+	void setSelectorHeaderName(string selectorHeaderName) {
 		this.selectorHeaderName = selectorHeaderName;
 	}
 
@@ -94,9 +95,9 @@ public class SimpleBrokerRegistration extends AbstractBrokerRegistration {
 	protected SimpleBrokerMessageHandler getMessageHandler(SubscribableChannel brokerChannel) {
 		SimpleBrokerMessageHandler handler = new SimpleBrokerMessageHandler(getClientInboundChannel(),
 				getClientOutboundChannel(), brokerChannel, getDestinationPrefixes());
-		if (this.taskScheduler !is null) {
-			handler.setTaskScheduler(this.taskScheduler);
-		}
+		// if (this.taskScheduler !is null) {
+		// 	handler.setTaskScheduler(this.taskScheduler);
+		// }
 		if (this.heartbeat !is null) {
 			handler.setHeartbeatValue(this.heartbeat);
 		}

@@ -655,9 +655,9 @@ class MessageHeaderAccessor {
 	 * @since 4.1
 	 */
 	
-	// static U getAccessor(U)(Message!(U) message, Class!(U) requiredType) {
-	// 	return getAccessor(message.getHeaders(), requiredType);
-	// }
+	static T getAccessor(T)(MessageBase message message) {
+		return getAccessor!T(message.getHeaders());
+	}
 
 	/**
 	 * A variation of {@link #getAccessor(hunt.framework.messaging.Message, Class)}
@@ -670,18 +670,17 @@ class MessageHeaderAccessor {
 	 */
 	
 	
-	// static <T extends MessageHeaderAccessor> T getAccessor(
-	// 		MessageHeaders messageHeaders, Class!(T) requiredType) {
+	static T getAccessor(T)(MessageHeaders messageHeaders) {
+		MutableMessageHeaders mutableHeaders = cast(MutableMessageHeaders) messageHeaders;
 
-	// 	if (messageHeaders instanceof MutableMessageHeaders) {
-	// 		MutableMessageHeaders mutableHeaders = (MutableMessageHeaders) messageHeaders;
-	// 		MessageHeaderAccessor headerAccessor = mutableHeaders.getAccessor();
-	// 		if (requiredType is null || requiredType.isInstance(headerAccessor))  {
-	// 			return (T) headerAccessor;
-	// 		}
-	// 	}
-	// 	return null;
-	// }
+		if (mutableHeaders !is null) {
+			MessageHeaderAccessor headerAccessor = mutableHeaders.getAccessor();
+			if (typeid(T) == typeid(headerAccessor))  {
+				return cast(T) headerAccessor;
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * Return a mutable {@code MessageHeaderAccessor} for the given message attempting

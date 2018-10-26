@@ -131,7 +131,7 @@ class OrderedMessageSender : MessageChannel {
 			implementationMissing(false);
 			// if (execChannel.getInterceptors().stream().noneMatch(i -> i instanceof CallbackInterceptor)) {
 			// 	execChannel.addInterceptor(0, new CallbackInterceptor());
-			}
+			// }
 		}
 		else {
 			ExecutorSubscribableChannel execChannel = cast(ExecutorSubscribableChannel) channel;

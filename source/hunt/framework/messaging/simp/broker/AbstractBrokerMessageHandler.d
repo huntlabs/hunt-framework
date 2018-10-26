@@ -53,7 +53,7 @@ abstract class AbstractBrokerMessageHandler
 
 	private SubscribableChannel brokerChannel;
 
-	private Collection!(string) destinationPrefixes;
+	private string[] destinationPrefixes;
 
 	private bool preservePublishOrder = false;
 	
@@ -69,7 +69,7 @@ abstract class AbstractBrokerMessageHandler
 
 	private bool running = false;
 
-	private Object lifecycleMonitor
+	private Object lifecycleMonitor;
 
 	private ChannelInterceptor unsentDisconnectInterceptor;
 
@@ -89,7 +89,7 @@ abstract class AbstractBrokerMessageHandler
 	 */
 	this(SubscribableChannel inboundChannel, MessageChannel outboundChannel,
 			SubscribableChannel brokerChannel) {
-		this(inboundChannel, outboundChannel, brokerChannel, Collections.emptyList());
+		this(inboundChannel, outboundChannel, brokerChannel, []);
 	}
 
 	/**
@@ -100,7 +100,7 @@ abstract class AbstractBrokerMessageHandler
 	 * @param destinationPrefixes prefixes to use to filter out messages
 	 */
 	this(SubscribableChannel inboundChannel, MessageChannel outboundChannel,
-			SubscribableChannel brokerChannel, Collection!(string) destinationPrefixes) {
+			SubscribableChannel brokerChannel, string[] destinationPrefixes) {
 
 		assert(inboundChannel, "'inboundChannel' must not be null");
 		assert(outboundChannel, "'outboundChannel' must not be null");
@@ -111,7 +111,7 @@ abstract class AbstractBrokerMessageHandler
 		this.clientOutboundChannel = outboundChannel;
 		this.brokerChannel = brokerChannel;
 
-		destinationPrefixes = (destinationPrefixes !is null ? destinationPrefixes : Collections.emptyList());
+		destinationPrefixes = (destinationPrefixes !is null ? destinationPrefixes : []);
 		this.destinationPrefixes = Collections.unmodifiableCollection(destinationPrefixes);
 	}
 
@@ -128,7 +128,7 @@ abstract class AbstractBrokerMessageHandler
 		return this.brokerChannel;
 	}
 
-	Collection!(string) getDestinationPrefixes() {
+	string[] getDestinationPrefixes() {
 		return this.destinationPrefixes;
 	}
 

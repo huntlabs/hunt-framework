@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.simp.config;
-
-import java.util.Arrays;
-import hunt.container.Collection;
-import hunt.container.Collections;
-import java.util.List;
-
+module hunt.framework.messaging.simp.config.AbstractBrokerRegistration;
 
 import hunt.framework.messaging.MessageChannel;
 import hunt.framework.messaging.SubscribableChannel;
@@ -35,14 +29,14 @@ import hunt.framework.messaging.simp.broker.AbstractBrokerMessageHandler;
  */
 abstract class AbstractBrokerRegistration {
 
-	private final SubscribableChannel clientInboundChannel;
+	private SubscribableChannel clientInboundChannel;
 
-	private final MessageChannel clientOutboundChannel;
+	private MessageChannel clientOutboundChannel;
 
-	private final List!(string) destinationPrefixes;
+	private string[] destinationPrefixes;
 
 
-	public AbstractBrokerRegistration(SubscribableChannel clientInboundChannel,
+	this(SubscribableChannel clientInboundChannel,
 			MessageChannel clientOutboundChannel, string[] destinationPrefixes) {
 
 		assert(clientOutboundChannel, "'clientInboundChannel' must not be null");
@@ -52,7 +46,7 @@ abstract class AbstractBrokerRegistration {
 		this.clientOutboundChannel = clientOutboundChannel;
 
 		this.destinationPrefixes = (destinationPrefixes !is null ?
-				Arrays.asList(destinationPrefixes) : Collections.emptyList());
+				destinationPrefixes : []);
 	}
 
 
@@ -64,11 +58,12 @@ abstract class AbstractBrokerRegistration {
 		return this.clientOutboundChannel;
 	}
 
-	protected Collection!(string) getDestinationPrefixes() {
+	protected string[] getDestinationPrefixes() {
 		return this.destinationPrefixes;
 	}
 
 
-	protected abstract AbstractBrokerMessageHandler getMessageHandler(SubscribableChannel brokerChannel);
+	protected abstract AbstractBrokerMessageHandler 
+		getMessageHandler(SubscribableChannel brokerChannel);
 
 }

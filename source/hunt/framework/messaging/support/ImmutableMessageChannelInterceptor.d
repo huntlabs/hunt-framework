@@ -37,7 +37,7 @@ class ImmutableMessageChannelInterceptor : ChannelInterceptor {
 
 	override
 	MessageBase preSend(MessageBase message, MessageChannel channel) {
-		MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
+		MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor!(MessageHeaderAccessor)(message);
 		if (accessor !is null && accessor.isMutable()) {
 			accessor.setImmutable();
 		}

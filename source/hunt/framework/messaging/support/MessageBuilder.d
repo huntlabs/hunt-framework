@@ -174,16 +174,16 @@ class MessageHelper {
 	 * also be used as the payload for the new message.
 	 * @param message the Message from which the payload and all headers will be copied
 	 */
-	static MessageBuilder!(U) fromMessage(U)(Message!(U) message) {
-		return new MessageBuilder!(U)(message);
+	static MessageBuilder!(T) fromMessage(T)(Message!(T) message) {
+		return new MessageBuilder!(T)(message);
 	}
 
 	/**
 	 * Create a new builder for a message with the given payload.
 	 * @param payload the payload
 	 */
-	static MessageBuilder!(U) withPayload(U)(T payload) {
-		return new MessageBuilder!(U)(payload, new MessageHeaderAccessor());
+	static MessageBuilder!(T) withPayload(T)(T payload) {
+		return new MessageBuilder!(T)(payload, new MessageHeaderAccessor());
 	}
 
 	/**
@@ -197,14 +197,14 @@ class MessageHelper {
 	 * @since 4.1
 	 */
 	
-	static Message!(U) createMessage(U)(U payload, MessageHeaders messageHeaders) {
+	static Message!(T) createMessage(T)(T payload, MessageHeaders messageHeaders) {
 		assert(payload, "Payload must not be null");
 		assert(messageHeaders, "MessageHeaders must not be null");
-		static if(is(U == class) || is(U == interface)) {
+		static if(is(T == class) || is(T == interface)) {
 			Throwable th = cast(Throwable) payload;
 			if (th !is null) 
 				return new ErrorMessage(th, messageHeaders);
 		}
-		return new GenericMessage!(U)(payload, messageHeaders);
+		return new GenericMessage!(T)(payload, messageHeaders);
 	}
 }

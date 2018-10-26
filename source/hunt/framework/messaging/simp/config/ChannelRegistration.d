@@ -16,13 +16,9 @@
 
 module hunt.framework.messaging.simp.config;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 
 import hunt.framework.messaging.support.ChannelInterceptor;
-import hunt.framework.scheduling.concurrent.ThreadPoolTaskExecutor;
+// import hunt.framework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
  * A registration class for customizing the configuration for a
@@ -31,41 +27,40 @@ import hunt.framework.scheduling.concurrent.ThreadPoolTaskExecutor;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class ChannelRegistration {
-
+class ChannelRegistration {
 	
-	private TaskExecutorRegistration registration;
+	// private TaskExecutorRegistration registration;
 
-	private final List!(ChannelInterceptor) interceptors = new ArrayList<>();
+	private ChannelInterceptor[] interceptors;
 
 
 	/**
 	 * Configure the thread pool backing this message channel.
 	 */
-	public TaskExecutorRegistration taskExecutor() {
-		return taskExecutor(null);
-	}
+	// TaskExecutorRegistration taskExecutor() {
+	// 	return taskExecutor(null);
+	// }
 
 	/**
 	 * Configure the thread pool backing this message channel using a custom
 	 * ThreadPoolTaskExecutor.
 	 * @param taskExecutor the executor to use (or {@code null} for a default executor)
 	 */
-	public TaskExecutorRegistration taskExecutor(ThreadPoolTaskExecutor taskExecutor) {
-		if (this.registration is null) {
-			this.registration = (taskExecutor !is null ? new TaskExecutorRegistration(taskExecutor) :
-					new TaskExecutorRegistration());
-		}
-		return this.registration;
-	}
+	// TaskExecutorRegistration taskExecutor(ThreadPoolTaskExecutor taskExecutor) {
+	// 	if (this.registration is null) {
+	// 		this.registration = (taskExecutor !is null ? new TaskExecutorRegistration(taskExecutor) :
+	// 				new TaskExecutorRegistration());
+	// 	}
+	// 	return this.registration;
+	// }
 
 	/**
 	 * Configure the given interceptors for this message channel,
 	 * adding them to the channel's current list of interceptors.
 	 * @since 4.3.12
 	 */
-	public ChannelRegistration interceptors(ChannelInterceptor... interceptors) {
-		this.interceptors.addAll(Arrays.asList(interceptors));
+	ChannelRegistration interceptors(ChannelInterceptor[] interceptors... ) {
+		this.interceptors ~= interceptors;
 		return this;
 	}
 
@@ -74,23 +69,23 @@ public class ChannelRegistration {
 	 * @deprecated as of 4.3.12, in favor of {@link #interceptors(ChannelInterceptor...)}
 	 */
 	@Deprecated
-	public ChannelRegistration setInterceptors(ChannelInterceptor... interceptors) {
+	ChannelRegistration setInterceptors(ChannelInterceptor[] interceptors... ) {
 		if (interceptors !is null) {
-			this.interceptors.addAll(Arrays.asList(interceptors));
+			this.interceptors ~= interceptors;
 		}
 		return this;
 	}
 
 
-	protected  hasTaskExecutor() {
+	protected bool hasTaskExecutor() {
 		return (this.registration !is null);
 	}
 
-	protected  hasInterceptors() {
+	protected bool hasInterceptors() {
 		return !this.interceptors.isEmpty();
 	}
 
-	protected List!(ChannelInterceptor) getInterceptors() {
+	protected ChannelInterceptor[] getInterceptors() {
 		return this.interceptors;
 	}
 
