@@ -206,7 +206,7 @@ abstract class AbstractMessageConverter(T) : SmartMessageConverter!T {
 	// 			if (mimeType !is null) {
 	// 				accessor.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE, mimeType);
 	// 			}
-	// 			return MessageBuilder.createMessage(payloadToUse, accessor.getMessageHeaders());
+	// 			return MessageHelper.createMessage(payloadToUse, accessor.getMessageHeaders());
 	// 		}
 	// 	}
 

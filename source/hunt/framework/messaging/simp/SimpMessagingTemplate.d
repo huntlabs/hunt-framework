@@ -175,7 +175,7 @@ import hunt.container.Map;
 
 // 		simpAccessor.setDestination(destination);
 // 		simpAccessor.setMessageTypeIfNotSet(SimpMessageType.MESSAGE);
-// 		message = MessageBuilder.createMessage(message.getPayload(), simpAccessor.getMessageHeaders());
+// 		message = MessageHelper.createMessage(message.getPayload(), simpAccessor.getMessageHeaders());
 // 		sendInternal(message);
 // 	}
 

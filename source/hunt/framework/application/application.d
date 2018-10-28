@@ -51,7 +51,11 @@ public import hunt.entity;
 public import hunt.event;
 public import hunt.event.EventLoopGroup;
 
-final class Application {
+import hunt.framework.context.ApplicationContext;
+
+/**
+*/
+final class Application : ApplicationContext {
     static Application getInstance() @property {
         if (_app is null)
             _app = new Application();
@@ -228,6 +232,26 @@ final class Application {
         webSocketBuilders.insertBack(webSocketBuilder);
         return webSocketBuilder;
     }
+
+    WebSocketMessageBroker withStompBroker() {
+        WebSocketMessageBroker broker = new WebSocketMessageBroker(this);
+        this._broker = broker;
+        return broker;
+    }
+    private WebSocketMessageBroker _broker;
+
+    // WebSocketMessageBrokerBuilder stompWebSocket(Action1!(MessageBrokerRegistry) configurer) {
+
+    // }
+    // WebSocketMessageBrokerBuilder stompWebSocket(Action1!(StompEndpointRegistry) configurer) {
+        
+    // }
+
+    // WebSocketMessageBroker stompWebSocket(string path) {            
+    //     WebSocketMessageBroker webSocketBuilder = new WebSocketMessageBroker(this, path);
+    //     messageBrokers.insertBack(webSocketBuilder);
+    //     return webSocketBuilder;
+    // }
 
     private void handleRequest(Request req) nothrow {
         this._dispatcher.dispatch(req);
@@ -436,6 +460,7 @@ private:
     }
 
     /**
+    Raw WebSocket Request Handler
     */
     class WebSocketBuilder : AbstractWebSocketBuilder {
         protected string path;
@@ -492,6 +517,9 @@ private:
         }
     }
 
+    /**
+    Raw WebSocket protocol Handler
+    */
     class SimpleWebSocketHandler : WebSocketHandler {
         override bool acceptUpgrade(HttpRequest request, HttpResponse response, 
             HttpOutputStream output, HttpConnection connection) {
@@ -581,6 +609,7 @@ private:
     WebSocketPolicy _webSocketPolicy;
     WebSocketHandler[string] webSocketHandlerMap;
     Array!WebSocketBuilder webSocketBuilders; 
+    Array!WebSocketMessageBroker messageBrokers; 
 
     version (NO_TASKPOOL) {
         // NOTHING TODO

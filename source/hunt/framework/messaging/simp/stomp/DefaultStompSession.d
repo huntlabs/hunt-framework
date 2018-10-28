@@ -41,7 +41,7 @@ import hunt.framework.messaging.simp.SimpLogging;
 import hunt.framework.messaging.support.MessageBuilder;
 import hunt.framework.messaging.support.MessageHeaderAccessor;
 import hunt.framework.messaging.tcp.TcpConnection;
-import hunt.framework.scheduling.TaskScheduler;
+import hunt.framework.task.TaskScheduler;
 import hunt.framework.util.AlternativeJdkIdGenerator;
 
 import hunt.framework.util.IdGenerator;
@@ -74,7 +74,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	static {
 		StompHeaderAccessor accessor = StompHeaderAccessor.createForHeartbeat();
-		HEARTBEAT = MessageBuilder.createMessage(StompDecoder.HEARTBEAT_PAYLOAD, accessor.getMessageHeaders());
+		HEARTBEAT = MessageHelper.createMessage(StompDecoder.HEARTBEAT_PAYLOAD, accessor.getMessageHeaders());
 	}
 
 
@@ -257,10 +257,10 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		accessor.updateSimpMessageHeadersFromStompHeaders();
 		Message!(byte[]) message;
 		if (payload is null) {
-			message = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
+			message = MessageHelper.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
 		}
 		else if (payload instanceof byte[]) {
-			message = MessageBuilder.createMessage((byte[]) payload, accessor.getMessageHeaders());
+			message = MessageHelper.createMessage((byte[]) payload, accessor.getMessageHeaders());
 		}
 		else {
 			message = (Message!(byte[])) getMessageConverter().toMessage(payload, accessor.getMessageHeaders());

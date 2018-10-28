@@ -71,7 +71,7 @@ alias Charset = string;
  * <pre class="code">
  * MessageHeaderAccessor accessor = new MessageHeaderAccessor();
  * accessor.setHeader("foo", "bar");
- * Message message = MessageBuilder.createMessage("payload", accessor.getMessageHeaders());
+ * Message message = MessageHelper.createMessage("payload", accessor.getMessageHeaders());
  * </pre>
  *
  * <p>After the above, by default the {@code MessageHeaderAccessor} becomes
@@ -82,7 +82,7 @@ alias Charset = string;
  * MessageHeaderAccessor accessor = new MessageHeaderAccessor();
  * accessor.setHeader("foo", "bar");
  * accessor.setLeaveMutable(true);
- * Message message = MessageBuilder.createMessage("payload", accessor.getMessageHeaders());
+ * Message message = MessageHelper.createMessage("payload", accessor.getMessageHeaders());
  *
  * // later on in the same thread...
  *
@@ -115,15 +115,15 @@ alias Charset = string;
  * <pre class="code">
  * MessageHeaderAccessor accessor1 = new MessageHeaderAccessor();
  * accessor.set("foo", "bar1");
- * Message message1 = MessageBuilder.createMessage("payload", accessor1.getMessageHeaders());
+ * Message message1 = MessageHelper.createMessage("payload", accessor1.getMessageHeaders());
  *
  * MessageHeaderAccessor accessor2 = new MessageHeaderAccessor();
  * accessor.set("foo", "bar2");
- * Message message2 = MessageBuilder.createMessage("payload", accessor2.getMessageHeaders());
+ * Message message2 = MessageHelper.createMessage("payload", accessor2.getMessageHeaders());
  *
  * MessageHeaderAccessor accessor3 = new MessageHeaderAccessor();
  * accessor.set("foo", "bar3");
- * Message message3 = MessageBuilder.createMessage("payload", accessor3.getMessageHeaders());
+ * Message message3 = MessageHelper.createMessage("payload", accessor3.getMessageHeaders());
  * </pre>
  *
  * <p>Note that the above examples aim to demonstrate the general idea of using

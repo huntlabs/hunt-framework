@@ -34,7 +34,7 @@ import hunt.framework.messaging.simp.SimpMessageType;
 import hunt.framework.messaging.support.MessageBuilder;
 import hunt.framework.messaging.support.MessageHeaderAccessor;
 import hunt.framework.messaging.support.MessageHeaderInitializer;
-import hunt.framework.scheduling.TaskScheduler;
+import hunt.framework.task.TaskScheduler;
 
 import hunt.framework.utils.PathMatcher;
 
@@ -318,7 +318,7 @@ class SimpleBrokerMessageHandler : AbstractBrokerMessageHandler {
 				}
 				connectAck.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, message);
 				connectAck.setHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER, heartbeatOut);
-				Message!(byte[]) messageOut = MessageBuilder.createMessage(EMPTY_PAYLOAD, connectAck.getMessageHeaders());
+				Message!(byte[]) messageOut = MessageHelper.createMessage(EMPTY_PAYLOAD, connectAck.getMessageHeaders());
 				getClientOutboundChannel().send(messageOut);
 			}
 		}
@@ -374,7 +374,7 @@ class SimpleBrokerMessageHandler : AbstractBrokerMessageHandler {
 			accessor.setHeader(SimpMessageHeaderAccessor.DISCONNECT_MESSAGE_HEADER, origMessage);
 		}
 		initHeaders(accessor);
-		Message!(byte[]) message = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
+		Message!(byte[]) message = MessageHelper.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
 		getClientOutboundChannel().send(message);
 	}
 
@@ -393,7 +393,7 @@ class SimpleBrokerMessageHandler : AbstractBrokerMessageHandler {
 				headerAccessor.copyHeadersIfAbsent(message.getHeaders());
 				headerAccessor.setLeaveMutable(true);
 				Object payload = message.getPayload();
-				MessageBase reply = MessageBuilder.createMessage(payload, headerAccessor.getMessageHeaders());
+				MessageBase reply = MessageHelper.createMessage(payload, headerAccessor.getMessageHeaders());
 				SessionInfo info = this.sessions.get(sessionId);
 				if (info !is null) {
 					try {
@@ -437,7 +437,7 @@ class SimpleBrokerMessageHandler : AbstractBrokerMessageHandler {
 					initHeaders(accessor);
 					accessor.setLeaveMutable(true);
 					MessageHeaders headers = accessor.getMessageHeaders();
-					info.getClientOutboundChannel().send(MessageBuilder.createMessage(EMPTY_PAYLOAD, headers));
+					info.getClientOutboundChannel().send(MessageHelper.createMessage(EMPTY_PAYLOAD, headers));
 				}
 			}
 		}

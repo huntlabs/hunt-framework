@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 import hunt.framework.messaging.converter.MessageConverter;
 import hunt.framework.messaging.converter.SimpleMessageConverter;
-import hunt.framework.scheduling.TaskScheduler;
+import hunt.framework.task.TaskScheduler;
 
 
 /**

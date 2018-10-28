@@ -105,7 +105,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	static {
 		EMPTY_TASK.run();
 		StompHeaderAccessor accessor = StompHeaderAccessor.createForHeartbeat();
-		HEARTBEAT_MESSAGE = MessageBuilder.createMessage(StompDecoder.HEARTBEAT_PAYLOAD, accessor.getMessageHeaders());
+		HEARTBEAT_MESSAGE = MessageHelper.createMessage(StompDecoder.HEARTBEAT_PAYLOAD, accessor.getMessageHeaders());
 	}
 
 
@@ -476,7 +476,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				}
 				accessor.setMessage("Broker not available.");
 				MessageHeaders headers = accessor.getMessageHeaders();
-				getClientOutboundChannel().send(MessageBuilder.createMessage(EMPTY_PAYLOAD, headers));
+				getClientOutboundChannel().send(MessageHelper.createMessage(EMPTY_PAYLOAD, headers));
 			}
 			return;
 		}
@@ -620,7 +620,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 							MAX_TIME_TO_CONNECTED_FRAME ~ " ms.", null);
 				}
 			}, MAX_TIME_TO_CONNECTED_FRAME);
-			connection.send(MessageBuilder.createMessage(EMPTY_PAYLOAD, this.connectHeaders.getMessageHeaders()));
+			connection.send(MessageHelper.createMessage(EMPTY_PAYLOAD, this.connectHeaders.getMessageHeaders()));
 		}
 
 		override
@@ -664,7 +664,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				}
 				accessor.setMessage(errorText);
 				accessor.setLeaveMutable(true);
-				MessageBase errorMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
+				MessageBase errorMessage = MessageHelper.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
 				handleInboundMessage(errorMessage);
 			}
 		}
@@ -815,7 +815,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			}
 
 			final MessageBase messageToSend = (accessor.isMutable() && accessor.isModified()) ?
-					MessageBuilder.createMessage(message.getPayload(), accessor.getMessageHeaders()) : message;
+					MessageHelper.createMessage(message.getPayload(), accessor.getMessageHeaders()) : message;
 
 			StompCommand command = accessor.getCommand();
 			if (logger.isDebugEnabled() && (StompCommand.SEND.equals(command) || StompCommand.SUBSCRIBE.equals(command) ||
@@ -929,7 +929,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				TcpConnection!(byte[]) conn = getTcpConnection();
 				if (conn !is null) {
 					MessageHeaders headers = accessor.getMessageHeaders();
-					conn.send(MessageBuilder.createMessage(EMPTY_PAYLOAD, headers)).addCallback(
+					conn.send(MessageHelper.createMessage(EMPTY_PAYLOAD, headers)).addCallback(
 							result -> {},
 							ex -> {
 								string error = "Failed to subscribe in \"system\" session.";
