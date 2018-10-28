@@ -21,7 +21,7 @@ import java.security.Principal;
 
 import hunt.framework.messaging.Message;
 
-import hunt.framework.websocket.CloseStatus;
+import hunt.http.codec.websocket.model.CloseStatus;
 
 /**
  * Event raised when the session of a WebSocket client using a Simple Messaging

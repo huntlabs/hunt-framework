@@ -50,9 +50,9 @@ import hunt.framework.util.concurrent.ListenableFuture;
 import hunt.framework.util.concurrent.ListenableFutureCallback;
 import hunt.framework.util.concurrent.SettableListenableFuture;
 import hunt.framework.websocket.BinaryMessage;
-import hunt.framework.websocket.CloseStatus;
+import hunt.http.codec.websocket.model.CloseStatus;
 import hunt.framework.websocket.TextMessage;
-import hunt.framework.websocket.WebSocketHandler;
+import hunt.http.server.WebSocketHandler;
 import hunt.framework.websocket.WebSocketHttpHeaders;
 import hunt.framework.websocket.WebSocketMessage;
 import hunt.framework.websocket.WebSocketSession;
@@ -77,11 +77,11 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 	private int inboundMessageSizeLimit = 64 * 1024;
 
-	private boolautoStartup = true;
+	private bool autoStartup = true;
 
 	private int phase = DEFAULT_PHASE;
 
-	private boolrunning = false;
+	private bool running = false;
 
 
 	/**
@@ -324,7 +324,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 		override
 		public void handleMessage(WebSocketSession session, WebSocketMessage<?> webSocketMessage) {
-			this.lastReadTime = (this.lastReadTime != -1 ? System.currentTimeMillis() : -1);
+			this.lastReadTime = (this.lastReadTime != -1 ? DateTimeHelper.currentTimeMillis : -1);
 			List!(Message!(byte[])) messages;
 			try {
 				messages = this.codec.decode(webSocketMessage);
@@ -392,22 +392,22 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		private void updateLastWriteTime() {
 			long lastWriteTime = this.lastWriteTime;
 			if (lastWriteTime != -1) {
-				this.lastWriteTime = System.currentTimeMillis();
+				this.lastWriteTime = DateTimeHelper.currentTimeMillis();
 			}
 		}
 
 		override
 		public void onReadInactivity(final Runnable runnable, final long duration) {
 			Assert.state(getTaskScheduler() !is null, "No TaskScheduler configured");
-			this.lastReadTime = System.currentTimeMillis();
+			this.lastReadTime = DateTimeHelper.currentTimeMillis();
 			this.inactivityTasks.add(getTaskScheduler().scheduleWithFixedDelay(() -> {
-				if (System.currentTimeMillis() - this.lastReadTime > duration) {
+				if (DateTimeHelper.currentTimeMillis - this.lastReadTime > duration) {
 					try {
 						runnable.run();
 					}
 					catch (Throwable ex) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("ReadInactivityTask failure", ex);
+						version(HUNT_DEBUG) {
+							trace("ReadInactivityTask failure", ex);
 						}
 					}
 				}
@@ -417,15 +417,15 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		override
 		public void onWriteInactivity(final Runnable runnable, final long duration) {
 			Assert.state(getTaskScheduler() !is null, "No TaskScheduler configured");
-			this.lastWriteTime = System.currentTimeMillis();
+			this.lastWriteTime = DateTimeHelper.currentTimeMillis();
 			this.inactivityTasks.add(getTaskScheduler().scheduleWithFixedDelay(() -> {
-				if (System.currentTimeMillis() - this.lastWriteTime > duration) {
+				if (DateTimeHelper.currentTimeMillis - this.lastWriteTime > duration) {
 					try {
 						runnable.run();
 					}
 					catch (Throwable ex) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("WriteInactivityTask failure", ex);
+						version(HUNT_DEBUG) {
+							trace("WriteInactivityTask failure", ex);
 						}
 					}
 				}
@@ -440,8 +440,8 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 					session.close();
 				}
 				catch (IOException ex) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Failed to close session: " ~ session.getId(), ex);
+					version(HUNT_DEBUG) {
+						trace("Failed to close session: " ~ session.getId(), ex);
 					}
 				}
 			}
@@ -478,7 +478,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 			}
 			result = this.bufferingDecoder.decode(byteBuffer);
 			if (result.isEmpty()) {
-				if (logger.isTraceEnabled()) {
+				version(HUNT_DEBUG) {
 					logger.trace("Incomplete STOMP frame content received, bufferSize=" ~
 							this.bufferingDecoder.getBufferSize() ~ ", bufferSizeLimit=" ~
 							this.bufferingDecoder.getBufferSizeLimit() ~ ".");

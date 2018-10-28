@@ -25,7 +25,7 @@ import hunt.framework.task.TaskScheduler;
 // import hunt.framework.util.ObjectUtils;
 // import hunt.framework.util.StringUtils;
 // import hunt.framework.web.HttpRequestHandler;
-// import hunt.framework.websocket.WebSocketHandler;
+// import hunt.http.server.WebSocketHandler;
 // import hunt.framework.websocket.server.HandshakeHandler;
 // import hunt.framework.websocket.server.HandshakeInterceptor;
 // import hunt.framework.websocket.server.support.OriginHandshakeInterceptor;

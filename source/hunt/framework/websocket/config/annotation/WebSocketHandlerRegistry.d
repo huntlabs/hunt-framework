@@ -18,7 +18,7 @@ module hunt.framework.websocket.config.annotation.WebSocketHandlerRegistry;
 
 import hunt.framework.websocket.config.annotation.WebSocketHandlerRegistration;
 
-import hunt.framework.websocket.WebSocketHandler;
+import hunt.http.server.WebSocketHandler;
 
 /**
  * Provides methods for configuring {@link WebSocketHandler} request mappings.

@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-module hunt.framework.websocket.messaging;
+module hunt.framework.websocket.messaging.SubProtocolHandler;
 
-import java.util.List;
-
+import hunt.container.List;
+import hunt.http.codec.websocket.frame.Frame;
+import hunt.http.codec.websocket.model.CloseStatus;
+import hunt.http.codec.websocket.stream.WebSocketConnection;
 
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageChannel;
-import hunt.framework.websocket.CloseStatus;
-import hunt.framework.websocket.WebSocketMessage;
-import hunt.framework.websocket.WebSocketSession;
+// import hunt.framework.websocket.WebSocketMessage;
+// import hunt.framework.websocket.WebSocketSession;
+
+alias WebSocketMessage = Frame;
+alias WebSocketSession = WebSocketConnection;
 
 /**
  * A contract for handling WebSocket messages as part of a higher level protocol,
@@ -40,7 +44,7 @@ import hunt.framework.websocket.WebSocketSession;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface SubProtocolHandler {
+interface SubProtocolHandler {
 
 	/**
 	 * Return the list of sub-protocols supported by this handler (never {@code null}).
@@ -53,29 +57,28 @@ public interface SubProtocolHandler {
 	 * @param message the client message
 	 * @param outputChannel an output channel to send messages to
 	 */
-	void handleMessageFromClient(WebSocketSession session, WebSocketMessage<?> message, MessageChannel outputChannel)
-			throws Exception;
+	void handleMessageFromClient(WebSocketSession session, WebSocketMessage message, MessageChannel outputChannel);
 
 	/**
 	 * Handle the given {@link Message} to the client associated with the given WebSocket session.
 	 * @param session the client session
 	 * @param message the client message
 	 */
-	void handleMessageToClient(WebSocketSession session, Message<?> message) throws Exception;
+	void handleMessageToClient(WebSocketSession session, MessageBase message);
 
 	/**
 	 * Resolve the session id from the given message or return {@code null}.
 	 * @param message the message to resolve the session id from
 	 */
 	
-	string resolveSessionId(Message<?> message);
+	string resolveSessionId(MessageBase message);
 
 	/**
 	 * Invoked after a {@link WebSocketSession} has started.
 	 * @param session the client session
 	 * @param outputChannel a channel
 	 */
-	void afterSessionStarted(WebSocketSession session, MessageChannel outputChannel) throws Exception;
+	void afterSessionStarted(WebSocketSession session, MessageChannel outputChannel);
 
 	/**
 	 * Invoked after a {@link WebSocketSession} has ended.
@@ -83,7 +86,7 @@ public interface SubProtocolHandler {
 	 * @param closeStatus the reason why the session was closed
 	 * @param outputChannel a channel
 	 */
-	void afterSessionEnded(WebSocketSession session, CloseStatus closeStatus, MessageChannel outputChannel)
-			throws Exception;
+	void afterSessionEnded(WebSocketSession session, 
+		CloseStatus closeStatus, MessageChannel outputChannel);
 
 }

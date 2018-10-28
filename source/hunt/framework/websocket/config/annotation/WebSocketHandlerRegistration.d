@@ -16,7 +16,7 @@
 
 module hunt.framework.websocket.config.annotation;
 
-import hunt.framework.websocket.WebSocketHandler;
+import hunt.http.server.WebSocketHandler;
 import hunt.framework.websocket.server.HandshakeHandler;
 import hunt.framework.websocket.server.HandshakeInterceptor;
 

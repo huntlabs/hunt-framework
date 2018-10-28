@@ -63,7 +63,6 @@ interface Message(T) : MessageBase {
  * @author Iwein Fuld
  * @since 4.0
  */
-// // 
 interface MessageHandler {
 
 	/**
@@ -72,5 +71,4 @@ interface MessageHandler {
 	 * @throws MessagingException if the handler failed to process the message
 	 */
 	void handleMessage(MessageBase message);
-
 }

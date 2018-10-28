@@ -16,11 +16,18 @@
 
 module hunt.framework.websocket.messaging.SubProtocolWebSocketHandler;
 
+import hunt.framework.websocket.messaging.SubProtocolHandler;
+
 // import java.util.concurrent.atomic.AtomicInteger;
 // import java.util.concurrent.locks.ReentrantLock;
 // import hunt.framework.context.SmartLifecycle;
 
 import hunt.container;
+import hunt.datetime;
+import hunt.lang.exception;
+import hunt.logging;
+
+import std.array;
 
 
 import hunt.framework.messaging.Message;
@@ -28,13 +35,15 @@ import hunt.framework.messaging.MessageChannel;
 import hunt.framework.messaging.MessageHandler;
 import hunt.framework.messaging.MessagingException;
 import hunt.framework.messaging.SubscribableChannel;
-
-import hunt.framework.util.StringUtils;
-import hunt.framework.websocket.CloseStatus;
 import hunt.framework.websocket.SubProtocolCapable;
-import hunt.framework.websocket.WebSocketHandler;
-import hunt.framework.websocket.WebSocketMessage;
-import hunt.framework.websocket.WebSocketSession;
+
+// import hunt.framework.util.StringUtils;
+import hunt.http.codec.websocket.frame.Frame;
+import hunt.http.codec.websocket.model.CloseStatus;
+import hunt.http.codec.websocket.stream.WebSocketConnection;
+import hunt.http.server.WebSocketHandler;
+// import hunt.framework.websocket.WebSocketMessage;
+// import hunt.framework.websocket.WebSocketSession;
 import hunt.framework.websocket.handler.ConcurrentWebSocketSessionDecorator;
 import hunt.framework.websocket.handler.SessionLimitExceededException;
 // import hunt.framework.websocket.sockjs.transport.session.PollingSockJsSession;
@@ -65,15 +74,13 @@ class SubProtocolWebSocketHandler
 
 	private SubscribableChannel clientOutboundChannel;
 
-	private Map!(string, SubProtocolHandler) protocolHandlerLookup =
-			new TreeMap<>(string.CASE_INSENSITIVE_ORDER);
+	private Map!(string, SubProtocolHandler) protocolHandlerLookup;
 
-	private Set!(SubProtocolHandler) protocolHandlers = new LinkedHashSet<>();
-
+	private Set!(SubProtocolHandler) protocolHandlers;
 	
 	private SubProtocolHandler defaultProtocolHandler;
 
-	private Map!(string, WebSocketSessionHolder) sessions = new ConcurrentHashMap<>();
+	private Map!(string, WebSocketSessionHolder) sessions;
 
 	private int sendTimeLimit = 10 * 1000;
 
@@ -81,15 +88,15 @@ class SubProtocolWebSocketHandler
 
 	private int timeToFirstMessage = DEFAULT_TIME_TO_FIRST_MESSAGE;
 
-	private long lastSessionCheckTime = System.currentTimeMillis();
+	private long lastSessionCheckTime;
 
-	private ReentrantLock sessionCheckLock = new ReentrantLock();
+	// private ReentrantLock sessionCheckLock = new ReentrantLock();
 
-	private Stats stats = new Stats();
+	// private Stats stats;
 
 	private bool running = false;
 
-	private Object lifecycleMonitor = new Object();
+	private Object lifecycleMonitor;
 
 
 	/**
@@ -100,6 +107,17 @@ class SubProtocolWebSocketHandler
 	this(MessageChannel clientInboundChannel, SubscribableChannel clientOutboundChannel) {
 		assert(clientInboundChannel, "Inbound MessageChannel must not be null");
 		assert(clientOutboundChannel, "Outbound MessageChannel must not be null");
+		
+		// TODO: Tasks pending completion -@zxp at 10/28/2018, 8:14:10 PM
+		// 
+		// protocolHandlerLookup = new TreeMap!(string, SubProtocolHandler)(string.CASE_INSENSITIVE_ORDER);
+		protocolHandlerLookup = new TreeMap!(string, SubProtocolHandler)();
+		protocolHandlers = new LinkedHashSet!(SubProtocolHandler)();
+		// sessions = new ConcurrentHashMap!(string, WebSocketSessionHolder)();
+		sessions = new HashMap!(string, WebSocketSessionHolder)();
+		lastSessionCheckTime = DateTimeHelper.currentTimeMillis();
+		// stats = new Stats();
+		lifecycleMonitor = new Object();
 		this.clientInboundChannel = clientInboundChannel;
 		this.clientOutboundChannel = clientOutboundChannel;
 	}
@@ -119,7 +137,7 @@ class SubProtocolWebSocketHandler
 	}
 
 	List!(SubProtocolHandler) getProtocolHandlers() {
-		return new ArrayList<>(this.protocolHandlers);
+		return new ArrayList!(SubProtocolHandler)(this.protocolHandlers);
 	}
 
 	/**
@@ -128,15 +146,15 @@ class SubProtocolWebSocketHandler
 	void addProtocolHandler(SubProtocolHandler handler) {
 		List!(string) protocols = handler.getSupportedProtocols();
 		if (CollectionUtils.isEmpty(protocols)) {
-			if (logger.isErrorEnabled()) {
-				logger.error("No sub-protocols for " ~ handler);
+			version(HUNT_DEBUG) {
+				errorf("No sub-protocols for " ~ handler);
 			}
 			return;
 		}
-		for (string protocol : protocols) {
+		foreach (string protocol ; protocols) {
 			SubProtocolHandler replaced = this.protocolHandlerLookup.put(protocol, handler);
 			if (replaced !is null && replaced != handler) {
-				throw new IllegalStateException("Cannot map " ~ handler +
+				throw new IllegalStateException("Cannot map " ~ handler ~
 						" to protocol '" ~ protocol ~ "': already mapped to " ~ replaced ~ ".");
 			}
 		}
@@ -173,8 +191,8 @@ class SubProtocolWebSocketHandler
 	/**
 	 * Return all supported protocols.
 	 */
-	List!(string) getSubProtocols() {
-		return new ArrayList<>(this.protocolHandlerLookup.keySet());
+	string[] getSubProtocols() {
+		return this.protocolHandlerLookup.byKey.array;
 	}
 
 	/**
@@ -236,13 +254,14 @@ class SubProtocolWebSocketHandler
 	 * Return a string describing internal state and counters.
 	 */
 	string getStatsInfo() {
-		return this.stats.toString();
+		// return this.stats.toString();
+		return "todo...";
 	}
 
 
 	override
 	final void start() {
-		Assert.isTrue(this.defaultProtocolHandler !is null || !this.protocolHandlers.isEmpty(), "No handlers");
+		assert(this.defaultProtocolHandler !is null || !this.protocolHandlers.isEmpty(), "No handlers");
 
 		synchronized (this.lifecycleMonitor) {
 			this.clientOutboundChannel.subscribe(this);
@@ -258,12 +277,12 @@ class SubProtocolWebSocketHandler
 		}
 
 		// Proactively notify all active WebSocket sessions
-		for (WebSocketSessionHolder holder : this.sessions.values()) {
+		foreach (WebSocketSessionHolder holder ; this.sessions.byValue) {
 			try {
 				holder.getSession().close(CloseStatus.GOING_AWAY);
 			}
 			catch (Throwable ex) {
-				if (logger.isWarnEnabled()) {
+				version(HUNT_DEBUG) {
 					logger.warn("Failed to close '" ~ holder.getSession() ~ "': " ~ ex);
 				}
 			}
@@ -279,19 +298,19 @@ class SubProtocolWebSocketHandler
 	}
 
 	override
-	final boolisRunning() {
+	final bool isRunning() {
 		return this.running;
 	}
 
 
 	override
-	void afterConnectionEstablished(WebSocketSession session) throws Exception {
+	void afterConnectionEstablished(WebSocketSession session) {
 		// WebSocketHandlerDecorator could close the session
 		if (!session.isOpen()) {
 			return;
 		}
 
-		this.stats.incrementSessionCount(session);
+		// this.stats.incrementSessionCount(session);
 		session = decorateSession(session);
 		this.sessions.put(session.getId(), new WebSocketSessionHolder(session));
 		findProtocolHandler(session).afterSessionStarted(session, this.clientInboundChannel);
@@ -301,7 +320,7 @@ class SubProtocolWebSocketHandler
 	 * Handle an inbound message from a WebSocket client.
 	 */
 	override
-	void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
+	void handleMessage(WebSocketSession session, WebSocketMessage message) {
 		WebSocketSessionHolder holder = this.sessions.get(session.getId());
 		if (holder !is null) {
 			session = holder.getSession();
@@ -318,20 +337,20 @@ class SubProtocolWebSocketHandler
 	 * Handle an outbound Spring Message to a WebSocket client.
 	 */
 	override
-	void handleMessage(Message<?> message) throws MessagingException {
+	void handleMessage(MessageBase message) {
 		string sessionId = resolveSessionId(message);
 		if (sessionId is null) {
-			if (logger.isErrorEnabled()) {
-				logger.error("Could not find session id in " ~ message);
+			version(HUNT_DEBUG) {
+				errorf("Could not find session id in " ~ message);
 			}
 			return;
 		}
 
 		WebSocketSessionHolder holder = this.sessions.get(sessionId);
 		if (holder is null) {
-			if (logger.isDebugEnabled()) {
+			version(HUNT_DEBUG) {
 				// The broker may not have removed the session yet
-				logger.debug("No session for " ~ message);
+				trace("No session for " ~ (cast(Object)message).toString());
 			}
 			return;
 		}
@@ -342,37 +361,39 @@ class SubProtocolWebSocketHandler
 		}
 		catch (SessionLimitExceededException ex) {
 			try {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Terminating '" ~ session ~ "'", ex);
+				version(HUNT_DEBUG) {
+					tracef("Terminating '" ~ session ~ "'", ex);
 				}
-				this.stats.incrementLimitExceededCount();
+				// this.stats.incrementLimitExceededCount();
 				clearSession(session, ex.getStatus()); // clear first, session may be unresponsive
 				session.close(ex.getStatus());
 			}
 			catch (Exception secondException) {
-				logger.debug("Failure while closing session " ~ sessionId ~ ".", secondException);
+				tracef("Failure while closing session " ~ sessionId ~ ".", secondException);
 			}
 		}
 		catch (Exception ex) {
 			// Could be part of normal workflow (e.g. browser tab closed)
-			if (logger.isDebugEnabled()) {
-				logger.debug("Failed to send message to client in " ~ session ~ ": " ~ message, ex);
+			version(HUNT_DEBUG) {
+				warningf("Failed to send message to client in " ~ session.toString() 
+					~ ": " ~ (cast(Object)message).toString() ~ "\n", ex);
 			}
 		}
 	}
 
 	override
-	void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
-		this.stats.incrementTransportError();
+	void handleTransportError(WebSocketSession session, Throwable exception) {
+		implementationMissing(false);
+		// this.stats.incrementTransportError();
 	}
 
 	override
-	void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
+	void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) {
 		clearSession(session, closeStatus);
 	}
 
 	override
-	boolsupportsPartialMessages() {
+	bool supportsPartialMessages() {
 		return false;
 	}
 
@@ -401,8 +422,8 @@ class SubProtocolWebSocketHandler
 		}
 		catch (Exception ex) {
 			// Shouldn't happen
-			logger.error("Failed to obtain session.getAcceptedProtocol(): " ~
-					"will use the default protocol handler (if configured).", ex);
+			errorf("Failed to obtain session.getAcceptedProtocol(): " ~
+					"will use the default protocol handler (if configured).", "\n", ex);
 		}
 
 		SubProtocolHandler handler;
@@ -429,8 +450,8 @@ class SubProtocolWebSocketHandler
 	}
 
 	
-	private string resolveSessionId(Message<?> message) {
-		for (SubProtocolHandler handler : this.protocolHandlerLookup.values()) {
+	private string resolveSessionId(MessageBase message) {
+		foreach (SubProtocolHandler handler : this.protocolHandlerLookup.byValue) {
 			string sessionId = handler.resolveSessionId(message);
 			if (sessionId !is null) {
 				return sessionId;
@@ -454,14 +475,14 @@ class SubProtocolWebSocketHandler
 	 * connected for more than 60 seconds without having received a single message.
 	 */
 	private void checkSessions() {
-		long currentTime = System.currentTimeMillis();
+		long currentTime = DateTimeHelper.currentTimeMillis();
 		if (!isRunning() || (currentTime - this.lastSessionCheckTime < getTimeToFirstMessage())) {
 			return;
 		}
 
 		if (this.sessionCheckLock.tryLock()) {
 			try {
-				for (WebSocketSessionHolder holder : this.sessions.values()) {
+				foreach (WebSocketSessionHolder holder ; this.sessions.byValue) {
 					if (holder.hasHandledMessages()) {
 						continue;
 					}
@@ -470,16 +491,16 @@ class SubProtocolWebSocketHandler
 						continue;
 					}
 					WebSocketSession session = holder.getSession();
-					if (logger.isInfoEnabled()) {
-						logger.info("No messages received after " ~ timeSinceCreated ~ " ms. " ~
+					version(HUNT_DEBUG) {
+						info("No messages received after " ~ timeSinceCreated ~ " ms. " ~
 								"Closing " ~ holder.getSession() ~ ".");
 					}
 					try {
-						this.stats.incrementNoMessagesReceivedCount();
+						// this.stats.incrementNoMessagesReceivedCount();
 						session.close(CloseStatus.SESSION_NOT_RELIABLE);
 					}
 					catch (Throwable ex) {
-						if (logger.isWarnEnabled()) {
+						version(HUNT_DEBUG) {
 							logger.warn("Failed to close unreliable " ~ session, ex);
 						}
 					}
@@ -492,12 +513,12 @@ class SubProtocolWebSocketHandler
 		}
 	}
 
-	private void clearSession(WebSocketSession session, CloseStatus closeStatus) throws Exception {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Clearing session " ~ session.getId());
+	private void clearSession(WebSocketSession session, CloseStatus closeStatus) {
+		version(HUNT_DEBUG) {
+			trace("Clearing session " ~ session.getId());
 		}
 		if (this.sessions.remove(session.getId()) !is null) {
-			this.stats.decrementSessionCount(session);
+			// this.stats.decrementSessionCount(session);
 		}
 		findProtocolHandler(session).afterSessionEnded(session, closeStatus, this.clientInboundChannel);
 	}
@@ -505,107 +526,109 @@ class SubProtocolWebSocketHandler
 
 	override
 	string toString() {
-		return "SubProtocolWebSocketHandler" ~ this.protocolHandlers;
+		return "SubProtocolWebSocketHandler" ~ this.protocolHandlers.toString();
 	}
 
 
-	private static class WebSocketSessionHolder {
+	// private class Stats {
 
-		private final WebSocketSession session;
+	// 	private final AtomicInteger total = new AtomicInteger();
 
-		private final long createTime;
+	// 	private final AtomicInteger webSocket = new AtomicInteger();
 
-		private boolhasHandledMessages;
+	// 	private final AtomicInteger httpStreaming = new AtomicInteger();
 
-		WebSocketSessionHolder(WebSocketSession session) {
-			this.session = session;
-			this.createTime = System.currentTimeMillis();
-		}
+	// 	private final AtomicInteger httpPolling = new AtomicInteger();
 
-		WebSocketSession getSession() {
-			return this.session;
-		}
+	// 	private final AtomicInteger limitExceeded = new AtomicInteger();
 
-		long getCreateTime() {
-			return this.createTime;
-		}
+	// 	private final AtomicInteger noMessagesReceived = new AtomicInteger();
 
-		void setHasHandledMessages() {
-			this.hasHandledMessages = true;
-		}
+	// 	private final AtomicInteger transportError = new AtomicInteger();
 
-		boolhasHandledMessages() {
-			return this.hasHandledMessages;
-		}
+	// 	void incrementSessionCount(WebSocketSession session) {
+	// 		getCountFor(session).incrementAndGet();
+	// 		this.total.incrementAndGet();
+	// 	}
 
-		override
-		string toString() {
-			return "WebSocketSessionHolder[session=" ~ this.session ~ ", createTime=" ~
-					this.createTime ~ ", hasHandledMessages=" ~ this.hasHandledMessages ~ "]";
-		}
+	// 	void decrementSessionCount(WebSocketSession session) {
+	// 		getCountFor(session).decrementAndGet();
+	// 	}
+
+	// 	void incrementLimitExceededCount() {
+	// 		this.limitExceeded.incrementAndGet();
+	// 	}
+
+	// 	void incrementNoMessagesReceivedCount() {
+	// 		this.noMessagesReceived.incrementAndGet();
+	// 	}
+
+	// 	void incrementTransportError() {
+	// 		this.transportError.incrementAndGet();
+	// 	}
+
+	// 	private AtomicInteger getCountFor(WebSocketSession session) {
+	// 		if (session instanceof PollingSockJsSession) {
+	// 			return this.httpPolling;
+	// 		}
+	// 		else if (session instanceof StreamingSockJsSession) {
+	// 			return this.httpStreaming;
+	// 		}
+	// 		else {
+	// 			return this.webSocket;
+	// 		}
+	// 	}
+
+	// 	string toString() {
+	// 		return SubProtocolWebSocketHandler.this.sessions.size() ~
+	// 				" current WS(" ~ this.webSocket.get() ~
+	// 				")-HttpStream(" ~ this.httpStreaming.get() ~
+	// 				")-HttpPoll(" ~ this.httpPolling.get() ~ "), " ~
+	// 				this.total.get() ~ " total, " ~
+	// 				(this.limitExceeded.get() ~ this.noMessagesReceived.get()) ~ " closed abnormally (" ~
+	// 				this.noMessagesReceived.get() ~ " connect failure, " ~
+	// 				this.limitExceeded.get() ~ " send limit, " ~
+	// 				this.transportError.get() ~ " transport error)";
+	// 	}
+	// }
+
+}
+
+
+
+private class WebSocketSessionHolder {
+
+	private WebSocketSession session;
+
+	private long createTime;
+
+	private bool hasHandledMessages;
+
+	this(WebSocketSession session) {
+		this.session = session;
+		this.createTime = DateTimeHelper.currentTimeMillis();
 	}
 
-
-	private class Stats {
-
-		private final AtomicInteger total = new AtomicInteger();
-
-		private final AtomicInteger webSocket = new AtomicInteger();
-
-		private final AtomicInteger httpStreaming = new AtomicInteger();
-
-		private final AtomicInteger httpPolling = new AtomicInteger();
-
-		private final AtomicInteger limitExceeded = new AtomicInteger();
-
-		private final AtomicInteger noMessagesReceived = new AtomicInteger();
-
-		private final AtomicInteger transportError = new AtomicInteger();
-
-		void incrementSessionCount(WebSocketSession session) {
-			getCountFor(session).incrementAndGet();
-			this.total.incrementAndGet();
-		}
-
-		void decrementSessionCount(WebSocketSession session) {
-			getCountFor(session).decrementAndGet();
-		}
-
-		void incrementLimitExceededCount() {
-			this.limitExceeded.incrementAndGet();
-		}
-
-		void incrementNoMessagesReceivedCount() {
-			this.noMessagesReceived.incrementAndGet();
-		}
-
-		void incrementTransportError() {
-			this.transportError.incrementAndGet();
-		}
-
-		private AtomicInteger getCountFor(WebSocketSession session) {
-			if (session instanceof PollingSockJsSession) {
-				return this.httpPolling;
-			}
-			else if (session instanceof StreamingSockJsSession) {
-				return this.httpStreaming;
-			}
-			else {
-				return this.webSocket;
-			}
-		}
-
-		string toString() {
-			return SubProtocolWebSocketHandler.this.sessions.size() +
-					" current WS(" ~ this.webSocket.get() +
-					")-HttpStream(" ~ this.httpStreaming.get() +
-					")-HttpPoll(" ~ this.httpPolling.get() ~ "), " ~
-					this.total.get() ~ " total, " ~
-					(this.limitExceeded.get() + this.noMessagesReceived.get()) ~ " closed abnormally (" ~
-					this.noMessagesReceived.get() ~ " connect failure, " ~
-					this.limitExceeded.get() ~ " send limit, " ~
-					this.transportError.get() ~ " transport error)";
-		}
+	WebSocketSession getSession() {
+		return this.session;
 	}
 
+	long getCreateTime() {
+		return this.createTime;
+	}
+
+	void setHasHandledMessages() {
+		this.hasHandledMessages = true;
+	}
+
+	bool hasHandledMessages() {
+		return this.hasHandledMessages;
+	}
+
+	override
+	string toString() {
+		return "WebSocketSessionHolder[session=" ~ this.session.toString() ~ ", createTime=" ~
+				this.createTime.to!string() ~ ", hasHandledMessages=" ~ 
+				this.hasHandledMessages.to!string() ~ "]";
+	}
 }

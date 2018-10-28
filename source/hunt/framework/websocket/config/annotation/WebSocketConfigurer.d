@@ -16,7 +16,7 @@
 
 module hunt.framework.websocket.config.annotation.WebSocketConfigurer;
 
-import hunt.framework.websocket.WebSocketHandler;
+import hunt.http.server.WebSocketHandler;
 
 /**
  * Defines callback methods to configure the WebSocket request handling

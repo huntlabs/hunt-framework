@@ -343,7 +343,7 @@ class SimpleBrokerMessageHandler : AbstractBrokerMessageHandler {
 		if (sessionId !is null) {
 			SessionInfo info = this.sessions.get(sessionId);
 			if (info !is null) {
-				info.setLastReadTime(System.currentTimeMillis());
+				info.setLastReadTime(DateTimeHelper.currentTimeMillis);
 			}
 		}
 	}

@@ -16,7 +16,7 @@
 
 module hunt.framework.websocket.config.annotation.WebSocketMessageBrokerConfiguration;
 
-import hunt.framework.beans.factory.config.CustomScopeConfigurer;
+// import hunt.framework.beans.factory.config.CustomScopeConfigurer;
 import hunt.framework.context.ApplicationContext;
 // import hunt.framework.context.annotation.Bean;
 // import hunt.framework.http.converter.json.Jackson2ObjectMapperBuilder;
@@ -29,12 +29,15 @@ import hunt.framework.messaging.simp.config.AbstractMessageBrokerConfiguration;
 import hunt.framework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import hunt.framework.messaging.simp.user.SimpUserRegistry;
 import hunt.framework.web.servlet.HandlerMapping;
-import hunt.framework.websocket.WebSocketHandler;
+import hunt.http.server.WebSocketHandler;
 import hunt.framework.websocket.config.WebSocketMessageBrokerStats;
 import hunt.framework.websocket.handler.WebSocketHandlerDecoratorFactory;
 import hunt.framework.websocket.messaging.DefaultSimpUserRegistry;
 import hunt.framework.websocket.messaging.SubProtocolWebSocketHandler;
 import hunt.framework.websocket.messaging.WebSocketAnnotationMethodMessageHandler;
+
+
+
 
 /**
  * Extends {@link AbstractMessageBrokerConfiguration} and adds configuration for
