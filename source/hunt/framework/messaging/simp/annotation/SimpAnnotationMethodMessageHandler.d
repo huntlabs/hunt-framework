@@ -16,19 +16,20 @@
 
 module hunt.framework.messaging.simp.annotation.SimpAnnotationMethodMessageHandler;
 
-// import java.lang.reflect.Method;
+import hunt.framework.messaging.converter.CompositeMessageConverter;
 
 import hunt.container;
+import hunt.lang.exception;
 import hunt.logging;
 
-import hunt.framework.beans.factory.config.ConfigurableBeanFactory;
+// import hunt.framework.beans.factory.config.ConfigurableBeanFactory;
 import hunt.framework.context.ApplicationContext;
-import hunt.framework.context.ConfigurableApplicationContext;
-import hunt.framework.context.EmbeddedValueResolverAware;
-import hunt.framework.context.SmartLifecycle;
-import hunt.framework.core.annotation.AnnotatedElementUtils;
-import hunt.framework.core.convert.ConversionService;
-import hunt.framework.format.support.DefaultFormattingConversionService;
+// import hunt.framework.context.ConfigurableApplicationContext;
+// import hunt.framework.context.EmbeddedValueResolverAware;
+// import hunt.framework.context.SmartLifecycle;
+// import hunt.framework.core.annotation.AnnotatedElementUtils;
+// import hunt.framework.core.convert.ConversionService;
+// import hunt.framework.format.support.DefaultFormattingConversionService;
 
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageChannel;
@@ -69,7 +70,7 @@ import hunt.framework.messaging.support.MessageHeaderInitializer;
 // import hunt.framework.util.AntPathMatcher;
 
 // import hunt.framework.util.CollectionUtils;
-// import hunt.framework.util.PathMatcher;
+import hunt.framework.utils.PathMatcher;
 // import hunt.framework.util.StringValueResolver;
 // import hunt.framework.validation.Validator;
 
@@ -85,34 +86,31 @@ import hunt.framework.messaging.support.MessageHeaderInitializer;
  * @since 4.0
  */
 class SimpAnnotationMethodMessageHandler : AbstractMethodMessageHandler!(SimpMessageMappingInfo)
-		, EmbeddedValueResolverAware, SmartLifecycle {
+		 { // , EmbeddedValueResolverAware, SmartLifecycle
 
-	private final SubscribableChannel clientInboundChannel;
+	private SubscribableChannel clientInboundChannel;
 
-	private final SimpMessageSendingOperations clientMessagingTemplate;
+	private SimpMessageSendingOperations clientMessagingTemplate;
 
-	private final SimpMessageSendingOperations brokerTemplate;
+	private SimpMessageSendingOperations brokerTemplate;
 
 	private MessageConverter messageConverter;
 
-	private ConversionService conversionService = new DefaultFormattingConversionService();
+	// private ConversionService conversionService = new DefaultFormattingConversionService();
 
-	private PathMatcher pathMatcher = new AntPathMatcher();
+	private PathMatcher pathMatcher;
 
 	private bool slashPathSeparator = true;
-
 	
-	private Validator validator;
+	// private Validator validator;
 
-	
-	private StringValueResolver valueResolver;
-
+	// private StringValueResolver valueResolver;
 	
 	private MessageHeaderInitializer headerInitializer;
 
 	private bool running = false;
 
-	private final Object lifecycleMonitor = new Object();
+	private Object lifecycleMonitor;
 
 
 	/**
@@ -129,13 +127,17 @@ class SimpAnnotationMethodMessageHandler : AbstractMethodMessageHandler!(SimpMes
 		assert(clientOutboundChannel, "clientOutboundChannel must not be null");
 		assert(brokerTemplate, "brokerTemplate must not be null");
 
+		pathMatcher = new AntPathMatcher();
+		lifecycleMonitor = new Object();
 		this.clientInboundChannel = clientInboundChannel;
 		this.clientMessagingTemplate = new SimpMessagingTemplate(clientOutboundChannel);
 		this.brokerTemplate = brokerTemplate;
 
-		Collection!(MessageConverter) converters = new ArrayList<>();
-		converters.add(new StringMessageConverter());
-		converters.add(new ByteArrayMessageConverter());
+		MessageConverter[] converters = [
+			new StringMessageConverter(),
+			new ByteArrayMessageConverter()
+		];
+		
 		this.messageConverter = new CompositeMessageConverter(converters);
 	}
 
@@ -150,21 +152,21 @@ class SimpAnnotationMethodMessageHandler : AbstractMethodMessageHandler!(SimpMes
 	 * depending on the configured {@code PathMatcher}.
 	 */
 	override
-	void setDestinationPrefixes(Collection!(string) prefixes) {
+	void setDestinationPrefixes(string[] prefixes) {
 		super.setDestinationPrefixes(appendSlashes(prefixes));
 	}
 
 	
-	private static Collection!(string) appendSlashes(Collection!(string) prefixes) {
-		if (CollectionUtils.isEmpty(prefixes)) {
+	private static string[] appendSlashes(string[] prefixes) {
+		if (prefixes.length == 0) {
 			return prefixes;
 		}
-		Collection!(string) result = new ArrayList<>(prefixes.size());
-		for (string prefix : prefixes) {
+		string[] result;
+		foreach (string prefix ; prefixes) {
 			if (!prefix.endsWith("/")) {
 				prefix = prefix ~ "/";
 			}
-			result.add(prefix);
+			result ~= prefix;
 		}
 		return result;
 	}
@@ -177,7 +179,8 @@ class SimpAnnotationMethodMessageHandler : AbstractMethodMessageHandler!(SimpMes
 	 */
 	void setMessageConverter(MessageConverter converter) {
 		this.messageConverter = converter;
-		((AbstractMessageSendingTemplate<?>) this.clientMessagingTemplate).setMessageConverter(converter);
+		implementationMissing(false);
+		// ((AbstractMessageSendingTemplate<?>) this.clientMessagingTemplate).setMessageConverter(converter);
 	}
 
 	/**
@@ -291,155 +294,142 @@ class SimpAnnotationMethodMessageHandler : AbstractMethodMessageHandler!(SimpMes
 		return this.running;
 	}
 
+	// protected List!(HandlerMethodArgumentResolver) initArgumentResolvers() {
+	// 	ApplicationContext context = getApplicationContext();
+	// 	ConfigurableBeanFactory beanFactory = (context instanceof ConfigurableApplicationContext ?
+	// 			((ConfigurableApplicationContext) context).getBeanFactory() : null);
 
-	protected List!(HandlerMethodArgumentResolver) initArgumentResolvers() {
-		ApplicationContext context = getApplicationContext();
-		ConfigurableBeanFactory beanFactory = (context instanceof ConfigurableApplicationContext ?
-				((ConfigurableApplicationContext) context).getBeanFactory() : null);
+	// 	List!(HandlerMethodArgumentResolver) resolvers = new ArrayList<>();
 
-		List!(HandlerMethodArgumentResolver) resolvers = new ArrayList<>();
+	// 	// Annotation-based argument resolution
+	// 	resolvers.add(new HeaderMethodArgumentResolver(this.conversionService, beanFactory));
+	// 	resolvers.add(new HeadersMethodArgumentResolver());
+	// 	resolvers.add(new DestinationVariableMethodArgumentResolver(this.conversionService));
 
-		// Annotation-based argument resolution
-		resolvers.add(new HeaderMethodArgumentResolver(this.conversionService, beanFactory));
-		resolvers.add(new HeadersMethodArgumentResolver());
-		resolvers.add(new DestinationVariableMethodArgumentResolver(this.conversionService));
+	// 	// Type-based argument resolution
+	// 	resolvers.add(new PrincipalMethodArgumentResolver());
+	// 	resolvers.add(new MessageMethodArgumentResolver(this.messageConverter));
 
-		// Type-based argument resolution
-		resolvers.add(new PrincipalMethodArgumentResolver());
-		resolvers.add(new MessageMethodArgumentResolver(this.messageConverter));
+	// 	resolvers.addAll(getCustomArgumentResolvers());
+	// 	resolvers.add(new PayloadArgumentResolver(this.messageConverter, this.validator));
 
-		resolvers.addAll(getCustomArgumentResolvers());
-		resolvers.add(new PayloadArgumentResolver(this.messageConverter, this.validator));
+	// 	return resolvers;
+	// }
 
-		return resolvers;
-	}
+	// override
+	// protected List!(HandlerMethodReturnValueHandler) initReturnValueHandlers() {
+	// 	List!(HandlerMethodReturnValueHandler) handlers = new ArrayList<>();
 
-	override
-	protected List!(HandlerMethodReturnValueHandler) initReturnValueHandlers() {
-		List!(HandlerMethodReturnValueHandler) handlers = new ArrayList<>();
+	// 	// Single-purpose return value types
 
-		// Single-purpose return value types
+	// 	handlers.add(new ListenableFutureReturnValueHandler());
+	// 	handlers.add(new CompletableFutureReturnValueHandler());
+	// 	handlers.add(new ReactiveReturnValueHandler());
 
-		handlers.add(new ListenableFutureReturnValueHandler());
-		handlers.add(new CompletableFutureReturnValueHandler());
-		handlers.add(new ReactiveReturnValueHandler());
+	// 	// Annotation-based return value types
 
-		// Annotation-based return value types
+	// 	SendToMethodReturnValueHandler sendToHandler =
+	// 			new SendToMethodReturnValueHandler(this.brokerTemplate, true);
+	// 	sendToHandler.setHeaderInitializer(this.headerInitializer);
+	// 	handlers.add(sendToHandler);
 
-		SendToMethodReturnValueHandler sendToHandler =
-				new SendToMethodReturnValueHandler(this.brokerTemplate, true);
-		sendToHandler.setHeaderInitializer(this.headerInitializer);
-		handlers.add(sendToHandler);
+	// 	SubscriptionMethodReturnValueHandler subscriptionHandler =
+	// 			new SubscriptionMethodReturnValueHandler(this.clientMessagingTemplate);
+	// 	subscriptionHandler.setHeaderInitializer(this.headerInitializer);
+	// 	handlers.add(subscriptionHandler);
 
-		SubscriptionMethodReturnValueHandler subscriptionHandler =
-				new SubscriptionMethodReturnValueHandler(this.clientMessagingTemplate);
-		subscriptionHandler.setHeaderInitializer(this.headerInitializer);
-		handlers.add(subscriptionHandler);
+	// 	// Custom return value types
 
-		// Custom return value types
+	// 	handlers.addAll(getCustomReturnValueHandlers());
 
-		handlers.addAll(getCustomReturnValueHandlers());
+	// 	// Catch-all
 
-		// Catch-all
+	// 	sendToHandler = new SendToMethodReturnValueHandler(this.brokerTemplate, false);
+	// 	sendToHandler.setHeaderInitializer(this.headerInitializer);
+	// 	handlers.add(sendToHandler);
 
-		sendToHandler = new SendToMethodReturnValueHandler(this.brokerTemplate, false);
-		sendToHandler.setHeaderInitializer(this.headerInitializer);
-		handlers.add(sendToHandler);
+	// 	return handlers;
+	// }
 
-		return handlers;
-	}
+	// override
+	// protected bool isHandler(Class<?> beanType) {
+	// 	return AnnotatedElementUtils.hasAnnotation(beanType, Controller.class);
+	// }
 
-	override
-	protected Log getReturnValueHandlerLogger() {
-		return SimpLogging.forLog(HandlerMethodReturnValueHandlerComposite.defaultLogger);
-	}
-
-	override
-	protected Log getHandlerMethodLogger() {
-		return SimpLogging.forLog(HandlerMethod.defaultLogger);
-	}
-
-
-	override
-	protected bool isHandler(Class<?> beanType) {
-		return AnnotatedElementUtils.hasAnnotation(beanType, Controller.class);
-	}
-
-	override
+	// override
 	
-	protected SimpMessageMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
-		MessageMapping messageAnn = AnnotatedElementUtils.findMergedAnnotation(method, MessageMapping.class);
-		if (messageAnn !is null) {
-			MessageMapping typeAnn = AnnotatedElementUtils.findMergedAnnotation(handlerType, MessageMapping.class);
-			// Only actually register it if there are destinations specified;
-			// otherwise @MessageMapping is just being used as a (meta-annotation) marker.
-			if (messageAnn.value().length > 0 || (typeAnn !is null && typeAnn.value().length > 0)) {
-				SimpMessageMappingInfo result = createMessageMappingCondition(messageAnn.value());
-				if (typeAnn !is null) {
-					result = createMessageMappingCondition(typeAnn.value()).combine(result);
-				}
-				return result;
-			}
-		}
+	// protected SimpMessageMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
+	// 	MessageMapping messageAnn = AnnotatedElementUtils.findMergedAnnotation(method, MessageMapping.class);
+	// 	if (messageAnn !is null) {
+	// 		MessageMapping typeAnn = AnnotatedElementUtils.findMergedAnnotation(handlerType, MessageMapping.class);
+	// 		// Only actually register it if there are destinations specified;
+	// 		// otherwise @MessageMapping is just being used as a (meta-annotation) marker.
+	// 		if (messageAnn.value().length > 0 || (typeAnn !is null && typeAnn.value().length > 0)) {
+	// 			SimpMessageMappingInfo result = createMessageMappingCondition(messageAnn.value());
+	// 			if (typeAnn !is null) {
+	// 				result = createMessageMappingCondition(typeAnn.value()).combine(result);
+	// 			}
+	// 			return result;
+	// 		}
+	// 	}
 
-		SubscribeMapping subscribeAnn = AnnotatedElementUtils.findMergedAnnotation(method, SubscribeMapping.class);
-		if (subscribeAnn !is null) {
-			MessageMapping typeAnn = AnnotatedElementUtils.findMergedAnnotation(handlerType, MessageMapping.class);
-			// Only actually register it if there are destinations specified;
-			// otherwise @SubscribeMapping is just being used as a (meta-annotation) marker.
-			if (subscribeAnn.value().length > 0 || (typeAnn !is null && typeAnn.value().length > 0)) {
-				SimpMessageMappingInfo result = createSubscribeMappingCondition(subscribeAnn.value());
-				if (typeAnn !is null) {
-					result = createMessageMappingCondition(typeAnn.value()).combine(result);
-				}
-				return result;
-			}
-		}
+	// 	SubscribeMapping subscribeAnn = AnnotatedElementUtils.findMergedAnnotation(method, SubscribeMapping.class);
+	// 	if (subscribeAnn !is null) {
+	// 		MessageMapping typeAnn = AnnotatedElementUtils.findMergedAnnotation(handlerType, MessageMapping.class);
+	// 		// Only actually register it if there are destinations specified;
+	// 		// otherwise @SubscribeMapping is just being used as a (meta-annotation) marker.
+	// 		if (subscribeAnn.value().length > 0 || (typeAnn !is null && typeAnn.value().length > 0)) {
+	// 			SimpMessageMappingInfo result = createSubscribeMappingCondition(subscribeAnn.value());
+	// 			if (typeAnn !is null) {
+	// 				result = createMessageMappingCondition(typeAnn.value()).combine(result);
+	// 			}
+	// 			return result;
+	// 		}
+	// 	}
 
-		return null;
-	}
+	// 	return null;
+	// }
 
-	private SimpMessageMappingInfo createMessageMappingCondition(string[] destinations) {
-		string[] resolvedDestinations = resolveEmbeddedValuesInDestinations(destinations);
-		return new SimpMessageMappingInfo(SimpMessageTypeMessageCondition.MESSAGE,
-				new DestinationPatternsMessageCondition(resolvedDestinations, this.pathMatcher));
-	}
+	// private SimpMessageMappingInfo createMessageMappingCondition(string[] destinations) {
+	// 	string[] resolvedDestinations = resolveEmbeddedValuesInDestinations(destinations);
+	// 	return new SimpMessageMappingInfo(SimpMessageTypeMessageCondition.MESSAGE,
+	// 			new DestinationPatternsMessageCondition(resolvedDestinations, this.pathMatcher));
+	// }
 
-	private SimpMessageMappingInfo createSubscribeMappingCondition(string[] destinations) {
-		string[] resolvedDestinations = resolveEmbeddedValuesInDestinations(destinations);
-		return new SimpMessageMappingInfo(SimpMessageTypeMessageCondition.SUBSCRIBE,
-				new DestinationPatternsMessageCondition(resolvedDestinations, this.pathMatcher));
-	}
+	// private SimpMessageMappingInfo createSubscribeMappingCondition(string[] destinations) {
+	// 	string[] resolvedDestinations = resolveEmbeddedValuesInDestinations(destinations);
+	// 	return new SimpMessageMappingInfo(SimpMessageTypeMessageCondition.SUBSCRIBE,
+	// 			new DestinationPatternsMessageCondition(resolvedDestinations, this.pathMatcher));
+	// }
 
 	/**
 	 * Resolve placeholder values in the given array of destinations.
 	 * @return a new array with updated destinations
 	 * @since 4.2
 	 */
-	protected string[] resolveEmbeddedValuesInDestinations(string[] destinations) {
-		if (this.valueResolver is null) {
-			return destinations;
-		}
-		string[] result = new string[destinations.length];
-		for (int i = 0; i < destinations.length; i++) {
-			result[i] = this.valueResolver.resolveStringValue(destinations[i]);
-		}
-		return result;
-	}
+	// protected string[] resolveEmbeddedValuesInDestinations(string[] destinations) {
+	// 	if (this.valueResolver is null) {
+	// 		return destinations;
+	// 	}
+	// 	string[] result = new string[destinations.length];
+	// 	for (int i = 0; i < destinations.length; i++) {
+	// 		result[i] = this.valueResolver.resolveStringValue(destinations[i]);
+	// 	}
+	// 	return result;
+	// }
+
+	// override
+	// protected Set!(string) getDirectLookupDestinations(SimpMessageMappingInfo mapping) {
+	// 	Set!(string) result = new LinkedHashSet<>();
+	// 	for (string pattern : mapping.getDestinationConditions().getPatterns()) {
+	// 		if (!this.pathMatcher.isPattern(pattern)) {
+	// 			result.add(pattern);
+	// 		}
+	// 	}
+	// 	return result;
+	// }
 
 	override
-	protected Set!(string) getDirectLookupDestinations(SimpMessageMappingInfo mapping) {
-		Set!(string) result = new LinkedHashSet<>();
-		for (string pattern : mapping.getDestinationConditions().getPatterns()) {
-			if (!this.pathMatcher.isPattern(pattern)) {
-				result.add(pattern);
-			}
-		}
-		return result;
-	}
-
-	override
-	
 	protected string getDestination(MessageBase message) {
 		return SimpMessageHeaderAccessor.getDestination(message.getHeaders());
 	}
@@ -449,61 +439,59 @@ class SimpAnnotationMethodMessageHandler : AbstractMethodMessageHandler!(SimpMes
 		if (destination is null) {
 			return null;
 		}
-		if (CollectionUtils.isEmpty(getDestinationPrefixes())) {
+		string[] prefixes = getDestinationPrefixes();
+		if (prefixes.length == 0) {
 			return destination;
 		}
-		for (string prefix : getDestinationPrefixes()) {
+		foreach (string prefix ; prefixes) {
 			if (destination.startsWith(prefix)) {
-				if (this.slashPathSeparator) {
-					return destination.substring(prefix.length() - 1);
-				}
-				else {
-					return destination.substring(prefix.length());
-				}
+				size_t pos = prefix.length;
+				if (this.slashPathSeparator) 
+					pos = pos - 1;
+				return destination[pos .. $];
 			}
 		}
 		return null;
 	}
 
-	override
-	
-	protected SimpMessageMappingInfo getMatchingMapping(SimpMessageMappingInfo mapping, MessageBase message) {
-		return mapping.getMatchingCondition(message);
+	// override
+	// protected SimpMessageMappingInfo getMatchingMapping(SimpMessageMappingInfo mapping, MessageBase message) {
+	// 	return mapping.getMatchingCondition(message);
 
-	}
+	// }
 
-	override
-	protected Comparator!(SimpMessageMappingInfo) getMappingComparator(final MessageBase message) {
-		return (info1, info2) -> info1.compareTo(info2, message);
-	}
+	// override
+	// protected Comparator!(SimpMessageMappingInfo) getMappingComparator(final MessageBase message) {
+	// 	return (info1, info2) -> info1.compareTo(info2, message);
+	// }
 
-	override
-	protected void handleMatch(SimpMessageMappingInfo mapping, HandlerMethod handlerMethod,
-			string lookupDestination, MessageBase message) {
+	// override
+	// protected void handleMatch(SimpMessageMappingInfo mapping, HandlerMethod handlerMethod,
+	// 		string lookupDestination, MessageBase message) {
 
-		Set!(string) patterns = mapping.getDestinationConditions().getPatterns();
-		if (!CollectionUtils.isEmpty(patterns)) {
-			string pattern = patterns.iterator().next();
-			Map!(string, string) vars = getPathMatcher().extractUriTemplateVariables(pattern, lookupDestination);
-			if (!CollectionUtils.isEmpty(vars)) {
-				MessageHeaderAccessor mha = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
-				Assert.state(mha !is null && mha.isMutable(), "Mutable MessageHeaderAccessor required");
-				mha.setHeader(DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER, vars);
-			}
-		}
+	// 	Set!(string) patterns = mapping.getDestinationConditions().getPatterns();
+	// 	if (!CollectionUtils.isEmpty(patterns)) {
+	// 		string pattern = patterns.iterator().next();
+	// 		Map!(string, string) vars = getPathMatcher().extractUriTemplateVariables(pattern, lookupDestination);
+	// 		if (!CollectionUtils.isEmpty(vars)) {
+	// 			MessageHeaderAccessor mha = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
+	// 			assert(mha !is null && mha.isMutable(), "Mutable MessageHeaderAccessor required");
+	// 			mha.setHeader(DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER, vars);
+	// 		}
+	// 	}
 
-		try {
-			SimpAttributesContextHolder.setAttributesFromMessage(message);
-			super.handleMatch(mapping, handlerMethod, lookupDestination, message);
-		}
-		finally {
-			SimpAttributesContextHolder.resetAttributes();
-		}
-	}
+	// 	try {
+	// 		SimpAttributesContextHolder.setAttributesFromMessage(message);
+	// 		super.handleMatch(mapping, handlerMethod, lookupDestination, message);
+	// 	}
+	// 	finally {
+	// 		SimpAttributesContextHolder.resetAttributes();
+	// 	}
+	// }
 
-	override
-	protected AbstractExceptionHandlerMethodResolver createExceptionHandlerMethodResolverFor(Class<?> beanType) {
-		return new AnnotationExceptionHandlerMethodResolver(beanType);
-	}
+	// override
+	// protected AbstractExceptionHandlerMethodResolver createExceptionHandlerMethodResolverFor(Class<?> beanType) {
+	// 	return new AnnotationExceptionHandlerMethodResolver(beanType);
+	// }
 
 }

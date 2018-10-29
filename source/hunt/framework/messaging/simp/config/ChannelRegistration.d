@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.simp.config;
+module hunt.framework.messaging.simp.config.ChannelRegistration;
 
 
 import hunt.framework.messaging.support.ChannelInterceptor;
@@ -68,13 +68,13 @@ class ChannelRegistration {
 	 * Configure interceptors for the message channel.
 	 * @deprecated as of 4.3.12, in favor of {@link #interceptors(ChannelInterceptor...)}
 	 */
-	@Deprecated
-	ChannelRegistration setInterceptors(ChannelInterceptor[] interceptors... ) {
-		if (interceptors !is null) {
-			this.interceptors ~= interceptors;
-		}
-		return this;
-	}
+	// @Deprecated
+	// ChannelRegistration setInterceptors(ChannelInterceptor[] interceptors... ) {
+	// 	if (interceptors !is null) {
+	// 		this.interceptors ~= interceptors;
+	// 	}
+	// 	return this;
+	// }
 
 
 	protected bool hasTaskExecutor() {

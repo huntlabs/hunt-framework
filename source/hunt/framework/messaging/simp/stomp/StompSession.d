@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.simp.stomp;
+module hunt.framework.messaging.simp.stomp.StompSession;
 
-
+import hunt.framework.messaging.simp.stomp.Receiptable;
+import hunt.framework.messaging.simp.stomp.StompFrameHandler;
+import hunt.framework.messaging.simp.stomp.StompHeaders;
 
 /**
  * Represents a STOMP session with operations to send messages, create
@@ -35,7 +37,7 @@ interface StompSession {
 	/**
 	 * Whether the session is connected.
 	 */
-	 isConnected();
+	bool isConnected();
 
 	/**
 	 * When enabled, a receipt header is automatically added to future
@@ -46,7 +48,7 @@ interface StompSession {
 	 * <p>A receipt header can also be added manually through the overloaded
 	 * methods that accept {@code StompHeaders}.
 	 */
-	void setAutoReceipt( enabled);
+	void setAutoReceipt(bool enabled);
 
 	/**
 	 * Send a message to the specified destination, converting the payload to a
@@ -148,7 +150,7 @@ interface StompSession {
 	/**
 	 * A handle to use to unsubscribe or to track a receipt.
 	 */
-	interface Subscription extends Receiptable {
+	interface Subscription : Receiptable {
 
 		/**
 		 * Return the id for the subscription.

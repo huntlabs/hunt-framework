@@ -655,7 +655,7 @@ class MessageHeaderAccessor {
 	 * @since 4.1
 	 */
 	
-	static T getAccessor(T)(MessageBase message message) {
+	static T getAccessor(T)(MessageBase message) {
 		return getAccessor!T(message.getHeaders());
 	}
 

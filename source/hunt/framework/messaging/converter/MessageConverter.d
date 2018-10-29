@@ -29,7 +29,7 @@ import hunt.framework.messaging.MessageHeaders;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-interface MessageConverter(T) {
+interface MessageConverter {
 
 	/**
 	 * Convert the payload of a {@link Message} from a serialized form to a typed Object
@@ -59,6 +59,6 @@ interface MessageConverter(T) {
 	 * Object type or the target media type
 	 */
 	
-	Message!(T) toMessage(Object payload, MessageHeaders headers);
+	MessageBase toMessage(Object payload, MessageHeaders headers);
 
 }

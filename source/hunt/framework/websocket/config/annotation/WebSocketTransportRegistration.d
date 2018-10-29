@@ -40,10 +40,10 @@ class WebSocketTransportRegistration {
 	
 	private int timeToFirstMessage;
 
-	private List!(WebSocketHandlerDecoratorFactory) decoratorFactories;
+	private WebSocketHandlerDecoratorFactory[] decoratorFactories;
 
 	this() {
-		decoratorFactories = new ArrayList!WebSocketHandlerDecoratorFactory(2);
+		// decoratorFactories = new ArrayList!WebSocketHandlerDecoratorFactory(2);
 	}
 
 
@@ -186,8 +186,8 @@ class WebSocketTransportRegistration {
 	 * when the corresponding HTTP session expires.
 	 * @since 4.1.2
 	 */
-	WebSocketTransportRegistration setDecoratorFactories(WebSocketHandlerDecoratorFactory... factories) {
-		this.decoratorFactories.addAll(Arrays.asList(factories));
+	WebSocketTransportRegistration setDecoratorFactories(WebSocketHandlerDecoratorFactory[] factories...) {
+		this.decoratorFactories ~= factories;
 		return this;
 	}
 
@@ -199,11 +199,11 @@ class WebSocketTransportRegistration {
 	 * @since 4.1.2
 	 */
 	WebSocketTransportRegistration addDecoratorFactory(WebSocketHandlerDecoratorFactory factory) {
-		this.decoratorFactories.add(factory);
+		this.decoratorFactories ~= factory;
 		return this;
 	}
 
-	protected List!(WebSocketHandlerDecoratorFactory) getDecoratorFactories() {
+	protected WebSocketHandlerDecoratorFactory[] getDecoratorFactories() {
 		return this.decoratorFactories;
 	}
 

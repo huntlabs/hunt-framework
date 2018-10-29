@@ -56,7 +56,7 @@ module hunt.framework.websocket.config.annotation.AbstractWebSocketHandlerRegist
 // 	override
 // 	WebSocketHandlerRegistration addHandler(WebSocketHandler handler, string... paths) {
 // 		assert(handler, "WebSocketHandler must not be null");
-// 		Assert.notEmpty(paths, "Paths must not be empty");
+// 		assert(paths, "Paths must not be empty");
 // 		this.handlerMap.put(handler, Arrays.asList(paths));
 // 		return this;
 // 	}

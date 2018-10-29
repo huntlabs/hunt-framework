@@ -287,7 +287,7 @@ abstract class AbstractMethodMessageHandler(T)
 	// 	Class<?> handlerType;
 	// 	if (handler instanceof string) {
 	// 		ApplicationContext context = getApplicationContext();
-	// 		Assert.state(context !is null, "ApplicationContext is required for resolving handler bean names");
+	// 		assert(context !is null, "ApplicationContext is required for resolving handler bean names");
 	// 		handlerType = context.getType((string) handler);
 	// 	}
 	// 	else {
@@ -351,7 +351,7 @@ abstract class AbstractMethodMessageHandler(T)
 	// 	HandlerMethod handlerMethod;
 	// 	if (handler instanceof string) {
 	// 		ApplicationContext context = getApplicationContext();
-	// 		Assert.state(context !is null, "ApplicationContext is required for resolving handler bean names");
+	// 		assert(context !is null, "ApplicationContext is required for resolving handler bean names");
 	// 		string beanName = (string) handler;
 	// 		handlerMethod = new HandlerMethod(beanName, context.getAutowireCapableBeanFactory(), method);
 	// 	}

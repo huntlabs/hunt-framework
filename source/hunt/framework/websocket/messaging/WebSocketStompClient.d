@@ -271,7 +271,7 @@ module hunt.framework.websocket.messaging.WebSocketStompClient;
 // 	protected StompHeaders processConnectHeaders(StompHeaders connectHeaders) {
 // 		connectHeaders = super.processConnectHeaders(connectHeaders);
 // 		if (connectHeaders.isHeartbeatEnabled()) {
-// 			Assert.state(getTaskScheduler() !is null, "TaskScheduler must be set if heartbeats are enabled");
+// 			assert(getTaskScheduler() !is null, "TaskScheduler must be set if heartbeats are enabled");
 // 		}
 // 		return connectHeaders;
 // 	}
@@ -374,7 +374,7 @@ module hunt.framework.websocket.messaging.WebSocketStompClient;
 // 			SettableListenableFuture!(Void) future = new SettableListenableFuture<>();
 // 			try {
 // 				WebSocketSession session = this.session;
-// 				Assert.state(session !is null, "No WebSocketSession available");
+// 				assert(session !is null, "No WebSocketSession available");
 // 				session.sendMessage(this.codec.encode(message, session.getClass()));
 // 				future.set(null);
 // 			}
@@ -396,7 +396,7 @@ module hunt.framework.websocket.messaging.WebSocketStompClient;
 
 // 		override
 // 		void onReadInactivity(final Runnable runnable, final long duration) {
-// 			Assert.state(getTaskScheduler() !is null, "No TaskScheduler configured");
+// 			assert(getTaskScheduler() !is null, "No TaskScheduler configured");
 // 			this.lastReadTime = DateTimeHelper.currentTimeMillis();
 // 			this.inactivityTasks.add(getTaskScheduler().scheduleWithFixedDelay(() -> {
 // 				if (DateTimeHelper.currentTimeMillis - this.lastReadTime > duration) {
@@ -414,7 +414,7 @@ module hunt.framework.websocket.messaging.WebSocketStompClient;
 
 // 		override
 // 		void onWriteInactivity(final Runnable runnable, final long duration) {
-// 			Assert.state(getTaskScheduler() !is null, "No TaskScheduler configured");
+// 			assert(getTaskScheduler() !is null, "No TaskScheduler configured");
 // 			this.lastWriteTime = DateTimeHelper.currentTimeMillis();
 // 			this.inactivityTasks.add(getTaskScheduler().scheduleWithFixedDelay(() -> {
 // 				if (DateTimeHelper.currentTimeMillis - this.lastWriteTime > duration) {

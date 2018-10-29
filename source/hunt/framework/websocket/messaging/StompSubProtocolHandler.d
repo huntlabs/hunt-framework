@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-module hunt.framework.websocket.messaging.StompSubProtocolErrorHandler;
+module hunt.framework.websocket.messaging.StompSubProtocolHandler;
+
+import hunt.framework.websocket.messaging.SubProtocolHandler;
+import hunt.http.codec.websocket.stream.WebSocketConnection;
+import hunt.http.codec.websocket.frame.WebSocketFrame;
 
 import hunt.container;
 import hunt.lang.exception;
-
 
 import hunt.framework.context.ApplicationEvent;
 import hunt.framework.context.ApplicationEventPublisher;
@@ -84,24 +87,28 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 
 	private int messageSizeLimit = 64 * 1024;
 
-	private StompEncoder stompEncoder = new StompEncoder();
+	private StompEncoder stompEncoder;
 
-	private StompDecoder stompDecoder = new StompDecoder();
+	private StompDecoder stompDecoder;
 
-	private final Map!(string, BufferingStompDecoder) decoders = new ConcurrentHashMap<>();
+	private Map!(string, BufferingStompDecoder) decoders;
 
-	
 	private MessageHeaderInitializer headerInitializer;
 
-	private final Map!(string, Principal) stompAuthentications = new ConcurrentHashMap<>();
-
+	private Map!(string, Principal) stompAuthentications;
 	
-	private Boolean immutableMessageInterceptorPresent;
-
+	private bool immutableMessageInterceptorPresent;
 	
 	private ApplicationEventPublisher eventPublisher;
 
-	// private final Stats stats = new Stats();
+	// private Stats stats = new Stats();
+
+	this() {
+		stompEncoder = new StompEncoder();
+		stompDecoder = new StompDecoder();
+		decoders = new HashMap!(string, BufferingStompDecoder)();
+		stompAuthentications = new HashMap!(string, Principal)();
+	}
 
 
 	/**
@@ -201,20 +208,20 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 	 * Handle incoming WebSocket messages from clients.
 	 */
 	void handleMessageFromClient(WebSocketSession session,
-			WebSocketMessage<?> webSocketMessage, MessageChannel outputChannel) {
+			WebSocketFrame webSocketMessage, MessageChannel outputChannel) {
 
 		List!(Message!(byte[])) messages;
 		try {
-			ByteBuffer byteBuffer;
-			if (webSocketMessage instanceof TextMessage) {
-				byteBuffer = ByteBuffer.wrap(((TextMessage) webSocketMessage).asBytes());
-			}
-			else if (webSocketMessage instanceof BinaryMessage) {
-				byteBuffer = ((BinaryMessage) webSocketMessage).getPayload();
-			}
-			else {
-				return;
-			}
+			ByteBuffer byteBuffer = webSocketMessage.getPayload();
+			// if (webSocketMessage instanceof TextMessage) {
+			// 	byteBuffer = ByteBuffer.wrap(((TextMessage) webSocketMessage).asBytes());
+			// }
+			// else if (webSocketMessage instanceof BinaryMessage) {
+			// 	byteBuffer = ((BinaryMessage) webSocketMessage).getPayload();
+			// }
+			// else {
+			// 	return;
+			// }
 
 			BufferingStompDecoder decoder = this.decoders.get(session.getId());
 			if (decoder is null) {
@@ -225,26 +232,26 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 			if (messages.isEmpty()) {
 				version(HUNT_DEBUG) {
 					trace("Incomplete STOMP frame content received in session " ~
-							session ~ ", bufferSize=" ~ decoder.getBufferSize() +
-							", bufferSizeLimit=" ~ decoder.getBufferSizeLimit() ~ ".");
+							session.toString() ~ ", bufferSize=" ~ to!string(decoder.getBufferSize()) ~
+							", bufferSizeLimit=" ~ to!string(decoder.getBufferSizeLimit()) ~ ".");
 				}
 				return;
 			}
 		}
 		catch (Throwable ex) {
 			version(HUNT_DEBUG) {
-				errorf("Failed to parse " ~ webSocketMessage +
-						" in session " ~ session.getId() ~ ". Sending STOMP ERROR to client.", ex);
+				errorf("Failed to parse " ~ webSocketMessage.toString() ~
+						" in session " ~ session.getId() ~ ". Sending STOMP ERROR to client.\n", ex);
 			}
 			handleError(session, ex, null);
 			return;
 		}
 
-		for (Message!(byte[]) message : messages) {
+		foreach (Message!(byte[]) message ; messages) {
 			try {
 				StompHeaderAccessor headerAccessor =
-						MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-				Assert.state(headerAccessor !is null, "No StompHeaderAccessor");
+						MessageHeaderAccessor.getAccessor!(StompHeaderAccessor)(message);
+				assert(headerAccessor !is null, "No StompHeaderAccessor");
 
 				headerAccessor.setSessionId(session.getId());
 				headerAccessor.setSessionAttributes(session.getAttributes());
@@ -324,7 +331,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 		}
 
 		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-		Assert.state(accessor !is null, "No StompHeaderAccessor");
+		assert(accessor !is null, "No StompHeaderAccessor");
 		sendToClient(session, accessor, message.getPayload());
 	}
 
@@ -423,7 +430,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 			Message!(byte[]) errorMessage = getErrorHandler().handleErrorMessageToClient((Message!(byte[])) message);
 			if (errorMessage !is null) {
 				accessor = MessageHeaderAccessor.getAccessor(errorMessage, StompHeaderAccessor.class);
-				Assert.state(accessor !is null, "No StompHeaderAccessor");
+				assert(accessor !is null, "No StompHeaderAccessor");
 				payload = errorMessage.getPayload();
 			}
 		}
@@ -630,11 +637,11 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 
 	// private static class Stats {
 
-	// 	private final AtomicInteger connect = new AtomicInteger();
+	// 	private AtomicInteger connect = new AtomicInteger();
 
-	// 	private final AtomicInteger connected = new AtomicInteger();
+	// 	private AtomicInteger connected = new AtomicInteger();
 
-	// 	private final AtomicInteger disconnect = new AtomicInteger();
+	// 	private AtomicInteger disconnect = new AtomicInteger();
 
 	// 	void incrementConnectCount() {
 	// 		this.connect.incrementAndGet();

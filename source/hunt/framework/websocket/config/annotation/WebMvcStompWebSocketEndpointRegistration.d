@@ -64,7 +64,7 @@ class WebMvcStompWebSocketEndpointRegistration : StompWebSocketEndpointRegistrat
 
 	this(string[] paths, WebSocketHandler webSocketHandler, TaskScheduler sockJsTaskScheduler) {
 
-		Assert.notEmpty(paths, "No paths specified");
+		assert(paths, "No paths specified");
 		assert(webSocketHandler, "WebSocketHandler must not be null");
 
 		this.paths = paths;

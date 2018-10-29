@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.simp.stomp;
+module hunt.framework.messaging.simp.stomp.StompFrameHandler;
 
-import java.lang.reflect.Type;
-
+import hunt.framework.messaging.simp.stomp.StompHeaders;
 
 
 /**
@@ -33,7 +32,7 @@ interface StompFrameHandler {
 	 * type of Object the payload should be converted to.
 	 * @param headers the headers of a message
 	 */
-	Type getPayloadType(StompHeaders headers);
+	TypeInfo getPayloadType(StompHeaders headers);
 
 	/**
 	 * Handle a STOMP frame with the payload converted to the target type returned

@@ -17,16 +17,18 @@
 module hunt.framework.websocket.messaging.SubProtocolHandler;
 
 import hunt.container.List;
-import hunt.http.codec.websocket.frame.Frame;
+import hunt.http.codec.websocket.frame.WebSocketFrame;
+// import hunt.http.codec.websocket.frame.Frame;
 import hunt.http.codec.websocket.model.CloseStatus;
 import hunt.http.codec.websocket.stream.WebSocketConnection;
+
 
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageChannel;
 // import hunt.framework.websocket.WebSocketMessage;
 // import hunt.framework.websocket.WebSocketSession;
 
-alias WebSocketMessage = Frame;
+alias WebSocketMessage = WebSocketFrame;
 alias WebSocketSession = WebSocketConnection;
 
 /**

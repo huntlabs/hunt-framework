@@ -302,7 +302,7 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 	private void updateUserDestinationResolver(AbstractBrokerMessageHandler handler) {
 		string[] prefixes = handler.getDestinationPrefixes();
 		// if (!prefixes.isEmpty() && !prefixes.iterator().next().startsWith("/")) {
-        if(prefixes.length > 0 && !prefixes[0].startsWith("/"))
+        if(prefixes.length > 0 && !prefixes[0].startsWith("/")) {
 			(cast(DefaultUserDestinationResolver) userDestinationResolver()).setRemoveLeadingSlash(true);
 		}
 	}
@@ -314,7 +314,7 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 		if (handler is null) {
 			return null;
 		}
-		Map!(string, MessageHandler) subscriptions = new HashMap<>(4);
+		Map!(string, MessageHandler) subscriptions = new HashMap!(string, MessageHandler)(4);
 		string destination = getBrokerRegistry().getUserDestinationBroadcast();
 		if (destination !is null) {
 			subscriptions.put(destination, userDestinationMessageHandler());
@@ -338,62 +338,60 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 		}
 		return handler;
 	}
-
 	
 	
-	MessageHandler userRegistryMessageHandler() {
-		if (getBrokerRegistry().getUserRegistryBroadcast() is null) {
-			return null;
-		}
-		SimpUserRegistry userRegistry = userRegistry();
-		Assert.isInstanceOf(MultiServerUserRegistry.class, userRegistry, "MultiServerUserRegistry required");
-		return new UserRegistryMessageHandler((MultiServerUserRegistry) userRegistry,
-				brokerMessagingTemplate(), getBrokerRegistry().getUserRegistryBroadcast(),
-				messageBrokerTaskScheduler());
-	}
+	// MessageHandler userRegistryMessageHandler() {
+	// 	if (getBrokerRegistry().getUserRegistryBroadcast() is null) {
+	// 		return null;
+	// 	}
+	// 	SimpUserRegistry userRegistry = userRegistry();
+	// 	Assert.isInstanceOf(MultiServerUserRegistry.class, userRegistry, "MultiServerUserRegistry required");
+	// 	return new UserRegistryMessageHandler((MultiServerUserRegistry) userRegistry,
+	// 			brokerMessagingTemplate(), getBrokerRegistry().getUserRegistryBroadcast(),
+	// 			messageBrokerTaskScheduler());
+	// }
 
 	// Expose alias for 4.1 compatibility
-	(name = {"messageBrokerTaskScheduler", "messageBrokerSockJsTaskScheduler"})
-	ThreadPoolTaskScheduler messageBrokerTaskScheduler() {
-		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-		scheduler.setThreadNamePrefix("MessageBroker-");
-		scheduler.setPoolSize(Runtime.getRuntime().availableProcessors());
-		scheduler.setRemoveOnCancelPolicy(true);
-		return scheduler;
-	}
+	// ThreadPoolTaskScheduler messageBrokerTaskScheduler() {
+	// 	ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+	// 	scheduler.setThreadNamePrefix("MessageBroker-");
+	// 	scheduler.setPoolSize(Runtime.getRuntime().availableProcessors());
+	// 	scheduler.setRemoveOnCancelPolicy(true);
+	// 	return scheduler;
+	// }
 
 	
 	SimpMessagingTemplate brokerMessagingTemplate() {
-		SimpMessagingTemplate template = new SimpMessagingTemplate(brokerChannel());
+		SimpMessagingTemplate t = new SimpMessagingTemplate(brokerChannel());
 		string prefix = getBrokerRegistry().getUserDestinationPrefix();
 		if (prefix !is null) {
-			template.setUserDestinationPrefix(prefix);
+			t.setUserDestinationPrefix(prefix);
 		}
-		template.setMessageConverter(brokerMessageConverter());
-		return template;
+		t.setMessageConverter(brokerMessageConverter());
+		return t;
 	}
 
 	
 	CompositeMessageConverter brokerMessageConverter() {
-		List!(MessageConverter) converters = new ArrayList<>();
-		 registerDefaults = configureMessageConverters(converters);
+		MessageConverter[] converters;
+		bool registerDefaults = configureMessageConverters(converters);
 		if (registerDefaults) {
-			converters.add(new StringMessageConverter());
-			converters.add(new ByteArrayMessageConverter());
-			if (jackson2Present) {
-				converters.add(createJacksonConverter());
-			}
+			converters ~= new StringMessageConverter();
+			converters ~= new ByteArrayMessageConverter();
+			// if (jackson2Present) {
+			// 	converters.add(createJacksonConverter());
+			// }
 		}
 		return new CompositeMessageConverter(converters);
 	}
 
-	protected MappingJackson2MessageConverter createJacksonConverter() {
-		DefaultContentTypeResolver resolver = new DefaultContentTypeResolver();
-		resolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
-		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
-		converter.setContentTypeResolver(resolver);
-		return converter;
-	}
+	// protected MappingJackson2MessageConverter createJacksonConverter() {
+	// 	DefaultContentTypeResolver resolver = new DefaultContentTypeResolver();
+	// 	resolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
+	// 	MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
+	// 	converter.setContentTypeResolver(resolver);
+	// 	return converter;
+	// }
 
 	/**
 	 * Override this method to add custom message converters.
@@ -401,47 +399,46 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 	 * @return {@code true} if default message converters should be added to list,
 	 * {@code false} if no more converters should be added.
 	 */
-	protected bool configureMessageConverters(List!(MessageConverter) messageConverters) {
+	protected bool configureMessageConverters(MessageConverter[] messageConverters) {
 		return true;
 	}
 
 	
-	UserDestinationResolver userDestinationResolver() {
-		DefaultUserDestinationResolver resolver = new DefaultUserDestinationResolver(userRegistry());
-		string prefix = getBrokerRegistry().getUserDestinationPrefix();
-		if (prefix !is null) {
-			resolver.setUserDestinationPrefix(prefix);
-		}
-		return resolver;
-	}
+	// UserDestinationResolver userDestinationResolver() {
+	// 	DefaultUserDestinationResolver resolver = new DefaultUserDestinationResolver(userRegistry());
+	// 	string prefix = getBrokerRegistry().getUserDestinationPrefix();
+	// 	if (prefix !is null) {
+	// 		resolver.setUserDestinationPrefix(prefix);
+	// 	}
+	// 	return resolver;
+	// }
 
 	
 	
-	SimpUserRegistry userRegistry() {
-		SimpUserRegistry registry = createLocalUserRegistry();
-		if (registry is null) {
-			registry = createLocalUserRegistry(getBrokerRegistry().getUserRegistryOrder());
-		}
-		 broadcast = getBrokerRegistry().getUserRegistryBroadcast() !is null;
-		return (broadcast ? new MultiServerUserRegistry(registry) : registry);
-	}
+	// SimpUserRegistry userRegistry() {
+	// 	SimpUserRegistry registry = createLocalUserRegistry();
+	// 	if (registry is null) {
+	// 		registry = createLocalUserRegistry(getBrokerRegistry().getUserRegistryOrder());
+	// 	}
+	// 	 broadcast = getBrokerRegistry().getUserRegistryBroadcast() !is null;
+	// 	return (broadcast ? new MultiServerUserRegistry(registry) : registry);
+	// }
 
 	/**
 	 * Create the user registry that provides access to local users.
-	 * @deprecated as of 5.1 in favor of {@link #createLocalUserRegistry(Integer)}
+	 * @deprecated as of 5.1 in favor of {@link #createLocalUserRegistry(int)}
 	 */
-	@Deprecated
-	
-	protected SimpUserRegistry createLocalUserRegistry() {
-		return null;
-	}
+	// @Deprecated
+	// protected SimpUserRegistry createLocalUserRegistry() {
+	// 	return null;
+	// }
 
 	/**
 	 * Create the user registry that provides access to local users.
 	 * @param order the order to use as a {@link SmartApplicationListener}.
 	 * @since 5.1
 	 */
-	protected abstract SimpUserRegistry createLocalUserRegistry(Integer order);
+	// protected abstract SimpUserRegistry createLocalUserRegistry(int order);
 
 	/**
 	 * Return a {@link hunt.framework.validation.Validator
@@ -457,45 +454,45 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 	 * <li>returning a no-op Validator instance</li>
 	 * </ul>
 	 */
-	protected Validator simpValidator() {
-		Validator validator = getValidator();
-		if (validator is null) {
-			if (this.applicationContext !is null && this.applicationContext.containsBean(MVC_VALIDATOR_NAME)) {
-				validator = this.applicationContext.getBean(MVC_VALIDATOR_NAME, Validator.class);
-			}
-			else if (ClassUtils.isPresent("javax.validation.Validator", getClass().getClassLoader())) {
-				Class<?> clazz;
-				try {
-					string className = "hunt.framework.validation.beanvalidation.OptionalValidatorFactoryBean";
-					clazz = ClassUtils.forName(className, AbstractMessageBrokerConfiguration.class.getClassLoader());
-				}
-				catch (Throwable ex) {
-					throw new BeanInitializationException("Could not find default validator class", ex);
-				}
-				validator = (Validator) BeanUtils.instantiateClass(clazz);
-			}
-			else {
-				validator = new Validator() {
-					override
-					bool supports(Class<?> clazz) {
-						return false;
-					}
-					override
-					void validate(Object target, Errors errors) {
-					}
-				};
-			}
-		}
-		return validator;
-	}
+	// protected Validator simpValidator() {
+	// 	Validator validator = getValidator();
+	// 	if (validator is null) {
+	// 		if (this.applicationContext !is null && this.applicationContext.containsBean(MVC_VALIDATOR_NAME)) {
+	// 			validator = this.applicationContext.getBean(MVC_VALIDATOR_NAME, Validator.class);
+	// 		}
+	// 		else if (ClassUtils.isPresent("javax.validation.Validator", getClass().getClassLoader())) {
+	// 			Class<?> clazz;
+	// 			try {
+	// 				string className = "hunt.framework.validation.beanvalidation.OptionalValidatorFactoryBean";
+	// 				clazz = ClassUtils.forName(className, AbstractMessageBrokerConfiguration.class.getClassLoader());
+	// 			}
+	// 			catch (Throwable ex) {
+	// 				throw new BeanInitializationException("Could not find default validator class", ex);
+	// 			}
+	// 			validator = (Validator) BeanUtils.instantiateClass(clazz);
+	// 		}
+	// 		else {
+	// 			validator = new Validator() {
+	// 				override
+	// 				bool supports(Class<?> clazz) {
+	// 					return false;
+	// 				}
+	// 				override
+	// 				void validate(Object target, Errors errors) {
+	// 				}
+	// 			};
+	// 		}
+	// 	}
+	// 	return validator;
+	// }
 
 	/**
 	 * Override this method to provide a custom {@link Validator}.
 	 * @since 4.0.1
 	 */
 	
-	Validator getValidator() {
-		return null;
-	}
+	// Validator getValidator() {
+	// 	return null;
+	// }
 
 }

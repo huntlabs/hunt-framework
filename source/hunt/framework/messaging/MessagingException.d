@@ -153,3 +153,24 @@ class MissingSessionUserException : MessagingException {
 	}
 
 }
+
+
+class MessageConversionException : MessagingException {
+
+	this(string description) {
+		super(description);
+	}
+
+	this(string description, Throwable cause) {
+		super(description, cause);
+	}
+
+	this(MessageBase failedMessage, string description) {
+		super(failedMessage, description);
+	}
+
+	this(MessageBase failedMessage, string description, Throwable cause) {
+		super(failedMessage, description, cause);
+	}
+
+}

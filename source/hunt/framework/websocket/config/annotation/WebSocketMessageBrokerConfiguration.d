@@ -139,13 +139,14 @@ class WebSocketMessageBrokerConfiguration : AbstractMessageBrokerConfiguration {
 		stompWebSocketHandlerMapping();
 
 		WebSocketMessageBrokerStats stats = new WebSocketMessageBrokerStats();
-		stats.setSubProtocolWebSocketHandler((SubProtocolWebSocketHandler) subProtocolWebSocketHandler());
-		if (relayBean instanceof StompBrokerRelayMessageHandler) {
-			stats.setStompBrokerRelay((StompBrokerRelayMessageHandler) relayBean);
+		stats.setSubProtocolWebSocketHandler(cast(SubProtocolWebSocketHandler) subProtocolWebSocketHandler());
+		auto rb = cast(StompBrokerRelayMessageHandler) relayBean;
+		if (rb !is null) {
+			stats.setStompBrokerRelay(rb);
 		}
 		stats.setInboundChannelExecutor(clientInboundChannelExecutor());
 		stats.setOutboundChannelExecutor(clientOutboundChannelExecutor());
-		stats.setSockJsTaskScheduler(messageBrokerTaskScheduler());
+		// stats.setSockJsTaskScheduler(messageBrokerTaskScheduler());
 		return stats;
 	}
 

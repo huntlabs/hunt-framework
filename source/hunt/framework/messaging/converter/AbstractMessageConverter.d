@@ -25,8 +25,8 @@ import hunt.framework.messaging.support.MessageHeaderAccessor;
 import hunt.logging;
 import hunt.container;
 
+import hunt.http.codec.http.model.MimeTypes;
 
-// import hunt.framework.util.MimeType;
 
 /**
  * Abstract base class for {@link SmartMessageConverter} implementations including
@@ -39,138 +39,133 @@ import hunt.container;
  * @author Juergen Hoeller
  * @since 4.0
  */
-abstract class AbstractMessageConverter(T) : SmartMessageConverter!T {
+abstract class AbstractMessageConverter : SmartMessageConverter {
 
-	
+	private MimeType[] supportedMimeTypes;
 
-	// private final List!(MimeType) supportedMimeTypes;
-
-	
 	// private ContentTypeResolver contentTypeResolver = new DefaultContentTypeResolver();
 
-	// private bool strictContentTypeMatch = false;
+	private bool strictContentTypeMatch = false;
 
 	// private Class<?> serializedPayloadClass = byte[].class;
 
 
-	// /**
-	//  * Construct an {@code AbstractMessageConverter} supporting a single MIME type.
-	//  * @param supportedMimeType the supported MIME type
-	//  */
-	// protected AbstractMessageConverter(MimeType supportedMimeType) {
-	// 	assert(supportedMimeType, "supportedMimeType is required");
-	// 	this.supportedMimeTypes = Collections.<MimeType>singletonList(supportedMimeType);
-	// }
+	/**
+	 * Construct an {@code AbstractMessageConverter} supporting a single MIME type.
+	 * @param supportedMimeType the supported MIME type
+	 */
+	protected this(MimeType supportedMimeType) {
+		assert(supportedMimeType, "supportedMimeType is required");
+		this.supportedMimeTypes = [supportedMimeType];
+	}
 
-	// /**
-	//  * Construct an {@code AbstractMessageConverter} supporting multiple MIME types.
-	//  * @param supportedMimeTypes the supported MIME types
-	//  */
-	// protected AbstractMessageConverter(Collection!(MimeType) supportedMimeTypes) {
-	// 	assert(supportedMimeTypes, "supportedMimeTypes must not be null");
-	// 	this.supportedMimeTypes = new ArrayList<>(supportedMimeTypes);
-	// }
+	/**
+	 * Construct an {@code AbstractMessageConverter} supporting multiple MIME types.
+	 * @param supportedMimeTypes the supported MIME types
+	 */
+	protected this(MimeType[] supportedMimeTypes) {
+		assert(supportedMimeTypes.length>0, "supportedMimeTypes must not be null");
+		this.supportedMimeTypes = supportedMimeTypes;
+	}
 
 
-	// /**
-	//  * Return the supported MIME types.
-	//  */
-	// public List!(MimeType) getSupportedMimeTypes() {
-	// 	return Collections.unmodifiableList(this.supportedMimeTypes);
-	// }
+	/**
+	 * Return the supported MIME types.
+	 */
+	MimeType[] getSupportedMimeTypes() {
+		return this.supportedMimeTypes;
+	}
 
-	// /**
-	//  * Configure the {@link ContentTypeResolver} to use to resolve the content
-	//  * type of an input message.
-	//  * <p>Note that if no resolver is configured, then
-	//  * {@link #setStrictContentTypeMatch() strictContentTypeMatch} should
-	//  * be left as {@code false} (the default) or otherwise this converter will
-	//  * ignore all messages.
-	//  * <p>By default, a {@code DefaultContentTypeResolver} instance is used.
-	//  */
-	// public void setContentTypeResolver(ContentTypeResolver resolver) {
-	// 	this.contentTypeResolver = resolver;
-	// }
+	/**
+	 * Configure the {@link ContentTypeResolver} to use to resolve the content
+	 * type of an input message.
+	 * <p>Note that if no resolver is configured, then
+	 * {@link #setStrictContentTypeMatch() strictContentTypeMatch} should
+	 * be left as {@code false} (the default) or otherwise this converter will
+	 * ignore all messages.
+	 * <p>By default, a {@code DefaultContentTypeResolver} instance is used.
+	 */
+	void setContentTypeResolver(ContentTypeResolver resolver) {
+		this.contentTypeResolver = resolver;
+	}
 
-	// /**
-	//  * Return the configured {@link ContentTypeResolver}.
-	//  */
+	/**
+	 * Return the configured {@link ContentTypeResolver}.
+	 */
 	
-	// public ContentTypeResolver getContentTypeResolver() {
-	// 	return this.contentTypeResolver;
-	// }
+	ContentTypeResolver getContentTypeResolver() {
+		return this.contentTypeResolver;
+	}
 
-	// /**
-	//  * Whether this converter should convert messages for which no content type
-	//  * could be resolved through the configured
-	//  * {@link hunt.framework.messaging.converter.ContentTypeResolver}.
-	//  * <p>A converter can configured to be strict only when a
-	//  * {@link #setContentTypeResolver contentTypeResolver} is configured and the
-	//  * list of {@link #getSupportedMimeTypes() supportedMimeTypes} is not be empty.
-	//  * <p>When this flag is set to {@code true}, {@link #supportsMimeType(MessageHeaders)}
-	//  * will return {@code false} if the {@link #setContentTypeResolver contentTypeResolver}
-	//  * is not defined or if no content-type header is present.
-	//  */
-	// public void setStrictContentTypeMatch( strictContentTypeMatch) {
-	// 	if (strictContentTypeMatch) {
-	// 		Assert.notEmpty(getSupportedMimeTypes(), "Strict match requires non-empty list of supported mime types");
-	// 		assert(getContentTypeResolver(), "Strict match requires ContentTypeResolver");
-	// 	}
-	// 	this.strictContentTypeMatch = strictContentTypeMatch;
-	// }
+	/**
+	 * Whether this converter should convert messages for which no content type
+	 * could be resolved through the configured
+	 * {@link hunt.framework.messaging.converter.ContentTypeResolver}.
+	 * <p>A converter can configured to be strict only when a
+	 * {@link #setContentTypeResolver contentTypeResolver} is configured and the
+	 * list of {@link #getSupportedMimeTypes() supportedMimeTypes} is not be empty.
+	 * <p>When this flag is set to {@code true}, {@link #supportsMimeType(MessageHeaders)}
+	 * will return {@code false} if the {@link #setContentTypeResolver contentTypeResolver}
+	 * is not defined or if no content-type header is present.
+	 */
+	void setStrictContentTypeMatch( strictContentTypeMatch) {
+		if (strictContentTypeMatch) {
+			assert(getSupportedMimeTypes(), "Strict match requires non-empty list of supported mime types");
+			assert(getContentTypeResolver(), "Strict match requires ContentTypeResolver");
+		}
+		this.strictContentTypeMatch = strictContentTypeMatch;
+	}
 
-	// /**
-	//  * Whether content type resolution must produce a value that matches one of
-	//  * the supported MIME types.
-	//  */
-	// bool isStrictContentTypeMatch() {
-	// 	return this.strictContentTypeMatch;
-	// }
+	/**
+	 * Whether content type resolution must produce a value that matches one of
+	 * the supported MIME types.
+	 */
+	bool isStrictContentTypeMatch() {
+		return this.strictContentTypeMatch;
+	}
 
-	// /**
-	//  * Configure the preferred serialization class to use (byte[] or string) when
-	//  * converting an Object payload to a {@link Message}.
-	//  * <p>The default value is byte[].
-	//  * @param payloadClass either byte[] or string
-	//  */
-	// public void setSerializedPayloadClass(Class<?> payloadClass) {
+	/**
+	 * Configure the preferred serialization class to use (byte[] or string) when
+	 * converting an Object payload to a {@link Message}.
+	 * <p>The default value is byte[].
+	 * @param payloadClass either byte[] or string
+	 */
+	// void setSerializedPayloadClass(Class<?> payloadClass) {
 	// 	assert(byte[].class == payloadClass || string.class == payloadClass,
 	// 			() -> "Payload class must be byte[] or string: " ~ payloadClass);
 	// 	this.serializedPayloadClass = payloadClass;
 	// }
 
-	// /**
-	//  * Return the configured preferred serialization payload class.
-	//  */
-	// public Class<?> getSerializedPayloadClass() {
+	/**
+	 * Return the configured preferred serialization payload class.
+	 */
+	// Class<?> getSerializedPayloadClass() {
 	// 	return this.serializedPayloadClass;
 	// }
 
 
-	// /**
-	//  * Returns the default content type for the payload. Called when
-	//  * {@link #toMessage(Object, MessageHeaders)} is invoked without message headers or
-	//  * without a content type header.
-	//  * <p>By default, this returns the first element of the {@link #getSupportedMimeTypes()
-	//  * supportedMimeTypes}, if any. Can be overridden in sub-classes.
-	//  * @param payload the payload being converted to message
-	//  * @return the content type, or {@code null} if not known
-	//  */
+	/**
+	 * Returns the default content type for the payload. Called when
+	 * {@link #toMessage(Object, MessageHeaders)} is invoked without message headers or
+	 * without a content type header.
+	 * <p>By default, this returns the first element of the {@link #getSupportedMimeTypes()
+	 * supportedMimeTypes}, if any. Can be overridden in sub-classes.
+	 * @param payload the payload being converted to message
+	 * @return the content type, or {@code null} if not known
+	 */
 	
-	// protected MimeType getDefaultContentType(Object payload) {
-	// 	List!(MimeType) mimeTypes = getSupportedMimeTypes();
-	// 	return (!mimeTypes.isEmpty() ? mimeTypes.get(0) : null);
-	// }
+	protected MimeType getDefaultContentType(Object payload) {
+		MimeType[] mimeTypes = getSupportedMimeTypes();
+		return (mimeTypes.length >0 ? mimeTypes[0] : null);
+	}
 
 	// override
-	
-	// public final Object fromMessage(MessageBase message, Class<?> targetClass) {
+	// final Object fromMessage(MessageBase message, Class<?> targetClass) {
 	// 	return fromMessage(message, targetClass, null);
 	// }
 
 	// override
-	
-	// public final Object fromMessage(MessageBase message, Class<?> targetClass, Object conversionHint) {
+	// final Object fromMessage(MessageBase message, Class<?> targetClass, Object conversionHint) {
 	// 	if (!canConvertFrom(message, targetClass)) {
 	// 		return null;
 	// 	}
@@ -183,13 +178,12 @@ abstract class AbstractMessageConverter(T) : SmartMessageConverter!T {
 
 	// override
 	
-	// public final MessageBase toMessage(Object payload, MessageHeaders headers) {
+	// final MessageBase toMessage(Object payload, MessageHeaders headers) {
 	// 	return toMessage(payload, headers, null);
 	// }
 
 	// override
-	
-	// public final MessageBase toMessage(Object payload, MessageHeaders headers, Object conversionHint) {
+	// final MessageBase toMessage(Object payload, MessageHeaders headers, Object conversionHint) {
 	// 	if (!canConvertTo(payload, headers)) {
 	// 		return null;
 	// 	}
@@ -224,45 +218,45 @@ abstract class AbstractMessageConverter(T) : SmartMessageConverter!T {
 	// 	return (supports(payload.getClass()) && supportsMimeType(headers));
 	// }
 
-	// protected bool supportsMimeType(MessageHeaders headers) {
-	// 	if (getSupportedMimeTypes().isEmpty()) {
-	// 		return true;
-	// 	}
-	// 	MimeType mimeType = getMimeType(headers);
-	// 	if (mimeType is null) {
-	// 		return !isStrictContentTypeMatch();
-	// 	}
-	// 	for (MimeType current : getSupportedMimeTypes()) {
-	// 		if (current.getType().equals(mimeType.getType()) && current.getSubtype().equals(mimeType.getSubtype())) {
-	// 			return true;
-	// 		}
-	// 	}
-	// 	return false;
-	// }
+	protected bool supportsMimeType(MessageHeaders headers) {
+		if (getSupportedMimeTypes().isEmpty()) {
+			return true;
+		}
+		MimeType mimeType = getMimeType(headers);
+		if (mimeType is null) {
+			return !isStrictContentTypeMatch();
+		}
+		foreach (MimeType current ; getSupportedMimeTypes()) {
+			if (current.getType().equals(mimeType.getType()) && current.getSubtype().equals(mimeType.getSubtype())) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	
-	// protected MimeType getMimeType(MessageHeaders headers) {
-	// 	return (headers !is null && this.contentTypeResolver !is null ? this.contentTypeResolver.resolve(headers) : null);
-	// }
+	protected MimeType getMimeType(MessageHeaders headers) {
+		return (headers !is null && this.contentTypeResolver !is null ? this.contentTypeResolver.resolve(headers) : null);
+	}
 
 
-	// /**
-	//  * Whether the given class is supported by this converter.
-	//  * @param clazz the class to test for support
-	//  * @return {@code true} if supported; {@code false} otherwise
-	//  */
+	/**
+	 * Whether the given class is supported by this converter.
+	 * @param clazz the class to test for support
+	 * @return {@code true} if supported; {@code false} otherwise
+	 */
 	// protected abstract  supports(Class<?> clazz);
 
-	// /**
-	//  * Convert the message payload from serialized form to an Object.
-	//  * @param message the input message
-	//  * @param targetClass the target class for the conversion
-	//  * @param conversionHint an extra object passed to the {@link MessageConverter},
-	//  * e.g. the associated {@code MethodParameter} (may be {@code null}}
-	//  * @return the result of the conversion, or {@code null} if the converter cannot
-	//  * perform the conversion
-	//  * @since 4.2
-	//  */
+	/**
+	 * Convert the message payload from serialized form to an Object.
+	 * @param message the input message
+	 * @param targetClass the target class for the conversion
+	 * @param conversionHint an extra object passed to the {@link MessageConverter},
+	 * e.g. the associated {@code MethodParameter} (may be {@code null}}
+	 * @return the result of the conversion, or {@code null} if the converter cannot
+	 * perform the conversion
+	 * @since 4.2
+	 */
 	
 	// protected Object convertFromInternal(
 	// 		MessageBase message, Class<?> targetClass, Object conversionHint) {
@@ -270,16 +264,16 @@ abstract class AbstractMessageConverter(T) : SmartMessageConverter!T {
 	// 	return null;
 	// }
 
-	// /**
-	//  * Convert the payload object to serialized form.
-	//  * @param payload the Object to convert
-	//  * @param headers optional headers for the message (may be {@code null})
-	//  * @param conversionHint an extra object passed to the {@link MessageConverter},
-	//  * e.g. the associated {@code MethodParameter} (may be {@code null}}
-	//  * @return the resulting payload for the message, or {@code null} if the converter
-	//  * cannot perform the conversion
-	//  * @since 4.2
-	//  */
+	/**
+	 * Convert the payload object to serialized form.
+	 * @param payload the Object to convert
+	 * @param headers optional headers for the message (may be {@code null})
+	 * @param conversionHint an extra object passed to the {@link MessageConverter},
+	 * e.g. the associated {@code MethodParameter} (may be {@code null}}
+	 * @return the resulting payload for the message, or {@code null} if the converter
+	 * cannot perform the conversion
+	 * @since 4.2
+	 */
 	
 	// protected Object convertToInternal(
 	// 		Object payload, MessageHeaders headers, Object conversionHint) {

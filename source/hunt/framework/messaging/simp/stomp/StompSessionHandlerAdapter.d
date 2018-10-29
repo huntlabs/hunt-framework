@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.simp.stomp;
+module hunt.framework.messaging.simp.stomp.StompSessionHandlerAdapter;
 
-import java.lang.reflect.Type;
-
+// import java.lang.reflect.Type;
+import hunt.framework.messaging.simp.stomp.StompCommand;
+import hunt.framework.messaging.simp.stomp.StompFrameHandler;
+import hunt.framework.messaging.simp.stomp.StompHeaders;
+import hunt.framework.messaging.simp.stomp.StompSessionHandler;
+import hunt.framework.messaging.simp.stomp.StompSession;
 
 
 /**
@@ -28,36 +32,36 @@ import java.lang.reflect.Type;
  * @author Rossen Stoyanchev
  * @since 4.2
  */
-abstract class StompSessionHandlerAdapter implements StompSessionHandler {
+abstract class StompSessionHandlerAdapter : StompSessionHandler {
 
 	/**
 	 * This implementation returns string as the expected payload type
 	 * for STOMP ERROR frames.
 	 */
 	override
-	public Type getPayloadType(StompHeaders headers) {
-		return string.class;
+	TypeInfo getPayloadType(StompHeaders headers) {
+		return typeid(string);
 	}
 
 	/**
 	 * This implementation is empty.
 	 */
 	override
-	public void handleFrame(StompHeaders headers, Object payload) {
+	void handleFrame(StompHeaders headers, Object payload) {
 	}
 
 	/**
 	 * This implementation is empty.
 	 */
 	override
-	public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
+	void afterConnected(StompSession session, StompHeaders connectedHeaders) {
 	}
 
 	/**
 	 * This implementation is empty.
 	 */
 	override
-	public void handleException(StompSession session, StompCommand command,
+	void handleException(StompSession session, StompCommand command,
 			StompHeaders headers, byte[] payload, Throwable exception) {
 	}
 
@@ -65,7 +69,7 @@ abstract class StompSessionHandlerAdapter implements StompSessionHandler {
 	 * This implementation is empty.
 	 */
 	override
-	public void handleTransportError(StompSession session, Throwable exception) {
+	void handleTransportError(StompSession session, Throwable exception) {
 	}
 
 }

@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.simp.stomp;
+module hunt.framework.messaging.simp.stomp.BufferingStompDecoder;
 
-import java.nio.ByteBuffer;
-import hunt.container.Collections;
-import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
-
-
+import hunt.framework.messaging.exception;
 import hunt.framework.messaging.Message;
 
-import hunt.framework.util.LinkedMultiValueMap;
-import hunt.framework.util.MultiValueMap;
+import hunt.container;
+import hunt.lang.Integer;
+
+import std.algorithm;
+import std.conv;
+import std.container.dlist;
+// import java.nio.ByteBuffer;
+// import java.util.List;
+// import java.util.Queue;
+// import java.util.concurrent.LinkedBlockingQueue;
+
+
+// import hunt.framework.util.LinkedMultiValueMap;
+// import hunt.framework.util.MultiValueMap;
 
 /**
  * An extension of {@link hunt.framework.messaging.simp.stomp.StompDecoder}
@@ -46,14 +52,14 @@ import hunt.framework.util.MultiValueMap;
  * @since 4.0.3
  * @see StompDecoder
  */
-public class BufferingStompDecoder {
+class BufferingStompDecoder {
 
-	private final StompDecoder stompDecoder;
+	private StompDecoder stompDecoder;
 
-	private final int bufferSizeLimit;
+	private int bufferSizeLimit;
 
-	private final Queue!(ByteBuffer) chunks = new LinkedBlockingQueue<>();
-
+	// private Queue!(ByteBuffer) chunks = new LinkedBlockingQueue<>();
+	private DList!(ByteBuffer) chunks;
 	
 	private Integer expectedContentLength;
 
@@ -63,7 +69,7 @@ public class BufferingStompDecoder {
 	 * @param stompDecoder the target decoder to wrap
 	 * @param bufferSizeLimit the buffer size limit
 	 */
-	public BufferingStompDecoder(StompDecoder stompDecoder, int bufferSizeLimit) {
+	this(StompDecoder stompDecoder, int bufferSizeLimit) {
 		assert(stompDecoder, "StompDecoder is required");
 		assert(bufferSizeLimit > 0, "Buffer size limit must be greater than 0");
 		this.stompDecoder = stompDecoder;
@@ -74,14 +80,14 @@ public class BufferingStompDecoder {
 	/**
 	 * Return the wrapped {@link StompDecoder}.
 	 */
-	public final StompDecoder getStompDecoder() {
+	final StompDecoder getStompDecoder() {
 		return this.stompDecoder;
 	}
 
 	/**
 	 * Return the configured buffer size limit.
 	 */
-	public final int getBufferSizeLimit() {
+	final int getBufferSizeLimit() {
 		return this.bufferSizeLimit;
 	}
 
@@ -100,21 +106,21 @@ public class BufferingStompDecoder {
 	 * @return decoded messages or an empty list
 	 * @throws StompConversionException raised in case of decoding issues
 	 */
-	public List!(Message!(byte[])) decode(ByteBuffer newBuffer) {
-		this.chunks.add(newBuffer);
+	List!(Message!(byte[])) decode(ByteBuffer newBuffer) {
+		this.chunks.insertBack(newBuffer);
 		checkBufferLimits();
 
 		Integer contentLength = this.expectedContentLength;
 		if (contentLength !is null && getBufferSize() < contentLength) {
-			return Collections.emptyList();
+			return Collections.emptyList!(Message!(byte[]))();
 		}
 
 		ByteBuffer bufferToDecode = assembleChunksAndReset();
-		MultiValueMap!(string, string) headers = new LinkedMultiValueMap<>();
+		MultiValueMap!(string, string) headers = new LinkedMultiValueMap!(string, string)();
 		List!(Message!(byte[])) messages = this.stompDecoder.decode(bufferToDecode, headers);
 
 		if (bufferToDecode.hasRemaining()) {
-			this.chunks.add(bufferToDecode);
+			this.chunks.insertBack(bufferToDecode);
 			this.expectedContentLength = StompHeaderAccessor.getContentLength(headers);
 		}
 
@@ -123,12 +129,12 @@ public class BufferingStompDecoder {
 
 	private ByteBuffer assembleChunksAndReset() {
 		ByteBuffer result;
-		if (this.chunks.size() == 1) {
-			result = this.chunks.remove();
+		if (this.chunks.count() == 1) {
+			result = this.chunks.front();
 		}
 		else {
 			result = ByteBuffer.allocate(getBufferSize());
-			for (ByteBuffer partial : this.chunks) {
+			foreach (ByteBuffer partial ; this.chunks) {
 				result.put(partial);
 			}
 			result.flip();
@@ -142,8 +148,8 @@ public class BufferingStompDecoder {
 		Integer contentLength = this.expectedContentLength;
 		if (contentLength !is null && contentLength > this.bufferSizeLimit) {
 			throw new StompConversionException(
-					"STOMP 'content-length' header value " ~ this.expectedContentLength +
-					"  exceeds configured buffer size limit " ~ this.bufferSizeLimit);
+					"STOMP 'content-length' header value " ~ this.expectedContentLength.toString() ~
+					"  exceeds configured buffer size limit " ~ this.bufferSizeLimit.to!string());
 		}
 		if (getBufferSize() > this.bufferSizeLimit) {
 			throw new StompConversionException("The configured STOMP buffer size limit of " ~
@@ -154,9 +160,9 @@ public class BufferingStompDecoder {
 	/**
 	 * Calculate the current buffer size.
 	 */
-	public int getBufferSize() {
+	int getBufferSize() {
 		int size = 0;
-		for (ByteBuffer buffer : this.chunks) {
+		foreach (ByteBuffer buffer ; this.chunks) {
 			size = size + buffer.remaining();
 		}
 		return size;
@@ -166,7 +172,7 @@ public class BufferingStompDecoder {
 	 * Get the expected content length of the currently buffered, incomplete STOMP frame.
 	 */
 	
-	public Integer getExpectedContentLength() {
+	int getExpectedContentLength() {
 		return this.expectedContentLength;
 	}
 

@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.simp.stomp;
+module hunt.framework.messaging.simp.stomp.StompSessionHandler;
 
-
+import hunt.framework.messaging.simp.stomp.StompCommand;
+import hunt.framework.messaging.simp.stomp.StompFrameHandler;
+import hunt.framework.messaging.simp.stomp.StompHeaders;
+import hunt.framework.messaging.simp.stomp.StompSession;
 
 /**
  * A contract for client STOMP session lifecycle events including a callback
@@ -33,7 +36,7 @@ module hunt.framework.messaging.simp.stomp;
  * @since 4.2
  * @see StompSessionHandlerAdapter
  */
-interface StompSessionHandler extends StompFrameHandler {
+interface StompSessionHandler : StompFrameHandler {
 
 	/**
 	 * Invoked when the session is ready to use, i.e. after the underlying

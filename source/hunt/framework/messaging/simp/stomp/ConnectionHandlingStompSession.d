@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.simp.stomp;
+module hunt.framework.messaging.simp.stomp.ConnectionHandlingStompSession;
 
-import hunt.framework.messaging.tcp.TcpConnectionHandler;
-import hunt.framework.util.concurrent.ListenableFuture;
+import hunt.framework.messaging.simp.stomp.StompSession;
+
+// import hunt.framework.messaging.tcp.TcpConnectionHandler;
+// import hunt.framework.util.concurrent.ListenableFuture;
 
 /**
  * A {@link StompSession} that implements
@@ -30,11 +32,12 @@ import hunt.framework.util.concurrent.ListenableFuture;
  * @author Rossen Stoyanchev
  * @since 4.2
  */
-interface ConnectionHandlingStompSession extends StompSession, TcpConnectionHandler!(byte[]) {
+interface ConnectionHandlingStompSession : StompSession { // , TcpConnectionHandler!(byte[])
 
 	/**
 	 * Return a future that will complete when the session is ready for use.
 	 */
-	ListenableFuture!(StompSession) getSessionFuture();
+	// ListenableFuture!(StompSession) getSessionFuture();
+	StompSession getSessionFuture();
 
 }

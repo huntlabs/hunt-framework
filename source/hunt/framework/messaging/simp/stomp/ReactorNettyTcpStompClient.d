@@ -14,90 +14,88 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.simp.stomp;
+module hunt.framework.messaging.simp.stomp.ReactorNettyTcpStompClient;
+
+// import hunt.framework.messaging.tcp.TcpOperations;
+// import hunt.framework.messaging.tcp.reactor.ReactorNettyTcpClient;
+
+// import hunt.framework.util.concurrent.ListenableFuture;
+
+// /**
+//  * A STOMP over TCP client that uses {@link ReactorNettyTcpClient}.
+//  *
+//  * @author Rossen Stoyanchev
+//  * @since 5.0
+//  */
+// class ReactorNettyTcpStompClient : StompClientSupport {
+
+// 	private final TcpOperations!(byte[]) tcpClient;
 
 
-import hunt.framework.messaging.simp.SimpLogging;
-import hunt.framework.messaging.tcp.TcpOperations;
-import hunt.framework.messaging.tcp.reactor.ReactorNettyTcpClient;
+// 	/**
+// 	 * Create an instance with host "127.0.0.1" and port 61613.
+// 	 */
+// 	this() {
+// 		this("127.0.0.1", 61613);
+// 	}
 
-import hunt.framework.util.concurrent.ListenableFuture;
+// 	/**
+// 	 * Create an instance with the given host and port.
+// 	 * @param host the host
+// 	 * @param port the port
+// 	 */
+// 	ReactorNettyTcpStompClient(string host, int port) {
+// 		this.tcpClient = initTcpClient(host, port);
+// 	}
 
-/**
- * A STOMP over TCP client that uses {@link ReactorNettyTcpClient}.
- *
- * @author Rossen Stoyanchev
- * @since 5.0
- */
-public class ReactorNettyTcpStompClient extends StompClientSupport {
+// 	/**
+// 	 * Create an instance with a pre-configured TCP client.
+// 	 * @param tcpClient the client to use
+// 	 */
+// 	ReactorNettyTcpStompClient(TcpOperations!(byte[]) tcpClient) {
+// 		assert(tcpClient, "'tcpClient' is required");
+// 		this.tcpClient = tcpClient;
+// 	}
 
-	private final TcpOperations!(byte[]) tcpClient;
-
-
-	/**
-	 * Create an instance with host "127.0.0.1" and port 61613.
-	 */
-	public ReactorNettyTcpStompClient() {
-		this("127.0.0.1", 61613);
-	}
-
-	/**
-	 * Create an instance with the given host and port.
-	 * @param host the host
-	 * @param port the port
-	 */
-	public ReactorNettyTcpStompClient(string host, int port) {
-		this.tcpClient = initTcpClient(host, port);
-	}
-
-	/**
-	 * Create an instance with a pre-configured TCP client.
-	 * @param tcpClient the client to use
-	 */
-	public ReactorNettyTcpStompClient(TcpOperations!(byte[]) tcpClient) {
-		assert(tcpClient, "'tcpClient' is required");
-		this.tcpClient = tcpClient;
-	}
-
-	private static ReactorNettyTcpClient!(byte[]) initTcpClient(string host, int port) {
-		ReactorNettyTcpClient!(byte[]) client = new ReactorNettyTcpClient<>(host, port, new StompReactorNettyCodec());
-		client.setLogger(SimpLogging.forLog(client.getLogger()));
-		return client;
-	}
+// 	private static ReactorNettyTcpClient!(byte[]) initTcpClient(string host, int port) {
+// 		ReactorNettyTcpClient!(byte[]) client = new ReactorNettyTcpClient<>(host, port, new StompReactorNettyCodec());
+// 		client.setLogger(SimpLogging.forLog(client.getLogger()));
+// 		return client;
+// 	}
 
 
-	/**
-	 * Connect and notify the given {@link StompSessionHandler} when connected
-	 * on the STOMP level.
-	 * @param handler the handler for the STOMP session
-	 * @return a ListenableFuture for access to the session when ready for use
-	 */
-	public ListenableFuture!(StompSession) connect(StompSessionHandler handler) {
-		return connect(null, handler);
-	}
+// 	/**
+// 	 * Connect and notify the given {@link StompSessionHandler} when connected
+// 	 * on the STOMP level.
+// 	 * @param handler the handler for the STOMP session
+// 	 * @return a ListenableFuture for access to the session when ready for use
+// 	 */
+// 	ListenableFuture!(StompSession) connect(StompSessionHandler handler) {
+// 		return connect(null, handler);
+// 	}
 
-	/**
-	 * An overloaded version of {@link #connect(StompSessionHandler)} that
-	 * accepts headers to use for the STOMP CONNECT frame.
-	 * @param connectHeaders headers to add to the CONNECT frame
-	 * @param handler the handler for the STOMP session
-	 * @return a ListenableFuture for access to the session when ready for use
-	 */
-	public ListenableFuture!(StompSession) connect(StompHeaders connectHeaders, StompSessionHandler handler) {
-		ConnectionHandlingStompSession session = createSession(connectHeaders, handler);
-		this.tcpClient.connect(session);
-		return session.getSessionFuture();
-	}
+// 	/**
+// 	 * An overloaded version of {@link #connect(StompSessionHandler)} that
+// 	 * accepts headers to use for the STOMP CONNECT frame.
+// 	 * @param connectHeaders headers to add to the CONNECT frame
+// 	 * @param handler the handler for the STOMP session
+// 	 * @return a ListenableFuture for access to the session when ready for use
+// 	 */
+// 	ListenableFuture!(StompSession) connect(StompHeaders connectHeaders, StompSessionHandler handler) {
+// 		ConnectionHandlingStompSession session = createSession(connectHeaders, handler);
+// 		this.tcpClient.connect(session);
+// 		return session.getSessionFuture();
+// 	}
 
-	/**
-	 * Shut down the client and release resources.
-	 */
-	public void shutdown() {
-		this.tcpClient.shutdown();
-	}
+// 	/**
+// 	 * Shut down the client and release resources.
+// 	 */
+// 	void shutdown() {
+// 		this.tcpClient.shutdown();
+// 	}
 
-	override
-	public string toString() {
-		return "ReactorNettyTcpStompClient[" ~ this.tcpClient ~ "]";
-	}
-}
+// 	override
+// 	string toString() {
+// 		return "ReactorNettyTcpStompClient[" ~ this.tcpClient ~ "]";
+// 	}
+// }

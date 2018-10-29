@@ -13,48 +13,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-module hunt.framework.messaging.simp.stomp;
+module hunt.framework.messaging.simp.stomp.StompReactorNettyCodec;
 
-import java.nio.ByteBuffer;
-import java.util.List;
+// import java.nio.ByteBuffer;
+// import java.util.List;
 
-import hunt.framework.messaging.Message;
-import hunt.framework.messaging.tcp.reactor.AbstractNioBufferReactorNettyCodec;
+// import hunt.framework.messaging.Message;
+// import hunt.framework.messaging.tcp.reactor.AbstractNioBufferReactorNettyCodec;
 
-/**
- * Simple delegation to StompDecoder and StompEncoder.
- *
- * @author Rossen Stoyanchev
- * @since 5.0
- */
-public class StompReactorNettyCodec extends AbstractNioBufferReactorNettyCodec!(byte[]) {
+// /**
+//  * Simple delegation to StompDecoder and StompEncoder.
+//  *
+//  * @author Rossen Stoyanchev
+//  * @since 5.0
+//  */
+// public class StompReactorNettyCodec : AbstractNioBufferReactorNettyCodec!(byte[]) {
 
-	private final StompDecoder decoder;
+// 	private final StompDecoder decoder;
 
-	private final StompEncoder encoder;
-
-
-	public StompReactorNettyCodec() {
-		this(new StompDecoder());
-	}
-
-	public StompReactorNettyCodec(StompDecoder decoder) {
-		this(decoder, new StompEncoder());
-	}
-
-	public StompReactorNettyCodec(StompDecoder decoder, StompEncoder encoder) {
-		this.decoder = decoder;
-		this.encoder = encoder;
-	}
+// 	private final StompEncoder encoder;
 
 
-	override
-	protected List!(Message!(byte[])) decodeInternal(ByteBuffer nioBuffer) {
-		return this.decoder.decode(nioBuffer);
-	}
+// 	public StompReactorNettyCodec() {
+// 		this(new StompDecoder());
+// 	}
 
-	protected ByteBuffer encodeInternal(Message!(byte[]) message) {
-		return ByteBuffer.wrap(this.encoder.encode(message));
-	}
+// 	public StompReactorNettyCodec(StompDecoder decoder) {
+// 		this(decoder, new StompEncoder());
+// 	}
 
-}
+// 	public StompReactorNettyCodec(StompDecoder decoder, StompEncoder encoder) {
+// 		this.decoder = decoder;
+// 		this.encoder = encoder;
+// 	}
+
+
+// 	override
+// 	protected List!(Message!(byte[])) decodeInternal(ByteBuffer nioBuffer) {
+// 		return this.decoder.decode(nioBuffer);
+// 	}
+
+// 	protected ByteBuffer encodeInternal(Message!(byte[]) message) {
+// 		return ByteBuffer.wrap(this.encoder.encode(message));
+// 	}
+
+// }

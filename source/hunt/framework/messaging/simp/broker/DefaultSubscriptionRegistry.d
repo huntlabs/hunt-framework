@@ -545,7 +545,7 @@ import hunt.framework.messaging.support.MessageHeaderAccessor;
 // 				MessageHeaders headers = (MessageHeaders) target;
 // 				SimpMessageHeaderAccessor accessor =
 // 						MessageHeaderAccessor.getAccessor(headers, SimpMessageHeaderAccessor.class);
-// 				Assert.state(accessor !is null, "No SimpMessageHeaderAccessor");
+// 				assert(accessor !is null, "No SimpMessageHeaderAccessor");
 // 				if ("destination".equalsIgnoreCase(name)) {
 // 					value = accessor.getDestination();
 // 				}

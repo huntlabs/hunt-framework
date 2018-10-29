@@ -240,19 +240,6 @@ final class Application : ApplicationContext {
     }
     private WebSocketMessageBroker _broker;
 
-    // WebSocketMessageBrokerBuilder stompWebSocket(Action1!(MessageBrokerRegistry) configurer) {
-
-    // }
-    // WebSocketMessageBrokerBuilder stompWebSocket(Action1!(StompEndpointRegistry) configurer) {
-        
-    // }
-
-    // WebSocketMessageBroker stompWebSocket(string path) {            
-    //     WebSocketMessageBroker webSocketBuilder = new WebSocketMessageBroker(this, path);
-    //     messageBrokers.insertBack(webSocketBuilder);
-    //     return webSocketBuilder;
-    // }
-
     private void handleRequest(Request req) nothrow {
         this._dispatcher.dispatch(req);
     }
