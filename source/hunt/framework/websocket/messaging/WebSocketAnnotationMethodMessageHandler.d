@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-module hunt.framework.websocket.messaging;
+module hunt.framework.websocket.messaging.WebSocketAnnotationMethodMessageHandler;
 
-import java.util.ArrayList;
-import java.util.List;
+// import java.util.ArrayList;
+// import java.util.List;
 
 import hunt.framework.context.ApplicationContext;
 import hunt.framework.core.annotation.AnnotationAwareOrderComparator;
@@ -27,7 +27,7 @@ import hunt.framework.messaging.SubscribableChannel;
 import hunt.framework.messaging.handler.MessagingAdviceBean;
 import hunt.framework.messaging.handler.annotation.support.AnnotationExceptionHandlerMethodResolver;
 import hunt.framework.messaging.simp.SimpMessageSendingOperations;
-import hunt.framework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
+import hunt.framework.messaging.simp.annotation.SimpAnnotationMethodMessageHandler;
 import hunt.framework.web.method.ControllerAdviceBean;
 
 /**
@@ -38,9 +38,9 @@ import hunt.framework.web.method.ControllerAdviceBean;
  * @author Rossen Stoyanchev
  * @since 4.2
  */
-public class WebSocketAnnotationMethodMessageHandler extends SimpAnnotationMethodMessageHandler {
+class WebSocketAnnotationMethodMessageHandler : SimpAnnotationMethodMessageHandler {
 
-	public WebSocketAnnotationMethodMessageHandler(SubscribableChannel clientInChannel,
+	this(SubscribableChannel clientInChannel,
 			MessageChannel clientOutChannel, SimpMessageSendingOperations brokerTemplate) {
 
 		super(clientInChannel, clientOutChannel, brokerTemplate);
@@ -48,7 +48,7 @@ public class WebSocketAnnotationMethodMessageHandler extends SimpAnnotationMetho
 
 
 	override
-	public void afterPropertiesSet() {
+	void afterPropertiesSet() {
 		initControllerAdviceCache();
 		super.afterPropertiesSet();
 	}
@@ -59,25 +59,25 @@ public class WebSocketAnnotationMethodMessageHandler extends SimpAnnotationMetho
 			return;
 		}
 		version(HUNT_DEBUG) {
-			logger.trace("Looking for @MessageExceptionHandler mappings: " ~ context);
+			trace("Looking for @MessageExceptionHandler mappings: " ~ (cast(Object)context).toString());
 		}
-		List!(ControllerAdviceBean) beans = ControllerAdviceBean.findAnnotatedBeans(context);
+		ControllerAdviceBean[] beans = ControllerAdviceBean.findAnnotatedBeans(context);
 		AnnotationAwareOrderComparator.sort(beans);
 		initMessagingAdviceCache(MessagingControllerAdviceBean.createFromList(beans));
 	}
 
-	private void initMessagingAdviceCache(List!(MessagingAdviceBean) beans) {
+	private void initMessagingAdviceCache(MessagingAdviceBean[] beans) {
 		if (beans is null) {
 			return;
 		}
-		for (MessagingAdviceBean bean : beans) {
-			Class<?> type = bean.getBeanType();
+		foreach (MessagingAdviceBean bean ; beans) {
+			TypeInfo_Class type = bean.getBeanType();
 			if (type !is null) {
 				AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(type);
 				if (resolver.hasExceptionMappings()) {
 					registerExceptionHandlerAdvice(bean, resolver);
 					version(HUNT_DEBUG) {
-						logger.trace("Detected @MessageExceptionHandler methods in " ~ bean);
+						trace("Detected @MessageExceptionHandler methods in " ~ bean);
 					}
 				}
 			}
@@ -85,45 +85,47 @@ public class WebSocketAnnotationMethodMessageHandler extends SimpAnnotationMetho
 	}
 
 
-	/**
-	 * Adapt ControllerAdviceBean to MessagingAdviceBean.
-	 */
-	private static final class MessagingControllerAdviceBean implements MessagingAdviceBean {
 
-		private final ControllerAdviceBean adviceBean;
+}
 
-		private MessagingControllerAdviceBean(ControllerAdviceBean adviceBean) {
-			this.adviceBean = adviceBean;
-		}
 
-		public static List!(MessagingAdviceBean) createFromList(List!(ControllerAdviceBean) beans) {
-			List!(MessagingAdviceBean) result = new ArrayList<>(beans.size());
-			for (ControllerAdviceBean bean : beans) {
-				result.add(new MessagingControllerAdviceBean(bean));
-			}
-			return result;
-		}
+/**
+ * Adapt ControllerAdviceBean to MessagingAdviceBean.
+ */
+private final class MessagingControllerAdviceBean : MessagingAdviceBean {
 
-		override
-		
-		public Class<?> getBeanType() {
-			return this.adviceBean.getBeanType();
-		}
+	private final ControllerAdviceBean adviceBean;
 
-		override
-		public Object resolveBean() {
-			return this.adviceBean.resolveBean();
-		}
-
-		override
-		public boolisApplicableToBeanType(Class<?> beanType) {
-			return this.adviceBean.isApplicableToBeanType(beanType);
-		}
-
-		override
-		public int getOrder() {
-			return this.adviceBean.getOrder();
-		}
+	private this(ControllerAdviceBean adviceBean) {
+		this.adviceBean = adviceBean;
 	}
 
+	static MessagingAdviceBean[] createFromList(ControllerAdviceBean[] beans) {
+		MessagingAdviceBean[] result;
+		foreach (ControllerAdviceBean bean ; beans) {
+			result ~= new MessagingControllerAdviceBean(bean);
+		}
+		return result;
+	}
+
+	override
+	
+	TypeInfo_Class getBeanType() {
+		return this.adviceBean.getBeanType();
+	}
+
+	override
+	Object resolveBean() {
+		return this.adviceBean.resolveBean();
+	}
+
+	override
+	boolisApplicableToBeanType(TypeInfo_Class beanType) {
+		return this.adviceBean.isApplicableToBeanType(beanType);
+	}
+
+	override
+	int getOrder() {
+		return this.adviceBean.getOrder();
+	}
 }

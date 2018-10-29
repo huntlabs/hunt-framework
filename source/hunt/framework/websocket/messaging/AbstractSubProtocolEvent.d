@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-module hunt.framework.websocket.messaging;
+module hunt.framework.websocket.messaging.AbstractSubProtocolEvent;
 
-import java.security.Principal;
+import hunt.security.Principal;
 
 import hunt.framework.context.ApplicationEvent;
-
 import hunt.framework.messaging.Message;
+import hunt.util.TypeUtils;
 
 
 /**
@@ -31,12 +31,11 @@ import hunt.framework.messaging.Message;
  * @since 4.1
  */
 
-public abstract class AbstractSubProtocolEvent extends ApplicationEvent {
+abstract class AbstractSubProtocolEvent : ApplicationEvent {
 
-	private final Message!(byte[]) message;
-
+	private Message!(byte[]) message;
 	
-	private final Principal user;
+	private Principal user;
 
 
 	/**
@@ -44,7 +43,7 @@ public abstract class AbstractSubProtocolEvent extends ApplicationEvent {
 	 * @param source the component that published the event (never {@code null})
 	 * @param message the incoming message (never {@code null})
 	 */
-	protected AbstractSubProtocolEvent(Object source, Message!(byte[]) message) {
+	protected this(Object source, Message!(byte[]) message) {
 		this(source, message, null);
 	}
 
@@ -53,7 +52,7 @@ public abstract class AbstractSubProtocolEvent extends ApplicationEvent {
 	 * @param source the component that published the event (never {@code null})
 	 * @param message the incoming message (never {@code null})
 	 */
-	protected AbstractSubProtocolEvent(Object source, Message!(byte[]) message, Principal user) {
+	protected this(Object source, Message!(byte[]) message, Principal user) { 
 		super(source);
 		assert(message, "Message must not be null");
 		this.message = message;
@@ -72,7 +71,7 @@ public abstract class AbstractSubProtocolEvent extends ApplicationEvent {
 	 * headers.getPrincipal();
 	 * </pre>
 	 */
-	public Message!(byte[]) getMessage() {
+	Message!(byte[]) getMessage() {
 		return this.message;
 	}
 
@@ -80,13 +79,13 @@ public abstract class AbstractSubProtocolEvent extends ApplicationEvent {
 	 * Return the user for the session associated with the event.
 	 */
 	
-	public Principal getUser() {
+	Principal getUser() {
 		return this.user;
 	}
 
 	override
-	public string toString() {
-		return getClass().getSimpleName() ~ "[" ~ this.message ~ "]";
+	string toString() {
+		return TypeUtils.getSimpleName(typeid(this)) ~ "[" ~ this.message ~ "]";
 	}
 
 }

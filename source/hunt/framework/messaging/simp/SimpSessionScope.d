@@ -25,7 +25,7 @@ module hunt.framework.messaging.simp.SimpSessionScope;
 //  * (e.g. WebSocket session).
 //  *
 //  * <p>Relies on a thread-bound {@link SimpAttributes} instance exported by
-//  * {@link hunt.framework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler}.
+//  * {@link hunt.framework.messaging.simp.annotation.SimpAnnotationMethodMessageHandler}.
 //  *
 //  * @author Rossen Stoyanchev
 //  * @since 4.1

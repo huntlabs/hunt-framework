@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-module hunt.framework.websocket.config.annotation;
+module hunt.framework.websocket.config.annotation.WebSocketHandlerRegistration;
 
 import hunt.http.server.WebSocketHandler;
 import hunt.framework.websocket.server.HandshakeHandler;
@@ -26,13 +26,13 @@ import hunt.framework.websocket.server.HandshakeInterceptor;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface WebSocketHandlerRegistration {
+interface WebSocketHandlerRegistration {
 
 	/**
 	 * Add more handlers that will share the same configuration (interceptors, SockJS
 	 * config, etc).
 	 */
-	WebSocketHandlerRegistration addHandler(WebSocketHandler handler, string... paths);
+	WebSocketHandlerRegistration addHandler(WebSocketHandler handler, string[] paths...);
 
 	/**
 	 * Configure the HandshakeHandler to use.
@@ -42,7 +42,7 @@ public interface WebSocketHandlerRegistration {
 	/**
 	 * Configure interceptors for the handshake request.
 	 */
-	WebSocketHandlerRegistration addInterceptors(HandshakeInterceptor... interceptors);
+	WebSocketHandlerRegistration addInterceptors(HandshakeInterceptor[] interceptors...);
 
 	/**
 	 * Configure allowed {@code Origin} header values. This check is mostly designed for
@@ -61,13 +61,11 @@ public interface WebSocketHandlerRegistration {
 	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
 	 * @see <a href="https://github.com/sockjs/sockjs-client#supported-transports-by-browser-html-served-from-http-or-https">SockJS supported transports by browser</a>
 	 */
-	WebSocketHandlerRegistration setAllowedOrigins(string... origins);
+	WebSocketHandlerRegistration setAllowedOrigins(string[] origins...);
 
 	/**
 	 * Enable SockJS fallback options.
 	 */
-	SockJsServiceRegistration withSockJS();
-
-
+	// SockJsServiceRegistration withSockJS();
 
 }

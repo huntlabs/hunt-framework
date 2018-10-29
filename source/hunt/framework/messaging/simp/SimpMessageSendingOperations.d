@@ -18,7 +18,6 @@ module hunt.framework.messaging.simp.SimpMessageSendingOperations;
 
 import hunt.container.Map;
 
-
 import hunt.framework.messaging.MessagingException;
 import hunt.framework.messaging.core.MessagePostProcessor;
 import hunt.framework.messaging.core.MessageSendingOperations;

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.simp.broker;
+module hunt.framework.messaging.simp.broker.SubscriptionRegistry;
 
 import hunt.framework.messaging.Message;
-import hunt.framework.util.MultiValueMap;
+import hunt.container.MultiValueMap;
 
 /**
  * A registry of subscription by session that allows looking up subscriptions.

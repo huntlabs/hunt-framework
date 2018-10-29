@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-module hunt.framework.websocket.messaging;
+module hunt.framework.websocket.messaging.SessionDisconnectEvent;
 
-import java.security.Principal;
-
-
+import hunt.framework.websocket.messaging.AbstractSubProtocolEvent;
 import hunt.framework.messaging.Message;
 
+import hunt.security.Principal;
 import hunt.http.codec.websocket.model.CloseStatus;
 
 /**
@@ -34,11 +33,11 @@ import hunt.http.codec.websocket.model.CloseStatus;
  * @since 4.0.3
  */
 
-public class SessionDisconnectEvent extends AbstractSubProtocolEvent {
+class SessionDisconnectEvent : AbstractSubProtocolEvent {
 
-	private final string sessionId;
+	private string sessionId;
 
-	private final CloseStatus status;
+	private CloseStatus status;
 
 
 	/**
@@ -48,9 +47,8 @@ public class SessionDisconnectEvent extends AbstractSubProtocolEvent {
 	 * @param sessionId the disconnect message
 	 * @param closeStatus the status object
 	 */
-	public SessionDisconnectEvent(Object source, Message!(byte[]) message, string sessionId,
+	this(Object source, Message!(byte[]) message, string sessionId,
 			CloseStatus closeStatus) {
-
 		this(source, message, sessionId, closeStatus, null);
 	}
 
@@ -62,9 +60,8 @@ public class SessionDisconnectEvent extends AbstractSubProtocolEvent {
 	 * @param closeStatus the status object
 	 * @param user the current session user
 	 */
-	public SessionDisconnectEvent(Object source, Message!(byte[]) message, string sessionId,
+	this(Object source, Message!(byte[]) message, string sessionId,
 			CloseStatus closeStatus, Principal user) {
-
 		super(source, message, user);
 		assert(sessionId, "Session id must not be null");
 		this.sessionId = sessionId;
@@ -75,21 +72,22 @@ public class SessionDisconnectEvent extends AbstractSubProtocolEvent {
 	/**
 	 * Return the session id.
 	 */
-	public string getSessionId() {
+	string getSessionId() {
 		return this.sessionId;
 	}
 
 	/**
 	 * Return the status with which the session was closed.
 	 */
-	public CloseStatus getCloseStatus() {
+	CloseStatus getCloseStatus() {
 		return this.status;
 	}
 
 
 	override
-	public string toString() {
-		return "SessionDisconnectEvent[sessionId=" ~ this.sessionId ~ ", " ~ this.status.toString() ~ "]";
+	string toString() {
+		return "SessionDisconnectEvent[sessionId=" ~ this.sessionId ~ 
+			", " ~ this.status.toString() ~ "]";
 	}
 
 }

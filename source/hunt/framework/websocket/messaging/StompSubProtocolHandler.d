@@ -60,7 +60,7 @@ import hunt.framework.websocket.handler.WebSocketSessionDecorator;
  * @author Andy Wilkinson
  * @since 4.0
  */
-public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationEventPublisherAware {
+class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublisherAware
 
 	/**
 	 * This handler supports assembling large STOMP messages split into multiple
@@ -68,22 +68,18 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	 * messages at 16K boundaries. Therefore the WebSocket server input message
 	 * buffer size must allow 16K at least plus a little extra for SockJS framing.
 	 */
-	public static final int MINIMUM_WEBSOCKET_MESSAGE_SIZE = 16 * 1024 + 256;
+	enum int MINIMUM_WEBSOCKET_MESSAGE_SIZE = 16 * 1024 + 256;
 
 	/**
 	 * The name of the header set on the CONNECTED frame indicating the name
 	 * of the user authenticated on the WebSocket session.
 	 */
-	public static final string CONNECTED_USER_HEADER = "user-name";
+	enum string CONNECTED_USER_HEADER = "user-name";
 
-	private static final string[] SUPPORTED_VERSIONS = {"1.2", "1.1", "1.0"};
+	private enum string[] SUPPORTED_VERSIONS = {"1.2", "1.1", "1.0"};
 
+	private enum byte[] EMPTY_PAYLOAD = [];
 
-
-	private static final byte[] EMPTY_PAYLOAD = new byte[0];
-
-
-	
 	private StompSubProtocolErrorHandler errorHandler;
 
 	private int messageSizeLimit = 64 * 1024;
@@ -105,7 +101,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	
 	private ApplicationEventPublisher eventPublisher;
 
-	private final Stats stats = new Stats();
+	// private final Stats stats = new Stats();
 
 
 	/**
@@ -115,7 +111,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	 * with a message header reflecting the error.
 	 * @param errorHandler the error handler
 	 */
-	public void setErrorHandler(StompSubProtocolErrorHandler errorHandler) {
+	void setErrorHandler(StompSubProtocolErrorHandler errorHandler) {
 		this.errorHandler = errorHandler;
 	}
 
@@ -123,7 +119,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	 * Return the configured error handler.
 	 */
 	
-	public StompSubProtocolErrorHandler getErrorHandler() {
+	StompSubProtocolErrorHandler getErrorHandler() {
 		return this.errorHandler;
 	}
 
@@ -135,7 +131,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	 * <p>By default this property is set to 64K.
 	 * @since 4.0.3
 	 */
-	public void setMessageSizeLimit(int messageSizeLimit) {
+	void setMessageSizeLimit(int messageSizeLimit) {
 		this.messageSizeLimit = messageSizeLimit;
 	}
 
@@ -143,7 +139,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	 * Get the configured message buffer size limit in bytes.
 	 * @since 4.0.3
 	 */
-	public int getMessageSizeLimit() {
+	int getMessageSizeLimit() {
 		return this.messageSizeLimit;
 	}
 
@@ -151,7 +147,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	 * Configure a {@link StompEncoder} for encoding STOMP frames.
 	 * @since 4.3.5
 	 */
-	public void setEncoder(StompEncoder encoder) {
+	void setEncoder(StompEncoder encoder) {
 		this.stompEncoder = encoder;
 	}
 
@@ -159,7 +155,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	 * Configure a {@link StompDecoder} for decoding STOMP frames.
 	 * @since 4.3.5
 	 */
-	public void setDecoder(StompDecoder decoder) {
+	void setDecoder(StompDecoder decoder) {
 		this.stompDecoder = decoder;
 	}
 
@@ -169,7 +165,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	 * client inbound channel.
 	 * <p>By default this property is not set.
 	 */
-	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
+	void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
 		this.headerInitializer = headerInitializer;
 		this.stompDecoder.setHeaderInitializer(headerInitializer);
 	}
@@ -178,32 +174,33 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	 * Return the configured header initializer.
 	 */
 	
-	public MessageHeaderInitializer getHeaderInitializer() {
+	MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;
 	}
 
 	override
-	public List!(string) getSupportedProtocols() {
-		return Arrays.asList("v10.stomp", "v11.stomp", "v12.stomp");
+	string[] getSupportedProtocols() {
+		return ["v10.stomp", "v11.stomp", "v12.stomp"];
 	}
 
 	override
-	public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+	void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
 		this.eventPublisher = applicationEventPublisher;
 	}
 
 	/**
 	 * Return a string describing internal state and counters.
 	 */
-	public string getStatsInfo() {
-		return this.stats.toString();
+	string getStatsInfo() {
+		implementationMissing(false);
+		return "this.stats.toString()";
 	}
 
 
 	/**
 	 * Handle incoming WebSocket messages from clients.
 	 */
-	public void handleMessageFromClient(WebSocketSession session,
+	void handleMessageFromClient(WebSocketSession session,
 			WebSocketMessage<?> webSocketMessage, MessageChannel outputChannel) {
 
 		List!(Message!(byte[])) messages;
@@ -227,7 +224,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			messages = decoder.decode(byteBuffer);
 			if (messages.isEmpty()) {
 				version(HUNT_DEBUG) {
-					logger.trace("Incomplete STOMP frame content received in session " ~
+					trace("Incomplete STOMP frame content received in session " ~
 							session ~ ", bufferSize=" ~ decoder.getBufferSize() +
 							", bufferSizeLimit=" ~ decoder.getBufferSizeLimit() ~ ".");
 				}
@@ -258,7 +255,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 				}
 
 				version(HUNT_DEBUG) {
-					logger.trace("From client: " ~ headerAccessor.getShortLogMessage(message.getPayload()));
+					trace("From client: " ~ headerAccessor.getShortLogMessage(message.getPayload()));
 				}
 
 				StompCommand command = headerAccessor.getCommand();
@@ -383,7 +380,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	 */
 	override
 	
-	public void handleMessageToClient(WebSocketSession session, MessageBase message) {
+	void handleMessageToClient(WebSocketSession session, MessageBase message) {
 		if (!(message.getPayload() instanceof byte[])) {
 			version(HUNT_DEBUG) {
 				errorf("Expected byte[] payload. Ignoring " ~ message ~ ".");
@@ -575,12 +572,12 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 	override
 	
-	public string resolveSessionId(MessageBase message) {
+	string resolveSessionId(MessageBase message) {
 		return SimpMessageHeaderAccessor.getSessionId(message.getHeaders());
 	}
 
 	override
-	public void afterSessionStarted(WebSocketSession session, MessageChannel outputChannel) {
+	void afterSessionStarted(WebSocketSession session, MessageChannel outputChannel) {
 		if (session.getTextMessageSizeLimit() < MINIMUM_WEBSOCKET_MESSAGE_SIZE) {
 			session.setTextMessageSizeLimit(MINIMUM_WEBSOCKET_MESSAGE_SIZE);
 		}
@@ -588,7 +585,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	}
 
 	override
-	public void afterSessionEnded(WebSocketSession session, CloseStatus closeStatus, MessageChannel outputChannel) {
+	void afterSessionEnded(WebSocketSession session, CloseStatus closeStatus, MessageChannel outputChannel) {
 		this.decoders.remove(session.getId());
 
 		Message!(byte[]) message = createDisconnectMessage(session);
@@ -626,35 +623,35 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	}
 
 	override
-	public string toString() {
+	string toString() {
 		return "StompSubProtocolHandler" ~ getSupportedProtocols();
 	}
 
 
-	private static class Stats {
+	// private static class Stats {
 
-		private final AtomicInteger connect = new AtomicInteger();
+	// 	private final AtomicInteger connect = new AtomicInteger();
 
-		private final AtomicInteger connected = new AtomicInteger();
+	// 	private final AtomicInteger connected = new AtomicInteger();
 
-		private final AtomicInteger disconnect = new AtomicInteger();
+	// 	private final AtomicInteger disconnect = new AtomicInteger();
 
-		public void incrementConnectCount() {
-			this.connect.incrementAndGet();
-		}
+	// 	void incrementConnectCount() {
+	// 		this.connect.incrementAndGet();
+	// 	}
 
-		public void incrementConnectedCount() {
-			this.connected.incrementAndGet();
-		}
+	// 	void incrementConnectedCount() {
+	// 		this.connected.incrementAndGet();
+	// 	}
 
-		public void incrementDisconnectCount() {
-			this.disconnect.incrementAndGet();
-		}
+	// 	void incrementDisconnectCount() {
+	// 		this.disconnect.incrementAndGet();
+	// 	}
 
-		public string toString() {
-			return "processed CONNECT(" ~ this.connect.get() ~ ")-CONNECTED(" ~
-					this.connected.get() ~ ")-DISCONNECT(" ~ this.disconnect.get() ~ ")";
-		}
-	}
+	// 	string toString() {
+	// 		return "processed CONNECT(" ~ this.connect.get() ~ ")-CONNECTED(" ~
+	// 				this.connected.get() ~ ")-DISCONNECT(" ~ this.disconnect.get() ~ ")";
+	// 	}
+	// }
 
 }

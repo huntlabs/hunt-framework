@@ -3,6 +3,7 @@ module hunt.framework.websocket.WebSocketMessageBroker;
 
 import hunt.framework.context.ApplicationContext;
 import hunt.framework.messaging.simp.config.MessageBrokerRegistry;
+import hunt.framework.websocket.config.annotation.StompEndpointRegistry;
 import hunt.framework.websocket.config.annotation.WebSocketMessageBrokerConfiguration;
 
 import hunt.http.codec.websocket.frame.Frame;
@@ -73,6 +74,7 @@ class WebSocketMessageBroker  { // : AbstractWebSocketBuilder
     void listen() {
         brokerConfiguration.stompWebSocketHandlerMapping();
         brokerConfiguration.webSocketMessageBrokerStats();
+        brokerConfiguration.simpAnnotationMethodMessageHandler();
     //     appContext.registerWebSocket(path, new class WebSocketHandler {
 
     //         override void onConnect(WebSocketConnection webSocketConnection) {

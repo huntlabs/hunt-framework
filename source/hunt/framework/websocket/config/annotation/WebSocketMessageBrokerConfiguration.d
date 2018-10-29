@@ -23,7 +23,7 @@ import hunt.framework.context.ApplicationContext;
 
 import hunt.framework.messaging.converter.MappingJackson2MessageConverter;
 import hunt.framework.messaging.simp.SimpSessionScope;
-import hunt.framework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
+import hunt.framework.messaging.simp.annotation.SimpAnnotationMethodMessageHandler;
 import hunt.framework.messaging.simp.broker.AbstractBrokerMessageHandler;
 import hunt.framework.messaging.simp.config.AbstractMessageBrokerConfiguration;
 import hunt.framework.messaging.simp.stomp.StompBrokerRelayMessageHandler;

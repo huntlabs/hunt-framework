@@ -16,7 +16,7 @@
 
 module hunt.framework.messaging.simp.stomp;
 
-import java.security.Principal;
+import hunt.security.Principal;
 import hunt.container.Collection;
 import hunt.container.HashMap;
 import hunt.container.Map;

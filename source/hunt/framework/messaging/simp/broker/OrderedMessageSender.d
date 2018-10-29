@@ -136,14 +136,14 @@ class OrderedMessageSender : MessageChannel {
 		else {
 			ExecutorSubscribableChannel execChannel = cast(ExecutorSubscribableChannel) channel;
 			if(execChannel !is null) {
-				foreach(execChannel.getInterceptors()) {
-
+				foreach(ChannelInterceptor i; execChannel.getInterceptors()) {
+					CallbackInterceptor ci = cast(CallbackInterceptor)i;
+					if(ci !is null)	{
+						execChannel.removeInterceptor(ci);
+						break;
+					}
 				}
 			}
-			execChannel.getInterceptors().stream().filter(i -> i instanceof CallbackInterceptor)
-					.findFirst()
-					.map(execChannel::removeInterceptor);
-
 		}
 	}
 

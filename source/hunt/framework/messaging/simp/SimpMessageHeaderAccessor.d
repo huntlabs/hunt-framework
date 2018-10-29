@@ -24,7 +24,7 @@ import hunt.framework.messaging.support.MessageHeaderAccessor;
 import hunt.framework.messaging.support.NativeMessageHeaderAccessor;
 
 
-// import java.security.Principal;
+import hunt.security.Principal;
 import hunt.container.List;
 import hunt.container.Map;
 import hunt.lang.Nullable;

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-module hunt.framework.websocket.messaging;
+module hunt.framework.websocket.messaging.SessionConnectEvent;
 
-import java.security.Principal;
-
-
+import hunt.framework.websocket.messaging.AbstractSubProtocolEvent;
 import hunt.framework.messaging.Message;
+import hunt.security.Principal;
+
 
 /**
  * Event raised when a new WebSocket client using a Simple Messaging Protocol
@@ -33,18 +33,18 @@ import hunt.framework.messaging.Message;
  * @since 4.0.3
  */
 
-public class SessionConnectEvent extends AbstractSubProtocolEvent {
+class SessionConnectEvent : AbstractSubProtocolEvent {
 
 	/**
 	 * Create a new SessionConnectEvent.
 	 * @param source the component that published the event (never {@code null})
 	 * @param message the connect message
 	 */
-	public SessionConnectEvent(Object source, Message!(byte[]) message) {
+	this(Object source, Message!(byte[]) message) {
 		super(source, message);
 	}
 
-	public SessionConnectEvent(Object source, Message!(byte[]) message, Principal user) {
+	this(Object source, Message!(byte[]) message, Principal user) {
 		super(source, message, user);
 	}
 

@@ -18,7 +18,7 @@ module hunt.framework.messaging.simp.broker.SimpleBrokerMessageHandler;
 
 import hunt.framework.messaging.simp.broker.AbstractBrokerMessageHandler;
 
-// import java.security.Principal;
+import hunt.security.Principal;
 
 import hunt.lang.exception;
 import hunt.container;
@@ -176,7 +176,7 @@ class SimpleBrokerMessageHandler : AbstractBrokerMessageHandler {
 	private void initSelectorHeaderNameToUse() {
 		auto s = cast(DefaultSubscriptionRegistry) this.subscriptionRegistry;
 		if (s !is null) {
-			s..setSelectorHeaderName(this.selectorHeaderName);
+			s.setSelectorHeaderName(this.selectorHeaderName);
 		}
 	}
 

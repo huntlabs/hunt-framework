@@ -56,7 +56,6 @@ class StompSubProtocolErrorHandler : SubProtocolErrorHandler!(byte[]) {
 	}
 
 	override
-	
 	Message!(byte[]) handleErrorMessageToClient(Message!(byte[]) errorMessage) {
 		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor!(StompHeaderAccessor)(errorMessage);
 		assert(accessor, "No StompHeaderAccessor");

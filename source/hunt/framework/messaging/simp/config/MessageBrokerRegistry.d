@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-module hunt.framework.messaging.simp.config;
+module hunt.framework.messaging.simp.config.MessageBrokerRegistry;
 
 // import hunt.framework.context.event.SmartApplicationListener;
 

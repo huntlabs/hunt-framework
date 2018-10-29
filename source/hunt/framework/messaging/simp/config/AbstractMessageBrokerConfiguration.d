@@ -16,18 +16,12 @@
 
 module hunt.framework.messaging.simp.config.AbstractMessageBrokerConfiguration;
 
-import java.util.ArrayList;
-import hunt.container.Collection;
-import hunt.container.HashMap;
-import java.util.List;
-import hunt.container.Map;
-
-import hunt.framework.beans.BeanUtils;
-import hunt.framework.beans.factory.BeanInitializationException;
+// import hunt.framework.beans.BeanUtils;
+// import hunt.framework.beans.factory.BeanInitializationException;
 import hunt.framework.context.ApplicationContext;
-import hunt.framework.context.ApplicationContextAware;
-import hunt.framework.context.annotation.Bean;
-import hunt.framework.context.event.SmartApplicationListener;
+// import hunt.framework.context.ApplicationContextAware;
+// import hunt.framework.context.annotation.Bean;
+// import hunt.framework.context.event.SmartApplicationListener;
 
 import hunt.framework.messaging.MessageHandler;
 import hunt.framework.messaging.converter.ByteArrayMessageConverter;
@@ -40,27 +34,31 @@ import hunt.framework.messaging.handler.invocation.HandlerMethodArgumentResolver
 import hunt.framework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
 import hunt.framework.messaging.simp.SimpLogging;
 import hunt.framework.messaging.simp.SimpMessagingTemplate;
-import hunt.framework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
+import hunt.framework.messaging.simp.annotation.SimpAnnotationMethodMessageHandler;
 import hunt.framework.messaging.simp.broker.AbstractBrokerMessageHandler;
 import hunt.framework.messaging.simp.broker.SimpleBrokerMessageHandler;
 import hunt.framework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
-import hunt.framework.messaging.simp.user.DefaultUserDestinationResolver;
-import hunt.framework.messaging.simp.user.MultiServerUserRegistry;
-import hunt.framework.messaging.simp.user.SimpUserRegistry;
-import hunt.framework.messaging.simp.user.UserDestinationMessageHandler;
-import hunt.framework.messaging.simp.user.UserDestinationResolver;
-import hunt.framework.messaging.simp.user.UserRegistryMessageHandler;
+// import hunt.framework.messaging.simp.user.DefaultUserDestinationResolver;
+// import hunt.framework.messaging.simp.user.MultiServerUserRegistry;
+// import hunt.framework.messaging.simp.user.SimpUserRegistry;
+// import hunt.framework.messaging.simp.user.UserDestinationMessageHandler;
+// import hunt.framework.messaging.simp.user.UserDestinationResolver;
+// import hunt.framework.messaging.simp.user.UserRegistryMessageHandler;
 import hunt.framework.messaging.support.AbstractSubscribableChannel;
 import hunt.framework.messaging.support.ExecutorSubscribableChannel;
 import hunt.framework.messaging.support.ImmutableMessageChannelInterceptor;
-import hunt.framework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import hunt.framework.scheduling.concurrent.ThreadPoolTaskScheduler;
+// import hunt.framework.scheduling.concurrent.ThreadPoolTaskExecutor;
+// import hunt.framework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-import hunt.framework.util.ClassUtils;
-import hunt.framework.util.MimeTypeUtils;
-import hunt.framework.util.PathMatcher;
-import hunt.framework.validation.Errors;
-import hunt.framework.validation.Validator;
+// import hunt.framework.util.ClassUtils;
+// import hunt.framework.util.MimeTypeUtils;
+// import hunt.framework.util.PathMatcher;
+// import hunt.framework.validation.Errors;
+// import hunt.framework.validation.Validator;
+
+import hunt.container;
+
+import std.string;
 
 /**
  * Provides essential configuration for handling messages with simple messaging
@@ -225,7 +223,8 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 	 */
 	protected final MessageBrokerRegistry getBrokerRegistry() {
 		if (this.brokerRegistry is null) {
-			MessageBrokerRegistry registry = new MessageBrokerRegistry(clientInboundChannel(), clientOutboundChannel());
+			MessageBrokerRegistry registry = new 
+                MessageBrokerRegistry(clientInboundChannel(), clientOutboundChannel());
 			configureMessageBroker(registry);
 			this.brokerRegistry = registry;
 		}
@@ -255,11 +254,13 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 		handler.setMessageConverter(brokerMessageConverter());
 		handler.setValidator(simpValidator());
 
-		List!(HandlerMethodArgumentResolver) argumentResolvers = new ArrayList<>();
+		List!(HandlerMethodArgumentResolver) argumentResolvers = 
+            new ArrayList!HandlerMethodArgumentResolver();
 		addArgumentResolvers(argumentResolvers);
 		handler.setCustomArgumentResolvers(argumentResolvers);
 
-		List!(HandlerMethodReturnValueHandler) returnValueHandlers = new ArrayList<>();
+		List!(HandlerMethodReturnValueHandler) returnValueHandlers = 
+            new ArrayList!(HandlerMethodReturnValueHandler)();
 		addReturnValueHandlers(returnValueHandlers);
 		handler.setCustomReturnValueHandlers(returnValueHandlers);
 
@@ -272,7 +273,7 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 
 	/**
 	 * Protected method for plugging in a custom subclass of
-	 * {@link hunt.framework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler
+	 * {@link hunt.framework.messaging.simp.annotation.SimpAnnotationMethodMessageHandler
 	 * SimpAnnotationMethodMessageHandler}.
 	 * @since 4.2
 	 */
@@ -299,9 +300,10 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 	}
 
 	private void updateUserDestinationResolver(AbstractBrokerMessageHandler handler) {
-		Collection!(string) prefixes = handler.getDestinationPrefixes();
-		if (!prefixes.isEmpty() && !prefixes.iterator().next().startsWith("/")) {
-			((DefaultUserDestinationResolver) userDestinationResolver()).setRemoveLeadingSlash(true);
+		string[] prefixes = handler.getDestinationPrefixes();
+		// if (!prefixes.isEmpty() && !prefixes.iterator().next().startsWith("/")) {
+        if(prefixes.length > 0 && !prefixes[0].startsWith("/"))
+			(cast(DefaultUserDestinationResolver) userDestinationResolver()).setRemoveLeadingSlash(true);
 		}
 	}
 

@@ -137,3 +137,19 @@ class MessageDeliveryException : MessagingException {
 	}
 
 }
+
+
+/**
+ * {@link MessagingException} thrown when a session is missing.
+ *
+ * @author Rossen Stoyanchev
+ * @since 4.0
+ */
+
+class MissingSessionUserException : MessagingException {
+
+	this(MessageBase message) {
+		super(message, "No \"user\" header in message");
+	}
+
+}

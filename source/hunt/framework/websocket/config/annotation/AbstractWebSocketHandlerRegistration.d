@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-module hunt.framework.websocket.config.annotation;
+module hunt.framework.websocket.config.annotation.AbstractWebSocketHandlerRegistration;
 
 
 // import hunt.container;

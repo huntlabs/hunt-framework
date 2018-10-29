@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-module hunt.framework.websocket.messaging;
+module hunt.framework.websocket.messaging.SessionSubscribeEvent;
 
-import java.security.Principal;
+import hunt.framework.websocket.messaging.AbstractSubProtocolEvent;
 
-
+import hunt.security.Principal;
 import hunt.framework.messaging.Message;
 
 /**
@@ -29,13 +29,13 @@ import hunt.framework.messaging.Message;
  * @since 4.0.3
  */
 
-public class SessionSubscribeEvent extends AbstractSubProtocolEvent {
+class SessionSubscribeEvent : AbstractSubProtocolEvent {
 
-	public SessionSubscribeEvent(Object source, Message!(byte[]) message) {
+	this(Object source, Message!(byte[]) message) {
 		super(source, message);
 	}
 
-	public SessionSubscribeEvent(Object source, Message!(byte[]) message, Principal user) {
+	this(Object source, Message!(byte[]) message, Principal user) {
 		super(source, message, user);
 	}
 
