@@ -19,7 +19,6 @@ module hunt.framework.messaging.simp.config.MessageBrokerRegistry;
 // import hunt.framework.context.event.SmartApplicationListener;
 
 import hunt.framework.messaging.MessageChannel;
-import hunt.framework.messaging.SubscribableChannel;
 import hunt.framework.messaging.simp.broker.SimpleBrokerMessageHandler;
 import hunt.framework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 

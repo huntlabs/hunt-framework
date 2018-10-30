@@ -19,13 +19,14 @@ module hunt.framework.websocket.messaging.StompSubProtocolHandler;
 import hunt.framework.websocket.messaging.SubProtocolHandler;
 import hunt.http.codec.websocket.stream.WebSocketConnection;
 import hunt.http.codec.websocket.frame.WebSocketFrame;
+import hunt.http.codec.websocket.model.CloseStatus;
 
 import hunt.container;
 import hunt.lang.exception;
+import hunt.lang.Nullable;
 
 import hunt.framework.context.ApplicationEvent;
-import hunt.framework.context.ApplicationEventPublisher;
-import hunt.framework.context.ApplicationEventPublisherAware;
+// import hunt.framework.context.ApplicationEventPublisherAware;
 
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageChannel;
@@ -43,17 +44,17 @@ import hunt.framework.messaging.support.ChannelInterceptor;
 import hunt.framework.messaging.support.ImmutableMessageChannelInterceptor;
 import hunt.framework.messaging.support.MessageBuilder;
 import hunt.framework.messaging.support.MessageHeaderAccessor;
-import hunt.framework.messaging.support.MessageHeaderInitializer;
 
-import hunt.framework.util.MimeTypeUtils;
-import hunt.framework.websocket.BinaryMessage;
-import hunt.http.codec.websocket.model.CloseStatus;
-import hunt.framework.websocket.TextMessage;
-import hunt.framework.websocket.WebSocketMessage;
-import hunt.framework.websocket.WebSocketSession;
-import hunt.framework.websocket.handler.SessionLimitExceededException;
-import hunt.framework.websocket.handler.WebSocketSessionDecorator;
+// import hunt.framework.util.MimeTypeUtils;
+// import hunt.framework.websocket.BinaryMessage;
+// import hunt.framework.websocket.TextMessage;
+// import hunt.framework.websocket.WebSocketMessage;
+// import hunt.framework.websocket.WebSocketSession;
+// import hunt.framework.websocket.handler.SessionLimitExceededException;
+// import hunt.framework.websocket.handler.WebSocketSessionDecorator;
 // import hunt.framework.websocket.sockjs.transport.SockJsSession;
+
+import std.conv;
 
 /**
  * A {@link SubProtocolHandler} for STOMP that supports versions 1.0, 1.1, and 1.2
@@ -266,11 +267,11 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 				}
 
 				StompCommand command = headerAccessor.getCommand();
-				boolisConnect = StompCommand.CONNECT.equals(command);
+				boolisConnect = StompCommand.CONNECT == command;
 				if (isConnect) {
 					this.stats.incrementConnectCount();
 				}
-				else if (StompCommand.DISCONNECT.equals(command)) {
+				else if (StompCommand.DISCONNECT == command) {
 					this.stats.incrementDisconnectCount();
 				}
 
@@ -290,10 +291,10 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 							if (isConnect) {
 								publishEvent(this.eventPublisher, new SessionConnectEvent(this, message, user));
 							}
-							else if (StompCommand.SUBSCRIBE.equals(command)) {
+							else if (StompCommand.SUBSCRIBE == command) {
 								publishEvent(this.eventPublisher, new SessionSubscribeEvent(this, message, user));
 							}
-							else if (StompCommand.UNSUBSCRIBE.equals(command)) {
+							else if (StompCommand.UNSUBSCRIBE == command) {
 								publishEvent(this.eventPublisher, new SessionUnsubscribeEvent(this, message, user));
 							}
 						}
@@ -319,18 +320,21 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 		return (user !is null ? user : session.getPrincipal());
 	}
 
-	private void handleError(WebSocketSession session, Throwable ex, Message!(byte[]) clientMessage) {
+	private void handleError(WebSocketSession session, Throwable ex, 
+		Message!(byte[]) clientMessage) {
 		if (getErrorHandler() is null) {
 			sendErrorMessage(session, ex);
 			return;
 		}
 
-		Message!(byte[]) message = getErrorHandler().handleClientMessageProcessingError(clientMessage, ex);
+		Message!(byte[]) message = 
+			getErrorHandler().handleClientMessageProcessingError(clientMessage, ex);
 		if (message is null) {
 			return;
 		}
 
-		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+		StompHeaderAccessor accessor = 
+			MessageHeaderAccessor.getAccessor!(StompHeaderAccessor)(message);
 		assert(accessor !is null, "No StompHeaderAccessor");
 		sendToClient(session, accessor, message.getPayload());
 	}
@@ -359,9 +363,11 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 			return this.immutableMessageInterceptorPresent;
 		}
 
-		if (channel instanceof AbstractMessageChannel) {
-			for (ChannelInterceptor interceptor : ((AbstractMessageChannel) channel).getInterceptors()) {
-				if (interceptor instanceof ImmutableMessageChannelInterceptor) {
+		auto ch = cast(AbstractMessageChannel) channel;
+		if (ch !is null) {
+			foreach (ChannelInterceptor interceptor ; ch.getInterceptors()) {
+				auto it = cast(ImmutableMessageChannelInterceptor)interceptor;
+				if (it !is null) {
 					this.immutableMessageInterceptorPresent = true;
 					return true;
 				}
@@ -388,9 +394,11 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 	override
 	
 	void handleMessageToClient(WebSocketSession session, MessageBase message) {
-		if (!(message.getPayload() instanceof byte[])) {
+		TypeInfo ti = message.payloadType();
+		if (ti ~= typeid(byte[])) {
 			version(HUNT_DEBUG) {
-				errorf("Expected byte[] payload. Ignoring " ~ message ~ ".");
+				errorf("Expected byte[] payload. Ignoring " ~ 
+					(cast(Object)message).toString() ~ ".");
 			}
 			return;
 		}
@@ -398,26 +406,29 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 		StompHeaderAccessor accessor = getStompHeaderAccessor(message);
 		StompCommand command = accessor.getCommand();
 
-		if (StompCommand.MESSAGE.equals(command)) {
+		if (StompCommand.MESSAGE == command) {
 			if (accessor.getSubscriptionId() is null && logger.isWarnEnabled()) {
 				logger.warn("No STOMP \"subscription\" header in " ~ message);
 			}
-			string origDestination = accessor.getFirstNativeHeader(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION);
+			string origDestination = accessor.
+				getFirstNativeHeader(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION);
 			if (origDestination !is null) {
 				accessor = toMutableAccessor(accessor, message);
 				accessor.removeNativeHeader(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION);
 				accessor.setDestination(origDestination);
 			}
 		}
-		else if (StompCommand.CONNECTED.equals(command)) {
+		else if (StompCommand.CONNECTED == command) {
 			this.stats.incrementConnectedCount();
 			accessor = afterStompSessionConnected(message, accessor, session);
-			if (this.eventPublisher !is null && StompCommand.CONNECTED.equals(command)) {
+			if (this.eventPublisher !is null && StompCommand.CONNECTED == command) {
 				try {
-					SimpAttributes simpAttributes = new SimpAttributes(session.getId(), session.getAttributes());
+					SimpAttributes simpAttributes = 
+						new SimpAttributes(session.getId(), session.getAttributes());
 					SimpAttributesContextHolder.setAttributes(simpAttributes);
 					Principal user = getUser(session);
-					publishEvent(this.eventPublisher, new SessionConnectedEvent(this, (Message!(byte[])) message, user));
+					publishEvent(this.eventPublisher, new SessionConnectedEvent(this, 
+						cast(Message!(byte[])) message, user));
 				}
 				finally {
 					SimpAttributesContextHolder.resetAttributes();
@@ -425,11 +436,14 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 			}
 		}
 
-		byte[] payload = (byte[]) message.getPayload();
-		if (StompCommand.ERROR.equals(command) && getErrorHandler() !is null) {
-			Message!(byte[]) errorMessage = getErrorHandler().handleErrorMessageToClient((Message!(byte[])) message);
+		auto msg = cast(Message!(byte[])) message;
+
+		byte[] payload = msg.getPayload();
+		if (StompCommand.ERROR == command && getErrorHandler() !is null) {
+			Message!(byte[]) errorMessage = getErrorHandler().
+				handleErrorMessageToClient(msg);
 			if (errorMessage !is null) {
-				accessor = MessageHeaderAccessor.getAccessor(errorMessage, StompHeaderAccessor.class);
+				accessor = MessageHeaderAccessor.getAccessor!(StompHeaderAccessor)(errorMessage);
 				assert(accessor !is null, "No StompHeaderAccessor");
 				payload = errorMessage.getPayload();
 			}
@@ -437,17 +451,24 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 		sendToClient(session, accessor, payload);
 	}
 
-	private void sendToClient(WebSocketSession session, StompHeaderAccessor stompAccessor, byte[] payload) {
+	private void sendToClient(WebSocketSession session, 
+		StompHeaderAccessor stompAccessor, byte[] payload) {
 		StompCommand command = stompAccessor.getCommand();
 		try {
 			byte[] bytes = this.stompEncoder.encode(stompAccessor.getMessageHeaders(), payload);
-			booluseBinary = (payload.length > 0 && !(session instanceof SockJsSession) &&
-					MimeTypeUtils.APPLICATION_OCTET_STREAM.isCompatibleWith(stompAccessor.getContentType()));
+
+			// booluseBinary = (payload.length > 0 && // && !(session instanceof SockJsSession) 
+			// 		MimeTypeUtils.APPLICATION_OCTET_STREAM.isCompatibleWith(stompAccessor.getContentType()));
+			// FIXME: Needing refactor or cleanup -@zxp at 10/30/2018, 10:35:24 AM
+			// 
+			bool useBinary = payload.length > 0;
 			if (useBinary) {
-				session.sendMessage(new BinaryMessage(bytes));
+				session.sendData(bytes);
+				// session.sendMessage(new BinaryMessage(bytes));
 			}
 			else {
-				session.sendMessage(new TextMessage(bytes));
+				session.sendText(cast(string)bytes);
+				// session.sendMessage(new TextMessage(bytes));
 			}
 		}
 		catch (SessionLimitExceededException ex) {
@@ -457,12 +478,13 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 		catch (Throwable ex) {
 			// Could be part of normal workflow (e.g. browser tab closed)
 			version(HUNT_DEBUG) {
-				trace("Failed to send WebSocket message to client in session " ~ session.getId(), ex);
+				tracef("Failed to send WebSocket message to client in session " ~ 
+					session.getId(), ":\n", ex);
 			}
 			command = StompCommand.ERROR;
 		}
 		finally {
-			if (StompCommand.ERROR.equals(command)) {
+			if (StompCommand.ERROR == command) {
 				try {
 					session.close(CloseStatus.PROTOCOL_ERROR);
 				}
@@ -474,17 +496,20 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 	}
 
 	private StompHeaderAccessor getStompHeaderAccessor(MessageBase message) {
-		MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
-		if (accessor instanceof StompHeaderAccessor) {
-			return (StompHeaderAccessor) accessor;
+		MessageHeaderAccessor accessor = 
+			MessageHeaderAccessor.getAccessor!(MessageHeaderAccessor)(message);
+		
+		auto ac = cast(StompHeaderAccessor) accessor;
+		if (ac !is null) {
+			return ac;
 		}
 		else {
 			StompHeaderAccessor stompAccessor = StompHeaderAccessor.wrap(message);
 			SimpMessageType messageType = SimpMessageHeaderAccessor.getMessageType(message.getHeaders());
-			if (SimpMessageType.CONNECT_ACK.equals(messageType)) {
+			if (SimpMessageType.CONNECT_ACK == messageType) {
 				stompAccessor = convertConnectAcktoStompConnected(stompAccessor);
 			}
-			else if (SimpMessageType.DISCONNECT_ACK.equals(messageType)) {
+			else if (SimpMessageType.DISCONNECT_ACK == messageType) {
 				string receipt = getDisconnectReceipt(stompAccessor);
 				if (receipt !is null) {
 					stompAccessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
@@ -495,12 +520,15 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 					stompAccessor.setMessage("Session closed.");
 				}
 			}
-			else if (SimpMessageType.HEARTBEAT.equals(messageType)) {
+			else if (SimpMessageType.HEARTBEAT == messageType) {
 				stompAccessor = StompHeaderAccessor.createForHeartbeat();
 			}
-			else if (stompAccessor.getCommand() is null || StompCommand.SEND.equals(stompAccessor.getCommand())) {
-				stompAccessor.updateStompCommandAsServerMessage();
-			}
+			else {
+				Nullable!StompCommand c = stompAccessor.getCommand();
+				if (c is null || StompCommand.SEND == c.value()) {
+					stompAccessor.updateStompCommandAsServerMessage();
+				}
+			} 
 			return stompAccessor;
 		}
 	}
@@ -511,25 +539,33 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 	 */
 	private StompHeaderAccessor convertConnectAcktoStompConnected(StompHeaderAccessor connectAckHeaders) {
 		string name = StompHeaderAccessor.CONNECT_MESSAGE_HEADER;
-		MessageBase message = (MessageBase) connectAckHeaders.getHeader(name);
+		MessageBase message = cast(MessageBase) connectAckHeaders.getHeader(name);
 		if (message is null) {
 			throw new IllegalStateException("Original STOMP CONNECT not found in " ~ connectAckHeaders);
 		}
 
-		StompHeaderAccessor connectHeaders = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+		StompHeaderAccessor connectHeaders = MessageHeaderAccessor.getAccessor!(StompHeaderAccessor)(message);
 		StompHeaderAccessor connectedHeaders = StompHeaderAccessor.create(StompCommand.CONNECTED);
 
 		if (connectHeaders !is null) {
-			Set!(string) acceptVersions = connectHeaders.getAcceptVersion();
-			connectedHeaders.setVersion(
-					Arrays.stream(SUPPORTED_VERSIONS)
-							.filter(acceptVersions::contains)
-							.findAny()
-							.orElseThrow(() -> new IllegalArgumentException(
-									"Unsupported STOMP version '" ~ acceptVersions ~ "'")));
+			string[] acceptVersions = connectHeaders.getAcceptVersion();
+			bool isFound = false;
+			foreach(string ver; SUPPORTED_VERSIONS) {
+				if(acceptVersions.canFind(ver)) {
+					connectedHeaders.setVersion(ver);
+					isFound = true;
+					break;
+				}
+			}
+			if(!isFound) {
+				throw new IllegalArgumentException("Unsupported STOMP version '" ~ 
+					acceptVersions.to!string() ~ "'");
+			}
 		}
 
-		long[] heartbeat = (long[]) connectAckHeaders.getHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER);
+		long[] heartbeat = cast(long[])cast(Nullable!(long[]))connectAckHeaders.
+			getHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER);
+
 		if (heartbeat !is null) {
 			connectedHeaders.setHeartbeat(heartbeat[0], heartbeat[1]);
 		}
@@ -543,9 +579,10 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 	
 	private string getDisconnectReceipt(SimpMessageHeaderAccessor simpHeaders) {
 		string name = StompHeaderAccessor.DISCONNECT_MESSAGE_HEADER;
-		MessageBase message = (MessageBase) simpHeaders.getHeader(name);
+		MessageBase message = cast(MessageBase) simpHeaders.getHeader(name);
 		if (message !is null) {
-			StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+			StompHeaderAccessor accessor = 
+				MessageHeaderAccessor.getAccessor!(StompHeaderAccessor)(message);
 			if (accessor !is null) {
 				return accessor.getReceipt();
 			}
@@ -568,10 +605,10 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 
 		long[] heartbeat = accessor.getHeartbeat();
 		if (heartbeat[1] > 0) {
-			session = WebSocketSessionDecorator.unwrap(session);
-			if (session instanceof SockJsSession) {
-				((SockJsSession) session).disableHeartbeat();
-			}
+			// session = WebSocketSessionDecorator.unwrap(session);
+			// if (session instanceof SockJsSession) {
+			// 	((SockJsSession) session).disableHeartbeat();
+			// }
 		}
 
 		return accessor;
@@ -592,7 +629,8 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 	}
 
 	override
-	void afterSessionEnded(WebSocketSession session, CloseStatus closeStatus, MessageChannel outputChannel) {
+	void afterSessionEnded(WebSocketSession session, 
+		CloseStatus closeStatus, MessageChannel outputChannel) {
 		this.decoders.remove(session.getId());
 
 		Message!(byte[]) message = createDisconnectMessage(session);
@@ -601,7 +639,8 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 			SimpAttributesContextHolder.setAttributes(simpAttributes);
 			if (this.eventPublisher !is null) {
 				Principal user = getUser(session);
-				publishEvent(this.eventPublisher, new SessionDisconnectEvent(this, message, session.getId(), closeStatus, user));
+				publishEvent(this.eventPublisher, 
+					new SessionDisconnectEvent(this, message, session.getId(), closeStatus, user));
 			}
 			outputChannel.send(message);
 		}
@@ -631,7 +670,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 
 	override
 	string toString() {
-		return "StompSubProtocolHandler" ~ getSupportedProtocols();
+		return "StompSubProtocolHandler" ~ getSupportedProtocols().to!string();
 	}
 
 

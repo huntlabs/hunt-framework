@@ -19,7 +19,7 @@ module hunt.framework.messaging.simp.config.SimpleBrokerRegistration;
 import hunt.framework.messaging.simp.config.AbstractBrokerRegistration;
 
 import hunt.framework.messaging.MessageChannel;
-import hunt.framework.messaging.SubscribableChannel;
+
 import hunt.framework.messaging.simp.broker.SimpleBrokerMessageHandler;
 // import hunt.framework.task.TaskScheduler;
 

@@ -24,7 +24,7 @@ import hunt.framework.messaging.converter.AbstractMessageConverter;
 
 import hunt.framework.messaging.Message;
 
-import hunt.framework.util.ClassUtils;
+// import hunt.framework.util.ClassUtils;
 
 /**
  * An extension of the {@link SimpleMessageConverter} that uses a

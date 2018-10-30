@@ -21,12 +21,12 @@ import hunt.framework.websocket.config.annotation.StompWebSocketEndpointRegistra
 import hunt.framework.context.ApplicationContext;
 import hunt.framework.task.TaskScheduler;
 
-import hunt.framework.web.HttpRequestHandler;
+// import hunt.framework.web.HttpRequestHandler;
 // import hunt.framework.websocket.handler.WebSocketHandlerDecorator;
 import hunt.framework.websocket.messaging.StompSubProtocolErrorHandler;
 import hunt.framework.websocket.messaging.StompSubProtocolHandler;
 import hunt.framework.websocket.messaging.SubProtocolWebSocketHandler;
-import hunt.framework.websocket.server.support.WebSocketHandlerMapping;
+// import hunt.framework.websocket.server.support.WebSocketHandlerMapping;
 // import hunt.framework.web.util.UrlPathHelper;
 
 import hunt.container;
@@ -184,23 +184,23 @@ class WebMvcStompEndpointRegistry : StompEndpointRegistry {
 	/**
 	 * Return a handler mapping with the mapped ViewControllers.
 	 */
-	AbstractHandlerMapping getHandlerMapping() {
-		Map!(string, Object) urlMap = new LinkedHashMap!(string, Object)();
-		foreach (WebMvcStompWebSocketEndpointRegistration registration ; this.registrations) {
-			MultiValueMap!(HttpRequestHandler, string) mappings = registration.getMappings();
-			foreach(HttpRequestHandler httpHandler, patterns; mappings) {
-				foreach (string pattern ; patterns) {
-					urlMap.put(pattern, httpHandler);
-				}
-			}
-		}
-		WebSocketHandlerMapping hm = new WebSocketHandlerMapping();
-		hm.setUrlMap(urlMap);
-		hm.setOrder(this.order);
-		// if (this.urlPathHelper !is null) {
-		// 	hm.setUrlPathHelper(this.urlPathHelper);
-		// }
-		return hm;
-	}
+	// AbstractHandlerMapping getHandlerMapping() {
+	// 	Map!(string, Object) urlMap = new LinkedHashMap!(string, Object)();
+	// 	foreach (WebMvcStompWebSocketEndpointRegistration registration ; this.registrations) {
+	// 		MultiValueMap!(HttpRequestHandler, string) mappings = registration.getMappings();
+	// 		foreach(HttpRequestHandler httpHandler, patterns; mappings) {
+	// 			foreach (string pattern ; patterns) {
+	// 				urlMap.put(pattern, httpHandler);
+	// 			}
+	// 		}
+	// 	}
+	// 	WebSocketHandlerMapping hm = new WebSocketHandlerMapping();
+	// 	hm.setUrlMap(urlMap);
+	// 	hm.setOrder(this.order);
+	// 	// if (this.urlPathHelper !is null) {
+	// 	// 	hm.setUrlPathHelper(this.urlPathHelper);
+	// 	// }
+	// 	return hm;
+	// }
 
 }

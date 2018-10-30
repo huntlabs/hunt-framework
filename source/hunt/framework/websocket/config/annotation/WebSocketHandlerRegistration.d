@@ -17,8 +17,8 @@
 module hunt.framework.websocket.config.annotation.WebSocketHandlerRegistration;
 
 import hunt.http.server.WebSocketHandler;
-import hunt.framework.websocket.server.HandshakeHandler;
-import hunt.framework.websocket.server.HandshakeInterceptor;
+// import hunt.framework.websocket.server.HandshakeHandler;
+// import hunt.framework.websocket.server.HandshakeInterceptor;
 
 /**
  * Provides methods for configuring a WebSocket handler.

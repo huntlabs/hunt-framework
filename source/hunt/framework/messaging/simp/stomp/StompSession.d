@@ -16,9 +16,72 @@
 
 module hunt.framework.messaging.simp.stomp.StompSession;
 
-import hunt.framework.messaging.simp.stomp.Receiptable;
 import hunt.framework.messaging.simp.stomp.StompFrameHandler;
 import hunt.framework.messaging.simp.stomp.StompHeaders;
+
+import hunt.lang.common;
+
+
+/**
+ * A handle to use to track receipts.
+ * @see #setAutoReceipt()
+ */
+interface Receiptable {
+
+    /**
+     * Return the receipt id, or {@code null} if the STOMP frame for which
+     * the handle was returned did not have a "receipt" header.
+     */
+    
+    string getReceiptId();
+
+    /**
+     * Task to invoke when a receipt is received.
+     * @throws java.lang.IllegalArgumentException if the receiptId is {@code null}
+     */
+    void addReceiptTask(Runnable runnable);
+
+    /**
+     * Task to invoke when a receipt is not received in the configured time.
+     * @throws java.lang.IllegalArgumentException if the receiptId is {@code null}
+     * @see hunt.framework.messaging.simp.stomp.StompClientSupport#setReceiptTimeLimit(long)
+     */
+    void addReceiptLostTask(Runnable runnable);
+}
+
+
+/**
+ * A handle to use to unsubscribe or to track a receipt.
+ */
+interface Subscription : Receiptable {
+
+    /**
+     * Return the id for the subscription.
+     */
+    
+    string getSubscriptionId();
+
+    /**
+     * Return the headers used on the SUBSCRIBE frame.
+     * @since 5.0
+     */
+    StompHeaders getSubscriptionHeaders();
+
+    /**
+     * Remove the subscription by sending an UNSUBSCRIBE frame.
+     */
+    void unsubscribe();
+
+    /**
+     * Alternative to {@link #unsubscribe()} with additional custom headers
+     * to send to the server.
+     * <p><strong>Note:</strong> There is no need to set the subscription id.
+     * @param headers the custom headers, if any
+     * @since 5.0
+     */
+    void unsubscribe(StompHeaders headers);
+}
+
 
 /**
  * Represents a STOMP session with operations to send messages, create
@@ -117,66 +180,5 @@ interface StompSession {
 	 * Disconnect the session by sending a DISCONNECT frame.
 	 */
 	void disconnect();
-
-
-	/**
-	 * A handle to use to track receipts.
-	 * @see #setAutoReceipt()
-	 */
-	interface Receiptable {
-
-		/**
-		 * Return the receipt id, or {@code null} if the STOMP frame for which
-		 * the handle was returned did not have a "receipt" header.
-		 */
-		
-		string getReceiptId();
-
-		/**
-		 * Task to invoke when a receipt is received.
-		 * @throws java.lang.IllegalArgumentException if the receiptId is {@code null}
-		 */
-		void addReceiptTask(Runnable runnable);
-
-		/**
-		 * Task to invoke when a receipt is not received in the configured time.
-		 * @throws java.lang.IllegalArgumentException if the receiptId is {@code null}
-		 * @see hunt.framework.messaging.simp.stomp.StompClientSupport#setReceiptTimeLimit(long)
-		 */
-		void addReceiptLostTask(Runnable runnable);
-	}
-
-
-	/**
-	 * A handle to use to unsubscribe or to track a receipt.
-	 */
-	interface Subscription : Receiptable {
-
-		/**
-		 * Return the id for the subscription.
-		 */
-		
-		string getSubscriptionId();
-
-		/**
-		 * Return the headers used on the SUBSCRIBE frame.
-		 * @since 5.0
-		 */
-		StompHeaders getSubscriptionHeaders();
-
-		/**
-		 * Remove the subscription by sending an UNSUBSCRIBE frame.
-		 */
-		void unsubscribe();
-
-		/**
-		 * Alternative to {@link #unsubscribe()} with additional custom headers
-		 * to send to the server.
-		 * <p><strong>Note:</strong> There is no need to set the subscription id.
-		 * @param headers the custom headers, if any
-		 * @since 5.0
-		 */
-		void unsubscribe(StompHeaders headers);
-	}
 
 }

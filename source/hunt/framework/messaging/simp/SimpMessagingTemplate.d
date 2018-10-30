@@ -28,7 +28,7 @@ import hunt.container.Map;
 // import hunt.framework.messaging.core.MessagePostProcessor;
 // import hunt.framework.messaging.support.MessageBuilder;
 // import hunt.framework.messaging.support.MessageHeaderAccessor;
-// import hunt.framework.messaging.support.MessageHeaderInitializer;
+// 
 // import hunt.framework.messaging.support.NativeMessageHeaderAccessor;
 // 
 // import hunt.framework.util.StringUtils;

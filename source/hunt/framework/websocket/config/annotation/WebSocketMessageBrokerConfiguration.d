@@ -21,22 +21,21 @@ import hunt.framework.context.ApplicationContext;
 // import hunt.framework.context.annotation.Bean;
 // import hunt.framework.http.converter.json.Jackson2ObjectMapperBuilder;
 
-import hunt.framework.messaging.converter.MappingJackson2MessageConverter;
+// import hunt.framework.messaging.converter.MappingJackson2MessageConverter;
 import hunt.framework.messaging.simp.SimpSessionScope;
 import hunt.framework.messaging.simp.annotation.SimpAnnotationMethodMessageHandler;
 import hunt.framework.messaging.simp.broker.AbstractBrokerMessageHandler;
 import hunt.framework.messaging.simp.config.AbstractMessageBrokerConfiguration;
 import hunt.framework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
-import hunt.framework.messaging.simp.user.SimpUserRegistry;
-import hunt.framework.web.servlet.HandlerMapping;
-import hunt.http.server.WebSocketHandler;
-import hunt.framework.websocket.config.WebSocketMessageBrokerStats;
-import hunt.framework.websocket.handler.WebSocketHandlerDecoratorFactory;
-import hunt.framework.websocket.messaging.DefaultSimpUserRegistry;
+// import hunt.framework.messaging.simp.user.SimpUserRegistry;
+// import hunt.framework.web.servlet.HandlerMapping;
+// import hunt.framework.websocket.config.WebSocketMessageBrokerStats;
+// import hunt.framework.websocket.handler.WebSocketHandlerDecoratorFactory;
+// import hunt.framework.websocket.messaging.DefaultSimpUserRegistry;
 import hunt.framework.websocket.messaging.SubProtocolWebSocketHandler;
 import hunt.framework.websocket.messaging.WebSocketAnnotationMethodMessageHandler;
 
-
+import hunt.http.server.WebSocketHandler;
 
 
 /**

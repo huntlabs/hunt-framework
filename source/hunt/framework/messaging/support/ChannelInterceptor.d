@@ -47,7 +47,7 @@ abstract class ChannelInterceptor {
 	 * Invoked immediately after the send invocation. The 
 	 * value argument represents the return value of that invocation.
 	 */
-	void postSend(MessageBase message, MessageChannel channel,  sent) {
+	void postSend(MessageBase message, MessageChannel channel, bool sent) {
 	}
 
 	/**

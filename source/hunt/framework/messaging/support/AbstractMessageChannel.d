@@ -16,6 +16,7 @@
 
 module hunt.framework.messaging.support.AbstractMessageChannel;
 
+import hunt.framework.messaging.support.ChannelInterceptor;
 import hunt.framework.messaging.support.InterceptableChannel;
 
 import hunt.framework.messaging.Message;
@@ -54,7 +55,7 @@ abstract class AbstractMessageChannel : MessageChannel, InterceptableChannel { /
 	/**
 	 * A message channel uses the bean name primarily for logging purposes.
 	 */
-	override
+	// override
 	void setBeanName(string name) {
 		this.beanName = name;
 	}
@@ -107,7 +108,7 @@ abstract class AbstractMessageChannel : MessageChannel, InterceptableChannel { /
 	override
 	bool send(MessageBase message, long timeout) {
 		assert(message !is null, "Message must not be null");
-		Message!(T) messageToUse = message;
+		MessageBase messageToUse = message;
 		ChannelInterceptorChain chain = new ChannelInterceptorChain();
 		 sent = false;
 		try {
@@ -154,10 +155,10 @@ abstract class AbstractMessageChannel : MessageChannel, InterceptableChannel { /
 		private int receiveInterceptorIndex = -1;
 
 		
-		Message!(T) applyPreSend(MessageBase message, MessageChannel channel) {
-			Message!(T) messageToUse = message;
+		MessageBase applyPreSend(MessageBase message, MessageChannel channel) {
+			MessageBase messageToUse = message;
 			foreach (ChannelInterceptor interceptor ; interceptors) {
-				Message!(T) resolvedMessage = interceptor.preSend(messageToUse, channel);
+				MessageBase resolvedMessage = interceptor.preSend(messageToUse, channel);
 				if (resolvedMessage is null) {
 					string name = TypeUtils.getSimpleName(typeid(interceptor));
 					version(HUNT_DEBUG) {
@@ -203,8 +204,8 @@ abstract class AbstractMessageChannel : MessageChannel, InterceptableChannel { /
 		}
 
 		
-		Message!(T) applyPostReceive(MessageBase message, MessageChannel channel) {
-			Message!(T) messageToUse = message;
+		MessageBase applyPostReceive(MessageBase message, MessageChannel channel) {
+			MessageBase messageToUse = message;
 			foreach (ChannelInterceptor interceptor ; interceptors) {
 				messageToUse = interceptor.postReceive(messageToUse, channel);
 				if (messageToUse is null) {

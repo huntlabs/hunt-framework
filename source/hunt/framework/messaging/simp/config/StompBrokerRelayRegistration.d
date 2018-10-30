@@ -18,7 +18,7 @@ module hunt.framework.messaging.simp.config.StompBrokerRelayRegistration;
 
 
 // import hunt.framework.messaging.MessageChannel;
-// import hunt.framework.messaging.SubscribableChannel;
+// 
 // import hunt.framework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 // import hunt.framework.messaging.tcp.TcpOperations;
 

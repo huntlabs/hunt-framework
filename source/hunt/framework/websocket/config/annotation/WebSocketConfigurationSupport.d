@@ -15,8 +15,8 @@
  */
 
 module hunt.framework.websocket.config.annotation.WebSocketConfigurationSupport;
-import hunt.framework.websocket.config.annotation.ServletWebSocketHandlerRegistry;
 
+// import hunt.framework.websocket.config.annotation.ServletWebSocketHandlerRegistry;
 // import hunt.framework.context.annotation.Bean;
 
 import hunt.framework.task.TaskScheduler;

@@ -32,9 +32,8 @@ import std.array;
 
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageChannel;
-import hunt.framework.messaging.MessageHandler;
 import hunt.framework.messaging.MessagingException;
-import hunt.framework.messaging.SubscribableChannel;
+
 import hunt.framework.websocket.SubProtocolCapable;
 
 // import hunt.framework.util.StringUtils;
@@ -44,8 +43,8 @@ import hunt.http.codec.websocket.stream.WebSocketConnection;
 import hunt.http.server.WebSocketHandler;
 // import hunt.framework.websocket.WebSocketMessage;
 // import hunt.framework.websocket.WebSocketSession;
-import hunt.framework.websocket.handler.ConcurrentWebSocketSessionDecorator;
-import hunt.framework.websocket.handler.SessionLimitExceededException;
+// import hunt.framework.websocket.handler.ConcurrentWebSocketSessionDecorator;
+// import hunt.framework.websocket.handler.SessionLimitExceededException;
 // import hunt.framework.websocket.sockjs.transport.session.PollingSockJsSession;
 // import hunt.framework.websocket.sockjs.transport.session.StreamingSockJsSession;
 
@@ -451,7 +450,7 @@ class SubProtocolWebSocketHandler
 
 	
 	private string resolveSessionId(MessageBase message) {
-		foreach (SubProtocolHandler handler : this.protocolHandlerLookup.byValue) {
+		foreach (SubProtocolHandler handler ; this.protocolHandlerLookup.byValue) {
 			string sessionId = handler.resolveSessionId(message);
 			if (sessionId !is null) {
 				return sessionId;

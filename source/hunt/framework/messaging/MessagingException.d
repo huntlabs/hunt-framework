@@ -19,7 +19,7 @@ module hunt.framework.messaging.MessagingException;
 import hunt.framework.messaging.exception;
 import hunt.framework.messaging.Message;
 
-// import hunt.lang.exception;
+import hunt.lang.exception;
 
 
 /**
