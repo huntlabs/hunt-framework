@@ -37,12 +37,12 @@ interface WebSocketHandlerRegistration {
 	/**
 	 * Configure the HandshakeHandler to use.
 	 */
-	WebSocketHandlerRegistration setHandshakeHandler(HandshakeHandler handshakeHandler);
+	// WebSocketHandlerRegistration setHandshakeHandler(HandshakeHandler handshakeHandler);
 
 	/**
 	 * Configure interceptors for the handshake request.
 	 */
-	WebSocketHandlerRegistration addInterceptors(HandshakeInterceptor[] interceptors...);
+	// WebSocketHandlerRegistration addInterceptors(HandshakeInterceptor[] interceptors...);
 
 	/**
 	 * Configure allowed {@code Origin} header values. This check is mostly designed for

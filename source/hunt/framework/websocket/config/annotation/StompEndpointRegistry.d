@@ -17,6 +17,8 @@
 module hunt.framework.websocket.config.annotation.StompEndpointRegistry;
 
 import hunt.framework.websocket.config.annotation.StompWebSocketEndpointRegistration;
+import hunt.framework.websocket.config.annotation.WebMvcStompWebSocketEndpointRegistration;
+import hunt.framework.websocket.config.annotation.WebSocketTransportRegistration;
 
 import hunt.framework.context.ApplicationContext;
 import hunt.framework.task.TaskScheduler;

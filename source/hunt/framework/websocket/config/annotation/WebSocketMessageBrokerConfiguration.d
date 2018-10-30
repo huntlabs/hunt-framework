@@ -16,6 +16,9 @@
 
 module hunt.framework.websocket.config.annotation.WebSocketMessageBrokerConfiguration;
 
+import hunt.framework.websocket.config.annotation.StompEndpointRegistry;
+import hunt.framework.websocket.config.annotation.WebSocketTransportRegistration;
+
 // import hunt.framework.beans.factory.config.CustomScopeConfigurer;
 import hunt.framework.context.ApplicationContext;
 // import hunt.framework.context.annotation.Bean;
@@ -26,6 +29,7 @@ import hunt.framework.messaging.simp.SimpSessionScope;
 import hunt.framework.messaging.simp.annotation.SimpAnnotationMethodMessageHandler;
 import hunt.framework.messaging.simp.broker.AbstractBrokerMessageHandler;
 import hunt.framework.messaging.simp.config.AbstractMessageBrokerConfiguration;
+import hunt.framework.messaging.simp.config.MessageBrokerRegistry;
 import hunt.framework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 // import hunt.framework.messaging.simp.user.SimpUserRegistry;
 // import hunt.framework.web.servlet.HandlerMapping;
@@ -36,6 +40,8 @@ import hunt.framework.websocket.messaging.SubProtocolWebSocketHandler;
 import hunt.framework.websocket.messaging.WebSocketAnnotationMethodMessageHandler;
 
 import hunt.http.server.WebSocketHandler;
+
+import hunt.lang.common;
 
 
 /**
@@ -71,16 +77,30 @@ class WebSocketMessageBrokerConfiguration : AbstractMessageBrokerConfiguration {
 				clientInboundChannel(), clientOutboundChannel(), brokerMessagingTemplate());
 	}
 
-	override
-	protected SimpUserRegistry createLocalUserRegistry(int order) {
-		DefaultSimpUserRegistry registry = new DefaultSimpUserRegistry();
-		if (order !is null) {
-			registry.setOrder(order);
-		}
-		return registry;
-	}
+	// override
+	// protected SimpUserRegistry createLocalUserRegistry(int order) {
+	// 	DefaultSimpUserRegistry registry = new DefaultSimpUserRegistry();
+	// 	if (order !is null) {
+	// 		registry.setOrder(order);
+	// 	}
+	// 	return registry;
+	// }
 
-	HandlerMapping stompWebSocketHandlerMapping() {
+// TODO: Tasks pending completion -@zxp at 10/30/2018, 2:42:18 PM
+// 
+	// HandlerMapping stompWebSocketHandlerMapping() {
+	// 	WebSocketHandler handler = decorateWebSocketHandler(subProtocolWebSocketHandler());
+	// 	WebMvcStompEndpointRegistry registry = new WebMvcStompEndpointRegistry(
+	// 			handler, getTransportRegistration(), messageBrokerTaskScheduler());
+	// 	ApplicationContext applicationContext = getApplicationContext();
+	// 	if (applicationContext !is null) {
+	// 		registry.setApplicationContext(applicationContext);
+	// 	}
+	// 	registerStompEndpoints(registry);
+	// 	return registry.getHandlerMapping();
+	// }
+
+	void stompWebSocketHandlerMapping() {
 		WebSocketHandler handler = decorateWebSocketHandler(subProtocolWebSocketHandler());
 		WebMvcStompEndpointRegistry registry = new WebMvcStompEndpointRegistry(
 				handler, getTransportRegistration(), messageBrokerTaskScheduler());
@@ -89,8 +109,8 @@ class WebSocketMessageBrokerConfiguration : AbstractMessageBrokerConfiguration {
 			registry.setApplicationContext(applicationContext);
 		}
 		registerStompEndpoints(registry);
-		return registry.getHandlerMapping();
-	}
+		// return registry.getHandlerMapping();
+	}	
 	
 	WebSocketHandler subProtocolWebSocketHandler() {
 		return new SubProtocolWebSocketHandler(clientInboundChannel(), clientOutboundChannel());
@@ -119,35 +139,36 @@ class WebSocketMessageBrokerConfiguration : AbstractMessageBrokerConfiguration {
 			endpointRegistryHandler(registry);
 	}
 
+	override
 	protected void configureMessageBroker(MessageBrokerRegistry registry) {
 		if(messageBrokerRegistryHandler !is null)
 			messageBrokerRegistryHandler(registry);
 	}
 	
-	static CustomScopeConfigurer webSocketScopeConfigurer() {
-		CustomScopeConfigurer configurer = new CustomScopeConfigurer();
-		configurer.addScope("websocket", new SimpSessionScope());
-		return configurer;
-	}
+	// static CustomScopeConfigurer webSocketScopeConfigurer() {
+	// 	CustomScopeConfigurer configurer = new CustomScopeConfigurer();
+	// 	configurer.addScope("websocket", new SimpSessionScope());
+	// 	return configurer;
+	// }
 
 	
-	WebSocketMessageBrokerStats webSocketMessageBrokerStats() {
-		AbstractBrokerMessageHandler relayBean = stompBrokerRelayMessageHandler();
+	// WebSocketMessageBrokerStats webSocketMessageBrokerStats() {
+	// 	AbstractBrokerMessageHandler relayBean = stompBrokerRelayMessageHandler();
 
-		// Ensure STOMP endpoints are registered
-		stompWebSocketHandlerMapping();
+	// 	// Ensure STOMP endpoints are registered
+	// 	stompWebSocketHandlerMapping();
 
-		WebSocketMessageBrokerStats stats = new WebSocketMessageBrokerStats();
-		stats.setSubProtocolWebSocketHandler(cast(SubProtocolWebSocketHandler) subProtocolWebSocketHandler());
-		auto rb = cast(StompBrokerRelayMessageHandler) relayBean;
-		if (rb !is null) {
-			stats.setStompBrokerRelay(rb);
-		}
-		stats.setInboundChannelExecutor(clientInboundChannelExecutor());
-		stats.setOutboundChannelExecutor(clientOutboundChannelExecutor());
-		// stats.setSockJsTaskScheduler(messageBrokerTaskScheduler());
-		return stats;
-	}
+	// 	WebSocketMessageBrokerStats stats = new WebSocketMessageBrokerStats();
+	// 	stats.setSubProtocolWebSocketHandler(cast(SubProtocolWebSocketHandler) subProtocolWebSocketHandler());
+	// 	auto rb = cast(StompBrokerRelayMessageHandler) relayBean;
+	// 	if (rb !is null) {
+	// 		stats.setStompBrokerRelay(rb);
+	// 	}
+	// 	stats.setInboundChannelExecutor(clientInboundChannelExecutor());
+	// 	stats.setOutboundChannelExecutor(clientOutboundChannelExecutor());
+	// 	// stats.setSockJsTaskScheduler(messageBrokerTaskScheduler());
+	// 	return stats;
+	// }
 
 	// override
 	// protected MappingJackson2MessageConverter createJacksonConverter() {

@@ -17,13 +17,7 @@
 module hunt.framework.websocket.messaging.StompSubProtocolHandler;
 
 import hunt.framework.websocket.messaging.SubProtocolHandler;
-import hunt.http.codec.websocket.stream.WebSocketConnection;
-import hunt.http.codec.websocket.frame.WebSocketFrame;
-import hunt.http.codec.websocket.model.CloseStatus;
-
-import hunt.container;
-import hunt.lang.exception;
-import hunt.lang.Nullable;
+import hunt.framework.websocket.messaging.StompSubProtocolErrorHandler;
 
 import hunt.framework.context.ApplicationEvent;
 // import hunt.framework.context.ApplicationEventPublisherAware;
@@ -54,6 +48,15 @@ import hunt.framework.messaging.support.MessageHeaderAccessor;
 // import hunt.framework.websocket.handler.WebSocketSessionDecorator;
 // import hunt.framework.websocket.sockjs.transport.SockJsSession;
 
+import hunt.http.codec.websocket.stream.WebSocketConnection;
+import hunt.http.codec.websocket.frame.WebSocketFrame;
+import hunt.http.codec.websocket.model.CloseStatus;
+
+import hunt.container;
+import hunt.lang.exception;
+import hunt.lang.Nullable;
+import hunt.security.Principal;
+
 import std.conv;
 
 /**
@@ -80,7 +83,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 	 */
 	enum string CONNECTED_USER_HEADER = "user-name";
 
-	private enum string[] SUPPORTED_VERSIONS = {"1.2", "1.1", "1.0"};
+	private enum string[] SUPPORTED_VERSIONS = ["1.2", "1.1", "1.0"];
 
 	private enum byte[] EMPTY_PAYLOAD = [];
 
@@ -186,12 +189,12 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 		return this.headerInitializer;
 	}
 
-	override
+	// override
 	string[] getSupportedProtocols() {
 		return ["v10.stomp", "v11.stomp", "v12.stomp"];
 	}
 
-	override
+	// override
 	void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
 		this.eventPublisher = applicationEventPublisher;
 	}

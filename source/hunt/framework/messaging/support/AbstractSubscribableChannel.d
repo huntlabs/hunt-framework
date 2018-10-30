@@ -32,7 +32,7 @@ import hunt.container.Set;
  */
 abstract class AbstractSubscribableChannel : AbstractMessageChannel, SubscribableChannel {
 
-	private final Set!(MessageHandler) handlers;
+	private Set!(MessageHandler) handlers;
 
 	this() {
 		handlers = new CopyOnWriteArraySet!(MessageHandler)();

@@ -16,14 +16,17 @@
 
 module hunt.framework.messaging.simp.broker.AbstractSubscriptionRegistry;
 
-import hunt.container;
-import hunt.logging;
+import hunt.framework.messaging.simp.broker.SubscriptionRegistry;
 
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageHeaders;
-
 import hunt.framework.messaging.simp.SimpMessageHeaderAccessor;
 import hunt.framework.messaging.simp.SimpMessageType;
+
+import hunt.container;
+import hunt.lang.exception;
+import hunt.logging;
+
 // import hunt.framework.util.CollectionUtils;
 // import hunt.framework.util.LinkedMultiValueMap;
 // import hunt.framework.util.MultiValueMap;
@@ -49,8 +52,9 @@ abstract class AbstractSubscriptionRegistry : SubscriptionRegistry {
 	final void registerSubscription(MessageBase message) {
 		MessageHeaders headers = message.getHeaders();
 
-		SimpMessageType messageType = SimpMessageHeaderAccessor.getMessageType(headers);
-		if (!SimpMessageType.SUBSCRIBE.equals(messageType)) {
+		SimpMessageType messageType = 
+			cast(SimpMessageType)SimpMessageHeaderAccessor.getMessageType(headers);
+		if (SimpMessageType.SUBSCRIBE != messageType) {
 			throw new IllegalArgumentException("Expected SUBSCRIBE: " ~ message);
 		}
 
@@ -85,8 +89,9 @@ abstract class AbstractSubscriptionRegistry : SubscriptionRegistry {
 	final void unregisterSubscription(MessageBase message) {
 		MessageHeaders headers = message.getHeaders();
 
-		SimpMessageType messageType = SimpMessageHeaderAccessor.getMessageType(headers);
-		if (!SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
+		SimpMessageType messageType = 
+			cast(SimpMessageType)SimpMessageHeaderAccessor.getMessageType(headers);
+		if (!SimpMessageType.UNSUBSCRIBE == messageType) {
 			throw new IllegalArgumentException("Expected UNSUBSCRIBE: " ~ message);
 		}
 
@@ -113,8 +118,9 @@ abstract class AbstractSubscriptionRegistry : SubscriptionRegistry {
 	final MultiValueMap!(string, string) findSubscriptions(MessageBase message) {
 		MessageHeaders headers = message.getHeaders();
 
-		SimpMessageType type = SimpMessageHeaderAccessor.getMessageType(headers);
-		if (!SimpMessageType.MESSAGE.equals(type)) {
+		SimpMessageType type = 
+			cast(SimpMessageType)SimpMessageHeaderAccessor.getMessageType(headers);
+		if (SimpMessageType.MESSAGE != type) {
 			throw new IllegalArgumentException("Unexpected message type: " ~ type);
 		}
 

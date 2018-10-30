@@ -16,7 +16,6 @@
 
 module hunt.framework.websocket.messaging.SubProtocolHandler;
 
-import hunt.container.List;
 import hunt.http.codec.websocket.frame.WebSocketFrame;
 // import hunt.http.codec.websocket.frame.Frame;
 import hunt.http.codec.websocket.model.CloseStatus;
@@ -51,7 +50,7 @@ interface SubProtocolHandler {
 	/**
 	 * Return the list of sub-protocols supported by this handler (never {@code null}).
 	 */
-	List!(string) getSupportedProtocols();
+	string[] getSupportedProtocols();
 
 	/**
 	 * Handle the given {@link WebSocketMessage} received from a client.

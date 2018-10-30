@@ -164,7 +164,7 @@ interface StompSession {
 	 * @return a Receiptable for tracking receipts
 	 * @since 4.3
 	 */
-	Receiptable acknowledge(string messageId,  consumed);
+	Receiptable acknowledge(string messageId, bool consumed);
 
 	/**
 	 * An overloaded version of {@link #acknowledge(string, )} with
@@ -174,7 +174,7 @@ interface StompSession {
 	 * @return a Receiptable for tracking receipts
 	 * @since 5.0.5
 	 */
-	Receiptable acknowledge(StompHeaders headers,  consumed);
+	Receiptable acknowledge(StompHeaders headers, bool consumed);
 
 	/**
 	 * Disconnect the session by sending a DISCONNECT frame.

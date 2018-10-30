@@ -99,11 +99,10 @@ abstract class AbstractMessageChannel : MessageChannel, InterceptableChannel { /
 		return this.interceptors.remove(index);
 	}
 
-
-	override
-	bool send(MessageBase message) {
-		return send(message, INDEFINITE_TIMEOUT);
-	}
+	// override
+	// bool send(MessageBase message) {
+	// 	return send(message, INDEFINITE_TIMEOUT);
+	// }
 
 	override
 	bool send(MessageBase message, long timeout) {

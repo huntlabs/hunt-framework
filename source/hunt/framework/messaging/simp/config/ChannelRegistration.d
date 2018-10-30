@@ -59,7 +59,7 @@ class ChannelRegistration {
 	 * adding them to the channel's current list of interceptors.
 	 * @since 4.3.12
 	 */
-	ChannelRegistration interceptors(ChannelInterceptor[] interceptors... ) {
+	ChannelRegistration addInterceptors(ChannelInterceptor[] interceptors... ) {
 		this.interceptors ~= interceptors;
 		return this;
 	}

@@ -16,6 +16,8 @@
 
 module hunt.framework.messaging.simp.stomp.BufferingStompDecoder;
 
+import hunt.framework.messaging.simp.stomp.StompDecoder;
+
 import hunt.framework.messaging.exception;
 import hunt.framework.messaging.Message;
 

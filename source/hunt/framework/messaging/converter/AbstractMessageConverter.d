@@ -22,10 +22,13 @@ import hunt.framework.messaging.MessageHeaders;
 import hunt.framework.messaging.support.MessageBuilder;
 import hunt.framework.messaging.support.MessageHeaderAccessor;
 
+import hunt.http.codec.http.model.MimeTypes;
+
 import hunt.logging;
 import hunt.container;
 
-import hunt.http.codec.http.model.MimeTypes;
+import std.array;
+
 
 
 /**
@@ -85,17 +88,17 @@ abstract class AbstractMessageConverter : SmartMessageConverter {
 	 * ignore all messages.
 	 * <p>By default, a {@code DefaultContentTypeResolver} instance is used.
 	 */
-	void setContentTypeResolver(ContentTypeResolver resolver) {
-		this.contentTypeResolver = resolver;
-	}
+	// void setContentTypeResolver(ContentTypeResolver resolver) {
+	// 	this.contentTypeResolver = resolver;
+	// }
 
 	/**
 	 * Return the configured {@link ContentTypeResolver}.
 	 */
 	
-	ContentTypeResolver getContentTypeResolver() {
-		return this.contentTypeResolver;
-	}
+	// ContentTypeResolver getContentTypeResolver() {
+	// 	return this.contentTypeResolver;
+	// }
 
 	/**
 	 * Whether this converter should convert messages for which no content type
@@ -108,10 +111,10 @@ abstract class AbstractMessageConverter : SmartMessageConverter {
 	 * will return {@code false} if the {@link #setContentTypeResolver contentTypeResolver}
 	 * is not defined or if no content-type header is present.
 	 */
-	void setStrictContentTypeMatch( strictContentTypeMatch) {
+	void setStrictContentTypeMatch(bool strictContentTypeMatch) {
 		if (strictContentTypeMatch) {
-			assert(getSupportedMimeTypes(), "Strict match requires non-empty list of supported mime types");
-			assert(getContentTypeResolver(), "Strict match requires ContentTypeResolver");
+			// assert(getSupportedMimeTypes(), "Strict match requires non-empty list of supported mime types");
+			// assert(getContentTypeResolver(), "Strict match requires ContentTypeResolver");
 		}
 		this.strictContentTypeMatch = strictContentTypeMatch;
 	}
@@ -219,24 +222,31 @@ abstract class AbstractMessageConverter : SmartMessageConverter {
 	// }
 
 	protected bool supportsMimeType(MessageHeaders headers) {
-		if (getSupportedMimeTypes().isEmpty()) {
+		if (getSupportedMimeTypes().empty()) {
 			return true;
 		}
 		MimeType mimeType = getMimeType(headers);
 		if (mimeType is null) {
 			return !isStrictContentTypeMatch();
 		}
+		MimeType mimeTypeBaseType = mimeType.getBaseType();
+		string mimeTypeName = mimeTypeBaseType.asString();
+
 		foreach (MimeType current ; getSupportedMimeTypes()) {
-			if (current.getType().equals(mimeType.getType()) && current.getSubtype().equals(mimeType.getSubtype())) {
+			MimeType currentBaseType = current.getBaseType();
+			// if (current.getType().equals(mimeType.getType()) && current.getSubtype().equals(mimeType.getSubtype())) 
+			if(currentBaseType.isSame(mimeTypeName))
 				return true;
-			}
 		}
 		return false;
 	}
 
 	
 	protected MimeType getMimeType(MessageHeaders headers) {
-		return (headers !is null && this.contentTypeResolver !is null ? this.contentTypeResolver.resolve(headers) : null);
+		// return (headers !is null && this.contentTypeResolver !is null ? this.contentTypeResolver.resolve(headers) : null);
+		// TODO: Tasks pending completion -@zxp at 10/30/2018, 4:25:10 PM
+		// 
+		return null;
 	}
 
 

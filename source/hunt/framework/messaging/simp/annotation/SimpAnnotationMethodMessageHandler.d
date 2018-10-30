@@ -16,11 +16,8 @@
 
 module hunt.framework.messaging.simp.annotation.SimpAnnotationMethodMessageHandler;
 
+import hunt.framework.messaging.simp.annotation.AbstractMethodMessageHandler;
 import hunt.framework.messaging.converter.CompositeMessageConverter;
-
-import hunt.container;
-import hunt.lang.exception;
-import hunt.logging;
 
 // import hunt.framework.beans.factory.config.ConfigurableBeanFactory;
 import hunt.framework.context.ApplicationContext;
@@ -71,8 +68,16 @@ import hunt.framework.messaging.support.MessageHeaderAccessor;
 
 // import hunt.framework.util.CollectionUtils;
 import hunt.framework.utils.PathMatcher;
+import hunt.framework.utils.AntPathMatcher;
 // import hunt.framework.util.StringValueResolver;
 // import hunt.framework.validation.Validator;
+
+import hunt.container;
+import hunt.lang.common;
+import hunt.lang.exception;
+import hunt.logging;
+
+import std.string;
 
 /**
  * A handler for messages delegating to {@link MessageMapping @MessageMapping}
@@ -85,12 +90,12 @@ import hunt.framework.utils.PathMatcher;
  * @author Juergen Hoeller
  * @since 4.0
  */
-class SimpAnnotationMethodMessageHandler : AbstractMethodMessageHandler!(SimpMessageMappingInfo)
-		 { // , EmbeddedValueResolverAware, SmartLifecycle
+class SimpAnnotationMethodMessageHandler 
+		 { // : AbstractMethodMessageHandler!(SimpMessageMappingInfo) , EmbeddedValueResolverAware, SmartLifecycle
 
 	private SubscribableChannel clientInboundChannel;
 
-	private SimpMessageSendingOperations clientMessagingTemplate;
+	// private SimpMessageSendingOperations clientMessagingTemplate;
 
 	private SimpMessageSendingOperations brokerTemplate;
 
@@ -121,17 +126,17 @@ class SimpAnnotationMethodMessageHandler : AbstractMethodMessageHandler!(SimpMes
 	 * @param brokerTemplate a messaging template to send application messages to the broker
 	 */
 	this(SubscribableChannel clientInboundChannel,
-			MessageChannel clientOutboundChannel, SimpMessageSendingOperations brokerTemplate) {
+			MessageChannel clientOutboundChannel) { // , SimpMessageSendingOperations brokerTemplate
 
 		assert(clientInboundChannel, "clientInboundChannel must not be null");
 		assert(clientOutboundChannel, "clientOutboundChannel must not be null");
-		assert(brokerTemplate, "brokerTemplate must not be null");
+		// assert(brokerTemplate, "brokerTemplate must not be null");
 
 		pathMatcher = new AntPathMatcher();
 		lifecycleMonitor = new Object();
 		this.clientInboundChannel = clientInboundChannel;
-		this.clientMessagingTemplate = new SimpMessagingTemplate(clientOutboundChannel);
-		this.brokerTemplate = brokerTemplate;
+		// this.clientMessagingTemplate = new SimpMessagingTemplate(clientOutboundChannel);
+		// this.brokerTemplate = brokerTemplate;
 
 		MessageConverter[] converters = [
 			new StringMessageConverter(),
@@ -151,7 +156,7 @@ class SimpAnnotationMethodMessageHandler : AbstractMethodMessageHandler!(SimpMes
 	 * prefix may use a different separator (e.g. commonly "." in messaging)
 	 * depending on the configured {@code PathMatcher}.
 	 */
-	override
+	// override
 	void setDestinationPrefixes(string[] prefixes) {
 		super.setDestinationPrefixes(appendSlashes(prefixes));
 	}
@@ -195,16 +200,16 @@ class SimpAnnotationMethodMessageHandler : AbstractMethodMessageHandler!(SimpMes
 	 * for example message header values.
 	 * <p>By default, {@link DefaultFormattingConversionService} is used.
 	 */
-	void setConversionService(ConversionService conversionService) {
-		this.conversionService = conversionService;
-	}
+	// void setConversionService(ConversionService conversionService) {
+	// 	this.conversionService = conversionService;
+	// }
 
 	/**
 	 * Return the configured {@link ConversionService}.
 	 */
-	ConversionService getConversionService() {
-		return this.conversionService;
-	}
+	// ConversionService getConversionService() {
+	// 	return this.conversionService;
+	// }
 
 	/**
 	 * Set the PathMatcher implementation to use for matching destinations
@@ -214,7 +219,7 @@ class SimpAnnotationMethodMessageHandler : AbstractMethodMessageHandler!(SimpMes
 	void setPathMatcher(PathMatcher pathMatcher) {
 		assert(pathMatcher, "PathMatcher must not be null");
 		this.pathMatcher = pathMatcher;
-		this.slashPathSeparator = this.pathMatcher.combine("a", "a").equals("a/a");
+		this.slashPathSeparator = this.pathMatcher.combine("a", "a") == ("a/a");
 	}
 
 	/**
@@ -228,23 +233,23 @@ class SimpAnnotationMethodMessageHandler : AbstractMethodMessageHandler!(SimpMes
 	 * Return the configured Validator instance.
 	 */
 	
-	Validator getValidator() {
-		return this.validator;
-	}
+	// Validator getValidator() {
+	// 	return this.validator;
+	// }
 
 	/**
 	 * Set the Validator instance used for validating {@code @Payload} arguments.
 	 * @see hunt.framework.validation.annotation.Validated
 	 * @see PayloadArgumentResolver
 	 */
-	void setValidator(Validator validator) {
-		this.validator = validator;
-	}
+	// void setValidator(Validator validator) {
+	// 	this.validator = validator;
+	// }
 
-	override
-	void setEmbeddedValueResolver(StringValueResolver resolver) {
-		this.valueResolver = resolver;
-	}
+	// override
+	// void setEmbeddedValueResolver(StringValueResolver resolver) {
+	// 	this.valueResolver = resolver;
+	// }
 
 	/**
 	 * Configure a {@link MessageHeaderInitializer} to pass on to
@@ -265,7 +270,7 @@ class SimpAnnotationMethodMessageHandler : AbstractMethodMessageHandler!(SimpMes
 	}
 
 
-	override
+	// override
 	final void start() {
 		synchronized (this.lifecycleMonitor) {
 			this.clientInboundChannel.subscribe(this);
@@ -273,7 +278,7 @@ class SimpAnnotationMethodMessageHandler : AbstractMethodMessageHandler!(SimpMes
 		}
 	}
 
-	override
+	// override
 	final void stop() {
 		synchronized (this.lifecycleMonitor) {
 			this.running = false;
@@ -281,7 +286,7 @@ class SimpAnnotationMethodMessageHandler : AbstractMethodMessageHandler!(SimpMes
 		}
 	}
 
-	override
+	// override
 	final void stop(Runnable callback) {
 		synchronized (this.lifecycleMonitor) {
 			stop();
@@ -289,7 +294,7 @@ class SimpAnnotationMethodMessageHandler : AbstractMethodMessageHandler!(SimpMes
 		}
 	}
 
-	override
+	// override
 	bool isRunning() {
 		return this.running;
 	}
@@ -429,12 +434,12 @@ class SimpAnnotationMethodMessageHandler : AbstractMethodMessageHandler!(SimpMes
 	// 	return result;
 	// }
 
-	override
+	// override
 	protected string getDestination(MessageBase message) {
 		return SimpMessageHeaderAccessor.getDestination(message.getHeaders());
 	}
 
-	override
+	// override
 	protected string getLookupDestination(string destination) {
 		if (destination is null) {
 			return null;

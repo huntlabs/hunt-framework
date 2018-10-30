@@ -34,7 +34,7 @@ import hunt.framework.task.TaskScheduler;
 // import hunt.framework.websocket.sockjs.support.SockJsHttpRequestHandler;
 // import hunt.framework.websocket.sockjs.transport.handler.WebSocketTransportHandler;
 
-// import hunt.container;
+import hunt.container;
 import hunt.lang.exception;
 import hunt.http.server.WebSocketHandler;
 
@@ -54,7 +54,7 @@ class WebMvcStompWebSocketEndpointRegistration : StompWebSocketEndpointRegistrat
 	
 	// private HandshakeHandler handshakeHandler;
 
-	private HandshakeInterceptor[] interceptors;
+	// private HandshakeInterceptor[] interceptors;
 
 	private string[] allowedOrigins;
 
@@ -123,8 +123,8 @@ class WebMvcStompWebSocketEndpointRegistration : StompWebSocketEndpointRegistrat
 	// 	return interceptors.toArray(new HandshakeInterceptor[0]);
 	// }
 
-	final MultiValueMap!(HttpRequestHandler, string) getMappings() {
-		MultiValueMap!(HttpRequestHandler, string) mappings = new LinkedMultiValueMap!(HttpRequestHandler, string)();
+	final MultiValueMap!(WebSocketHandler, string) getMappings() {
+		MultiValueMap!(WebSocketHandler, string) mappings = new LinkedMultiValueMap!(WebSocketHandler, string)();
 		// if (this.registration !is null) {
 		// 	SockJsService sockJsService = this.registration.getSockJsService();
 		// 	for (string path : this.paths) {
@@ -138,19 +138,19 @@ class WebMvcStompWebSocketEndpointRegistration : StompWebSocketEndpointRegistrat
 			// TODO: Tasks pending completion -@zxp at 10/27/2018, 10:56:17 AM
 			// 
 			foreach (string path ; this.paths) {
-				WebSocketHttpRequestHandler handler;
+				// WebSocketHttpRequestHandler handler;
 				// if (this.handshakeHandler !is null) {
 				// 	handler = new WebSocketHttpRequestHandler(this.webSocketHandler, this.handshakeHandler);
 				// }
 				// else 
-				{
-					handler = new WebSocketHttpRequestHandler(this.webSocketHandler);
-				}
+				// {
+					// handler = new WebSocketHttpRequestHandler(this.webSocketHandler);
+				// }
 				// HandshakeInterceptor[] interceptors = getInterceptors();
 				// if (interceptors.length > 0) {
 				// 	handler.setHandshakeInterceptors(interceptors);
 				// }
-				mappings.add(handler, path);
+				mappings.add(this.webSocketHandler, path);
 			}
 		}
 		return mappings;

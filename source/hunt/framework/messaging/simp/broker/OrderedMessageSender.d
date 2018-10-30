@@ -32,6 +32,7 @@ import hunt.framework.messaging.support.ExecutorSubscribableChannel;
 import hunt.framework.messaging.support.MessageHeaderAccessor;
 
 import core.atomic;
+import std.container.dlist;
 
 /**
  * Submit messages to an {@link ExecutorSubscribableChannel}, one at a time.
@@ -46,7 +47,8 @@ class OrderedMessageSender : MessageChannel {
 
 	private MessageChannel channel;
 
-	private Queue!(MessageBase) messages;
+	// private Queue!(MessageBase) messages;
+	private DList!(MessageBase) messages;
 
 	private shared bool sendInProgress = false;
 
@@ -57,34 +59,35 @@ class OrderedMessageSender : MessageChannel {
 
 	private void initlize() {
 		// messages = new ConcurrentLinkedQueue<>();
-		messages = new LinkedQueue!(MessageBase)();
+		// messages = new LinkedQueue!(MessageBase)();
 	}
 
-	bool send(MessageBase message) {
-		return send(message, -1);
-	}
+	// bool send(MessageBase message) {
+	// 	return send(message, -1);
+	// }
 
 	override
 	bool send(MessageBase message, long timeout) {
-		this.messages.add(message);
+		this.messages.insertBack(message);
 		trySend();
 		return true;
 	}
 
 	private void trySend() {
 		// Take sendInProgress flag only if queue is not empty
-		if (this.messages.isEmpty()) {
+		if (this.messages.empty) {
 			return;
 		}
 
-		if (cas(this.sendInProgress, false, true)) {
+		if (cas(&this.sendInProgress, false, true)) {
 			sendNextMessage();
 		}
 	}
 
 	private void sendNextMessage() {
 		for (;;) {
-			MessageBase message = this.messages.poll();
+			MessageBase message = this.messages.front;
+			this.messages.removeFront();
 			if (message !is null) {
 				try {
 					addCompletionCallback(message);
@@ -122,7 +125,7 @@ class OrderedMessageSender : MessageChannel {
 	 * @param preservePublishOrder whether preserve order is on or off based on
 	 * which an interceptor is either added or removed.
 	 */
-	static void configureOutboundChannel(MessageChannel channel,  preservePublishOrder) {
+	static void configureOutboundChannel(MessageChannel channel, bool preservePublishOrder) {
 		if (preservePublishOrder) {
 			ExecutorSubscribableChannel execChannel = cast(ExecutorSubscribableChannel) channel;
 			assert(execChannel !is null, 

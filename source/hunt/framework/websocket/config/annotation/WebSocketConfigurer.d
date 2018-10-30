@@ -16,6 +16,7 @@
 
 module hunt.framework.websocket.config.annotation.WebSocketConfigurer;
 
+import hunt.framework.websocket.config.annotation.WebSocketHandlerRegistry;
 import hunt.http.server.WebSocketHandler;
 
 /**

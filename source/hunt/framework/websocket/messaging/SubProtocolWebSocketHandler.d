@@ -24,6 +24,7 @@ import hunt.framework.websocket.messaging.SubProtocolHandler;
 
 import hunt.container;
 import hunt.datetime;
+import hunt.lang.common;
 import hunt.lang.exception;
 import hunt.logging;
 
@@ -258,7 +259,7 @@ class SubProtocolWebSocketHandler
 	}
 
 
-	override
+	// override
 	final void start() {
 		assert(this.defaultProtocolHandler !is null || !this.protocolHandlers.isEmpty(), "No handlers");
 
@@ -268,7 +269,7 @@ class SubProtocolWebSocketHandler
 		}
 	}
 
-	override
+	// override
 	final void stop() {
 		synchronized (this.lifecycleMonitor) {
 			this.running = false;
@@ -288,7 +289,7 @@ class SubProtocolWebSocketHandler
 		}
 	}
 
-	override
+	// override
 	final void stop(Runnable callback) {
 		synchronized (this.lifecycleMonitor) {
 			stop();
@@ -296,13 +297,13 @@ class SubProtocolWebSocketHandler
 		}
 	}
 
-	override
+	// override
 	final bool isRunning() {
 		return this.running;
 	}
 
 
-	override
+	// override
 	void afterConnectionEstablished(WebSocketSession session) {
 		// WebSocketHandlerDecorator could close the session
 		if (!session.isOpen()) {
@@ -318,7 +319,7 @@ class SubProtocolWebSocketHandler
 	/**
 	 * Handle an inbound message from a WebSocket client.
 	 */
-	override
+	// override
 	void handleMessage(WebSocketSession session, WebSocketMessage message) {
 		WebSocketSessionHolder holder = this.sessions.get(session.getId());
 		if (holder !is null) {
@@ -380,18 +381,18 @@ class SubProtocolWebSocketHandler
 		}
 	}
 
-	override
+	// override
 	void handleTransportError(WebSocketSession session, Throwable exception) {
 		implementationMissing(false);
 		// this.stats.incrementTransportError();
 	}
 
-	override
+	// override
 	void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) {
 		clearSession(session, closeStatus);
 	}
 
-	override
+	// override
 	bool supportsPartialMessages() {
 		return false;
 	}
@@ -601,7 +602,7 @@ private class WebSocketSessionHolder {
 
 	private long createTime;
 
-	private bool hasHandledMessages;
+	private bool _hasHandledMessages;
 
 	this(WebSocketSession session) {
 		this.session = session;
@@ -617,17 +618,17 @@ private class WebSocketSessionHolder {
 	}
 
 	void setHasHandledMessages() {
-		this.hasHandledMessages = true;
+		this._hasHandledMessages = true;
 	}
 
 	bool hasHandledMessages() {
-		return this.hasHandledMessages;
+		return this._hasHandledMessages;
 	}
 
 	override
 	string toString() {
 		return "WebSocketSessionHolder[session=" ~ this.session.toString() ~ ", createTime=" ~
 				this.createTime.to!string() ~ ", hasHandledMessages=" ~ 
-				this.hasHandledMessages.to!string() ~ "]";
+				this._hasHandledMessages.to!string() ~ "]";
 	}
 }

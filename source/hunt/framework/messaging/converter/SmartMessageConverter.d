@@ -30,7 +30,7 @@ import hunt.framework.messaging.MessageHeaders;
  * @author Juergen Hoeller
  * @since 4.2.1
  */
-interface SmartMessageConverter(T) : MessageConverter!(T) {
+interface SmartMessageConverter : MessageConverter {
 
 	/**
 	 * A variant of {@link #fromMessage(Message, Class)} which takes an extra
@@ -60,6 +60,8 @@ interface SmartMessageConverter(T) : MessageConverter!(T) {
 	 * @see #toMessage(Object, MessageHeaders)
 	 */
 	
-	Message!(T) toMessage(Object payload, MessageHeaders headers, Object conversionHint);
+	MessageBase toMessage(Object payload, MessageHeaders headers, Object conversionHint);
+
+	alias toMessage = MessageConverter.toMessage;
 
 }

@@ -16,11 +16,8 @@
 
 module hunt.framework.messaging.simp.broker.AbstractBrokerMessageHandler;
 
+import hunt.framework.messaging.simp.broker.BrokerAvailabilityEvent;
 import hunt.framework.messaging.simp.broker.OrderedMessageSender;
-
-import hunt.lang.common;
-import hunt.container;
-import hunt.logging;
 
 import hunt.framework.context.ApplicationEvent;
 // import hunt.framework.context.ApplicationEventPublisherAware;
@@ -33,6 +30,13 @@ import hunt.framework.messaging.simp.SimpMessageType;
 import hunt.framework.messaging.support.ChannelInterceptor;
 import hunt.framework.messaging.support.InterceptableChannel;
 
+import hunt.lang.common;
+import hunt.container;
+import hunt.logging;
+
+import core.atomic;
+import std.array;
+import std.string;
 
 /**
  * Abstract base class for a {@link MessageHandler} that broker messages to
@@ -56,7 +60,7 @@ abstract class AbstractBrokerMessageHandler
 	
 	private ApplicationEventPublisher eventPublisher;
 
-	private bool brokerAvailable = false;
+	private shared bool brokerAvailable = false;
 
 	private BrokerAvailabilityEvent availableEvent;
 
@@ -141,7 +145,7 @@ abstract class AbstractBrokerMessageHandler
 	 * @param preservePublishOrder whether to publish in order
 	 * @since 5.1
 	 */
-	void setPreservePublishOrder( preservePublishOrder) {
+	void setPreservePublishOrder(bool preservePublishOrder) {
 		OrderedMessageSender.configureOutboundChannel(this.clientOutboundChannel, preservePublishOrder);
 		this.preservePublishOrder = preservePublishOrder;
 	}
@@ -154,7 +158,7 @@ abstract class AbstractBrokerMessageHandler
 		return this.preservePublishOrder;
 	}
 
-	override
+	// override
 	void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
 		this.eventPublisher = publisher;
 	}
@@ -164,17 +168,17 @@ abstract class AbstractBrokerMessageHandler
 		return this.eventPublisher;
 	}
 
-	void setAutoStartup( autoStartup) {
+	void setAutoStartup(bool autoStartup) {
 		this.autoStartup = autoStartup;
 	}
 
-	override
+	// override
 	bool isAutoStartup() {
 		return this.autoStartup;
 	}
 
 
-	override
+	// override
 	void start() {
 		synchronized (this.lifecycleMonitor) {
 			info("Starting...");
@@ -193,7 +197,7 @@ abstract class AbstractBrokerMessageHandler
 	protected void startInternal() {
 	}
 
-	override
+	// override
 	void stop() {
 		synchronized (this.lifecycleMonitor) {
 			info("Stopping...");
@@ -212,7 +216,7 @@ abstract class AbstractBrokerMessageHandler
 	protected void stopInternal() {
 	}
 
-	override
+	// override
 	final void stop(Runnable callback) {
 		synchronized (this.lifecycleMonitor) {
 			stop();
@@ -226,7 +230,7 @@ abstract class AbstractBrokerMessageHandler
 	 * {@link #isBrokerAvailable()} flag may still independently alternate between
 	 * being on and off depending on the concrete sub-class implementation.
 	 */
-	override
+	// override
 	final bool isRunning() {
 		return this.running;
 	}
@@ -262,7 +266,7 @@ abstract class AbstractBrokerMessageHandler
 
 
 	protected bool checkDestinationPrefix(string destination) {
-		if (destination is null || CollectionUtils.isEmpty(this.destinationPrefixes)) {
+		if (destination is null || this.destinationPrefixes.empty()) {
 			return true;
 		}
 		foreach (string prefix ; this.destinationPrefixes) {
@@ -274,7 +278,7 @@ abstract class AbstractBrokerMessageHandler
 	}
 
 	protected void publishBrokerAvailableEvent() {
-		 shouldPublish = this.brokerAvailable.compareAndSet(false, true);
+		bool shouldPublish = cas(&this.brokerAvailable, false, true);
 		if (this.eventPublisher !is null && shouldPublish) {
 			version(HUNT_DEBUG) {
 				info(this.availableEvent);
@@ -284,7 +288,7 @@ abstract class AbstractBrokerMessageHandler
 	}
 
 	protected void publishBrokerUnavailableEvent() {
-		 shouldPublish = this.brokerAvailable.compareAndSet(true, false);
+		bool shouldPublish = cas(&this.brokerAvailable, true, false);
 		if (this.eventPublisher !is null && shouldPublish) {
 			version(HUNT_DEBUG) {
 				info(this.notAvailableEvent);
@@ -300,7 +304,7 @@ abstract class AbstractBrokerMessageHandler
 	 */
 	protected MessageChannel getClientOutboundChannelForSession(string sessionId) {
 		return this.preservePublishOrder ?
-				new OrderedMessageSender(getClientOutboundChannel(), logger) : getClientOutboundChannel();
+				new OrderedMessageSender(getClientOutboundChannel()) : getClientOutboundChannel();
 	}
 
 
@@ -310,12 +314,11 @@ abstract class AbstractBrokerMessageHandler
 	private class UnsentDisconnectChannelInterceptor : ChannelInterceptor {
 
 		override
-		void afterSendCompletion(
-				MessageBase message, MessageChannel channel,  sent, Exception ex) {
-
+		void afterSendCompletion(MessageBase message, 
+			MessageChannel channel, bool sent, Exception ex) {
 			if (!sent) {
 				SimpMessageType messageType = SimpMessageHeaderAccessor.getMessageType(message.getHeaders());
-				if (SimpMessageType.DISCONNECT.equals(messageType)) {
+				if (SimpMessageType.DISCONNECT == (messageType)) {
 					trace("Detected unsent DISCONNECT message. Processing anyway.");
 					handleMessage(message);
 				}

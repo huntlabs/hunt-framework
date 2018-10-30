@@ -16,9 +16,10 @@
 
 module hunt.framework.websocket.config.annotation.WebSocketTransportRegistration;
 
+
 import hunt.container;
 
-// import hunt.framework.websocket.handler.WebSocketHandlerDecoratorFactory;
+import hunt.framework.websocket.server.WebSocketHandlerDecorator;
 
 /**
  * Configure the processing of messages received from and sent to WebSocket clients.

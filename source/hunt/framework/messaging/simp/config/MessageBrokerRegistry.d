@@ -17,6 +17,10 @@
 module hunt.framework.messaging.simp.config.MessageBrokerRegistry;
 
 // import hunt.framework.context.event.SmartApplicationListener;
+import hunt.framework.messaging.simp.config.ChannelRegistration;
+import hunt.framework.messaging.simp.config.StompBrokerRelayRegistration;
+import hunt.framework.messaging.simp.config.SimpleBrokerRegistration;
+
 
 import hunt.framework.messaging.MessageChannel;
 import hunt.framework.messaging.simp.broker.SimpleBrokerMessageHandler;
@@ -223,7 +227,7 @@ class MessageBrokerRegistry {
 	 * since there is some performance overhead to keep messages in order.
 	 * @since 5.1
 	 */
-	MessageBrokerRegistry setPreservePublishOrder( preservePublishOrder) {
+	MessageBrokerRegistry setPreservePublishOrder(bool preservePublishOrder) {
 		this.preservePublishOrder = preservePublishOrder;
 		return this;
 	}

@@ -16,12 +16,15 @@
 
 module hunt.framework.websocket.config.annotation.WebSocketMessageBrokerConfigurer;
 
-
+import hunt.framework.websocket.config.annotation.StompEndpointRegistry;
+import hunt.framework.websocket.config.annotation.WebSocketTransportRegistration;
 import hunt.framework.messaging.converter.MessageConverter;
 // import hunt.framework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 // import hunt.framework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
 import hunt.framework.messaging.simp.config.ChannelRegistration;
 import hunt.framework.messaging.simp.config.MessageBrokerRegistry;
+
+import hunt.container.List;
 
 /**
  * Defines methods for configuring message handling with simple messaging
@@ -75,8 +78,8 @@ abstract class WebSocketMessageBrokerConfigurer {
 	 * @param argumentResolvers the resolvers to register (initially an empty list)
 	 * @since 4.1.1
 	 */
-	void addArgumentResolvers(List!(HandlerMethodArgumentResolver) argumentResolvers) {
-	}
+	// void addArgumentResolvers(List!(HandlerMethodArgumentResolver) argumentResolvers) {
+	// }
 
 	/**
 	 * Add handlers to support custom controller method return value types.
@@ -86,8 +89,8 @@ abstract class WebSocketMessageBrokerConfigurer {
 	 * @param returnValueHandlers the handlers to register (initially an empty list)
 	 * @since 4.1.1
 	 */
-	void addReturnValueHandlers(List!(HandlerMethodReturnValueHandler) returnValueHandlers) {
-	}
+	// void addReturnValueHandlers(List!(HandlerMethodReturnValueHandler) returnValueHandlers) {
+	// }
 
 	/**
 	 * Configure the message converters to use when extracting the payload of

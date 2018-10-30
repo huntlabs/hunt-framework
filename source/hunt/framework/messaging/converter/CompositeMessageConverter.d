@@ -76,7 +76,6 @@ class CompositeMessageConverter : SmartMessageConverter {
 	// }
 
 	override
-	
 	MessageBase toMessage(Object payload, MessageHeaders headers) {
 		foreach (MessageConverter converter ; getConverters()) {
 			MessageBase result = converter.toMessage(payload, headers);
@@ -88,11 +87,10 @@ class CompositeMessageConverter : SmartMessageConverter {
 	}
 
 	override
-	
 	MessageBase toMessage(Object payload, MessageHeaders headers, Object conversionHint) {
 		foreach (MessageConverter converter ; getConverters()) {
-			auto smc = cast(SmartMessageConverter) converter.toMessage(payload, headers, conversionHint);
-			MessageBase result = (smc !is null ? smc :
+			auto smc = cast(SmartMessageConverter) converter;
+			MessageBase result = (smc !is null ? smc.toMessage(payload, headers, conversionHint) :
 					converter.toMessage(payload, headers));
 			if (result !is null) {
 				return result;

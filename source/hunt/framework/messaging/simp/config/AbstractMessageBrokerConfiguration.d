@@ -16,6 +16,9 @@
 
 module hunt.framework.messaging.simp.config.AbstractMessageBrokerConfiguration;
 
+import hunt.framework.messaging.simp.config.ChannelRegistration;
+import hunt.framework.messaging.simp.config.MessageBrokerRegistry;
+
 // import hunt.framework.beans.BeanUtils;
 // import hunt.framework.beans.factory.BeanInitializationException;
 import hunt.framework.context.ApplicationContext;
@@ -56,6 +59,7 @@ import hunt.framework.messaging.support.ImmutableMessageChannelInterceptor;
 // import hunt.framework.validation.Errors;
 // import hunt.framework.validation.Validator;
 
+import hunt.framework.utils.PathMatcher;
 import hunt.container;
 
 import std.string;
@@ -118,7 +122,8 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 	}
 
 	AbstractSubscribableChannel clientInboundChannel() {
-		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(clientInboundChannelExecutor());
+		// ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(clientInboundChannelExecutor());
+		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(null);
 		channel.setLogger(SimpLogging.forLog(channel.getLogger()));
 		ChannelRegistration reg = getClientInboundChannelRegistration();
 		if (reg.hasInterceptors()) {
@@ -128,12 +133,12 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 	}
 
 	
-	ThreadPoolTaskExecutor clientInboundChannelExecutor() {
-		TaskExecutorRegistration reg = getClientInboundChannelRegistration().taskExecutor();
-		ThreadPoolTaskExecutor executor = reg.getTaskExecutor();
-		executor.setThreadNamePrefix("clientInboundChannel-");
-		return executor;
-	}
+	// ThreadPoolTaskExecutor clientInboundChannelExecutor() {
+	// 	TaskExecutorRegistration reg = getClientInboundChannelRegistration().taskExecutor();
+	// 	ThreadPoolTaskExecutor executor = reg.getTaskExecutor();
+	// 	executor.setThreadNamePrefix("clientInboundChannel-");
+	// 	return executor;
+	// }
 
 	protected final ChannelRegistration getClientInboundChannelRegistration() {
 		if (this.clientInboundChannelRegistration is null) {
@@ -154,7 +159,8 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 
 	
 	AbstractSubscribableChannel clientOutboundChannel() {
-		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(clientOutboundChannelExecutor());
+		// ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(clientOutboundChannelExecutor());
+		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(null);
 		channel.setLogger(SimpLogging.forLog(channel.getLogger()));
 		ChannelRegistration reg = getClientOutboundChannelRegistration();
 		if (reg.hasInterceptors()) {
@@ -164,12 +170,12 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 	}
 
 	
-	ThreadPoolTaskExecutor clientOutboundChannelExecutor() {
-		TaskExecutorRegistration reg = getClientOutboundChannelRegistration().taskExecutor();
-		ThreadPoolTaskExecutor executor = reg.getTaskExecutor();
-		executor.setThreadNamePrefix("clientOutboundChannel-");
-		return executor;
-	}
+	// ThreadPoolTaskExecutor clientOutboundChannelExecutor() {
+	// 	TaskExecutorRegistration reg = getClientOutboundChannelRegistration().taskExecutor();
+	// 	ThreadPoolTaskExecutor executor = reg.getTaskExecutor();
+	// 	executor.setThreadNamePrefix("clientOutboundChannel-");
+	// 	return executor;
+	// }
 
 	protected final ChannelRegistration getClientOutboundChannelRegistration() {
 		if (this.clientOutboundChannelRegistration is null) {
@@ -192,7 +198,10 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 	AbstractSubscribableChannel brokerChannel() {
 		ChannelRegistration reg = getBrokerRegistry().getBrokerChannelRegistration();
 		ExecutorSubscribableChannel channel = (reg.hasTaskExecutor() ?
-				new ExecutorSubscribableChannel(brokerChannelExecutor()) : new ExecutorSubscribableChannel());
+				new ExecutorSubscribableChannel(null) : new ExecutorSubscribableChannel());
+
+		// ExecutorSubscribableChannel channel = (reg.hasTaskExecutor() ?
+		// 		new ExecutorSubscribableChannel(brokerChannelExecutor()) : new ExecutorSubscribableChannel());
 		reg.interceptors(new ImmutableMessageChannelInterceptor());
 		channel.setLogger(SimpLogging.forLog(channel.getLogger()));
 		channel.setInterceptors(reg.getInterceptors());
@@ -200,22 +209,22 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 	}
 
 	
-	ThreadPoolTaskExecutor brokerChannelExecutor() {
-		ChannelRegistration reg = getBrokerRegistry().getBrokerChannelRegistration();
-		ThreadPoolTaskExecutor executor;
-		if (reg.hasTaskExecutor()) {
-			executor = reg.taskExecutor().getTaskExecutor();
-		}
-		else {
-			// Should never be used
-			executor = new ThreadPoolTaskExecutor();
-			executor.setCorePoolSize(0);
-			executor.setMaxPoolSize(1);
-			executor.setQueueCapacity(0);
-		}
-		executor.setThreadNamePrefix("brokerChannel-");
-		return executor;
-	}
+	// ThreadPoolTaskExecutor brokerChannelExecutor() {
+	// 	ChannelRegistration reg = getBrokerRegistry().getBrokerChannelRegistration();
+	// 	ThreadPoolTaskExecutor executor;
+	// 	if (reg.hasTaskExecutor()) {
+	// 		executor = reg.taskExecutor().getTaskExecutor();
+	// 	}
+	// 	else {
+	// 		// Should never be used
+	// 		executor = new ThreadPoolTaskExecutor();
+	// 		executor.setCorePoolSize(0);
+	// 		executor.setMaxPoolSize(1);
+	// 		executor.setQueueCapacity(0);
+	// 	}
+	// 	executor.setThreadNamePrefix("brokerChannel-");
+	// 	return executor;
+	// }
 
 	/**
 	 * An accessor for the {@link MessageBrokerRegistry} that ensures its one-time creation
@@ -282,11 +291,11 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 				clientOutboundChannel(), brokerMessagingTemplate());
 	}
 
-	protected void addArgumentResolvers(List!(HandlerMethodArgumentResolver) argumentResolvers) {
-	}
+	// protected void addArgumentResolvers(List!(HandlerMethodArgumentResolver) argumentResolvers) {
+	// }
 
-	protected void addReturnValueHandlers(List!(HandlerMethodReturnValueHandler) returnValueHandlers) {
-	}
+	// protected void addReturnValueHandlers(List!(HandlerMethodReturnValueHandler) returnValueHandlers) {
+	// }
 
 	
 	
@@ -307,8 +316,6 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 		}
 	}
 
-	
-	
 	AbstractBrokerMessageHandler stompBrokerRelayMessageHandler() {
 		StompBrokerRelayMessageHandler handler = getBrokerRegistry().getStompBrokerRelay(brokerChannel());
 		if (handler is null) {
@@ -316,28 +323,28 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 		}
 		Map!(string, MessageHandler) subscriptions = new HashMap!(string, MessageHandler)(4);
 		string destination = getBrokerRegistry().getUserDestinationBroadcast();
-		if (destination !is null) {
-			subscriptions.put(destination, userDestinationMessageHandler());
-		}
-		destination = getBrokerRegistry().getUserRegistryBroadcast();
-		if (destination !is null) {
-			subscriptions.put(destination, userRegistryMessageHandler());
-		}
+		// if (destination !is null) {
+		// 	subscriptions.put(destination, userDestinationMessageHandler());
+		// }
+		// destination = getBrokerRegistry().getUserRegistryBroadcast();
+		// if (destination !is null) {
+		// 	subscriptions.put(destination, userRegistryMessageHandler());
+		// }
 		handler.setSystemSubscriptions(subscriptions);
 		updateUserDestinationResolver(handler);
 		return handler;
 	}
 
 	
-	UserDestinationMessageHandler userDestinationMessageHandler() {
-		UserDestinationMessageHandler handler = new UserDestinationMessageHandler(clientInboundChannel(),
-				brokerChannel(), userDestinationResolver());
-		string destination = getBrokerRegistry().getUserDestinationBroadcast();
-		if (destination !is null) {
-			handler.setBroadcastDestination(destination);
-		}
-		return handler;
-	}
+	// UserDestinationMessageHandler userDestinationMessageHandler() {
+	// 	UserDestinationMessageHandler handler = new UserDestinationMessageHandler(clientInboundChannel(),
+	// 			brokerChannel(), userDestinationResolver());
+	// 	string destination = getBrokerRegistry().getUserDestinationBroadcast();
+	// 	if (destination !is null) {
+	// 		handler.setBroadcastDestination(destination);
+	// 	}
+	// 	return handler;
+	// }
 	
 	
 	// MessageHandler userRegistryMessageHandler() {
@@ -361,15 +368,15 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 	// }
 
 	
-	SimpMessagingTemplate brokerMessagingTemplate() {
-		SimpMessagingTemplate t = new SimpMessagingTemplate(brokerChannel());
-		string prefix = getBrokerRegistry().getUserDestinationPrefix();
-		if (prefix !is null) {
-			t.setUserDestinationPrefix(prefix);
-		}
-		t.setMessageConverter(brokerMessageConverter());
-		return t;
-	}
+	// SimpMessagingTemplate brokerMessagingTemplate() {
+	// 	SimpMessagingTemplate t = new SimpMessagingTemplate(brokerChannel());
+	// 	string prefix = getBrokerRegistry().getUserDestinationPrefix();
+	// 	if (prefix !is null) {
+	// 		t.setUserDestinationPrefix(prefix);
+	// 	}
+	// 	t.setMessageConverter(brokerMessageConverter());
+	// 	return t;
+	// }
 
 	
 	CompositeMessageConverter brokerMessageConverter() {
