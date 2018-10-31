@@ -203,7 +203,7 @@ abstract class AbstractMethodMessageHandler(T)
 	// 	return this.returnValueHandlers.getReturnValueHandlers();
 	// }
 
-	override
+	// override
 	void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
@@ -214,7 +214,7 @@ abstract class AbstractMethodMessageHandler(T)
 	}
 
 
-	override
+	// override
 	void afterPropertiesSet() {
 		implementationMissing(false);
 		// if (this.argumentResolvers.getResolvers().isEmpty()) {
@@ -397,9 +397,9 @@ abstract class AbstractMethodMessageHandler(T)
 	/**
 	 * Return a map with all handler methods and their mappings.
 	 */
-	Map!(T, HandlerMethod) getHandlerMethods() {
-		return Collections.unmodifiableMap(this.handlerMethods);
-	}
+	// Map!(T, HandlerMethod) getHandlerMethods() {
+	// 	return Collections.unmodifiableMap(this.handlerMethods);
+	// }
 
 
 	override

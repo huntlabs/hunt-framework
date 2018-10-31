@@ -32,7 +32,7 @@ import hunt.http.codec.http.model.MimeTypes;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-class StringMessageConverter(T) : AbstractMessageConverter!T {
+class StringMessageConverter : AbstractMessageConverter {
 
 	private Charset defaultCharset;
 
@@ -43,7 +43,7 @@ class StringMessageConverter(T) : AbstractMessageConverter!T {
 
 	this(Charset defaultCharset) {
 		implementationMissing(false);
-		// super(new MimeType("text", "plain", defaultCharset));
+		super(new MimeType("text/plain", defaultCharset));
 		assert(defaultCharset, "Default Charset must not be null");
 		this.defaultCharset = defaultCharset;
 	}

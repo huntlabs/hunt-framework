@@ -16,9 +16,6 @@
 
 module hunt.framework.websocket.messaging.WebSocketAnnotationMethodMessageHandler;
 
-// import java.util.ArrayList;
-// import java.util.List;
-
 import hunt.framework.context.ApplicationContext;
 // import hunt.framework.core.annotation.AnnotationAwareOrderComparator;
 
@@ -47,7 +44,7 @@ class WebSocketAnnotationMethodMessageHandler : SimpAnnotationMethodMessageHandl
 	}
 
 
-	// override
+	override
 	void afterPropertiesSet() {
 		initControllerAdviceCache();
 		super.afterPropertiesSet();

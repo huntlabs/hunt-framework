@@ -59,7 +59,7 @@ import hunt.framework.messaging.support.ImmutableMessageChannelInterceptor;
 // import hunt.framework.validation.Errors;
 // import hunt.framework.validation.Validator;
 
-import hunt.framework.utils.PathMatcher;
+import hunt.string.PathMatcher;
 import hunt.container;
 
 import std.string;

@@ -67,8 +67,7 @@ import hunt.framework.messaging.support.MessageHeaderAccessor;
 // import hunt.framework.util.AntPathMatcher;
 
 // import hunt.framework.util.CollectionUtils;
-import hunt.framework.utils.PathMatcher;
-import hunt.framework.utils.AntPathMatcher;
+import hunt.string.PathMatcher;
 // import hunt.framework.util.StringValueResolver;
 // import hunt.framework.validation.Validator;
 
@@ -90,8 +89,8 @@ import std.string;
  * @author Juergen Hoeller
  * @since 4.0
  */
-class SimpAnnotationMethodMessageHandler 
-		 { // : AbstractMethodMessageHandler!(SimpMessageMappingInfo) , EmbeddedValueResolverAware, SmartLifecycle
+class SimpAnnotationMethodMessageHandler : AbstractMethodMessageHandler!(SimpMessageMappingInfo)
+		 { // EmbeddedValueResolverAware, SmartLifecycle
 
 	private SubscribableChannel clientInboundChannel;
 
@@ -156,7 +155,7 @@ class SimpAnnotationMethodMessageHandler
 	 * prefix may use a different separator (e.g. commonly "." in messaging)
 	 * depending on the configured {@code PathMatcher}.
 	 */
-	// override
+	override
 	void setDestinationPrefixes(string[] prefixes) {
 		super.setDestinationPrefixes(appendSlashes(prefixes));
 	}
@@ -434,12 +433,12 @@ class SimpAnnotationMethodMessageHandler
 	// 	return result;
 	// }
 
-	// override
+	override
 	protected string getDestination(MessageBase message) {
 		return SimpMessageHeaderAccessor.getDestination(message.getHeaders());
 	}
 
-	// override
+	override
 	protected string getLookupDestination(string destination) {
 		if (destination is null) {
 			return null;

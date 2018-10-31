@@ -37,7 +37,7 @@ import hunt.framework.messaging.support.MessageBuilder;
 import hunt.framework.messaging.support.MessageHeaderAccessor;
 
 import hunt.framework.task.TaskScheduler;
-import hunt.framework.utils.PathMatcher;
+import hunt.string.PathMatcher;
 
 import std.conv;
 

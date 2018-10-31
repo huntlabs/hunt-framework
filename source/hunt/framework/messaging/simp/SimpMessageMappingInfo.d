@@ -16,10 +16,10 @@
 
 module hunt.framework.messaging.simp.SimpMessageMappingInfo;
 
-
+import hunt.framework.messaging.simp.SimpMessageTypeMessageCondition;
 import hunt.framework.messaging.Message;
-// import hunt.framework.messaging.handler.DestinationPatternsMessageCondition;
-// import hunt.framework.messaging.handler.MessageCondition;
+import hunt.framework.messaging.handler.DestinationPatternsMessageCondition;
+import hunt.framework.messaging.handler.MessageCondition;
 
 /**
  * {@link MessageCondition} for SImple Messaging Protocols. Encapsulates the following
@@ -32,88 +32,89 @@ import hunt.framework.messaging.Message;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-// class SimpMessageMappingInfo : MessageCondition!(SimpMessageMappingInfo) {
+class SimpMessageMappingInfo : MessageCondition!(SimpMessageMappingInfo) {
 
-// 	private final SimpMessageTypeMessageCondition messageTypeMessageCondition;
+	private SimpMessageTypeMessageCondition messageTypeMessageCondition;
 
-// 	private final DestinationPatternsMessageCondition destinationConditions;
-
-
-// 	SimpMessageMappingInfo(SimpMessageTypeMessageCondition messageTypeMessageCondition,
-// 			DestinationPatternsMessageCondition destinationConditions) {
-
-// 		this.messageTypeMessageCondition = messageTypeMessageCondition;
-// 		this.destinationConditions = destinationConditions;
-// 	}
+	private DestinationPatternsMessageCondition destinationConditions;
 
 
-// 	SimpMessageTypeMessageCondition getMessageTypeMessageCondition() {
-// 		return this.messageTypeMessageCondition;
-// 	}
+	this(SimpMessageTypeMessageCondition messageTypeMessageCondition,
+			DestinationPatternsMessageCondition destinationConditions) {
 
-// 	DestinationPatternsMessageCondition getDestinationConditions() {
-// 		return this.destinationConditions;
-// 	}
+		this.messageTypeMessageCondition = messageTypeMessageCondition;
+		this.destinationConditions = destinationConditions;
+	}
 
 
-// 	override
-// 	SimpMessageMappingInfo combine(SimpMessageMappingInfo other) {
-// 		SimpMessageTypeMessageCondition typeCond =
-// 				this.getMessageTypeMessageCondition().combine(other.getMessageTypeMessageCondition());
-// 		DestinationPatternsMessageCondition destCond =
-// 				this.destinationConditions.combine(other.getDestinationConditions());
-// 		return new SimpMessageMappingInfo(typeCond, destCond);
-// 	}
+	SimpMessageTypeMessageCondition getMessageTypeMessageCondition() {
+		return this.messageTypeMessageCondition;
+	}
 
-// 	override
+	DestinationPatternsMessageCondition getDestinationConditions() {
+		return this.destinationConditions;
+	}
+
+
+	override
+	SimpMessageMappingInfo combine(SimpMessageMappingInfo other) {
+		SimpMessageTypeMessageCondition typeCond =
+				this.getMessageTypeMessageCondition().combine(other.getMessageTypeMessageCondition());
+		DestinationPatternsMessageCondition destCond =
+				this.destinationConditions.combine(other.getDestinationConditions());
+		return new SimpMessageMappingInfo(typeCond, destCond);
+	}
+
+	override
 	
-// 	SimpMessageMappingInfo getMatchingCondition(MessageBase message) {
-// 		SimpMessageTypeMessageCondition typeCond = this.messageTypeMessageCondition.getMatchingCondition(message);
-// 		if (typeCond is null) {
-// 			return null;
-// 		}
-// 		DestinationPatternsMessageCondition destCond = this.destinationConditions.getMatchingCondition(message);
-// 		if (destCond is null) {
-// 			return null;
-// 		}
-// 		return new SimpMessageMappingInfo(typeCond, destCond);
-// 	}
+	SimpMessageMappingInfo getMatchingCondition(MessageBase message) {
+		SimpMessageTypeMessageCondition typeCond = this.messageTypeMessageCondition.getMatchingCondition(message);
+		if (typeCond is null) {
+			return null;
+		}
+		DestinationPatternsMessageCondition destCond = this.destinationConditions.getMatchingCondition(message);
+		if (destCond is null) {
+			return null;
+		}
+		return new SimpMessageMappingInfo(typeCond, destCond);
+	}
 
-// 	override
-// 	int compareTo(SimpMessageMappingInfo other, MessageBase message) {
-// 		int result = this.messageTypeMessageCondition.compareTo(other.messageTypeMessageCondition, message);
-// 		if (result != 0) {
-// 			return result;
-// 		}
-// 		result = this.destinationConditions.compareTo(other.destinationConditions, message);
-// 		if (result != 0) {
-// 			return result;
-// 		}
-// 		return 0;
-// 	}
+	override
+	int compareTo(SimpMessageMappingInfo other, MessageBase message) {
+		int result = this.messageTypeMessageCondition.compareTo(other.messageTypeMessageCondition, message);
+		if (result != 0) {
+			return result;
+		}
+		result = this.destinationConditions.compareTo(other.destinationConditions, message);
+		if (result != 0) {
+			return result;
+		}
+		return 0;
+	}
 
 
-// 	override
-// 	bool opEquals(Object other) {
-// 		if (this == other) {
-// 			return true;
-// 		}
-// 		if (!(other instanceof SimpMessageMappingInfo)) {
-// 			return false;
-// 		}
-// 		SimpMessageMappingInfo otherInfo = (SimpMessageMappingInfo) other;
-// 		return (this.destinationConditions.equals(otherInfo.destinationConditions) &&
-// 				this.messageTypeMessageCondition.equals(otherInfo.messageTypeMessageCondition));
-// 	}
+	override
+	bool opEquals(Object other) {
+		if (this is other) {
+			return true;
+		}
+		SimpMessageMappingInfo otherInfo = cast(SimpMessageMappingInfo) other;
+        if(otherInfo is null)
+            return false;
 
-// 	override
-// 	size_t toHash() @trusted nothrow {
-// 		return (this.destinationConditions.toHash() * 31 + this.messageTypeMessageCondition.toHash());
-// 	}
+		return (this.destinationConditions == (otherInfo.destinationConditions) &&
+				this.messageTypeMessageCondition == (otherInfo.messageTypeMessageCondition));
+	}
 
-// 	override
-// 	string toString() {
-// 		return "{" ~ this.destinationConditions ~ ",messageType=" ~ this.messageTypeMessageCondition + '}';
-// 	}
+	override
+	size_t toHash() @trusted nothrow {
+		return (this.destinationConditions.toHash() * 31 + this.messageTypeMessageCondition.toHash());
+	}
 
-// }
+	override
+	string toString() {
+		return "{" ~ this.destinationConditions.toString()
+             ~ ",messageType=" ~ this.messageTypeMessageCondition.toString() ~ "}";
+	}
+
+}
