@@ -18,10 +18,11 @@ module hunt.framework.messaging.simp.SimpMessageTypeMessageCondition;
 
 import hunt.framework.messaging.simp.SimpMessageHeaderAccessor;
 import hunt.framework.messaging.simp.SimpMessageType;
-import hunt.container;
-
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.handler.AbstractMessageCondition;
+
+import hunt.container;
+import hunt.lang.Nullable;
 
 /**
  * {@code MessageCondition} that matches by the message type obtained via

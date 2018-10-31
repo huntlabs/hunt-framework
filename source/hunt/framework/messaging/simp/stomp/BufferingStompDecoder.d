@@ -17,6 +17,8 @@
 module hunt.framework.messaging.simp.stomp.BufferingStompDecoder;
 
 import hunt.framework.messaging.simp.stomp.StompDecoder;
+import hunt.framework.messaging.simp.stomp.StompHeaderAccessor;
+
 
 import hunt.framework.messaging.exception;
 import hunt.framework.messaging.Message;
@@ -25,6 +27,7 @@ import hunt.container;
 import hunt.lang.Integer;
 
 import std.algorithm;
+import std.array;
 import std.conv;
 import std.container.dlist;
 // import java.nio.ByteBuffer;
@@ -131,7 +134,8 @@ class BufferingStompDecoder {
 
 	private ByteBuffer assembleChunksAndReset() {
 		ByteBuffer result;
-		if (this.chunks.count() == 1) {
+		ByteBuffer[] cs = this.chunks.array();
+		if (cs.length == 1) {
 			result = this.chunks.front();
 		}
 		else {
@@ -155,7 +159,7 @@ class BufferingStompDecoder {
 		}
 		if (getBufferSize() > this.bufferSizeLimit) {
 			throw new StompConversionException("The configured STOMP buffer size limit of " ~
-					this.bufferSizeLimit ~ " bytes has been exceeded");
+					this.bufferSizeLimit.to!string() ~ " bytes has been exceeded");
 		}
 	}
 
@@ -174,7 +178,7 @@ class BufferingStompDecoder {
 	 * Get the expected content length of the currently buffered, incomplete STOMP frame.
 	 */
 	
-	int getExpectedContentLength() {
+	Integer getExpectedContentLength() {
 		return this.expectedContentLength;
 	}
 

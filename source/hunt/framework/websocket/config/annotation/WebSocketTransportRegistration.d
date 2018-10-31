@@ -28,19 +28,11 @@ import hunt.framework.websocket.server.WebSocketHandlerDecorator;
  * @since 4.0.3
  */
 class WebSocketTransportRegistration {
-
 	
 	private int messageSizeLimit;
-
-	
 	private int sendTimeLimit;
-
-	
 	private int sendBufferSizeLimit;
-
-	
 	private int timeToFirstMessage;
-
 	private WebSocketHandlerDecoratorFactory[] decoratorFactories;
 
 	this() {
@@ -72,8 +64,7 @@ class WebSocketTransportRegistration {
 	/**
 	 * Protected accessor for internal use.
 	 */
-	
-	protected int getMessageSizeLimit() {
+	int getMessageSizeLimit() {
 		return this.messageSizeLimit;
 	}
 
@@ -115,7 +106,7 @@ class WebSocketTransportRegistration {
 	 * Protected accessor for internal use.
 	 */
 	
-	protected int getSendTimeLimit() {
+	int getSendTimeLimit() {
 		return this.sendTimeLimit;
 	}
 
@@ -152,7 +143,7 @@ class WebSocketTransportRegistration {
 	 * Protected accessor for internal use.
 	 */
 	
-	protected int getSendBufferSizeLimit() {
+	int getSendBufferSizeLimit() {
 		return this.sendBufferSizeLimit;
 	}
 
@@ -175,8 +166,7 @@ class WebSocketTransportRegistration {
 	/**
 	 * Protected accessor for internal use.
 	 */
-	
-	protected int getTimeToFirstMessage() {
+	int getTimeToFirstMessage() {
 		return this.timeToFirstMessage;
 	}
 
@@ -204,7 +194,7 @@ class WebSocketTransportRegistration {
 		return this;
 	}
 
-	protected WebSocketHandlerDecoratorFactory[] getDecoratorFactories() {
+	WebSocketHandlerDecoratorFactory[] getDecoratorFactories() {
 		return this.decoratorFactories;
 	}
 

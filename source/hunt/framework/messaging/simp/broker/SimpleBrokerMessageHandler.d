@@ -17,16 +17,8 @@
 module hunt.framework.messaging.simp.broker.SimpleBrokerMessageHandler;
 
 import hunt.framework.messaging.simp.broker.AbstractBrokerMessageHandler;
+import hunt.framework.messaging.simp.broker.DefaultSubscriptionRegistry;
 import hunt.framework.messaging.simp.broker.SubscriptionRegistry;
-
-
-import hunt.security.Principal;
-
-import hunt.lang.common;
-import hunt.lang.exception;
-import hunt.container;
-// import java.util.concurrent.ConcurrentHashMap;
-// import java.util.concurrent.ScheduledFuture;
 
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageChannel;
@@ -37,8 +29,16 @@ import hunt.framework.messaging.support.MessageBuilder;
 import hunt.framework.messaging.support.MessageHeaderAccessor;
 
 import hunt.framework.task.TaskScheduler;
+
+import hunt.container;
+import hunt.datetime;
+import hunt.lang.common;
+import hunt.lang.exception;
+import hunt.logging;
+import hunt.security.Principal;
 import hunt.string.PathMatcher;
 
+import std.algorithm;
 import std.conv;
 
 /**
@@ -148,7 +148,7 @@ class SimpleBrokerMessageHandler : AbstractBrokerMessageHandler {
 
 	private void initCacheLimitToUse() {
 		auto s = cast(DefaultSubscriptionRegistry) this.subscriptionRegistry;
-		if (this.cacheLimit !is null && s !is null) {
+		if (s !is null) {
 			s.setCacheLimit(this.cacheLimit);
 		}
 	}
@@ -188,21 +188,21 @@ class SimpleBrokerMessageHandler : AbstractBrokerMessageHandler {
 	 * <p>By default this is not set.
 	 * @since 4.2
 	 */
-	void setTaskScheduler(TaskScheduler taskScheduler) {
-		this.taskScheduler = taskScheduler;
-		if (taskScheduler !is null && this.heartbeatValue is null) {
-			this.heartbeatValue = [10000, 10000];
-		}
-	}
+	// void setTaskScheduler(TaskScheduler taskScheduler) {
+	// 	this.taskScheduler = taskScheduler;
+	// 	if (taskScheduler !is null && this.heartbeatValue is null) {
+	// 		this.heartbeatValue = [10000, 10000];
+	// 	}
+	// }
 
 	/**
 	 * Return the configured TaskScheduler.
 	 * @since 4.2
 	 */
 	
-	TaskScheduler getTaskScheduler() {
-		return this.taskScheduler;
-	}
+	// TaskScheduler getTaskScheduler() {
+	// 	return this.taskScheduler;
+	// }
 
 	/**
 	 * Configure the value for the heart-beat settings. The first number
@@ -252,18 +252,19 @@ class SimpleBrokerMessageHandler : AbstractBrokerMessageHandler {
 	override
 	void startInternal() {
 		publishBrokerAvailableEvent();
-		if (this.taskScheduler !is null) {
-			long interval = initHeartbeatTaskDelay();
-			if (interval > 0) {
-				// this.heartbeatFuture = this.taskScheduler.scheduleWithFixedDelay(new HeartbeatTask(), interval);
-				implementationMissing(false);
-			}
-		}
-		else {
-			assert(getHeartbeatValue() is null ||
-					(getHeartbeatValue()[0] == 0 && getHeartbeatValue()[1] == 0),
-					"Heartbeat values configured but no TaskScheduler provided");
-		}
+		implementationMissing(false);
+		// if (this.taskScheduler !is null) {
+		// 	long interval = initHeartbeatTaskDelay();
+		// 	if (interval > 0) {
+		// 		// this.heartbeatFuture = this.taskScheduler.scheduleWithFixedDelay(new HeartbeatTask(), interval);
+		// 		implementationMissing(false);
+		// 	}
+		// }
+		// else {
+		// 	assert(getHeartbeatValue() is null ||
+		// 			(getHeartbeatValue()[0] == 0 && getHeartbeatValue()[1] == 0),
+		// 			"Heartbeat values configured but no TaskScheduler provided");
+		// }
 	}
 
 	private long initHeartbeatTaskDelay() {
@@ -271,7 +272,7 @@ class SimpleBrokerMessageHandler : AbstractBrokerMessageHandler {
 			return 0;
 		}
 		else if (getHeartbeatValue()[0] > 0 && getHeartbeatValue()[1] > 0) {
-			return Math.min(getHeartbeatValue()[0], getHeartbeatValue()[1]);
+			return min(getHeartbeatValue()[0], getHeartbeatValue()[1]);
 		}
 		else {
 			return (getHeartbeatValue()[0] > 0 ? getHeartbeatValue()[0] : getHeartbeatValue()[1]);
@@ -281,9 +282,9 @@ class SimpleBrokerMessageHandler : AbstractBrokerMessageHandler {
 	override
 	void stopInternal() {
 		publishBrokerUnavailableEvent();
-		if (this.heartbeatFuture !is null) {
-			this.heartbeatFuture.cancel(true);
-		}
+		// if (this.heartbeatFuture !is null) {
+		// 	this.heartbeatFuture.cancel(true);
+		// }
 	}
 
 	override
@@ -299,42 +300,44 @@ class SimpleBrokerMessageHandler : AbstractBrokerMessageHandler {
 			return;
 		}
 
-		if (SimpMessageType.MESSAGE.equals(messageType)) {
+		if (SimpMessageType.MESSAGE == messageType) {
 			logMessage(message);
 			sendMessageToSubscribers(destination, message);
 		}
-		else if (SimpMessageType.CONNECT.equals(messageType)) {
+		else if (SimpMessageType.CONNECT == messageType) {
 			logMessage(message);
 			if (sessionId !is null) {
 				long[] heartbeatIn = SimpMessageHeaderAccessor.getHeartbeat(headers);
 				long[] heartbeatOut = getHeartbeatValue();
-				Principal user = SimpMessageHeaderAccessor.getUser(headers);
+				// TODO: Tasks pending completion -@zxp at 10/31/2018, 4:39:26 PM
+				// 
+				Principal user = null; // SimpMessageHeaderAccessor.getUser(headers);
 				MessageChannel outChannel = getClientOutboundChannelForSession(sessionId);
 				this.sessions.put(sessionId, new SessionInfo(sessionId, user, outChannel, heartbeatIn, heartbeatOut));
 				SimpMessageHeaderAccessor connectAck = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
 				initHeaders(connectAck);
 				connectAck.setSessionId(sessionId);
-				if (user !is null) {
-					connectAck.setUser(user);
-				}
+				// if (user !is null) {
+				// 	connectAck.setUser(user);
+				// }
 				connectAck.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, message);
 				connectAck.setHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER, heartbeatOut);
 				Message!(byte[]) messageOut = MessageHelper.createMessage(EMPTY_PAYLOAD, connectAck.getMessageHeaders());
 				getClientOutboundChannel().send(messageOut);
 			}
 		}
-		else if (SimpMessageType.DISCONNECT.equals(messageType)) {
+		else if (SimpMessageType.DISCONNECT == messageType) {
 			logMessage(message);
 			if (sessionId !is null) {
-				Principal user = SimpMessageHeaderAccessor.getUser(headers);
-				handleDisconnect(sessionId, user, message);
+				// Principal user = SimpMessageHeaderAccessor.getUser(headers);
+				handleDisconnect(sessionId, null, message);
 			}
 		}
-		else if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
+		else if (SimpMessageType.SUBSCRIBE == messageType) {
 			logMessage(message);
 			this.subscriptionRegistry.registerSubscription(message);
 		}
-		else if (SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
+		else if (SimpMessageType.UNSUBSCRIBE == messageType) {
 			logMessage(message);
 			this.subscriptionRegistry.unregisterSubscription(message);
 		}
@@ -368,9 +371,9 @@ class SimpleBrokerMessageHandler : AbstractBrokerMessageHandler {
 		this.subscriptionRegistry.unregisterAllSubscriptions(sessionId);
 		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.DISCONNECT_ACK);
 		accessor.setSessionId(sessionId);
-		if (user !is null) {
-			accessor.setUser(user);
-		}
+		// if (user !is null) {
+		// 	accessor.setUser(user);
+		// }
 		if (origMessage !is null) {
 			accessor.setHeader(SimpMessageHeaderAccessor.DISCONNECT_MESSAGE_HEADER, origMessage);
 		}
@@ -381,41 +384,46 @@ class SimpleBrokerMessageHandler : AbstractBrokerMessageHandler {
 
 	protected void sendMessageToSubscribers(string destination, MessageBase message) {
 		MultiValueMap!(string,string) subscriptions = this.subscriptionRegistry.findSubscriptions(message);
-		if (!subscriptions.isEmpty() && logger.isDebugEnabled()) {
-			trace("Broadcasting to " ~ subscriptions.size() ~ " sessions.");
+		version(HUNT_DEBUG) {
+			if (!subscriptions.isEmpty()) {
+				trace("Broadcasting to " ~ subscriptions.size().to!string() ~ " sessions.");
+			}
 		}
-		long now =DateTimeHelper.currentTimeMillis();
+		long now = DateTimeHelper.currentTimeMillis();
 		foreach(string sessionId, List!string subscriptionIds; subscriptions) {
 			foreach (string subscriptionId ; subscriptionIds) {
 				SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
 				initHeaders(headerAccessor);
 				headerAccessor.setSessionId(sessionId);
 				headerAccessor.setSubscriptionId(subscriptionId);
-				headerAccessor.copyHeadersIfAbsent(message.getHeaders());
+				// TODO: Tasks pending completion -@zxp at 10/31/2018, 4:48:36 PM
+				// 
+				// headerAccessor.copyHeadersIfAbsent(message.getHeaders());
 				headerAccessor.setLeaveMutable(true);
-				Object payload = message.getPayload();
-				MessageBase reply = MessageHelper.createMessage(payload, headerAccessor.getMessageHeaders());
-				SessionInfo info = this.sessions.get(sessionId);
-				if (info !is null) {
-					try {
-						info.getClientOutboundChannel().send(reply);
-					}
-					catch (Throwable ex) {
-						version(HUNT_DEBUG) {
-							errorf("Failed to send " ~ message  ~ ": \n", ex);
-						}
-					}
-					finally {
-						info.setLastWriteTime(now);
-					}
-				}
+				warning(message.payloadType);
+				// Object payload = message.getPayload();
+				// MessageBase reply = MessageHelper.createMessage(payload, headerAccessor.getMessageHeaders());
+				// SessionInfo info = this.sessions.get(sessionId);
+				// if (info !is null) {
+				// 	try {
+				// 		info.getClientOutboundChannel().send(reply);
+				// 	}
+				// 	catch (Throwable ex) {
+				// 		version(HUNT_DEBUG) {
+				// 			errorf("Failed to send " ~ message  ~ ": \n", ex);
+				// 		}
+				// 	}
+				// 	finally {
+				// 		info.setLastWriteTime(now);
+				// 	}
+				// }
 			}
 		}
 	}
 
 	override
 	string toString() {
-		return "SimpleBrokerMessageHandler [" ~ this.subscriptionRegistry ~ "]";
+		return "SimpleBrokerMessageHandler [" ~ (cast(Object)this.subscriptionRegistry).toString() ~ "]";
 	}
 
 
@@ -426,15 +434,17 @@ class SimpleBrokerMessageHandler : AbstractBrokerMessageHandler {
 			long now =DateTimeHelper.currentTimeMillis();
 			foreach (SessionInfo info ; sessions.values()) {
 				if (info.getReadInterval() > 0 && (now - info.getLastReadTime()) > info.getReadInterval()) {
-					handleDisconnect(info.getSessionId(), info.getUser(), null);
+					handleDisconnect(info.getSessionId(), null, null); // info.getUser()
 				}
 				if (info.getWriteInterval() > 0 && (now - info.getLastWriteTime()) > info.getWriteInterval()) {
 					SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.HEARTBEAT);
 					accessor.setSessionId(info.getSessionId());
-					Principal user = info.getUser();
-					if (user !is null) {
-						accessor.setUser(user);
-					}
+					// TODO: Tasks pending completion -@zxp at 10/31/2018, 4:39:51 PM
+					// 
+					// Principal user = info.getUser();
+					// if (user !is null) {
+					// 	accessor.setUser(user);
+					// }
 					initHeaders(accessor);
 					accessor.setLeaveMutable(true);
 					MessageHeaders headers = accessor.getMessageHeaders();
@@ -467,8 +477,7 @@ private static class SessionInfo {
 
 	private long lastWriteTime;
 
-// Principal user,
-	this(string sessionId,  MessageChannel outboundChannel,
+	this(string sessionId, Principal user,  MessageChannel outboundChannel,
 			long[] clientHeartbeat, long[] serverHeartbeat) {
 
 		this.sessionId = sessionId;
@@ -476,9 +485,9 @@ private static class SessionInfo {
 		this.clientOutboundChannel = outboundChannel;
 		if (clientHeartbeat !is null && serverHeartbeat !is null) {
 			this.readInterval = (clientHeartbeat[0] > 0 && serverHeartbeat[1] > 0 ?
-					Math.max(clientHeartbeat[0], serverHeartbeat[1]) * HEARTBEAT_MULTIPLIER : 0);
+					max(clientHeartbeat[0], serverHeartbeat[1]) * HEARTBEAT_MULTIPLIER : 0);
 			this.writeInterval = (clientHeartbeat[1] > 0 && serverHeartbeat[0] > 0 ?
-					Math.max(clientHeartbeat[1], serverHeartbeat[0]) : 0);
+					max(clientHeartbeat[1], serverHeartbeat[0]) : 0);
 		}
 		else {
 			this.readInterval = 0;

@@ -72,7 +72,7 @@ module hunt.framework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 //  * @author Andy Wilkinson
 //  * @since 4.0
 //  */
-// class StompBrokerRelayMessageHandler : AbstractBrokerMessageHandler {
+class StompBrokerRelayMessageHandler  { // : AbstractBrokerMessageHandler
 
 // 	/**
 // 	 * The system session ID.
@@ -1028,4 +1028,4 @@ module hunt.framework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 // 		}
 // 	}
 
-// }
+}

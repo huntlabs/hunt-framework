@@ -16,11 +16,15 @@
 
 module hunt.framework.messaging.simp.config.StompBrokerRelayRegistration;
 
-import hunt.framework.messaging.MessageChannel;
+import hunt.framework.messaging.simp.broker.AbstractBrokerMessageHandler;
 import hunt.framework.messaging.simp.config.AbstractBrokerRegistration;
 import hunt.framework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
+import hunt.framework.messaging.MessageChannel;
 // import hunt.framework.messaging.tcp.TcpOperations;
 
+import hunt.lang.exception;
+
+import std.array;
 
 /**
  * Registration class for configuring a {@link StompBrokerRelayMessageHandler}.
@@ -71,7 +75,7 @@ class StompBrokerRelayRegistration : AbstractBrokerRegistration {
 	 * Set the STOMP message broker host.
 	 */
 	StompBrokerRelayRegistration setRelayHost(string relayHost) {
-		Assert.hasText(relayHost, "relayHost must not be empty");
+		assert(!relayHost.empty(), "relayHost must not be empty");
 		this.relayHost = relayHost;
 		return this;
 	}
@@ -90,7 +94,7 @@ class StompBrokerRelayRegistration : AbstractBrokerRegistration {
 	 * <p>By default this is set to "guest".
 	 */
 	StompBrokerRelayRegistration setClientLogin(string login) {
-		Assert.hasText(login, "clientLogin must not be empty");
+		assert(!login.empty(), "clientLogin must not be empty");
 		this.clientLogin = login;
 		return this;
 	}
@@ -101,7 +105,7 @@ class StompBrokerRelayRegistration : AbstractBrokerRegistration {
 	 * <p>By default this is set to "guest".
 	 */
 	StompBrokerRelayRegistration setClientPasscode(string passcode) {
-		Assert.hasText(passcode, "clientPasscode must not be empty");
+		assert(!passcode.empty(), "clientPasscode must not be empty");
 		this.clientPasscode = passcode;
 		return this;
 	}
@@ -113,7 +117,7 @@ class StompBrokerRelayRegistration : AbstractBrokerRegistration {
 	 * <p>By default this is set to "guest".
 	 */
 	StompBrokerRelayRegistration setSystemLogin(string login) {
-		Assert.hasText(login, "systemLogin must not be empty");
+		assert(!login.empty(), "systemLogin must not be empty");
 		this.systemLogin = login;
 		return this;
 	}
@@ -125,7 +129,7 @@ class StompBrokerRelayRegistration : AbstractBrokerRegistration {
 	 * <p>By default this is set to "guest".
 	 */
 	StompBrokerRelayRegistration setSystemPasscode(string passcode) {
-		Assert.hasText(passcode, "systemPasscode must not be empty");
+		assert(!passcode.empty(), "systemPasscode must not be empty");
 		this.systemPasscode = passcode;
 		return this;
 	}
@@ -203,7 +207,7 @@ class StompBrokerRelayRegistration : AbstractBrokerRegistration {
 	}
 
 	
-	protected string getUserDestinationBroadcast() {
+	string getUserDestinationBroadcast() {
 		return this.userDestinationBroadcast;
 	}
 
@@ -222,12 +226,12 @@ class StompBrokerRelayRegistration : AbstractBrokerRegistration {
 	}
 
 	
-	protected string getUserRegistryBroadcast() {
+	string getUserRegistryBroadcast() {
 		return this.userRegistryBroadcast;
 	}
 
-
-	// protected StompBrokerRelayMessageHandler getMessageHandler(SubscribableChannel brokerChannel) {
+	override
+	protected AbstractBrokerMessageHandler getMessageHandler(SubscribableChannel brokerChannel) {
 
 	// 	StompBrokerRelayMessageHandler handler = new StompBrokerRelayMessageHandler(
 	// 			getClientInboundChannel(), getClientOutboundChannel(),
@@ -258,6 +262,8 @@ class StompBrokerRelayRegistration : AbstractBrokerRegistration {
 	// 	handler.setAutoStartup(this.autoStartup);
 
 	// 	return handler;
-	// }
+		implementationMissing(false);
+		return null;
+	}
 
 }

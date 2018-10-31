@@ -17,7 +17,7 @@
 module hunt.framework.messaging.Message;
 
 import hunt.framework.messaging.MessageHeaders;
-
+import hunt.lang.common;
 
 /**
 * See_also:
@@ -71,4 +71,28 @@ interface MessageHandler {
 	 * @throws MessagingException if the handler failed to process the message
 	 */
 	void handleMessage(MessageBase message);
+
+	int opCmp(MessageHandler o);
+}
+
+
+/**
+ * Extension of the {@link Runnable} interface with methods to obtain the
+ * {@link MessageHandler} and {@link Message} to be handled.
+ *
+ * @author Rossen Stoyanchev
+ * @since 4.1.1
+ */
+interface MessageHandlingRunnable : Runnable {
+
+	/**
+	 * Return the Message that will be handled.
+	 */
+	MessageBase getMessage();
+
+	/**
+	 * Return the MessageHandler that will be used to handle the message.
+	 */
+	MessageHandler getMessageHandler();
+
 }

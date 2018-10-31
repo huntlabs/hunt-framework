@@ -16,12 +16,13 @@
 
 module hunt.framework.websocket.messaging.AbstractSubProtocolEvent;
 
-import hunt.security.Principal;
-
 import hunt.framework.context.ApplicationEvent;
 import hunt.framework.messaging.Message;
+
+import hunt.security.Principal;
 import hunt.util.TypeUtils;
 
+import std.conv;
 
 /**
  * A base class for events for a message received from a WebSocket client and
@@ -85,7 +86,7 @@ abstract class AbstractSubProtocolEvent : ApplicationEvent {
 
 	override
 	string toString() {
-		return TypeUtils.getSimpleName(typeid(this)) ~ "[" ~ this.message ~ "]";
+		return TypeUtils.getSimpleName(typeid(this)) ~ "[" ~ this.message.to!string() ~ "]";
 	}
 
 }

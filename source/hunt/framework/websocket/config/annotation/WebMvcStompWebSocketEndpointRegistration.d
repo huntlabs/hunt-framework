@@ -38,6 +38,8 @@ import hunt.container;
 import hunt.lang.exception;
 import hunt.http.server.WebSocketHandler;
 
+import std.array;
+
 /**
  * An abstract base class for configuring STOMP over WebSocket/SockJS endpoints.
  *

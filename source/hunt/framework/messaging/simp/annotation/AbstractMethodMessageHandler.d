@@ -19,8 +19,10 @@ module hunt.framework.messaging.simp.annotation.AbstractMethodMessageHandler;
 import hunt.container;
 import hunt.lang.exception;
 import hunt.logging;
+import hunt.util.TypeUtils;
 
 import std.array;
+import std.conv;
 import std.string;
 
 // import hunt.framework.beans.factory.InitializingBean;
@@ -31,7 +33,7 @@ import hunt.framework.context.ApplicationContext;
 
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessagingException;
-// import hunt.framework.messaging.handler.DestinationPatternsMessageCondition;
+import hunt.framework.messaging.handler.DestinationPatternsMessageCondition;
 // import hunt.framework.messaging.handler.HandlerMethod;
 // import hunt.framework.messaging.handler.MessagingAdviceBean;
 import hunt.framework.messaging.support.MessageBuilder;
@@ -363,7 +365,7 @@ abstract class AbstractMethodMessageHandler(T)
 	 * Return destinations contained in the mapping that are not patterns and are
 	 * therefore suitable for direct lookups.
 	 */
-	protected abstract Set!(string) getDirectLookupDestinations(T mapping);
+	// protected abstract Set!(string) getDirectLookupDestinations(T mapping);
 
 	/**
 	 * Return a logger to set on {@link HandlerMethodReturnValueHandlerComposite}.
@@ -416,13 +418,15 @@ abstract class AbstractMethodMessageHandler(T)
 		MessageHeaderAccessor headerAccessor = MessageHeaderAccessor.getMutableAccessor(message);
 		headerAccessor.setHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER, lookupDestination);
 		headerAccessor.setLeaveMutable(true);
-		message = MessageHelper.createMessage(message.getPayload(), headerAccessor.getMessageHeaders());
+		implementationMissing(false);
+		warning(message.payloadType);
+		// message = MessageHelper.createMessage(message.getPayload(), headerAccessor.getMessageHeaders());
 
-		version(HUNT_DEBUG) {
-			trace("Searching methods to handle " ~
-					headerAccessor.getShortLogMessage(message.getPayload()) ~
-					", lookupDestination='" ~ lookupDestination ~ "'");
-		}
+		// version(HUNT_DEBUG) {
+		// 	trace("Searching methods to handle " ~
+		// 			headerAccessor.getShortLogMessage(message.getPayload()) ~
+		// 			", lookupDestination='" ~ lookupDestination ~ "'");
+		// }
 
 		handleMessageInternal(message, lookupDestination);
 		headerAccessor.setImmutable();
@@ -511,7 +515,7 @@ abstract class AbstractMethodMessageHandler(T)
 	 * @return the match or {@code null} if there is no match
 	 */
 	
-	protected abstract T getMatchingMapping(T mapping, MessageBase message);
+	// protected abstract T getMatchingMapping(T mapping, MessageBase message);
 
 	protected void handleNoMatch(Set!(T) ts, string lookupDestination, MessageBase message) {
 		trace("No matching message handler methods.");
@@ -632,7 +636,7 @@ abstract class AbstractMethodMessageHandler(T)
 
 	override
 	string toString() {
-		return TypeUtils.getSimpleName(typeid(this)) ~ "[prefixes=" ~ getDestinationPrefixes() ~ "]";
+		return TypeUtils.getSimpleName(typeid(this)) ~ "[prefixes=" ~ getDestinationPrefixes().to!string() ~ "]";
 	}
 
 

@@ -23,6 +23,9 @@ import hunt.container;
 import hunt.lang.Nullable;
 import hunt.string.PathMatcher;
 
+import std.array;
+import std.string;
+
 /**
  * A {@link MessageCondition} for matching the destination of a Message
  * against one or more destination patterns using a {@link PathMatcher}.
@@ -59,12 +62,12 @@ class DestinationPatternsMessageCondition
 	 * @param pathMatcher the PathMatcher to use
 	 */
 	this(string[] patterns, PathMatcher pathMatcher) {
-		this(Arrays.asList(patterns), pathMatcher);
+		this(new ArrayList!(string)(patterns), pathMatcher);
 	}
 
 	private this(Collection!(string) patterns, PathMatcher pathMatcher) {
 		this.pathMatcher = (pathMatcher !is null ? pathMatcher : new AntPathMatcher());
-		this.patterns = Collections.unmodifiableSet(prependLeadingSlash(patterns, this.pathMatcher));
+		this.patterns = prependLeadingSlash(patterns, this.pathMatcher);
 	}
 
 
@@ -72,7 +75,7 @@ class DestinationPatternsMessageCondition
 		bool slashSeparator = pathMatcher.combine("a", "a") == ("a/a");
 		Set!(string) result = new LinkedHashSet!(string)(patterns.size());
 		foreach (string pattern ; patterns) {
-			if (slashSeparator && StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
+			if (slashSeparator && !pattern.empty() && !pattern.startsWith("/")) {
 				pattern = "/" ~ pattern;
 			}
 			result.add(pattern);

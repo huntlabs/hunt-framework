@@ -33,6 +33,7 @@ import hunt.framework.websocket.messaging.SubProtocolWebSocketHandler;
 
 import hunt.container;
 import hunt.http.server.WebSocketHandler;
+import hunt.lang.exception;
 
 /**
  * A contract for registering STOMP over WebSocket endpoints.
@@ -105,14 +106,18 @@ class WebMvcStompEndpointRegistry : StompEndpointRegistry {
 
 		this.webSocketHandler = webSocketHandler;
 		this.subProtocolWebSocketHandler = unwrapSubProtocolWebSocketHandler(webSocketHandler);
-
-		if (transportRegistration.getSendTimeLimit() !is null) {
+// FIXME: Needing refactor or cleanup -@zxp at 10/31/2018, 5:45:08 PM
+// 
+		// if (transportRegistration.getSendTimeLimit() !is null) 
+		{
 			this.subProtocolWebSocketHandler.setSendTimeLimit(transportRegistration.getSendTimeLimit());
 		}
-		if (transportRegistration.getSendBufferSizeLimit() !is null) {
+		// if (transportRegistration.getSendBufferSizeLimit() !is null) 
+		{
 			this.subProtocolWebSocketHandler.setSendBufferSizeLimit(transportRegistration.getSendBufferSizeLimit());
 		}
-		if (transportRegistration.getTimeToFirstMessage() !is null) {
+		// if (transportRegistration.getTimeToFirstMessage() !is null) 
+		{
 			this.subProtocolWebSocketHandler.setTimeToFirstMessage(transportRegistration.getTimeToFirstMessage());
 		}
 
@@ -179,7 +184,7 @@ class WebMvcStompEndpointRegistry : StompEndpointRegistry {
 		return this;
 	}
 
-	protected void setApplicationContext(ApplicationContext applicationContext) {
+	void setApplicationContext(ApplicationContext applicationContext) {
 		this.stompHandler.setApplicationEventPublisher(applicationContext);
 	}
 

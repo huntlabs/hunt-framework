@@ -69,7 +69,7 @@ abstract class AbstractMessageChannel : MessageChannel, InterceptableChannel { /
 
 
 	override
-	void setInterceptors(List!(ChannelInterceptor) interceptors) {
+	void setInterceptors(ChannelInterceptor[] interceptors) {
 		this.interceptors.clear();
 		this.interceptors.addAll(interceptors);
 	}
@@ -86,7 +86,7 @@ abstract class AbstractMessageChannel : MessageChannel, InterceptableChannel { /
 
 	override
 	List!(ChannelInterceptor) getInterceptors() {
-		return Collections.unmodifiableList(this.interceptors);
+		return this.interceptors; // Collections.unmodifiableList(this.interceptors);
 	}
 
 	override
@@ -96,7 +96,7 @@ abstract class AbstractMessageChannel : MessageChannel, InterceptableChannel { /
 
 	override
 	ChannelInterceptor removeInterceptor(int index) {
-		return this.interceptors.remove(index);
+		return this.interceptors.removeAt(index);
 	}
 
 	// override
@@ -109,7 +109,7 @@ abstract class AbstractMessageChannel : MessageChannel, InterceptableChannel { /
 		assert(message !is null, "Message must not be null");
 		MessageBase messageToUse = message;
 		ChannelInterceptorChain chain = new ChannelInterceptorChain();
-		 sent = false;
+		bool sent = false;
 		try {
 			messageToUse = chain.applyPreSend(messageToUse, this);
 			if (messageToUse is null) {
@@ -186,7 +186,7 @@ abstract class AbstractMessageChannel : MessageChannel, InterceptableChannel { /
 					interceptor.afterSendCompletion(message, channel, sent, ex);
 				}
 				catch (Throwable ex2) {
-					errorf("Exception from afterSendCompletion in " ~ interceptor, ex2);
+					errorf("Exception from afterSendCompletion in " ~ interceptor.toString(), ex2);
 				}
 			}
 		}

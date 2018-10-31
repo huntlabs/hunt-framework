@@ -144,6 +144,10 @@ class SimpMessageHeaderAccessor : NativeMessageHeaderAccessor {
 		return getHeaderAs!(string)(SUBSCRIPTION_ID_HEADER);
 	}
 
+	void setSessionId(int sessionId) {
+		setHeader(SESSION_ID_HEADER, sessionId.to!string());
+	}
+
 	void setSessionId(string sessionId) {
 		setHeader(SESSION_ID_HEADER, sessionId);
 	}
@@ -264,10 +268,10 @@ class SimpMessageHeaderAccessor : NativeMessageHeaderAccessor {
 		return new SimpMessageHeaderAccessor(message);
 	}
 	
-	static SimpMessageType getMessageType(Map!(string, Object) headers) {
+	static Nullable!SimpMessageType getMessageType(Map!(string, Object) headers) {
 		auto h = cast(Nullable!SimpMessageType)headers.get(MESSAGE_TYPE_HEADER);
 		assert(h !is null);
-		return cast(SimpMessageType)h;
+		return h;
 	}
 
 	

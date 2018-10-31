@@ -33,7 +33,7 @@ interface InterceptableChannel {
 	/**
 	 * Set the list of channel interceptors clearing any existing interceptors.
 	 */
-	void setInterceptors(List!(ChannelInterceptor) interceptors);
+	void setInterceptors(ChannelInterceptor[] interceptors);
 
 	/**
 	 * Add a channel interceptor to the end of the list.

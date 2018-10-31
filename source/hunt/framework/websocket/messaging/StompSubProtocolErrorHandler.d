@@ -38,7 +38,7 @@ class StompSubProtocolErrorHandler : SubProtocolErrorHandler!(byte[]) {
 	override
 	Message!(byte[]) handleClientMessageProcessingError(Message!(byte[]) clientMessage, Throwable ex) {
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
-		accessor.setMessage(ex.getMessage());
+		accessor.setMessage(ex.msg);
 		accessor.setLeaveMutable(true);
 
 		StompHeaderAccessor clientHeaderAccessor = null;

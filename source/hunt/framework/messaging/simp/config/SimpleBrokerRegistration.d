@@ -92,7 +92,7 @@ class SimpleBrokerRegistration : AbstractBrokerRegistration {
 
 
 	override
-	protected SimpleBrokerMessageHandler getMessageHandler(SubscribableChannel brokerChannel) {
+	SimpleBrokerMessageHandler getMessageHandler(SubscribableChannel brokerChannel) {
 		SimpleBrokerMessageHandler handler = new SimpleBrokerMessageHandler(getClientInboundChannel(),
 				getClientOutboundChannel(), brokerChannel, getDestinationPrefixes());
 		// if (this.taskScheduler !is null) {

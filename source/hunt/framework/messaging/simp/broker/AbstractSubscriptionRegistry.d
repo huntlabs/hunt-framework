@@ -27,6 +27,7 @@ import hunt.container;
 import hunt.lang.exception;
 import hunt.logging;
 
+import std.conv;
 // import hunt.framework.util.CollectionUtils;
 // import hunt.framework.util.LinkedMultiValueMap;
 // import hunt.framework.util.MultiValueMap;
@@ -55,13 +56,13 @@ abstract class AbstractSubscriptionRegistry : SubscriptionRegistry {
 		SimpMessageType messageType = 
 			cast(SimpMessageType)SimpMessageHeaderAccessor.getMessageType(headers);
 		if (SimpMessageType.SUBSCRIBE != messageType) {
-			throw new IllegalArgumentException("Expected SUBSCRIBE: " ~ message);
+			throw new IllegalArgumentException("Expected SUBSCRIBE: " ~ (cast(Object)message).toString());
 		}
 
 		string sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 		if (sessionId is null) {
 			version(HUNT_DEBUG) {
-				error("No sessionId in  " ~ message);
+				error("No sessionId in  " ~ (cast(Object)message).toString());
 			}
 			return;
 		}
@@ -69,7 +70,7 @@ abstract class AbstractSubscriptionRegistry : SubscriptionRegistry {
 		string subscriptionId = SimpMessageHeaderAccessor.getSubscriptionId(headers);
 		if (subscriptionId is null) {
 			version(HUNT_DEBUG) {
-				error("No subscriptionId in " ~ message);
+				error("No subscriptionId in " ~ (cast(Object)message).toString());
 			}
 			return;
 		}
@@ -77,7 +78,7 @@ abstract class AbstractSubscriptionRegistry : SubscriptionRegistry {
 		string destination = SimpMessageHeaderAccessor.getDestination(headers);
 		if (destination is null) {
 			version(HUNT_DEBUG) {
-				error("No destination in " ~ message);
+				error("No destination in " ~ (cast(Object)message).toString());
 			}
 			return;
 		}
@@ -92,13 +93,13 @@ abstract class AbstractSubscriptionRegistry : SubscriptionRegistry {
 		SimpMessageType messageType = 
 			cast(SimpMessageType)SimpMessageHeaderAccessor.getMessageType(headers);
 		if (!SimpMessageType.UNSUBSCRIBE == messageType) {
-			throw new IllegalArgumentException("Expected UNSUBSCRIBE: " ~ message);
+			throw new IllegalArgumentException("Expected UNSUBSCRIBE: " ~ (cast(Object)message).toString());
 		}
 
 		string sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 		if (sessionId is null) {
 			version(HUNT_DEBUG) {
-				error("No sessionId in " ~ message);
+				error("No sessionId in " ~ (cast(Object)message).toString());
 			}
 			return;
 		}
@@ -106,7 +107,7 @@ abstract class AbstractSubscriptionRegistry : SubscriptionRegistry {
 		string subscriptionId = SimpMessageHeaderAccessor.getSubscriptionId(headers);
 		if (subscriptionId is null) {
 			version(HUNT_DEBUG) {
-				error("No subscriptionId " ~ message);
+				error("No subscriptionId " ~ (cast(Object)message).toString());
 			}
 			return;
 		}
@@ -121,7 +122,7 @@ abstract class AbstractSubscriptionRegistry : SubscriptionRegistry {
 		SimpMessageType type = 
 			cast(SimpMessageType)SimpMessageHeaderAccessor.getMessageType(headers);
 		if (SimpMessageType.MESSAGE != type) {
-			throw new IllegalArgumentException("Unexpected message type: " ~ type);
+			throw new IllegalArgumentException("Unexpected message type: " ~ type.to!string());
 		}
 
 		string destination = SimpMessageHeaderAccessor.getDestination(headers);

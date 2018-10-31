@@ -61,6 +61,7 @@ import hunt.framework.messaging.support.ImmutableMessageChannelInterceptor;
 
 import hunt.string.PathMatcher;
 import hunt.container;
+import hunt.lang.exception;
 
 import std.string;
 
@@ -124,7 +125,7 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 	AbstractSubscribableChannel clientInboundChannel() {
 		// ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(clientInboundChannelExecutor());
 		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(null);
-		channel.setLogger(SimpLogging.forLog(channel.getLogger()));
+		// channel.setLogger(SimpLogging.forLog(channel.getLogger()));
 		ChannelRegistration reg = getClientInboundChannelRegistration();
 		if (reg.hasInterceptors()) {
 			channel.setInterceptors(reg.getInterceptors());
@@ -144,7 +145,7 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 		if (this.clientInboundChannelRegistration is null) {
 			ChannelRegistration registration = new ChannelRegistration();
 			configureClientInboundChannel(registration);
-			registration.interceptors(new ImmutableMessageChannelInterceptor());
+			registration.addInterceptors(new ImmutableMessageChannelInterceptor());
 			this.clientInboundChannelRegistration = registration;
 		}
 		return this.clientInboundChannelRegistration;
@@ -161,7 +162,7 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 	AbstractSubscribableChannel clientOutboundChannel() {
 		// ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(clientOutboundChannelExecutor());
 		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(null);
-		channel.setLogger(SimpLogging.forLog(channel.getLogger()));
+		// channel.setLogger(SimpLogging.forLog(channel.getLogger()));
 		ChannelRegistration reg = getClientOutboundChannelRegistration();
 		if (reg.hasInterceptors()) {
 			channel.setInterceptors(reg.getInterceptors());
@@ -181,7 +182,7 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 		if (this.clientOutboundChannelRegistration is null) {
 			ChannelRegistration registration = new ChannelRegistration();
 			configureClientOutboundChannel(registration);
-			registration.interceptors(new ImmutableMessageChannelInterceptor());
+			registration.addInterceptors(new ImmutableMessageChannelInterceptor());
 			this.clientOutboundChannelRegistration = registration;
 		}
 		return this.clientOutboundChannelRegistration;
@@ -202,8 +203,8 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 
 		// ExecutorSubscribableChannel channel = (reg.hasTaskExecutor() ?
 		// 		new ExecutorSubscribableChannel(brokerChannelExecutor()) : new ExecutorSubscribableChannel());
-		reg.interceptors(new ImmutableMessageChannelInterceptor());
-		channel.setLogger(SimpLogging.forLog(channel.getLogger()));
+		reg.addInterceptors(new ImmutableMessageChannelInterceptor());
+		// channel.setLogger(SimpLogging.forLog(channel.getLogger()));
 		channel.setInterceptors(reg.getInterceptors());
 		return channel;
 	}
@@ -261,17 +262,17 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 		SimpAnnotationMethodMessageHandler handler = createAnnotationMethodMessageHandler();
 		handler.setDestinationPrefixes(getBrokerRegistry().getApplicationDestinationPrefixes());
 		handler.setMessageConverter(brokerMessageConverter());
-		handler.setValidator(simpValidator());
+		// handler.setValidator(simpValidator());
 
-		List!(HandlerMethodArgumentResolver) argumentResolvers = 
-            new ArrayList!HandlerMethodArgumentResolver();
-		addArgumentResolvers(argumentResolvers);
-		handler.setCustomArgumentResolvers(argumentResolvers);
+		// List!(HandlerMethodArgumentResolver) argumentResolvers = 
+        //     new ArrayList!HandlerMethodArgumentResolver();
+		// addArgumentResolvers(argumentResolvers);
+		// handler.setCustomArgumentResolvers(argumentResolvers);
 
-		List!(HandlerMethodReturnValueHandler) returnValueHandlers = 
-            new ArrayList!(HandlerMethodReturnValueHandler)();
-		addReturnValueHandlers(returnValueHandlers);
-		handler.setCustomReturnValueHandlers(returnValueHandlers);
+		// List!(HandlerMethodReturnValueHandler) returnValueHandlers = 
+        //     new ArrayList!(HandlerMethodReturnValueHandler)();
+		// addReturnValueHandlers(returnValueHandlers);
+		// handler.setCustomReturnValueHandlers(returnValueHandlers);
 
 		PathMatcher pathMatcher = getBrokerRegistry().getPathMatcher();
 		if (pathMatcher !is null) {
@@ -288,7 +289,7 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 	 */
 	protected SimpAnnotationMethodMessageHandler createAnnotationMethodMessageHandler() {
 		return new SimpAnnotationMethodMessageHandler(clientInboundChannel(),
-				clientOutboundChannel(), brokerMessagingTemplate());
+				clientOutboundChannel()); // , brokerMessagingTemplate()
 	}
 
 	// protected void addArgumentResolvers(List!(HandlerMethodArgumentResolver) argumentResolvers) {
@@ -312,17 +313,23 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 		string[] prefixes = handler.getDestinationPrefixes();
 		// if (!prefixes.isEmpty() && !prefixes.iterator().next().startsWith("/")) {
         if(prefixes.length > 0 && !prefixes[0].startsWith("/")) {
-			(cast(DefaultUserDestinationResolver) userDestinationResolver()).setRemoveLeadingSlash(true);
+			// (cast(DefaultUserDestinationResolver) userDestinationResolver()).setRemoveLeadingSlash(true);
 		}
 	}
 
 	AbstractBrokerMessageHandler stompBrokerRelayMessageHandler() {
-		StompBrokerRelayMessageHandler handler = getBrokerRegistry().getStompBrokerRelay(brokerChannel());
-		if (handler is null) {
-			return null;
-		}
-		Map!(string, MessageHandler) subscriptions = new HashMap!(string, MessageHandler)(4);
-		string destination = getBrokerRegistry().getUserDestinationBroadcast();
+
+		implementationMissing(false);
+		return null;
+		// TODO: Tasks pending completion -@zxp at 10/31/2018, 5:39:16 PM
+		// 		
+		// StompBrokerRelayMessageHandler handler = getBrokerRegistry().getStompBrokerRelay(brokerChannel());
+		// if (handler is null) {
+		// 	return null;
+		// }
+
+		// Map!(string, MessageHandler) subscriptions = new HashMap!(string, MessageHandler)(4);
+		// string destination = getBrokerRegistry().getUserDestinationBroadcast();
 		// if (destination !is null) {
 		// 	subscriptions.put(destination, userDestinationMessageHandler());
 		// }
@@ -330,9 +337,9 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 		// if (destination !is null) {
 		// 	subscriptions.put(destination, userRegistryMessageHandler());
 		// }
-		handler.setSystemSubscriptions(subscriptions);
-		updateUserDestinationResolver(handler);
-		return handler;
+		// handler.setSystemSubscriptions(subscriptions);
+		// updateUserDestinationResolver(handler);
+		// return handler;
 	}
 
 	

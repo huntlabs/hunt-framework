@@ -113,7 +113,7 @@ abstract class AbstractBrokerMessageHandler
 		this.brokerChannel = brokerChannel;
 
 		destinationPrefixes = (destinationPrefixes !is null ? destinationPrefixes : []);
-		this.destinationPrefixes = Collections.unmodifiableCollection(destinationPrefixes);
+		this.destinationPrefixes = destinationPrefixes;
 	}
 
 

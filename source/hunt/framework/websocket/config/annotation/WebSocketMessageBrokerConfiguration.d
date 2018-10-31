@@ -74,7 +74,7 @@ class WebSocketMessageBrokerConfiguration : AbstractMessageBrokerConfiguration {
 	override
 	protected SimpAnnotationMethodMessageHandler createAnnotationMethodMessageHandler() {
 		return new WebSocketAnnotationMethodMessageHandler(
-				clientInboundChannel(), clientOutboundChannel(), brokerMessagingTemplate());
+				clientInboundChannel(), clientOutboundChannel(), null); // , brokerMessagingTemplate()
 	}
 
 	// override
@@ -103,7 +103,7 @@ class WebSocketMessageBrokerConfiguration : AbstractMessageBrokerConfiguration {
 	void stompWebSocketHandlerMapping() {
 		WebSocketHandler handler = decorateWebSocketHandler(subProtocolWebSocketHandler());
 		WebMvcStompEndpointRegistry registry = new WebMvcStompEndpointRegistry(
-				handler, getTransportRegistration(), messageBrokerTaskScheduler());
+				handler, getTransportRegistration(), null); // messageBrokerTaskScheduler()
 		ApplicationContext applicationContext = getApplicationContext();
 		if (applicationContext !is null) {
 			registry.setApplicationContext(applicationContext);
@@ -134,7 +134,7 @@ class WebSocketMessageBrokerConfiguration : AbstractMessageBrokerConfiguration {
 	protected void configureWebSocketTransport(WebSocketTransportRegistration registry) {
 	}
 
-	protected abstract void registerStompEndpoints(StompEndpointRegistry registry) {
+	protected void registerStompEndpoints(StompEndpointRegistry registry) {
 		if(endpointRegistryHandler !is null)
 			endpointRegistryHandler(registry);
 	}

@@ -102,18 +102,18 @@ class MessageBrokerRegistry {
 		return this.brokerChannelRegistration;
 	}
 
-	protected ChannelRegistration getBrokerChannelRegistration() {
+	ChannelRegistration getBrokerChannelRegistration() {
 		return this.brokerChannelRegistration;
 	}
 
 	
-	protected string getUserDestinationBroadcast() {
+	string getUserDestinationBroadcast() {
 		return (this.brokerRelayRegistration !is null ?
 				this.brokerRelayRegistration.getUserDestinationBroadcast() : null);
 	}
 
 	
-	protected string getUserRegistryBroadcast() {
+	string getUserRegistryBroadcast() {
 		return (this.brokerRelayRegistration !is null ?
 				this.brokerRelayRegistration.getUserRegistryBroadcast() : null);
 	}
@@ -134,7 +134,7 @@ class MessageBrokerRegistry {
 	}
 
 	
-	protected string[] getApplicationDestinationPrefixes() {
+	string[] getApplicationDestinationPrefixes() {
 		return (this.applicationDestinationPrefixes !is null ?
 				this.applicationDestinationPrefixes : null);
 	}
@@ -157,7 +157,7 @@ class MessageBrokerRegistry {
 	}
 
 	
-	protected string getUserDestinationPrefix() {
+	string getUserDestinationPrefix() {
 		return this.userDestinationPrefix;
 	}
 
@@ -173,7 +173,7 @@ class MessageBrokerRegistry {
 	}
 
 	
-	protected int getUserRegistryOrder() {
+	int getUserRegistryOrder() {
 		return this.userRegistryOrder;
 	}
 
@@ -200,7 +200,7 @@ class MessageBrokerRegistry {
 	}
 
 	
-	protected PathMatcher getPathMatcher() {
+	PathMatcher getPathMatcher() {
 		return this.pathMatcher;
 	}
 
@@ -233,7 +233,7 @@ class MessageBrokerRegistry {
 	}
 
 	
-	protected SimpleBrokerMessageHandler getSimpleBroker(SubscribableChannel brokerChannel) {
+	SimpleBrokerMessageHandler getSimpleBroker(SubscribableChannel brokerChannel) {
 		if (this.simpleBrokerRegistration is null && this.brokerRelayRegistration is null) {
 			enableSimpleBroker();
 		}
@@ -248,7 +248,7 @@ class MessageBrokerRegistry {
 	}
 
 	
-	// protected StompBrokerRelayMessageHandler getStompBrokerRelay(SubscribableChannel brokerChannel) {
+	// StompBrokerRelayMessageHandler getStompBrokerRelay(SubscribableChannel brokerChannel) {
 	// 	if (this.brokerRelayRegistration !is null) {
 	// 		StompBrokerRelayMessageHandler relay = this.brokerRelayRegistration.getMessageHandler(brokerChannel);
 	// 		relay.setPreservePublishOrder(this.preservePublishOrder);

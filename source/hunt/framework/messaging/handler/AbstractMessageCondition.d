@@ -19,6 +19,7 @@ module hunt.framework.messaging.handler.AbstractMessageCondition;
 import hunt.framework.messaging.handler.MessageCondition;
 
 import hunt.container;
+import hunt.string.StringBuilder;
 
 
 
@@ -35,26 +36,32 @@ import hunt.container;
 abstract class AbstractMessageCondition(T, U) : MessageCondition!(T) {
 
 	override
-	public bool opEquals(Object other) {
+	bool opEquals(Object other) {
 		if (other is null) 
 			return false;
 
 		if (this is other) 
 			return true;
 			
-		auto ot = cast(AbstractMessageCondition!T) other;
+		auto ot = cast(typeof(this)) other;
 		if(ot is null)
 			return false;
 		return getContent() == ot.getContent();
 	}
 
 	override
-	public size_t toHash() @trusted nothrow {
-		return getContent().toHash();
+	size_t toHash() @trusted nothrow {
+		size_t h = 0;
+		try {
+			h = getContent().toHash();
+		} catch(Exception e) {
+
+		}
+		return h;
 	}
 
 	override
-	public string toString() {
+	string toString() {
 		StringBuilder builder = new StringBuilder("[");
 		// for (Iterator<?> iterator = getContent().iterator(); iterator.hasNext();) {
 		// 	Object expression = iterator.next();

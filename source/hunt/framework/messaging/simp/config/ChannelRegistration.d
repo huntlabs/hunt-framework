@@ -77,15 +77,16 @@ class ChannelRegistration {
 	// }
 
 
-	protected bool hasTaskExecutor() {
-		return (this.registration !is null);
+	bool hasTaskExecutor() {
+		// return (this.registration !is null);
+		return false;
 	}
 
-	protected bool hasInterceptors() {
-		return !this.interceptors.isEmpty();
+	bool hasInterceptors() {
+		return !this.interceptors.length > 0;
 	}
 
-	protected ChannelInterceptor[] getInterceptors() {
+	ChannelInterceptor[] getInterceptors() {
 		return this.interceptors;
 	}
 

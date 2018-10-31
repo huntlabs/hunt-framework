@@ -20,8 +20,7 @@ import hunt.framework.messaging.support.AbstractMessageChannel;
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageChannel;
 
-import hunt.container.Collections;
-import hunt.container.Set;
+import hunt.container;
 // import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
@@ -35,12 +34,12 @@ abstract class AbstractSubscribableChannel : AbstractMessageChannel, Subscribabl
 	private Set!(MessageHandler) handlers;
 
 	this() {
-		handlers = new CopyOnWriteArraySet!(MessageHandler)();
+		handlers = new HashSet!(MessageHandler)(); //  new CopyOnWriteArraySet!(MessageHandler)();
 	}
 
 
 	Set!(MessageHandler) getSubscribers() {
-		return Collections.unmodifiableSet!(MessageHandler)(this.handlers);
+		return (this.handlers); // Collections.unmodifiableSet!(MessageHandler)
 	}
 
 	bool hasSubscription(MessageHandler handler) {
@@ -49,10 +48,10 @@ abstract class AbstractSubscribableChannel : AbstractMessageChannel, Subscribabl
 
 	override
 	bool subscribe(MessageHandler handler) {
-		 result = this.handlers.add(handler);
+		bool result = this.handlers.add(handler);
 		if (result) {
 			version(HUNT_DEBUG) {
-				trace(getBeanName() ~ " added " ~ handler);
+				trace(getBeanName() ~ " added " ~ (cast(Object)handler).toString());
 			}
 		}
 		return result;
@@ -60,10 +59,10 @@ abstract class AbstractSubscribableChannel : AbstractMessageChannel, Subscribabl
 
 	override
 	bool unsubscribe(MessageHandler handler) {
-		 result = this.handlers.remove(handler);
+		bool result = this.handlers.remove(handler);
 		if (result) {
 			version(HUNT_DEBUG) {
-				trace(getBeanName() ~ " removed " ~ handler);
+				trace(getBeanName() ~ " removed " ~ (cast(Object)handler).toString());
 			}
 		}
 		return result;
