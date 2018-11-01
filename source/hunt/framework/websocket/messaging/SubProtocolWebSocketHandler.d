@@ -285,7 +285,8 @@ class SubProtocolWebSocketHandler
 			}
 			catch (Throwable ex) {
 				version(HUNT_DEBUG) {
-					warningf("Failed to close '" ~ holder.getSession() ~ "': " ~ ex);
+					warningf("Failed to close '" ~ holder.getSession().to!string() ~ 
+						"': " ~ ex.toString());
 				}
 			}
 		}
@@ -343,7 +344,7 @@ class SubProtocolWebSocketHandler
 		string sessionId = resolveSessionId(message);
 		if (sessionId is null) {
 			version(HUNT_DEBUG) {
-				errorf("Could not find session id in " ~ message);
+				errorf("Could not find session id in " ~ message.to!string());
 			}
 			return;
 		}
@@ -364,7 +365,7 @@ class SubProtocolWebSocketHandler
 		catch (SessionLimitExceededException ex) {
 			try {
 				version(HUNT_DEBUG) {
-					tracef("Terminating '" ~ session ~ "'", ex);
+					tracef("Terminating '" ~ session.to!string() ~ "'", ex);
 				}
 				// this.stats.incrementLimitExceededCount();
 				clearSession(session, ex.getStatus()); // clear first, session may be unresponsive
@@ -377,8 +378,8 @@ class SubProtocolWebSocketHandler
 		catch (Exception ex) {
 			// Could be part of normal workflow (e.g. browser tab closed)
 			version(HUNT_DEBUG) {
-				warningf("Failed to send message to client in " ~ session.toString() 
-					~ ": " ~ (cast(Object)message).toString() ~ "\n", ex);
+				warningf("Failed to send message to client in " ~ session.to!string()
+					~ ": " ~ message.to!string() ~ "\n", ex);
 			}
 		}
 	}
@@ -497,8 +498,8 @@ class SubProtocolWebSocketHandler
 					}
 					WebSocketSession session = holder.getSession();
 					version(HUNT_DEBUG) {
-						info("No messages received after " ~ timeSinceCreated ~ " ms. " ~
-								"Closing " ~ holder.getSession() ~ ".");
+						info("No messages received after " ~ timeSinceCreated.to!string() ~ " ms. " ~
+								"Closing " ~ holder.getSession().to!string() ~ ".");
 					}
 					try {
 						// this.stats.incrementNoMessagesReceivedCount();
@@ -506,7 +507,7 @@ class SubProtocolWebSocketHandler
 					}
 					catch (Throwable ex) {
 						version(HUNT_DEBUG) {
-							warningf("Failed to close unreliable " ~ session, ex);
+							warningf("Failed to close unreliable " ~ session.to!string(), ex);
 						}
 					}
 				}
@@ -526,6 +527,11 @@ class SubProtocolWebSocketHandler
 			// this.stats.decrementSessionCount(session);
 		}
 		findProtocolHandler(session).afterSessionEnded(session, closeStatus, this.clientInboundChannel);
+	}
+
+	override int opCmp(MessageHandler o) {
+		implementationMissing(false);
+		return 0;
 	}
 
 

@@ -31,6 +31,7 @@ import hunt.framework.messaging.support.ExecutorSubscribableChannel;
 import hunt.framework.messaging.support.MessageHeaderAccessor;
 
 import core.atomic;
+import std.conv;
 import std.container.dlist;
 
 /**
@@ -96,7 +97,7 @@ class OrderedMessageSender : MessageChannel {
 				}
 				catch (Throwable ex) {
 					version(HUNT_DEBUG) {
-						error("Failed to send " ~ message, ex);
+						error("Failed to send " ~ message.to!string(), ex);
 					}
 				}
 			}

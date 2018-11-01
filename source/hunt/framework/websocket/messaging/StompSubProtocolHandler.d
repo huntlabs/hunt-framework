@@ -241,7 +241,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 			if (messages.isEmpty()) {
 				version(HUNT_DEBUG) {
 					trace("Incomplete STOMP frame content received in session " ~
-							session.toString() ~ ", bufferSize=" ~ to!string(decoder.getBufferSize()) ~
+							session.to!string() ~ ", bufferSize=" ~ to!string(decoder.getBufferSize()) ~
 							", bufferSizeLimit=" ~ to!string(decoder.getBufferSizeLimit()) ~ ".");
 				}
 				return;
@@ -249,8 +249,8 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 		}
 		catch (Throwable ex) {
 			version(HUNT_DEBUG) {
-				errorf("Failed to parse " ~ webSocketMessage.toString() ~
-						" in session " ~ session.getSessionId() ~ ". Sending STOMP ERROR to client.\n", ex);
+				errorf("Failed to parse " ~ webSocketMessage.to!string() ~
+						" in session " ~ session.getSessionId().to!string() ~ ". Sending STOMP ERROR to client.\n", ex);
 			}
 			handleError(session, ex, null);
 			return;
@@ -271,7 +271,8 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 				}
 
 				version(HUNT_DEBUG) {
-					trace("From client: " ~ headerAccessor.getShortLogMessage(message.getPayload()));
+					byte[] buffer = message.getPayload();
+					trace("From client: " ~ headerAccessor.getShortLogMessage( new Nullable!(byte[])(buffer) ).to!string());
 				}
 
 				StompCommand command = headerAccessor.getCommand();
@@ -317,7 +318,8 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 			catch (Throwable ex) {
 				version(HUNT_DEBUG) {
 					errorf("Failed to send client message to application via MessageChannel" ~
-							" in session " ~ session.getSessionId() ~ ". Sending STOMP ERROR to client.", ex);
+							" in session " ~ session.getSessionId().to!string() ~ 
+							". Sending STOMP ERROR to client.", ex);
 				}
 				handleError(session, ex, message);
 			}
@@ -396,7 +398,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 		}
 		catch (Throwable ex) {
 			version(HUNT_DEBUG) {
-				errorf("Error publishing " ~ event, ex);
+				errorf("Error publishing " ~ event.to!string(), ex);
 			}
 		}
 	}
@@ -422,7 +424,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 		if (StompCommand.MESSAGE == command) {
 			version(HUNT_DEBUG) {
 				if (accessor.getSubscriptionId() is null) {
-					warningf("No STOMP \"subscription\" header in " ~ message);
+					warningf("No STOMP \"subscription\" header in " ~ message.to!string());
 				}
 			}
 			string origDestination = accessor.
@@ -494,7 +496,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 			// Could be part of normal workflow (e.g. browser tab closed)
 			version(HUNT_DEBUG) {
 				tracef("Failed to send WebSocket message to client in session " ~ 
-					session.getSessionId(), ":\n", ex);
+					session.getSessionId().to!string(), ":\n", ex);
 			}
 			command = StompCommand.ERROR;
 		}
@@ -679,6 +681,11 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 		// }
 
 		return MessageHelper.createMessage(EMPTY_PAYLOAD, headerAccessor.getMessageHeaders());
+	}
+
+	int opCmp(SubProtocolHandler o) {
+		implementationMissing(false);
+		return 0;
 	}
 
 	override

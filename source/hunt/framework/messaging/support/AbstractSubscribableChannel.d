@@ -21,6 +21,8 @@ import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageChannel;
 
 import hunt.container;
+import hunt.logging;
+import std.conv;
 // import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
@@ -51,7 +53,7 @@ abstract class AbstractSubscribableChannel : AbstractMessageChannel, Subscribabl
 		bool result = this.handlers.add(handler);
 		if (result) {
 			version(HUNT_DEBUG) {
-				trace(getBeanName() ~ " added " ~ (cast(Object)handler).toString());
+				trace(getBeanName() ~ " added " ~ handler.to!string());
 			}
 		}
 		return result;
@@ -62,7 +64,7 @@ abstract class AbstractSubscribableChannel : AbstractMessageChannel, Subscribabl
 		bool result = this.handlers.remove(handler);
 		if (result) {
 			version(HUNT_DEBUG) {
-				trace(getBeanName() ~ " removed " ~ (cast(Object)handler).toString());
+				trace(getBeanName() ~ " removed " ~ handler.to!string());
 			}
 		}
 		return result;

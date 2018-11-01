@@ -27,6 +27,8 @@ import hunt.framework.messaging.simp.SimpMessageSendingOperations;
 import hunt.framework.messaging.simp.annotation.SimpAnnotationMethodMessageHandler;
 // import hunt.framework.web.method.ControllerAdviceBean;
 
+import hunt.logging;
+
 /**
  * A sub-class of {@link SimpAnnotationMethodMessageHandler} to provide support
  * for {@link hunt.framework.web.bind.annotation.ControllerAdvice

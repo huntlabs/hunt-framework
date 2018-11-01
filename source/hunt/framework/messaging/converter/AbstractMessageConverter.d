@@ -24,6 +24,7 @@ import hunt.framework.messaging.support.MessageHeaderAccessor;
 
 import hunt.http.codec.http.model.MimeTypes;
 
+import hunt.lang.exception;
 import hunt.logging;
 import hunt.container;
 
@@ -179,47 +180,51 @@ abstract class AbstractMessageConverter : SmartMessageConverter {
 	// 	return (supports(targetClass) && supportsMimeType(message.getHeaders()));
 	// }
 
-	// override
-	
-	// final MessageBase toMessage(Object payload, MessageHeaders headers) {
-	// 	return toMessage(payload, headers, null);
-	// }
+	override	
+	final MessageBase toMessage(Object payload, MessageHeaders headers) {
+		return toMessage(payload, headers, null);
+	}
 
-	// override
-	// final MessageBase toMessage(Object payload, MessageHeaders headers, Object conversionHint) {
-	// 	if (!canConvertTo(payload, headers)) {
-	// 		return null;
-	// 	}
+	override
+	final MessageBase toMessage(Object payload, MessageHeaders headers, Object conversionHint) {
+		if (!canConvertTo(payload, headers)) {
+			return null;
+		}
 
-	// 	Object payloadToUse = convertToInternal(payload, headers, conversionHint);
-	// 	if (payloadToUse is null) {
-	// 		return null;
-	// 	}
+		implementationMissing(false);
+		return null;
 
-	// 	MimeType mimeType = getDefaultContentType(payloadToUse);
-	// 	if (headers !is null) {
-	// 		MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(headers, MessageHeaderAccessor.class);
-	// 		if (accessor !is null && accessor.isMutable()) {
-	// 			if (mimeType !is null) {
-	// 				accessor.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE, mimeType);
-	// 			}
-	// 			return MessageHelper.createMessage(payloadToUse, accessor.getMessageHeaders());
-	// 		}
-	// 	}
+		// Object payloadToUse = convertToInternal(payload, headers, conversionHint);
+		// if (payloadToUse is null) {
+		// 	return null;
+		// }
 
-	// 	MessageBuilder<?> builder = MessageBuilder.withPayload(payloadToUse);
-	// 	if (headers !is null) {
-	// 		builder.copyHeaders(headers);
-	// 	}
-	// 	if (mimeType !is null) {
-	// 		builder.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE, mimeType);
-	// 	}
-	// 	return builder.build();
-	// }
+		// MimeType mimeType = getDefaultContentType(payloadToUse);
+		// if (headers !is null) {
+		// 	MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(headers, MessageHeaderAccessor.class);
+		// 	if (accessor !is null && accessor.isMutable()) {
+		// 		if (mimeType !is null) {
+		// 			accessor.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE, mimeType);
+		// 		}
+		// 		return MessageHelper.createMessage(payloadToUse, accessor.getMessageHeaders());
+		// 	}
+		// }
 
-	// protected bool canConvertTo(Object payload, MessageHeaders headers) {
-	// 	return (supports(payload.getClass()) && supportsMimeType(headers));
-	// }
+		// MessageBuilder<?> builder = MessageBuilder.withPayload(payloadToUse);
+		// if (headers !is null) {
+		// 	builder.copyHeaders(headers);
+		// }
+		// if (mimeType !is null) {
+		// 	builder.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE, mimeType);
+		// }
+		// return builder.build();
+	}
+
+	protected bool canConvertTo(Object payload, MessageHeaders headers) {
+		// return (supports(payload.getClass()) && supportsMimeType(headers));
+		implementationMissing(false);
+		return false;
+	}
 
 	protected bool supportsMimeType(MessageHeaders headers) {
 		if (getSupportedMimeTypes().empty()) {

@@ -356,7 +356,8 @@ class SimpleBrokerMessageHandler : AbstractBrokerMessageHandler {
 		version(HUNT_DEBUG) {
 			SimpMessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor!SimpMessageHeaderAccessor(message);
 			accessor = (accessor !is null ? accessor : SimpMessageHeaderAccessor.wrap(message));
-			trace("Processing " ~ accessor.getShortLogMessage(message.getPayload()));
+			trace("Processing " ~ message.payloadType.toString());
+			// trace("Processing " ~ accessor.getShortLogMessage(message.getPayload()));
 		}
 	}
 
@@ -421,9 +422,16 @@ class SimpleBrokerMessageHandler : AbstractBrokerMessageHandler {
 		}
 	}
 
+
+	int opCmp(MessageHandler o) {
+		implementationMissing(false);
+		return 0;
+	}
+
+
 	override
 	string toString() {
-		return "SimpleBrokerMessageHandler [" ~ (cast(Object)this.subscriptionRegistry).toString() ~ "]";
+		return "SimpleBrokerMessageHandler [" ~ this.subscriptionRegistry.to!string() ~ "]";
 	}
 
 

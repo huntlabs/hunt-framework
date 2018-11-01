@@ -36,6 +36,7 @@ import hunt.logging;
 
 import core.atomic;
 import std.array;
+import std.conv;
 import std.string;
 
 /**
@@ -255,7 +256,7 @@ abstract class AbstractBrokerMessageHandler
 	void handleMessage(MessageBase message) {
 		if (!this.running) {
 			version(HUNT_DEBUG) {
-				trace(this ~ " not running yet. Ignoring " ~ message);
+				trace(this.toString() ~ " not running yet. Ignoring " ~ message.to!string());
 			}
 			return;
 		}

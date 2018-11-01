@@ -128,7 +128,7 @@ abstract class AbstractSubscriptionRegistry : SubscriptionRegistry {
 		string destination = SimpMessageHeaderAccessor.getDestination(headers);
 		if (destination is null) {
 			version(HUNT_DEBUG) {
-				error("No destination in " ~ message);
+				error("No destination in " ~ message.to!string());
 			}
 			return EMPTY_MAP;
 		}

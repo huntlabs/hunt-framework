@@ -633,6 +633,10 @@ abstract class AbstractMethodMessageHandler(T)
 	// protected abstract AbstractExceptionHandlerMethodResolver createExceptionHandlerMethodResolverFor(
 	// 		Class<?> beanType);
 
+	override int opCmp(MessageHandler o) {
+		implementationMissing(false);
+		return 0;
+	}
 
 	override
 	string toString() {

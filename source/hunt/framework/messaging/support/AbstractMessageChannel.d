@@ -29,6 +29,8 @@ import hunt.logging;
 import hunt.util.ObjectUtils;
 import hunt.util.TypeUtils;
 
+import std.conv;
+
 /**
  * Abstract base class for {@link MessageChannel} implementations.
  *
@@ -224,7 +226,7 @@ abstract class AbstractMessageChannel : MessageChannel, InterceptableChannel { /
 				}
 				catch (Throwable ex2) {
 					version(HUNT_DEBUG) {
-						errorf("Exception from afterReceiveCompletion in " ~ interceptor, ex2);
+						errorf("Exception from afterReceiveCompletion in " ~ interceptor.to!string, ex2);
 					}
 				}
 			}
