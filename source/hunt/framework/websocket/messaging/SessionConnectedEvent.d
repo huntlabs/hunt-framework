@@ -17,11 +17,10 @@
 module hunt.framework.websocket.messaging.SessionConnectedEvent;
 
 import hunt.framework.websocket.messaging.AbstractSubProtocolEvent;
+import hunt.framework.messaging.Message;
 
 import hunt.security.Principal;
 
-
-import hunt.framework.messaging.Message;
 
 /**
  * A connected event represents the server response to a client's connect request.

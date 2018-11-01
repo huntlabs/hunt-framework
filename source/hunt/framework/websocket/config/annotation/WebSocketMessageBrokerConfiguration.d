@@ -19,6 +19,7 @@ module hunt.framework.websocket.config.annotation.WebSocketMessageBrokerConfigur
 import hunt.framework.websocket.config.annotation.StompEndpointRegistry;
 import hunt.framework.websocket.config.annotation.WebSocketTransportRegistration;
 
+
 // import hunt.framework.beans.factory.config.CustomScopeConfigurer;
 import hunt.framework.context.ApplicationContext;
 // import hunt.framework.context.annotation.Bean;
@@ -34,10 +35,10 @@ import hunt.framework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 // import hunt.framework.messaging.simp.user.SimpUserRegistry;
 // import hunt.framework.web.servlet.HandlerMapping;
 // import hunt.framework.websocket.config.WebSocketMessageBrokerStats;
-// import hunt.framework.websocket.handler.WebSocketHandlerDecoratorFactory;
 // import hunt.framework.websocket.messaging.DefaultSimpUserRegistry;
 import hunt.framework.websocket.messaging.SubProtocolWebSocketHandler;
 import hunt.framework.websocket.messaging.WebSocketAnnotationMethodMessageHandler;
+import hunt.framework.websocket.server.WebSocketHandlerDecorator;
 
 import hunt.http.server.WebSocketHandler;
 
@@ -63,7 +64,7 @@ class WebSocketMessageBrokerConfiguration : AbstractMessageBrokerConfiguration {
 	Action1!(MessageBrokerRegistry) messageBrokerRegistryHandler;
 
 	this(ApplicationContext context) {
-
+		super(context);
 	}
 
 	// void onStompEndpointsRegister(Action1!(StompEndpointRegistry) handler) {

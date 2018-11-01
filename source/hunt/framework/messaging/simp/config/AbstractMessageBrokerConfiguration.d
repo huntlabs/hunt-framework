@@ -289,7 +289,7 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 	 */
 	protected SimpAnnotationMethodMessageHandler createAnnotationMethodMessageHandler() {
 		return new SimpAnnotationMethodMessageHandler(clientInboundChannel(),
-				clientOutboundChannel()); // , brokerMessagingTemplate()
+				clientOutboundChannel(), null); // , brokerMessagingTemplate()
 	}
 
 	// protected void addArgumentResolvers(List!(HandlerMethodArgumentResolver) argumentResolvers) {

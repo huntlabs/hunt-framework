@@ -16,6 +16,7 @@
 
 module hunt.framework.messaging.simp.SimpAttributes;
 
+import hunt.framework.messaging.simp.SimpMessageHeaderAccessor;
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageHeaders;
 

@@ -16,11 +16,9 @@
 
 module hunt.framework.websocket.messaging.StompSubProtocolHandler;
 
-import hunt.framework.websocket.messaging.SubProtocolHandler;
+import hunt.framework.websocket.messaging.SessionConnectedEvent;
 import hunt.framework.websocket.messaging.StompSubProtocolErrorHandler;
-
-import hunt.framework.context.ApplicationEvent;
-// import hunt.framework.context.ApplicationEventPublisherAware;
+import hunt.framework.websocket.messaging.SubProtocolHandler;
 
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageChannel;
@@ -39,12 +37,14 @@ import hunt.framework.messaging.support.ImmutableMessageChannelInterceptor;
 import hunt.framework.messaging.support.MessageBuilder;
 import hunt.framework.messaging.support.MessageHeaderAccessor;
 
+import hunt.framework.context.ApplicationEvent;
+// import hunt.framework.context.ApplicationEventPublisherAware;
+import hunt.framework.websocket.exception;
 // import hunt.framework.util.MimeTypeUtils;
 // import hunt.framework.websocket.BinaryMessage;
 // import hunt.framework.websocket.TextMessage;
 // import hunt.framework.websocket.WebSocketMessage;
 // import hunt.framework.websocket.WebSocketSession;
-// import hunt.framework.websocket.handler.SessionLimitExceededException;
 // import hunt.framework.websocket.handler.WebSocketSessionDecorator;
 // import hunt.framework.websocket.sockjs.transport.SockJsSession;
 
@@ -53,10 +53,13 @@ import hunt.http.codec.websocket.frame.WebSocketFrame;
 import hunt.http.codec.websocket.model.CloseStatus;
 
 import hunt.container;
+import hunt.lang.Boolean;
 import hunt.lang.exception;
 import hunt.lang.Nullable;
+import hunt.logging;
 import hunt.security.Principal;
 
+import std.algorithm;
 import std.conv;
 
 /**
@@ -101,7 +104,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 
 	private Map!(string, Principal) stompAuthentications;
 	
-	private bool immutableMessageInterceptorPresent;
+	private Boolean immutableMessageInterceptorPresent;
 	
 	private ApplicationEventPublisher eventPublisher;
 
@@ -110,8 +113,9 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 	this() {
 		stompEncoder = new StompEncoder();
 		stompDecoder = new StompDecoder();
+		immutableMessageInterceptorPresent = Boolean.valueOf(false);
 		decoders = new HashMap!(string, BufferingStompDecoder)();
-		stompAuthentications = new HashMap!(string, Principal)();
+		stompAuthentications = new HashMap!(string, Principal)(); 
 	}
 
 
@@ -227,9 +231,10 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 			// 	return;
 			// }
 
-			BufferingStompDecoder decoder = this.decoders.get(session.getSessionId());
+			BufferingStompDecoder decoder = this.decoders.get(session.getSessionId().to!string());
 			if (decoder is null) {
-				throw new IllegalStateException("No decoder for session id '" ~ session.getSessionId() ~ "'");
+				throw new IllegalStateException("No decoder for session id '" ~ 
+					session.getSessionId().to!string() ~ "'");
 			}
 
 			messages = decoder.decode(byteBuffer);
@@ -257,7 +262,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 						MessageHeaderAccessor.getAccessor!(StompHeaderAccessor)(message);
 				assert(headerAccessor !is null, "No StompHeaderAccessor");
 
-				headerAccessor.setSessionId(session.getSessionId());
+				headerAccessor.setSessionId(session.getSessionId().to!string());
 				// headerAccessor.setSessionAttributes(session.getAttributes());
 				// headerAccessor.setUser(getUser(session));
 				headerAccessor.setHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER, headerAccessor.getHeartbeat());
@@ -271,40 +276,42 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 
 				StompCommand command = headerAccessor.getCommand();
 				bool isConnect = StompCommand.CONNECT == command;
-				if (isConnect) {
-					this.stats.incrementConnectCount();
-				}
-				else if (StompCommand.DISCONNECT == command) {
-					this.stats.incrementDisconnectCount();
-				}
+				// if (isConnect) {
+				// 	this.stats.incrementConnectCount();
+				// }
+				// else if (StompCommand.DISCONNECT == command) {
+				// 	this.stats.incrementDisconnectCount();
+				// }
 
 				try {
-					SimpAttributesContextHolder.setAttributesFromMessage(message);
+					// SimpAttributesContextHolder.setAttributesFromMessage(message);
 					bool sent = outputChannel.send(message);
 
 					if (sent) {
 						if (isConnect) {
-							Principal user = headerAccessor.getUser();
-							if (user !is null && user != session.getPrincipal()) {
-								this.stompAuthentications.put(session.getSessionId(), user);
-							}
+							Principal user = null; // headerAccessor.getUser();
+							// if (user !is null && user != session.getPrincipal()) {
+							// 	this.stompAuthentications.put(session.getSessionId(), user);
+							// }
 						}
 						if (this.eventPublisher !is null) {
-							Principal user = getUser(session);
-							if (isConnect) {
-								publishEvent(this.eventPublisher, new SessionConnectEvent(this, message, user));
-							}
-							else if (StompCommand.SUBSCRIBE == command) {
-								publishEvent(this.eventPublisher, new SessionSubscribeEvent(this, message, user));
-							}
-							else if (StompCommand.UNSUBSCRIBE == command) {
-								publishEvent(this.eventPublisher, new SessionUnsubscribeEvent(this, message, user));
-							}
+							implementationMissing(false);
+							// Principal user = getUser(session);
+							// if (isConnect) {
+							// 	publishEvent(this.eventPublisher, new SessionConnectEvent(this, message, user));
+							// }
+							// else if (StompCommand.SUBSCRIBE == command) {
+							// 	publishEvent(this.eventPublisher, new SessionSubscribeEvent(this, message, user));
+							// }
+							// else if (StompCommand.UNSUBSCRIBE == command) {
+							// 	publishEvent(this.eventPublisher, new SessionUnsubscribeEvent(this, message, user));
+							// }
 						}
 					}
 				}
+
 				finally {
-					SimpAttributesContextHolder.resetAttributes();
+					// SimpAttributesContextHolder.resetAttributes();
 				}
 			}
 			catch (Throwable ex) {
@@ -319,8 +326,10 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 
 	
 	private Principal getUser(WebSocketSession session) {
-		Principal user = this.stompAuthentications.get(session.getSessionId());
-		return (user !is null ? user : session.getPrincipal());
+		// Principal user = this.stompAuthentications.get(session.getSessionId().to!string());
+		// return (user !is null ? user : session.getPrincipal());
+		implementationMissing(false);
+		return null;
 	}
 
 	private void handleError(WebSocketSession session, Throwable ex, 
@@ -349,11 +358,12 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 	 */
 	private void sendErrorMessage(WebSocketSession session, Throwable error) {
 		StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.ERROR);
-		headerAccessor.setMessage(error.getMessage());
+		headerAccessor.setMessage(error.msg);
 
 		byte[] bytes = this.stompEncoder.encode(headerAccessor.getMessageHeaders(), EMPTY_PAYLOAD);
 		try {
-			session.sendMessage(new TextMessage(bytes));
+			// session.sendMessage(new TextMessage(bytes));
+			session.sendText(cast(string)bytes);
 		}
 		catch (Throwable ex) {
 			// Could be part of normal workflow (e.g. browser tab closed)
@@ -363,7 +373,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 
 	private bool detectImmutableMessageInterceptor(MessageChannel channel) {
 		if (this.immutableMessageInterceptorPresent !is null) {
-			return this.immutableMessageInterceptorPresent;
+			return this.immutableMessageInterceptorPresent.booleanValue;
 		}
 
 		auto ch = cast(AbstractMessageChannel) channel;
@@ -398,7 +408,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 	
 	void handleMessageToClient(WebSocketSession session, MessageBase message) {
 		TypeInfo ti = message.payloadType();
-		if (ti ~= typeid(byte[])) {
+		if (ti != typeid(byte[])) {
 			version(HUNT_DEBUG) {
 				errorf("Expected byte[] payload. Ignoring " ~ 
 					(cast(Object)message).toString() ~ ".");
@@ -410,8 +420,10 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 		StompCommand command = accessor.getCommand();
 
 		if (StompCommand.MESSAGE == command) {
-			if (accessor.getSubscriptionId() is null && logger.isWarnEnabled()) {
-				logger.warn("No STOMP \"subscription\" header in " ~ message);
+			version(HUNT_DEBUG) {
+				if (accessor.getSubscriptionId() is null) {
+					warningf("No STOMP \"subscription\" header in " ~ message);
+				}
 			}
 			string origDestination = accessor.
 				getFirstNativeHeader(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION);
@@ -422,19 +434,19 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 			}
 		}
 		else if (StompCommand.CONNECTED == command) {
-			this.stats.incrementConnectedCount();
+			// this.stats.incrementConnectedCount();
 			accessor = afterStompSessionConnected(message, accessor, session);
 			if (this.eventPublisher !is null && StompCommand.CONNECTED == command) {
 				try {
-					SimpAttributes simpAttributes = 
-						new SimpAttributes(session.getSessionId(), session.getAttributes());
-					SimpAttributesContextHolder.setAttributes(simpAttributes);
-					Principal user = getUser(session);
+					// SimpAttributes simpAttributes = 
+					// 	new SimpAttributes(session.getSessionId(), session.getAttributes());
+					// SimpAttributesContextHolder.setAttributes(simpAttributes);
+					Principal user = null; // getUser(session);
 					publishEvent(this.eventPublisher, new SessionConnectedEvent(this, 
 						cast(Message!(byte[])) message, user));
 				}
 				finally {
-					SimpAttributesContextHolder.resetAttributes();
+					// SimpAttributesContextHolder.resetAttributes();
 				}
 			}
 		}
@@ -488,12 +500,8 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 		}
 		finally {
 			if (StompCommand.ERROR == command) {
-				try {
-					session.close(CloseStatus.PROTOCOL_ERROR);
-				}
-				catch (IOException ex) {
-					// Ignore
-				}
+				implementationMissing(false);
+				// session.close(CloseStatus.PROTOCOL_ERROR);
 			}
 		}
 	}
@@ -544,7 +552,8 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 		string name = StompHeaderAccessor.CONNECT_MESSAGE_HEADER;
 		MessageBase message = cast(MessageBase) connectAckHeaders.getHeader(name);
 		if (message is null) {
-			throw new IllegalStateException("Original STOMP CONNECT not found in " ~ connectAckHeaders);
+			throw new IllegalStateException("Original STOMP CONNECT not found in " 
+				~ connectAckHeaders.toString());
 		}
 
 		StompHeaderAccessor connectHeaders = MessageHeaderAccessor.getAccessor!(StompHeaderAccessor)(message);
@@ -625,31 +634,32 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 
 	override
 	void afterSessionStarted(WebSocketSession session, MessageChannel outputChannel) {
-		if (session.getTextMessageSizeLimit() < MINIMUM_WEBSOCKET_MESSAGE_SIZE) {
-			session.setTextMessageSizeLimit(MINIMUM_WEBSOCKET_MESSAGE_SIZE);
-		}
-		this.decoders.put(session.getSessionId(), new BufferingStompDecoder(this.stompDecoder, getMessageSizeLimit()));
+		// if (session.getTextMessageSizeLimit() < MINIMUM_WEBSOCKET_MESSAGE_SIZE) {
+		// 	session.setTextMessageSizeLimit(MINIMUM_WEBSOCKET_MESSAGE_SIZE);
+		// }
+		this.decoders.put(session.getSessionId().to!string(), new BufferingStompDecoder(this.stompDecoder, getMessageSizeLimit()));
 	}
 
 	override
 	void afterSessionEnded(WebSocketSession session, 
 		CloseStatus closeStatus, MessageChannel outputChannel) {
-		this.decoders.remove(session.getSessionId());
+		this.decoders.remove(session.getSessionId().to!string());
 
 		Message!(byte[]) message = createDisconnectMessage(session);
 		SimpAttributes simpAttributes = SimpAttributes.fromMessage(message);
 		try {
-			SimpAttributesContextHolder.setAttributes(simpAttributes);
+			implementationMissing(false);
+			// SimpAttributesContextHolder.setAttributes(simpAttributes);
 			if (this.eventPublisher !is null) {
-				Principal user = getUser(session);
-				publishEvent(this.eventPublisher, 
-					new SessionDisconnectEvent(this, message, session.getSessionId(), closeStatus, user));
+				// Principal user = getUser(session);
+				// publishEvent(this.eventPublisher, 
+				// 	new SessionDisconnectEvent(this, message, session.getSessionId().to!string(), closeStatus, user));
 			}
 			outputChannel.send(message);
 		}
 		finally {
-			this.stompAuthentications.remove(session.getSessionId());
-			SimpAttributesContextHolder.resetAttributes();
+			this.stompAuthentications.remove(session.getSessionId().to!string());
+			// SimpAttributesContextHolder.resetAttributes();
 			simpAttributes.sessionCompleted();
 		}
 	}
@@ -660,13 +670,13 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 			getHeaderInitializer().initHeaders(headerAccessor);
 		}
 
-		headerAccessor.setSessionId(session.getSessionId());
-		headerAccessor.setSessionAttributes(session.getAttributes());
+		headerAccessor.setSessionId(session.getSessionId().to!string());
+		// headerAccessor.setSessionAttributes(session.getAttributes());
 
-		Principal user = getUser(session);
-		if (user !is null) {
-			headerAccessor.setUser(user);
-		}
+		// Principal user = getUser(session);
+		// if (user !is null) {
+		// 	headerAccessor.setUser(user);
+		// }
 
 		return MessageHelper.createMessage(EMPTY_PAYLOAD, headerAccessor.getMessageHeaders());
 	}

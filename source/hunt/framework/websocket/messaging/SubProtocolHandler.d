@@ -90,4 +90,7 @@ interface SubProtocolHandler {
 	void afterSessionEnded(WebSocketSession session, 
 		CloseStatus closeStatus, MessageChannel outputChannel);
 
+	
+	int opCmp(SubProtocolHandler o);
+
 }

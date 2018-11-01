@@ -122,7 +122,8 @@ class WebMvcStompEndpointRegistry : StompEndpointRegistry {
 		}
 
 		this.stompHandler = new StompSubProtocolHandler();
-		if (transportRegistration.getMessageSizeLimit() !is null) {
+		// if (transportRegistration.getMessageSizeLimit() !is null) 
+		{
 			this.stompHandler.setMessageSizeLimit(transportRegistration.getMessageSizeLimit());
 		}
 

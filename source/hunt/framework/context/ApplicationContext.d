@@ -1,9 +1,11 @@
 module hunt.framework.context.ApplicationContext;
 
+import hunt.framework.context.ApplicationEvent;
+
 import hunt.http.server.WebSocketHandler;
 
-interface ApplicationContext {
+interface ApplicationContext : ApplicationEventPublisher {
     void start();
     
-    void registerWebSocket(string path, WebSocketHandler handler);
+    ApplicationContext registerWebSocket(string path, WebSocketHandler handler);
 }

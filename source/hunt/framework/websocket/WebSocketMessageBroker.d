@@ -73,7 +73,7 @@ class WebSocketMessageBroker  { // : AbstractWebSocketBuilder
 
     void listen() {
         brokerConfiguration.stompWebSocketHandlerMapping();
-        brokerConfiguration.webSocketMessageBrokerStats();
+        // brokerConfiguration.webSocketMessageBrokerStats();
         brokerConfiguration.simpAnnotationMethodMessageHandler();
     //     appContext.registerWebSocket(path, new class WebSocketHandler {
 

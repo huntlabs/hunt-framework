@@ -22,19 +22,10 @@ import hunt.framework.websocket.messaging.SubProtocolHandler;
 // import java.util.concurrent.locks.ReentrantLock;
 // import hunt.framework.context.SmartLifecycle;
 
-import hunt.container;
-import hunt.datetime;
-import hunt.lang.common;
-import hunt.lang.exception;
-import hunt.logging;
-
-import std.array;
-
-
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageChannel;
 import hunt.framework.messaging.MessagingException;
-
+import hunt.framework.websocket.exception;
 import hunt.framework.websocket.SubProtocolCapable;
 
 // import hunt.framework.util.StringUtils;
@@ -48,6 +39,16 @@ import hunt.http.server.WebSocketHandler;
 // import hunt.framework.websocket.handler.SessionLimitExceededException;
 // import hunt.framework.websocket.sockjs.transport.session.PollingSockJsSession;
 // import hunt.framework.websocket.sockjs.transport.session.StreamingSockJsSession;
+
+import hunt.container;
+import hunt.datetime;
+import hunt.lang.common;
+import hunt.lang.exception;
+import hunt.logging;
+
+import std.array;
+import std.conv;
+
 
 /**
  * An implementation of {@link WebSocketHandler} that delegates incoming WebSocket
@@ -144,18 +145,19 @@ class SubProtocolWebSocketHandler
 	 * Register a sub-protocol handler.
 	 */
 	void addProtocolHandler(SubProtocolHandler handler) {
-		List!(string) protocols = handler.getSupportedProtocols();
-		if (CollectionUtils.isEmpty(protocols)) {
+		string[] protocols = handler.getSupportedProtocols();
+		if (protocols.empty()) {
 			version(HUNT_DEBUG) {
-				errorf("No sub-protocols for " ~ handler);
+				errorf("No sub-protocols for " ~ handler.to!string());
 			}
 			return;
 		}
 		foreach (string protocol ; protocols) {
 			SubProtocolHandler replaced = this.protocolHandlerLookup.put(protocol, handler);
 			if (replaced !is null && replaced != handler) {
-				throw new IllegalStateException("Cannot map " ~ handler ~
-						" to protocol '" ~ protocol ~ "': already mapped to " ~ replaced ~ ".");
+				throw new IllegalStateException("Cannot map " ~ handler.to!string() ~
+						" to protocol '" ~ protocol ~ "': already mapped to " ~ 
+						replaced.to!string() ~ ".");
 			}
 		}
 		this.protocolHandlers.add(handler);
@@ -279,11 +281,11 @@ class SubProtocolWebSocketHandler
 		// Proactively notify all active WebSocket sessions
 		foreach (WebSocketSessionHolder holder ; this.sessions.byValue) {
 			try {
-				holder.getSession().close(CloseStatus.GOING_AWAY);
+				holder.getSession().close(); // CloseStatus.GOING_AWAY
 			}
 			catch (Throwable ex) {
 				version(HUNT_DEBUG) {
-					logger.warn("Failed to close '" ~ holder.getSession() ~ "': " ~ ex);
+					warningf("Failed to close '" ~ holder.getSession() ~ "': " ~ ex);
 				}
 			}
 		}
@@ -312,7 +314,7 @@ class SubProtocolWebSocketHandler
 
 		// this.stats.incrementSessionCount(session);
 		session = decorateSession(session);
-		this.sessions.put(session.getId(), new WebSocketSessionHolder(session));
+		this.sessions.put(session.getSessionId().to!string(), new WebSocketSessionHolder(session));
 		findProtocolHandler(session).afterSessionStarted(session, this.clientInboundChannel);
 	}
 
@@ -321,7 +323,7 @@ class SubProtocolWebSocketHandler
 	 */
 	// override
 	void handleMessage(WebSocketSession session, WebSocketMessage message) {
-		WebSocketSessionHolder holder = this.sessions.get(session.getId());
+		WebSocketSessionHolder holder = this.sessions.get(session.getSessionId().to!string());
 		if (holder !is null) {
 			session = holder.getSession();
 		}
@@ -366,7 +368,7 @@ class SubProtocolWebSocketHandler
 				}
 				// this.stats.incrementLimitExceededCount();
 				clearSession(session, ex.getStatus()); // clear first, session may be unresponsive
-				session.close(ex.getStatus());
+				session.close(); // ex.getStatus()
 			}
 			catch (Exception secondException) {
 				tracef("Failure while closing session " ~ sessionId ~ ".", secondException);
@@ -408,7 +410,8 @@ class SubProtocolWebSocketHandler
 	 * @since 4.3.13
 	 */
 	protected WebSocketSession decorateSession(WebSocketSession session) {
-		return new ConcurrentWebSocketSessionDecorator(session, getSendTimeLimit(), getSendBufferSizeLimit());
+		// return new ConcurrentWebSocketSessionDecorator(session, getSendTimeLimit(), getSendBufferSizeLimit());
+		return session;
 	}
 
 	/**
@@ -418,7 +421,9 @@ class SubProtocolWebSocketHandler
 	protected final SubProtocolHandler findProtocolHandler(WebSocketSession session) {
 		string protocol = null;
 		try {
-			protocol = session.getAcceptedProtocol();
+			// TODO: Tasks pending completion -@zxp at 11/1/2018, 2:35:35 PM
+			// 
+			protocol = "1.2"; // session.getAcceptedProtocol();
 		}
 		catch (Exception ex) {
 			// Shouldn't happen
@@ -427,11 +432,11 @@ class SubProtocolWebSocketHandler
 		}
 
 		SubProtocolHandler handler;
-		if (!StringUtils.isEmpty(protocol)) {
+		if (!protocol.empty) {
 			handler = this.protocolHandlerLookup.get(protocol);
 			if (handler is null) {
 				throw new IllegalStateException(
-						"No handler for '" ~ protocol ~ "' among " ~ this.protocolHandlerLookup);
+						"No handler for '" ~ protocol ~ "' among " ~ this.protocolHandlerLookup.toString());
 			}
 		}
 		else {
@@ -439,7 +444,7 @@ class SubProtocolWebSocketHandler
 				handler = this.defaultProtocolHandler;
 			}
 			else if (this.protocolHandlers.size() == 1) {
-				handler = this.protocolHandlers.iterator().next();
+				handler = this.protocolHandlers.iterator.front() ;
 			}
 			else {
 				throw new IllegalStateException("Multiple protocol handlers configured and " ~
@@ -480,7 +485,7 @@ class SubProtocolWebSocketHandler
 			return;
 		}
 
-		if (this.sessionCheckLock.tryLock()) {
+		// if (this.sessionCheckLock.tryLock()) {
 			try {
 				foreach (WebSocketSessionHolder holder ; this.sessions.byValue) {
 					if (holder.hasHandledMessages()) {
@@ -497,27 +502,27 @@ class SubProtocolWebSocketHandler
 					}
 					try {
 						// this.stats.incrementNoMessagesReceivedCount();
-						session.close(CloseStatus.SESSION_NOT_RELIABLE);
+						session.close(); // CloseStatus.SESSION_NOT_RELIABLE
 					}
 					catch (Throwable ex) {
 						version(HUNT_DEBUG) {
-							logger.warn("Failed to close unreliable " ~ session, ex);
+							warningf("Failed to close unreliable " ~ session, ex);
 						}
 					}
 				}
 			}
 			finally {
 				this.lastSessionCheckTime = currentTime;
-				this.sessionCheckLock.unlock();
+				// this.sessionCheckLock.unlock();
 			}
-		}
+		// }
 	}
 
 	private void clearSession(WebSocketSession session, CloseStatus closeStatus) {
 		version(HUNT_DEBUG) {
-			trace("Clearing session " ~ session.getId());
+			trace("Clearing session " ~ session.getSessionId().to!string());
 		}
-		if (this.sessions.remove(session.getId()) !is null) {
+		if (this.sessions.remove(session.getSessionId().to!string()) !is null) {
 			// this.stats.decrementSessionCount(session);
 		}
 		findProtocolHandler(session).afterSessionEnded(session, closeStatus, this.clientInboundChannel);
@@ -627,7 +632,7 @@ private class WebSocketSessionHolder {
 
 	override
 	string toString() {
-		return "WebSocketSessionHolder[session=" ~ this.session.toString() ~ ", createTime=" ~
+		return "WebSocketSessionHolder[session=" ~ this.session.to!string() ~ ", createTime=" ~
 				this.createTime.to!string() ~ ", hasHandledMessages=" ~ 
 				this._hasHandledMessages.to!string() ~ "]";
 	}

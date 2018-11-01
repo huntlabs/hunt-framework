@@ -125,7 +125,7 @@ class SimpAnnotationMethodMessageHandler : AbstractMethodMessageHandler!(SimpMes
 	 * @param brokerTemplate a messaging template to send application messages to the broker
 	 */
 	this(SubscribableChannel clientInboundChannel,
-			MessageChannel clientOutboundChannel) { // , SimpMessageSendingOperations brokerTemplate
+			MessageChannel clientOutboundChannel, SimpMessageSendingOperations brokerTemplate) {
 
 		assert(clientInboundChannel, "clientInboundChannel must not be null");
 		assert(clientOutboundChannel, "clientOutboundChannel must not be null");
@@ -135,7 +135,7 @@ class SimpAnnotationMethodMessageHandler : AbstractMethodMessageHandler!(SimpMes
 		lifecycleMonitor = new Object();
 		this.clientInboundChannel = clientInboundChannel;
 		// this.clientMessagingTemplate = new SimpMessagingTemplate(clientOutboundChannel);
-		// this.brokerTemplate = brokerTemplate;
+		this.brokerTemplate = brokerTemplate;
 
 		MessageConverter[] converters = [
 			new StringMessageConverter(),

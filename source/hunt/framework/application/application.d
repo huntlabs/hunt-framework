@@ -217,6 +217,10 @@ final class Application : ApplicationContext {
         _server.stop();
     }
 
+    void publishEvent(Object event) {
+        implementationMissing(false);
+    }
+
     Application registerWebSocket(string uri, WebSocketHandler webSocketHandler) {
         webSocketHandlerMap[uri] = webSocketHandler;
         return this;
