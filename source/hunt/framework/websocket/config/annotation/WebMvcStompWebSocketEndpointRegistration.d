@@ -36,6 +36,7 @@ import hunt.framework.task.TaskScheduler;
 
 import hunt.container;
 import hunt.lang.exception;
+import hunt.logging;
 import hunt.http.server.WebSocketHandler;
 
 import std.array;
@@ -65,8 +66,7 @@ class WebMvcStompWebSocketEndpointRegistration : StompWebSocketEndpointRegistrat
 
 
 	this(string[] paths, WebSocketHandler webSocketHandler, TaskScheduler sockJsTaskScheduler) {
-
-		assert(paths, "No paths specified");
+		assert(!paths.empty(), "No paths specified");
 		assert(webSocketHandler, "WebSocketHandler must not be null");
 
 		this.paths = paths;
@@ -74,6 +74,9 @@ class WebMvcStompWebSocketEndpointRegistration : StompWebSocketEndpointRegistrat
 		this.sockJsTaskScheduler = sockJsTaskScheduler;
 	}
 
+	string[] getPaths() {
+		return paths;
+	}
 
 	// override
 	// StompWebSocketEndpointRegistration setHandshakeHandler(HandshakeHandler handshakeHandler) {
@@ -93,7 +96,7 @@ class WebMvcStompWebSocketEndpointRegistration : StompWebSocketEndpointRegistrat
 	StompWebSocketEndpointRegistration setAllowedOrigins(string[] allowedOrigins... ) {
 		this.allowedOrigins = [];
 		if (!allowedOrigins.empty()) {
-			this.allowedOrigins = allowedOrigins;
+			this.allowedOrigins = allowedOrigins.dup;
 		}
 		return this;
 	}
@@ -125,37 +128,51 @@ class WebMvcStompWebSocketEndpointRegistration : StompWebSocketEndpointRegistrat
 	// 	return interceptors.toArray(new HandshakeInterceptor[0]);
 	// }
 
-	final MultiValueMap!(WebSocketHandler, string) getMappings() {
-		MultiValueMap!(WebSocketHandler, string) mappings = new LinkedMultiValueMap!(WebSocketHandler, string)();
-		// if (this.registration !is null) {
-		// 	SockJsService sockJsService = this.registration.getSockJsService();
-		// 	for (string path : this.paths) {
-		// 		string pattern = (path.endsWith("/") ? path ~ "**" : path ~ "/**");
-		// 		SockJsHttpRequestHandler handler = new SockJsHttpRequestHandler(sockJsService, this.webSocketHandler);
-		// 		mappings.add(handler, pattern);
-		// 	}
-		// }
-		// else 
-		{
-			// TODO: Tasks pending completion -@zxp at 10/27/2018, 10:56:17 AM
-			// 
-			foreach (string path ; this.paths) {
-				// WebSocketHttpRequestHandler handler;
-				// if (this.handshakeHandler !is null) {
-				// 	handler = new WebSocketHttpRequestHandler(this.webSocketHandler, this.handshakeHandler);
-				// }
-				// else 
-				// {
-					// handler = new WebSocketHttpRequestHandler(this.webSocketHandler);
-				// }
-				// HandshakeInterceptor[] interceptors = getInterceptors();
-				// if (interceptors.length > 0) {
-				// 	handler.setHandshakeInterceptors(interceptors);
-				// }
-				mappings.add(this.webSocketHandler, path);
-			}
-		}
-		return mappings;
-	}
+	// final MultiValueMap!(WebSocketHandler, string) getMappings() {
+	// 	MultiValueMap!(WebSocketHandler, string) mappings = new LinkedMultiValueMap!(WebSocketHandler, string)();
+	// 	// if (this.registration !is null) {
+	// 	// 	SockJsService sockJsService = this.registration.getSockJsService();
+	// 	// 	for (string path : this.paths) {
+	// 	// 		string pattern = (path.endsWith("/") ? path ~ "**" : path ~ "/**");
+	// 	// 		SockJsHttpRequestHandler handler = new SockJsHttpRequestHandler(sockJsService, this.webSocketHandler);
+	// 	// 		mappings.add(handler, pattern);
+	// 	// 	}
+	// 	// }
+	// 	// else 
+	// 	{
+	// 		// TODO: Tasks pending completion -@zxp at 10/27/2018, 10:56:17 AM
+	// 		// 
+	// 		foreach (string path ; this.paths) {
+	// 			// WebSocketHttpRequestHandler handler;
+	// 			// if (this.handshakeHandler !is null) {
+	// 			// 	handler = new WebSocketHttpRequestHandler(this.webSocketHandler, this.handshakeHandler);
+	// 			// }
+	// 			// else 
+	// 			// {
+	// 				// handler = new WebSocketHttpRequestHandler(this.webSocketHandler);
+	// 			// }
+	// 			// HandshakeInterceptor[] interceptors = getInterceptors();
+	// 			// if (interceptors.length > 0) {
+	// 			// 	handler.setHandshakeInterceptors(interceptors);
+	// 			// }
+	// 			trace("mapping: ", path);
+	// 			mappings.add(new class WebSocketHandler {
+
+	// 				override void onConnect(WebSocketConnection webSocketConnection) {
+	// 					// onUpgrade(webSocketConnection);
+	// 				}
+
+	// 				override void onFrame(Frame frame, WebSocketConnection connection) {
+	// 					// this.outer.onFrame(frame, connection);
+	// 				}
+
+	// 				override void onError(Exception t, WebSocketConnection connection) {
+	// 					// this.outer.onError(t, connection);
+	// 				}
+	// 			}, path);
+	// 		}
+	// 	}
+	// 	return mappings;
+	// }
 
 }

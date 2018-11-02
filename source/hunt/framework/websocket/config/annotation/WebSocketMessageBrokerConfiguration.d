@@ -43,6 +43,7 @@ import hunt.framework.websocket.server.WebSocketHandlerDecorator;
 import hunt.http.server.WebSocketHandler;
 
 import hunt.lang.common;
+import hunt.logging;
 
 
 /**
@@ -97,21 +98,30 @@ class WebSocketMessageBrokerConfiguration : AbstractMessageBrokerConfiguration {
 	// 	if (applicationContext !is null) {
 	// 		registry.setApplicationContext(applicationContext);
 	// 	}
-	// 	registerStompEndpoints(registry);
+	// 	onRegisterStompEndpoints(registry);
 	// 	return registry.getHandlerMapping();
 	// }
 
 	void stompWebSocketHandlerMapping() {
 		WebSocketHandler handler = decorateWebSocketHandler(subProtocolWebSocketHandler());
 		WebMvcStompEndpointRegistry registry = new WebMvcStompEndpointRegistry(
-				handler, getTransportRegistration(), null); // messageBrokerTaskScheduler()
-		ApplicationContext applicationContext = getApplicationContext();
-		if (applicationContext !is null) {
-			registry.setApplicationContext(applicationContext);
+				handler, getTransportRegistration(), 
+				null, applicationContext); // messageBrokerTaskScheduler()
+		// ApplicationContext applicationContext = getApplicationContext();
+		// if (applicationContext !is null) {
+		// 	registry.setApplicationContext(applicationContext);
+		// }
+		// registry.setApplicationContext(applicationContext);
+		onRegisterStompEndpoints(registry);
+		// registry.getHandlerMapping();
+		foreach(string p; registry.getPaths()) {
+			info("mapping: ", p);
+			WebSocketHandler handler1 = decorateWebSocketHandler(subProtocolWebSocketHandler());
+			applicationContext.registerWebSocket(p, handler1);
 		}
-		registerStompEndpoints(registry);
-		// return registry.getHandlerMapping();
-	}	
+
+	}
+	// private WebMvcStompEndpointRegistry registry;
 	
 	WebSocketHandler subProtocolWebSocketHandler() {
 		return new SubProtocolWebSocketHandler(clientInboundChannel(), clientOutboundChannel());
@@ -135,7 +145,7 @@ class WebSocketMessageBrokerConfiguration : AbstractMessageBrokerConfiguration {
 	protected void configureWebSocketTransport(WebSocketTransportRegistration registry) {
 	}
 
-	protected void registerStompEndpoints(StompEndpointRegistry registry) {
+	protected void onRegisterStompEndpoints(StompEndpointRegistry registry) {
 		if(endpointRegistryHandler !is null)
 			endpointRegistryHandler(registry);
 	}

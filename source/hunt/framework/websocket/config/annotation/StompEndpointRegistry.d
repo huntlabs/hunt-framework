@@ -34,6 +34,7 @@ import hunt.framework.websocket.messaging.SubProtocolWebSocketHandler;
 import hunt.container;
 import hunt.http.server.WebSocketHandler;
 import hunt.lang.exception;
+import hunt.logging;
 
 /**
  * A contract for registering STOMP over WebSocket endpoints.
@@ -94,16 +95,20 @@ class WebMvcStompEndpointRegistry : StompEndpointRegistry {
 
 	private List!(WebMvcStompWebSocketEndpointRegistration) registrations;
 
+	private ApplicationContext appContext;
+
 
 	this(WebSocketHandler webSocketHandler,
 			WebSocketTransportRegistration transportRegistration, 
-			TaskScheduler defaultSockJsTaskScheduler) {
+			TaskScheduler defaultSockJsTaskScheduler,
+			ApplicationContext context) {
 
 		assert(webSocketHandler, "WebSocketHandler is required ");
 		assert(transportRegistration, "WebSocketTransportRegistration is required");
 		
 		registrations = new ArrayList!WebMvcStompWebSocketEndpointRegistration();
 
+		this.appContext = context;
 		this.webSocketHandler = webSocketHandler;
 		this.subProtocolWebSocketHandler = unwrapSubProtocolWebSocketHandler(webSocketHandler);
 // FIXME: Needing refactor or cleanup -@zxp at 10/31/2018, 5:45:08 PM
@@ -127,6 +132,7 @@ class WebMvcStompEndpointRegistry : StompEndpointRegistry {
 			this.stompHandler.setMessageSizeLimit(transportRegistration.getMessageSizeLimit());
 		}
 
+		this.stompHandler.setApplicationEventPublisher(context);
 		this.sockJsScheduler = defaultSockJsTaskScheduler;
 	}
 
@@ -144,7 +150,7 @@ class WebMvcStompEndpointRegistry : StompEndpointRegistry {
 	StompWebSocketEndpointRegistration addEndpoint(string[] paths... ) {
 		this.subProtocolWebSocketHandler.addProtocolHandler(this.stompHandler);
 		WebMvcStompWebSocketEndpointRegistration registration =
-				new WebMvcStompWebSocketEndpointRegistration(paths, 
+				new WebMvcStompWebSocketEndpointRegistration(paths.dup, 
 					this.webSocketHandler, this.sockJsScheduler);
 		this.registrations.add(registration);
 		return registration;
@@ -185,13 +191,33 @@ class WebMvcStompEndpointRegistry : StompEndpointRegistry {
 		return this;
 	}
 
-	void setApplicationContext(ApplicationContext applicationContext) {
-		this.stompHandler.setApplicationEventPublisher(applicationContext);
+	void setApplicationContext(ApplicationContext context) {
+		this.appContext = context;
+		this.stompHandler.setApplicationEventPublisher(context);
+	}
+
+	string[] getPaths() {
+		import std.array;
+		import std.container.array;
+		Array!string buffer;
+		foreach (WebMvcStompWebSocketEndpointRegistration registration ; this.registrations) {
+			buffer ~= registration.getPaths();
+		}
+
+		return buffer.array;
 	}
 
 	/**
 	 * Return a handler mapping with the mapped ViewControllers.
 	 */
+	//  void getHandlerMapping() {
+	// 	foreach (WebMvcStompWebSocketEndpointRegistration registration ; this.registrations) {
+	// 	 	// registration.getMappings();
+	// 		 foreach(string p; registration.getPaths()) {
+
+	// 		 }
+	// 	}
+	//  }
 	// AbstractHandlerMapping getHandlerMapping() {
 	// 	Map!(string, Object) urlMap = new LinkedHashMap!(string, Object)();
 	// 	foreach (WebMvcStompWebSocketEndpointRegistration registration ; this.registrations) {

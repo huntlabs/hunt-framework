@@ -207,6 +207,13 @@ final class Application : ApplicationContext {
         foreach(WebSocketBuilder b; webSocketBuilders) {
             b.listenWebSocket();
         }
+
+        if(_broker !is null)
+            _broker.listen();
+
+        // foreach(WebSocketMessageBroker b; messageBrokers) {
+        //     b.listen();
+        // }
         _server.start();
     }
 
@@ -600,7 +607,7 @@ private:
     WebSocketPolicy _webSocketPolicy;
     WebSocketHandler[string] webSocketHandlerMap;
     Array!WebSocketBuilder webSocketBuilders; 
-    Array!WebSocketMessageBroker messageBrokers; 
+    // Array!WebSocketMessageBroker messageBrokers; 
 
     version (NO_TASKPOOL) {
         // NOTHING TODO
