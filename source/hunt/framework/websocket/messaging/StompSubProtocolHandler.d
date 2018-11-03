@@ -44,7 +44,7 @@ import hunt.framework.websocket.exception;
 // import hunt.framework.websocket.BinaryMessage;
 // import hunt.framework.websocket.TextMessage;
 // import hunt.framework.websocket.WebSocketMessage;
-// import hunt.framework.websocket.WebSocketSession;
+import hunt.framework.websocket.WebSocketSession;
 // import hunt.framework.websocket.handler.WebSocketSessionDecorator;
 // import hunt.framework.websocket.sockjs.transport.SockJsSession;
 
@@ -231,10 +231,10 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 			// 	return;
 			// }
 
-			BufferingStompDecoder decoder = this.decoders.get(session.getSessionId().to!string());
+			BufferingStompDecoder decoder = this.decoders.get(session.getId());
 			if (decoder is null) {
 				throw new IllegalStateException("No decoder for session id '" ~ 
-					session.getSessionId().to!string() ~ "'");
+					session.getId() ~ "'");
 			}
 
 			messages = decoder.decode(byteBuffer);
@@ -250,7 +250,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 		catch (Throwable ex) {
 			version(HUNT_DEBUG) {
 				errorf("Failed to parse " ~ webSocketMessage.to!string() ~
-						" in session " ~ session.getSessionId().to!string() ~ ". Sending STOMP ERROR to client.\n", ex);
+						" in session " ~ session.getId() ~ ". Sending STOMP ERROR to client.\n", ex);
 			}
 			handleError(session, ex, null);
 			return;
@@ -262,7 +262,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 						MessageHeaderAccessor.getAccessor!(StompHeaderAccessor)(message);
 				assert(headerAccessor !is null, "No StompHeaderAccessor");
 
-				headerAccessor.setSessionId(session.getSessionId().to!string());
+				headerAccessor.setSessionId(session.getId());
 				// headerAccessor.setSessionAttributes(session.getAttributes());
 				// headerAccessor.setUser(getUser(session));
 				headerAccessor.setHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER, headerAccessor.getHeartbeat());
@@ -318,7 +318,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 			catch (Throwable ex) {
 				version(HUNT_DEBUG) {
 					errorf("Failed to send client message to application via MessageChannel" ~
-							" in session " ~ session.getSessionId().to!string() ~ 
+							" in session " ~ session.getId() ~ 
 							". Sending STOMP ERROR to client.", ex);
 				}
 				handleError(session, ex, message);
@@ -328,7 +328,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 
 	
 	private Principal getUser(WebSocketSession session) {
-		// Principal user = this.stompAuthentications.get(session.getSessionId().to!string());
+		// Principal user = this.stompAuthentications.get(session.getId());
 		// return (user !is null ? user : session.getPrincipal());
 		implementationMissing(false);
 		return null;
@@ -365,7 +365,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 		byte[] bytes = this.stompEncoder.encode(headerAccessor.getMessageHeaders(), EMPTY_PAYLOAD);
 		try {
 			// session.sendMessage(new TextMessage(bytes));
-			session.sendText(cast(string)bytes);
+			session.sendTextMessage(cast(string)bytes);
 		}
 		catch (Throwable ex) {
 			// Could be part of normal workflow (e.g. browser tab closed)
@@ -480,11 +480,11 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 			// 
 			bool useBinary = payload.length > 0;
 			if (useBinary) {
-				session.sendData(bytes);
+				session.sendBinaryMessage(bytes);
 				// session.sendMessage(new BinaryMessage(bytes));
 			}
 			else {
-				session.sendText(cast(string)bytes);
+				session.sendTextMessage(cast(string)bytes);
 				// session.sendMessage(new TextMessage(bytes));
 			}
 		}
@@ -496,7 +496,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 			// Could be part of normal workflow (e.g. browser tab closed)
 			version(HUNT_DEBUG) {
 				tracef("Failed to send WebSocket message to client in session " ~ 
-					session.getSessionId().to!string(), ":\n", ex);
+					session.getId(), ":\n", ex);
 			}
 			command = StompCommand.ERROR;
 		}
@@ -639,13 +639,13 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 		// if (session.getTextMessageSizeLimit() < MINIMUM_WEBSOCKET_MESSAGE_SIZE) {
 		// 	session.setTextMessageSizeLimit(MINIMUM_WEBSOCKET_MESSAGE_SIZE);
 		// }
-		this.decoders.put(session.getSessionId().to!string(), new BufferingStompDecoder(this.stompDecoder, getMessageSizeLimit()));
+		this.decoders.put(session.getId(), new BufferingStompDecoder(this.stompDecoder, getMessageSizeLimit()));
 	}
 
 	override
 	void afterSessionEnded(WebSocketSession session, 
 		CloseStatus closeStatus, MessageChannel outputChannel) {
-		this.decoders.remove(session.getSessionId().to!string());
+		this.decoders.remove(session.getId());
 
 		Message!(byte[]) message = createDisconnectMessage(session);
 		SimpAttributes simpAttributes = SimpAttributes.fromMessage(message);
@@ -655,12 +655,12 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 			if (this.eventPublisher !is null) {
 				// Principal user = getUser(session);
 				// publishEvent(this.eventPublisher, 
-				// 	new SessionDisconnectEvent(this, message, session.getSessionId().to!string(), closeStatus, user));
+				// 	new SessionDisconnectEvent(this, message, session.getId(), closeStatus, user));
 			}
 			outputChannel.send(message);
 		}
 		finally {
-			this.stompAuthentications.remove(session.getSessionId().to!string());
+			this.stompAuthentications.remove(session.getId());
 			// SimpAttributesContextHolder.resetAttributes();
 			simpAttributes.sessionCompleted();
 		}
@@ -672,7 +672,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 			getHeaderInitializer().initHeaders(headerAccessor);
 		}
 
-		headerAccessor.setSessionId(session.getSessionId().to!string());
+		headerAccessor.setSessionId(session.getId());
 		// headerAccessor.setSessionAttributes(session.getAttributes());
 
 		// Principal user = getUser(session);

@@ -39,9 +39,11 @@ import hunt.framework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import hunt.framework.websocket.messaging.SubProtocolWebSocketHandler;
 import hunt.framework.websocket.messaging.WebSocketAnnotationMethodMessageHandler;
 import hunt.framework.websocket.server.WebSocketHandlerDecorator;
+import hunt.framework.websocket.WebSocketMessageHandler;
 
 import hunt.http.server.WebSocketHandler;
 
+import hunt.container;
 import hunt.lang.common;
 import hunt.logging;
 
@@ -103,7 +105,7 @@ class WebSocketMessageBrokerConfiguration : AbstractMessageBrokerConfiguration {
 	// }
 
 	void stompWebSocketHandlerMapping() {
-		WebSocketHandler handler = decorateWebSocketHandler(subProtocolWebSocketHandler());
+		WebSocketMessageHandler handler = decorateWebSocketHandler(subProtocolWebSocketHandler());
 		WebMvcStompEndpointRegistry registry = new WebMvcStompEndpointRegistry(
 				handler, getTransportRegistration(), 
 				null, applicationContext); // messageBrokerTaskScheduler()
@@ -113,21 +115,25 @@ class WebSocketMessageBrokerConfiguration : AbstractMessageBrokerConfiguration {
 		// }
 		// registry.setApplicationContext(applicationContext);
 		onRegisterStompEndpoints(registry);
-		// registry.getHandlerMapping();
-		foreach(string p; registry.getPaths()) {
-			info("mapping: ", p);
-			WebSocketHandler handler1 = decorateWebSocketHandler(subProtocolWebSocketHandler());
-			applicationContext.registerWebSocket(p, handler1);
+		Map!(string, WebSocketHandler) mappings = registry.getHandlerMapping();
+		foreach(string path, WebSocketHandler handler; mappings) {
+			applicationContext.registerWebSocket(path, handler);
 		}
+
+		// foreach(string p; registry.getPaths()) {
+		// 	info("mapping: ", p);
+		// 	// WebSocketHandler handler1 = decorateWebSocketHandler(subProtocolWebSocketHandler());
+		// 	applicationContext.registerWebSocket(p, handler1);
+		// }
 
 	}
 	// private WebMvcStompEndpointRegistry registry;
 	
-	WebSocketHandler subProtocolWebSocketHandler() {
+	WebSocketMessageHandler subProtocolWebSocketHandler() {
 		return new SubProtocolWebSocketHandler(clientInboundChannel(), clientOutboundChannel());
 	}
 
-	protected WebSocketHandler decorateWebSocketHandler(WebSocketHandler handler) {
+	protected WebSocketMessageHandler decorateWebSocketHandler(WebSocketMessageHandler handler) {
 		foreach (WebSocketHandlerDecoratorFactory factory ; getTransportRegistration().getDecoratorFactories()) {
 			handler = factory.decorate(handler);
 		}

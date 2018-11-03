@@ -522,7 +522,7 @@ private:
         override bool acceptUpgrade(HttpRequest request, HttpResponse response, 
             HttpOutputStream output, HttpConnection connection) {
             version(HUNT_DEBUG) {
-                logInfo("The connection %s will upgrade to WebSocket connection",
+                logInfof("The connection %s will upgrade to WebSocket connection",
                         connection.getSessionId());
             }
             string path = request.getURI().getPath();

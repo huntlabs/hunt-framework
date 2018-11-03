@@ -28,6 +28,7 @@ import hunt.framework.task.TaskScheduler;
 import hunt.framework.websocket.messaging.StompSubProtocolErrorHandler;
 import hunt.framework.websocket.messaging.StompSubProtocolHandler;
 import hunt.framework.websocket.messaging.SubProtocolWebSocketHandler;
+import hunt.framework.websocket.WebSocketMessageHandler;
 // import hunt.framework.websocket.server.support.WebSocketHandlerMapping;
 // import hunt.framework.web.util.UrlPathHelper;
 
@@ -35,6 +36,8 @@ import hunt.container;
 import hunt.http.server.WebSocketHandler;
 import hunt.lang.exception;
 import hunt.logging;
+
+import std.conv;
 
 /**
  * A contract for registering STOMP over WebSocket endpoints.
@@ -81,7 +84,7 @@ interface StompEndpointRegistry {
  */
 class WebMvcStompEndpointRegistry : StompEndpointRegistry {
 
-	private WebSocketHandler webSocketHandler;
+	private WebSocketMessageHandler webSocketHandler;
 
 	private TaskScheduler sockJsScheduler;
 
@@ -98,7 +101,7 @@ class WebMvcStompEndpointRegistry : StompEndpointRegistry {
 	private ApplicationContext appContext;
 
 
-	this(WebSocketHandler webSocketHandler,
+	this(WebSocketMessageHandler webSocketHandler,
 			WebSocketTransportRegistration transportRegistration, 
 			TaskScheduler defaultSockJsTaskScheduler,
 			ApplicationContext context) {
@@ -136,11 +139,11 @@ class WebMvcStompEndpointRegistry : StompEndpointRegistry {
 		this.sockJsScheduler = defaultSockJsTaskScheduler;
 	}
 
-	private static SubProtocolWebSocketHandler unwrapSubProtocolWebSocketHandler(WebSocketHandler handler) {
-		WebSocketHandler actual = handler; //WebSocketHandlerDecorator.unwrap(handler);
+	private static SubProtocolWebSocketHandler unwrapSubProtocolWebSocketHandler(WebSocketMessageHandler handler) {
+		WebSocketMessageHandler actual = handler; //WebSocketHandlerDecorator.unwrap(handler);
 		auto r = cast(SubProtocolWebSocketHandler) actual;
 		if (r is null) {
-			throw new IllegalArgumentException("No SubProtocolWebSocketHandler in " ~ handler.toString());
+			throw new IllegalArgumentException("No SubProtocolWebSocketHandler in " ~ handler.to!string());
 		}
 		return r;
 	}
@@ -203,21 +206,23 @@ class WebMvcStompEndpointRegistry : StompEndpointRegistry {
 		foreach (WebMvcStompWebSocketEndpointRegistration registration ; this.registrations) {
 			buffer ~= registration.getPaths();
 		}
-
 		return buffer.array;
 	}
 
 	/**
 	 * Return a handler mapping with the mapped ViewControllers.
 	 */
-	//  void getHandlerMapping() {
-	// 	foreach (WebMvcStompWebSocketEndpointRegistration registration ; this.registrations) {
-	// 	 	// registration.getMappings();
-	// 		 foreach(string p; registration.getPaths()) {
+	Map!(string, WebSocketHandler) getHandlerMapping() {
+		Map!(string, WebSocketHandler) urlMap = new LinkedHashMap!(string, WebSocketHandler)();
+		foreach (WebMvcStompWebSocketEndpointRegistration registration ; this.registrations) {
+		 	Map!(string, WebSocketHandler) mappings = registration.getMappings();
+			foreach(string path, WebSocketHandler handler; mappings) {
+				urlMap.put(path, handler);
+			}
+		}
 
-	// 		 }
-	// 	}
-	//  }
+		return urlMap;
+	 }
 	// AbstractHandlerMapping getHandlerMapping() {
 	// 	Map!(string, Object) urlMap = new LinkedHashMap!(string, Object)();
 	// 	foreach (WebMvcStompWebSocketEndpointRegistration registration ; this.registrations) {

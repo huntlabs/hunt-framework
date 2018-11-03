@@ -25,11 +25,11 @@ import hunt.framework.task.TaskScheduler;
 // import hunt.framework.util.ObjectUtils;
 // import hunt.framework.util.StringUtils;
 // import hunt.framework.web.HttpRequestHandler;
-// import hunt.http.server.WebSocketHandler;
+import hunt.framework.websocket.WebSocketMessageHandler;
+import hunt.framework.websocket.server.WebSocketHttpRequestHandler;
 // import hunt.framework.websocket.server.HandshakeHandler;
 // import hunt.framework.websocket.server.HandshakeInterceptor;
 // import hunt.framework.websocket.server.support.OriginHandshakeInterceptor;
-// import hunt.framework.websocket.server.support.WebSocketHttpRequestHandler;
 // import hunt.framework.websocket.sockjs.SockJsService;
 // import hunt.framework.websocket.sockjs.support.SockJsHttpRequestHandler;
 // import hunt.framework.websocket.sockjs.transport.handler.WebSocketTransportHandler;
@@ -51,7 +51,7 @@ class WebMvcStompWebSocketEndpointRegistration : StompWebSocketEndpointRegistrat
 
 	private string[] paths;
 
-	private WebSocketHandler webSocketHandler;
+	private WebSocketMessageHandler webSocketHandler;
 
 	private TaskScheduler sockJsTaskScheduler;
 	
@@ -65,7 +65,7 @@ class WebMvcStompWebSocketEndpointRegistration : StompWebSocketEndpointRegistrat
 	// private SockJsServiceRegistration registration;
 
 
-	this(string[] paths, WebSocketHandler webSocketHandler, TaskScheduler sockJsTaskScheduler) {
+	this(string[] paths, WebSocketMessageHandler webSocketHandler, TaskScheduler sockJsTaskScheduler) {
 		assert(!paths.empty(), "No paths specified");
 		assert(webSocketHandler, "WebSocketHandler must not be null");
 
@@ -128,8 +128,17 @@ class WebMvcStompWebSocketEndpointRegistration : StompWebSocketEndpointRegistrat
 	// 	return interceptors.toArray(new HandshakeInterceptor[0]);
 	// }
 
-	// final MultiValueMap!(WebSocketHandler, string) getMappings() {
-	// 	MultiValueMap!(WebSocketHandler, string) mappings = new LinkedMultiValueMap!(WebSocketHandler, string)();
+	Map!(string, WebSocketHandler) getMappings(){
+		Map!(string, WebSocketHandler) mappings = new LinkedHashMap!(string, WebSocketHandler)();
+		foreach (string path ; this.paths) {
+			auto handler = new WebSocketHttpRequestHandler(this.webSocketHandler);
+			mappings.put(path, handler);
+		}
+		return mappings;
+	}
+
+	// final MultiValueMap!(WebSocketMessageHandler, string) getMappings() {
+	// 	MultiValueMap!(WebSocketMessageHandler, string) mappings = new LinkedMultiValueMap!(WebSocketMessageHandler, string)();
 	// 	// if (this.registration !is null) {
 	// 	// 	SockJsService sockJsService = this.registration.getSockJsService();
 	// 	// 	for (string path : this.paths) {

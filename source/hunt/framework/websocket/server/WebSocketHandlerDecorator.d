@@ -17,7 +17,8 @@
 module hunt.framework.websocket.server.WebSocketHandlerDecorator;
 
 import hunt.http.codec.websocket.model.CloseStatus;
-import hunt.http.server.WebSocketHandler;
+// import hunt.http.server.WebSocketHandler;
+import hunt.framework.websocket.WebSocketMessageHandler;
 // import hunt.framework.websocket.WebSocketMessage;
 // import hunt.framework.websocket.WebSocketSession;
 
@@ -117,6 +118,6 @@ interface WebSocketHandlerDecoratorFactory {
 	 * @return the same handler or the handler wrapped with a sub-class of
 	 * {@code WebSocketHandlerDecorator}.
 	 */
-	WebSocketHandler decorate(WebSocketHandler handler);
+	WebSocketMessageHandler decorate(WebSocketMessageHandler handler);
 
 }

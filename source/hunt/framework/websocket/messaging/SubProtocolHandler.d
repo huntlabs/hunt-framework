@@ -16,19 +16,17 @@
 
 module hunt.framework.websocket.messaging.SubProtocolHandler;
 
-import hunt.http.codec.websocket.frame.WebSocketFrame;
+// import hunt.http.codec.websocket.frame.WebSocketFrame;
 // import hunt.http.codec.websocket.frame.Frame;
+import hunt.framework.websocket.WebSocketSession;
 import hunt.http.codec.websocket.model.CloseStatus;
 import hunt.http.codec.websocket.stream.WebSocketConnection;
 
-
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageChannel;
-// import hunt.framework.websocket.WebSocketMessage;
-// import hunt.framework.websocket.WebSocketSession;
 
-alias WebSocketMessage = WebSocketFrame;
-alias WebSocketSession = WebSocketConnection;
+// alias WebSocketMessage = WebSocketFrame;
+// alias WebSocketSession = WebSocketConnection;
 
 /**
  * A contract for handling WebSocket messages as part of a higher level protocol,

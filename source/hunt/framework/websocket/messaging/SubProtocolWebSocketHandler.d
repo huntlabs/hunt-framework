@@ -27,6 +27,7 @@ import hunt.framework.messaging.MessageChannel;
 import hunt.framework.messaging.MessagingException;
 import hunt.framework.websocket.exception;
 import hunt.framework.websocket.SubProtocolCapable;
+import hunt.framework.websocket.WebSocketMessageHandler;
 
 // import hunt.framework.util.StringUtils;
 import hunt.http.codec.websocket.frame.Frame;
@@ -34,7 +35,7 @@ import hunt.http.codec.websocket.model.CloseStatus;
 import hunt.http.codec.websocket.stream.WebSocketConnection;
 import hunt.http.server.WebSocketHandler;
 // import hunt.framework.websocket.WebSocketMessage;
-// import hunt.framework.websocket.WebSocketSession;
+import hunt.framework.websocket.WebSocketSession;
 // import hunt.framework.websocket.handler.ConcurrentWebSocketSessionDecorator;
 // import hunt.framework.websocket.handler.SessionLimitExceededException;
 // import hunt.framework.websocket.sockjs.transport.session.PollingSockJsSession;
@@ -66,7 +67,7 @@ import std.conv;
  * @since 4.0
  */
 class SubProtocolWebSocketHandler
-		: WebSocketHandler, SubProtocolCapable, MessageHandler { // , SmartLifecycle 
+		: WebSocketMessageHandler, SubProtocolCapable, MessageHandler { // , SmartLifecycle 
 
 	/** The default value for {@link #setTimeToFirstMessage(int) timeToFirstMessage}. */
 	private enum int DEFAULT_TIME_TO_FIRST_MESSAGE = 60 * 1000;
@@ -315,7 +316,7 @@ class SubProtocolWebSocketHandler
 
 		// this.stats.incrementSessionCount(session);
 		session = decorateSession(session);
-		this.sessions.put(session.getSessionId().to!string(), new WebSocketSessionHolder(session));
+		this.sessions.put(session.getId(), new WebSocketSessionHolder(session));
 		findProtocolHandler(session).afterSessionStarted(session, this.clientInboundChannel);
 	}
 
@@ -324,7 +325,7 @@ class SubProtocolWebSocketHandler
 	 */
 	// override
 	void handleMessage(WebSocketSession session, WebSocketMessage message) {
-		WebSocketSessionHolder holder = this.sessions.get(session.getSessionId().to!string());
+		WebSocketSessionHolder holder = this.sessions.get(session.getId());
 		if (holder !is null) {
 			session = holder.getSession();
 		}
@@ -521,13 +522,26 @@ class SubProtocolWebSocketHandler
 
 	private void clearSession(WebSocketSession session, CloseStatus closeStatus) {
 		version(HUNT_DEBUG) {
-			trace("Clearing session " ~ session.getSessionId().to!string());
+			trace("Clearing session " ~ session.getId());
 		}
-		if (this.sessions.remove(session.getSessionId().to!string()) !is null) {
+		if (this.sessions.remove(session.getId()) !is null) {
 			// this.stats.decrementSessionCount(session);
 		}
 		findProtocolHandler(session).afterSessionEnded(session, closeStatus, this.clientInboundChannel);
 	}
+
+	// override void onConnect(WebSocketConnection webSocketConnection) {
+	// 	afterConnectionEstablished(webSocketConnection);
+	// 	// if(_connectHandler !is null) 
+	// 	//     _connectHandler(webSocketConnection);
+	// }
+
+	// override void onFrame(Frame frame, WebSocketConnection connection) {
+	// 	handleMessage(connection, cast(WebSocketMessage)frame);
+	// }
+
+	// override void onError(Exception t, WebSocketConnection connection) {
+	// }
 
 	override int opCmp(MessageHandler o) {
 		implementationMissing(false);
