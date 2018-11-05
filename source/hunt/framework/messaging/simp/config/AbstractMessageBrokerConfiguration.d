@@ -126,6 +126,7 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 		// ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(clientInboundChannelExecutor());
 		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(null);
 		// channel.setLogger(SimpLogging.forLog(channel.getLogger()));
+		channel.id = "inbound";
 		ChannelRegistration reg = getClientInboundChannelRegistration();
 		if (reg.hasInterceptors()) {
 			channel.setInterceptors(reg.getInterceptors());
@@ -163,6 +164,7 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 		// ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(clientOutboundChannelExecutor());
 		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(null);
 		// channel.setLogger(SimpLogging.forLog(channel.getLogger()));
+		channel.id = "outbound";
 		ChannelRegistration reg = getClientOutboundChannelRegistration();
 		if (reg.hasInterceptors()) {
 			channel.setInterceptors(reg.getInterceptors());

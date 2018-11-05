@@ -75,6 +75,7 @@ class BufferingStompDecoder {
 	 * @param bufferSizeLimit the buffer size limit
 	 */
 	this(StompDecoder stompDecoder, int bufferSizeLimit) {
+		// assert(false, "Test");
 		assert(stompDecoder, "StompDecoder is required");
 		assert(bufferSizeLimit > 0, "Buffer size limit must be greater than 0");
 		this.stompDecoder = stompDecoder;

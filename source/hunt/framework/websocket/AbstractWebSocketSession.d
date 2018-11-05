@@ -16,47 +16,17 @@
 
 module hunt.framework.websocket.AbstractWebSocketSession;
 
-// import java.io.IOException;
-// import java.util.Map;
-// import java.util.concurrent.ConcurrentHashMap;
-
 import hunt.framework.messaging.IdGenerator;
-// import hunt.framework.websocket.BinaryMessage;
 import hunt.http.codec.websocket.model.CloseStatus;
-// import hunt.framework.websocket.PingMessage;
-// import hunt.framework.websocket.PongMessage;
-// import hunt.framework.websocket.TextMessage;
-// import hunt.framework.websocket.WebSocketMessage;
 import hunt.framework.websocket.WebSocketSession;
 
 import hunt.container;
 import hunt.lang.exception;
+import hunt.logging;
 import hunt.util.TypeUtils;
 
 import std.uuid;
-/**
- * A {@link WebSocketSession} that exposes the underlying, native WebSocketSession
- * through a getter.
- *
- * @author Rossen Stoyanchev
- * @since 4.0
- */
-// interface NativeWebSocketSession : WebSocketSession {
 
-// 	/**
-// 	 * Return the underlying native WebSocketSession.
-// 	 */
-// 	Object getNativeSession();
-
-// 	/**
-// 	 * Return the underlying native WebSocketSession, if available.
-// 	 * @param requiredType the required type of the session
-// 	 * @return the native session of the required type,
-// 	 * or {@code null} if not available
-// 	 */
-	
-// 	// <T> T getNativeSession(Class!(T) requiredType);
-// }
 
 /**
  * An abstract base class for implementations of {@link WebSocketSession}.
@@ -88,7 +58,7 @@ abstract class AbstractWebSocketSession(T) : WebSocketSession {
 	 * session; the provided attributes are copied, the original map is not used.
 	 */
 	this(Map!(string, Object) attributes) {
-		attributes = new HashMap!(string, Object)(); //  = new ConcurrentHashMap<>();
+		this.attributes = new HashMap!(string, Object)(); //  = new ConcurrentHashMap<>();
 		if (attributes !is null) {
 			this.attributes.putAll(attributes);
 		}
@@ -102,7 +72,7 @@ abstract class AbstractWebSocketSession(T) : WebSocketSession {
 
 	// override
 	T getNativeSession() {
-		assert(this.nativeSession !is null, "WebSocket session not yet initialized");
+		assert(this.nativeSession !is null, "WebSocket session is not yet initialized");
 		return this.nativeSession;
 	}
 
@@ -126,7 +96,7 @@ abstract class AbstractWebSocketSession(T) : WebSocketSession {
 		checkNativeSessionInitialized();
 
 		version(HUNT_DEBUG) {
-			trace("Sending " ~ message ~ ", " ~ this);
+			trace("Sending " ~ message.toString() ~ ", " ~ this.toString());
 		}
 
 		// if (message instanceof TextMessage) {
@@ -163,7 +133,7 @@ abstract class AbstractWebSocketSession(T) : WebSocketSession {
 	final void close(CloseStatus status) {
 		checkNativeSessionInitialized();
 		version(HUNT_DEBUG) {
-			trace("Closing " ~ this);
+			trace("Closing " ~ this.toString());
 		}
 		closeInternal(status);
 	}

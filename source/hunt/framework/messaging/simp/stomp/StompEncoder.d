@@ -49,7 +49,7 @@ alias ByteArrayMap = Map!(string, byte[]);
  * @since 4.0
  * @see StompDecoder
  */
-public class StompEncoder  {
+class StompEncoder  {
 
 	private enum byte LF = '\n';
 
@@ -90,7 +90,7 @@ public class StompEncoder  {
 	 * @param message the message to encode
 	 * @return the encoded message
 	 */
-	public byte[] encode(Message!(byte[]) message) {
+	byte[] encode(Message!(byte[]) message) {
 		return encode(message.getHeaders(), message.getPayload());
 	}
 
@@ -100,7 +100,7 @@ public class StompEncoder  {
 	 * @param payload the payload
 	 * @return the encoded message
 	 */
-	public byte[] encode(Map!(string, Object) headers, byte[] payload) {
+	byte[] encode(Map!(string, Object) headers, byte[] payload) {
 		assert(headers !is null, "'headers' is required");
 		assert(payload !is null, "'payload' is required");
 
@@ -111,9 +111,7 @@ public class StompEncoder  {
 			if (SimpMessageType.HEARTBEAT == SimpMessageHeaderAccessor.getMessageType(headers)) {
 				trace("Encoding heartbeat");
 				output.write(StompDecoder.HEARTBEAT_PAYLOAD);
-			}
-
-			else {
+			} else {
 				StompCommand command = StompHeaderAccessor.getCommand(headers);
 				if (command == StompCommand.Null) {
 					throw new IllegalStateException("Missing STOMP command: " ~ (cast(Object)headers).toString());
@@ -126,8 +124,14 @@ public class StompEncoder  {
 				writeBody(payload, output);
 				output.write(0);
 			}
+			output.close();
 
-			return baos.toByteArray();
+			byte[] bbb = baos.toByteArray();
+
+			warningf("%(%02X %)", bbb);
+			warningf("xxxxxxx=> %d", bbb.length);
+
+			return bbb;
 		}
 		catch (IOException ex) {
 			throw new StompConversionException(

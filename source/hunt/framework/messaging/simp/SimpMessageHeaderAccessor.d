@@ -96,7 +96,6 @@ class SimpMessageHeaderAccessor : NativeMessageHeaderAccessor {
 			Map!(string, List!string) externalSourceHeaders) {
 
 		super(externalSourceHeaders);
-		assert(messageType, "MessageType must not be null");
 		setHeader(MESSAGE_TYPE_HEADER, new Nullable!SimpMessageType(messageType));
 		headerInitializer.initHeaders(this);
 	}

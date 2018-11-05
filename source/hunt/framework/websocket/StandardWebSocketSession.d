@@ -191,7 +191,10 @@ class StandardWebSocketSession : AbstractWebSocketSession!(WebSocketConnection) 
 		super.initializeNativeSession(session);
 
 		this.uri = session.getUpgradeRequest().getURI();
+		// TODO: Tasks pending completion -@zxp at 11/4/2018, 10:15:44 AM
+		// 
 		// this.acceptedProtocol = session.getNegotiatedSubprotocol();
+		this.acceptedProtocol = "";
 
 		// List!(Extension) standardExtensions = getNativeSession().getNegotiatedExtensions();
 		// if (!CollectionUtils.isEmpty(standardExtensions)) {

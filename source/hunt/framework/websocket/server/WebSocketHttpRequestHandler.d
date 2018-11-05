@@ -152,10 +152,10 @@ class WebSocketHttpRequestHandler : WebSocketHandler { // , Lifecycle, ServletCo
 	}
 
 	override void onConnect(WebSocketConnection session) {
-				info("...");
+		version(HUNT_DEBUG)
+		info("WebSocket connection on: ", session.getUpgradeRequest.getURI.toString());
 
 		this.wsSession.initializeNativeSession(session);
-		
 		this.wsHandler.afterConnectionEstablished(this.wsSession);
 	}
 
@@ -182,9 +182,8 @@ class WebSocketHttpRequestHandler : WebSocketHandler { // , Lifecycle, ServletCo
 				trace(request.getMethod() ~ " " ~ request.getURIString());
 			}
 
-			HttpFields headers = request.getFields();
-
-			wsSession = new StandardWebSocketSession(headers, null, null, null); // , attrs, localAddr, remoteAddr, user
+			wsSession = new StandardWebSocketSession(request.getFields(), null,
+				connection.getLocalAddress(), connection.getRemoteAddress(), null); // user
 
 			// Map!(string, Object) attributes = new HashMap<>();
 			// if (!chain.applyBeforeHandshake(request, response, attributes)) {

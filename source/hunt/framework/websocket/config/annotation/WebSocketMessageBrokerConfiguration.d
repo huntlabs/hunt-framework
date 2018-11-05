@@ -22,6 +22,7 @@ import hunt.framework.websocket.config.annotation.WebSocketTransportRegistration
 
 // import hunt.framework.beans.factory.config.CustomScopeConfigurer;
 import hunt.framework.context.ApplicationContext;
+import hunt.framework.context.Lifecycle;
 // import hunt.framework.context.annotation.Bean;
 // import hunt.framework.http.converter.json.Jackson2ObjectMapperBuilder;
 
@@ -120,6 +121,10 @@ class WebSocketMessageBrokerConfiguration : AbstractMessageBrokerConfiguration {
 			applicationContext.registerWebSocket(path, handler);
 		}
 
+		// 
+		Lifecycle d = cast(Lifecycle)handler;
+		d.start();
+
 		// foreach(string p; registry.getPaths()) {
 		// 	info("mapping: ", p);
 		// 	// WebSocketHandler handler1 = decorateWebSocketHandler(subProtocolWebSocketHandler());
@@ -127,7 +132,6 @@ class WebSocketMessageBrokerConfiguration : AbstractMessageBrokerConfiguration {
 		// }
 
 	}
-	// private WebMvcStompEndpointRegistry registry;
 	
 	WebSocketMessageHandler subProtocolWebSocketHandler() {
 		return new SubProtocolWebSocketHandler(clientInboundChannel(), clientOutboundChannel());

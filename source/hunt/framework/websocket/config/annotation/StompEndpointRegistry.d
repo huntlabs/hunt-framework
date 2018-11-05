@@ -117,20 +117,24 @@ class WebMvcStompEndpointRegistry : StompEndpointRegistry {
 // FIXME: Needing refactor or cleanup -@zxp at 10/31/2018, 5:45:08 PM
 // 
 		// if (transportRegistration.getSendTimeLimit() !is null) 
+		if (transportRegistration.getSendTimeLimit() > 0) 
 		{
 			this.subProtocolWebSocketHandler.setSendTimeLimit(transportRegistration.getSendTimeLimit());
 		}
 		// if (transportRegistration.getSendBufferSizeLimit() !is null) 
+		if (transportRegistration.getSendBufferSizeLimit() > 0) 
 		{
 			this.subProtocolWebSocketHandler.setSendBufferSizeLimit(transportRegistration.getSendBufferSizeLimit());
 		}
 		// if (transportRegistration.getTimeToFirstMessage() !is null) 
+		if (transportRegistration.getTimeToFirstMessage() >0) 
 		{
 			this.subProtocolWebSocketHandler.setTimeToFirstMessage(transportRegistration.getTimeToFirstMessage());
 		}
 
 		this.stompHandler = new StompSubProtocolHandler();
 		// if (transportRegistration.getMessageSizeLimit() !is null) 
+		if (transportRegistration.getMessageSizeLimit() > 0) 
 		{
 			this.stompHandler.setMessageSizeLimit(transportRegistration.getMessageSizeLimit());
 		}

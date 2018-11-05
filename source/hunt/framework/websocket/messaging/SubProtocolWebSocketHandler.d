@@ -17,10 +17,8 @@
 module hunt.framework.websocket.messaging.SubProtocolWebSocketHandler;
 
 import hunt.framework.websocket.messaging.SubProtocolHandler;
-
-// import java.util.concurrent.atomic.AtomicInteger;
-// import java.util.concurrent.locks.ReentrantLock;
-// import hunt.framework.context.SmartLifecycle;
+import hunt.framework.websocket.WebSocketSession;
+import hunt.framework.context.Lifecycle;
 
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageChannel;
@@ -29,13 +27,11 @@ import hunt.framework.websocket.exception;
 import hunt.framework.websocket.SubProtocolCapable;
 import hunt.framework.websocket.WebSocketMessageHandler;
 
-// import hunt.framework.util.StringUtils;
 import hunt.http.codec.websocket.frame.Frame;
 import hunt.http.codec.websocket.model.CloseStatus;
 import hunt.http.codec.websocket.stream.WebSocketConnection;
 import hunt.http.server.WebSocketHandler;
 // import hunt.framework.websocket.WebSocketMessage;
-import hunt.framework.websocket.WebSocketSession;
 // import hunt.framework.websocket.handler.ConcurrentWebSocketSessionDecorator;
 // import hunt.framework.websocket.handler.SessionLimitExceededException;
 // import hunt.framework.websocket.sockjs.transport.session.PollingSockJsSession;
@@ -66,8 +62,8 @@ import std.conv;
  * @author Artem Bilan
  * @since 4.0
  */
-class SubProtocolWebSocketHandler
-		: WebSocketMessageHandler, SubProtocolCapable, MessageHandler { // , SmartLifecycle 
+class SubProtocolWebSocketHandler : WebSocketMessageHandler, 
+	SubProtocolCapable, MessageHandler, SmartLifecycle  {
 
 	/** The default value for {@link #setTimeToFirstMessage(int) timeToFirstMessage}. */
 	private enum int DEFAULT_TIME_TO_FIRST_MESSAGE = 60 * 1000;
@@ -261,6 +257,13 @@ class SubProtocolWebSocketHandler
 		return "todo...";
 	}
 
+	bool isAutoStartup() {
+		return true;
+	}
+
+	int getPhase() {
+		return int.max;
+	}
 
 	// override
 	final void start() {
@@ -314,6 +317,8 @@ class SubProtocolWebSocketHandler
 			return;
 		}
 
+		version(HUNT_DEBUG) trace("new WebSocketSession: ", session.getId());
+
 		// this.stats.incrementSessionCount(session);
 		session = decorateSession(session);
 		this.sessions.put(session.getId(), new WebSocketSessionHolder(session));
@@ -330,7 +335,7 @@ class SubProtocolWebSocketHandler
 			session = holder.getSession();
 		}
 		SubProtocolHandler protocolHandler = findProtocolHandler(session);
-		protocolHandler.handleMessageFromClient(session, message, this.clientInboundChannel);
+		protocolHandler.handleMessageFromClient(session, message, this.clientOutboundChannel);
 		if (holder !is null) {
 			holder.setHasHandledMessages();
 		}
@@ -423,25 +428,16 @@ class SubProtocolWebSocketHandler
 	protected final SubProtocolHandler findProtocolHandler(WebSocketSession session) {
 		string protocol = null;
 		try {
-			// TODO: Tasks pending completion -@zxp at 11/1/2018, 2:35:35 PM
-			// 
-			protocol = "1.2"; // session.getAcceptedProtocol();
+			protocol = session.getAcceptedProtocol();
 		}
 		catch (Exception ex) {
 			// Shouldn't happen
 			errorf("Failed to obtain session.getAcceptedProtocol(): " ~
-					"will use the default protocol handler (if configured).", "\n", ex);
+					"will use the default protocol handler (if configured).\n", ex);
 		}
 
 		SubProtocolHandler handler;
-		if (!protocol.empty) {
-			handler = this.protocolHandlerLookup.get(protocol);
-			if (handler is null) {
-				throw new IllegalStateException(
-						"No handler for '" ~ protocol ~ "' among " ~ this.protocolHandlerLookup.toString());
-			}
-		}
-		else {
+		if (protocol.empty) {
 			if (this.defaultProtocolHandler !is null) {
 				handler = this.defaultProtocolHandler;
 			}
@@ -451,6 +447,12 @@ class SubProtocolWebSocketHandler
 			else {
 				throw new IllegalStateException("Multiple protocol handlers configured and " ~
 						"no protocol was negotiated. Consider configuring a default SubProtocolHandler.");
+			}
+		} else {
+			handler = this.protocolHandlerLookup.get(protocol);
+			if (handler is null) {
+				throw new IllegalStateException(
+						"No handler for '" ~ protocol ~ "' among " ~ this.protocolHandlerLookup.toString());
 			}
 		}
 		return handler;

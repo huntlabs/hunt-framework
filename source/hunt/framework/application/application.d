@@ -545,15 +545,25 @@ private:
         override void onConnect(WebSocketConnection connection) {
             string path = connection.getUpgradeRequest().getURI().getPath();
             WebSocketHandler handler = webSocketHandlerMap.get(path, null);
-            if (handler !is null)
-                handler.onConnect(connection);
+            if (handler !is null) {
+                try {
+                    handler.onConnect(connection);
+                } catch (Exception e) {
+                    logErrorf("WebSocket connection failed: ", e.msg);
+                }
+            }
         }
 
         override void onFrame(Frame frame, WebSocketConnection connection) {
             string path = connection.getUpgradeRequest().getURI().getPath();
             WebSocketHandler handler = webSocketHandlerMap.get(path, null);
-            if (handler !is null)
-                handler.onFrame(frame, connection);
+            if (handler !is null) {
+                try {
+                    handler.onFrame(frame, connection);
+                } catch (Exception e) {
+                    logErrorf("WebSocket frame handling failed: ", e.msg);
+                }
+            }
         }
 
         override void onError(Exception t, WebSocketConnection connection) {

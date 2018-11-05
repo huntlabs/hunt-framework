@@ -98,22 +98,22 @@ class ExecutorSubscribableChannel : AbstractSubscribableChannel {
 		auto ec = cast(ExecutorChannelInterceptor) interceptor;
 		if (ec !is null) {
 			// this.executorInterceptors.add(ec);
+			implementationMissing(false);
 		}
 	}
 
 
 	override
 	bool sendInternal(MessageBase message, long timeout) {
-		implementationMissing(false);
-		// foreach (MessageHandler handler : getSubscribers()) {
-		// 	SendTask sendTask = new SendTask(message, handler);
-		// 	if (this.executor is null) {
-		// 		sendTask.run();
-		// 	}
-		// 	else {
-		// 		this.executor.execute(sendTask);
-		// 	}
-		// }
+		trace("xxxx=>", this.getSubscribers.size);
+		foreach (MessageHandler handler ; getSubscribers()) {
+			SendTask sendTask = new SendTask(message, handler);
+			if (this.executor is null) {
+				sendTask.run();
+			} else {
+				this.executor.execute(sendTask);
+			}
+		}
 		return true;
 	}
 
@@ -130,6 +130,7 @@ class ExecutorSubscribableChannel : AbstractSubscribableChannel {
 		private int interceptorIndex = -1;
 
 		this(MessageBase message, MessageHandler messageHandler) {
+			version(HUNT_DEBUG) trace("Creating SendTask for ", typeid(message));
 			this.inputMessage = message;
 			this.messageHandler = messageHandler;
 		}
@@ -161,9 +162,8 @@ class ExecutorSubscribableChannel : AbstractSubscribableChannel {
 				if (e !is null) {
 					throw e;
 				}
-				string description = "Failed to handle " ~ 
-					message.to!string() ~ " to " ~ this.toString() ~ 
-						" in " ~ this.messageHandler.to!string();
+				string description = "Failed to handle " ~ message.to!string() ~ 
+					" to " ~ this.toString() ~ " in " ~ this.messageHandler.to!string();
 				throw new MessageDeliveryException(message, description, ex);
 			}
 			catch (Throwable err) {

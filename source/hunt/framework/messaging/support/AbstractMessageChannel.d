@@ -43,14 +43,17 @@ abstract class AbstractMessageChannel : MessageChannel, InterceptableChannel { /
 
 	private string beanName;
 
+	string id;
+
 
 	this() {
+		interceptors = new ArrayList!ChannelInterceptor(5);
 		this.beanName = TypeUtils.getSimpleName(typeid(this)) ~ "@" ~ ObjectUtils.getIdentityHexString(this);
 	}
 
-	private void initialize() {
-		interceptors = new ArrayList!ChannelInterceptor(5);
-	}
+	// private void initialize() {
+	// 	interceptors = new ArrayList!ChannelInterceptor(5);
+	// }
 
 
 

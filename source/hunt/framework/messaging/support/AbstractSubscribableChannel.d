@@ -41,7 +41,8 @@ abstract class AbstractSubscribableChannel : AbstractMessageChannel, Subscribabl
 
 
 	Set!(MessageHandler) getSubscribers() {
-		return (this.handlers); // Collections.unmodifiableSet!(MessageHandler)
+		trace("vvv=>>>>>>", id);
+		return this.handlers; // Collections.unmodifiableSet!(MessageHandler)
 	}
 
 	bool hasSubscription(MessageHandler handler) {
@@ -51,21 +52,24 @@ abstract class AbstractSubscribableChannel : AbstractMessageChannel, Subscribabl
 	override
 	bool subscribe(MessageHandler handler) {
 		bool result = this.handlers.add(handler);
-		if (result) {
-			version(HUNT_DEBUG) {
+		version(HUNT_DEBUG) {
+			if (result) 
 				trace(getBeanName() ~ " added " ~ handler.to!string());
-			}
 		}
+
+		tracef("xxxx=>%s, %d", id, this.handlers.size);
+		
 		return result;
 	}
 
 	override
 	bool unsubscribe(MessageHandler handler) {
+
+		trace("xxxxxxxxxxxxxx");
 		bool result = this.handlers.remove(handler);
-		if (result) {
-			version(HUNT_DEBUG) {
+		version(HUNT_DEBUG) {
+			if (result)
 				trace(getBeanName() ~ " removed " ~ handler.to!string());
-			}
 		}
 		return result;
 	}
