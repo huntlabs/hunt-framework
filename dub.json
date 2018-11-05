@@ -7,7 +7,7 @@
     "dependencies": {
         "hunt-http": "~>0.0.2",
         "hunt-cache": "~>0.2.0",
-        "hunt-entity": "~>1.6.2"
+        "hunt-entity": "~>2.0.0"
     },
     "authors": [
         "zoujiaqing",
