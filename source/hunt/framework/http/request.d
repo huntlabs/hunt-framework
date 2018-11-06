@@ -688,7 +688,7 @@ final class Request : RequestHandler
 	string bearerToken()
 	{
 		string v = header("Authorization", "");
-		if (startsWith(v, "Bearer ") >= 0)
+		if (startsWith(v, "Bearer ") > 0)
 			return v[7 .. $];
 		return null;
 	}
