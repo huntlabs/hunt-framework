@@ -1207,10 +1207,12 @@ final class Request : RequestHandler
 
 	protected string[string] getInputSource()
 	{
-		if (isContained(this.method, ["GET", "HEAD"]))
+		if (isContained(this.method, ["GET", "HEAD"])){
 			return _httpMessage.queryParam();
-		else
+		}else if(_body.length == 0)
 		{
+			return string[string].init;
+		}else{
 			return httpForm.formData();
 		}
 	}
