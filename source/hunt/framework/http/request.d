@@ -1209,7 +1209,7 @@ final class Request : RequestHandler
 	{
 		if (isContained(this.method, ["GET", "HEAD"])){
 			return _httpMessage.queryParam();
-		}else if(_body.length == 0)
+		}else if(!_body)
 		{
 			return string[string].init;
 		}else{
