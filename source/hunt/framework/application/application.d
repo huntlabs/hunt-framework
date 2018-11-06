@@ -199,11 +199,6 @@ final class Application : ApplicationContext {
     }
 
     void start() {
-        if (_server.getHttp2Configuration.isSecureConnectionEnabled())
-            writeln("Try to browse https://", addr.toString());
-        else
-            writeln("Try to browse http://", addr.toString());
-        
         foreach(WebSocketBuilder b; webSocketBuilders) {
             b.listenWebSocket();
         }
@@ -214,6 +209,12 @@ final class Application : ApplicationContext {
         // foreach(WebSocketMessageBroker b; messageBrokers) {
         //     b.listen();
         // }
+
+        if (_server.getHttp2Configuration.isSecureConnectionEnabled())
+            writeln("Try to browse https://", addr.toString());
+        else
+            writeln("Try to browse http://", addr.toString());
+        
         _server.start();
     }
 

@@ -37,14 +37,13 @@ import std.conv;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-abstract class AbstractMessageChannel : MessageChannel, InterceptableChannel { // , BeanNameAware
+abstract class AbstractMessageChannel : MessageChannel, InterceptableChannel { 
 
 	private List!(ChannelInterceptor) interceptors;
 
 	private string beanName;
 
 	string id;
-
 
 	this() {
 		interceptors = new ArrayList!ChannelInterceptor(5);
@@ -54,7 +53,6 @@ abstract class AbstractMessageChannel : MessageChannel, InterceptableChannel { /
 	// private void initialize() {
 	// 	interceptors = new ArrayList!ChannelInterceptor(5);
 	// }
-
 
 
 	/**

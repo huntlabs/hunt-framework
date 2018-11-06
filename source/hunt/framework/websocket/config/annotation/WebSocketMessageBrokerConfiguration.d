@@ -105,7 +105,7 @@ class WebSocketMessageBrokerConfiguration : AbstractMessageBrokerConfiguration {
 	// 	return registry.getHandlerMapping();
 	// }
 
-	void stompWebSocketHandlerMapping() {
+	WebSocketMessageHandler stompWebSocketHandlerMapping() {
 		WebSocketMessageHandler handler = decorateWebSocketHandler(subProtocolWebSocketHandler());
 		WebMvcStompEndpointRegistry registry = new WebMvcStompEndpointRegistry(
 				handler, getTransportRegistration(), 
@@ -122,8 +122,8 @@ class WebSocketMessageBrokerConfiguration : AbstractMessageBrokerConfiguration {
 		}
 
 		// 
-		Lifecycle d = cast(Lifecycle)handler;
-		d.start();
+		// Lifecycle d = cast(Lifecycle)handler;
+		// d.start();
 
 		// foreach(string p; registry.getPaths()) {
 		// 	info("mapping: ", p);
@@ -131,6 +131,7 @@ class WebSocketMessageBrokerConfiguration : AbstractMessageBrokerConfiguration {
 		// 	applicationContext.registerWebSocket(p, handler1);
 		// }
 
+		return handler;
 	}
 	
 	WebSocketMessageHandler subProtocolWebSocketHandler() {

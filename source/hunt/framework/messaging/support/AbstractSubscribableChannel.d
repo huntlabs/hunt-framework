@@ -22,6 +22,8 @@ import hunt.framework.messaging.MessageChannel;
 
 import hunt.container;
 import hunt.logging;
+import hunt.util.ObjectUtils;
+
 import std.conv;
 // import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -37,11 +39,14 @@ abstract class AbstractSubscribableChannel : AbstractMessageChannel, Subscribabl
 
 	this() {
 		handlers = new HashSet!(MessageHandler)(); //  new CopyOnWriteArraySet!(MessageHandler)();
+		super();
 	}
 
-
 	Set!(MessageHandler) getSubscribers() {
-		trace("vvv=>>>>>>", id);
+		// version(HUNT_DEBUG) {
+		// 	tracef("%s@%s, handlers: %d", id, 
+		// 		ObjectUtils.getIdentityHexString(this), this.handlers.size);
+		// }
 		return this.handlers; // Collections.unmodifiableSet!(MessageHandler)
 	}
 
@@ -56,8 +61,7 @@ abstract class AbstractSubscribableChannel : AbstractMessageChannel, Subscribabl
 			if (result) 
 				trace(getBeanName() ~ " added " ~ handler.to!string());
 		}
-
-		tracef("xxxx=>%s, %d", id, this.handlers.size);
+		// tracef("xxxx=>%s@%s, %d", id, ObjectUtils.getIdentityHexString(this), this.handlers.size);
 		
 		return result;
 	}

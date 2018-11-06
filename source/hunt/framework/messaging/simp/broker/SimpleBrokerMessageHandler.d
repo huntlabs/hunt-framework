@@ -290,6 +290,10 @@ class SimpleBrokerMessageHandler : AbstractBrokerMessageHandler {
 	override
 	protected void handleMessageInternal(MessageBase message) {
 		MessageHeaders headers = message.getHeaders();
+		version(HUNT_DEBUG) {
+			trace(headers.toString());
+		}
+
 		SimpMessageType messageType = SimpMessageHeaderAccessor.getMessageType(headers);
 		string destination = SimpMessageHeaderAccessor.getDestination(headers);
 		string sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
@@ -323,7 +327,11 @@ class SimpleBrokerMessageHandler : AbstractBrokerMessageHandler {
 				connectAck.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, message);
 				connectAck.setHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER, heartbeatOut);
 				Message!(byte[]) messageOut = MessageHelper.createMessage(EMPTY_PAYLOAD, connectAck.getMessageHeaders());
+				info("responding ..........");
 				getClientOutboundChannel().send(messageOut);
+				info("responding ..........done");
+			} else {
+				warning("sessionId is null");
 			}
 		}
 		else if (SimpMessageType.DISCONNECT == messageType) {
@@ -356,8 +364,13 @@ class SimpleBrokerMessageHandler : AbstractBrokerMessageHandler {
 		version(HUNT_DEBUG) {
 			SimpMessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor!SimpMessageHeaderAccessor(message);
 			accessor = (accessor !is null ? accessor : SimpMessageHeaderAccessor.wrap(message));
-			trace("Processing " ~ message.payloadType.toString());
-			// trace("Processing " ~ accessor.getShortLogMessage(message.getPayload()));
+			import hunt.framework.messaging.support.GenericMessage;
+			import hunt.lang.Nullable;
+			GenericMessage!(byte[]) gm = cast(GenericMessage!(byte[]))message;
+			if(gm is null) 
+				trace("Processing " ~ typeid(cast(Object)message).name);
+			else
+				trace("Processing " ~ accessor.getShortLogMessage(new Nullable!(byte[])(gm.getPayload())));
 		}
 	}
 

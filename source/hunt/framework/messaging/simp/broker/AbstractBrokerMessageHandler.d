@@ -21,7 +21,7 @@ import hunt.framework.messaging.simp.broker.OrderedMessageSender;
 
 import hunt.framework.context.ApplicationEvent;
 // import hunt.framework.context.ApplicationEventPublisherAware;
-// import hunt.framework.context.SmartLifecycle;
+import hunt.framework.context.Lifecycle;
 
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageChannel;
@@ -46,8 +46,8 @@ import std.string;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-abstract class AbstractBrokerMessageHandler
-		: MessageHandler { // , ApplicationEventPublisherAware, SmartLifecycle
+abstract class AbstractBrokerMessageHandler : MessageHandler, SmartLifecycle { 
+	// , ApplicationEventPublisherAware, 
 
 	private SubscribableChannel clientInboundChannel;
 
@@ -178,11 +178,14 @@ abstract class AbstractBrokerMessageHandler
 		return this.autoStartup;
 	}
 
+	int getPhase() {
+		return int.max;
+	}
 
 	// override
 	void start() {
 		synchronized (this.lifecycleMonitor) {
-			info("Starting...");
+			version(HUNT_DEBUG) info("Starting...");
 			this.clientInboundChannel.subscribe(this);
 			this.brokerChannel.subscribe(this);
 			InterceptableChannel channel = cast(InterceptableChannel) this.clientInboundChannel;
@@ -191,7 +194,7 @@ abstract class AbstractBrokerMessageHandler
 			}
 			startInternal();
 			this.running = true;
-			info("Started.");
+			version(HUNT_DEBUG) info("Started.");
 		}
 	}
 
@@ -201,7 +204,7 @@ abstract class AbstractBrokerMessageHandler
 	// override
 	void stop() {
 		synchronized (this.lifecycleMonitor) {
-			info("Stopping...");
+			version(HUNT_DEBUG) info("Stopping...");
 			stopInternal();
 			this.clientInboundChannel.unsubscribe(this);
 			this.brokerChannel.unsubscribe(this);
@@ -210,7 +213,7 @@ abstract class AbstractBrokerMessageHandler
 				channel.removeInterceptor(this.unsentDisconnectInterceptor);
 			}
 			this.running = false;
-			info("Stopped.");
+			version(HUNT_DEBUG) info("Stopped.");
 		}
 	}
 
@@ -254,13 +257,16 @@ abstract class AbstractBrokerMessageHandler
 
 	override
 	void handleMessage(MessageBase message) {
-		if (!this.running) {
+		version(HUNT_DEBUG) {
+			trace("Processing " ~  typeid(cast(Object)message).name);
+		}
+		if (this.running) 
+			handleMessageInternal(message);
+		else {
 			version(HUNT_DEBUG) {
 				trace(this.toString() ~ " not running yet. Ignoring " ~ message.to!string());
 			}
-			return;
 		}
-		handleMessageInternal(message);
 	}
 
 	protected abstract void handleMessageInternal(MessageBase message);

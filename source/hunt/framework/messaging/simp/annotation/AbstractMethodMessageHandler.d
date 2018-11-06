@@ -406,20 +406,25 @@ abstract class AbstractMethodMessageHandler(T)
 
 	override
 	void handleMessage(MessageBase message) {
+		version(HUNT_DEBUG) {
+			trace("Processing " ~  typeid(cast(Object)message).name);
+		}
+
 		string destination = getDestination(message);
 		if (destination is null) {
 			return;
 		}
+		trace("xxxxxxx");
 		string lookupDestination = getLookupDestination(destination);
 		if (lookupDestination is null) {
 			return;
 		}
-
+		trace("xxxxxxx");
 		MessageHeaderAccessor headerAccessor = MessageHeaderAccessor.getMutableAccessor(message);
+		trace("xxxxxxx");
 		headerAccessor.setHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER, lookupDestination);
 		headerAccessor.setLeaveMutable(true);
 		implementationMissing(false);
-		warning(message.payloadType);
 		// message = MessageHelper.createMessage(message.getPayload(), headerAccessor.getMessageHeaders());
 
 		// version(HUNT_DEBUG) {

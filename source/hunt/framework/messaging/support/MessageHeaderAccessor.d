@@ -142,7 +142,6 @@ class MessageHeaderAccessor {
 
 	private __gshared MimeType[] READABLE_MIME_TYPES;
 
-
 	private MutableMessageHeaders headers;
 
 	private bool leaveMutable = false;
@@ -151,7 +150,6 @@ class MessageHeaderAccessor {
 
 	private bool enableTimestamp = false;
 
-	
 	private IdGenerator idGenerator;
 
 	shared static this() {
@@ -591,8 +589,7 @@ class MessageHeaderAccessor {
 				return (bytes.length < 80) ?
 						" payload=" ~ cast(string)(bytes) :
 						" payload=" ~ cast(string)(bytes[0..80]) ~ "...(truncated)";
-			}
-			else {
+			} else {
 				return " payload=byte[" ~ to!string(bytes.length) ~ "]";
 			}
 		}

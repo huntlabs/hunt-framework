@@ -65,8 +65,6 @@ class ExecutorSubscribableChannel : AbstractSubscribableChannel {
 	this(Executor executor) {
 		this.executor = executor;
 	}
-
-
 	
 	Executor getExecutor() {
 		return this.executor;
@@ -105,7 +103,9 @@ class ExecutorSubscribableChannel : AbstractSubscribableChannel {
 
 	override
 	bool sendInternal(MessageBase message, long timeout) {
-		trace("xxxx=>", this.getSubscribers.size);
+		version(HUNT_DEBUG) {
+			trace("sending message: ", message.to!string());
+		}
 		foreach (MessageHandler handler ; getSubscribers()) {
 			SendTask sendTask = new SendTask(message, handler);
 			if (this.executor is null) {
@@ -129,10 +129,13 @@ class ExecutorSubscribableChannel : AbstractSubscribableChannel {
 
 		private int interceptorIndex = -1;
 
-		this(MessageBase message, MessageHandler messageHandler) {
-			version(HUNT_DEBUG) trace("Creating SendTask for ", typeid(message));
+		this(MessageBase message, MessageHandler handler) {
+			version(HUNT_DEBUG) {
+				tracef("creating SendTask for Message: %s, with handler: %s", 
+					typeid(cast(Object)message), typeid(cast(Object)handler));
+			}
 			this.inputMessage = message;
-			this.messageHandler = messageHandler;
+			this.messageHandler = handler;
 		}
 
 		override
@@ -150,9 +153,8 @@ class ExecutorSubscribableChannel : AbstractSubscribableChannel {
 			MessageBase message = this.inputMessage;
 			try {
 				message = applyBeforeHandle(message);
-				if (message is null) {
+				if (message is null)
 					return;
-				}
 				this.messageHandler.handleMessage(message);
 				triggerAfterMessageHandled(message, null);
 			}

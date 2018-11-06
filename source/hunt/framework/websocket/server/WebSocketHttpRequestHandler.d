@@ -160,12 +160,10 @@ class WebSocketHttpRequestHandler : WebSocketHandler { // , Lifecycle, ServletCo
 	}
 
 	override void onFrame(Frame frame, WebSocketConnection connection) {
-				info("...");
 		this.wsHandler.handleMessage(this.wsSession, cast(WebSocketFrame)frame);
 	}
 
 	override void onError(Exception t, WebSocketConnection connection) {
-				error("...");
 		this.wsHandler.handleTransportError(this.wsSession, t);
 	}
 
@@ -173,12 +171,12 @@ class WebSocketHttpRequestHandler : WebSocketHandler { // , Lifecycle, ServletCo
 	bool acceptUpgrade(HttpRequest request, HttpResponse response, 
             HttpOutputStream output, HttpConnection connection) {
 
-		info("Upgrade handshaking...");
 		// HandshakeInterceptorChain chain = new HandshakeInterceptorChain(this.interceptors, this.wsHandler);
 		// HandshakeFailureException failure = null;
 
 		try {
 			version(HUNT_DEBUG) { 
+				info("Upgrade handshaking...");
 				trace(request.getMethod() ~ " " ~ request.getURIString());
 			}
 

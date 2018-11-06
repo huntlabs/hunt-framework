@@ -123,16 +123,19 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 	}
 
 	AbstractSubscribableChannel clientInboundChannel() {
-		// ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(clientInboundChannelExecutor());
-		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(null);
-		// channel.setLogger(SimpLogging.forLog(channel.getLogger()));
-		channel.id = "inbound";
-		ChannelRegistration reg = getClientInboundChannelRegistration();
-		if (reg.hasInterceptors()) {
-			channel.setInterceptors(reg.getInterceptors());
+		if(inboundChannel is null) {
+			// ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(clientInboundChannelExecutor());
+			inboundChannel = new ExecutorSubscribableChannel(null);
+			// channel.setLogger(SimpLogging.forLog(channel.getLogger()));
+			inboundChannel.id = "inbound";
+			ChannelRegistration reg = getClientInboundChannelRegistration();
+			if (reg.hasInterceptors()) {
+				inboundChannel.setInterceptors(reg.getInterceptors());
+			}
 		}
-		return channel;
+		return inboundChannel;
 	}
+	private AbstractSubscribableChannel inboundChannel;
 
 	
 	// ThreadPoolTaskExecutor clientInboundChannelExecutor() {
@@ -161,16 +164,18 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 
 	
 	AbstractSubscribableChannel clientOutboundChannel() {
-		// ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(clientOutboundChannelExecutor());
-		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(null);
-		// channel.setLogger(SimpLogging.forLog(channel.getLogger()));
-		channel.id = "outbound";
-		ChannelRegistration reg = getClientOutboundChannelRegistration();
-		if (reg.hasInterceptors()) {
-			channel.setInterceptors(reg.getInterceptors());
+		if(outboundChannel is null) {
+			// ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(clientOutboundChannelExecutor());
+			outboundChannel = new ExecutorSubscribableChannel(null);
+			outboundChannel.id = "outbound";
+			ChannelRegistration reg = getClientOutboundChannelRegistration();
+			if (reg.hasInterceptors()) {
+				outboundChannel.setInterceptors(reg.getInterceptors());
+			}
 		}
-		return channel;
+		return outboundChannel;
 	}
+	private AbstractSubscribableChannel outboundChannel;
 
 	
 	// ThreadPoolTaskExecutor clientOutboundChannelExecutor() {
@@ -199,17 +204,21 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 
 	
 	AbstractSubscribableChannel brokerChannel() {
-		ChannelRegistration reg = getBrokerRegistry().getBrokerChannelRegistration();
-		ExecutorSubscribableChannel channel = (reg.hasTaskExecutor() ?
-				new ExecutorSubscribableChannel(null) : new ExecutorSubscribableChannel());
+		if(_brokerChannel is null) {
+			ChannelRegistration reg = getBrokerRegistry().getBrokerChannelRegistration();
+			_brokerChannel = (reg.hasTaskExecutor() ?
+					new ExecutorSubscribableChannel(null) : new ExecutorSubscribableChannel());
+			_brokerChannel.id = "brokerChannel";
 
-		// ExecutorSubscribableChannel channel = (reg.hasTaskExecutor() ?
-		// 		new ExecutorSubscribableChannel(brokerChannelExecutor()) : new ExecutorSubscribableChannel());
-		reg.addInterceptors(new ImmutableMessageChannelInterceptor());
-		// channel.setLogger(SimpLogging.forLog(channel.getLogger()));
-		channel.setInterceptors(reg.getInterceptors());
-		return channel;
+			// ExecutorSubscribableChannel channel = (reg.hasTaskExecutor() ?
+			// 		new ExecutorSubscribableChannel(brokerChannelExecutor()) : new ExecutorSubscribableChannel());
+			reg.addInterceptors(new ImmutableMessageChannelInterceptor());
+			// channel.setLogger(SimpLogging.forLog(channel.getLogger()));
+			_brokerChannel.setInterceptors(reg.getInterceptors());
+		}
+		return _brokerChannel;
 	}
+	private AbstractSubscribableChannel _brokerChannel;
 
 	
 	// ThreadPoolTaskExecutor brokerChannelExecutor() {

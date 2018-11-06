@@ -67,13 +67,13 @@ class GenericMessage(T) : Message!(T) {
 	 * @param headers message headers
 	 */
 	this(T payload, MessageHeaders headers) {
-		assert(payload, "Payload must not be null");
+		// assert(payload, "Payload must not be null");
 		assert(headers, "MessageHeaders must not be null");
 		this.payload = payload;
 		this.headers = headers;
 	}
 
-	TypeInfo  payloadType() {
+	TypeInfo payloadType() {
 		return typeid(T);
 	}
 

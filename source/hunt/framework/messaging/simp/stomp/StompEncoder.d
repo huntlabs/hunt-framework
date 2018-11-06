@@ -102,7 +102,7 @@ class StompEncoder  {
 	 */
 	byte[] encode(Map!(string, Object) headers, byte[] payload) {
 		assert(headers !is null, "'headers' is required");
-		assert(payload !is null, "'payload' is required");
+		// assert(payload !is null, "'payload' is required");
 
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream(128 + cast(int)payload.length);
@@ -124,14 +124,8 @@ class StompEncoder  {
 				writeBody(payload, output);
 				output.write(0);
 			}
-			output.close();
-
-			byte[] bbb = baos.toByteArray();
-
-			warningf("%(%02X %)", bbb);
-			warningf("xxxxxxx=> %d", bbb.length);
-
-			return bbb;
+			output.flush();
+			return baos.toByteArray();
 		}
 		catch (IOException ex) {
 			throw new StompConversionException(

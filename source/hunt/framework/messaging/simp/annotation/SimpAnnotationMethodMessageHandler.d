@@ -21,9 +21,9 @@ import hunt.framework.messaging.converter.CompositeMessageConverter;
 
 // import hunt.framework.beans.factory.config.ConfigurableBeanFactory;
 import hunt.framework.context.ApplicationContext;
+import hunt.framework.context.Lifecycle;
 // import hunt.framework.context.ConfigurableApplicationContext;
 // import hunt.framework.context.EmbeddedValueResolverAware;
-// import hunt.framework.context.SmartLifecycle;
 // import hunt.framework.core.annotation.AnnotatedElementUtils;
 // import hunt.framework.core.convert.ConversionService;
 // import hunt.framework.format.support.DefaultFormattingConversionService;
@@ -89,9 +89,9 @@ import std.string;
  * @author Juergen Hoeller
  * @since 4.0
  */
-class SimpAnnotationMethodMessageHandler : AbstractMethodMessageHandler!(SimpMessageMappingInfo)
-		 { // EmbeddedValueResolverAware, SmartLifecycle
-
+class SimpAnnotationMethodMessageHandler : 
+	AbstractMethodMessageHandler!(SimpMessageMappingInfo), SmartLifecycle {
+		 // EmbeddedValueResolverAware
 	private SubscribableChannel clientInboundChannel;
 
 	// private SimpMessageSendingOperations clientMessagingTemplate;
@@ -268,6 +268,13 @@ class SimpAnnotationMethodMessageHandler : AbstractMethodMessageHandler!(SimpMes
 		return this.headerInitializer;
 	}
 
+	bool isAutoStartup() {
+		return true;
+	}
+
+	int getPhase() {
+		return int.max;
+	}
 
 	// override
 	final void start() {

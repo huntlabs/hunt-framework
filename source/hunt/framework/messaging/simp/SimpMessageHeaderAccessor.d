@@ -54,7 +54,7 @@ class SimpMessageHeaderAccessor : NativeMessageHeaderAccessor {
 		headerInitializer.setEnableTimestamp(false);
 	}
 
-	// SiMP header names
+	// SIMP header names
 
 	enum string DESTINATION_HEADER = "simpDestination";
 
@@ -120,7 +120,6 @@ class SimpMessageHeaderAccessor : NativeMessageHeaderAccessor {
 		}
 	}
 
-	
 	Nullable!SimpMessageType getMessageType() {
 		return cast(Nullable!SimpMessageType) getHeader(MESSAGE_TYPE_HEADER);
 	}
@@ -128,7 +127,6 @@ class SimpMessageHeaderAccessor : NativeMessageHeaderAccessor {
 	void setDestination(string destination) {
 		setHeader(DESTINATION_HEADER, destination);
 	}
-
 	
 	string getDestination() {
 		return getHeaderAs!(string)(DESTINATION_HEADER);
@@ -269,29 +267,34 @@ class SimpMessageHeaderAccessor : NativeMessageHeaderAccessor {
 	
 	static Nullable!SimpMessageType getMessageType(Map!(string, Object) headers) {
 		auto h = cast(Nullable!SimpMessageType)headers.get(MESSAGE_TYPE_HEADER);
-		assert(h !is null);
 		return h;
 	}
 
 	
 	static string getDestination(Map!(string, Object) headers) {
 		auto h = cast(Nullable!string)headers.get(DESTINATION_HEADER);
-		assert(h !is null);
-		return cast(string) h;
+		if(h is null)
+			return null;
+		else
+			return cast(string) h;
 	}
 
 	
 	static string getSubscriptionId(Map!(string, Object) headers) {
 		auto h = cast(Nullable!string)headers.get(SUBSCRIPTION_ID_HEADER);
-		assert(h !is null);
-		return cast(string) h;
+		if(h is null)
+			return null;
+		else
+			return cast(string) h;
 	}
 
 	
 	static string getSessionId(Map!(string, Object) headers) {
 		auto h = cast(Nullable!string)headers.get(SESSION_ID_HEADER);
-		assert(h !is null);
-		return cast(string) h;
+		if(h is null)
+			return null;
+		else
+			return cast(string) h;
 	}
 
 	
@@ -307,8 +310,10 @@ class SimpMessageHeaderAccessor : NativeMessageHeaderAccessor {
 	
 	static long[] getHeartbeat(Map!(string, Object) headers) {
 		auto h = cast(Nullable!(long[]))headers.get(HEART_BEAT_HEADER);
-		assert(h !is null);
-		return cast(long[]) h;
+		if(h is null)
+			return null;
+		else
+			return cast(long[]) h;
 	}
 
 }

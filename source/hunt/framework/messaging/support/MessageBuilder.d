@@ -55,7 +55,7 @@ final class MessageBuilder(T) {
 	}
 
 	private this(T payload, MessageHeaderAccessor accessor) {
-		assert(payload, "Payload must not be null");
+		// assert(payload, "Payload must not be null");
 		assert(accessor, "MessageHeaderAccessor must not be null");
 		this.payload = payload;
 		this.originalMessage = null;
@@ -198,7 +198,7 @@ class MessageHelper {
 	 */
 	
 	static Message!(T) createMessage(T)(T payload, MessageHeaders messageHeaders) {
-		assert(payload, "Payload must not be null");
+		// assert(payload, "Payload must not be null");
 		assert(messageHeaders, "MessageHeaders must not be null");
 		static if(is(T == class) || is(T == interface)) {
 			Throwable th = cast(Throwable) payload;

@@ -223,6 +223,7 @@ class MessageHeaders : AbstractMap!(string, Object) {
 	T getAs(T=Object)(string key) {
 		Object value = this.headers.get(key);
 		if (value is null) {
+			version(HUNT_DEBUG) warningf("header does not exist: %s", key);
 			return T.init;
 		}
 		// if (!type.isAssignableFrom(value.getClass())) {
@@ -238,12 +239,13 @@ class MessageHeaders : AbstractMap!(string, Object) {
 		Nullable!T o = cast(Nullable!T)value;
 		if(o is null) {
 			static if(is(T == class)) {
+				version(HUNT_DEBUG) tracef("header[%s] = %s", key, value);
 				return cast(T) value;
 			} else {
-				assert(false, "erro type");
+				assert(false, "wrong type");
 			}
-		}
-		else{
+		} else {
+			version(HUNT_DEBUG) tracef("header[%s] = %s", key, o.value);
 			return o.value;
 		}
 	}

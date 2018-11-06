@@ -2,6 +2,8 @@
 module hunt.framework.websocket.WebSocketMessageBroker;
 
 import hunt.framework.context.ApplicationContext;
+import hunt.framework.context.Lifecycle;
+
 import hunt.framework.messaging.simp.config.MessageBrokerRegistry;
 import hunt.framework.websocket.config.annotation.StompEndpointRegistry;
 import hunt.framework.websocket.config.annotation.WebSocketMessageBrokerConfiguration;
@@ -36,15 +38,23 @@ class WebSocketMessageBroker  {
         return this;
 	}
 
-
     void start() {
         appContext.start();
     }
 
     void listen() {
-        brokerConfiguration.stompWebSocketHandlerMapping();
+        Lifecycle webSocketHandler = cast(Lifecycle)brokerConfiguration.stompWebSocketHandlerMapping();
         // brokerConfiguration.webSocketMessageBrokerStats();
-        brokerConfiguration.simpAnnotationMethodMessageHandler(); 
+
+        Lifecycle methodMessageHandler = 
+            brokerConfiguration.simpAnnotationMethodMessageHandler(); 
+
+        brokerConfiguration.stompBrokerRelayMessageHandler();
+        Lifecycle brokerMessageHandler = brokerConfiguration.simpleBrokerMessageHandler();
+
+        webSocketHandler.start();
+        methodMessageHandler.start();
+        brokerMessageHandler.start();
     }
 
 }

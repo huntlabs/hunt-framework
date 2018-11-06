@@ -259,6 +259,10 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 
 		foreach (Message!(byte[]) message ; messages) {
 			try {
+				version(HUNT_DEBUG) {
+					trace("handling message: ", message.to!string());
+				}
+
 				StompHeaderAccessor headerAccessor =
 						MessageHeaderAccessor.getAccessor!(StompHeaderAccessor)(message);
 				assert(headerAccessor !is null, "No StompHeaderAccessor");
@@ -287,8 +291,6 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 
 				try {
 					// SimpAttributesContextHolder.setAttributesFromMessage(message);
-					trace("beanName=>", (cast(AbstractMessageChannel)outputChannel).getBeanName);
-					trace("ttttttt=>", (cast(AbstractMessageChannel)outputChannel).id);
 					bool sent = outputChannel.send(message);
 
 					if (sent) {
@@ -323,7 +325,8 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 					error("Failed to send client message to application via MessageChannel" ~
 							" in session " ~ session.getId() ~ 
 							". Sending STOMP ERROR to client.");
-					error(ex.toString());
+					// error(ex.toString());
+					error(ex.msg);
 				}
 				handleError(session, ex, message);
 			}
@@ -368,7 +371,6 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 
 		byte[] bytes = this.stompEncoder.encode(headerAccessor.getMessageHeaders(), EMPTY_PAYLOAD);
 		try {
-			// session.sendMessage(new TextMessage(bytes));
 			session.sendTextMessage(cast(string)bytes);
 		}
 		catch (Throwable ex) {
@@ -410,7 +412,6 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 	 * Handle STOMP messages going back out to WebSocket clients.
 	 */
 	override
-	
 	void handleMessageToClient(WebSocketSession session, MessageBase message) {
 		TypeInfo ti = message.payloadType();
 		if (ti != typeid(byte[])) {
@@ -423,6 +424,11 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 
 		StompHeaderAccessor accessor = getStompHeaderAccessor(message);
 		StompCommand command = accessor.getCommand();
+
+		version(HUNT_DEBUG) { 
+			trace("message: ", message.to!string());
+			trace("StompCommand: ", command.toString());
+		}
 
 		if (StompCommand.MESSAGE == command) {
 			version(HUNT_DEBUG) {
@@ -555,8 +561,14 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 	 */
 	private StompHeaderAccessor convertConnectAcktoStompConnected(StompHeaderAccessor connectAckHeaders) {
 		string name = StompHeaderAccessor.CONNECT_MESSAGE_HEADER;
-		MessageBase message = cast(MessageBase) connectAckHeaders.getHeader(name);
+		Object ob = connectAckHeaders.getHeader(name);
+		MessageBase message = cast(MessageBase)cast(Nullable!(MessageBase)) ob;
 		if (message is null) {
+			version(HUNT_DEBUG) {
+				warningf("message is null for header: %s", name);
+				if(ob !is null) 
+					warning(typeid(ob));
+			}
 			throw new IllegalStateException("Original STOMP CONNECT not found in " 
 				~ connectAckHeaders.toString());
 		}
@@ -585,8 +597,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 
 		if (heartbeat !is null) {
 			connectedHeaders.setHeartbeat(heartbeat[0], heartbeat[1]);
-		}
-		else {
+		} else {
 			connectedHeaders.setHeartbeat(0, 0);
 		}
 

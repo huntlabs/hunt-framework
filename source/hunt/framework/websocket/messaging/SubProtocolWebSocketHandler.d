@@ -335,7 +335,7 @@ class SubProtocolWebSocketHandler : WebSocketMessageHandler,
 			session = holder.getSession();
 		}
 		SubProtocolHandler protocolHandler = findProtocolHandler(session);
-		protocolHandler.handleMessageFromClient(session, message, this.clientOutboundChannel);
+		protocolHandler.handleMessageFromClient(session, message, this.clientInboundChannel);
 		if (holder !is null) {
 			holder.setHasHandledMessages();
 		}
@@ -384,8 +384,9 @@ class SubProtocolWebSocketHandler : WebSocketMessageHandler,
 		catch (Exception ex) {
 			// Could be part of normal workflow (e.g. browser tab closed)
 			version(HUNT_DEBUG) {
-				warningf("Failed to send message to client in " ~ session.to!string()
-					~ ": " ~ message.to!string() ~ "\n", ex);
+				error("Failed to send message to client in " ~ session.to!string()
+					~ ": " ~ message.to!string() ~ "\n");
+				error(ex.msg);
 			}
 		}
 	}
