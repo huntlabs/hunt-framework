@@ -218,6 +218,8 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 	void handleMessageFromClient(WebSocketSession session,
 			WebSocketFrame webSocketMessage, MessageChannel outputChannel) {
 
+		version(HUNT_DEBUG) trace("handing message...");
+
 		List!(Message!(byte[])) messages;
 		try {
 			ByteBuffer byteBuffer = webSocketMessage.getPayload();
@@ -241,8 +243,10 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 			if (messages.isEmpty()) {
 				version(HUNT_DEBUG) {
 					trace("Incomplete STOMP frame content received in session " ~
-							session.to!string() ~ ", bufferSize=" ~ to!string(decoder.getBufferSize()) ~
-							", bufferSizeLimit=" ~ to!string(decoder.getBufferSizeLimit()) ~ ".");
+							session.to!string() ~ ", bufferSize=" ~ 
+							to!string(decoder.getBufferSize()) ~
+							", bufferSizeLimit=" ~ 
+							to!string(decoder.getBufferSizeLimit()) ~ ".");
 				}
 				return;
 			}
@@ -250,75 +254,18 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 		catch (Throwable ex) {
 			version(HUNT_DEBUG) {
 				error("Failed to parse " ~ webSocketMessage.toString() ~
-						" in session " ~ session.getId() ~ ". Sending STOMP ERROR to client.");
+						" in session " ~ session.getId() ~ 
+						". Sending STOMP ERROR to client.");
 				error(ex.toString());
 			}
 			handleError(session, ex, null);
 			return;
 		}
 
+		//
 		foreach (Message!(byte[]) message ; messages) {
 			try {
-				version(HUNT_DEBUG) {
-					trace("handling message: ", message.to!string());
-				}
-
-				StompHeaderAccessor headerAccessor =
-						MessageHeaderAccessor.getAccessor!(StompHeaderAccessor)(message);
-				assert(headerAccessor !is null, "No StompHeaderAccessor");
-
-				headerAccessor.setSessionId(session.getId());
-				// headerAccessor.setSessionAttributes(session.getAttributes());
-				// headerAccessor.setUser(getUser(session));
-				headerAccessor.setHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER, headerAccessor.getHeartbeat());
-				if (!detectImmutableMessageInterceptor(outputChannel)) {
-					headerAccessor.setImmutable();
-				}
-
-				version(HUNT_DEBUG) {
-					byte[] buffer = message.getPayload();
-					trace("From client: " ~ headerAccessor.getShortLogMessage( new Nullable!(byte[])(buffer) ).to!string());
-				}
-
-				StompCommand command = headerAccessor.getCommand();
-				bool isConnect = StompCommand.CONNECT == command;
-				// if (isConnect) {
-				// 	this.stats.incrementConnectCount();
-				// }
-				// else if (StompCommand.DISCONNECT == command) {
-				// 	this.stats.incrementDisconnectCount();
-				// }
-
-				try {
-					// SimpAttributesContextHolder.setAttributesFromMessage(message);
-					bool sent = outputChannel.send(message);
-
-					if (sent) {
-						if (isConnect) {
-							Principal user = null; // headerAccessor.getUser();
-							// if (user !is null && user != session.getPrincipal()) {
-							// 	this.stompAuthentications.put(session.getSessionId(), user);
-							// }
-						}
-						if (this.eventPublisher !is null) {
-							implementationMissing(false);
-							// Principal user = getUser(session);
-							// if (isConnect) {
-							// 	publishEvent(this.eventPublisher, new SessionConnectEvent(this, message, user));
-							// }
-							// else if (StompCommand.SUBSCRIBE == command) {
-							// 	publishEvent(this.eventPublisher, new SessionSubscribeEvent(this, message, user));
-							// }
-							// else if (StompCommand.UNSUBSCRIBE == command) {
-							// 	publishEvent(this.eventPublisher, new SessionUnsubscribeEvent(this, message, user));
-							// }
-						}
-					}
-				}
-
-				finally {
-					// SimpAttributesContextHolder.resetAttributes();
-				}
+				handleMessageFromClient(message, session, outputChannel);
 			}
 			catch (Throwable ex) {
 				version(HUNT_DEBUG) {
@@ -330,6 +277,70 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 				}
 				handleError(session, ex, message);
 			}
+		}
+	}
+
+	private void handleMessageFromClient(Message!(byte[]) message, 
+		WebSocketSession session, MessageChannel outputChannel) {
+		version(HUNT_DEBUG) {
+			trace("handling message: ", message.to!string());
+		}
+
+		StompHeaderAccessor headerAccessor =
+				MessageHeaderAccessor.getAccessor!(StompHeaderAccessor)(message);
+		assert(headerAccessor !is null, "No StompHeaderAccessor");
+
+		headerAccessor.setSessionId(session.getId());
+		// headerAccessor.setSessionAttributes(session.getAttributes());
+		// headerAccessor.setUser(getUser(session));
+		headerAccessor.setHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER, headerAccessor.getHeartbeat());
+		if (!detectImmutableMessageInterceptor(outputChannel)) {
+			headerAccessor.setImmutable();
+		}
+
+		version(HUNT_DEBUG) {
+			byte[] buffer = message.getPayload();
+			trace("From client: " ~ headerAccessor.getShortLogMessage( new Nullable!(byte[])(buffer) ).to!string());
+		}
+
+		StompCommand command = headerAccessor.getCommand();
+		bool isConnect = StompCommand.CONNECT == command;
+		// if (isConnect) {
+		// 	this.stats.incrementConnectCount();
+		// }
+		// else if (StompCommand.DISCONNECT == command) {
+		// 	this.stats.incrementDisconnectCount();
+		// }
+
+		try {
+			// SimpAttributesContextHolder.setAttributesFromMessage(message);
+			bool sent = outputChannel.send(message);
+
+			if (sent) {
+				if (isConnect) {
+					Principal user = null; // headerAccessor.getUser();
+					// if (user !is null && user != session.getPrincipal()) {
+					// 	this.stompAuthentications.put(session.getSessionId(), user);
+					// }
+				}
+				if (this.eventPublisher !is null) {
+					implementationMissing(false);
+					// Principal user = getUser(session);
+					// if (isConnect) {
+					// 	publishEvent(this.eventPublisher, new SessionConnectEvent(this, message, user));
+					// }
+					// else if (StompCommand.SUBSCRIBE == command) {
+					// 	publishEvent(this.eventPublisher, new SessionSubscribeEvent(this, message, user));
+					// }
+					// else if (StompCommand.UNSUBSCRIBE == command) {
+					// 	publishEvent(this.eventPublisher, new SessionUnsubscribeEvent(this, message, user));
+					// }
+				}
+			}
+		}
+
+		finally {
+			// SimpAttributesContextHolder.resetAttributes();
 		}
 	}
 

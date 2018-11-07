@@ -347,6 +347,7 @@ class SubProtocolWebSocketHandler : WebSocketMessageHandler,
 	 */
 	override
 	void handleMessage(MessageBase message) {
+		version(HUNT_DEBUG) info("handling message");
 		string sessionId = resolveSessionId(message);
 		if (sessionId is null) {
 			version(HUNT_DEBUG) {

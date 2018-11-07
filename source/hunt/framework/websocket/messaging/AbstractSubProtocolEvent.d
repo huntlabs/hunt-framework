@@ -86,7 +86,7 @@ abstract class AbstractSubProtocolEvent : ApplicationEvent {
 
 	override
 	string toString() {
-		return TypeUtils.getSimpleName(typeid(this)) ~ "[" ~ this.message.to!string() ~ "]";
+		return TypeUtils.getSimpleName(typeid(this)) ~ " [" ~ this.message.to!string() ~ "]";
 	}
 
 }

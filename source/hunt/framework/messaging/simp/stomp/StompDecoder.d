@@ -32,6 +32,7 @@ import hunt.lang.exception;
 import hunt.lang.Integer;
 import hunt.lang.Nullable;
 import hunt.string;
+import hunt.util.TypeUtils;
 
 import std.conv;
 import std.string;
@@ -110,17 +111,21 @@ class StompDecoder {
 	 */
 	List!(ByteMessage) decode(ByteBuffer byteBuffer,
 			MultiStringsMap partialMessageHeaders) {
+		
+		version(HUNT_DEBUG) tracef("decoding buffer %s...", byteBuffer.toString());
 
 		List!(ByteMessage) messages = new ArrayList!(ByteMessage)();
 		while (byteBuffer.hasRemaining()) {
 			ByteMessage message = decodeMessage(byteBuffer, partialMessageHeaders);
 			if (message !is null) {
+				version(HUNT_DEBUG) tracef("messages: %s", messages.toString());
 				messages.add(message);
-			}
-			else {
+			} else {
 				break;
 			}
 		}
+		version(HUNT_DEBUG) tracef("Decoding buffer done. Messages size: %d", messages.size());
+
 		return messages;
 	}
 
@@ -129,6 +134,9 @@ class StompDecoder {
 	 */
 	
 	private ByteMessage decodeMessage(ByteBuffer byteBuffer, MultiStringsMap headers) {
+
+		version(HUNT_DEBUG) tracef("decoding buffer %s...", byteBuffer.toString());
+			
 		ByteMessage decodedMessage = null;
 		skipLeadingEol(byteBuffer);
 
@@ -138,37 +146,48 @@ class StompDecoder {
 		buffer.mark();
 
 		string command = readCommand(byteBuffer);
+		version(HUNT_DEBUG) infof("command: %s", command);
 		if (command.length > 0) {
 			StompHeaderAccessor headerAccessor = null;
-			byte[] payload = null;
+			Pair!(bool, byte[]) payload = makePair(false, cast(byte[])null);
 			if (byteBuffer.remaining() > 0) {
 				StompCommand stompCommand = StompCommand.valueOf(command);
 				headerAccessor = StompHeaderAccessor.create(stompCommand);
 				initHeaders(headerAccessor);
 				readHeaders(byteBuffer, headerAccessor);
 				payload = readPayload(byteBuffer, headerAccessor);
+				version(HUNT_DEBUG) tracef("payload size(bytes): %d", payload.second.length);
 			}
-			if (payload !is null) {
-				if (payload.length > 0) {
+
+			if (payload.first) {
+				byte[] payloadBuffer = payload.second;
+				if (payloadBuffer.length > 0) {
 					Nullable!StompCommand stompCommand = headerAccessor.getCommand();
 					if (stompCommand !is null) {
 						StompCommand cmd = stompCommand.value;
 						if(!cmd.isBodyAllowed()) {
+							string hs = "null";
+							if(headers !is null) hs = headers.toString();
 							throw new StompConversionException(stompCommand.toString() ~
 									" shouldn't have a payload: length=" ~ 
-									to!string(payload.length) ~ ", headers=" ~ headers.toString());
+									to!string(payloadBuffer.length) ~ ", headers=" ~ hs);
 						}
 					}
 				}
-				headerAccessor.updateSimpMessageHeadersFromStompHeaders();
-				headerAccessor.setLeaveMutable(true);
-				decodedMessage = MessageHelper.createMessage(payload, headerAccessor.getMessageHeaders());
-				version(HUNT_DEBUG) {
-					trace("Decoded " ~ headerAccessor.getDetailedLogMessage(new Nullable!(byte[])(payload)));
-				}
-			}
-			else {
-				trace("Incomplete frame, resetting input buffer...");
+
+				// if(headerAccessor !is null) {
+					headerAccessor.updateSimpMessageHeadersFromStompHeaders();
+					headerAccessor.setLeaveMutable(true);
+					decodedMessage = MessageHelper.createMessage(payloadBuffer, headerAccessor.getMessageHeaders());
+					version(HUNT_DEBUG) {
+						trace("Decoded " ~ headerAccessor.getDetailedLogMessage(new Nullable!(byte[])(payloadBuffer)));
+					}
+				// } else {
+				// 	version(HUNT_DEBUG) warning("Incomplete frame, resetting input buffer...");
+				// 	buffer.reset();
+				// }
+			} else {
+				version(HUNT_DEBUG) warning("Incomplete frame, resetting input buffer...");
 				if (headers !is null && headerAccessor !is null) {
 					string name = NativeMessageHeaderAccessor.NATIVE_HEADERS;
 					
@@ -179,8 +198,7 @@ class StompDecoder {
 				}
 				buffer.reset();
 			}
-		}
-		else {
+		} else {
 			StompHeaderAccessor headerAccessor = StompHeaderAccessor.createForHeartbeat();
 			initHeaders(headerAccessor);
 			headerAccessor.setLeaveMutable(true);
@@ -243,6 +261,7 @@ class StompDecoder {
 				else {
 					string headerName = unescape(header.substring(0, colonIndex));
 					string headerValue = unescape(header.substring(colonIndex + 1));
+					version(HUNT_DEBUG) tracef("header: name=%s, value=%s", headerName, headerValue);
 					try {
 						headerAccessor.addNativeHeader(headerName, headerValue);
 					}
@@ -301,7 +320,7 @@ class StompDecoder {
 	}
 
 	
-	private byte[] readPayload(ByteBuffer byteBuffer, StompHeaderAccessor headerAccessor) {
+	private Pair!(bool, byte[]) readPayload(ByteBuffer byteBuffer, StompHeaderAccessor headerAccessor) {
 		Integer contentLength;
 		try {
 			contentLength = headerAccessor.getContentLength();
@@ -320,25 +339,24 @@ class StompDecoder {
 				if (byteBuffer.get() != 0) {
 					throw new StompConversionException("Frame must be terminated with a null octet");
 				}
-				return payload;
+				return makePair(true, payload);
 			}
 			else {
-				return null;
+				return makePair(false, cast(byte[])null); // null;
 			}
-		}
-		else {
+		} else {
 			ByteArrayOutputStream payload = new ByteArrayOutputStream(256);
 			while (byteBuffer.remaining() > 0) {
 				byte b = byteBuffer.get();
 				if (b == 0) {
-					return payload.toByteArray();
+					return makePair(true, payload.toByteArray()); // payload.toByteArray();
 				}
 				else {
 					payload.write(b);
 				}
 			}
 		}
-		return null;
+		return makePair(false, cast(byte[])null); // null;
 	}
 
 	/**
