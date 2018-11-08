@@ -112,7 +112,7 @@ class StompDecoder {
 	List!(ByteMessage) decode(ByteBuffer byteBuffer,
 			MultiStringsMap partialMessageHeaders) {
 		
-		version(HUNT_DEBUG) tracef("decoding buffer %s...", byteBuffer.toString());
+		version(HUNT_DEBUG) tracef("Decoding %s...", byteBuffer.toString());
 
 		List!(ByteMessage) messages = new ArrayList!(ByteMessage)();
 		while (byteBuffer.hasRemaining()) {
@@ -124,7 +124,7 @@ class StompDecoder {
 				break;
 			}
 		}
-		version(HUNT_DEBUG) tracef("Decoding buffer done. Messages size: %d", messages.size());
+		version(HUNT_DEBUG) tracef("Decoding done. Messages size: %d", messages.size());
 
 		return messages;
 	}

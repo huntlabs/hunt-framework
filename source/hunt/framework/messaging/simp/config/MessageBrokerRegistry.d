@@ -76,7 +76,7 @@ class MessageBrokerRegistry {
 	 */
 	SimpleBrokerRegistration enableSimpleBroker(string[] destinationPrefixes... ) {
 		this.simpleBrokerRegistration = new SimpleBrokerRegistration(
-				this.clientInboundChannel, this.clientOutboundChannel, destinationPrefixes);
+				this.clientInboundChannel, this.clientOutboundChannel, destinationPrefixes.dup);
 		return this.simpleBrokerRegistration;
 	}
 
@@ -87,7 +87,7 @@ class MessageBrokerRegistry {
 	 */
 	StompBrokerRelayRegistration enableStompBrokerRelay(string[] destinationPrefixes... ) {
 		this.brokerRelayRegistration = new StompBrokerRelayRegistration(
-				this.clientInboundChannel, this.clientOutboundChannel, destinationPrefixes);
+				this.clientInboundChannel, this.clientOutboundChannel, destinationPrefixes.dup);
 		return this.brokerRelayRegistration;
 	}
 
@@ -129,7 +129,7 @@ class MessageBrokerRegistry {
 	 * <p>Prefixes that do not have a trailing slash will have one automatically appended.
 	 */
 	MessageBrokerRegistry setApplicationDestinationPrefixes(string[] prefixes... ) {
-		this.applicationDestinationPrefixes = prefixes;
+		this.applicationDestinationPrefixes = prefixes.dup;
 		return this;
 	}
 

@@ -97,7 +97,7 @@ final class MessageBuilder(T) {
 	 * styles are: "xxx*", "*xxx", "*xxx*" and "xxx*yyy".
 	 */
 	MessageBuilder!(T) removeHeaders(string[] headerPatterns... ) {
-		this.headerAccessor.removeHeaders(headerPatterns);
+		this.headerAccessor.removeHeaders(headerPatterns.dup);
 		return this;
 	}
 	/**

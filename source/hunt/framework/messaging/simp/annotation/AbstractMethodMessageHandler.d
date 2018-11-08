@@ -16,8 +16,10 @@
 
 module hunt.framework.messaging.simp.annotation.AbstractMethodMessageHandler;
 
+
 import hunt.container;
 import hunt.lang.exception;
+import hunt.lang.Nullable;
 import hunt.logging;
 import hunt.util.TypeUtils;
 
@@ -36,13 +38,11 @@ import hunt.framework.messaging.MessagingException;
 import hunt.framework.messaging.handler.DestinationPatternsMessageCondition;
 // import hunt.framework.messaging.handler.HandlerMethod;
 // import hunt.framework.messaging.handler.MessagingAdviceBean;
+import hunt.framework.messaging.support.GenericMessage;
 import hunt.framework.messaging.support.MessageBuilder;
 import hunt.framework.messaging.support.MessageHeaderAccessor;
 
 // import hunt.framework.util.ClassUtils;
-// import hunt.framework.util.CollectionUtils;
-// import hunt.framework.util.LinkedMultiValueMap;
-// import hunt.framework.util.MultiValueMap;
 // import hunt.framework.util.concurrent.ListenableFuture;
 // import hunt.framework.util.concurrent.ListenableFutureCallback;
 
@@ -114,11 +114,9 @@ abstract class AbstractMethodMessageHandler(T)
 	 */
 	void setDestinationPrefixes(string[] prefixes) {
 		this.destinationPrefixes = [];
-		if (prefixes.length > 0) {
-			foreach (string prefix ; prefixes) {
-				prefix = prefix.strip();
-				this.destinationPrefixes ~= prefix;
-			}
+		foreach (string prefix ; prefixes) {
+			prefix = prefix.strip();
+			this.destinationPrefixes ~= prefix;
 		}
 	}
 
@@ -414,24 +412,26 @@ abstract class AbstractMethodMessageHandler(T)
 		if (destination is null) {
 			return;
 		}
-		trace("xxxxxxx");
 		string lookupDestination = getLookupDestination(destination);
 		if (lookupDestination is null) {
 			return;
 		}
-		trace("xxxxxxx");
 		MessageHeaderAccessor headerAccessor = MessageHeaderAccessor.getMutableAccessor(message);
-		trace("xxxxxxx");
 		headerAccessor.setHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER, lookupDestination);
 		headerAccessor.setLeaveMutable(true);
-		implementationMissing(false);
-		// message = MessageHelper.createMessage(message.getPayload(), headerAccessor.getMessageHeaders());
 
-		// version(HUNT_DEBUG) {
-		// 	trace("Searching methods to handle " ~
-		// 			headerAccessor.getShortLogMessage(message.getPayload()) ~
-		// 			", lookupDestination='" ~ lookupDestination ~ "'");
-		// }
+		if(message.payloadType == typeid(byte[])) {
+			GenericMessage!(byte[]) gm = cast(GenericMessage!(byte[]))message;
+			message = MessageHelper.createMessage(gm.getPayload(), headerAccessor.getMessageHeaders());
+
+			version(HUNT_DEBUG) {
+				trace("Searching methods to handle " ~
+						headerAccessor.getShortLogMessage(new Nullable!(byte[])(gm.getPayload())) ~
+						", lookupDestination='" ~ lookupDestination ~ "'");
+			}
+		} else {
+			warning("Can't handle message: ", message.payloadType.toString());
+		}
 
 		handleMessageInternal(message, lookupDestination);
 		headerAccessor.setImmutable();
@@ -447,8 +447,6 @@ abstract class AbstractMethodMessageHandler(T)
 	 * <p>If there are no matching prefixes, return {@code null}.
 	 * <p>If there are no destination prefixes, return the destination as is.
 	 */
-	
-	
 	protected string getLookupDestination(string destination) {
 		if (destination.empty()) {
 			return null;
@@ -456,8 +454,8 @@ abstract class AbstractMethodMessageHandler(T)
 		if (this.destinationPrefixes.length >0) {
 			return destination;
 		}
-		for (size_t i = 0; i < this.destinationPrefixes.length; i++) {
-			string prefix = this.destinationPrefixes[i];
+
+		foreach(string prefix; destinationPrefixes) {
 			if (destination.startsWith(prefix)) {
 				return destination[prefix.length .. $];
 			}
@@ -467,7 +465,7 @@ abstract class AbstractMethodMessageHandler(T)
 
 	protected void handleMessageInternal(MessageBase message, string lookupDestination) {
 		implementationMissing(false);
-		// List!(Match) matches = new ArrayList<>();
+		// List!(Match) matches = new ArrayList!(Match)();
 
 		// List!(T) mappingsByUrl = this.destinationLookup.get(lookupDestination);
 		// if (mappingsByUrl !is null) {

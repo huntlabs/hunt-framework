@@ -53,7 +53,7 @@ class DestinationPatternsMessageCondition
 	 * @param patterns 0 or more URL patterns; if 0 the condition will match to every request.
 	 */
 	this(string[] patterns...) {
-		this(patterns, null);
+		this(patterns.dup, null);
 	}
 
 	/**

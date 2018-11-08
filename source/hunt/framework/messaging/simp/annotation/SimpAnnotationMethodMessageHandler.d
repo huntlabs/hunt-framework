@@ -160,11 +160,9 @@ class SimpAnnotationMethodMessageHandler :
 		super.setDestinationPrefixes(appendSlashes(prefixes));
 	}
 
-	
 	private static string[] appendSlashes(string[] prefixes) {
-		if (prefixes.length == 0) {
+		if (prefixes.length == 0) 
 			return prefixes;
-		}
 		string[] result;
 		foreach (string prefix ; prefixes) {
 			if (!prefix.endsWith("/")) {

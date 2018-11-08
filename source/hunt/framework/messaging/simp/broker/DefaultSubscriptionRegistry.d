@@ -21,6 +21,7 @@ import hunt.framework.messaging.simp.broker.SubscriptionRegistry;
 
 import hunt.container;
 import hunt.lang.exception;
+import hunt.logging;
 import hunt.string.PathMatcher;
 
 import std.array;
@@ -166,6 +167,9 @@ class DefaultSubscriptionRegistry : AbstractSubscriptionRegistry {
 		// this.subscriptionRegistry.addSubscription(sessionId, subsId, destination, expression);
         this.subscriptionRegistry.addSubscription(sessionId, subsId, destination);
 		this.destinationCache.updateAfterNewSubscription(destination, sessionId, subsId);
+
+		infof("Subscription added: id=%s, subsId=%s, destination=%s", 
+			sessionId, subsId, destination);
 	}
 
 	

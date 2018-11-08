@@ -344,8 +344,9 @@ class HttpSession {
      * @return void
      */
     void keep(string[] keys...) {
-        mergeNewFlashes(keys);
-        removeFromOldFlashData(keys);
+        string[] ks = keys.dup;
+        mergeNewFlashes(ks);
+        removeFromOldFlashData(ks);
     }
 
     /**

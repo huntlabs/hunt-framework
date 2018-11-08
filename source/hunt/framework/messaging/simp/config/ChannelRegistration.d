@@ -60,7 +60,7 @@ class ChannelRegistration {
 	 * @since 4.3.12
 	 */
 	ChannelRegistration addInterceptors(ChannelInterceptor[] interceptors... ) {
-		this.interceptors ~= interceptors;
+		this.interceptors ~= interceptors.dup;
 		return this;
 	}
 

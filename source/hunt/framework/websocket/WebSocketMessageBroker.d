@@ -4,6 +4,7 @@ module hunt.framework.websocket.WebSocketMessageBroker;
 import hunt.framework.context.ApplicationContext;
 import hunt.framework.context.Lifecycle;
 
+import hunt.framework.messaging.simp.annotation.SimpAnnotationMethodMessageHandler;
 import hunt.framework.messaging.simp.config.MessageBrokerRegistry;
 import hunt.framework.websocket.config.annotation.StompEndpointRegistry;
 import hunt.framework.websocket.config.annotation.WebSocketMessageBrokerConfiguration;
@@ -20,6 +21,7 @@ import hunt.lang.common;
 class WebSocketMessageBroker  { 
     protected Action1!(WebSocketConnection) _connectHandler;
     private WebSocketMessageBrokerConfiguration brokerConfiguration;
+    private SimpAnnotationMethodMessageHandler annotationMethodMessageHandler;
     private ApplicationContext appContext;
 
     this(ApplicationContext context) {
@@ -46,14 +48,14 @@ class WebSocketMessageBroker  {
         Lifecycle webSocketHandler = cast(Lifecycle)brokerConfiguration.stompWebSocketHandlerMapping();
         // brokerConfiguration.webSocketMessageBrokerStats();
 
-        Lifecycle methodMessageHandler = 
+        annotationMethodMessageHandler = 
             brokerConfiguration.simpAnnotationMethodMessageHandler(); 
 
         brokerConfiguration.stompBrokerRelayMessageHandler();
         Lifecycle brokerMessageHandler = brokerConfiguration.simpleBrokerMessageHandler();
 
         webSocketHandler.start();
-        methodMessageHandler.start();
+        annotationMethodMessageHandler.start();
         brokerMessageHandler.start();
     }
 

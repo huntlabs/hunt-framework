@@ -246,11 +246,17 @@ final class Application : ApplicationContext {
     }
 
     WebSocketMessageBroker withStompBroker() {
-        WebSocketMessageBroker broker = new WebSocketMessageBroker(this);
-        this._broker = broker;
-        return broker;
+        if(_broker is null) {
+            WebSocketMessageBroker broker = new WebSocketMessageBroker(this);
+            this._broker = broker;
+        }
+        return _broker;
     }
     private WebSocketMessageBroker _broker;
+
+    WebSocketMessageBroker getStompBroker() {
+        return _broker;
+    }
 
     private void handleRequest(Request req) nothrow {
         this._dispatcher.dispatch(req);

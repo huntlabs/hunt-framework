@@ -42,7 +42,6 @@ class StringMessageConverter : AbstractMessageConverter {
 	}
 
 	this(Charset defaultCharset) {
-		implementationMissing(false);
 		super(new MimeType("text/plain", defaultCharset));
 		assert(defaultCharset, "Default Charset must not be null");
 		this.defaultCharset = defaultCharset;
