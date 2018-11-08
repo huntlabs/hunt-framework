@@ -13,7 +13,6 @@ dub.selections.json
 .idea
 /hunt.iml
 __test__library__
-core
 *.a
 *.so
 *.kate-swp
