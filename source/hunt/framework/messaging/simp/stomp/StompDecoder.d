@@ -178,7 +178,7 @@ class StompDecoder {
 				// if(headerAccessor !is null) {
 					headerAccessor.updateSimpMessageHeadersFromStompHeaders();
 					headerAccessor.setLeaveMutable(true);
-					decodedMessage = MessageHelper.createMessage(payloadBuffer, headerAccessor.getMessageHeaders());
+					decodedMessage = cast(ByteMessage)MessageHelper.createMessage(payloadBuffer, headerAccessor.getMessageHeaders());
 					version(HUNT_DEBUG) {
 						trace("Decoded " ~ headerAccessor.getDetailedLogMessage(new Nullable!(byte[])(payloadBuffer)));
 					}

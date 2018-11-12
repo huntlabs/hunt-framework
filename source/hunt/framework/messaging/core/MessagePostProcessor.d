@@ -28,7 +28,7 @@ import hunt.framework.messaging.Message;
  * @see MessageSendingOperations
  * @see MessageRequestReplyOperations
  */
-interface MessagePostProcessor(T) {
+interface MessagePostProcessor {
 
 	/**
 	 * Process the given message.
@@ -36,6 +36,6 @@ interface MessagePostProcessor(T) {
 	 * @return a post-processed variant of the message,
 	 * or simply the incoming message; never {@code null}
 	 */
-	Message!T postProcessMessage(Message!T message);
+	MessageBase postProcessMessage(MessageBase message);
 
 }

@@ -79,7 +79,7 @@ class WebSocketMessageBrokerConfiguration : AbstractMessageBrokerConfiguration {
 	override
 	protected SimpAnnotationMethodMessageHandler createAnnotationMethodMessageHandler() {
 		return new WebSocketAnnotationMethodMessageHandler(
-				clientInboundChannel(), clientOutboundChannel(), null); // , brokerMessagingTemplate()
+				clientInboundChannel(), clientOutboundChannel(), brokerMessagingTemplate()); 
 	}
 
 	// override

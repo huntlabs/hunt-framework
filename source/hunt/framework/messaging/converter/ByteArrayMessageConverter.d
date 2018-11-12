@@ -22,6 +22,7 @@ import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageHeaders;
 // import hunt.framework.util.MimeTypeUtils;
 import hunt.http.codec.http.model.MimeTypes;
+import hunt.logging;
 
 /**
  * A {@link MessageConverter} that supports MIME type "application/octet-stream" with the
@@ -37,10 +38,11 @@ class ByteArrayMessageConverter : AbstractMessageConverter {
 	}
 
 
-	// override
-	// protected bool supports(Class<?> clazz) {
-	// 	return (byte[].class == clazz);
-	// }
+	override
+	protected bool supports(TypeInfo typeInfo) {
+		version(HUNT_DEBUG) tracef("payload type: %s", typeInfo);
+		return (typeid(byte[]) == typeInfo);
+	}
 
 	// override
 	// protected Object convertFromInternal(

@@ -425,29 +425,25 @@ class MessageHeaderAccessor {
 	 * <p>This operation will overwrite any existing values. Use
 	 * {@link #copyHeadersIfAbsent(Map)} to avoid overwriting values.
 	 */
-	// void copyHeaders(Map<string, ?> headersToCopy) {
-	// 	if (headersToCopy !is null) {
-	// 		headersToCopy.forEach((key, value) -> {
-	// 			if (!isReadOnly(key)) {
-	// 				setHeader(key, value);
-	// 			}
-	// 		});
-	// 	}
-	// }
+	void copyHeaders(Map!(string, Object) headersToCopy) {
+		if (headersToCopy !is null) {
+			foreach(string key, Object value; headersToCopy) {
+				if (!isReadOnly(key)) setHeader(key, value);
+			}
+		}
+	}
 
 	/**
 	 * Copy the name-value pairs from the provided Map.
 	 * <p>This operation will <em>not</em> overwrite any existing values.
 	 */
-	// void copyHeadersIfAbsent(Map<string, ?> headersToCopy) {
-	// 	if (headersToCopy !is null) {
-	// 		headersToCopy.forEach((key, value) -> {
-	// 			if (!isReadOnly(key)) {
-	// 				setHeaderIfAbsent(key, value);
-	// 			}
-	// 		});
-	// 	}
-	// }
+	void copyHeadersIfAbsent(Map!(string, Object) headersToCopy) {
+		if (headersToCopy !is null) {
+			foreach(string key, Object value; headersToCopy) {
+				if (!isReadOnly(key)) setHeaderIfAbsent(key, value);
+			}
+		}
+	}
 
 	protected bool isReadOnly(string headerName) {
 		return (MessageHeaders.ID == (headerName) || MessageHeaders.TIMESTAMP == (headerName));
@@ -455,7 +451,6 @@ class MessageHeaderAccessor {
 
 
 	// Specific header accessors
-
 	
 	UUID getId() {
 		Object value = getHeader(MessageHeaders.ID);

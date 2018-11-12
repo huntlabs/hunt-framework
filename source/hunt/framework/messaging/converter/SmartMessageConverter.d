@@ -60,7 +60,7 @@ interface SmartMessageConverter : MessageConverter {
 	 * @see #toMessage(Object, MessageHeaders)
 	 */
 	
-	MessageBase toMessage(Object payload, MessageHeaders headers, Object conversionHint);
+	MessageBase toMessage(Object payload, MessageHeaders headers, TypeInfo conversionHint);
 
 	alias toMessage = MessageConverter.toMessage;
 

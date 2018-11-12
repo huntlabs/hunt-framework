@@ -4,10 +4,15 @@ import hunt.lang.common;
 import hunt.logging;
 import hunt.framework.messaging.simp.annotation.SimpAnnotationMethodMessageHandler;
 import hunt.framework.messaging.annotation;
+import hunt.framework.messaging.Message;
 
-import std.container.array;
+import std.algorithm;
 import std.array;
+// import std.container.array;
 import std.traits;
+
+alias ReturnHandler = void delegate(Object, TypeInfo);
+alias MessageReturnHandler = void delegate(Object, TypeInfo, string[] receivers);
 
 class AnnotationMethodHandlerAdapter {
     SimpAnnotationMethodMessageHandler handler;
@@ -16,7 +21,7 @@ class AnnotationMethodHandlerAdapter {
 
 /**
 */
-class WebSocketController {
+abstract class WebSocketController {
 
     AnnotationMethodHandlerAdapter annotationHandler;
 
@@ -24,10 +29,11 @@ class WebSocketController {
         initialization();
     }
 
-    void initialization() {
+    protected void initialization() {
 
     }
 
+    protected void __invoke(string methodName, MessageBase message, ReturnHandler handler );
 }
 
 /**
@@ -36,38 +42,51 @@ class WebSocketControllerHelper {
 
     __gshared WebSocketControllerProxy[string] controllers;
     __gshared AnnotationMethodHandlerAdapter annotationMethodAdapter;
-    __gshared Array!MessageMappingInfo messageMappings;
+    __gshared MessageMappingInfo[] messageMappings;
 
     shared static this() {
         annotationMethodAdapter = new AnnotationMethodHandlerAdapter();
     }
 
-    // static void invoke(string methodName, MessageBase message, ReturnHandler handler ) {
-
-    // }
+    static void invoke(string mappingName, MessageBase message, MessageReturnHandler handler ) {
+        auto r = messageMappings.filter!(m => m.name == mappingName);
+        size_t count = r.count();
+        if(count == 0) {
+            warningf("No mapping found: %s", mappingName);
+        // } else if(count > 1) {
+            // MessageMappingInfo m = r.front;
+        } else {
+            MessageMappingInfo m = r.front;
+            WebSocketController c = controllers[m.controller].controller;
+            c.__invoke(m.method, message, 
+                (Object r, TypeInfo t) {  
+                    if(handler !is null) handler(r, t, m.receivers); 
+                }
+            );
+        }
+    }
 
     // WebSocketController getController(string lookupDestination) {
 
     // }
 
-    static void createControllers(AnnotationMethodHandlerAdapter handler) {
+    // static void createControllers(AnnotationMethodHandlerAdapter handler) {
 
-    }
-
-    // WebSocketController createController(T)(AnnotationMethodHandlerAdapter handler) {
-    //     T t = new T();
-    //     t.annotationHandler = handler;
-
-    //     return t;
     // }
 
-    static void registerController(T)() {
+
+    static void registerController(T)() if(is(T : WebSocketController)) {
         WebSocketController builder() {
             T c = new T();
             return c;
         }
         // t.annotationHandler = handler;
         enum fullName = fullyQualifiedName!(T);
+
+        // auto itemPtr = fullName in controllers;
+        // if(itemPtr !is null) {
+        //     warning("message mapping collision: " ~ name);
+        // }
 
         controllers[fullName] = new WebSocketControllerProxy(&builder);
 
@@ -92,9 +111,16 @@ class WebSocketControllerHelper {
                         enum hasMessageMapping = hasUDA!(currentMember, MessageMapping);
                         enum hasSendTo = hasUDA!(currentMember, SendTo);
                         static if (hasMessageMapping) {
-                            foreach (string name; getUDAs!(currentMember, MessageMapping)[0].values) {
-                                addMessageMapping(name, fullName, memberName);
+                            string[] receivers;
+                            static if(hasSendTo) {
+                                receivers = getUDAs!(currentMember, SendTo)[0].values;
                             }
+
+                            foreach (string name; getUDAs!(currentMember, MessageMapping)[0].values) {
+                                addMessageMapping(name, fullName, memberName, receivers);
+                            }
+
+                            // invoke("/hello", null, null); // for test
                         }
                     }
                 }
@@ -103,13 +129,19 @@ class WebSocketControllerHelper {
 
     }
 
-    private static void addMessageMapping(string name, string controller, string method) {
+    static void addMessageMapping(string name, string controller, 
+        string method, string[] receivers) {
 
-        MessageMappingInfo info = new MessageMappingInfo(name, controller, method);
+        MessageMappingInfo info = new MessageMappingInfo(name, controller, method, receivers);
+        infof("adding: name=%s, controller=%s, method=%s, receivers=%s", 
+            name, controller, method, receivers);
 
-        infof("adding: name=%s, controller=%s, method=%s", name, controller, method);
+        auto r = messageMappings.filter!(m => m.name == name);
+        if(r.count() > 0) {
+            warning("message mapping collision: " ~ name);
+        }
 
-        messageMappings.insertBack(info);
+        messageMappings ~= info;
     }
 }
 
@@ -137,10 +169,12 @@ class MessageMappingInfo {
     string name;
     string controller;
     string method;
+    string[] receivers;
 
-    this(string name, string controller, string method) {
+    this(string name, string controller, string method, string[] receivers) {
         this.name = name;
         this.controller = controller;
         this.method = method;
+        this.receivers = receivers;
     }
 }

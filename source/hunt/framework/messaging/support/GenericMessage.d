@@ -105,11 +105,18 @@ class GenericMessage(T) : Message!(T) {
 	override string toString() {
 		StringBuilder sb = new StringBuilder(typeid(this).name);
 		sb.append(" [payload=");
-		static if(is(T == byte[])) {
-			sb.append("byte[").append((cast(byte[]) this.payload).length).append("]");
-		} else {
+		static if(is(T == class)) {
 			sb.append(this.payload.toString());
+		} else static if(is(T == interface)) {
+			sb.append((cast(Object)this.payload).toString());
+		} else {
+			sb.append("byte[").append((cast(byte[]) this.payload).length).append("]");
 		}
+		// static if(is(T == byte[])) {
+		// 	sb.append("byte[").append((cast(byte[]) this.payload).length).append("]");
+		// } else {
+		// 	sb.append(this.payload.toString());
+		// }
 		sb.append(", headers=").append(this.headers.toString()).append("]");
 		return sb.toString();
 	}

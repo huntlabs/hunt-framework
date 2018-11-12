@@ -23,6 +23,8 @@ import hunt.framework.messaging.MessageHeaders;
 import hunt.framework.messaging.support.MessageBuilder;
 import hunt.framework.messaging.support.MessageHeaderAccessor;
 
+import hunt.logging;
+
 /**
  * A simple converter that simply unwraps the message payload as long as it matches the
  * expected target class. Or reversely, simply wraps the payload in a message.
@@ -33,24 +35,23 @@ import hunt.framework.messaging.support.MessageHeaderAccessor;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class SimpleMessageConverter(T) : MessageConverter!(T) {
+class SimpleMessageConverter : MessageConverter {
 
 	// override
-	
-	// public Object fromMessage(MessageBase message, Class!(T) targetClass) {
+	// public Object fromMessage(MessageBase message, TypeInfo targetClass) {
 	// 	Object payload = message.getPayload();
 	// 	return (ClassUtils.isAssignableValue(targetClass, payload) ? payload : null);
 	// }
 
-	// override
-	// public Message!(T) toMessage(Object payload, MessageHeaders headers) {
-	// 	if (headers !is null) {
-	// 		MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(headers, MessageHeaderAccessor.class);
-	// 		if (accessor !is null && accessor.isMutable()) {
-	// 			return MessageHelper.createMessage(payload, accessor.getMessageHeaders());
-	// 		}
-	// 	}
-	// 	return MessageBuilder.withPayload(payload).copyHeaders(headers).build();
-	// }
+	override
+	MessageBase toMessage(Object payload, MessageHeaders headers) {
+		if (headers !is null) {
+			MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor!(MessageHeaderAccessor)(headers);
+			if (accessor !is null && accessor.isMutable()) {
+				return MessageHelper.createMessage!(Object)(payload, accessor.getMessageHeaders());
+			}
+		}
+		return MessageHelper.withPayload(payload).copyHeaders(headers).build();
+	}
 
 }

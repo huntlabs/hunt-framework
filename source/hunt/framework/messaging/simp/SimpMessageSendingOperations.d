@@ -94,7 +94,7 @@ interface SimpMessageSendingOperations : MessageSendingOperations!(string) {
 	 * @param postProcessor a postProcessor to post-process or modify the created message
 	 */
 	void convertAndSendToUser(string user, string destination, 
-		Object payload, MessagePostProcessor!string postProcessor);
+		Object payload, MessagePostProcessor postProcessor);
 
 	/**
 	 * Send a message to the given user.
@@ -107,6 +107,6 @@ interface SimpMessageSendingOperations : MessageSendingOperations!(string) {
 	 * @param postProcessor a postProcessor to post-process or modify the created message
 	 */
 	void convertAndSendToUser(string user, string destination, 
-		Object payload, Map!(string, Object) headers, MessagePostProcessor!string postProcessor);
+		Object payload, Map!(string, Object) headers, MessagePostProcessor postProcessor);
 
 }

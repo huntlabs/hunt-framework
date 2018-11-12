@@ -25,6 +25,7 @@ import hunt.framework.messaging.MessageChannel;
 import hunt.framework.messaging.MessageHeaders;
 import hunt.framework.messaging.simp.SimpMessageHeaderAccessor;
 import hunt.framework.messaging.simp.SimpMessageType;
+import hunt.framework.messaging.support.GenericMessage;
 import hunt.framework.messaging.support.MessageBuilder;
 import hunt.framework.messaging.support.MessageHeaderAccessor;
 
@@ -326,7 +327,7 @@ class SimpleBrokerMessageHandler : AbstractBrokerMessageHandler {
 				// }
 				connectAck.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, message);
 				connectAck.setHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER, heartbeatOut);
-				Message!(byte[]) messageOut = MessageHelper.createMessage(EMPTY_PAYLOAD, connectAck.getMessageHeaders());
+				MessageBase messageOut = MessageHelper.createMessage(EMPTY_PAYLOAD, connectAck.getMessageHeaders());
 				info("responding ..........");
 				getClientOutboundChannel().send(messageOut);
 				info("responding ..........done");
@@ -392,7 +393,7 @@ class SimpleBrokerMessageHandler : AbstractBrokerMessageHandler {
 			accessor.setHeader(SimpMessageHeaderAccessor.DISCONNECT_MESSAGE_HEADER, origMessage);
 		}
 		initHeaders(accessor);
-		Message!(byte[]) message = MessageHelper.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
+		MessageBase message = MessageHelper.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
 		getClientOutboundChannel().send(message);
 	}
 
@@ -412,25 +413,28 @@ class SimpleBrokerMessageHandler : AbstractBrokerMessageHandler {
 				headerAccessor.setSubscriptionId(subscriptionId);
 				// TODO: Tasks pending completion -@zxp at 10/31/2018, 4:48:36 PM
 				// 
-				// headerAccessor.copyHeadersIfAbsent(message.getHeaders());
+				headerAccessor.copyHeadersIfAbsent(message.getHeaders());
 				headerAccessor.setLeaveMutable(true);
 				warning(message.payloadType);
-				// Object payload = message.getPayload();
-				// MessageBase reply = MessageHelper.createMessage(payload, headerAccessor.getMessageHeaders());
-				// SessionInfo info = this.sessions.get(sessionId);
-				// if (info !is null) {
-				// 	try {
-				// 		info.getClientOutboundChannel().send(reply);
-				// 	}
-				// 	catch (Throwable ex) {
-				// 		version(HUNT_DEBUG) {
-				// 			errorf("Failed to send " ~ message  ~ ": \n", ex);
-				// 		}
-				// 	}
-				// 	finally {
-				// 		info.setLastWriteTime(now);
-				// 	}
-				// }
+				auto gm = cast(GenericMessage!(string))message;
+				if(gm is null) {
+					warning("Can't cast message: %s", typeid(message));
+					continue;
+				}
+				string payload = gm.getPayload();
+				MessageBase reply = MessageHelper.createMessage(cast(byte[])payload, headerAccessor.getMessageHeaders());
+				SessionInfo info = this.sessions.get(sessionId);
+				if (info !is null) {
+					try {
+						info.getClientOutboundChannel().send(reply);
+					}
+					catch (Throwable ex) {
+						errorf("Failed to send " ~ message.to!string()  ~ ": \n%s", ex.msg);
+					}
+					finally {
+						info.setLastWriteTime(now);
+					}
+				}
 			}
 		}
 	}

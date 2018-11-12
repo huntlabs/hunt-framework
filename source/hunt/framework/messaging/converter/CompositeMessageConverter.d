@@ -45,7 +45,7 @@ class CompositeMessageConverter : SmartMessageConverter {
 	 * Create an instance with the given converters.
 	 */
 	this(MessageConverter[] converters) {
-		assert(converters, "Converters must not be empty");
+		assert(converters !is null, "Converters must not be empty");
 		this.converters = converters;
 	}
 
@@ -87,7 +87,7 @@ class CompositeMessageConverter : SmartMessageConverter {
 	}
 
 	override
-	MessageBase toMessage(Object payload, MessageHeaders headers, Object conversionHint) {
+	MessageBase toMessage(Object payload, MessageHeaders headers, TypeInfo conversionHint) {
 		foreach (MessageConverter converter ; getConverters()) {
 			auto smc = cast(SmartMessageConverter) converter;
 			MessageBase result = (smc !is null ? smc.toMessage(payload, headers, conversionHint) :

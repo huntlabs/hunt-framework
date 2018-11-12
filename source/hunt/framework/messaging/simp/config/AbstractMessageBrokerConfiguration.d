@@ -300,7 +300,7 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 	 */
 	protected SimpAnnotationMethodMessageHandler createAnnotationMethodMessageHandler() {
 		return new SimpAnnotationMethodMessageHandler(clientInboundChannel(),
-				clientOutboundChannel(), null); // , brokerMessagingTemplate()
+				clientOutboundChannel(), brokerMessagingTemplate()); 
 	}
 
 	// protected void addArgumentResolvers(List!(HandlerMethodArgumentResolver) argumentResolvers) {
@@ -386,15 +386,15 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 	// }
 
 	
-	// SimpMessagingTemplate brokerMessagingTemplate() {
-	// 	SimpMessagingTemplate t = new SimpMessagingTemplate(brokerChannel());
-	// 	string prefix = getBrokerRegistry().getUserDestinationPrefix();
-	// 	if (prefix !is null) {
-	// 		t.setUserDestinationPrefix(prefix);
-	// 	}
-	// 	t.setMessageConverter(brokerMessageConverter());
-	// 	return t;
-	// }
+	SimpMessagingTemplate brokerMessagingTemplate() {
+		SimpMessagingTemplate t = new SimpMessagingTemplate(brokerChannel());
+		string prefix = getBrokerRegistry().getUserDestinationPrefix();
+		if (prefix !is null) {
+			t.setUserDestinationPrefix(prefix);
+		}
+		t.setMessageConverter(brokerMessageConverter());
+		return t;
+	}
 
 	
 	CompositeMessageConverter brokerMessageConverter() {

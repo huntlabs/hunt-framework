@@ -16,19 +16,12 @@
 
 module hunt.framework.messaging.simp.annotation.AbstractMethodMessageHandler;
 
-
-import hunt.container;
-import hunt.lang.exception;
-import hunt.lang.Nullable;
-import hunt.logging;
-import hunt.util.TypeUtils;
-
-import std.array;
-import std.conv;
-import std.string;
+import hunt.framework.messaging.simp.SimpMessageHeaderAccessor;
+import hunt.framework.messaging.simp.SimpMessageType;
 
 // import hunt.framework.beans.factory.InitializingBean;
 import hunt.framework.context.ApplicationContext;
+import hunt.framework.websocket.WebSocketController;
 // import hunt.framework.context.ApplicationContextAware;
 // import hunt.framework.core.MethodIntrospector;
 // import hunt.framework.core.MethodParameter;
@@ -45,6 +38,16 @@ import hunt.framework.messaging.support.MessageHeaderAccessor;
 // import hunt.framework.util.ClassUtils;
 // import hunt.framework.util.concurrent.ListenableFuture;
 // import hunt.framework.util.concurrent.ListenableFutureCallback;
+
+import hunt.container;
+import hunt.lang.exception;
+import hunt.lang.Nullable;
+import hunt.logging;
+import hunt.util.TypeUtils;
+
+import std.array;
+import std.conv;
+import std.string;
 
 /**
  * Abstract base class for HandlerMethod-based message handling. Provides most of
@@ -463,8 +466,50 @@ abstract class AbstractMethodMessageHandler(T)
 		return null;
 	}
 
+	protected void handleReturnValue(Object returnValue, TypeInfo returnType, 
+			MessageBase message, string[] destinations) ;
+	// 		{
+	// 	MessageHeaders headers = message.getHeaders();
+	// 	string sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
+	// 	foreach (string destination ; destinations) {
+
+	// 	}
+	// }
+
 	protected void handleMessageInternal(MessageBase message, string lookupDestination) {
 		implementationMissing(false);
+
+		try {
+			WebSocketControllerHelper.invoke(lookupDestination, message, 
+				(Object returnValue, TypeInfo returnType, string[] destinations) {
+				handleReturnValue(returnValue, returnType, message, destinations);
+			});
+			// Object returnValue = invocable.invoke(message);
+			// MethodParameter returnType = handlerMethod.getReturnType();
+			// if (void.class == returnType.getParameterType()) {
+			// 	return;
+			// }
+			// if (returnValue !is null && this.returnValueHandlers.isAsyncReturnValue(returnValue, returnType)) {
+			// 	ListenableFuture<?> future = this.returnValueHandlers.toListenableFuture(returnValue, returnType);
+			// 	if (future !is null) {
+			// 		future.addCallback(new ReturnValueListenableFutureCallback(invocable, message));
+			// 	}
+			// }
+			// else {
+			// 	this.returnValueHandlers.handleReturnValue(returnValue, returnType, message);
+			// }
+		}
+		catch (Exception ex) {
+			warning(ex.msg);
+			// processHandlerMethodException(handlerMethod, ex, message);
+		}
+		catch (Throwable ex) {
+			warning(ex.msg);
+			Exception handlingException =
+					new MessageHandlingException(message, "Unexpected handler method invocation error", ex);
+		}
+			// processHandlerMethodException(handlerMethod, handlingException, message);
+
 		// List!(Match) matches = new ArrayList!(Match)();
 
 		// List!(T) mappingsByUrl = this.destinationLookup.get(lookupDestination);
@@ -520,9 +565,9 @@ abstract class AbstractMethodMessageHandler(T)
 	
 	// protected abstract T getMatchingMapping(T mapping, MessageBase message);
 
-	protected void handleNoMatch(Set!(T) ts, string lookupDestination, MessageBase message) {
-		trace("No matching message handler methods.");
-	}
+	// protected void handleNoMatch(Set!(T) ts, string lookupDestination, MessageBase message) {
+	// 	trace("No matching message handler methods.");
+	// }
 
 	/**
 	 * Return a comparator for sorting matching mappings.
