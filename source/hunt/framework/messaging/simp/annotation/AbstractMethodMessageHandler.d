@@ -104,7 +104,6 @@ abstract class AbstractMethodMessageHandler(T)
 	// 		new LinkedHashMap<>(64);
 
 	this() {
-
 	}
 
 	/**

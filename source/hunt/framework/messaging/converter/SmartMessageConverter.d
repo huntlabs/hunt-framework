@@ -45,7 +45,9 @@ interface SmartMessageConverter : MessageConverter {
 	 * @see #fromMessage(Message, Class)
 	 */
 	
-	// Object fromMessage(MessageBase message, Class!(T) targetClass, Object conversionHint);
+	Object fromMessage(MessageBase message, TypeInfo targetClass, TypeInfo conversionHint);
+
+	alias fromMessage = MessageConverter.fromMessage;
 
 	/**
 	 * A variant of {@link #toMessage(Object, MessageHeaders)} which takes an extra

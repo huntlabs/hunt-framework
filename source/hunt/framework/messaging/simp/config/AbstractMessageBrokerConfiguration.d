@@ -29,8 +29,8 @@ import hunt.framework.context.ApplicationContext;
 
 import hunt.framework.messaging.converter.ByteArrayMessageConverter;
 import hunt.framework.messaging.converter.CompositeMessageConverter;
-// import hunt.framework.messaging.converter.DefaultContentTypeResolver;
-// import hunt.framework.messaging.converter.MappingJackson2MessageConverter;
+import hunt.framework.messaging.converter.DefaultContentTypeResolver;
+import hunt.framework.messaging.converter.JsonMessageConverter;
 import hunt.framework.messaging.converter.MessageConverter;
 import hunt.framework.messaging.converter.StringMessageConverter;
 // import hunt.framework.messaging.handler.invocation.HandlerMethodArgumentResolver;
@@ -53,15 +53,10 @@ import hunt.framework.messaging.support.ImmutableMessageChannelInterceptor;
 // import hunt.framework.scheduling.concurrent.ThreadPoolTaskExecutor;
 // import hunt.framework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-// import hunt.framework.util.ClassUtils;
-// import hunt.framework.util.MimeTypeUtils;
-// import hunt.framework.util.PathMatcher;
-// import hunt.framework.validation.Errors;
-// import hunt.framework.validation.Validator;
-
-import hunt.string.PathMatcher;
 import hunt.container;
+import hunt.http.codec.http.model.MimeTypes;
 import hunt.lang.exception;
+import hunt.string.PathMatcher;
 
 import std.string;
 
@@ -403,6 +398,7 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 		if (registerDefaults) {
 			converters ~= new StringMessageConverter();
 			converters ~= new ByteArrayMessageConverter();
+			converters ~= createJsonConverter();
 			// if (jackson2Present) {
 			// 	converters.add(createJacksonConverter());
 			// }
@@ -410,13 +406,15 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 		return new CompositeMessageConverter(converters);
 	}
 
-	// protected MappingJackson2MessageConverter createJacksonConverter() {
-	// 	DefaultContentTypeResolver resolver = new DefaultContentTypeResolver();
-	// 	resolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
-	// 	MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
-	// 	converter.setContentTypeResolver(resolver);
-	// 	return converter;
-	// }
+	protected JsonMessageConverter createJsonConverter() {
+		DefaultContentTypeResolver resolver = new DefaultContentTypeResolver();
+		resolver.setDefaultMimeType(MimeType.APPLICATION_JSON);
+
+		JsonMessageConverter converter = new JsonMessageConverter();
+		converter.setContentTypeResolver(resolver);
+		
+		return converter;
+	}
 
 	/**
 	 * Override this method to add custom message converters.

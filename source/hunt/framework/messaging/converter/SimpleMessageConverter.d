@@ -20,10 +20,12 @@ import hunt.framework.messaging.converter.MessageConverter;
 
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageHeaders;
+import hunt.framework.messaging.support.GenericMessage;
 import hunt.framework.messaging.support.MessageBuilder;
 import hunt.framework.messaging.support.MessageHeaderAccessor;
 
 import hunt.logging;
+import hunt.lang.exception;
 
 /**
  * A simple converter that simply unwraps the message payload as long as it matches the
@@ -37,11 +39,19 @@ import hunt.logging;
  */
 class SimpleMessageConverter : MessageConverter {
 
-	// override
-	// public Object fromMessage(MessageBase message, TypeInfo targetClass) {
-	// 	Object payload = message.getPayload();
-	// 	return (ClassUtils.isAssignableValue(targetClass, payload) ? payload : null);
-	// }
+	override
+	Object fromMessage(MessageBase message, TypeInfo targetClass) {
+		TypeInfo payloadType = message.payloadType;
+
+		GenericMessage!(string) gm = cast(GenericMessage!(string))message;
+		if(gm is null)
+			return null;
+
+		string payload = gm.getPayload();
+		// return (ClassUtils.isAssignableValue(targetClass, payload) ? payload : null);
+		implementationMissing(false);
+		return null;
+	}
 
 	override
 	MessageBase toMessage(Object payload, MessageHeaders headers) {

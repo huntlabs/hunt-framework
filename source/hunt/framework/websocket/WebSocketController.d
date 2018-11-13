@@ -14,19 +14,17 @@ import std.traits;
 alias ReturnHandler = void delegate(Object, TypeInfo);
 alias MessageReturnHandler = void delegate(Object, TypeInfo, string[] receivers);
 
-class AnnotationMethodHandlerAdapter {
-    SimpAnnotationMethodMessageHandler handler;
-
-}
 
 /**
 */
 abstract class WebSocketController {
 
-    AnnotationMethodHandlerAdapter annotationHandler;
-
     this() {
         initialization();
+    }
+
+    final SimpAnnotationMethodMessageHandler annotationHandler() {
+        return WebSocketControllerHelper.annotationMethodMessageHandler;
     }
 
     protected void initialization() {
@@ -41,11 +39,10 @@ abstract class WebSocketController {
 class WebSocketControllerHelper {
 
     __gshared WebSocketControllerProxy[string] controllers;
-    __gshared AnnotationMethodHandlerAdapter annotationMethodAdapter;
+    __gshared SimpAnnotationMethodMessageHandler annotationMethodMessageHandler;
     __gshared MessageMappingInfo[] messageMappings;
 
     shared static this() {
-        annotationMethodAdapter = new AnnotationMethodHandlerAdapter();
     }
 
     static void invoke(string mappingName, MessageBase message, MessageReturnHandler handler ) {
@@ -67,10 +64,6 @@ class WebSocketControllerHelper {
     }
 
     // WebSocketController getController(string lookupDestination) {
-
-    // }
-
-    // static void createControllers(AnnotationMethodHandlerAdapter handler) {
 
     // }
 
@@ -101,8 +94,7 @@ class WebSocketControllerHelper {
                 static if (memberProtection == "private"
                         || memberProtection == "protected" || memberProtection == "export") {
                     version (HUNT_DEBUG) pragma(msg, "skip private member: " ~ memberName);
-                }
-                else {
+                } else {
                     import std.meta : Alias;
 
                     alias currentMember = Alias!(__traits(getMember, T, memberName));

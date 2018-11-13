@@ -43,7 +43,7 @@ interface MessageConverter {
 	 * perform the conversion
 	 */
 	
-	// Object fromMessage(MessageBase message, Class!(T) targetClass);
+	Object fromMessage(MessageBase message, TypeInfo targetClass);
 
 	/**
 	 * Create a {@link Message} whose payload is the result of converting the given

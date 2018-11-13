@@ -44,14 +44,15 @@ class StringMessageConverter : AbstractMessageConverter {
 
 	this(Charset defaultCharset) {
 		super(new MimeType("text/plain", defaultCharset));
-		assert(defaultCharset, "Default Charset must not be null");
+		assert(defaultCharset !is null, "Default Charset must not be null");
 		this.defaultCharset = defaultCharset;
 	}
 
 
 	override
 	protected bool supports(TypeInfo typeInfo) {
-		version(HUNT_DEBUG) tracef("payload type: %s", typeInfo);
+		version(HUNT_DEBUG) tracef("checking message type, expected: %s, actual: %s", 
+			typeid(string), typeInfo);
 		return (typeid(string) == typeInfo);
 	}
 

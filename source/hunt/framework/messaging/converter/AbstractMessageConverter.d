@@ -169,18 +169,16 @@ abstract class AbstractMessageConverter : SmartMessageConverter {
 		return (mimeTypes.length >0 ? mimeTypes[0] : null);
 	}
 
-	// override
-	// final Object fromMessage(MessageBase message, Class<?> targetClass) {
-	// 	return fromMessage(message, targetClass, null);
-	// }
+	final Object fromMessage(MessageBase message, TypeInfo targetClass) {
+		return fromMessage(message, targetClass, null);
+	}
 
-	// override
-	// final Object fromMessage(MessageBase message, Class<?> targetClass, Object conversionHint) {
-	// 	if (!canConvertFrom(message, targetClass)) {
-	// 		return null;
-	// 	}
-	// 	return convertFromInternal(message, targetClass, conversionHint);
-	// }
+	final Object fromMessage(MessageBase message, TypeInfo targetClass, TypeInfo conversionHint) {
+		if (!canConvertFrom(message, targetClass)) {
+			return null;
+		}
+		return convertFromInternal(message, targetClass, conversionHint);
+	}
 
 	protected bool canConvertFrom(MessageBase message, TypeInfo targetClass) {
 		return (supports(targetClass) && supportsMimeType(message.getHeaders()));
@@ -218,7 +216,6 @@ abstract class AbstractMessageConverter : SmartMessageConverter {
 					accessor.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE, mimeType);
 				}
 
-				trace("xxxxxxxxx");
 				if(conversionHint == typeid(TypeInfo_Class) || conversionHint == typeid(TypeInfo_Interface))
 					return MessageHelper.createMessage!(Object)(payloadToUse, accessor.getMessageHeaders());
 				else {
@@ -325,11 +322,19 @@ abstract class AbstractMessageConverter : SmartMessageConverter {
 	 * @since 4.2
 	 */
 	
-	// protected Object convertFromInternal(
-	// 		MessageBase message, Class<?> targetClass, Object conversionHint) {
+	protected Object convertFromInternal(
+			MessageBase message, TypeInfo targetClass, TypeInfo conversionHint) {
+		
+		auto m = cast(GenericMessage!(byte[]))message;
+		trace("xxxxxxxxxxxxx");
+		if(targetClass == typeid(string)) {
+			return new Nullable!string(cast(string) m.getPayload());
+		} else {
+            warningf("Can't handle message for type: %s", targetClass);
+        }
 
-	// 	return null;
-	// }
+		return null;
+	}
 
 	/**
 	 * Convert the payload object to serialized form.

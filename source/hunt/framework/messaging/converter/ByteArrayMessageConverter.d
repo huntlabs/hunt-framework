@@ -40,7 +40,8 @@ class ByteArrayMessageConverter : AbstractMessageConverter {
 
 	override
 	protected bool supports(TypeInfo typeInfo) {
-		version(HUNT_DEBUG) tracef("payload type: %s", typeInfo);
+		version(HUNT_DEBUG) tracef("checking message type, expected: %s, actual: %s", 
+			typeid(string), typeInfo);
 		return (typeid(byte[]) == typeInfo);
 	}
 

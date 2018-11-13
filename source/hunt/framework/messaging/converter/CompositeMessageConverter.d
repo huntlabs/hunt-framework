@@ -50,30 +50,30 @@ class CompositeMessageConverter : SmartMessageConverter {
 	}
 
 
-	// override	
-	// Object fromMessage(MessageBase message, Class<?> targetClass) {
-	// 	for (MessageConverter converter : getConverters()) {
-	// 		Object result = converter.fromMessage(message, targetClass);
-	// 		if (result !is null) {
-	// 			return result;
-	// 		}
-	// 	}
-	// 	return null;
-	// }
+	override	
+	Object fromMessage(MessageBase message, TypeInfo targetClass) {
+		foreach (MessageConverter converter ; getConverters()) {
+			Object result = converter.fromMessage(message, targetClass);
+			if (result !is null) {
+				return result;
+			}
+		}
+		return null;
+	}
 
-	// override
-	
-	// Object fromMessage(MessageBase message, Class<?> targetClass, Object conversionHint) {
-	// 	for (MessageConverter converter : getConverters()) {
-	// 		Object result = (converter instanceof SmartMessageConverter ?
-	// 				((SmartMessageConverter) converter).fromMessage(message, targetClass, conversionHint) :
-	// 				converter.fromMessage(message, targetClass));
-	// 		if (result !is null) {
-	// 			return result;
-	// 		}
-	// 	}
-	// 	return null;
-	// }
+	override
+	Object fromMessage(MessageBase message, TypeInfo targetClass, TypeInfo conversionHint) {
+		foreach (MessageConverter converter ; getConverters()) {
+			auto smc = cast(SmartMessageConverter) converter;
+
+			Object result = (smc is null ? converter.fromMessage(message, targetClass) :
+				smc.fromMessage(message, targetClass, conversionHint));
+			if (result !is null) {
+				return result;
+			}
+		}
+		return null;
+	}
 
 	override
 	MessageBase toMessage(Object payload, MessageHeaders headers) {

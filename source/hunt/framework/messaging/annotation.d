@@ -90,6 +90,8 @@ struct SendTo {
     string[] values;
 }
 
+/**
+*/
 struct SendToUser {
     string[] values;
 }
