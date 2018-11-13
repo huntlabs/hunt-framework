@@ -253,7 +253,9 @@ class SimpleBrokerMessageHandler : AbstractBrokerMessageHandler {
 	override
 	void startInternal() {
 		publishBrokerAvailableEvent();
-		implementationMissing(false);
+		// implementationMissing(false);
+		// TODO: Tasks pending completion -@zxp at 11/13/2018, 3:18:33 PM
+		// 
 		// if (this.taskScheduler !is null) {
 		// 	long interval = initHeartbeatTaskDelay();
 		// 	if (interval > 0) {
@@ -411,11 +413,9 @@ class SimpleBrokerMessageHandler : AbstractBrokerMessageHandler {
 				initHeaders(headerAccessor);
 				headerAccessor.setSessionId(sessionId);
 				headerAccessor.setSubscriptionId(subscriptionId);
-				// TODO: Tasks pending completion -@zxp at 10/31/2018, 4:48:36 PM
-				// 
 				headerAccessor.copyHeadersIfAbsent(message.getHeaders());
 				headerAccessor.setLeaveMutable(true);
-				warning(message.payloadType);
+				// warning(message.payloadType);
 				auto gm = cast(GenericMessage!(string))message;
 				if(gm is null) {
 					warning("Can't cast message: %s", typeid(message));

@@ -17,7 +17,6 @@
 module hunt.framework.messaging.simp.annotation.SimpAnnotationMethodMessageHandler;
 
 import hunt.framework.messaging.simp.annotation.AbstractMethodMessageHandler;
-import hunt.framework.messaging.converter.CompositeMessageConverter;
 
 // import hunt.framework.beans.factory.config.ConfigurableBeanFactory;
 import hunt.framework.context.ApplicationContext;
@@ -32,11 +31,12 @@ import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageChannel;
 import hunt.framework.messaging.MessageHeaders;
 
+import hunt.framework.messaging.converter.AbstractMessageConverter;
 import hunt.framework.messaging.converter.ByteArrayMessageConverter;
 import hunt.framework.messaging.converter.CompositeMessageConverter;
 import hunt.framework.messaging.converter.MessageConverter;
 import hunt.framework.messaging.converter.StringMessageConverter;
-// import hunt.framework.messaging.core.AbstractMessageSendingTemplate;
+import hunt.framework.messaging.core.AbstractMessageSendingTemplate;
 // import hunt.framework.messaging.handler.DestinationPatternsMessageCondition;
 // import hunt.framework.messaging.handler.HandlerMethod;
 // import hunt.framework.messaging.handler.annotation.MessageMapping;
@@ -183,8 +183,7 @@ class SimpAnnotationMethodMessageHandler :
 	 */
 	void setMessageConverter(MessageConverter converter) {
 		this.messageConverter = converter;
-		implementationMissing(false);
-		// ((AbstractMessageSendingTemplate<?>) this.clientMessagingTemplate).setMessageConverter(converter);
+		(cast(AbstractMessageSendingTemplate!string) this.clientMessagingTemplate).setMessageConverter(converter);
 	}
 
 	/**

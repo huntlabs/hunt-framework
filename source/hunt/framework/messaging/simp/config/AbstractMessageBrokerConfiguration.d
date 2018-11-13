@@ -325,7 +325,7 @@ abstract class AbstractMessageBrokerConfiguration { // : ApplicationContextAware
 
 	AbstractBrokerMessageHandler stompBrokerRelayMessageHandler() {
 
-		implementationMissing(false);
+		// implementationMissing(false);
 		return null;
 		// TODO: Tasks pending completion -@zxp at 10/31/2018, 5:39:16 PM
 		// 		

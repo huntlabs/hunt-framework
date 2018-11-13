@@ -25,15 +25,15 @@ import hunt.framework.messaging.support.GenericMessage;
 import hunt.framework.messaging.support.MessageBuilder;
 import hunt.framework.messaging.support.MessageHeaderAccessor;
 
-import hunt.http.codec.http.model.MimeTypes;
 
+import hunt.container;
+import hunt.http.codec.http.model.MimeTypes;
 import hunt.lang.exception;
 import hunt.lang.Nullable;
 import hunt.logging;
-import hunt.container;
+import hunt.util.TypeUtils;
 
 import std.array;
-
 
 
 /**
@@ -134,25 +134,6 @@ abstract class AbstractMessageConverter : SmartMessageConverter {
 		return this.strictContentTypeMatch;
 	}
 
-	/**
-	 * Configure the preferred serialization class to use (byte[] or string) when
-	 * converting an Object payload to a {@link Message}.
-	 * <p>The default value is byte[].
-	 * @param payloadClass either byte[] or string
-	 */
-	// void setSerializedPayloadClass(Class<?> payloadClass) {
-	// 	assert(byte[].class == payloadClass || string.class == payloadClass,
-	// 			() -> "Payload class must be byte[] or string: " ~ payloadClass);
-	// 	this.serializedPayloadClass = payloadClass;
-	// }
-
-	/**
-	 * Return the configured preferred serialization payload class.
-	 */
-	// Class<?> getSerializedPayloadClass() {
-	// 	return this.serializedPayloadClass;
-	// }
-
 
 	/**
 	 * Returns the default content type for the payload. Called when
@@ -162,8 +143,7 @@ abstract class AbstractMessageConverter : SmartMessageConverter {
 	 * supportedMimeTypes}, if any. Can be overridden in sub-classes.
 	 * @param payload the payload being converted to message
 	 * @return the content type, or {@code null} if not known
-	 */
-	
+	 */	
 	protected MimeType getDefaultContentType(Object payload) {
 		MimeType[] mimeTypes = getSupportedMimeTypes();
 		return (mimeTypes.length >0 ? mimeTypes[0] : null);
@@ -181,7 +161,10 @@ abstract class AbstractMessageConverter : SmartMessageConverter {
 	}
 
 	protected bool canConvertFrom(MessageBase message, TypeInfo targetClass) {
-		return (supports(targetClass) && supportsMimeType(message.getHeaders()));
+		bool r = (supports(targetClass) && supportsMimeType(message.getHeaders()));
+		version(HUNT_DEBUG) tracef("checking message, target: %s, converter: %s, result: %s", 
+			targetClass, TypeUtils.getSimpleName(typeid(this)), r);
+		return r;
 	}
 
 	override	
@@ -267,14 +250,17 @@ abstract class AbstractMessageConverter : SmartMessageConverter {
 	}
 
 	protected bool canConvertTo(Object payload, MessageHeaders headers, TypeInfo conversionHint) {
+		bool r = false;
 		if(conversionHint !is null) {
-			version(HUNT_DEBUG) tracef("raw payload type: %s", conversionHint);
-			return (supports(conversionHint) && supportsMimeType(headers));
+			r = (supports(conversionHint) && supportsMimeType(headers));
+			version(HUNT_DEBUG) tracef("checking payload, type: %s, converter: %s, result: %s", 
+				conversionHint, TypeUtils.getSimpleName(typeid(this)), r);
 		} else {
-			version(HUNT_DEBUG) tracef("supports: %s, supportsMimeType: %s", 
-				supports(typeid(payload)), supportsMimeType(headers));
-			return (supports(typeid(payload)) && supportsMimeType(headers));
+			r = (supports(typeid(payload)) && supportsMimeType(headers));
+			version(HUNT_DEBUG) tracef("checking payload, type: %s, converter: %s, result: %s", 
+				typeid(payload), TypeUtils.getSimpleName(typeid(this)), r);
 		}
+		return r;
 	}
 
 	protected bool supportsMimeType(MessageHeaders headers) {
@@ -290,7 +276,6 @@ abstract class AbstractMessageConverter : SmartMessageConverter {
 
 		foreach (MimeType current ; getSupportedMimeTypes()) {
 			MimeType currentBaseType = current.getBaseType();
-			// if (current.getType().equals(mimeType.getType()) && current.getSubtype().equals(mimeType.getSubtype())) 
 			if(currentBaseType.isSame(mimeTypeName))
 				return true;
 		}
@@ -326,7 +311,6 @@ abstract class AbstractMessageConverter : SmartMessageConverter {
 			MessageBase message, TypeInfo targetClass, TypeInfo conversionHint) {
 		
 		auto m = cast(GenericMessage!(byte[]))message;
-		trace("xxxxxxxxxxxxx");
 		if(targetClass == typeid(string)) {
 			return new Nullable!string(cast(string) m.getPayload());
 		} else {

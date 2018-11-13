@@ -226,7 +226,9 @@ final class Application : ApplicationContext {
     }
 
     void publishEvent(Object event) {
-        implementationMissing(false);
+        // implementationMissing(false);
+        // TODO: Tasks pending completion -@zxp at 11/13/2018, 3:26:56 PM
+        // 
     }
 
     Application registerWebSocket(string uri, WebSocketHandler webSocketHandler) {
