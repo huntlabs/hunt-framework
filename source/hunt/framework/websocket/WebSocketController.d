@@ -8,6 +8,9 @@ import hunt.framework.messaging.Message;
 
 import std.algorithm;
 import std.array;
+import std.conv;
+import std.format;
+import std.json;
 // import std.container.array;
 import std.traits;
 
@@ -32,6 +35,53 @@ abstract class WebSocketController {
     }
 
     protected void __invoke(string methodName, MessageBase message, ReturnHandler handler );
+
+    
+}
+
+
+/**
+*/
+mixin template ControllerExtensions(string moduleName = __MODULE__) {
+    import hunt.framework.messaging.Message;
+    import hunt.framework.messaging.converter.AbstractMessageConverter;
+    import hunt.framework.messaging.converter.MessageConverter;
+    import hunt.framework.messaging.converter.MessageConverterHelper;
+    import hunt.http.codec.http.model.MimeTypes;
+    import hunt.lang.Nullable;
+    import hunt.logging;
+    import hunt.util.JsonHelper;
+    import hunt.util.serialize;
+    import std.json;
+
+    alias This = typeof(this);
+    
+    shared static this() {
+        WebSocketControllerHelper.registerController!This();
+    }
+
+    
+    override protected void __invoke(string methodName, MessageBase message, ReturnHandler handler ) {
+
+        version(HUNT_DEBUG) info("invoking: ", methodName);
+        
+        MessageConverter messageConverter = 
+            annotationHandler.getMessageConverter();
+
+        // MimeType mt = messageConverter.getMimeType();
+        // info(mt.toString());
+            
+        Object ob = messageConverter.fromMessage(message, typeid(JSONValue));
+        if(ob is null)
+            warning("no payload");
+        else {
+             version(HUNT_DEBUG) infof("playload: %s", typeid(ob));
+        }
+
+        enum str = WebSocketControllerHelper.generateMethodSwitch!(This, moduleName);
+        pragma(msg, str);
+        mixin(str);
+    }
 }
 
 /**
@@ -88,7 +138,7 @@ class WebSocketControllerHelper {
             pragma(msg, "member: " ~ memberName);
 
             static if (isType!(__traits(getMember, T, memberName))) {
-                pragma(msg, "skipping type: " ~ memberName);
+                pragma(msg, "skipping type defination: " ~ memberName);
             } else {
                 enum memberProtection = __traits(getProtection, __traits(getMember, T, memberName));
                 static if (memberProtection == "private"
@@ -135,6 +185,207 @@ class WebSocketControllerHelper {
 
         messageMappings ~= info;
     }
+
+
+    static string generateMethodSwitch(T, string moduleName)() {
+        string c;
+        c ~= "string currentParameterInfo;\n"; // for debug
+        c ~= `
+        switch(methodName) {`;
+
+        foreach (memberName; __traits(derivedMembers, T)) {
+                pragma(msg, "member-caller: " ~ memberName);
+
+                static if (isType!(__traits(getMember, T, memberName))) {
+                    pragma(msg, "skipping type defination: " ~ memberName);
+                } else {
+                    enum memberProtection = __traits(getProtection, __traits(getMember, T, memberName));
+                    static if (memberProtection == "private"
+                            || memberProtection == "protected" || memberProtection == "export") {
+                        version (HUNT_DEBUG) pragma(msg, "skip private member: " ~ memberName);
+                    } else {
+                        import std.meta : Alias;
+                        alias currentMember = Alias!(__traits(getMember, T, memberName));
+                        alias memberType = typeof(currentMember);
+                        static if (is(memberType == function)) {
+                            foreach (t; __traits(getOverloads, T, memberName)) {
+                                enum hasMessageMapping = hasUDA!(t, MessageMapping);                        
+                                static if (hasMessageMapping) {
+
+        enum identifiers = ParameterIdentifierTuple!t;
+                                    c ~= generateMethodSwitchCases!(t, moduleName, memberName);
+                                }
+                            }
+                        }
+                    }
+                }
+            }                
+                
+
+            c ~= `default : {
+                    version(HUNT_DEBUG) warning("do nothing for invoking " ~ methodName);
+                }
+            }`;
+        
+        return c;
+    }
+
+    private static string wrapperParameters(T, string methodName)() {
+        string s;
+        s ~= ``;
+
+        return s;
+
+    }
+
+    private static string generateMethodSwitchCases(alias symbol, string moduleName, string methodName)() {
+        string s;
+        enum parametersInJson = "parametersInJson";
+
+        s ~= `
+                case "` ~ methodName ~ `" : {
+                    auto temp = cast(Nullable!JSONValue) ob;
+                    if(temp is null) {
+                        warningf("Wrong pyaload type: %s, handler: %s", typeid(ob), "` ~ methodName ~ `");
+                        return;
+                    }
+
+                    JSONValue ` ~ parametersInJson ~` = temp.value;
+                    version(HUNT_DEBUG) tracef("incoming message");
+            `; 
+
+        enum argumentsNumber = arity!symbol;
+        enum identifiers = ParameterIdentifierTuple!symbol;
+        alias parameterTypes = Parameters!symbol;
+        alias returnType = ReturnType!symbol;
+
+        static if(argumentsNumber == 0) {
+            static if(is(returnType == void)) {
+                s ~= "         " ~ methodName ~ "();";
+            } else {
+                s ~= "         auto r = " ~ methodName ~ "();";
+            }
+        } else static if(argumentsNumber == 1) {
+            alias parameterType = parameterTypes[0];
+            static if(is(parameterType == JSONValue)) {
+                enum varName = parametersInJson;
+            } else {
+                enum pt = parameterType.stringof;
+                enum varName = "parameterModel";
+                static if(is(parameterType == class) || is(parameterType == struct)) {
+                    s ~= format(`        %1$s %2$s = JsonHelper.getAs!(%1$s)(%3$s);` ~ "\n",
+                            pt, varName, parametersInJson);
+                    // s ~= "        " ~ pt ~ " " ~ varName ~ " = toObject!(" ~ pt ~ ")(" ~ parametersInJson ~ ");\n";
+                } else {
+                    enum pn = identifiers[0];
+                    s ~= format(`        %1$s %2$s = JsonHelper.getItemAs!(%1$s)(%3$s, "%4$s");` ~ "\n",
+                            pt, varName, parametersInJson, pn);
+                    // s ~= `        auto item = "` ~ pn ~ `" in ` ~ parametersInJson ~ ";\n";
+                    // s ~= `        if(item is null) {` ~ "\n";
+                    // s ~= `            version(HUNT_DEBUG) warningf("Can't get data for %s in method %s.` ~ 
+                    //     ` Using the defaults instead.", "` ~ pn ~ `", "` ~ methodName ~ "\");\n";
+                    // s ~= "            " ~ pt ~ " " ~ varName ~ " = " ~ pt ~ ".init;\n";
+                    // s ~= "        } else {\n";
+                    // s ~= "            " ~ pt ~ " " ~ varName ~ " = toObject!(" ~ pt ~ ")(" ~ parametersInJson ~ ");\n";
+                    // s ~= "        }\n";
+                }                
+            }
+
+            static if(is(returnType == void)) {
+                s ~= "                  " ~ methodName ~ "(" ~ varName ~ ");";
+            } else {
+                s ~= "                    auto r = " ~ methodName ~ "(" ~ varName ~ ");";
+            }
+
+        } else {
+            string invokingStatement;
+            invokingStatement ~= methodName ~"(";
+            s ~= "        JSONValue item;\n";
+            string pt;
+            string tempVarName;
+
+            static foreach(int i, string pn; identifiers) {
+                pt = parameterTypes[i].stringof;
+                tempVarName = "__var" ~ i.to!string();
+                s ~= "currentParameterInfo =\"type: " ~ pt ~ ", name: " ~ pn ~ "\";\n"; // for debug
+
+                static if(is(parameterTypes[i] == class) || is(parameterTypes[i] == struct)) {
+                    if(pn == "__body" && (pt == "JSONValue" || pt == "const(JSONValue)") ) {
+                        tempVarName = parametersInJson;
+                    } 
+                } 
+                
+                if(tempVarName != parametersInJson) {
+                    // s ~= `           item = parametersInJson["` ~ pn ~ `"];` ~ "\n";
+                    s ~= format(`           %1$s %2$s = JsonHelper.getItemAs!(%1$s)(%3$s, "%4$s");` ~ "\n\n",
+                            pt, tempVarName, parametersInJson, pn);
+                }
+
+                static if(i == 0) {
+                    invokingStatement ~= tempVarName;
+                } else {
+                    invokingStatement ~= ", " ~ tempVarName;
+                }
+            }
+            // foreach (i, p; identifiers) {
+            //     string pt = parameterTypes[i].stringof;
+            //     s ~= "tttttt=\"" ~ pt ~ "\";\n";
+            //     string tempVarName;
+            //     if(p == "__body" && (pt == "JSONValue" || pt == "const(JSONValue)") ) {
+            //         tempVarName = parametersInJson;
+            //     } else {
+            //         tempVarName = "__var" ~ i.to!string();
+            //         s ~= `           item = parametersInJson["` ~ p ~ `"];` ~ "\n";
+            //         // s ~= "           " ~ pt ~ " " ~ tempVarName ~ "= toObject!(" ~ pt ~")(item);\n\n";
+            //         static if(is(parameterType == class) || is(parameterType == struct)) {
+            //             s ~= format(`        %1$s %2$s = JsonHelper.getAs!(%1$s)(%3$s);` ~ "\n",
+            //                     pt, varName, parametersInJson);
+            //             // s ~= "        " ~ pt ~ " " ~ varName ~ " = toObject!(" ~ pt ~ ")(" ~ parametersInJson ~ ");\n";
+            //         } else {
+            //             enum pn = identifiers[0];
+            //             s ~= format(`        %1$s %2$s = JsonHelper.getItemAs!(%1$s)(%3$s, "%4$s");` ~ "\n",
+            //                     pt, varName, parametersInJson, pn);
+            //         }
+
+            //     }
+                
+            //     if(first) {
+            //         first = false;
+            //         invokingStatement ~= tempVarName;
+            //     } else {
+            //         invokingStatement ~= ", " ~ tempVarName;
+            //     }
+            // }
+            invokingStatement ~= ");";
+
+            static if(is(returnType == void)) {
+                s ~= invokingStatement;
+            } else {
+                s ~= "           auto r = " ~ invokingStatement;
+            }
+        }
+
+        static if(!is(returnType == void)) {
+            s ~=`
+                    if(handler !is null) {
+                        JSONValue resultInJson = toJson(r);
+                        string resultInString = resultInJson.toString();
+                        version(HUNT_DEBUG) tracef("outgoing message: %s", resultInString);
+                        handler(new Nullable!string(resultInString), typeid(string));  
+                    }`;     
+        }
+
+        s ~= `
+                    version(HUNT_DEBUG) tracef("invoking done.");
+                    break;
+                }
+                
+                `;   
+        
+        return s;
+
+    }
+
 }
 
 /**
