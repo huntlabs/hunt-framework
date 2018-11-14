@@ -25,7 +25,7 @@ import hunt.lang.common;
 
 import hunt.framework.exception;
 import hunt.framework.http.session;
-import hunt.framework.routing.route;
+import hunt.framework.routing.Route;
 import hunt.framework.routing.define;
 import hunt.framework.security.acl.User;
 

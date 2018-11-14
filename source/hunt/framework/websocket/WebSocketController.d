@@ -35,7 +35,6 @@ abstract class WebSocketController {
     }
 
     protected void __invoke(string methodName, MessageBase message, ReturnHandler handler );
-
     
 }
 
@@ -79,7 +78,7 @@ mixin template ControllerExtensions(string moduleName = __MODULE__) {
         }
 
         enum str = WebSocketControllerHelper.generateMethodSwitch!(This, moduleName);
-        pragma(msg, str);
+        // pragma(msg, str);
         mixin(str);
 
         version(HUNT_DEBUG) infof("invoking %s done", methodName);
@@ -114,11 +113,6 @@ class WebSocketControllerHelper {
             );
         }
     }
-
-    // WebSocketController getController(string lookupDestination) {
-
-    // }
-
 
     static void registerController(T)() if(is(T : WebSocketController)) {
         WebSocketController builder() {

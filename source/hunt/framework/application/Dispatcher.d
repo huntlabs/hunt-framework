@@ -9,10 +9,10 @@
  *
  */
 
-module hunt.framework.application.dispatcher;
+module hunt.framework.application.Dispatcher;
 
-import hunt.framework.application.controller;
-import hunt.framework.application.config;
+import hunt.framework.application.Controller;
+import hunt.framework.application.AppConfig;
 import hunt.framework.exception;
 import hunt.framework.http.Request;
 import hunt.framework.http.Response;

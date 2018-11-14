@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.framework.routing.config;
+module hunt.framework.routing.RouteConfig;
 
 import hunt.framework.routing.define;
 

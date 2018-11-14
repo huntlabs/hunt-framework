@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.framework.application.application;
+module hunt.framework.application.Application;
 
 import hunt.cache;
 import hunt.container;
@@ -26,7 +26,7 @@ import hunt.http.codec.websocket.stream.WebSocketConnection;
 import hunt.http.codec.websocket.stream.WebSocketPolicy;
 import hunt.http.server;
 
-import hunt.framework.application.dispatcher;
+import hunt.framework.application.Dispatcher;
 import hunt.framework.context.ApplicationContext;
 import hunt.framework.init;
 import hunt.framework.routing;
@@ -35,8 +35,8 @@ import hunt.framework.websocket.WebSocketMessageBroker;
 
 public import hunt.framework.http;
 public import hunt.framework.i18n;
-public import hunt.framework.application.config;
-public import hunt.framework.application.middleware;
+public import hunt.framework.application.AppConfig;
+public import hunt.framework.application.Middleware;
 public import hunt.framework.security.acl.Identity;
 
 public import hunt.entity;

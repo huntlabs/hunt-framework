@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.framework.application.config;
+module hunt.framework.application.AppConfig;
 
 import std.exception;
 import std.parallelism : totalCPUs;
@@ -20,8 +20,8 @@ import std.string;
 import hunt.util.configuration;
 import hunt.logging;
 import hunt.framework.init;
-// import hunt.framework.application.application : WebSocketFactory;
-// import hunt.framework.application.application;
+// import hunt.framework.application.Application : WebSocketFactory;
+// import hunt.framework.application.Application;
 
 
 @Configuration("hunt")

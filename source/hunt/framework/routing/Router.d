@@ -9,13 +9,13 @@
  *
  */
 
-module hunt.framework.routing.router;
+module hunt.framework.routing.Router;
 
 import hunt.framework.routing.define;
-import hunt.framework.routing.routegroup;
-import hunt.framework.routing.route;
-import hunt.framework.routing.config;
-import hunt.framework.application.controller;
+import hunt.framework.routing.RouteGroup;
+import hunt.framework.routing.Route;
+import hunt.framework.routing.RouteConfig;
+import hunt.framework.application.Controller;
 import hunt.framework.simplify;
 
 import hunt.logging;
@@ -348,7 +348,7 @@ class Router
                     routeGroup.addRoute(route);
                 }
             }
-            import hunt.framework.application.config;
+            import hunt.framework.application.AppConfig;
             this.staticRootRoute = this.makeRoute("GET", "/", "staticDir:"~Config.app.http.path, group);
             if (!haveRootRoute)
                 routeGroup.addRoute(staticRootRoute);

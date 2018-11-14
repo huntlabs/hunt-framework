@@ -11,8 +11,8 @@
  
 module hunt.framework.application;
 
-public import hunt.framework.application.controller;
-public import hunt.framework.application.config;
-public import hunt.framework.application.application;
-public import hunt.framework.application.middleware;
+public import hunt.framework.application.Controller;
+public import hunt.framework.application.AppConfig;
+public import hunt.framework.application.Application;
+public import hunt.framework.application.Middleware;
 public import hunt.framework.simplify;

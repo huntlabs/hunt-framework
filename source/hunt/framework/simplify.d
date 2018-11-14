@@ -11,7 +11,7 @@
 
 module hunt.framework.simplify;
 
-public import hunt.framework.application.application : app;
+public import hunt.framework.application.Application : app;
 // public import hunt.framework.http.cookie.CookieManager : cookie;
 
 public import hunt.datetime;
