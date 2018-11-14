@@ -70,15 +70,14 @@ class Dispatcher
                 this._cached[cacheKey] = route;
             }
 
+
+
             // add route's params
             auto params = route.getParams();
-            if (params.length > 0)
+            foreach (param, value; params)
             {
-                foreach (param, value; params)
-                {
-                    // tracef("param=%s, value=%s", param, value);
-                    request.queries()[param] = value;
-                }
+                // tracef("param=%s, value=%s", param, value);
+                request.putQueryParameter(param, value);
             }
 
             request.route = route;

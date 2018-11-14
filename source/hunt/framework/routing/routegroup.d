@@ -18,6 +18,7 @@ import std.algorithm;
 import std.string;
 import std.regex;
 import std.uri : decode;
+import hunt.logging;
 
 /**
 */
@@ -170,7 +171,6 @@ class RouteGroup
                 {
                     params[key] = decode(matched.captures[i + 1]);
                 }
-
                 route.setParams(params);
                 return route;
             }

@@ -228,7 +228,7 @@ final class Request {
 	}
 
 	// get queries
-	@property string[string] queries() {
+	@property ref string[string] queries() {
 		if (_queryParams is null) {
 			MultiMap!string map = new MultiMap!string();
 			getURI().decodeQueryTo(map);
@@ -237,6 +237,10 @@ final class Request {
 			}
 		}
 		return _queryParams;
+	}
+
+	void putQueryParameter(string key, string value) {
+		_queryParams[key] = value;
 	}
 
 	private string[string] _queryParams;
