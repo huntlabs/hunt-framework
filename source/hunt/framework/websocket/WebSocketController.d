@@ -63,7 +63,7 @@ mixin template ControllerExtensions(string moduleName = __MODULE__) {
     
     override protected void __invoke(string methodName, MessageBase message, ReturnHandler handler ) {
 
-        version(HUNT_DEBUG) info("invoking: ", methodName);
+        version(HUNT_DEBUG) infof("invoking %s ...", methodName);
         
         MessageConverter messageConverter = 
             annotationHandler.getMessageConverter();
@@ -81,6 +81,8 @@ mixin template ControllerExtensions(string moduleName = __MODULE__) {
         enum str = WebSocketControllerHelper.generateMethodSwitch!(This, moduleName);
         pragma(msg, str);
         mixin(str);
+
+        version(HUNT_DEBUG) infof("invoking %s done", methodName);
     }
 }
 
@@ -275,19 +277,10 @@ class WebSocketControllerHelper {
                 static if(is(parameterType == class) || is(parameterType == struct)) {
                     s ~= format(`        %1$s %2$s = JsonHelper.getAs!(%1$s)(%3$s);` ~ "\n",
                             pt, varName, parametersInJson);
-                    // s ~= "        " ~ pt ~ " " ~ varName ~ " = toObject!(" ~ pt ~ ")(" ~ parametersInJson ~ ");\n";
                 } else {
                     enum pn = identifiers[0];
                     s ~= format(`        %1$s %2$s = JsonHelper.getItemAs!(%1$s)(%3$s, "%4$s");` ~ "\n",
                             pt, varName, parametersInJson, pn);
-                    // s ~= `        auto item = "` ~ pn ~ `" in ` ~ parametersInJson ~ ";\n";
-                    // s ~= `        if(item is null) {` ~ "\n";
-                    // s ~= `            version(HUNT_DEBUG) warningf("Can't get data for %s in method %s.` ~ 
-                    //     ` Using the defaults instead.", "` ~ pn ~ `", "` ~ methodName ~ "\");\n";
-                    // s ~= "            " ~ pt ~ " " ~ varName ~ " = " ~ pt ~ ".init;\n";
-                    // s ~= "        } else {\n";
-                    // s ~= "            " ~ pt ~ " " ~ varName ~ " = toObject!(" ~ pt ~ ")(" ~ parametersInJson ~ ");\n";
-                    // s ~= "        }\n";
                 }                
             }
 
@@ -327,35 +320,7 @@ class WebSocketControllerHelper {
                     invokingStatement ~= ", " ~ tempVarName;
                 }
             }
-            // foreach (i, p; identifiers) {
-            //     string pt = parameterTypes[i].stringof;
-            //     s ~= "tttttt=\"" ~ pt ~ "\";\n";
-            //     string tempVarName;
-            //     if(p == "__body" && (pt == "JSONValue" || pt == "const(JSONValue)") ) {
-            //         tempVarName = parametersInJson;
-            //     } else {
-            //         tempVarName = "__var" ~ i.to!string();
-            //         s ~= `           item = parametersInJson["` ~ p ~ `"];` ~ "\n";
-            //         // s ~= "           " ~ pt ~ " " ~ tempVarName ~ "= toObject!(" ~ pt ~")(item);\n\n";
-            //         static if(is(parameterType == class) || is(parameterType == struct)) {
-            //             s ~= format(`        %1$s %2$s = JsonHelper.getAs!(%1$s)(%3$s);` ~ "\n",
-            //                     pt, varName, parametersInJson);
-            //             // s ~= "        " ~ pt ~ " " ~ varName ~ " = toObject!(" ~ pt ~ ")(" ~ parametersInJson ~ ");\n";
-            //         } else {
-            //             enum pn = identifiers[0];
-            //             s ~= format(`        %1$s %2$s = JsonHelper.getItemAs!(%1$s)(%3$s, "%4$s");` ~ "\n",
-            //                     pt, varName, parametersInJson, pn);
-            //         }
-
-            //     }
-                
-            //     if(first) {
-            //         first = false;
-            //         invokingStatement ~= tempVarName;
-            //     } else {
-            //         invokingStatement ~= ", " ~ tempVarName;
-            //     }
-            // }
+            
             invokingStatement ~= ");";
 
             static if(is(returnType == void)) {
@@ -376,7 +341,6 @@ class WebSocketControllerHelper {
         }
 
         s ~= `
-                    version(HUNT_DEBUG) tracef("invoking done.");
                     break;
                 }
                 
