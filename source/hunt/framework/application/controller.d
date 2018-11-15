@@ -21,6 +21,8 @@ public import hunt.framework.application.middleware;
 import hunt.cache;
 import hunt.framework.simplify;
 import hunt.framework.view;
+import hunt.validation;
+import hunt.framework.http.Form;
 
 import std.exception;
 import std.traits;
@@ -258,6 +260,10 @@ string __createCallActionMethod(T, string moduleName)()
                                 || paramsType[i].stringof == "uint" || paramsType[i].stringof == "ulong" || paramsType[i].stringof == "ushort" || paramsType[i].stringof == "ifloat" || paramsType[i].stringof == "idouble"
                                  || paramsType[i].stringof == "cfloat" || paramsType[i].stringof == "cdouble")
                                     str ~= "\t\tauto " ~ varName ~ " = this.processGetNumericString(request.get(\"" ~ params[i] ~ "\")).to!" ~ paramsType[i].stringof ~ ";\n";
+                                else static if(is(paramsType[i] : Form))
+                                {
+                                    str ~= "\t\tauto " ~ varName ~ " = request.bindForm!" ~ paramsType[i].stringof ~ "();\n";
+                                }
                                 else
                                     str ~= "\t\tauto " ~ varName ~ " = request.get(\"" ~ params[i] ~ "\").to!" ~ paramsType[i].stringof ~ ";\n";
                             }

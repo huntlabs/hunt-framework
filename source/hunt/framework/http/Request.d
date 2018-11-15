@@ -228,7 +228,7 @@ final class Request {
 	}
 
 	// get queries
-	@property string[string] queries() {
+	@property ref string[string] queries() {
 		if (_queryParams is null) {
 			MultiMap!string map = new MultiMap!string();
 			getURI().decodeQueryTo(map);
@@ -254,6 +254,15 @@ final class Request {
 
 	private string[string] _xFormData;
 
+
+	public T bindForm(T)()
+	{
+		import hunt.util.JsonHelper;
+
+		auto formData  = xFormData();
+		auto jsonData = JSONValue(formData);
+		return JsonHelper.getAs!T(jsonData);
+	}
 	/**
    * Sets the query parameter with the specified name to the specified value.
    *
