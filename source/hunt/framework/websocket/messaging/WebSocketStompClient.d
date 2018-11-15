@@ -25,22 +25,22 @@ module hunt.framework.websocket.messaging.WebSocketStompClient;
 // import java.util.concurrent.ScheduledFuture;
 
 
-// import hunt.framework.context.Lifecycle;
+// import hunt.util.SmartLifecycle;
 // import hunt.framework.context.SmartLifecycle;
 
-// import hunt.framework.messaging.Message;
-// import hunt.framework.messaging.simp.stomp.BufferingStompDecoder;
-// import hunt.framework.messaging.simp.stomp.ConnectionHandlingStompSession;
-// import hunt.framework.messaging.simp.stomp.StompClientSupport;
-// import hunt.framework.messaging.simp.stomp.StompDecoder;
-// import hunt.framework.messaging.simp.stomp.StompEncoder;
-// import hunt.framework.messaging.simp.stomp.StompHeaderAccessor;
-// import hunt.framework.messaging.simp.stomp.StompHeaders;
-// import hunt.framework.messaging.simp.stomp.StompSession;
-// import hunt.framework.messaging.simp.stomp.StompSessionHandler;
-// import hunt.framework.messaging.support.MessageHeaderAccessor;
-// import hunt.framework.messaging.tcp.TcpConnection;
-// import hunt.framework.messaging.tcp.TcpConnectionHandler;
+// import hunt.stomp.Message;
+// import hunt.stomp.simp.stomp.BufferingStompDecoder;
+// import hunt.stomp.simp.stomp.ConnectionHandlingStompSession;
+// import hunt.stomp.simp.stomp.StompClientSupport;
+// import hunt.stomp.simp.stomp.StompDecoder;
+// import hunt.stomp.simp.stomp.StompEncoder;
+// import hunt.stomp.simp.stomp.StompHeaderAccessor;
+// import hunt.stomp.simp.stomp.StompHeaders;
+// import hunt.stomp.simp.stomp.StompSession;
+// import hunt.stomp.simp.stomp.StompSessionHandler;
+// import hunt.stomp.support.MessageHeaderAccessor;
+// import hunt.stomp.tcp.TcpConnection;
+// import hunt.stomp.tcp.TcpConnectionHandler;
 // import hunt.framework.task.TaskScheduler;
 
 // import hunt.framework.util.MimeTypeUtils;
@@ -200,7 +200,7 @@ module hunt.framework.websocket.messaging.WebSocketStompClient;
 
 // 	/**
 // 	 * Connect to the given WebSocket URL and notify the given
-// 	 * {@link hunt.framework.messaging.simp.stomp.StompSessionHandler}
+// 	 * {@link hunt.stomp.simp.stomp.StompSessionHandler}
 // 	 * when connected on the STOMP level after the CONNECTED frame is received.
 // 	 * @param url the url to connect to
 // 	 * @param handler the session handler

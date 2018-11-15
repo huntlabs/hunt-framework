@@ -18,11 +18,11 @@ module hunt.framework.websocket.config.annotation.WebSocketMessageBrokerConfigur
 
 import hunt.framework.websocket.config.annotation.StompEndpointRegistry;
 import hunt.framework.websocket.config.annotation.WebSocketTransportRegistration;
-import hunt.framework.messaging.converter.MessageConverter;
-// import hunt.framework.messaging.handler.invocation.HandlerMethodArgumentResolver;
-// import hunt.framework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
-import hunt.framework.messaging.simp.config.ChannelRegistration;
-import hunt.framework.messaging.simp.config.MessageBrokerRegistry;
+import hunt.stomp.converter.MessageConverter;
+// import hunt.stomp.handler.invocation.HandlerMethodArgumentResolver;
+// import hunt.stomp.handler.invocation.HandlerMethodReturnValueHandler;
+import hunt.stomp.simp.config.ChannelRegistration;
+import hunt.stomp.simp.config.MessageBrokerRegistry;
 
 import hunt.container.List;
 
@@ -53,7 +53,7 @@ abstract class WebSocketMessageBrokerConfigurer {
 	}
 
 	/**
-	 * Configure the {@link hunt.framework.messaging.MessageChannel} used for
+	 * Configure the {@link hunt.stomp.MessageChannel} used for
 	 * incoming messages from WebSocket clients. By default the channel is backed
 	 * by a thread pool of size 1. It is recommended to customize thread pool
 	 * settings for production use.
@@ -62,7 +62,7 @@ abstract class WebSocketMessageBrokerConfigurer {
 	}
 
 	/**
-	 * Configure the {@link hunt.framework.messaging.MessageChannel} used for
+	 * Configure the {@link hunt.stomp.MessageChannel} used for
 	 * outbound messages to WebSocket clients. By default the channel is backed
 	 * by a thread pool of size 1. It is recommended to customize thread pool
 	 * settings for production use.

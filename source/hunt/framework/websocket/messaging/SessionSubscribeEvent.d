@@ -19,7 +19,7 @@ module hunt.framework.websocket.messaging.SessionSubscribeEvent;
 import hunt.framework.websocket.messaging.AbstractSubProtocolEvent;
 
 import hunt.security.Principal;
-import hunt.framework.messaging.Message;
+import hunt.stomp.Message;
 
 /**
  * Event raised when a new WebSocket client using a Simple Messaging Protocol

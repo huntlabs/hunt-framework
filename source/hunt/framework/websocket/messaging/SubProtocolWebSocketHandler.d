@@ -18,11 +18,11 @@ module hunt.framework.websocket.messaging.SubProtocolWebSocketHandler;
 
 import hunt.framework.websocket.messaging.SubProtocolHandler;
 import hunt.framework.websocket.WebSocketSession;
-import hunt.framework.context.Lifecycle;
+import hunt.util.SmartLifecycle;
 
-import hunt.framework.messaging.Message;
-import hunt.framework.messaging.MessageChannel;
-import hunt.framework.messaging.MessagingException;
+import hunt.stomp.Message;
+import hunt.stomp.MessageChannel;
+import hunt.stomp.MessagingException;
 import hunt.framework.websocket.exception;
 import hunt.framework.websocket.SubProtocolCapable;
 import hunt.framework.websocket.WebSocketMessageHandler;

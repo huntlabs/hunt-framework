@@ -17,7 +17,7 @@
 module hunt.framework.websocket.messaging.SessionConnectEvent;
 
 import hunt.framework.websocket.messaging.AbstractSubProtocolEvent;
-import hunt.framework.messaging.Message;
+import hunt.stomp.Message;
 import hunt.security.Principal;
 
 

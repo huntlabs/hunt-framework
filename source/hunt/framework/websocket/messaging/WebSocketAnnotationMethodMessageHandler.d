@@ -18,13 +18,16 @@ module hunt.framework.websocket.messaging.WebSocketAnnotationMethodMessageHandle
 
 import hunt.framework.context.ApplicationContext;
 // import hunt.framework.core.annotation.AnnotationAwareOrderComparator;
+import hunt.framework.websocket.WebSocketController;
 
-import hunt.framework.messaging.MessageChannel;
+import hunt.stomp.Message;
+import hunt.stomp.MessageChannel;
+import hunt.stomp.MessagingException;
 
-// import hunt.framework.messaging.handler.MessagingAdviceBean;
-// import hunt.framework.messaging.handler.annotation.support.AnnotationExceptionHandlerMethodResolver;
-import hunt.framework.messaging.simp.SimpMessageSendingOperations;
-import hunt.framework.messaging.simp.annotation.SimpAnnotationMethodMessageHandler;
+// import hunt.stomp.handler.MessagingAdviceBean;
+// import hunt.stomp.handler.annotation.support.AnnotationExceptionHandlerMethodResolver;
+import hunt.stomp.simp.SimpMessageSendingOperations;
+import hunt.stomp.simp.annotation.SimpAnnotationMethodMessageHandler;
 // import hunt.framework.web.method.ControllerAdviceBean;
 
 import hunt.logging;
@@ -52,19 +55,45 @@ class WebSocketAnnotationMethodMessageHandler : SimpAnnotationMethodMessageHandl
 		super.afterPropertiesSet();
 	}
 
+	// ApplicationContext getApplicationContext() {
+	// 	return this.applicationContext;
+	// }
+
 	private void initControllerAdviceCache() {
-		ApplicationContext context = getApplicationContext();
-		if (context is null) {
-			return;
-		}
+		// ApplicationContext context = getApplicationContext();
+		// if (context is null) {
+		// 	return;
+		// }
+		import hunt.lang.exception;
+		implementationMissing(false);
 		version(HUNT_DEBUG) {
-			trace("Looking for @MessageExceptionHandler mappings: " ~ (cast(Object)context).toString());
+			// trace("Looking for @MessageExceptionHandler mappings: " ~ (cast(Object)context).toString());
 		}
 		// TODO: Tasks pending completion -@zxp at 10/30/2018, 2:39:18 PM
 		// 
 		// ControllerAdviceBean[] beans = ControllerAdviceBean.findAnnotatedBeans(context);
 		// AnnotationAwareOrderComparator.sort(beans);
 		// initMessagingAdviceCache(MessagingControllerAdviceBean.createFromList(beans));
+	}
+
+	override protected void handleMessageInternal(MessageBase message, string lookupDestination) {
+		// FIXME: Needing refactor or cleanup -@zxp at 11/13/2018, 3:07:59 PM
+		// more tests
+		try {
+			WebSocketControllerHelper.invoke(lookupDestination, message, 
+				(Object returnValue, TypeInfo returnType, string[] destinations) {
+				handleReturnValue(returnValue, returnType, message, destinations);
+			});
+		}
+		catch (Exception ex) {
+			warning(ex.msg);
+			// processHandlerMethodException(handlerMethod, ex, message);
+		}
+		catch (Throwable ex) {
+			warning(ex.msg);
+			Exception handlingException = new MessageHandlingException(message, 
+				"Unexpected handler method invocation error", ex);
+		}
 	}
 
 	// private void initMessagingAdviceCache(MessagingAdviceBean[] beans) {

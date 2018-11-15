@@ -16,7 +16,7 @@
 
 module hunt.framework.websocket.AbstractWebSocketSession;
 
-import hunt.framework.messaging.IdGenerator;
+import hunt.stomp.IdGenerator;
 import hunt.http.codec.websocket.model.CloseStatus;
 import hunt.framework.websocket.WebSocketSession;
 

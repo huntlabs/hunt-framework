@@ -22,6 +22,7 @@ import hunt.container;
 import hunt.logging;
 import hunt.lang.exception;
 import hunt.lang.common;
+import hunt.util.MimeTypeUtils;
 
 import hunt.framework.exception;
 import hunt.framework.http.session;
@@ -108,7 +109,7 @@ final class Request {
 	}
 
 	package(hunt.framework) void onMessageCompleted() {
-		string contentType = MimeTypes.getContentTypeMIMEType(
+		string contentType = MimeTypeUtils.getContentTypeMIMEType(
 				_httpFields.get(HttpHeader.CONTENT_TYPE));
 		_isXFormUrlencoded = std.string.icmp("application/x-www-form-urlencoded", contentType) == 0;
 		if (_isXFormUrlencoded) {

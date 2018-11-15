@@ -22,18 +22,18 @@ import hunt.framework.websocket.config.annotation.WebSocketTransportRegistration
 
 // import hunt.framework.beans.factory.config.CustomScopeConfigurer;
 import hunt.framework.context.ApplicationContext;
-import hunt.framework.context.Lifecycle;
+import hunt.util.SmartLifecycle;
 // import hunt.framework.context.annotation.Bean;
 // import hunt.framework.http.converter.json.Jackson2ObjectMapperBuilder;
 
-// import hunt.framework.messaging.converter.MappingJackson2MessageConverter;
-import hunt.framework.messaging.simp.SimpSessionScope;
-import hunt.framework.messaging.simp.annotation.SimpAnnotationMethodMessageHandler;
-import hunt.framework.messaging.simp.broker.AbstractBrokerMessageHandler;
-import hunt.framework.messaging.simp.config.AbstractMessageBrokerConfiguration;
-import hunt.framework.messaging.simp.config.MessageBrokerRegistry;
-import hunt.framework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
-// import hunt.framework.messaging.simp.user.SimpUserRegistry;
+// import hunt.stomp.converter.MappingJackson2MessageConverter;
+import hunt.stomp.simp.SimpSessionScope;
+import hunt.stomp.simp.annotation.SimpAnnotationMethodMessageHandler;
+import hunt.stomp.simp.broker.AbstractBrokerMessageHandler;
+import hunt.stomp.simp.config.AbstractMessageBrokerConfiguration;
+import hunt.stomp.simp.config.MessageBrokerRegistry;
+import hunt.stomp.simp.stomp.StompBrokerRelayMessageHandler;
+// import hunt.stomp.simp.user.SimpUserRegistry;
 // import hunt.framework.web.servlet.HandlerMapping;
 // import hunt.framework.websocket.config.WebSocketMessageBrokerStats;
 // import hunt.framework.websocket.messaging.DefaultSimpUserRegistry;
@@ -66,9 +66,12 @@ class WebSocketMessageBrokerConfiguration : AbstractMessageBrokerConfiguration {
 	private WebSocketTransportRegistration transportRegistration;
 	Action1!(StompEndpointRegistry) endpointRegistryHandler;
 	Action1!(MessageBrokerRegistry) messageBrokerRegistryHandler;
+	
+	protected ApplicationContext applicationContext;
 
 	this(ApplicationContext context) {
-		super(context);
+		// super(); // context
+		applicationContext = context;
 	}
 
 	// void onStompEndpointsRegister(Action1!(StompEndpointRegistry) handler) {

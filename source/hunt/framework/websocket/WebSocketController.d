@@ -2,9 +2,9 @@ module hunt.framework.websocket.WebSocketController;
 
 import hunt.lang.common;
 import hunt.logging;
-import hunt.framework.messaging.simp.annotation.SimpAnnotationMethodMessageHandler;
-import hunt.framework.messaging.annotation;
-import hunt.framework.messaging.Message;
+import hunt.stomp.simp.annotation.SimpAnnotationMethodMessageHandler;
+import hunt.stomp.annotation;
+import hunt.stomp.Message;
 
 import std.algorithm;
 import std.array;
@@ -42,15 +42,14 @@ abstract class WebSocketController {
 /**
 */
 mixin template ControllerExtensions(string moduleName = __MODULE__) {
-    import hunt.framework.messaging.Message;
-    import hunt.framework.messaging.converter.AbstractMessageConverter;
-    import hunt.framework.messaging.converter.MessageConverter;
-    import hunt.framework.messaging.converter.MessageConverterHelper;
-    import hunt.http.codec.http.model.MimeTypes;
+    import hunt.stomp.Message;
+    import hunt.stomp.converter.AbstractMessageConverter;
+    import hunt.stomp.converter.MessageConverter;
+    import hunt.stomp.converter.MessageConverterHelper;
     import hunt.lang.Nullable;
     import hunt.logging;
     import hunt.util.JsonHelper;
-    import hunt.util.serialize;
+    import hunt.util.MimeType;
     import std.json;
 
     alias This = typeof(this);
@@ -327,7 +326,7 @@ class WebSocketControllerHelper {
         static if(!is(returnType == void)) {
             s ~=`
                     if(handler !is null) {
-                        JSONValue resultInJson = toJson(r);
+                        JSONValue resultInJson = JsonHelper.toJson(r);
                         string resultInString = resultInJson.toString();
                         version(HUNT_DEBUG) tracef("outgoing message: %s", resultInString);
                         handler(new Nullable!string(resultInString), typeid(string));  

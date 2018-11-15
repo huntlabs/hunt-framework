@@ -18,7 +18,7 @@ module hunt.framework.websocket.server.WebSocketHandlerMapping;
 
 // import javax.servlet.ServletContext;
 
-// import hunt.framework.context.Lifecycle;
+// import hunt.util.SmartLifecycle;
 // import hunt.framework.context.SmartLifecycle;
 // import hunt.framework.web.context.ServletContextAware;
 // import hunt.framework.web.servlet.handler.SimpleUrlHandlerMapping;

@@ -18,11 +18,11 @@ module hunt.framework.websocket.messaging.StompSubProtocolErrorHandler;
 
 import hunt.framework.websocket.messaging.SubProtocolErrorHandler;
 
-import hunt.framework.messaging.Message;
-import hunt.framework.messaging.simp.stomp.StompCommand;
-import hunt.framework.messaging.simp.stomp.StompHeaderAccessor;
-import hunt.framework.messaging.support.MessageBuilder;
-import hunt.framework.messaging.support.MessageHeaderAccessor;
+import hunt.stomp.Message;
+import hunt.stomp.simp.stomp.StompCommand;
+import hunt.stomp.simp.stomp.StompHeaderAccessor;
+import hunt.stomp.support.MessageBuilder;
+import hunt.stomp.support.MessageHeaderAccessor;
 
 /**
  * A {@link SubProtocolErrorHandler} for use with STOMP.

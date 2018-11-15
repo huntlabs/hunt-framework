@@ -22,8 +22,8 @@ import hunt.framework.websocket.WebSocketSession;
 import hunt.http.codec.websocket.model.CloseStatus;
 import hunt.http.codec.websocket.stream.WebSocketConnection;
 
-import hunt.framework.messaging.Message;
-import hunt.framework.messaging.MessageChannel;
+import hunt.stomp.Message;
+import hunt.stomp.MessageChannel;
 
 // alias WebSocketMessage = WebSocketFrame;
 // alias WebSocketSession = WebSocketConnection;

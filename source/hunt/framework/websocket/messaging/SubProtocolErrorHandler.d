@@ -16,7 +16,7 @@
 
 module hunt.framework.websocket.messaging.SubProtocolErrorHandler;
 
-import hunt.framework.messaging.Message;
+import hunt.stomp.Message;
 
 /**
  * A contract for handling sub-protocol errors sent to clients.
@@ -45,7 +45,7 @@ interface SubProtocolErrorHandler(T) {
 
 	/**
 	 * Handle errors sent from the server side to clients, e.g. errors from the
-	 * {@link hunt.framework.messaging.simp.stomp.StompBrokerRelayMessageHandler
+	 * {@link hunt.stomp.simp.stomp.StompBrokerRelayMessageHandler
 	 * "broke relay"} because connectivity failed or the external broker sent an
 	 * error message, etc.
 	 * @param errorMessage the error message, never {@code null}
