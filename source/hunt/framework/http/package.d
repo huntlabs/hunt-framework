@@ -18,4 +18,5 @@ public import hunt.framework.http.DownloadResponse;
 public import hunt.framework.http.JsonResponse;
 public import hunt.framework.http.RedirectResponse;
 public import hunt.framework.http.session;
+public import hunt.framework.http.Form;
 
