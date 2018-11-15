@@ -16,14 +16,15 @@
 
 module hunt.framework.messaging.converter.StringMessageConverter;
 
-import hunt.lang.Charset;
-import hunt.lang.exception;
-
 import hunt.framework.messaging.converter.AbstractMessageConverter;
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageHeaders;
 
 import hunt.http.codec.http.model.MimeTypes;
+
+import hunt.lang.Charset;
+import hunt.lang.exception;
+import hunt.logging;
 
 /**
  * A {@link MessageConverter} that supports MIME type "text/plain" with the
@@ -43,15 +44,17 @@ class StringMessageConverter : AbstractMessageConverter {
 
 	this(Charset defaultCharset) {
 		super(new MimeType("text/plain", defaultCharset));
-		assert(defaultCharset, "Default Charset must not be null");
+		assert(defaultCharset !is null, "Default Charset must not be null");
 		this.defaultCharset = defaultCharset;
 	}
 
 
-	// override
-	// protected bool supports(Class<?> clazz) {
-	// 	return (string.class == clazz);
-	// }
+	override
+	protected bool supports(TypeInfo typeInfo) {
+		// version(HUNT_DEBUG) tracef("checking message type, expected: %s, actual: %s", 
+		// 	typeid(string), typeInfo);
+		return (typeid(string) == typeInfo);
+	}
 
 	// override
 	// protected Object convertFromInternal(MessageBase message, Class<?> targetClass, Object conversionHint) {
@@ -61,14 +64,16 @@ class StringMessageConverter : AbstractMessageConverter {
 	// }
 
 	// override
-	
 	// protected Object convertToInternal(
 	// 		Object payload, MessageHeaders headers, Object conversionHint) {
 
-	// 	if (byte[].class == getSerializedPayloadClass()) {
-	// 		Charset charset = getContentTypeCharset(getMimeType(headers));
-	// 		payload = ((string) payload).getBytes(charset);
-	// 	}
+	// 	// trace("xxxxxx=>", typeid(payload));
+	// 	// TypeInfo rawType = cast(TypeInfo)conversionHint;
+
+	// 	// if (byte[].class == getSerializedPayloadClass()) {
+	// 	// 	Charset charset = getContentTypeCharset(getMimeType(headers));
+	// 	// 	payload = ((string) payload).getBytes(charset);
+	// 	// }
 	// 	return payload;
 	// }
 

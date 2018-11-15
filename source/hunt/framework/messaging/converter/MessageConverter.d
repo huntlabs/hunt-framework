@@ -41,9 +41,8 @@ interface MessageConverter {
 	 * @param targetClass the target class for the conversion
 	 * @return the result of the conversion, or {@code null} if the converter cannot
 	 * perform the conversion
-	 */
-	
-	// Object fromMessage(MessageBase message, Class!(T) targetClass);
+	 */	
+	Object fromMessage(MessageBase message, TypeInfo targetClass);
 
 	/**
 	 * Create a {@link Message} whose payload is the result of converting the given
@@ -57,8 +56,7 @@ interface MessageConverter {
 	 * @param headers optional headers for the message (may be {@code null})
 	 * @return the new message, or {@code null} if the converter does not support the
 	 * Object type or the target media type
-	 */
-	
+	 */	
 	MessageBase toMessage(Object payload, MessageHeaders headers);
 
 }

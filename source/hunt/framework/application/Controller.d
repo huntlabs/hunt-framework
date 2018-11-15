@@ -9,14 +9,14 @@
  *
  */
 
-module hunt.framework.application.controller;
+module hunt.framework.application.Controller;
 
 import hunt.logging;
 
 public import hunt.framework.http.Response;
 public import hunt.framework.http.Request;
 public import hunt.framework.routing;
-public import hunt.framework.application.middleware;
+public import hunt.framework.application.Middleware;
 
 import hunt.cache;
 import hunt.framework.simplify;
@@ -39,7 +39,7 @@ abstract class Controller
         Response _response;
         View _view;
         ///called before all actions
-        MiddlewareInterface[] middlewares;
+        Middleware[] middlewares;
     }
 
     @property View view()
@@ -74,7 +74,7 @@ abstract class Controller
 
     ///add middleware
     ///return true is ok, the named middleware is already exist return false
-    bool addMiddleware(MiddlewareInterface m)
+    bool addMiddleware(Middleware m)
     {
         if (m is null)
             return false;
@@ -89,7 +89,7 @@ abstract class Controller
     }
 
     // get all middleware
-    MiddlewareInterface[] getMiddlewares()
+    Middleware[] getMiddlewares()
     {
         return this.middlewares;
     }
@@ -317,7 +317,7 @@ string __createRouteMap(T, string moduleName)()
     // pragma(msg, "moduleName: ", moduleName);
 
     str ~= q{
-        import hunt.framework.application.staticfile;
+        import hunt.framework.application.StaticfileController;
         addRouteList("hunt.application.staticfile.StaticfileController.doStaticFile", 
             &callHandler!(StaticfileController, "doStaticFile"));
     };

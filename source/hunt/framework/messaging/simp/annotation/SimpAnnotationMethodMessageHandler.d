@@ -17,7 +17,6 @@
 module hunt.framework.messaging.simp.annotation.SimpAnnotationMethodMessageHandler;
 
 import hunt.framework.messaging.simp.annotation.AbstractMethodMessageHandler;
-import hunt.framework.messaging.converter.CompositeMessageConverter;
 
 // import hunt.framework.beans.factory.config.ConfigurableBeanFactory;
 import hunt.framework.context.ApplicationContext;
@@ -30,12 +29,14 @@ import hunt.framework.context.Lifecycle;
 
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageChannel;
+import hunt.framework.messaging.MessageHeaders;
 
+import hunt.framework.messaging.converter.AbstractMessageConverter;
 import hunt.framework.messaging.converter.ByteArrayMessageConverter;
 import hunt.framework.messaging.converter.CompositeMessageConverter;
 import hunt.framework.messaging.converter.MessageConverter;
 import hunt.framework.messaging.converter.StringMessageConverter;
-// import hunt.framework.messaging.core.AbstractMessageSendingTemplate;
+import hunt.framework.messaging.core.AbstractMessageSendingTemplate;
 // import hunt.framework.messaging.handler.DestinationPatternsMessageCondition;
 // import hunt.framework.messaging.handler.HandlerMethod;
 // import hunt.framework.messaging.handler.annotation.MessageMapping;
@@ -58,6 +59,7 @@ import hunt.framework.messaging.simp.SimpAttributesContextHolder;
 import hunt.framework.messaging.simp.SimpMessageHeaderAccessor;
 import hunt.framework.messaging.simp.SimpMessageMappingInfo;
 import hunt.framework.messaging.simp.SimpMessageSendingOperations;
+import hunt.framework.messaging.simp.SimpMessageType;
 import hunt.framework.messaging.simp.SimpMessageTypeMessageCondition;
 import hunt.framework.messaging.simp.SimpMessagingTemplate;
 // import hunt.framework.messaging.simp.annotation.SubscribeMapping;
@@ -94,7 +96,7 @@ class SimpAnnotationMethodMessageHandler :
 		 // EmbeddedValueResolverAware
 	private SubscribableChannel clientInboundChannel;
 
-	// private SimpMessageSendingOperations clientMessagingTemplate;
+	private SimpMessageSendingOperations clientMessagingTemplate;
 
 	private SimpMessageSendingOperations brokerTemplate;
 
@@ -134,7 +136,7 @@ class SimpAnnotationMethodMessageHandler :
 		pathMatcher = new AntPathMatcher();
 		lifecycleMonitor = new Object();
 		this.clientInboundChannel = clientInboundChannel;
-		// this.clientMessagingTemplate = new SimpMessagingTemplate(clientOutboundChannel);
+		this.clientMessagingTemplate = new SimpMessagingTemplate(clientOutboundChannel);
 		this.brokerTemplate = brokerTemplate;
 
 		MessageConverter[] converters = [
@@ -181,8 +183,7 @@ class SimpAnnotationMethodMessageHandler :
 	 */
 	void setMessageConverter(MessageConverter converter) {
 		this.messageConverter = converter;
-		implementationMissing(false);
-		// ((AbstractMessageSendingTemplate<?>) this.clientMessagingTemplate).setMessageConverter(converter);
+		(cast(AbstractMessageSendingTemplate!string) this.clientMessagingTemplate).setMessageConverter(converter);
 	}
 
 	/**
@@ -461,6 +462,32 @@ class SimpAnnotationMethodMessageHandler :
 			}
 		}
 		return null;
+	}
+
+	override protected void handleReturnValue(Object returnValue, TypeInfo returnType, 
+			MessageBase message, string[] destinations) {
+		MessageHeaders headers = message.getHeaders();
+		string sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
+		version(HUNT_DEBUG) tracef("raw return type: %s", returnType);
+		MessageHeaders hs = createHeaders(sessionId, returnType);
+		foreach (string destination ; destinations) {
+			version(HUNT_DEBUG) trace("handling destination: ", destination);
+			this.brokerTemplate.convertAndSend(destination, returnValue, hs);
+		}
+	}
+
+	private MessageHeaders createHeaders(string sessionId, TypeInfo returnType) {
+		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+		if (getHeaderInitializer() !is null) {
+			getHeaderInitializer().initHeaders(headerAccessor);
+		}
+
+		if (!sessionId.empty) {
+			headerAccessor.setSessionId(sessionId);
+		}
+		headerAccessor.setHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER, returnType);
+		headerAccessor.setLeaveMutable(true);
+		return headerAccessor.getMessageHeaders();
 	}
 
 	// override

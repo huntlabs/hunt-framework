@@ -1,4 +1,4 @@
-module hunt.framework.application.staticfile;
+module hunt.framework.application.StaticfileController;
 
 import core.time;
 import std.conv;
@@ -11,8 +11,8 @@ import std.stdio;
 import hunt.logging;
 
 import hunt.framework;
-import hunt.framework.application.controller;
-// import hunt.framework.application.config;
+import hunt.framework.application.Controller;
+// import hunt.framework.application.AppConfig;
 import hunt.framework.utils.string;
 
 import hunt.http.codec.http.model.HttpHeader;

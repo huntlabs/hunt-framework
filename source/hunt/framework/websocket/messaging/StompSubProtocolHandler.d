@@ -324,7 +324,9 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 					// }
 				}
 				if (this.eventPublisher !is null) {
-					implementationMissing(false);
+					// TODO: Tasks pending completion -@zxp at 11/13/2018, 3:15:58 PM
+					// 
+					// implementationMissing(false);
 					// Principal user = getUser(session);
 					// if (isConnect) {
 					// 	publishEvent(this.eventPublisher, new SessionConnectEvent(this, message, user));
@@ -348,7 +350,9 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 	private Principal getUser(WebSocketSession session) {
 		// Principal user = this.stompAuthentications.get(session.getId());
 		// return (user !is null ? user : session.getPrincipal());
-		implementationMissing(false);
+		// implementationMissing(false);
+		// TODO: Tasks pending completion -@zxp at 11/13/2018, 3:27:06 PM
+		// 
 		return null;
 	}
 

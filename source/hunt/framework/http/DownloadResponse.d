@@ -9,7 +9,7 @@ import std.file;
 import std.stdio;
 
 import hunt.framework.init;
-import hunt.framework.application.config;
+import hunt.framework.application.AppConfig;
 // import hunt.framework.http.cookie;
 import hunt.framework.utils.string;
 import hunt.framework.versions;

@@ -16,20 +16,24 @@
 
 module hunt.framework.messaging.converter.AbstractMessageConverter;
 
+import hunt.framework.messaging.converter.ContentTypeResolver;
+import hunt.framework.messaging.converter.DefaultContentTypeResolver;
 import hunt.framework.messaging.converter.SmartMessageConverter;
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageHeaders;
+import hunt.framework.messaging.support.GenericMessage;
 import hunt.framework.messaging.support.MessageBuilder;
 import hunt.framework.messaging.support.MessageHeaderAccessor;
 
-import hunt.http.codec.http.model.MimeTypes;
 
-import hunt.lang.exception;
-import hunt.logging;
 import hunt.container;
+import hunt.http.codec.http.model.MimeTypes;
+import hunt.lang.exception;
+import hunt.lang.Nullable;
+import hunt.logging;
+import hunt.util.TypeUtils;
 
 import std.array;
-
 
 
 /**
@@ -47,7 +51,7 @@ abstract class AbstractMessageConverter : SmartMessageConverter {
 
 	private MimeType[] supportedMimeTypes;
 
-	// private ContentTypeResolver contentTypeResolver = new DefaultContentTypeResolver();
+	private ContentTypeResolver contentTypeResolver;
 
 	private bool strictContentTypeMatch = false;
 
@@ -61,6 +65,7 @@ abstract class AbstractMessageConverter : SmartMessageConverter {
 	protected this(MimeType supportedMimeType) {
 		assert(supportedMimeType, "supportedMimeType is required");
 		this.supportedMimeTypes = [supportedMimeType];
+		contentTypeResolver = new DefaultContentTypeResolver();
 	}
 
 	/**
@@ -70,6 +75,7 @@ abstract class AbstractMessageConverter : SmartMessageConverter {
 	protected this(MimeType[] supportedMimeTypes) {
 		assert(supportedMimeTypes.length>0, "supportedMimeTypes must not be null");
 		this.supportedMimeTypes = supportedMimeTypes;
+		contentTypeResolver = new DefaultContentTypeResolver();
 	}
 
 
@@ -89,17 +95,17 @@ abstract class AbstractMessageConverter : SmartMessageConverter {
 	 * ignore all messages.
 	 * <p>By default, a {@code DefaultContentTypeResolver} instance is used.
 	 */
-	// void setContentTypeResolver(ContentTypeResolver resolver) {
-	// 	this.contentTypeResolver = resolver;
-	// }
+	void setContentTypeResolver(ContentTypeResolver resolver) {
+		this.contentTypeResolver = resolver;
+	}
 
 	/**
 	 * Return the configured {@link ContentTypeResolver}.
 	 */
 	
-	// ContentTypeResolver getContentTypeResolver() {
-	// 	return this.contentTypeResolver;
-	// }
+	ContentTypeResolver getContentTypeResolver() {
+		return this.contentTypeResolver;
+	}
 
 	/**
 	 * Whether this converter should convert messages for which no content type
@@ -128,25 +134,6 @@ abstract class AbstractMessageConverter : SmartMessageConverter {
 		return this.strictContentTypeMatch;
 	}
 
-	/**
-	 * Configure the preferred serialization class to use (byte[] or string) when
-	 * converting an Object payload to a {@link Message}.
-	 * <p>The default value is byte[].
-	 * @param payloadClass either byte[] or string
-	 */
-	// void setSerializedPayloadClass(Class<?> payloadClass) {
-	// 	assert(byte[].class == payloadClass || string.class == payloadClass,
-	// 			() -> "Payload class must be byte[] or string: " ~ payloadClass);
-	// 	this.serializedPayloadClass = payloadClass;
-	// }
-
-	/**
-	 * Return the configured preferred serialization payload class.
-	 */
-	// Class<?> getSerializedPayloadClass() {
-	// 	return this.serializedPayloadClass;
-	// }
-
 
 	/**
 	 * Returns the default content type for the payload. Called when
@@ -156,29 +143,29 @@ abstract class AbstractMessageConverter : SmartMessageConverter {
 	 * supportedMimeTypes}, if any. Can be overridden in sub-classes.
 	 * @param payload the payload being converted to message
 	 * @return the content type, or {@code null} if not known
-	 */
-	
+	 */	
 	protected MimeType getDefaultContentType(Object payload) {
 		MimeType[] mimeTypes = getSupportedMimeTypes();
 		return (mimeTypes.length >0 ? mimeTypes[0] : null);
 	}
 
-	// override
-	// final Object fromMessage(MessageBase message, Class<?> targetClass) {
-	// 	return fromMessage(message, targetClass, null);
-	// }
+	final Object fromMessage(MessageBase message, TypeInfo targetClass) {
+		return fromMessage(message, targetClass, null);
+	}
 
-	// override
-	// final Object fromMessage(MessageBase message, Class<?> targetClass, Object conversionHint) {
-	// 	if (!canConvertFrom(message, targetClass)) {
-	// 		return null;
-	// 	}
-	// 	return convertFromInternal(message, targetClass, conversionHint);
-	// }
+	final Object fromMessage(MessageBase message, TypeInfo targetClass, TypeInfo conversionHint) {
+		if (!canConvertFrom(message, targetClass)) {
+			return null;
+		}
+		return convertFromInternal(message, targetClass, conversionHint);
+	}
 
-	// protected bool canConvertFrom(MessageBase message, Class<?> targetClass) {
-	// 	return (supports(targetClass) && supportsMimeType(message.getHeaders()));
-	// }
+	protected bool canConvertFrom(MessageBase message, TypeInfo targetClass) {
+		bool r = (supports(targetClass) && supportsMimeType(message.getHeaders()));
+		version(HUNT_DEBUG) tracef("checking message, target: %s, converter: %s, result: %s", 
+			targetClass, TypeUtils.getSimpleName(typeid(this)), r);
+		return r;
+	}
 
 	override	
 	final MessageBase toMessage(Object payload, MessageHeaders headers) {
@@ -186,44 +173,94 @@ abstract class AbstractMessageConverter : SmartMessageConverter {
 	}
 
 	override
-	final MessageBase toMessage(Object payload, MessageHeaders headers, Object conversionHint) {
-		if (!canConvertTo(payload, headers)) {
+	final MessageBase toMessage(Object payload, MessageHeaders headers, TypeInfo conversionHint) {
+		version(HUNT_DEBUG) trace("converting message...");
+		if (!canConvertTo(payload, headers, conversionHint)) {
+			version(HUNT_DEBUG) warning("A message can't be converted.");
+			return null;
+		}
+		
+		version(HUNT_DEBUG) {
+			if(conversionHint !is null)
+				tracef("conversionHint: %s", conversionHint);
+		}
+
+		Object payloadToUse = convertToInternal(payload, headers, conversionHint);
+		if (payloadToUse is null) {
+			warningf("Can't convert payload: %s", typeid((cast(Object)payload)));
 			return null;
 		}
 
-		implementationMissing(false);
-		return null;
+		MimeType mimeType = getDefaultContentType(payloadToUse);
+		if (headers !is null) {
+			MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor!(MessageHeaderAccessor)(headers);
+			if (accessor !is null && accessor.isMutable()) {
+				if (mimeType !is null) {
+					accessor.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE, mimeType);
+				}
 
-		// Object payloadToUse = convertToInternal(payload, headers, conversionHint);
-		// if (payloadToUse is null) {
-		// 	return null;
-		// }
+				if(conversionHint == typeid(TypeInfo_Class) || conversionHint == typeid(TypeInfo_Interface))
+					return MessageHelper.createMessage!(Object)(payloadToUse, accessor.getMessageHeaders());
+				else {
+					INullable t = cast(INullable)payloadToUse;
+					if(t is null)  {
+						warningf("Can't handle: %s", typeid((cast(Object)payloadToUse)));
+						return null;
+					} else {
+						// TODO: Tasks pending completion -@zxp at 11/12/2018, 3:02:11 PM
+						// handle payload of byte[]
+						return new GenericMessage!(string)(payloadToUse.toString(), 
+							accessor.getMessageHeaders());
+					}
+				}
+			}
+		}
 
-		// MimeType mimeType = getDefaultContentType(payloadToUse);
-		// if (headers !is null) {
-		// 	MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(headers, MessageHeaderAccessor.class);
-		// 	if (accessor !is null && accessor.isMutable()) {
-		// 		if (mimeType !is null) {
-		// 			accessor.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE, mimeType);
-		// 		}
-		// 		return MessageHelper.createMessage(payloadToUse, accessor.getMessageHeaders());
-		// 	}
-		// }
+		if(conversionHint == typeid(TypeInfo_Class) || conversionHint == typeid(TypeInfo_Interface)) {
+			MessageBuilder!Object builder = MessageHelper.withPayload(payloadToUse);
+			if (headers !is null) {
+				builder.copyHeaders(headers);
+			}
+			if (mimeType !is null) {
+				builder.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE, mimeType);
+			}
+			return builder.build();
+		} else {
+			INullable t = cast(INullable)payloadToUse;
+			if(t is null)  {
+				warningf("Can't handle: %s", typeid((cast(Object)payloadToUse)));
+				return null;
+			} else {
+				// TODO: Tasks pending completion -@zxp at 11/12/2018, 3:02:11 PM
+				// handle payload of byte[]
+				// MessageBuilder!(byte[]) builder = 
+				// 	MessageHelper.withPayload!(byte[])(cast(byte[])payloadToUse.toString());
+				MessageBuilder!(string) builder = 
+					MessageHelper.withPayload!(string)(payloadToUse.toString());
+				if (headers !is null) {
+					builder.copyHeaders(headers);
+				}
+				if (mimeType !is null) {
+					builder.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE, mimeType);
+				}
+				return builder.build();
+			}
+		}
 
-		// MessageBuilder<?> builder = MessageBuilder.withPayload(payloadToUse);
-		// if (headers !is null) {
-		// 	builder.copyHeaders(headers);
-		// }
-		// if (mimeType !is null) {
-		// 	builder.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE, mimeType);
-		// }
-		// return builder.build();
 	}
 
-	protected bool canConvertTo(Object payload, MessageHeaders headers) {
-		// return (supports(payload.getClass()) && supportsMimeType(headers));
-		implementationMissing(false);
-		return false;
+	protected bool canConvertTo(Object payload, MessageHeaders headers, TypeInfo conversionHint) {
+		bool r = false;
+		if(conversionHint !is null) {
+			r = (supports(conversionHint) && supportsMimeType(headers));
+			version(HUNT_DEBUG) tracef("checking payload, type: %s, converter: %s, result: %s", 
+				conversionHint, TypeUtils.getSimpleName(typeid(this)), r);
+		} else {
+			r = (supports(typeid(payload)) && supportsMimeType(headers));
+			version(HUNT_DEBUG) tracef("checking payload, type: %s, converter: %s, result: %s", 
+				typeid(payload), TypeUtils.getSimpleName(typeid(this)), r);
+		}
+		return r;
 	}
 
 	protected bool supportsMimeType(MessageHeaders headers) {
@@ -239,7 +276,6 @@ abstract class AbstractMessageConverter : SmartMessageConverter {
 
 		foreach (MimeType current ; getSupportedMimeTypes()) {
 			MimeType currentBaseType = current.getBaseType();
-			// if (current.getType().equals(mimeType.getType()) && current.getSubtype().equals(mimeType.getSubtype())) 
 			if(currentBaseType.isSame(mimeTypeName))
 				return true;
 		}
@@ -248,10 +284,8 @@ abstract class AbstractMessageConverter : SmartMessageConverter {
 
 	
 	protected MimeType getMimeType(MessageHeaders headers) {
-		// return (headers !is null && this.contentTypeResolver !is null ? this.contentTypeResolver.resolve(headers) : null);
-		// TODO: Tasks pending completion -@zxp at 10/30/2018, 4:25:10 PM
-		// 
-		return null;
+		return (headers !is null && this.contentTypeResolver !is null ? 
+			this.contentTypeResolver.resolve(headers) : null);
 	}
 
 
@@ -260,7 +294,7 @@ abstract class AbstractMessageConverter : SmartMessageConverter {
 	 * @param clazz the class to test for support
 	 * @return {@code true} if supported; {@code false} otherwise
 	 */
-	// protected abstract  supports(Class<?> clazz);
+	protected abstract bool supports(TypeInfo typeInfo);
 
 	/**
 	 * Convert the message payload from serialized form to an Object.
@@ -273,11 +307,18 @@ abstract class AbstractMessageConverter : SmartMessageConverter {
 	 * @since 4.2
 	 */
 	
-	// protected Object convertFromInternal(
-	// 		MessageBase message, Class<?> targetClass, Object conversionHint) {
+	protected Object convertFromInternal(
+			MessageBase message, TypeInfo targetClass, TypeInfo conversionHint) {
+		
+		auto m = cast(GenericMessage!(byte[]))message;
+		if(targetClass == typeid(string)) {
+			return new Nullable!string(cast(string) m.getPayload());
+		} else {
+            warningf("Can't handle message for type: %s", targetClass);
+        }
 
-	// 	return null;
-	// }
+		return null;
+	}
 
 	/**
 	 * Convert the payload object to serialized form.
@@ -290,10 +331,10 @@ abstract class AbstractMessageConverter : SmartMessageConverter {
 	 * @since 4.2
 	 */
 	
-	// protected Object convertToInternal(
-	// 		Object payload, MessageHeaders headers, Object conversionHint) {
-
-	// 	return null;
-	// }
+	protected Object convertToInternal(
+			Object payload, MessageHeaders headers, TypeInfo conversionHint) {
+				
+		return payload;
+	}
 
 }

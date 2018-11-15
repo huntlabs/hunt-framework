@@ -9,15 +9,16 @@
  *
  */
 
-module hunt.framework.routing.routegroup;
+module hunt.framework.routing.RouteGroup;
 
 import hunt.framework.routing.define;
-import hunt.framework.routing.route;
+import hunt.framework.routing.Route;
 
 import std.algorithm;
 import std.string;
 import std.regex;
 import std.uri : decode;
+import hunt.logging;
 
 /**
 */
@@ -170,7 +171,6 @@ class RouteGroup
                 {
                     params[key] = decode(matched.captures[i + 1]);
                 }
-
                 route.setParams(params);
                 return route;
             }

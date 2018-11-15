@@ -16,19 +16,12 @@
 
 module hunt.framework.messaging.simp.annotation.AbstractMethodMessageHandler;
 
-
-import hunt.container;
-import hunt.lang.exception;
-import hunt.lang.Nullable;
-import hunt.logging;
-import hunt.util.TypeUtils;
-
-import std.array;
-import std.conv;
-import std.string;
+import hunt.framework.messaging.simp.SimpMessageHeaderAccessor;
+import hunt.framework.messaging.simp.SimpMessageType;
 
 // import hunt.framework.beans.factory.InitializingBean;
 import hunt.framework.context.ApplicationContext;
+import hunt.framework.websocket.WebSocketController;
 // import hunt.framework.context.ApplicationContextAware;
 // import hunt.framework.core.MethodIntrospector;
 // import hunt.framework.core.MethodParameter;
@@ -45,6 +38,16 @@ import hunt.framework.messaging.support.MessageHeaderAccessor;
 // import hunt.framework.util.ClassUtils;
 // import hunt.framework.util.concurrent.ListenableFuture;
 // import hunt.framework.util.concurrent.ListenableFutureCallback;
+
+import hunt.container;
+import hunt.lang.exception;
+import hunt.lang.Nullable;
+import hunt.logging;
+import hunt.util.TypeUtils;
+
+import std.array;
+import std.conv;
+import std.string;
 
 /**
  * Abstract base class for HandlerMethod-based message handling. Provides most of
@@ -101,7 +104,6 @@ abstract class AbstractMethodMessageHandler(T)
 	// 		new LinkedHashMap<>(64);
 
 	this() {
-
 	}
 
 	/**
@@ -463,42 +465,27 @@ abstract class AbstractMethodMessageHandler(T)
 		return null;
 	}
 
+	protected void handleReturnValue(Object returnValue, TypeInfo returnType, 
+			MessageBase message, string[] destinations) ;
+
 	protected void handleMessageInternal(MessageBase message, string lookupDestination) {
-		implementationMissing(false);
-		// List!(Match) matches = new ArrayList!(Match)();
-
-		// List!(T) mappingsByUrl = this.destinationLookup.get(lookupDestination);
-		// if (mappingsByUrl !is null) {
-		// 	addMatchesToCollection(mappingsByUrl, message, matches);
-		// }
-		// if (matches.isEmpty()) {
-		// 	// No direct hits, go through all mappings
-		// 	Set!(T) allMappings = this.handlerMethods.keySet();
-		// 	addMatchesToCollection(allMappings, message, matches);
-		// }
-		// if (matches.isEmpty()) {
-		// 	handleNoMatch(this.handlerMethods.keySet(), lookupDestination, message);
-		// 	return;
-		// }
-
-		// Comparator!(Match) comparator = new MatchComparator(getMappingComparator(message));
-		// matches.sort(comparator);
-		// version(HUNT_DEBUG) {
-		// 	trace("Found " ~ matches.size() ~ " handler methods: " ~ matches);
-		// }
-
-		// Match bestMatch = matches.get(0);
-		// if (matches.size() > 1) {
-		// 	Match secondBestMatch = matches.get(1);
-		// 	if (comparator.compare(bestMatch, secondBestMatch) == 0) {
-		// 		Method m1 = bestMatch.handlerMethod.getMethod();
-		// 		Method m2 = secondBestMatch.handlerMethod.getMethod();
-		// 		throw new IllegalStateException("Ambiguous handler methods mapped for destination '" ~
-		// 				lookupDestination ~ "': {" ~ m1 ~ ", " ~ m2 ~ "}");
-		// 	}
-		// }
-
-		// handleMatch(bestMatch.mapping, bestMatch.handlerMethod, lookupDestination, message);
+		// FIXME: Needing refactor or cleanup -@zxp at 11/13/2018, 3:07:59 PM
+		// more tests
+		try {
+			WebSocketControllerHelper.invoke(lookupDestination, message, 
+				(Object returnValue, TypeInfo returnType, string[] destinations) {
+				handleReturnValue(returnValue, returnType, message, destinations);
+			});
+		}
+		catch (Exception ex) {
+			warning(ex.msg);
+			// processHandlerMethodException(handlerMethod, ex, message);
+		}
+		catch (Throwable ex) {
+			warning(ex.msg);
+			Exception handlingException = new MessageHandlingException(message, 
+				"Unexpected handler method invocation error", ex);
+		}
 	}
 
 	// private void addMatchesToCollection(Collection!(T) mappingsToCheck, MessageBase message, List!(Match) matches) {
@@ -520,9 +507,9 @@ abstract class AbstractMethodMessageHandler(T)
 	
 	// protected abstract T getMatchingMapping(T mapping, MessageBase message);
 
-	protected void handleNoMatch(Set!(T) ts, string lookupDestination, MessageBase message) {
-		trace("No matching message handler methods.");
-	}
+	// protected void handleNoMatch(Set!(T) ts, string lookupDestination, MessageBase message) {
+	// 	trace("No matching message handler methods.");
+	// }
 
 	/**
 	 * Return a comparator for sorting matching mappings.

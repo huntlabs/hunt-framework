@@ -223,7 +223,7 @@ class MessageHeaders : AbstractMap!(string, Object) {
 	T getAs(T=Object)(string key) {
 		Object value = this.headers.get(key);
 		if (value is null) {
-			version(HUNT_DEBUG) warningf("header does not exist: %s", key);
+			// version(HUNT_DEBUG) warningf("header does not exist: %s", key);
 			return T.init;
 		}
 		// if (!type.isAssignableFrom(value.getClass())) {

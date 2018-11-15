@@ -13,6 +13,7 @@ import hunt.http.codec.websocket.frame.Frame;
 import hunt.http.codec.websocket.stream.AbstractWebSocketBuilder;
 import hunt.http.codec.websocket.stream.WebSocketConnection;
 import hunt.http.codec.websocket.stream.WebSocketPolicy;
+import hunt.framework.websocket.WebSocketController;
 import hunt.http.server.WebSocketHandler;
 import hunt.lang.common;
 
@@ -50,6 +51,7 @@ class WebSocketMessageBroker  {
 
         annotationMethodMessageHandler = 
             brokerConfiguration.simpAnnotationMethodMessageHandler(); 
+        WebSocketControllerHelper.annotationMethodMessageHandler = annotationMethodMessageHandler;
 
         brokerConfiguration.stompBrokerRelayMessageHandler();
         Lifecycle brokerMessageHandler = brokerConfiguration.simpleBrokerMessageHandler();

@@ -45,35 +45,35 @@ class CompositeMessageConverter : SmartMessageConverter {
 	 * Create an instance with the given converters.
 	 */
 	this(MessageConverter[] converters) {
-		assert(converters, "Converters must not be empty");
+		assert(converters !is null, "Converters must not be empty");
 		this.converters = converters;
 	}
 
 
-	// override	
-	// Object fromMessage(MessageBase message, Class<?> targetClass) {
-	// 	for (MessageConverter converter : getConverters()) {
-	// 		Object result = converter.fromMessage(message, targetClass);
-	// 		if (result !is null) {
-	// 			return result;
-	// 		}
-	// 	}
-	// 	return null;
-	// }
+	override	
+	Object fromMessage(MessageBase message, TypeInfo targetClass) {
+		foreach (MessageConverter converter ; getConverters()) {
+			Object result = converter.fromMessage(message, targetClass);
+			if (result !is null) {
+				return result;
+			}
+		}
+		return null;
+	}
 
-	// override
-	
-	// Object fromMessage(MessageBase message, Class<?> targetClass, Object conversionHint) {
-	// 	for (MessageConverter converter : getConverters()) {
-	// 		Object result = (converter instanceof SmartMessageConverter ?
-	// 				((SmartMessageConverter) converter).fromMessage(message, targetClass, conversionHint) :
-	// 				converter.fromMessage(message, targetClass));
-	// 		if (result !is null) {
-	// 			return result;
-	// 		}
-	// 	}
-	// 	return null;
-	// }
+	override
+	Object fromMessage(MessageBase message, TypeInfo targetClass, TypeInfo conversionHint) {
+		foreach (MessageConverter converter ; getConverters()) {
+			auto smc = cast(SmartMessageConverter) converter;
+
+			Object result = (smc is null ? converter.fromMessage(message, targetClass) :
+				smc.fromMessage(message, targetClass, conversionHint));
+			if (result !is null) {
+				return result;
+			}
+		}
+		return null;
+	}
 
 	override
 	MessageBase toMessage(Object payload, MessageHeaders headers) {
@@ -87,7 +87,7 @@ class CompositeMessageConverter : SmartMessageConverter {
 	}
 
 	override
-	MessageBase toMessage(Object payload, MessageHeaders headers, Object conversionHint) {
+	MessageBase toMessage(Object payload, MessageHeaders headers, TypeInfo conversionHint) {
 		foreach (MessageConverter converter ; getConverters()) {
 			auto smc = cast(SmartMessageConverter) converter;
 			MessageBase result = (smc !is null ? smc.toMessage(payload, headers, conversionHint) :

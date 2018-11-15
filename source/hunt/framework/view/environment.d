@@ -18,7 +18,7 @@ import std.path;
 import std.stdio;
 
 import hunt.logging;
-import hunt.framework.application.config;
+import hunt.framework.application.AppConfig;
 import hunt.framework.view.match;
 import hunt.framework.view.rule;
 import hunt.framework.view.parser;

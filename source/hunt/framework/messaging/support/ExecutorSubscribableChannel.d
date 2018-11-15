@@ -180,7 +180,9 @@ class ExecutorSubscribableChannel : AbstractSubscribableChannel {
 		
 		private MessageBase applyBeforeHandle(MessageBase message) {
 			MessageBase messageToUse = message;
-			implementationMissing(false);
+			// TODO: Tasks pending completion -@zxp at 11/13/2018, 2:17:10 PM
+			// 
+			// implementationMissing(false);
 			// foreach (ExecutorChannelInterceptor interceptor ; executorInterceptors) {
 			// 	messageToUse = interceptor.beforeHandle(messageToUse, ExecutorSubscribableChannel.this, this.messageHandler);
 			// 	if (messageToUse is null) {
@@ -197,7 +199,9 @@ class ExecutorSubscribableChannel : AbstractSubscribableChannel {
 		}
 
 		private void triggerAfterMessageHandled(MessageBase message, Exception ex) {
-			implementationMissing(false);
+			// TODO: Tasks pending completion -@zxp at 11/13/2018, 2:17:31 PM
+			// 
+			// implementationMissing(false);
 			for (int i = this.interceptorIndex; i >= 0; i--) {
 				// ExecutorChannelInterceptor interceptor = executorInterceptors.get(i);
 				// try {

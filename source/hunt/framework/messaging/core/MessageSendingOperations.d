@@ -81,7 +81,7 @@ interface MessageSendingOperations(T) {
 	 * @param payload the Object to use as payload
 	 * @param postProcessor the post processor to apply to the message
 	 */
-	void convertAndSend(Object payload, MessagePostProcessor!T postProcessor);
+	void convertAndSend(Object payload, MessagePostProcessor postProcessor);
 
 	/**
 	 * Convert the given Object to serialized form, possibly using a
@@ -92,7 +92,7 @@ interface MessageSendingOperations(T) {
 	 * @param payload the Object to use as payload
 	 * @param postProcessor the post processor to apply to the message
 	 */
-	void convertAndSend(T destination, Object payload, MessagePostProcessor!T postProcessor);
+	void convertAndSend(T destination, Object payload, MessagePostProcessor postProcessor);
 
 	/**
 	 * Convert the given Object to serialized form, possibly using a
@@ -105,6 +105,6 @@ interface MessageSendingOperations(T) {
 	 * @param postProcessor the post processor to apply to the message
 	 */
 	void convertAndSend(T destination, Object payload, Map!(string, Object) headers,
-			MessagePostProcessor!T postProcessor);
+			MessagePostProcessor postProcessor);
 
 }

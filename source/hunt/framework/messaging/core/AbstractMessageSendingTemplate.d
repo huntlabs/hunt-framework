@@ -20,15 +20,14 @@ import hunt.container.Map;
 import hunt.logging;
 import hunt.lang.exception;
 
-import hunt.framework.messaging.core.MessageSendingOperations;
-
-import hunt.framework.messaging.Message;
-import hunt.framework.messaging.MessageHeaders;
-import hunt.framework.messaging.MessagingException;
-
 import hunt.framework.messaging.converter.MessageConverter;
 import hunt.framework.messaging.converter.SimpleMessageConverter;
 import hunt.framework.messaging.converter.SmartMessageConverter;
+import hunt.framework.messaging.core.MessagePostProcessor;
+import hunt.framework.messaging.core.MessageSendingOperations;
+import hunt.framework.messaging.Message;
+import hunt.framework.messaging.MessageHeaders;
+import hunt.framework.messaging.MessagingException;
 
 
 /**
@@ -158,36 +157,56 @@ abstract class AbstractMessageSendingTemplate(T) : MessageSendingOperations!(T) 
 	protected Message!(T) doConvert(Object payload, Map!(string, Object) headers,
 			MessagePostProcessor postProcessor) {
 
-		// MessageHeaders messageHeaders = null;
-		// Object conversionHint = (headers !is null ? headers.get(CONVERSION_HINT_HEADER) : null);
+		MessageHeaders messageHeaders = null;
 
-		// Map!(string, Object) headersToUse = processHeadersToSend(headers);
-		// if (headersToUse !is null) {
-		// 	if (headersToUse instanceof MessageHeaders) {
-		// 		messageHeaders = (MessageHeaders) headersToUse;
-		// 	}
-		// 	else {
-		// 		messageHeaders = new MessageHeaders(headersToUse);
-		// 	}
-		// }
+		Map!(string, Object) headersToUse = processHeadersToSend(headers);
+		if (headersToUse !is null) {
+			messageHeaders = cast(MessageHeaders) headersToUse;
+			if (messageHeaders is null) {
+				messageHeaders = new MessageHeaders(headersToUse);
+			}
+		}
 
-		// MessageConverter converter = getMessageConverter();
-		// MessageBase message = (converter instanceof SmartMessageConverter ?
-		// 		((SmartMessageConverter) converter).toMessage(payload, messageHeaders, conversionHint) :
-		// 		converter.toMessage(payload, messageHeaders));
-		// if (message is null) {
-		// 	string payloadType = payload.getClass().getName();
-		// 	Object contentType = (messageHeaders !is null ? messageHeaders.get(MessageHeaders.CONTENT_TYPE) : null);
-		// 	throw new MessageConversionException("Unable to convert payload with type='" ~ payloadType +
-		// 			"', contentType='" ~ contentType ~ "', converter=[" ~ getMessageConverter() ~ "]");
-		// }
-		// if (postProcessor !is null) {
-		// 	message = postProcessor.postProcessMessage(message);
-		// }
-		// return message;
-		
-		implementationMissing(flase);
-		return null;
+		Object conversionHintObj = (headers !is null ? headers.get(CONVERSION_HINT_HEADER) : null);
+		TypeInfo conversionHint = cast(TypeInfo)conversionHintObj;
+		MessageConverter converter = getMessageConverter();
+
+		version(HUNT_DEBUG) {
+			if(conversionHint is null)
+				warningf("conversionHintObj: %s", conversionHintObj);
+			else
+				tracef("conversionHint: %s", conversionHint);
+			tracef("MessageConverter is: %s", typeid(cast(Object)converter));
+		}
+
+		SmartMessageConverter smc = cast(SmartMessageConverter) converter;
+		MessageBase message;
+		if(smc is null)
+			message = converter.toMessage(payload, messageHeaders);
+		else
+			message = smc.toMessage(payload, messageHeaders, conversionHint);
+
+		if (message is null) {
+			version(HUNT_DEBUG) warning("message is null");
+			string payloadType = typeid(payload).toString();
+			Object contentType = (messageHeaders !is null ? messageHeaders.get(MessageHeaders.CONTENT_TYPE) : null);
+			if(contentType is null) {
+				throw new MessageConversionException("Unable to convert payload with type='null', converter=[" ~ 
+						(cast(Object) getMessageConverter()).toString() ~ "]");
+			} else {
+				throw new MessageConversionException("Unable to convert payload with type='" ~ payloadType ~
+						"', contentType='" ~ contentType.toString() ~ "', converter=[" ~ 
+						(cast(Object) getMessageConverter()).toString() ~ "]");
+			}
+		}
+
+		if (postProcessor !is null) {
+			message = postProcessor.postProcessMessage(message);
+		}
+		Message!(T) r = cast(Message!(T)) message;
+		if(r is null)
+			warningf("Message conversion error, expected: %s, actual: %s", typeid(Message!(T)), typeid(message));
+		return r;
 	}
 
 	/**

@@ -9,10 +9,10 @@
  *
  */
 
-module hunt.framework.application.dispatcher;
+module hunt.framework.application.Dispatcher;
 
-import hunt.framework.application.controller;
-import hunt.framework.application.config;
+import hunt.framework.application.Controller;
+import hunt.framework.application.AppConfig;
 import hunt.framework.exception;
 import hunt.framework.http.Request;
 import hunt.framework.http.Response;
@@ -70,15 +70,14 @@ class Dispatcher
                 this._cached[cacheKey] = route;
             }
 
+
+
             // add route's params
             auto params = route.getParams();
-            if (params.length > 0)
+            foreach (param, value; params)
             {
-                foreach (param, value; params)
-                {
-                    // tracef("param=%s, value=%s", param, value);
-                    request.queries()[param] = value;
-                }
+                // tracef("param=%s, value=%s", param, value);
+                request.putQueryParameter(param, value);
             }
 
             request.route = route;

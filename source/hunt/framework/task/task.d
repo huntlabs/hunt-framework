@@ -202,7 +202,7 @@ __gshared private TaskManager _taskMInstance;
 TaskManager GetTaskMObject()
 {
     if (_taskMInstance is null) {
-        import hunt.framework.application.application;
+        import hunt.framework.application.Application;
         _taskMInstance = new TaskManager();
         _taskMInstance.setEventLoop(app().mainLoop());
     }

@@ -104,7 +104,7 @@ __gshared private Environment _envInstance;
 
 View GetViewObject()
 {
-    import hunt.framework.application.config;
+    import hunt.framework.application.AppConfig;
     if (_envInstance is null)
     {
         _envInstance = new Environment;

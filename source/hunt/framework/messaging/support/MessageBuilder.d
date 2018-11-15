@@ -113,19 +113,19 @@ final class MessageBuilder(T) {
 	 * existing values. Use { {@link #copyHeadersIfAbsent(Map)} to avoid overwriting
 	 * values. Note that the 'id' and 'timestamp' header values will never be overwritten.
 	 */
-	// MessageBuilder!(T) copyHeaders(Map<string, ?> headersToCopy) {
-	// 	this.headerAccessor.copyHeaders(headersToCopy);
-	// 	return this;
-	// }
+	MessageBuilder!(T) copyHeaders(Map!(string, Object) headersToCopy) {
+		this.headerAccessor.copyHeaders(headersToCopy);
+		return this;
+	}
 
 	/**
 	 * Copy the name-value pairs from the provided Map. This operation will <em>not</em>
 	 * overwrite any existing values.
 	 */
-	// MessageBuilder!(T) copyHeadersIfAbsent(Map<string, ?> headersToCopy) {
-	// 	this.headerAccessor.copyHeadersIfAbsent(headersToCopy);
-	// 	return this;
-	// }
+	MessageBuilder!(T) copyHeadersIfAbsent(Map!(string, Object) headersToCopy) {
+		this.headerAccessor.copyHeadersIfAbsent(headersToCopy);
+		return this;
+	}
 
 	MessageBuilder!(T) setReplyChannel(MessageChannel replyChannel) {
 		this.headerAccessor.setReplyChannel(replyChannel);
@@ -153,12 +153,14 @@ final class MessageBuilder(T) {
 			return this.originalMessage;
 		}
 		MessageHeaders headersToUse = this.headerAccessor.toMessageHeaders();
-		Throwable th = cast(Throwable) this.payload;
-		if (th !is null) {
-			return cast(Message!(T)) new ErrorMessage(th, headersToUse);
-		} else {
-			return new GenericMessage!(T)(this.payload, headersToUse);
-		}
+		static if(is(T == class) || is(T == interface)) {
+			Throwable th = cast(Throwable) this.payload;
+			if (th !is null) {
+				return cast(Message!(T)) new ErrorMessage(th, headersToUse);
+			} 
+		} 
+		
+		return new GenericMessage!(T)(this.payload, headersToUse);
 	}
 
 }
@@ -196,15 +198,21 @@ class MessageHelper {
 	 * @return the created message
 	 * @since 4.1
 	 */
-	
-	static Message!(T) createMessage(T)(T payload, MessageHeaders messageHeaders) {
+	static MessageBase createMessage(T)(Object payload, MessageHeaders messageHeaders) 
+		if(is(T == class) || is(T == interface)) {
 		// assert(payload, "Payload must not be null");
 		assert(messageHeaders, "MessageHeaders must not be null");
-		static if(is(T == class) || is(T == interface)) {
-			Throwable th = cast(Throwable) payload;
-			if (th !is null) 
-				return new ErrorMessage(th, messageHeaders);
-		}
+		Throwable th = cast(Throwable) payload;
+		if (th !is null) 
+			return new ErrorMessage(th, messageHeaders);
+		return new GenericMessage!(T)(payload, messageHeaders);
+	}
+
+	static Message!(T) createMessage(T)(T payload, MessageHeaders messageHeaders) 
+		if(!is(T == class) && !is(T == interface)) {
+		// assert(payload, "Payload must not be null");
+		assert(messageHeaders, "MessageHeaders must not be null");
+
 		return new GenericMessage!(T)(payload, messageHeaders);
 	}
 }

@@ -20,8 +20,12 @@ import hunt.framework.messaging.converter.MessageConverter;
 
 import hunt.framework.messaging.Message;
 import hunt.framework.messaging.MessageHeaders;
+import hunt.framework.messaging.support.GenericMessage;
 import hunt.framework.messaging.support.MessageBuilder;
 import hunt.framework.messaging.support.MessageHeaderAccessor;
+
+import hunt.logging;
+import hunt.lang.exception;
 
 /**
  * A simple converter that simply unwraps the message payload as long as it matches the
@@ -33,24 +37,31 @@ import hunt.framework.messaging.support.MessageHeaderAccessor;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class SimpleMessageConverter(T) : MessageConverter!(T) {
+class SimpleMessageConverter : MessageConverter {
 
-	// override
-	
-	// public Object fromMessage(MessageBase message, Class!(T) targetClass) {
-	// 	Object payload = message.getPayload();
-	// 	return (ClassUtils.isAssignableValue(targetClass, payload) ? payload : null);
-	// }
+	override
+	Object fromMessage(MessageBase message, TypeInfo targetClass) {
+		TypeInfo payloadType = message.payloadType;
 
-	// override
-	// public Message!(T) toMessage(Object payload, MessageHeaders headers) {
-	// 	if (headers !is null) {
-	// 		MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(headers, MessageHeaderAccessor.class);
-	// 		if (accessor !is null && accessor.isMutable()) {
-	// 			return MessageHelper.createMessage(payload, accessor.getMessageHeaders());
-	// 		}
-	// 	}
-	// 	return MessageBuilder.withPayload(payload).copyHeaders(headers).build();
-	// }
+		GenericMessage!(string) gm = cast(GenericMessage!(string))message;
+		if(gm is null)
+			return null;
+
+		string payload = gm.getPayload();
+		// return (ClassUtils.isAssignableValue(targetClass, payload) ? payload : null);
+		implementationMissing(false);
+		return null;
+	}
+
+	override
+	MessageBase toMessage(Object payload, MessageHeaders headers) {
+		if (headers !is null) {
+			MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor!(MessageHeaderAccessor)(headers);
+			if (accessor !is null && accessor.isMutable()) {
+				return MessageHelper.createMessage!(Object)(payload, accessor.getMessageHeaders());
+			}
+		}
+		return MessageHelper.withPayload(payload).copyHeaders(headers).build();
+	}
 
 }
