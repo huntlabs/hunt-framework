@@ -57,8 +57,9 @@ View [hunt-skeleton](https://github.com/huntlabs/hunt-skeleton) example project 
 2. [Caching](https://github.com/huntlabs/hunt-framework/wiki/Cache)
 3. [Middleware](https://github.com/huntlabs/hunt-framework/wiki/Middleware)
 4. [Configuration](https://github.com/huntlabs/hunt-framework/wiki/Configuration)
-5. Validation
+5. [Validation](https://github.com/huntlabs/hunt-framework/wiki/Validation)
 6. [Entity & Repository](https://github.com/huntlabs/hunt-framework/wiki/Database)
+7. [Form](https://github.com/huntlabs/hunt-framework/wiki/Form)
 7. [Template Engine](https://github.com/huntlabs/hunt-framework/wiki/View)
 8. Task Worker
 9. Security
