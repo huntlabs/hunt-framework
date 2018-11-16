@@ -339,7 +339,7 @@ final class Application : ApplicationContext {
     }
 
     private void buildHttpServer(AppConfig conf) {
-        logDebug("addr:", conf.http.address, ":", conf.http.port);
+        version(HUNT_DEBUG) logDebug("addr:", conf.http.address, ":", conf.http.port);
 
         SimpleWebSocketHandler webSocketHandler = new SimpleWebSocketHandler();
         webSocketHandler.setWebSocketPolicy(_webSocketPolicy);
@@ -390,7 +390,7 @@ private:
         //if(conf.webSocketFactory)
         //    _wfactory = conf.webSocketFactory;
 
-        logDebug(conf.route.groups);
+        version(HUNT_DEBUG) logDebug(conf.route.groups);
 
         version (NO_TASKPOOL) {
         }

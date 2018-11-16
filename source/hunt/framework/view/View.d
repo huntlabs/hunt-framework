@@ -85,7 +85,7 @@ class View
     {
         import std.stdio;
 
-        trace("---rend context :", _context.toString);
+        version (HUNT_DEBUG) trace("---rend context :", _context.toString);
         return _env.render_file(tempalteFile ~ _extName, _context);
     }
 

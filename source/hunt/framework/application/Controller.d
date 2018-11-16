@@ -106,11 +106,11 @@ abstract class Controller
 
     protected final Response doMiddleware()
     {
-        debug logDebug("doMiddlware ..");
+        version (HUNT_DEBUG) logDebug("doMiddlware ..");
 
         foreach (m; middlewares)
         {
-            debug logDebugf("do %s onProcess ..", m.name());
+            version (HUNT_DEBUG) logDebugf("do %s onProcess ..", m.name());
 
             auto response = m.onProcess(this.request, this.response);
             if (response is null)
@@ -118,7 +118,7 @@ abstract class Controller
                 continue;
             }
 
-            debug logDebugf("Middleware %s is to retrun.", m.name);
+            version (HUNT_DEBUG) logDebugf("Middleware %s is to retrun.", m.name);
             return response;
         }
 

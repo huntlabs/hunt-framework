@@ -28,14 +28,14 @@ class StaticfileController : Controller
     Response doStaticFile()
     {
 		string currentPath = request.route.staticFilePath;
-		debug logDebug("currentPath: ", currentPath);
+		version (HUNT_DEBUG) logDebug("currentPath: ", currentPath);
         if (currentPath == string.init)
         {
 			currentPath = Config.app.http.path;
         }
 
         string staticFilename = mendPath(currentPath);
-		debug logDebug ("staticFilename: ", staticFilename);
+		version (HUNT_DEBUG) logDebug ("staticFilename: ", staticFilename);
 
         if (staticFilename == string.init)
         {

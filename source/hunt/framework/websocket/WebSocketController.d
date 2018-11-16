@@ -170,7 +170,7 @@ class WebSocketControllerHelper {
         string method, string[] receivers) {
 
         MessageMappingInfo info = new MessageMappingInfo(name, controller, method, receivers);
-        infof("adding: name=%s, controller=%s, method=%s, receivers=%s", 
+        version(HUNT_DEBUG) infof("adding: name=%s, controller=%s, method=%s, receivers=%s", 
             name, controller, method, receivers);
 
         auto r = messageMappings.filter!(m => m.name == name);

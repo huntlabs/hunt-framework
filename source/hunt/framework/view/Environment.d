@@ -106,7 +106,7 @@ public:
 
     ASTNode parse_template(string filename)
     {
-        trace("parse file path : ",input_path ~ filename);
+        version (HUNT_DEBUG) trace("parse file path : ",input_path ~ filename);
         return _parser.parse_template(input_path ~ filename);
     }
 
