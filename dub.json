@@ -6,6 +6,7 @@
     "description": "A high performance full-stack Web framework.",
     "dependencies": {
         "hunt-http": "~>0.0.7",
+        "hunt-stomp": "~>0.0.1-beta.1",
         "hunt-cache": "~>0.2.0",
         "hunt-entity": "~>2.0.2"
     },
