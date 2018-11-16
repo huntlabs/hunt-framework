@@ -16,6 +16,6 @@ import hunt.validation.ConstraintValidatorContext;
 
 interface Form 
 {
-    ///valid result 
-    ConstraintValidatorContext getResult();
+    ///make valid and return result 
+    ConstraintValidatorContext valid();
 }
