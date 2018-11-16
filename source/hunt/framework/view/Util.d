@@ -9,17 +9,17 @@
  *
  */
 
-module hunt.framework.view.util;
+module hunt.framework.view.Util;
 
-import hunt.framework.view.element;
-import hunt.framework.view.rule;
+import hunt.framework.view.Element;
+import hunt.framework.view.Rule;
 import std.stdio;
 import std.regex;
 
 class Util
 {
     static int level = 1;
-public:
+
     static void debug_ast(Element e)
     {
         level++;

@@ -9,13 +9,13 @@
  *
  */
 
-module hunt.framework.view.rule;
+module hunt.framework.view.Rule;
 
 import std.regex;
 import std.exception;
 import std.string;
 
-import hunt.framework.view.match;
+import hunt.framework.view.Match;
 
 void template_engine_throw(string type, string message) {
 	throw new Exception("[Template Engine exception." ~ type ~ "] " ~ message);
@@ -91,7 +91,7 @@ enum  Loop {
 	ForMapIn
 }
 
-static this()
+shared static this()
 {
 	regex_map_delimiters = [
 		Delimiter.Statement :  ("\\{\\%\\s*(.+?)\\s*\\%\\}"),
@@ -175,4 +175,4 @@ enum string[Function] regex_map_functions = [
 enum ElementNotation {
 	Dot,
 	Pointer
-};
+}

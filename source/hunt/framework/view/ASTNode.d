@@ -9,13 +9,12 @@
  *
  */
 
-module hunt.framework.view.ast;
+module hunt.framework.view.ASTNode;
 
-import hunt.framework.view.element;
+import hunt.framework.view.Element;
 
 class ASTNode
 {
-public:
     Element parsed_node;
 
     this()

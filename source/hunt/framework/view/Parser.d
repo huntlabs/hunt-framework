@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.framework.view.parser;
+module hunt.framework.view.Parser;
 
 import std.string;
 import std.file;
@@ -18,12 +18,12 @@ import std.conv;
 import std.stdio;
 
 import hunt.logging;
-import hunt.framework.view.rule;
-import hunt.framework.view.element;
-import hunt.framework.view.match;
-import hunt.framework.view.ast;
-import hunt.framework.view.util;
-import hunt.framework.view.cache;
+import hunt.framework.view.Rule;
+import hunt.framework.view.Element;
+import hunt.framework.view.Match;
+import hunt.framework.view.ASTNode;
+import hunt.framework.view.Util;
+import hunt.framework.view.ASTCacheManager;
 
 class Parser
 {

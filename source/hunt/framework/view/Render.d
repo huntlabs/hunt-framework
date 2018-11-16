@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.framework.view.render;
+module hunt.framework.view.Render;
 
 import std.string;
 import std.file;
@@ -23,11 +23,11 @@ import std.functional;
 
 import hunt.logging;
 
-import hunt.framework.view.rule;
-import hunt.framework.view.element;
-import hunt.framework.view.match;
-import hunt.framework.view.ast;
-import hunt.framework.view.util;
+import hunt.framework.view.Rule;
+import hunt.framework.view.Element;
+import hunt.framework.view.Match;
+import hunt.framework.view.ASTNode;
+import hunt.framework.view.Util;
 
 import hunt.framework.routing;
 import hunt.framework.simplify;

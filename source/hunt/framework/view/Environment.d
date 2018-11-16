@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.framework.view.environment;
+module hunt.framework.view.Environment;
 
 import std.string;
 import std.json;
@@ -19,12 +19,12 @@ import std.stdio;
 
 import hunt.logging;
 import hunt.framework.application.AppConfig;
-import hunt.framework.view.match;
-import hunt.framework.view.rule;
-import hunt.framework.view.parser;
-import hunt.framework.view.render;
-import hunt.framework.view.util;
-import hunt.framework.view.ast;
+import hunt.framework.view.Match;
+import hunt.framework.view.Rule;
+import hunt.framework.view.Parser;
+import hunt.framework.view.Render;
+import hunt.framework.view.Util;
+import hunt.framework.view.ASTNode;
 
 class Environment
 {

@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.framework.view.cache;
+module hunt.framework.view.ASTCacheManager;
 
 import std.stdio;
 import std.array;
@@ -17,7 +17,7 @@ import std.string;
 import core.sync.rwmutex;
 import std.digest.sha;
 import std.digest.md;
-import hunt.framework.view.ast;
+import hunt.framework.view.ASTNode;
 
 class ASTCacheManager
 {

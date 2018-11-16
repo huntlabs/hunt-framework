@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.framework.view.match;
+module hunt.framework.view.Match;
 
 import std.regex;
 import std.string;
@@ -18,7 +18,7 @@ import std.stdio;
 import std.conv;
 import std.algorithm.sorting;
 
-import hunt.framework.view.rule;
+import hunt.framework.view.Rule;
 
 class Match
 {

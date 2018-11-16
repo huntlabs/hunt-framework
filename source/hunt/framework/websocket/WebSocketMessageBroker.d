@@ -2,7 +2,7 @@
 module hunt.framework.websocket.WebSocketMessageBroker;
 
 import hunt.framework.context.ApplicationContext;
-import hunt.util.SmartLifecycle;
+import hunt.util.Lifecycle;
 
 import hunt.stomp.simp.annotation.SimpAnnotationMethodMessageHandler;
 import hunt.stomp.simp.config.MessageBrokerRegistry;

@@ -9,12 +9,12 @@
  *
  */
 
-module hunt.framework.view.element;
+module hunt.framework.view.Element;
 
 import std.string;
 import std.variant;
 import std.json;
-import hunt.framework.view.rule;
+import hunt.framework.view.Rule;
 
 class Element
 {

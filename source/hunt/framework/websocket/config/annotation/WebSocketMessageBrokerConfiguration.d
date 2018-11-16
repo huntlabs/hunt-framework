@@ -22,7 +22,7 @@ import hunt.framework.websocket.config.annotation.WebSocketTransportRegistration
 
 // import hunt.framework.beans.factory.config.CustomScopeConfigurer;
 import hunt.framework.context.ApplicationContext;
-import hunt.util.SmartLifecycle;
+import hunt.util.Lifecycle;
 // import hunt.framework.context.annotation.Bean;
 // import hunt.framework.http.converter.json.Jackson2ObjectMapperBuilder;
 

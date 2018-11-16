@@ -130,10 +130,10 @@ class WebSocketControllerHelper {
 
         // 
         foreach (memberName; __traits(derivedMembers, T)) {
-            pragma(msg, "member: " ~ memberName);
+            version (HUNT_DEBUG) pragma(msg, "member: " ~ memberName);
 
             static if (isType!(__traits(getMember, T, memberName))) {
-                pragma(msg, "skipping type defination: " ~ memberName);
+                version (HUNT_DEBUG) pragma(msg, "skipping type defination: " ~ memberName);
             } else {
                 enum memberProtection = __traits(getProtection, __traits(getMember, T, memberName));
                 static if (memberProtection == "private"
@@ -189,10 +189,10 @@ class WebSocketControllerHelper {
         switch(methodName) {`;
 
         foreach (memberName; __traits(derivedMembers, T)) {
-                pragma(msg, "member-caller: " ~ memberName);
+                version (HUNT_DEBUG) pragma(msg, "member-caller: " ~ memberName);
 
                 static if (isType!(__traits(getMember, T, memberName))) {
-                    pragma(msg, "skipping type defination: " ~ memberName);
+                    version (HUNT_DEBUG) pragma(msg, "skipping type defination: " ~ memberName);
                 } else {
                     enum memberProtection = __traits(getProtection, __traits(getMember, T, memberName));
                     static if (memberProtection == "private"
@@ -206,8 +206,6 @@ class WebSocketControllerHelper {
                             foreach (t; __traits(getOverloads, T, memberName)) {
                                 enum hasMessageMapping = hasUDA!(t, MessageMapping);                        
                                 static if (hasMessageMapping) {
-
-        enum identifiers = ParameterIdentifierTuple!t;
                                     c ~= generateMethodSwitchCases!(t, moduleName, memberName);
                                 }
                             }

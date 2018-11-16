@@ -18,7 +18,7 @@ module hunt.framework.websocket.messaging.SubProtocolWebSocketHandler;
 
 import hunt.framework.websocket.messaging.SubProtocolHandler;
 import hunt.framework.websocket.WebSocketSession;
-import hunt.util.SmartLifecycle;
+import hunt.util.Lifecycle;
 
 import hunt.stomp.Message;
 import hunt.stomp.MessageChannel;
