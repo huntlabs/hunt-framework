@@ -26,7 +26,7 @@ import hunt.logging;
 import hunt.framework.view.Rule;
 import hunt.framework.view.Element;
 import hunt.framework.view.Match;
-import hunt.framework.view.ASTNode;
+import hunt.framework.view.AstNode;
 import hunt.framework.view.Util;
 
 import hunt.framework.routing;
@@ -387,7 +387,7 @@ public:
         return T();
     }
 
-    string render(ASTNode temp, ref JSONValue data)
+    string render(AstNode temp, ref JSONValue data)
     {
         string result = "";
         //writeln("------temp.parsed_node.children-----: ",temp.parsed_node.children.length);
@@ -439,7 +439,7 @@ public:
                                 JSONValue data_loop = parseJSON(data.toString);
                                 data_loop["index"] = k;
                                 data_loop[element_loop.value] = v;
-                                result ~= render(new ASTNode(element_loop), data_loop);
+                                result ~= render(new AstNode(element_loop), data_loop);
                             }
                             break;
                         }
@@ -454,7 +454,7 @@ public:
                                     JSONValue data_loop = data;
                                     data_loop[element_loop.key] = k;
                                     data_loop[element_loop.value] = v;
-                                    result ~= render(new ASTNode(element_loop), data_loop);
+                                    result ~= render(new AstNode(element_loop), data_loop);
                                 }
                             }
                             else if (map.type == JSON_TYPE.ARRAY)
@@ -464,7 +464,7 @@ public:
                                     JSONValue data_loop = data;
                                     data_loop[element_loop.key] = idx;
                                     data_loop[element_loop.value] = v;
-                                    result ~= render(new ASTNode(element_loop), data_loop);
+                                    result ~= render(new AstNode(element_loop), data_loop);
                                 }
                             }
                             else
@@ -493,7 +493,7 @@ public:
                         //writeln("-----flg.type-------: ",flg.type);
                         if (element_branch.condition_type == Condition.Else || eval(flg))
                         {
-                            result ~= render(new ASTNode(element_branch), data);
+                            result ~= render(new AstNode(element_branch), data);
                             break;
                         }
                     }

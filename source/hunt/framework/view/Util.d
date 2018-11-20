@@ -147,10 +147,8 @@ class Util
     static bool is_num(string str)
     {
         import std.algorithm.searching;
-        //writeln(" is num ", str);
         if(startsWith(str,"-"))
             str = str[1..$];
-        //writeln(" is num 2 :", str);
         auto m = match(str, regex(`^[0-9]\d*$`));
         return !m.empty;
     }

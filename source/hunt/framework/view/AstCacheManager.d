@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.framework.view.ASTCacheManager;
+module hunt.framework.view.AstCacheManager;
 
 import std.stdio;
 import std.array;
@@ -17,12 +17,12 @@ import std.string;
 import core.sync.rwmutex;
 import std.digest.sha;
 import std.digest.md;
-import hunt.framework.view.ASTNode;
+import hunt.framework.view.AstNode;
 
-class ASTCacheManager
+class AstCacheManager
 {
 
-    ASTNode node(string path)
+    AstNode node(string path)
     {
         synchronized (_mutex.reader)
         {
@@ -32,7 +32,7 @@ class ASTCacheManager
 
     }
 
-    void add(string path, ASTNode node)
+    void add(string path, AstNode node)
     {
         _mutex.writer.lock();
         scope (exit)
@@ -59,12 +59,12 @@ private:
         _mutex.destroy;
     }
 
-    ASTNode[string] _astMap;
+    AstNode[string] _astMap;
 
     ReadWriteMutex _mutex;
 }
 
-@property ASTCacheManager ASTCache()
+@property AstCacheManager ASTCache()
 {
     return _astcache;
 }
@@ -72,8 +72,8 @@ private:
 shared static this()
 {
     //writeln("#######rrt");
-    _astcache = new ASTCacheManager();
+    _astcache = new AstCacheManager();
 }
 
 private:
-__gshared ASTCacheManager _astcache;
+__gshared AstCacheManager _astcache;
