@@ -21,9 +21,9 @@ import hunt.logging;
 import hunt.framework.view.Rule;
 import hunt.framework.view.Element;
 import hunt.framework.view.Match;
-import hunt.framework.view.ASTNode;
+import hunt.framework.view.AstNode;
 import hunt.framework.view.Util;
-import hunt.framework.view.ASTCacheManager;
+import hunt.framework.view.AstCacheManager;
 
 class Parser
 {
@@ -264,7 +264,7 @@ public:
                         {
                             string included_filename = path ~ match_statement.str(1);
                             trace("----include file path : ",included_filename);
-                            ASTNode included_template = parse_template(included_filename);
+                            AstNode included_template = parse_template(included_filename);
                             foreach (element; included_template.parsed_node.children)
                             {
                                 result ~= element;
@@ -332,13 +332,13 @@ public:
         return current_element;
     }
 
-    ASTNode parse(string input)
+    AstNode parse(string input)
     {
         auto parsed = parse_tree(new Element(Type.Main, input), "./");
-        return new ASTNode(parsed);
+        return new AstNode(parsed);
     }
 
-    ASTNode parse_template(string filename)
+    AstNode parse_template(string filename)
     {
         auto node = ASTCache.node(filename);
         if (node !is null)
@@ -348,9 +348,9 @@ public:
         string path = dirName(filename);
         //writeln("----template file path : ",filename);
         auto parsed = parse_tree(new Element(Type.Main, input), path ~ "/");
-        auto astnode = new ASTNode(parsed);
-        ASTCache.add(filename, astnode);
-        return astnode;
+        auto AstNode = new AstNode(parsed);
+        ASTCache.add(filename, AstNode);
+        return AstNode;
     }
 
     string load_file(string filename)

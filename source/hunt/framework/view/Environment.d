@@ -24,7 +24,7 @@ import hunt.framework.view.Rule;
 import hunt.framework.view.Parser;
 import hunt.framework.view.Render;
 import hunt.framework.view.Util;
-import hunt.framework.view.ASTNode;
+import hunt.framework.view.AstNode;
 
 class Environment
 {
@@ -99,12 +99,12 @@ public:
         _parser.element_notation = element_notation_;
     }
 
-    ASTNode parse(string input)
+    AstNode parse(string input)
     {
         return _parser.parse(input);
     }
 
-    ASTNode parse_template(string filename)
+    AstNode parse_template(string filename)
     {
         version (HUNT_DEBUG) trace("parse file path : ",input_path ~ filename);
         return _parser.parse_template(input_path ~ filename);
@@ -115,7 +115,7 @@ public:
         return _render.render(parse(input), data);
     }
 
-    string render(ASTNode temp, JSONValue data)
+    string render(AstNode temp, JSONValue data)
     {
         return _render.render(temp, data);
     }
@@ -135,7 +135,7 @@ public:
         std.file.write(output_path ~ filename_out,render_file(filename,data));
     }
 
-    void write(ASTNode temp, JSONValue data, string filename_out) {
+    void write(AstNode temp, JSONValue data, string filename_out) {
     	std.file.write(output_path ~ filename_out,render(temp,data));
     }
 
@@ -144,7 +144,7 @@ public:
     	write(filename, data, filename_out);
     }
 
-    void write_with_json_file(ASTNode temp, string filename_data, string filename_out) {
+    void write_with_json_file(AstNode temp, string filename_data, string filename_out) {
     	auto data = load_json(filename_data);
     	write(temp, data, filename_out);
     }

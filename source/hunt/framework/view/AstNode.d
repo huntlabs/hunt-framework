@@ -9,11 +9,11 @@
  *
  */
 
-module hunt.framework.view.ASTNode;
+module hunt.framework.view.AstNode;
 
 import hunt.framework.view.Element;
 
-class ASTNode
+class AstNode
 {
     Element parsed_node;
 
