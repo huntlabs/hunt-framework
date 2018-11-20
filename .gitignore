@@ -1,35 +1,32 @@
-.dub
-docs.json
-__dummy.html
+# Visual Studio Code
+#.vscode/
+
+# Compiled Object files
 *.o
 *.obj
-.lumenconfig
-*.cmake
-CMakeLists.txt
-/hunt
-.directory
-*.kdev4
-dub.selections.json
-.idea
-/hunt.iml
-__test__library__
-*.a
-*.so
-*.kate-swp
-dub.userprefs
-*.lib
-*.exe
-*.zip
-.DS_Store
-.project
-libhunt.a
-hunt-test-default
-.settings
-.vscode
-test.config
-tmp.conf
-tmp.saveas.conf
-web
-examples/simplest/hunt-web
 
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.a
+*.lib
+
+# Executables
+*.exe
+
+# DUB
+.dub
+dub.selections.json
+docs.json
+__dummy.html
+docs/
+
+# Code coverage
+*.lst
+
+# Others
 /java
+hunt-framework-test-*

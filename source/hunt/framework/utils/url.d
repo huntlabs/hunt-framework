@@ -37,8 +37,6 @@ import std.exception;
 pure:
 @safe:
 
-import std.exception : basicExceptionCtors;
-
 /// An exception thrown when something bad happens with URLs.
 class URLException : Exception
 {
@@ -244,7 +242,7 @@ pure:
 		}
 		s ~= humanReadable ? host : host.toPuny;
 		if (providedPort) {
-			if ((scheme in schemeToDefaultPort) is null || schemeToDefaultPort[scheme] != providedPort) {
+			if ((scheme in schemeToDefaultPort) == null || schemeToDefaultPort[scheme] != providedPort) {
 				s ~= ":";
 				s ~= providedPort.to!string;
 			}
@@ -499,7 +497,7 @@ pure:
 				{
 					for (int j = i - 1; j >= 0; j--)
 					{
-						if (parts[j] !is null)
+						if (parts[j] != null)
 						{
 							parts[j] = null;
 							parts[i] = null;
@@ -508,7 +506,7 @@ pure:
 					}
 				}
 			}
-			other = "/" ~ parts.filter!(x => x !is null).joiner("/").to!string;
+			other = "/" ~ parts.filter!(x => x != null).joiner("/").to!string;
 		}
 		parsePathAndQuery(ret, other);
 		return ret;
