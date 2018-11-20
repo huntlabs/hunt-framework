@@ -50,7 +50,7 @@ class IndexController : Controller
 }
 ```
 
-View [hunt-skeleton](https://github.com/huntlabs/hunt-skeleton) example project source code.
+View [hunt-skeleton](https://github.com/huntlabs/hunt-skeleton) or [hunt-examples](https://github.com/huntlabs/hunt-examples).
 
 ## Components
 1. [Routing](https://github.com/huntlabs/hunt-framework/wiki/Routing)
