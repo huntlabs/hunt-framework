@@ -202,9 +202,11 @@ __gshared private TaskManager _taskMInstance;
 TaskManager GetTaskMObject()
 {
     if (_taskMInstance is null) {
-        import hunt.framework.application.Application;
+        import hunt.event;
+        import hunt.net.NetUtil;
+        EventLoopGroup eg = NetUtil.defaultEventLoopGroup();
         _taskMInstance = new TaskManager();
-        _taskMInstance.setEventLoop(app().mainLoop());
+        _taskMInstance.setEventLoop(eg[0]);
     }
     return _taskMInstance;
 }

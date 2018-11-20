@@ -98,9 +98,9 @@ final class Application : ApplicationContext {
         return _server;
     }
 
-    @property EventLoop mainLoop() {
-        return _server.eventLoop;
-    }
+    // @property EventLoop mainLoop() {
+    //     return _server.eventLoop;
+    // }
 
     @property EventLoopGroup loopGroup() {
         return NetUtil.defaultEventLoopGroup();

@@ -34,7 +34,7 @@ import std.conv;
 import std.string;
 import std.exception;
 
-pure:
+
 @safe:
 
 /// An exception thrown when something bad happens with URLs.
@@ -127,7 +127,7 @@ struct URL
 		return asTuple().toHash();
 	}
 	
-pure:
+
 	/// The URL scheme. For instance, ssh, ftp, or https.
 	string scheme;
 	
