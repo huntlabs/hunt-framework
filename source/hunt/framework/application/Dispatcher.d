@@ -112,7 +112,6 @@ class Dispatcher
 
     bool accessFilter(Request request)
     {
-        //兼容老的.
         Identity identity = app().accessManager().getIdentity(request.route.getGroup());
 
         if (identity is null || request.route.getController().length == 0)
@@ -230,7 +229,8 @@ void doRequestHandle(RoutingHandler handle, Request req)
         response.setHeader("Access-Control-Allow-Methods", "*");
 
         response.setHeader("Access-Control-Allow-Headers",
-                "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type");
+                "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With," ~
+                "If-Modified-Since,Cache-Control,Content-Type");
         // if (response.dataHandler is null)
         //     response.dataHandler = req.responseHandler;
 

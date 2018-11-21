@@ -11,8 +11,9 @@
 
 module hunt.framework.http.Request;
 
-import hunt.http.codec.http.model;
+import hunt.framework.http.HttpForm;
 
+import hunt.http.codec.http.model;
 import hunt.http.codec.http.stream.HttpConnection;
 import hunt.http.codec.http.stream.HttpOutputStream;
 import hunt.http.util.UrlEncoded;
@@ -115,15 +116,22 @@ final class Request {
 	}
 
 	package(hunt.framework) void onMessageCompleted() {
-		string contentType = MimeTypeUtils.getContentTypeMIMEType(
-				_httpFields.get(HttpHeader.CONTENT_TYPE));
-		_isXFormUrlencoded = std.string.icmp("application/x-www-form-urlencoded", contentType) == 0;
+		string contentType = MimeTypeUtils.getContentTypeMIMEType(_httpFields.get(HttpHeader.CONTENT_TYPE));
+		_isXFormUrlencoded = contentType.startsWith("application/x-www-form-urlencoded");
 		if (_isXFormUrlencoded) {
 			urlEncodedMap.decode(getStringBody());
 			// version(HUNT_DEBUG) info(urlEncodedMap.toString());
+		} else {
+			_isMultipart = contentType.startsWith("multipart/form-data");
+			if(_isMultipart) {
+				// _form = new HttpForm(contentType, requestBody);
+				// _multiPartForm = new MultiPartFormInputStream();
+			}		
 		}
 	}
+	// private MultiPartFormInputStream _multiPartForm;
 
+	private bool _isMultipart = false;
 	private bool _isXFormUrlencoded = false;
 
 	bool isChunked() {
@@ -308,7 +316,9 @@ final class Request {
 		return _response;
 	}
 
-	string getStringBody() {
+	alias getStringBody = getBodyAsString;
+
+	string getBodyAsString() {
 		if (stringBody is null) {
 			Appender!string buffer;
 			foreach (ByteBuffer b; requestBody) {
@@ -946,6 +956,12 @@ final class Request {
 	// 	return null;
 	// }
 
+	// @property HttpForm httpForm() {
+	// 	if (_form is null)
+	// 		_form = new HttpForm(requestBody);
+	// 	return _form;
+	// }
+	// private HttpForm _form;
 	/**
      * Get an array of all of the files on the request.
      *
@@ -962,7 +978,7 @@ final class Request {
      * @param  string  key
      * @return bool
      */
-	// public bool hasFile(string key)
+	// bool hasFile(string key)
 	// {
 	// 	HttpForm.FormFile file = httpForm.getFileValue(key);
 
