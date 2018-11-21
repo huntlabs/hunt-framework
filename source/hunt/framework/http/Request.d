@@ -13,7 +13,6 @@ module hunt.framework.http.Request;
 
 import hunt.http.codec.http.model;
 
-// import hunt.http.codec.http.stream;
 import hunt.http.codec.http.stream.HttpConnection;
 import hunt.http.codec.http.stream.HttpOutputStream;
 import hunt.http.util.UrlEncoded;
@@ -30,6 +29,7 @@ import hunt.framework.routing.Route;
 import hunt.framework.routing.define;
 import hunt.framework.security.acl.User;
 
+import core.time : MonoTime, Duration;
 import std.algorithm;
 import std.array;
 import std.container.array;
@@ -53,6 +53,7 @@ final class Request {
 	private UrlEncoded urlEncodedMap;
 	private Cookie[] _cookies;
 	private HttpSession _session;
+	private MonoTime _monoCreated;
 
 	HttpConnection _connection;
 	// Action1!ByteBuffer content;
@@ -66,6 +67,7 @@ final class Request {
 
 	this(HttpRequest request, HttpResponse response, HttpOutputStream output,
 			HttpConnection connection, SessionStorage sessionStorage) {
+		_monoCreated = MonoTime.currTime;
 		requestBody = new ArrayList!(ByteBuffer)();
 		this._request = request;
 		this.outputStream = output;
@@ -82,6 +84,10 @@ final class Request {
 	}
 
 	// alias _request this;
+	@property int elapsed()	{
+		Duration timeElapsed = MonoTime.currTime - _monoCreated;
+		return cast(int)timeElapsed.total!"msecs";
+	}
 
 	HttpURI getURI() {
 		return _request.getURI();
