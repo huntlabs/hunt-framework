@@ -19,3 +19,4 @@ public import hunt.framework.routing;
 public import hunt.cache;
 public import hunt.framework.http;
 public import hunt.framework.view;
+public import hunt.validation;

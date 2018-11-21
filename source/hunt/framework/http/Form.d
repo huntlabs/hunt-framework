@@ -12,10 +12,13 @@
 module hunt.framework.http.Form;
 
 import hunt.validation.ConstraintValidatorContext;
+import hunt.validation.Valid;
 
-
-interface Form 
+interface Form : Valid
 {
-    ///make valid and return result 
-    ConstraintValidatorContext valid();
+}
+
+mixin template MakeForm()
+{
+	mixin MakeValid;
 }
