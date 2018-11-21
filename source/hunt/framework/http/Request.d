@@ -872,16 +872,13 @@ final class Request {
      * @return string|array
      */
 	T post(T = string)(string key, T v = T.init) {
-
-		implementationMissing(false);
-		// auto form = postForm();
-		// if (form is null)
-		// 	return v;
-		// auto _v = postForm.getFromValue(key);
-		// if (_v.length)
-		// {
-		// 	return to!T(_v);
-		// }
+		auto form = xFormData();
+		if (form is null)
+			return v;
+		auto _v = form[key];
+		if (_v.length) {
+			return to!T(_v);
+		}
 		return v;
 	}
 
