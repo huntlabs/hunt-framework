@@ -81,6 +81,12 @@ class View
         return this;
     }
 
+    public View setLocale(string locale)
+    {
+        _env.setLocale(locale);
+        return this;
+    }
+
     public string render(string tempalteFile)
     {
         import std.stdio;

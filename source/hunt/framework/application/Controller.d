@@ -48,6 +48,7 @@ abstract class Controller
         {
             _view = GetViewObject();
             _view.setRouteGroup(this.request.route.getGroup());
+            _view.setLocale(this.request.locale());
         }
        
         return _view;

@@ -76,6 +76,7 @@ enum  Function {
 	DateFormat,
 	Url,
 	IsNull,
+	Lang,
 	ReadJson,
 	Default
 }
@@ -169,6 +170,7 @@ enum string[Function] regex_map_functions = [
 	Function.DateFormat : function_regex("date", 2),
 	Function.Url : function_regex("url", 2),
 	Function.IsNull : function_regex("isNull", 1),
+	Function.Lang : function_regex("lang", 1),
 	Function.ReadJson : "\\s*([^\\(\\)]*\\S)\\s*"
 ];
 

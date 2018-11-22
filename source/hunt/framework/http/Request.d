@@ -944,6 +944,19 @@ final class Request {
 	}
 
 	/**
+     * Retrieve  users' own preferred language.
+     */
+	string locale()
+	{
+		string locale = "en-us";
+		locale = cookie("Content-Language");
+		if(locale is null)
+		{
+			locale = header("Content-Language","en-us");
+		}
+		return toLower(locale);
+	}
+	/**
      * Get an array of all cookies.
      *
      * @return array

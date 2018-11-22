@@ -137,7 +137,7 @@ class I18n
 }
 
 ///设置本地化
-private string _local = I18N_DEFAULT_LOCALE;
+private string _local /* = I18N_DEFAULT_LOCALE */;
 
 @property string getLocale(){
 	if(_local)
@@ -180,6 +180,34 @@ string getText(string key, lazy string default_value = string.init)
 	return default_value;
 }
 
+///key is [filename.key]
+string getText(string locale , string key, lazy string default_value = string.init)
+{ 
+	I18n i18n = I18n.instance();
+	if(!i18n.isResLoaded)
+	{
+		logWarning("The lang resources has't loaded yet!");
+		return key;
+	}
+
+	auto p = locale in i18n.resources;
+	if(p !is null)
+	{
+		return p.get(key, default_value);
+	}
+	logDebug("unsupported local: ", locale, ", use default now: ", i18n.defaultLocale);
+	
+	p = i18n.defaultLocale in i18n.resources;
+	
+	if(p !is null)
+	{
+		return p.get(key, default_value);
+	}
+	
+	logDebug("unsupport local ", i18n.defaultLocale );
+	
+	return default_value;
+}
 
 
 /*

@@ -361,6 +361,17 @@ public:
                 result = res.isNull;
                 return result;
             }
+        case Function.Lang:
+            {
+                auto res = eval_expression(element.args[0], data);
+                if(res.type == JSON_TYPE.STRING)
+                {
+                    import hunt.framework.i18n;
+                    logDebug("---lang locale : ",_locale);
+                    result = getText(_locale,res.str, "");
+                }
+                return result;
+            }
         case Function.Default:
             {
                 //writeln("-----Function.Default----");
@@ -513,6 +524,13 @@ public:
         _routeGroup = rg;
     }
 
+    public void setLocale(string locale)
+    {
+        _locale = locale;
+    }
+
 private:
     string _routeGroup = DEFAULT_ROUTE_GROUP;
+    string _locale = "en-us";
+
 }

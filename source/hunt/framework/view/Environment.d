@@ -69,6 +69,11 @@ public:
          _render.setRouteGroup(rg);
      }
 
+    void setLocale(string locale)
+    {
+        _render.setLocale(locale);
+    }
+
     void setTemplatePath(string path)
     {
         this.input_path = buildNormalizedPath(path) ~ dirSeparator;
