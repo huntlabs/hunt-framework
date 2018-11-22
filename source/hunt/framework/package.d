@@ -20,3 +20,10 @@ public import hunt.cache;
 public import hunt.framework.http;
 public import hunt.framework.view;
 public import hunt.validation;
+
+debug {}
+else {
+    import hunt.lang.common;
+    static assert(CompilerHelper.isGreater(2082), 
+        "The version of D compiler must be greater than 2.083 in release model.");
+}
