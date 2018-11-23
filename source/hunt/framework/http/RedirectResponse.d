@@ -32,6 +32,15 @@ class RedirectResponse : Response
         // connectionClose();
     }
 
+    this(string targetUrl, bool use301 = false)
+    {
+        super(request());
+
+        setStatus((use301 ? 301 : 302));
+        setHeader(HttpHeader.LOCATION, targetUrl);
+        // connectionClose();
+    }
+
     /// the session store implementation.
     @property HttpSession session()
     {

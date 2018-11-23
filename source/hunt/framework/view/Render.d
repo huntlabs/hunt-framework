@@ -274,7 +274,7 @@ public:
             }
         case Function.Result:
             {
-                writeln("--read result --:", element.result.toString);
+                version(HUNT_DEBUG) writeln("--read result --:", element.result.toString);
                 result = element.result;
                 return result;
             }
@@ -285,6 +285,8 @@ public:
                     result = res.str.length;
                 else if (res.type == JSON_TYPE.ARRAY)
                     result = res.array.length;
+                else if(res.type == JSON_TYPE.OBJECT)
+                    result = res.object.length;
                 else
                     result = 0;
                 return result;
@@ -367,8 +369,8 @@ public:
                 if(res.type == JSON_TYPE.STRING)
                 {
                     import hunt.framework.i18n;
-                    logDebug("---lang locale : ",_locale);
                     result = getText(_locale,res.str, "");
+                    version(HUNT_DEBUG) logDebug("---lang locale : ",_locale, " code : ",res.str," result : ",result);
                 }
                 return result;
             }
