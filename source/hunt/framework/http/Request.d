@@ -267,7 +267,7 @@ final class Request {
 			foreach (string key; map.byKey()) {
 				// _xFormData[key] = map.getValue(key, 0);
 				foreach(string v; map.getValues(key))
-				_xFormData[key] ~= v;
+					_xFormData[key] ~= v;
 			}
 		}
 		return _xFormData;
@@ -276,13 +276,20 @@ final class Request {
 	private string[][string] _xFormData;
 
 
-	public T bindForm(T)()
-	{
+	public T bindForm(T)() {
 		import hunt.util.JsonHelper;
 
-		auto formData  = xFormData();
-		auto jsonData = JSONValue(formData);
-		return JsonHelper.getAs!T(jsonData);
+		JSONValue jv;
+		foreach(string k, string[] values; xFormData()) {
+			if(values.length > 1) {
+				jv[k] = JSONValue(values);
+			} else if(values.length == 1) {
+				jv[k] = JSONValue(values[0]);
+			} else {
+				warning("null value in form");
+			}
+		}
+		return JsonHelper.getAs!T(jv);
 	}
 	/**
    * Sets the query parameter with the specified name to the specified value.
