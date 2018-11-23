@@ -23,9 +23,6 @@ module hunt.framework.websocket.StandardWebSocketSession;
 // import javax.websocket.Extension;
 // import javax.websocket.Session;
 
-// import hunt.framework.http.HttpHeaders;
-
-
 // import hunt.framework.util.CollectionUtils;
 // import hunt.framework.websocket.BinaryMessage;
 // import hunt.framework.websocket.PingMessage;

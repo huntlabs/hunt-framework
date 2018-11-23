@@ -260,18 +260,20 @@ final class Request {
 
 	private string[string] _queryParams;
 
-	@property string[string] xFormData() {
+	@property string[][string] xFormData() {
 		if (_xFormData is null && _isXFormUrlencoded) {
 			UrlEncoded map = new UrlEncoded();
 			map.decode(stringBody);
 			foreach (string key; map.byKey()) {
-				_xFormData[key] = map.getValue(key, 0);
+				// _xFormData[key] = map.getValue(key, 0);
+				foreach(string v; map.getValues(key))
+				_xFormData[key] ~= v;
 			}
 		}
 		return _xFormData;
 	}
 
-	private string[string] _xFormData;
+	private string[][string] _xFormData;
 
 
 	public T bindForm(T)()
@@ -1215,8 +1217,11 @@ final class Request {
 	Request replace(string[string] input) {
 		if (isContained(this.method, ["GET", "HEAD"]))
 			_queryParams = input;
-		else
-			_xFormData = input;
+		else {
+			foreach(string k, string v; input) {
+				_xFormData[k] ~= v;
+			}
+		}
 
 		return this;
 	}
@@ -1224,8 +1229,13 @@ final class Request {
 	protected string[string] getInputSource() {
 		if (isContained(this.method, ["GET", "HEAD"]))
 			return queries();
-		else
-			return xFormData();
+		else {
+			string[string] r;
+			foreach(string k, string[] v; xFormData()) {
+				r[k] = v[0];
+			}
+			return r;
+		}
 	}
 
 	/**
