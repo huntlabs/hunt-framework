@@ -109,66 +109,71 @@ final class Request {
 	package(hunt.framework) void onHeaderCompleted() {
 		_httpFields = _request.getFields();
 		string transferEncoding = _httpFields.get(HttpHeader.TRANSFER_ENCODING);
+		long contentLength = _request.getContentLength();
 
 		_isChunked = (HttpHeaderValue.CHUNKED.asString() == transferEncoding
 				|| (_request.getHttpVersion() == HttpVersion.HTTP_2
-					&& _request.getContentLength() < 0));
+					&& contentLength < 0));
+
+		if(_isChunked) {
+			pipedStream = new ByteArrayPipedStream(4 * 1024);
+		} else if(contentLength>0) {
+			// if (contentLength > configuration.getBodyBufferThreshold()) {
+            //         pipedStream = new FilePipedStream(configuration.getTempFilePath());
+			pipedStream = new ByteArrayPipedStream(cast(int) contentLength);
+		}
 	}
+	private PipedStream pipedStream;
 
 	package(hunt.framework) void onContent(ByteBuffer buffer) {
 		version(HUNT_DEBUG) info(BufferUtils.toString(buffer));
-		requestBody.add(buffer);
+		if(pipedStream is null)
+			requestBody.add(buffer);
+		else
+			pipedStream.getOutputStream().write(BufferUtils.toArray(buffer, false));
 	}
 
 	package(hunt.framework) void onContentCompleted() {
-		string contentType = MimeTypeUtils.getContentTypeMIMEType(_httpFields.get(HttpHeader.CONTENT_TYPE));
-		_isXFormUrlencoded = icmp(contentType, "application/x-www-form-urlencoded") == 0;
-		if (_isXFormUrlencoded) {
-			urlEncodedMap.decode(getStringBody());
-			// version(HUNT_DEBUG) info(urlEncodedMap.toString());
-		} else {
-			_isMultipart = icmp(contentType, "multipart/form-data") == 0;
-			if(_isMultipart) {
-				AppConfig config = Config.app;
-				string p = config.upload.path;
-				warning("xxx=>", p);
+		if(pipedStream is null)
+			return;
 
-				if(requestBody.size() > 1) {
-					// FIXME: Needing refactor or cleanup -@zxp at 11/25/2018, 7:34:15 PM
-					// 
-					implementationMissing(false);
-				}
-				ByteBuffer buffer = requestBody.get(0);
-				ByteArrayInputStream inputStream = new ByteArrayInputStream(BufferUtils.toArray(buffer));
-				contentType = _httpFields.get(HttpHeader.CONTENT_TYPE);
-				// 
-				_multiPartForm = new MultipartFormInputStream(inputStream,
-					contentType, config.multiparConfig, p);
-			}		
+		if(requestBody.size() > 1) {
+			// FIXME: Needing refactor or cleanup -@zxp at 11/25/2018, 7:34:15 PM
+			// 
+			implementationMissing(false);
+		}
+		pipedStream.getOutputStream().close();
+		InputStream inputStream = pipedStream.getInputStream();
+		string contentType = MimeTypeUtils.getContentTypeMIMEType(_httpFields.get(HttpHeader.CONTENT_TYPE));
+		contentType = contentType.toLower();
+		_isXFormUrlencoded = contentType == "application/x-www-form-urlencoded";
+
+		if (_isXFormUrlencoded) {
+			stringBody = IOUtils.toString(inputStream);
+			version (HUNT_DEBUG)
+				trace("body content: ", stringBody);
+			urlEncodedMap.decode(stringBody); // getBodyAsString()
+			// version(HUNT_DEBUG) info(urlEncodedMap.toString());
+		} else if(contentType == "multipart/form-data") {
+			_isMultipart = true;
+			AppConfig config = Config.app;
+			string p = config.upload.path;
+			ByteBuffer buffer = requestBody.get(0);
+			// ByteArrayInputStream inputStream = new ByteArrayInputStream(BufferUtils.toArray(buffer));
+			contentType = _httpFields.get(HttpHeader.CONTENT_TYPE);
+			_multiPartForm = new MultipartFormInputStream(inputStream,
+				contentType, config.multiparConfig, p);
+
+		} else {
+			warningf("Can't handle content type: %s", contentType);
+			stringBody = IOUtils.toString(inputStream);
+			version (HUNT_DEBUG)
+				trace("body content: ", stringBody);
 		}		
 	}
 
 	package(hunt.framework) void onMessageCompleted() {
 		version(HUNT_DEBUG) trace("do nothing");
-		// string contentType = MimeTypeUtils.getContentTypeMIMEType(_httpFields.get(HttpHeader.CONTENT_TYPE));
-		// string contentType = _httpFields.get(HttpHeader.CONTENT_TYPE);
-		// _isXFormUrlencoded = contentType.startsWith("application/x-www-form-urlencoded");
-		// if (_isXFormUrlencoded) {
-		// 	urlEncodedMap.decode(getStringBody());
-		// 	// version(HUNT_DEBUG) info(urlEncodedMap.toString());
-		// } else {
-		// 	_isMultipart = contentType.startsWith("multipart/form-data");
-		// 	if(_isMultipart) {
-		// 		import hunt.framework.application.AppConfig;
-		// 		AppConfig config = Config.app;
-		// 		string p = config.upload.path;
-		// 		warning("xxx=>", p);
-		// 		// 
-		// 		// _form = new HttpForm(contentType, requestBody);
-		// 		_multiPartForm = new MultipartFormInputStream(
-		// 			contentType, config.multiparConfig, p);
-		// 	}		
-		// }
 	}
 
 	MultipartFormInputStream multiPartFormInputStream() { return _multiPartForm; }
@@ -252,7 +257,7 @@ final class Request {
 
 	@property JSONValue json() {
 		if (_json == JSONValue.init)
-			_json = parseJSON(getStringBody());
+			_json = parseJSON(getBodyAsString());
 		return _json;
 	}
 

@@ -293,10 +293,8 @@ final class Application : ApplicationContext {
             return false;
         }).content((buffer, request, response, ot, connection) {
             Request r = cast(Request) request.getAttachment();
-            // logInfo(BufferUtils.toString(buffer));
             if (r !is null)
                 r.onContent(buffer);
-            // r.requestBody.add(buffer);
             return false;
         }).contentComplete((request, response, ot, connection)  {
             Request r = cast(Request) request.getAttachment();
