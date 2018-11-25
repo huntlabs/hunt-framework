@@ -317,7 +317,10 @@ final class Request {
 	private string[][string] _xFormData;
 
 
-	T bindForm(T)() {
+	public T bindForm(T)() {
+
+		if(method() != "POST")
+			return null;
 		import hunt.util.JsonHelper;
 
 		JSONValue jv;
