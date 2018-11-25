@@ -264,7 +264,7 @@ final class Application : ApplicationContext {
         this._dispatcher.dispatch(req);
     }
 
-    private Action1!Request _headerComplete;
+    // private Action1!Request _headerComplete;
     private Action3!(int, string, Request) _badMessage;
     private Action1!Request _earlyEof;
     // private Action1!HttpConnection _acceptConnection;
@@ -286,23 +286,25 @@ final class Application : ApplicationContext {
         }).headerComplete((request, response, ot, connection) {
             Request r = new Request(request, response, ot, connection, _sessionStorage);
             request.setAttachment(r);
-            if (_headerComplete !is null) {
-                _headerComplete(r);
-            }
+            // if (_headerComplete !is null) {
+            //     _headerComplete(r);
+            // }
             r.onHeaderCompleted();
             return false;
         }).content((buffer, request, response, ot, connection) {
             Request r = cast(Request) request.getAttachment();
             // logInfo(BufferUtils.toString(buffer));
-            r.requestBody.add(buffer);
+            if (r !is null)
+                r.onContent(buffer);
+            // r.requestBody.add(buffer);
             return false;
-        // }).contentComplete((request, response, ot, connection)  {
-        //     Request r = cast(Request) request.getAttachment();
-        //     if (r.contentComplete !is null) {
-        //         r.contentComplete(r);
-        //     }
+        }).contentComplete((request, response, ot, connection)  {
+            Request r = cast(Request) request.getAttachment();
+            if (r !is null) {
+                r.onContentCompleted();
+            }
 
-        //     return false;
+            return false;
         }).messageComplete((request, response, ot, connection) {
             Request r = cast(Request) request.getAttachment();
             r.onMessageCompleted();
@@ -348,28 +350,6 @@ final class Application : ApplicationContext {
 
         _server = new HttpServer(conf.http.address, conf.http.port,
                 configuration, buildHttpHandlerAdapter(), webSocketHandler);
-        
-        // HTTPServerOptions option = new HTTPServerOptions();
-        // option.maxHeaderSize = conf.http.maxHeaderSize;
-        // //option.listenBacklog = conf.http.listenBacklog;
-
-        // version(NO_TASKPOOL)
-        // {
-        //     option.threads = conf.http.ioThreads + conf.http.workerThreads;
-        // }
-        // else
-        // {
-        //     option.threads = conf.http.ioThreads;
-        // }
-
-        // option.timeOut = conf.http.keepAliveTimeOut;
-        // option.handlerFactories ~= (&newHandler);
-
-        // _server = new HttpServer(option);
-        // HTTPServerOptions.IPConfig ipconf;
-        // ipconf.address = addr;
-
-        // _server.addBind(ipconf);
     }
 
 private:

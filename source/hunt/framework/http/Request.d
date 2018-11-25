@@ -11,19 +11,19 @@
 
 module hunt.framework.http.Request;
 
-import hunt.framework.http.HttpForm;
-
 import hunt.http.codec.http.model;
 import hunt.http.codec.http.stream.HttpConnection;
 import hunt.http.codec.http.stream.HttpOutputStream;
 import hunt.http.util.UrlEncoded;
 
 import hunt.container;
+import hunt.io;
 import hunt.logging;
 import hunt.lang.exception;
 import hunt.lang.common;
 import hunt.util.MimeTypeUtils;
 
+import hunt.framework.application.AppConfig;
 import hunt.framework.exception;
 import hunt.framework.http.session;
 import hunt.framework.routing.Route;
@@ -115,22 +115,64 @@ final class Request {
 					&& _request.getContentLength() < 0));
 	}
 
-	package(hunt.framework) void onMessageCompleted() {
+	package(hunt.framework) void onContent(ByteBuffer buffer) {
+		version(HUNT_DEBUG) info(BufferUtils.toString(buffer));
+		requestBody.add(buffer);
+	}
+
+	package(hunt.framework) void onContentCompleted() {
 		string contentType = MimeTypeUtils.getContentTypeMIMEType(_httpFields.get(HttpHeader.CONTENT_TYPE));
-		_isXFormUrlencoded = contentType.startsWith("application/x-www-form-urlencoded");
+		_isXFormUrlencoded = icmp(contentType, "application/x-www-form-urlencoded") == 0;
 		if (_isXFormUrlencoded) {
 			urlEncodedMap.decode(getStringBody());
 			// version(HUNT_DEBUG) info(urlEncodedMap.toString());
 		} else {
-			_isMultipart = contentType.startsWith("multipart/form-data");
+			_isMultipart = icmp(contentType, "multipart/form-data") == 0;
 			if(_isMultipart) {
-				// _form = new HttpForm(contentType, requestBody);
-				// _multiPartForm = new MultiPartFormInputStream();
-			}		
-		}
-	}
-	// private MultiPartFormInputStream _multiPartForm;
+				AppConfig config = Config.app;
+				string p = config.upload.path;
+				warning("xxx=>", p);
 
+				if(requestBody.size() > 1) {
+					// FIXME: Needing refactor or cleanup -@zxp at 11/25/2018, 7:34:15 PM
+					// 
+					implementationMissing(false);
+				}
+				ByteBuffer buffer = requestBody.get(0);
+				ByteArrayInputStream inputStream = new ByteArrayInputStream(BufferUtils.toArray(buffer));
+				contentType = _httpFields.get(HttpHeader.CONTENT_TYPE);
+				// 
+				_multiPartForm = new MultipartFormInputStream(inputStream,
+					contentType, config.multiparConfig, p);
+			}		
+		}		
+	}
+
+	package(hunt.framework) void onMessageCompleted() {
+		version(HUNT_DEBUG) trace("do nothing");
+		// string contentType = MimeTypeUtils.getContentTypeMIMEType(_httpFields.get(HttpHeader.CONTENT_TYPE));
+		// string contentType = _httpFields.get(HttpHeader.CONTENT_TYPE);
+		// _isXFormUrlencoded = contentType.startsWith("application/x-www-form-urlencoded");
+		// if (_isXFormUrlencoded) {
+		// 	urlEncodedMap.decode(getStringBody());
+		// 	// version(HUNT_DEBUG) info(urlEncodedMap.toString());
+		// } else {
+		// 	_isMultipart = contentType.startsWith("multipart/form-data");
+		// 	if(_isMultipart) {
+		// 		import hunt.framework.application.AppConfig;
+		// 		AppConfig config = Config.app;
+		// 		string p = config.upload.path;
+		// 		warning("xxx=>", p);
+		// 		// 
+		// 		// _form = new HttpForm(contentType, requestBody);
+		// 		_multiPartForm = new MultipartFormInputStream(
+		// 			contentType, config.multiparConfig, p);
+		// 	}		
+		// }
+	}
+
+	MultipartFormInputStream multiPartFormInputStream() { return _multiPartForm; }
+	private MultipartFormInputStream _multiPartForm;
 	private bool _isMultipart = false;
 	private bool _isXFormUrlencoded = false;
 
@@ -265,7 +307,6 @@ final class Request {
 			UrlEncoded map = new UrlEncoded();
 			map.decode(stringBody);
 			foreach (string key; map.byKey()) {
-				// _xFormData[key] = map.getValue(key, 0);
 				foreach(string v; map.getValues(key))
 					_xFormData[key] ~= v;
 			}
@@ -276,7 +317,7 @@ final class Request {
 	private string[][string] _xFormData;
 
 
-	public T bindForm(T)() {
+	T bindForm(T)() {
 		import hunt.util.JsonHelper;
 
 		JSONValue jv;
@@ -286,7 +327,7 @@ final class Request {
 			} else if(values.length == 1) {
 				jv[k] = JSONValue(values[0]);
 			} else {
-				warning("null value in form");
+				warningf("null value for %s in form data: ", k);
 			}
 		}
 		return JsonHelper.getAs!T(jv);
@@ -978,21 +1019,18 @@ final class Request {
 	// 	return null;
 	// }
 
-	// @property HttpForm httpForm() {
-	// 	if (_form is null)
-	// 		_form = new HttpForm(requestBody);
-	// 	return _form;
-	// }
-	// private HttpForm _form;
+
 	/**
      * Get an array of all of the files on the request.
      *
      * @return array
      */
-	// HttpForm.FormFile[string] allFiles()
-	// {
-	// 	return httpForm.fileMap();
-	// }
+	Part[] allFiles() {
+		if(_multiPartForm is null)
+			return null;
+		else 
+			return _multiPartForm.getParts();
+	}
 
 	/**
      * Determine if the uploaded data contains a file.
@@ -1000,12 +1038,14 @@ final class Request {
      * @param  string  key
      * @return bool
      */
-	// bool hasFile(string key)
-	// {
-	// 	HttpForm.FormFile file = httpForm.getFileValue(key);
-
-	// 	return file !is null;
-	// }
+	bool hasFile(string key) {	
+		if(_multiPartForm is null) {
+			return false;
+		} else {
+			Part part = _multiPartForm.getPart(key);
+			return part !is null;
+		}
+	}
 
 	/**
      * Retrieve a file from the request.
@@ -1014,10 +1054,14 @@ final class Request {
      * @param  mixed default
      * @return HttpForm.FormFile
      */
-	// HttpForm.FormFile file(string key)
-	// {
-	// 	return httpForm.getFileValue(key);
-	// }
+	MultipartFormInputStream.MultiPart file(string key)	{
+		if(_multiPartForm is null) {
+			return null;
+		} else {
+			Part part = _multiPartForm.getPart(key);
+			return cast(MultipartFormInputStream.MultiPart)part;
+		}
+	}
 
 	@property string method() {
 		return _request.getMethod();

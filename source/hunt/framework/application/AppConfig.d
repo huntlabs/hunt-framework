@@ -17,11 +17,10 @@ import std.socket : Address, parseAddress;
 import std.format;
 import std.string;
 
-import hunt.util.configuration;
+import hunt.http.codec.http.model.MultipartConfig;
 import hunt.logging;
 import hunt.framework.init;
-// import hunt.framework.application.Application : WebSocketFactory;
-// import hunt.framework.application.Application;
+import hunt.util.configuration;
 
 
 @Configuration("hunt")
@@ -117,7 +116,7 @@ final class AppConfig
 
     struct UploadConf
     {
-        string path;
+        string path = "./attachments";
         uint maxSize = 4 * 1024 * 1024;
     }
 
@@ -227,6 +226,18 @@ final class AppConfig
     MailConf mail;
     RpcConf rpc;
     View view;
+
+	MultipartConfig multiparConfig() {
+        if(_multiparConfig is null) {
+            string path = upload.path;
+            if(!path.exists())
+                path.mkdirRecurse();
+            _multiparConfig = new MultipartConfig(path, 1024, 3072, 50); 
+        }
+        return _multiparConfig;
+    }
+    
+    private MultipartConfig _multiparConfig;
 
     this()
     {
