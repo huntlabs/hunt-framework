@@ -137,18 +137,14 @@ final class Request {
 		if(pipedStream is null)
 			return;
 
-		if(requestBody.size() > 1) {
-			// FIXME: Needing refactor or cleanup -@zxp at 11/25/2018, 7:34:15 PM
-			// 
-			implementationMissing(false);
-		}
 		pipedStream.getOutputStream().close();
 		InputStream inputStream = pipedStream.getInputStream();
 		string contentType = MimeTypeUtils.getContentTypeMIMEType(_httpFields.get(HttpHeader.CONTENT_TYPE));
+		version (HUNT_DEBUG) info("content type: ", contentType);
 		contentType = contentType.toLower();
-		_isXFormUrlencoded = contentType == "application/x-www-form-urlencoded";
 
-		if (_isXFormUrlencoded) {
+		if (contentType == "application/x-www-form-urlencoded") {
+			_isXFormUrlencoded = true;
 			stringBody = IOUtils.toString(inputStream);
 			version (HUNT_DEBUG)
 				trace("body content: ", stringBody);
@@ -157,12 +153,18 @@ final class Request {
 		} else if(contentType == "multipart/form-data") {
 			_isMultipart = true;
 			AppConfig config = Config.app;
-			string p = config.upload.path;
-			ByteBuffer buffer = requestBody.get(0);
+			import std.path;
+			import std.file;
+			import hunt.framework.init;
+			string tempDir = buildPath(APP_PATH, config.upload.tempDir);
+            if(!tempDir.exists())
+                tempDir.mkdirRecurse();
+			// version (HUNT_DEBUG) info("temp dir for upload: ",tempDir);
+			// ByteBuffer buffer = requestBody.get(0);
 			// ByteArrayInputStream inputStream = new ByteArrayInputStream(BufferUtils.toArray(buffer));
 			contentType = _httpFields.get(HttpHeader.CONTENT_TYPE);
-			_multiPartForm = new MultipartFormInputStream(inputStream,
-				contentType, config.multiparConfig, p);
+			_multipartForm = new MultipartFormInputStream(inputStream,
+				contentType, config.multiparConfig, tempDir);
 
 		} else {
 			warningf("Can't handle content type: %s", contentType);
@@ -172,14 +174,14 @@ final class Request {
 		}		
 	}
 
-	package(hunt.framework) void onMessageCompleted() {
-		version(HUNT_DEBUG) trace("do nothing");
-	}
-
-	MultipartFormInputStream multiPartFormInputStream() { return _multiPartForm; }
-	private MultipartFormInputStream _multiPartForm;
+	MultipartFormInputStream multiPartForm() { return _multipartForm; }
+	private MultipartFormInputStream _multipartForm;
 	private bool _isMultipart = false;
 	private bool _isXFormUrlencoded = false;
+
+	package(hunt.framework) void onMessageCompleted() {
+		version(HUNT_DEBUG) info("do nothing");
+	}
 
 	bool isChunked() {
 		return _isChunked;
@@ -1034,10 +1036,10 @@ final class Request {
      * @return array
      */
 	Part[] allFiles() {
-		if(_multiPartForm is null)
+		if(_multipartForm is null)
 			return null;
 		else 
-			return _multiPartForm.getParts();
+			return _multipartForm.getParts();
 	}
 
 	/**
@@ -1047,10 +1049,10 @@ final class Request {
      * @return bool
      */
 	bool hasFile(string key) {	
-		if(_multiPartForm is null) {
+		if(_multipartForm is null) {
 			return false;
 		} else {
-			Part part = _multiPartForm.getPart(key);
+			Part part = _multipartForm.getPart(key);
 			return part !is null;
 		}
 	}
@@ -1063,10 +1065,10 @@ final class Request {
      * @return HttpForm.FormFile
      */
 	MultipartFormInputStream.MultiPart file(string key)	{
-		if(_multiPartForm is null) {
+		if(_multipartForm is null) {
 			return null;
 		} else {
-			Part part = _multiPartForm.getPart(key);
+			Part part = _multipartForm.getPart(key);
 			return cast(MultipartFormInputStream.MultiPart)part;
 		}
 	}

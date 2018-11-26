@@ -117,6 +117,7 @@ final class AppConfig
     struct UploadConf
     {
         string path = "./attachments";
+        string tempDir = "./attachments/temp";
         uint maxSize = 4 * 1024 * 1024;
     }
 
@@ -229,10 +230,11 @@ final class AppConfig
 
 	MultipartConfig multiparConfig() {
         if(_multiparConfig is null) {
-            string path = upload.path;
+            string path = buildPath(APP_PATH, upload.path);
             if(!path.exists())
                 path.mkdirRecurse();
-            _multiparConfig = new MultipartConfig(path, 1024, 3072, 50); 
+            // _multiparConfig = new MultipartConfig(path, 1024, 3072, 50); 
+            _multiparConfig = new MultipartConfig(path, upload.maxSize, upload.maxSize, 50); 
         }
         return _multiparConfig;
     }
