@@ -3,13 +3,11 @@ module hunt.framework.security.acl.Manager;
 import hunt.framework.security.acl.Role;
 import hunt.framework.security.acl.User;
 import hunt.framework.security.acl.Permission;
-import hunt.framework.security.acl.AuthenticateInterface;
+import hunt.framework.security.acl.AuthenticateProxy;
 import hunt.logging;
 import hunt.datetime;
 import hunt.cache;
-//import hunt.framework.application.Application;
-//import hunt.framework.application.AppConfig;
-
+import hunt.framework.http.Request;
 import std.conv;
 
 
@@ -20,7 +18,7 @@ public:
 	Permission[]            permissions;
 
 private:
-    AuthenticateInterface   auth;
+    AuthenticateProxy       auth;
     int                     updatedTick;
 
     UCache                  cache;
@@ -34,7 +32,7 @@ public:
          this.prefix = prefix;
     }
 
-    void initAuthenticate(AuthenticateInterface auth)
+    void initAuthenticateProxy(AuthenticateProxy auth)
     {
         this.auth = auth;
     }
@@ -73,6 +71,10 @@ public:
         int[] ids = cache.get!(int[])(prefix ~ name ~ "_userids");
         ids ~= id;
         cache.put!(int[])(prefix ~ name ~ "_userIds" , ids);
+        
+        auto session = request().session(true);
+        session.set("auth_userid" , to!string(id));
+        request().flush();
 
         return users[0];
     }
@@ -92,7 +94,7 @@ public:
         }
 
         auto updated = cache.get!int(prefix ~ name ~ "_permissions");
-        if(updated > updatedTick)
+        if(updated >= updatedTick)
         {
             int[] ids = cache.get!(int[])(prefix ~ name ~ "_userids");
             this.permissions =  auth.getAllPermissions();
@@ -102,8 +104,24 @@ public:
             {
                 cache.put!User(prefix ~ name ~ "_user_" ~ to!string(u.id) , u);
             }
-            updatedTick = updated;
+            updatedTick = updated + 1;
+        } 
+    }
+ 
+    bool checkAuth()
+    {
+        auto session = request().session(true);
+        if(!session.exists("auth_userid"))
+        {
+            return false;
         }
+        auto id = to!int(session.get("auth_userid"));
+        auto user = getUser(id);
+        if(user is null || ! user.can(request().getMCA()))
+        {
+            return false;
+        }
+        return true;
     }
 
 }

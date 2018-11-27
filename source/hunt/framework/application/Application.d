@@ -174,7 +174,7 @@ final class Application : ApplicationContext {
         return _manger.getCache("default");
     }
 
-    AccessManager accessManager() {
+    AccessManager accessManager() @property {
         return _accessManager;
     }
 
@@ -260,7 +260,7 @@ final class Application : ApplicationContext {
         return _broker;
     }
     
-    void addGroupMiddleware(string group , Middleware ware)
+    void addGroupMiddleware(Middleware ware , string group = "default")
     {
         _groupMiddlewares[group] ~= ware;
     }

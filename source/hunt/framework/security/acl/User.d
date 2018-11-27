@@ -14,6 +14,11 @@ class User
 
     }
 
+    this(int id)
+    {
+        this.id = id;
+    }
+
     bool can(string key)
     {
         import std.algorithm.searching;

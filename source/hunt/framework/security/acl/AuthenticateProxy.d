@@ -1,10 +1,10 @@
-module hunt.framework.security.acl.AuthenticateInterface;
+module hunt.framework.security.acl.AuthenticateProxy;
 import hunt.framework.security.acl.Role;
 import hunt.framework.security.acl.Permission;
 import hunt.framework.security.acl.User;
 
 ///
-interface AuthenticateInterface 
+interface AuthenticateProxy 
 {
     Role[] getAllRoles();
     Permission[] getAllPermissions();

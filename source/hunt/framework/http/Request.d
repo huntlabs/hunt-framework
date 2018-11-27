@@ -678,6 +678,21 @@ final class Request {
 
 	}
 
+	public string getMCA()
+	{
+		string mca;
+		if (request.route.getModule() is null)
+		{
+			mca = request.route.getController() ~ "." ~ request.route.getAction();
+		}
+		else
+		{
+			mca = request.route.getModule() ~ "." ~ request.route.getController()
+				~ "." ~ request.route.getAction();
+		}
+		return mca;
+	}
+
 	/**
      * Flush all of the old input from the session.
      *

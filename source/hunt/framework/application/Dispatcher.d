@@ -129,7 +129,7 @@ class Dispatcher
 
 Response doGroupMiddleware(Request request)
 {
-    string mca;
+    
 
     if (request.route.getController().length == 0)
         return null;
@@ -138,19 +138,12 @@ Response doGroupMiddleware(Request request)
     if( mids.length == 0)
         return null;
     
-    if (request.route.getModule() is null)
-    {
-        mca = request.route.getController() ~ "." ~ request.route.getAction();
-    }
-    else
-    {
-        mca = request.route.getModule() ~ "." ~ request.route.getController()
-            ~ "." ~ request.route.getAction();
-    }
-
+    string mca = request.getMCA();
+    
     if(mca == "hunt.application.staticfile.staticfile.doStaticFile" ||
         mca == "staticfile.doStaticFile" )
         return null;
+        
     Response response;
     foreach(m ; mids)
     {
