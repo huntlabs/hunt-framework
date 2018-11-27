@@ -37,7 +37,6 @@ public import hunt.framework.http;
 public import hunt.framework.i18n;
 public import hunt.framework.application.AppConfig;
 public import hunt.framework.application.Middleware;
-public import hunt.framework.security.acl.Identity;
 
 public import hunt.entity;
 public import hunt.event;
@@ -196,6 +195,7 @@ final class Application : ApplicationContext {
             initDatabase(config.database);
         initCache(config.cache);
         initSessionStorage(config.session);
+        _accessManager = new AccessManager(cache() , config.application.name , config.session.prefix);
     }
 
     void start() {
@@ -258,6 +258,19 @@ final class Application : ApplicationContext {
 
     WebSocketMessageBroker getStompBroker() {
         return _broker;
+    }
+    
+    void addGroupMiddleware(string group , Middleware ware)
+    {
+        _groupMiddlewares[group] ~= ware;
+    }
+
+    Middleware[] getGroupMiddleware(string group)
+    {
+        auto mid =  group in _groupMiddlewares;
+        if( mid == null)
+            return null;
+        return *mid;
     }
 
     private void handleRequest(Request req) nothrow {
@@ -406,6 +419,8 @@ private:
 
         this._dispatcher.loadRouteGroups();
     }
+
+
 
     void setLogConfig(ref AppConfig.LoggingConfig conf) {
         hunt.logging.LogLevel level = hunt.logging.LogLevel.LOG_DEBUG;
@@ -582,11 +597,12 @@ private:
 
     this() {
         setDefaultLogging();
-        _accessManager = new AccessManager();
+        
         _manger = new CacheManger();
 
         this._dispatcher = new Dispatcher();
         setConfig(Config.app);
+        
     }
 
     __gshared static Application _app;
@@ -604,6 +620,7 @@ private:
     WebSocketPolicy _webSocketPolicy;
     WebSocketHandler[string] webSocketHandlerMap;
     Array!WebSocketBuilder webSocketBuilders; 
+    Middleware[][string]  _groupMiddlewares;
     // Array!WebSocketMessageBroker messageBrokers; 
 
     version (NO_TASKPOOL) {

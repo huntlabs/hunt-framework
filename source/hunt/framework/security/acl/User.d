@@ -1,74 +1,42 @@
 module hunt.framework.security.acl.User;
 
 import hunt.framework.security.acl.Role;
-import hunt.framework.security.acl.permission.Permission;
+import hunt.framework.security.acl.Permission;
+import hunt.framework.application.Application;
 
 class User
-{
-   
-    public
+{   
+    int                     id;
+    Role[]                  roles;
+
+    this()
     {
-        int 		   _id;
-		string 		   _name;
-        Permission 	   _permission;
-        Role[] 		   roles;
-		__gshared User _default;
+
     }
 
-	this()
-	{
-
-	}
-
-    public this(int id , string name)
+    bool can(string key)
     {
-        this._id = id;
-        this._permission = new Permission;
-		this._name = name;	
-	}
-
-	static public User defaultUser()
-    {
-		if(_default is null)
-			_default = new User(0 , "default");
-		return _default;
-	}
-
-    public int id()
-    {
-        return this._id;
-    }
-
-	public string name()
-	{
-		return this._name;
-	}
-
-    public bool isGuest()
-    {
-        return this._id == 0;
-    }
-
-    public bool hasRole(int roleId)
-    {
-		foreach(r ; roles)
-			if(r.id == roleId)
-				return true;
-
+        import std.algorithm.searching;
+        foreach(r ; roles)
+        {
+            if(r.can(key))
+                return true;
+        }
         return false;
     }
 
-    public bool can(string key)
+    User addRoleIds(int[] roleIds ... )
     {
-        return this._permission.hasPermission(key);
-    }
-
-    public User assignRole(Role role)
-    {
-        this.roles ~= role;
-
-        this._permission.addPermissions(role.permission.permissions);
-        
+        import std.algorithm.searching;
+        auto roles = app().accessManager.roles;
+        foreach(id ; roleIds)
+        {
+            auto role = find!(" a.id == b")(roles , id);
+            if(role.length > 0)
+                this.roles ~= role[0];
+        }
         return this;
-    }
+    } 
+
+
 }

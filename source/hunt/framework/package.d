@@ -14,7 +14,6 @@ module hunt.framework;
 public import hunt.framework.versions;
 public import hunt.framework.init;
 public import hunt.framework.application;
-public import hunt.framework.security;
 public import hunt.framework.routing;
 public import hunt.cache;
 public import hunt.framework.http;

@@ -17,7 +17,6 @@ import hunt.framework.exception;
 import hunt.framework.http.Request;
 import hunt.framework.http.Response;
 import hunt.framework.routing;
-import hunt.framework.security.acl.Identity;
 import hunt.framework.security.acl.Manager;
 import hunt.framework.security.acl.User;
 import hunt.framework.simplify;
@@ -82,17 +81,7 @@ class Dispatcher
 
             request.route = route;
 
-            // hunt.security filter
-            request.user = authenticateUser(request);
-
-            if (!accessFilter(request))
-            {
-                auto response = new Response(request);
-                response.do403("no permiss to access: " ~ request.route.getController() ~ "." ~ request.route.getAction());
-                // response.connectionClose();
-                response.done();
-                return;
-            }
+       
 
             // FIXME: Needing refactor or cleanup -@zxp at 9/14/2018, 5:17:25 PM
             version(NO_TASKPOOL)
@@ -108,50 +97,6 @@ class Dispatcher
         {
             collectException(error(e.toString));
         }
-    }
-
-    bool accessFilter(Request request)
-    {
-        Identity identity = app().accessManager().getIdentity(request.route.getGroup());
-
-        if (identity is null || request.route.getController().length == 0)
-            return true;
-
-        string persident;
-        if (request.route.getModule() is null)
-        {
-            persident = request.route.getController() ~ "." ~ request.route.getAction();
-            if (persident == "staticfile.doStaticFile" || identity.isAllowAction(persident))
-                return true;
-        }
-        else
-        {
-            persident = request.route.getModule() ~ "." ~ request.route.getController()
-                ~ "." ~ request.route.getAction();
-            if (persident == "hunt.application.staticfile.staticfile.doStaticFile"
-                    || identity.isAllowAction(persident))
-                return true;
-        }
-
-        return request.user.can(persident);
-    }
-
-    User authenticateUser(Request request)
-    {
-        User user;
-        Identity identity = app().accessManager()
-            .getIdentity(request.route.getGroup());
-        if (identity !is null)
-        {
-            user = identity.login(request);
-        }
-
-        if (user is null)
-        {
-            return User.defaultUser;
-        }
-
-        return user;
     }
 
     void addRouteGroup(string group, string method, string value)
@@ -182,6 +127,40 @@ class Dispatcher
     }
 }
 
+Response doGroupMiddleware(Request request)
+{
+    string mca;
+
+    if (request.route.getController().length == 0)
+        return null;
+
+    auto mids = app().getGroupMiddleware(request.route.getGroup());
+    if( mids.length == 0)
+        return null;
+    
+    if (request.route.getModule() is null)
+    {
+        mca = request.route.getController() ~ "." ~ request.route.getAction();
+    }
+    else
+    {
+        mca = request.route.getModule() ~ "." ~ request.route.getController()
+            ~ "." ~ request.route.getAction();
+    }
+
+    if(mca == "hunt.application.staticfile.staticfile.doStaticFile" ||
+        mca == "staticfile.doStaticFile" )
+        return null;
+    Response response;
+    foreach(m ; mids)
+    {
+        response = m.onProcess(request , response);
+        if(response !is null)
+            return response;
+    }
+    return null;
+}
+
 void doRequestHandle(RoutingHandler handle, Request req)
 {
     Response response;
@@ -191,9 +170,14 @@ void doRequestHandle(RoutingHandler handle, Request req)
 
     try
     {
-        response = handle(req);
-        if (response is null)
-            response = new Response(req);
+        ///this group middleware.
+        response = doGroupMiddleware(req);
+        if(response is null)
+        {
+            response = handle(req);
+            if (response is null)
+                response = new Response(req);
+        }
     }
     catch (CreateResponseException e)
     {

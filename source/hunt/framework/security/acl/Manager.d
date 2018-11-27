@@ -1,52 +1,109 @@
 module hunt.framework.security.acl.Manager;
 
 import hunt.framework.security.acl.Role;
-import hunt.framework.security.acl.Identity;
 import hunt.framework.security.acl.User;
-import hunt.framework.security.acl.permission.Permission;
+import hunt.framework.security.acl.Permission;
+import hunt.framework.security.acl.AuthenticateInterface;
 import hunt.logging;
+import hunt.datetime;
+import hunt.cache;
+//import hunt.framework.application.Application;
+//import hunt.framework.application.AppConfig;
+
+import std.conv;
+
 
 class AccessManager
 {
-    private
+public:    
+    Role[] 			        roles;
+	Permission[]            permissions;
+
+private:
+    AuthenticateInterface   auth;
+    int                     updatedTick;
+
+    UCache                  cache;
+    string                  name;
+    string                  prefix;                   
+public:
+    this(UCache cache , string name , string prefix)
     {
-        Role[int] 			roles;
-		Identity[string]	identitys;
+         this.cache = cache;
+         this.name = name;
+         this.prefix = prefix;
     }
 
-    public
+    void initAuthenticate(AuthenticateInterface auth)
     {
-		Role createRole(int id, string name , Permission permission)
-		{
-            Role role = new Role;
-            role.id = id;
-            role.name = name;
-			role.permission = permission;
-            this.roles[id] = role;
+        this.auth = auth;
+    }
+
+    Permission getPermission(string key)
+    {
+        import std.algorithm.searching;
+        auto per = find!(" a.key == b")(permissions , key);
+        if(per.length > 0)
+            return per[0];
+        return null;
+    }
+
+    void refresh()
+    {
+        import core.stdc.time : time;
+        cache.put!int(prefix ~ name ~ "_permissions" , cast(int)time(null));
+    }
+
+    User addUser(int id)
+    {
+        updataData();
+        if(auth is null)
+        {
+            logError(" un set proxy for Manager");
+            return null;
+        }
+        auto users = auth.getAllUsers([id]);
+        if(users.length <= 0)
+        {
+            logError(" can't find id " , id);
+            return null;
+        }
         
-            return role;
+        cache.put!User(prefix ~ name ~ "_user_" ~ to!string(id) , users[0]);
+        int[] ids = cache.get!(int[])(prefix ~ name ~ "_userids");
+        ids ~= id;
+        cache.put!(int[])(prefix ~ name ~ "_userIds" , ids);
+
+        return users[0];
+    }
+
+    User getUser(int id)
+    {
+        updataData();
+        return cache.get!User(prefix ~ name ~ "_user_" ~ to!string(id));
+    }
+
+    private void updataData()
+    {
+        if(auth is null)
+        {
+            logError(" un set proxy for Manager");
+            return;
         }
 
-        Role getRole(int id)
+        auto updated = cache.get!int(prefix ~ name ~ "_permissions");
+        if(updated > updatedTick)
         {
-            return this.roles[id];
-        }
-
-		void addIdentity(Identity identity)
-		{
-			identitys[identity.group] = identity;
-		}
-
-		Identity getIdentity(string groupName)
-		{
-			if( groupName !in identitys)
-				return null;
-			return identitys[groupName];
-		}
-
-        User createUser(int id, string name)
-        {
-			return new User(id , name);
+            int[] ids = cache.get!(int[])(prefix ~ name ~ "_userids");
+            this.permissions =  auth.getAllPermissions();
+            this.roles = auth.getAllRoles();
+            auto users = auth.getAllUsers(ids);
+            foreach(u ; users)
+            {
+                cache.put!User(prefix ~ name ~ "_user_" ~ to!string(u.id) , u);
+            }
+            updatedTick = updated;
         }
     }
+
 }
