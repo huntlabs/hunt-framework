@@ -19,12 +19,9 @@ import hunt.framework.exception;
  * RedirectResponse represents an HTTP response doing a redirect.
  *
  */
-class RedirectResponse : Response
-{
-    protected HttpSession _session;
+class RedirectResponse : Response {
 
-    this(Request request, string targetUrl, bool use301 = false)
-    {
+    this(Request request, string targetUrl, bool use301 = false) {
         super(request);
 
         setStatus((use301 ? 301 : 302));
@@ -32,8 +29,7 @@ class RedirectResponse : Response
         // connectionClose();
     }
 
-    this(string targetUrl, bool use301 = false)
-    {
+    this(string targetUrl, bool use301 = false) {
         super(request());
 
         setStatus((use301 ? 301 : 302));
@@ -41,17 +37,6 @@ class RedirectResponse : Response
         // connectionClose();
     }
 
-    /// the session store implementation.
-    @property HttpSession session()
-    {
-        return _session;
-    }
-
-    /// ditto
-    @property void session(HttpSession se)
-    {
-        _session = se;
-    }
 
     /**
      * Flash a piece of data to the session.
@@ -60,35 +45,27 @@ class RedirectResponse : Response
      * @param  mixed  value
      * @return RedirectResponse
      */
-    RedirectResponse withSession(string key, string value)
-    {
-        // _session.flash(key, value);
-        implementationMissing(false);
+    RedirectResponse withSession(string key, string value) {
+        session.flash(key, value);
         return this;
     }
 
     /// ditto
-    RedirectResponse withSession(string[string] sessions)
-    {
-        implementationMissing(false);
-        // foreach (string key, string value; sessions)
-        // {
-        //     _session.flash(key, value);
-        // }
+    RedirectResponse withSession(string[string] sessions) {
+        foreach (string key, string value; sessions) {
+            session.flash(key, value);
+        }
         return this;
     }
-    
+
     /**
      * Flash an array of input to the session.
      *
      * @param  array  input
      * @return this
      */
-    RedirectResponse withInput(string[string] input = null)
-    {
-        // _session.flashInput(input is null ? _request.input() : input);
-        implementationMissing(false);
-
+    RedirectResponse withInput(string[string] input = null) {
+        session.flashInput(input is null ? _request.input() : input);
         return this;
     }
 
@@ -102,7 +79,6 @@ class RedirectResponse : Response
     // {
     //     throw new NotImplementedException("removeFilesFromInput");
     // }
-
 
     /**
      * Flash an array of input to the session.

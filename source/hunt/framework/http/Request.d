@@ -708,7 +708,7 @@ final class Request {
      *
      * @return HttpSession|null The session
      */
-	@property HttpSession session(bool canCreate = false) {
+	@property HttpSession session(bool canCreate = true) {
 		if (_session !is null || isSessionRetrieved)
 			return _session;
 
@@ -718,8 +718,11 @@ final class Request {
 			_session = _sessionStorage.get(sessionId);
 		}
 
+		version(HUNT_DEBUG) info("last session: " ~ sessionId);
+
 		if (_session is null && canCreate) {
 			sessionId = HttpSession.generateSessionId();
+			version(HUNT_DEBUG) info("new session: " ~ sessionId);
 			_session = HttpSession.create(sessionId, _sessionStorage.expire);
 			// _sessionStorage.put(sessionId, _session);
 		}
