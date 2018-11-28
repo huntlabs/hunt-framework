@@ -140,6 +140,8 @@ class HttpSession {
         attributes = json;
     }
 
+    alias forget = remove;
+
     string[] keys() {
         string[] ret;
 
