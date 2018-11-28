@@ -54,32 +54,56 @@ public:
 
     User addUser(int id)
     {
-        updataData();
         if(auth is null)
         {
             logError(" un set proxy for Manager");
             return null;
         }
-        auto users = auth.getAllUsers([id]);
-        if(users.length <= 0)
+
+        User user = getUser(id);
+        if(user is null)
         {
-            logError(" can't find id " , id);
-            return null;
+            auto users = auth.getAllUsers([id]);
+            if(users.length <= 0)
+            {
+                logError(" can't find id " , id);
+                return null;
+            }   
+            cache.put!User(prefix ~ name ~ "_user_" ~ to!string(id) , users[0]);
+            int[] ids = cache.get!(int[])(prefix ~ name ~ "_userids");
+            ids ~= id;
+            cache.put!(int[])(prefix ~ name ~ "_userIds" , ids);
+            user = users[0];
         }
-        
-        cache.put!User(prefix ~ name ~ "_user_" ~ to!string(id) , users[0]);
-        int[] ids = cache.get!(int[])(prefix ~ name ~ "_userids");
-        ids ~= id;
-        cache.put!(int[])(prefix ~ name ~ "_userIds" , ids);
         
         auto session = request().session(true);
         session.set("auth_userid" , to!string(id));
         request().flush();
 
-        return users[0];
+        return user;
     }
 
-    User getUser(int id)
+    User user() @property
+    {
+        auto session = request().session(true);
+        if(!session.exists("auth_userid"))
+        {
+            return null;
+        }
+        auto id = to!int(session.get("auth_userid"));
+        return getUser(id);
+    }
+
+    bool checkAuth()
+    {
+        if(user is null || ! user.can(request().getMCA()))
+        {
+            return false;
+        }
+        return true;
+    }
+
+    private User getUser(int id)
     {
         updataData();
         return cache.get!User(prefix ~ name ~ "_user_" ~ to!string(id));
@@ -106,22 +130,6 @@ public:
             }
             updatedTick = updated + 1;
         } 
-    }
- 
-    bool checkAuth()
-    {
-        auto session = request().session(true);
-        if(!session.exists("auth_userid"))
-        {
-            return false;
-        }
-        auto id = to!int(session.get("auth_userid"));
-        auto user = getUser(id);
-        if(user is null || ! user.can(request().getMCA()))
-        {
-            return false;
-        }
-        return true;
     }
 
 }
