@@ -216,10 +216,22 @@ class Response : Closeable {
         return this;
     }
 
-    pragma(inline) final void done() {
+    /// the session store implementation.
+    @property HttpSession session() {
+        return _request.session();
+    }
+
+    /// ditto
+    // @property void session(HttpSession se) {
+    //     _session = se;
+    // }
+
+    final void done() {
         if (_isDone)
             return;
         ///set session
+
+		_request.flush(); // assure the sessiondata flushed;
         HttpSession session = _request.session();
         if (session !is null && session.isNewSession()) {
             withCookie(new Cookie(DefaultSessionIdName, session.getId(), session.getMaxInactiveInterval(),
