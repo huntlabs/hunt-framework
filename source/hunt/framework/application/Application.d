@@ -195,7 +195,7 @@ final class Application : ApplicationContext {
             initDatabase(config.database);
         initCache(config.cache);
         initSessionStorage(config.session);
-        _accessManager = new AccessManager(cache() , config.application.name , config.session.prefix);
+        _accessManager = new AccessManager(cache() , config.application.name , config.session.prefix, config.session.expire);
     }
 
     void start() {

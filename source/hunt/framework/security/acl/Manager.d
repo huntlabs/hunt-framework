@@ -23,13 +23,15 @@ private:
 
     UCache                  cache;
     string                  name;
-    string                  prefix;                   
+    string                  prefix;
+    int                     expired;                   
 public:
-    this(UCache cache , string name , string prefix)
+    this(UCache cache , string name , string prefix , int expired)
     {
          this.cache = cache;
          this.name = name;
          this.prefix = prefix;
+         this.expired = expired;
     }
 
     void initAuthenticateProxy(AuthenticateProxy auth)
@@ -68,14 +70,21 @@ public:
             {
                 logError(" can't find id " , id);
                 return null;
-            }   
-            cache.put!User(prefix ~ name ~ "_user_" ~ to!string(id) , users[0]);
-            int[] ids = cache.get!(int[])(prefix ~ name ~ "_userids");
-            ids ~= id;
-            cache.put!(int[])(prefix ~ name ~ "_userIds" , ids);
+            }  
             user = users[0];
         }
+
+        cache.put!User(prefix ~ name ~ "_user_" ~ to!string(id) , user , expired);
+        int[] ids = cache.get!(int[])(prefix ~ name ~ "_userids");
         
+        import std.algorithm.searching;
+        auto f = find!("a == b")(ids , id);
+        if(f.length == 0)
+        {    
+            ids ~= id;
+        }
+        cache.put!(int[])(prefix ~ name ~ "_userids" , ids , expired);
+        logInfo(prefix ~ name ~ "_userids" , ids);
         auto session = request().session(true);
         session.set("auth_userid" , to!string(id));
         request().flush();
@@ -123,10 +132,13 @@ public:
             int[] ids = cache.get!(int[])(prefix ~ name ~ "_userids");
             this.permissions =  auth.getAllPermissions();
             this.roles = auth.getAllRoles();
-            auto users = auth.getAllUsers(ids);
-            foreach(u ; users)
+            if(ids.length > 0)
             {
-                cache.put!User(prefix ~ name ~ "_user_" ~ to!string(u.id) , u);
+                auto users = auth.getAllUsers(ids);
+                foreach(u ; users)
+                {
+                    cache.put!User(prefix ~ name ~ "_user_" ~ to!string(u.id) , u , expired);
+                }
             }
             updatedTick = updated + 1;
         } 
