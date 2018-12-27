@@ -11,10 +11,7 @@
         "hunt-entity": "~>2.0.2"
     },
     "authors": [
-        "zoujiaqing",
-        "zhangyuchun",
-        "zhangxueping",
-        "gaoxincheng"
+        "huntlabs.net"
     ],
     "configurations": [
         {
