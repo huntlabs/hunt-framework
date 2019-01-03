@@ -8,11 +8,11 @@ import std.path;
 import std.file;
 import std.stdio;
 
-import hunt.framework.init;
+import hunt.framework.Init;
 import hunt.framework.application.AppConfig;
 // import hunt.framework.http.cookie;
 import hunt.framework.utils.string;
-import hunt.framework.versions;
+import hunt.framework.Version;
 import hunt.framework.http.Response;
 import hunt.framework.http.Request;
 

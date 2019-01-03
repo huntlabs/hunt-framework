@@ -27,7 +27,7 @@ import hunt.framework.application.AppConfig;
 import hunt.framework.exception;
 import hunt.framework.http.session;
 import hunt.framework.routing.Route;
-import hunt.framework.routing.define;
+import hunt.framework.routing.Define;
 import hunt.framework.security.acl.User;
 
 import core.time : MonoTime, Duration;
@@ -155,7 +155,7 @@ final class Request {
 			AppConfig config = Config.app;
 			import std.path;
 			import std.file;
-			import hunt.framework.init;
+			import hunt.framework.Init;
 			string tempDir = buildPath(APP_PATH, config.upload.tempDir);
             if(!tempDir.exists())
                 tempDir.mkdirRecurse();

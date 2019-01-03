@@ -11,12 +11,13 @@
 
 module hunt.framework.routing.Router;
 
-import hunt.framework.routing.define;
+import hunt.framework.routing.Define;
 import hunt.framework.routing.RouteGroup;
 import hunt.framework.routing.Route;
 import hunt.framework.routing.RouteConfig;
 import hunt.framework.application.Controller;
-import hunt.framework.simplify;
+
+import hunt.framework.Simplify;
 
 import hunt.logging;
 
@@ -440,7 +441,7 @@ private:
     // enable muiltple route group
     bool _supportMultipleGroup = false;
 
-    import hunt.framework.init;
+    import hunt.framework.Init;
 
     alias _configPath = DEFAULT_CONFIG_PATH;
 }

@@ -9,9 +9,9 @@
  *
  */
 
-module hunt.framework.init;
+module hunt.framework.Init;
 
-public import hunt.framework.versions;
+public import hunt.framework.Version;
 
 import std.path : buildPath, dirName;
 import std.file : thisExePath;

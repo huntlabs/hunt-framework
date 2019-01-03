@@ -19,7 +19,7 @@ import hunt.framework.http.Response;
 import hunt.framework.routing;
 import hunt.framework.security.acl.Manager;
 import hunt.framework.security.acl.User;
-import hunt.framework.simplify;
+import hunt.framework.Simplify;
 
 import hunt.logging;
 import hunt.lang.exception;
@@ -69,8 +69,6 @@ class Dispatcher
                 this._cached[cacheKey] = route;
             }
 
-
-
             // add route's params
             auto params = route.getParams();
             foreach (param, value; params)
@@ -80,8 +78,6 @@ class Dispatcher
             }
 
             request.route = route;
-
-       
 
             // FIXME: Needing refactor or cleanup -@zxp at 9/14/2018, 5:17:25 PM
             version(NO_TASKPOOL)
@@ -129,12 +125,10 @@ class Dispatcher
 
 Response doGroupMiddleware(Request request)
 {
-    
-
     if (request.route.getController().length == 0)
         return null;
 
-    auto mids = app().getGroupMiddleware(request.route.getGroup());
+    auto mids = app().getGroupMiddlewares(request.route.getGroup());
     if( mids.length == 0)
         return null;
     

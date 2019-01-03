@@ -2,13 +2,14 @@
     "name": "hunt-framework",
     "targetType": "library",
     "license": "Apache-2.0",
-    "copyright": "Copyright (C) 2015-2019, Shanghai Putao Technology Co., Ltd",
+    "copyright": "Copyright (C) 2015-2019, HuntLabs.net",
     "description": "A high performance full-stack Web framework.",
     "dependencies": {
-        "hunt-http": "~>0.0.9",
+        "hunt": "~>1.0.0-rc.6",
+        "hunt-http": "~>0.0.11",
         "hunt-stomp": "~>0.0.1-beta.1",
         "hunt-cache": "~>0.2.0",
-        "hunt-entity": "~>2.0.2"
+        "hunt-entity": "~>2.0.5"
     },
     "authors": [
         "huntlabs.net"

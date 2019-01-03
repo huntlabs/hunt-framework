@@ -19,7 +19,7 @@ import std.string;
 
 import hunt.http.codec.http.model.MultipartConfig;
 import hunt.logging;
-import hunt.framework.init;
+import hunt.framework.Init;
 import hunt.util.configuration;
 
 
@@ -30,8 +30,8 @@ final class AppConfig
     {
         string name = "Hunt Application";
         string baseUrl = "http://localhost:8080/";
-        string defaultCookieDomain = ".example.com";
-        string defaultLanguage = "zh-CN";
+        string defaultCookieDomain = "localhost";
+        string defaultLanguage = "en-US";
         string languages = "zh-CN,en-US";
         string secret = "CD6CABB1123C86EDAD9";
         string encoding = "utf-8";

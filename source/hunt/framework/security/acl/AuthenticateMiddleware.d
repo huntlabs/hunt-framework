@@ -4,9 +4,9 @@ import hunt.framework.http.Request;
 import hunt.framework.http.Response;
 import hunt.framework.application.Application;
 
-class AuthenticateMiddleware : Middleware
+class AuthenticateMiddleware : MiddlewareInterface
 {
-    this( string[] whiteList ...)
+    this(string[] whiteList ...)
     {
        mcaList ~= whiteList;
     }

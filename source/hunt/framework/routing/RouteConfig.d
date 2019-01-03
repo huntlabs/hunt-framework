@@ -11,7 +11,7 @@
 
 module hunt.framework.routing.RouteConfig;
 
-import hunt.framework.routing.define;
+import hunt.framework.routing.Define;
 
 struct RouteItem
 {

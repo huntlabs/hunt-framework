@@ -28,7 +28,7 @@ import hunt.http.server;
 
 import hunt.framework.application.Dispatcher;
 import hunt.framework.context.ApplicationContext;
-import hunt.framework.init;
+import hunt.framework.Init;
 import hunt.framework.routing;
 import hunt.framework.security.acl.Manager;
 import hunt.framework.websocket.WebSocketMessageBroker;
@@ -36,7 +36,7 @@ import hunt.framework.websocket.WebSocketMessageBroker;
 public import hunt.framework.http;
 public import hunt.framework.i18n;
 public import hunt.framework.application.AppConfig;
-public import hunt.framework.application.Middleware;
+public import hunt.framework.application.MiddlewareInterface;
 
 public import hunt.entity;
 public import hunt.event;
@@ -260,17 +260,15 @@ final class Application : ApplicationContext {
         return _broker;
     }
     
-    void addGroupMiddleware(Middleware ware , string group = "default")
+    Application addGroupMiddleware(MiddlewareInterface mw , string group = "default")
     {
-        _groupMiddlewares[group] ~= ware;
+        _groupMiddlewares[group][mw.name()] = mw;
+        return this;
     }
 
-    Middleware[] getGroupMiddleware(string group)
+    MiddlewareInterface[string] getGroupMiddlewares(string group)
     {
-        auto mid =  group in _groupMiddlewares;
-        if( mid == null)
-            return null;
-        return *mid;
+        return _groupMiddlewares[group];
     }
 
     private void handleRequest(Request req) nothrow {
@@ -620,7 +618,7 @@ private:
     WebSocketPolicy _webSocketPolicy;
     WebSocketHandler[string] webSocketHandlerMap;
     Array!WebSocketBuilder webSocketBuilders; 
-    Middleware[][string]  _groupMiddlewares;
+    MiddlewareInterface[string][string]  _groupMiddlewares;
     // Array!WebSocketMessageBroker messageBrokers; 
 
     version (NO_TASKPOOL) {

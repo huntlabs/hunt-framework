@@ -9,9 +9,9 @@
  *
  */
 
-module hunt.framework.versions;
+module hunt.framework.Version;
 
-import std.conv;
+import std.conv : to;
 
 // define hunt framework versions
 enum int HUNT_MAJOR_VERSION = 2;

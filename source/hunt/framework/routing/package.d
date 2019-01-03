@@ -11,7 +11,7 @@
 
 module hunt.framework.routing;
 
-public import hunt.framework.routing.define;
+public import hunt.framework.routing.Define;
 public import hunt.framework.routing.RouteConfig;
 public import hunt.framework.routing.Router;
 public import hunt.framework.routing.Route;

@@ -9,13 +9,12 @@
  *
  */
 
-module hunt.framework.application.Middleware;
+module hunt.framework.application.MiddlewareInterface;
 
 import hunt.framework.http.Request;
 import hunt.framework.http.Response;
 
-
-interface Middleware
+interface MiddlewareInterface
 {
     ///get the middleware name
     string name();

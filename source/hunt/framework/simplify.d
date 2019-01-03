@@ -9,12 +9,17 @@
  *
  */
 
-module hunt.framework.simplify;
+module hunt.framework.Simplify;
 
 public import hunt.framework.application.Application : app;
 // public import hunt.framework.http.cookie.CookieManager : cookie;
 
 public import hunt.datetime;
+
+string createUrl(string mca, string group = null)
+{
+    return createUrl(mca, null, group);
+}
 
 string createUrl(string mca, string[string] params = null, string group = null)
 {

@@ -9,7 +9,7 @@ import hunt.logging;
 import hunt.lang.exception;
 
 import hunt.framework.utils.string;
-import hunt.framework.versions;
+import hunt.framework.Version;
 import hunt.framework.http.Response;
 import hunt.framework.http.Request;
 import hunt.framework.http.session;

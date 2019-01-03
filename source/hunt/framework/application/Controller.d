@@ -16,10 +16,10 @@ import hunt.logging;
 public import hunt.framework.http.Response;
 public import hunt.framework.http.Request;
 public import hunt.framework.routing;
-public import hunt.framework.application.Middleware;
+public import hunt.framework.application.MiddlewareInterface;
 
 import hunt.cache;
-import hunt.framework.simplify;
+import hunt.framework.Simplify;
 import hunt.framework.view;
 import hunt.validation;
 import hunt.framework.http.Form;
@@ -39,7 +39,7 @@ abstract class Controller
         Response _response;
         View _view;
         ///called before all actions
-        Middleware[] middlewares;
+        MiddlewareInterface[string] middlewares;
     }
 
     @property View view()
@@ -75,22 +75,19 @@ abstract class Controller
 
     ///add middleware
     ///return true is ok, the named middleware is already exist return false
-    bool addMiddleware(Middleware m)
+    bool addMiddleware(MiddlewareInterface m)
     {
-        if (m is null)
-            return false;
-        foreach (tmp; this.middlewares)
+        if(m is null || this.middlewares.get(m.name(), null) is null)
         {
-            if (tmp.name == m.name)
-                return false;
+            return false;
         }
 
-        this.middlewares ~= m;
+        this.middlewares[m.name()]= m;
         return true;
     }
 
     // get all middleware
-    Middleware[] getMiddlewares()
+    MiddlewareInterface[string] getMiddlewares()
     {
         return this.middlewares;
     }

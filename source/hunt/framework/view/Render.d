@@ -30,7 +30,7 @@ import hunt.framework.view.AstNode;
 import hunt.framework.view.Util;
 
 import hunt.framework.routing;
-import hunt.framework.simplify;
+import hunt.framework.Simplify;
 
 class Render
 {

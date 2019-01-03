@@ -11,7 +11,7 @@
 
 module hunt.framework.routing.RouteGroup;
 
-import hunt.framework.routing.define;
+import hunt.framework.routing.Define;
 import hunt.framework.routing.Route;
 
 import std.algorithm;
