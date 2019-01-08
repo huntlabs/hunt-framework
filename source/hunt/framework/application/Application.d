@@ -268,7 +268,10 @@ final class Application : ApplicationContext {
 
     MiddlewareInterface[string] getGroupMiddlewares(string group)
     {
-        return _groupMiddlewares[group];
+        if(group in _groupMiddlewares)
+            return _groupMiddlewares[group];
+        else
+         return null;
     }
 
     private void handleRequest(Request req) nothrow {
@@ -421,40 +424,67 @@ private:
 
 
     void setLogConfig(ref AppConfig.LoggingConfig conf) {
-        hunt.logging.LogLevel level = hunt.logging.LogLevel.LOG_DEBUG;
-
-        switch (toLower(conf.level)) {
-        case "critical":
-        case "error":
-            level = hunt.logging.LogLevel.LOG_ERROR;
-            break;
-        case "fatal":
-            level = hunt.logging.LogLevel.LOG_FATAL;
-            break;
-        case "warning":
-            level = hunt.logging.LogLevel.LOG_WARNING;
-            break;
-        case "info":
-            level = hunt.logging.LogLevel.LOG_INFO;
-            break;
-        case "off":
-            level = hunt.logging.LogLevel.LOG_Off;
-            break;
-        default:
-            break;
+        version(HUNT_DEBUG) {
+            hunt.logging.LogLevel level = hunt.logging.LogLevel.Trace;
+            switch (toLower(conf.level)) {
+            case "critical":
+            case "error":
+                level = hunt.logging.LogLevel.Error;
+                break;
+            case "fatal":
+                level = hunt.logging.LogLevel.Fatal;
+                break;
+            case "warning":
+                level = hunt.logging.LogLevel.Warning;
+                break;
+            case "info":
+                level = hunt.logging.LogLevel.Info;
+                break;
+            case "off":
+                level = hunt.logging.LogLevel.Off;
+                break;
+            default:
+                break;
+            }
+        } else {
+            hunt.logging.LogLevel level = hunt.logging.LogLevel.LOG_DEBUG;
+            switch (toLower(conf.level)) {
+            case "critical":
+            case "error":
+                level = hunt.logging.LogLevel.LOG_ERROR;
+                break;
+            case "fatal":
+                level = hunt.logging.LogLevel.LOG_FATAL;
+                break;
+            case "warning":
+                level = hunt.logging.LogLevel.LOG_WARNING;
+                break;
+            case "info":
+                level = hunt.logging.LogLevel.LOG_INFO;
+                break;
+            case "off":
+                level = hunt.logging.LogLevel.LOG_Off;
+                break;
+            default:
+                break;
+            }
         }
 
-        LogConf logconf;
-        logconf.level = level;
-        logconf.disableConsole = conf.disableConsole;
+        version(HUNT_DEBUG) {}
+        else {
+            LogConf logconf;
+            logconf.level = level;
+            logconf.disableConsole = conf.disableConsole;
 
-        if (!conf.file.empty)
-            logconf.fileName = buildPath(conf.path, conf.file);
+            if (!conf.file.empty)
+                logconf.fileName = buildPath(conf.path, conf.file);
 
-        logconf.maxSize = conf.maxSize;
-        logconf.maxNum = conf.maxNum;
+            logconf.maxSize = conf.maxSize;
+            logconf.maxNum = conf.maxNum;
 
-        logLoadConf(logconf);
+            logLoadConf(logconf);
+        }
+        
     }
 
     /**
@@ -634,10 +664,13 @@ Application app() {
 }
 
 void setDefaultLogging() {
-    LogConf logconf;
-    logconf.level = hunt.logging.LogLevel.LOG_Off;
-    logconf.disableConsole = true;
-    logLoadConf(logconf);
+    version(HUNT_DEBUG) {} 
+    else {
+        LogConf logconf;
+        logconf.level = hunt.logging.LogLevel.LOG_Off;
+        logconf.disableConsole = true;
+        logLoadConf(logconf);
+    }
 }
 
 shared static this() {
