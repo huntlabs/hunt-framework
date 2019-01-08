@@ -80,7 +80,7 @@ class Router {
                     }
 
                     params.remove(key);
-                    url.replaceFirst("{" ~ key ~ "}", value);
+                    url = url.replaceFirst("{" ~ key ~ "}", value);
                 }
             }
         }
