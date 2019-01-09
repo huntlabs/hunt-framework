@@ -5,11 +5,11 @@
     "copyright": "Copyright (C) 2015-2019, HuntLabs.net",
     "description": "A high performance full-stack Web framework.",
     "dependencies": {
-        "hunt": "~>1.0.0-rc.7",
+        "hunt": "~>1.0.0-rc.8",
         "hunt-http": "~>0.0.12",
         "hunt-stomp": "~>0.0.2",
         "hunt-cache": "~>0.2.0",
-        "hunt-entity": "~>2.0.5"
+        "hunt-entity": "~>2.1.0"
     },
     "authors": [
         "huntlabs.net"
