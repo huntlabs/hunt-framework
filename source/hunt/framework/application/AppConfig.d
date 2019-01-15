@@ -209,6 +209,12 @@ final class AppConfig
         string ext = ".dhtml";
     }
 
+    struct ZipKin
+    {
+        string  imfhost = "";
+        ushort  imfport = 0;
+    }
+
     DatabaseConf database;
     ApplicationConf application;
     CookieConf cookie;
@@ -227,6 +233,7 @@ final class AppConfig
     MailConf mail;
     RpcConf rpc;
     View view;
+    ZipKin zipkin;
 
 	MultipartConfig multiparConfig() {
         if(_multiparConfig is null) {

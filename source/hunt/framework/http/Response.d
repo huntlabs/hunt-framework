@@ -195,6 +195,18 @@ class Response : Closeable {
         return this;
     }
 
+    int status() @property
+    {
+        return _response.getStatus();
+    }
+
+    long size() @property
+    {
+        return 0;
+        // no api.
+        //getOutputStream().
+    }
+
     Response setReason(string reason) {
         _response.setReason(reason);
         return this;
