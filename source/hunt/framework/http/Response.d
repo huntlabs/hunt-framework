@@ -32,7 +32,7 @@ import hunt.Exceptions;
 import hunt.framework.Init;
 import hunt.framework.http.Request;
 import hunt.framework.http.session;
-import hunt.framework.utils.string;
+import hunt.framework.util.string;
 
 enum PlainContentType = "text/plain;charset=utf-8";
 enum HtmlContentType = "text/html;charset=utf-8";

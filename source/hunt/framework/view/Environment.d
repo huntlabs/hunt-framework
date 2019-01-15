@@ -95,7 +95,7 @@ public:
 
     string render(TemplateNode tree,JSONValue data)
     {
-        import hunt.framework.view.uninode.serialization;
+        import hunt.framework.util.uninode.Serialization;
 
         auto render = new Render(tree);
         render.setRouteGroup(_routeGroup);
@@ -110,7 +110,7 @@ public:
 
     string render(string str,JSONValue data)
     {
-        import hunt.framework.view.uninode.serialization;
+        import hunt.framework.util.uninode.Serialization;
         auto tree = _parser.parseTree(str);
         auto render = new Render(tree);
         render.setRouteGroup(_routeGroup);

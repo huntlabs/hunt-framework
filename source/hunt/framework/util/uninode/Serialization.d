@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.framework.view.uninode.Serialization;
+module hunt.framework.util.uninode.Serialization;
 
 import std.stdio;
 
@@ -18,7 +18,7 @@ private
     import hunt.util.Serialize;
     import std.traits;
     import std.json;
-    import hunt.framework.view.uninode.Core;
+    import hunt.framework.util.uninode.Core;
 }
 
 /**

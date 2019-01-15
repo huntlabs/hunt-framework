@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.framework.view.uninode.Core;
+module hunt.framework.util.uninode.Core;
 
 private
 {

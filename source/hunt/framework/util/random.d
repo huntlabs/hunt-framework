@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.framework.utils.random;
+module hunt.framework.util.random;
 
 import std.stdio;
 import std.exception;

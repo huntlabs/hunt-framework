@@ -8,7 +8,7 @@ import hunt.http.codec.http.model.HttpHeader;
 import hunt.logging;
 import hunt.Exceptions;
 
-import hunt.framework.utils.string;
+import hunt.framework.util.string;
 import hunt.framework.Version;
 import hunt.framework.http.Response;
 import hunt.framework.http.Request;
