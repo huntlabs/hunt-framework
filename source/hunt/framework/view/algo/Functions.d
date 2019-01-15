@@ -1,22 +1,21 @@
-/**
-  * Description of global functions
-  *
-  * Copyright:
-  *     Copyright (c) 2018, Maxim Tyapkin.
-  * Authors:
-  *     Maxim Tyapkin
-  * License:
-  *     This software is licensed under the terms of the BSD 3-clause license.
-  *     The full terms of the license can be found in the LICENSE.md file.
-  */
+/*
+ * Hunt - A high-level D Programming Language Web framework that encourages rapid development and clean, pragmatic design.
+ *
+ * Copyright (C) 2015-2019 HuntLabs
+ *
+ * Website: https://www.huntlabs.net/
+ *
+ * Licensed under the Apache-2.0 License.
+ *
+ */
 
-module hunt.framework.view.djinja.algo.functions;
+module hunt.framework.view.algo.Functions;
 
 private
 {
-    import hunt.framework.view.djinja.algo.wrapper;
-    import hunt.framework.view.djinja.exception : assertJinja = assertJinjaException;
-    import hunt.framework.view.djinja.uninode;
+    import hunt.framework.view.algo.Wrapper;
+    import hunt.framework.view.Exception : assertJinja = assertJinjaException;
+    import hunt.framework.view.Uninode;
 
     import std.functional : toDelegate;
     import std.format : fmt = format;

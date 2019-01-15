@@ -1,32 +1,31 @@
-/**
-  *  Djinja render
-  *
-  * Copyright:
-  *     Copyright (c) 2018, Maxim Tyapkin.
-  * Authors:
-  *     Maxim Tyapkin
-  * License:
-  *     This software is licensed under the terms of the BSD 3-clause license.
-  *     The full terms of the license can be found in the LICENSE.md file.
-  */
+/*
+ * Hunt - A high-level D Programming Language Web framework that encourages rapid development and clean, pragmatic design.
+ *
+ * Copyright (C) 2015-2019 HuntLabs
+ *
+ * Website: https://www.huntlabs.net/
+ *
+ * Licensed under the Apache-2.0 License.
+ *
+ */
 
-module hunt.framework.view.djinja.render;
+module hunt.framework.view.Render;
 
 private
 {
     import std.range;
     import std.format: fmt = format;
 
-    import hunt.framework.view.djinja.ast.node;
-    import hunt.framework.view.djinja.ast.visitor;
-    import hunt.framework.view.djinja.algo;
-    import hunt.framework.view.djinja.algo.wrapper;
-    import hunt.framework.view.djinja.lexer;
-    import hunt.framework.view.djinja.parser;
-    import hunt.framework.view.djinja.exception : JinjaRenderException,
+    import hunt.framework.view.ast.Node;
+    import hunt.framework.view.ast.Visitor;
+    import hunt.framework.view.algo;
+    import hunt.framework.view.algo.Wrapper;
+    import hunt.framework.view.Lexer;
+    import hunt.framework.view.Parser;
+    import hunt.framework.view.Exception : JinjaRenderException,
                               assertJinja = assertJinjaRender;
 
-    import hunt.framework.view.djinja.uninode;
+    import hunt.framework.view.Uninode;
 
     import hunt.framework.routing;
     import hunt.framework.Simplify;
@@ -179,7 +178,7 @@ struct AppliedFilter
 }
 
 
-class Render : IVisitor
+class Render : VisitorInterface
 {
     private
     {

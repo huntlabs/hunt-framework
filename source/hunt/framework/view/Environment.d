@@ -1,15 +1,15 @@
 /*
- * Hunt - Hunt is a high-level D Programming Language Web framework that encourages rapid development and clean, pragmatic design. It lets you build high-performance Web applications quickly and easily.
+ * Hunt - A high-level D Programming Language Web framework that encourages rapid development and clean, pragmatic design.
  *
- * Copyright (C) 2015-2018  Shanghai Putao Technology Co., Ltd
+ * Copyright (C) 2015-2019 HuntLabs
  *
- * Website: www.huntframework.com
+ * Website: https://www.huntlabs.net/
  *
  * Licensed under the Apache-2.0 License.
  *
  */
 
-module hunt.framework.view.djinja.Environment;
+module hunt.framework.view.Environment;
 
 import std.string;
 import std.json;
@@ -18,8 +18,9 @@ import std.path;
 import std.stdio;
 
 import hunt.logging;
+
 import hunt.framework.application.AppConfig;
-import hunt.framework.view.djinja.djinja;
+import hunt.framework.view.Template;
 import hunt.framework.routing;
 
 private
@@ -27,11 +28,11 @@ private
     import std.meta;
     import std.traits;
 
-    import hunt.framework.view.djinja.render;
-    import hunt.framework.view.djinja.lexer;
-    import hunt.framework.view.djinja.parser;
-    import hunt.framework.view.djinja.uninode;
-    import hunt.framework.view.djinja.ast;
+    import hunt.framework.view.Render;
+    import hunt.framework.view.Lexer;
+    import hunt.framework.view.Parser;
+    import hunt.framework.view.Uninode;
+    import hunt.framework.view.ast;
 }
 
 class Environment
@@ -41,9 +42,9 @@ class Environment
         string input_path;
         string output_path;
 
-        alias JinjaLexer = Lexer!(JinjaConfig.init.exprOpBegin,
-                JinjaConfig.init.exprOpEnd, JinjaConfig.init.stmtOpBegin, JinjaConfig.init.stmtOpEnd,
-                JinjaConfig.init.cmntOpBegin, JinjaConfig.init.cmntOpEnd, JinjaConfig.init.stmtOpInline, JinjaConfig.init.cmntOpInline);
+        alias JinjaLexer = Lexer!(TemplateConfig.init.exprOpBegin,
+                TemplateConfig.init.exprOpEnd, TemplateConfig.init.stmtOpBegin, TemplateConfig.init.stmtOpEnd,
+                TemplateConfig.init.cmntOpBegin, TemplateConfig.init.cmntOpEnd, TemplateConfig.init.stmtOpInline, TemplateConfig.init.cmntOpInline);
         Parser!JinjaLexer _parser;
 
         string _routeGroup = DEFAULT_ROUTE_GROUP;

@@ -11,5 +11,4 @@
 
 module hunt.framework.view;
 
-
 public import hunt.framework.view.View;

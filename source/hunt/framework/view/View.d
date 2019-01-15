@@ -11,8 +11,10 @@
 
 module hunt.framework.view.View;
 
-public import hunt.framework.view.djinja.Environment;
+public import hunt.framework.view.Environment;
+public import hunt.framework.view.Template;
 public import hunt.framework.view.Util;
+public import hunt.framework.view.Exception;
 
 public import hunt.util.Serialize;
 public import hunt.logging;

@@ -1,20 +1,19 @@
-/**
-  * DJinja parser
-  *
-  * Copyright:
-  *     Copyright (c) 2018, Maxim Tyapkin.
-  * Authors:
-  *     Maxim Tyapkin
-  * License:
-  *     This software is licensed under the terms of the BSD 3-clause license.
-  *     The full terms of the license can be found in the LICENSE.md file.
-  */
+/*
+ * Hunt - A high-level D Programming Language Web framework that encourages rapid development and clean, pragmatic design.
+ *
+ * Copyright (C) 2015-2019 HuntLabs
+ *
+ * Website: https://www.huntlabs.net/
+ *
+ * Licensed under the Apache-2.0 License.
+ *
+ */
 
-module hunt.framework.view.djinja.parser;
+module hunt.framework.view.Parser;
 
 public
 {
-    import hunt.framework.view.djinja.lexer : Position;
+    import hunt.framework.view.Lexer : Position;
 }
 
 private
@@ -25,9 +24,9 @@ private
     import std.format: fmt = format;
     import std.range;
 
-    import hunt.framework.view.djinja.ast;
-    import hunt.framework.view.djinja.lexer;
-    import hunt.framework.view.djinja.exception : JinjaParserException,
+    import hunt.framework.view.ast;
+    import hunt.framework.view.Lexer;
+    import hunt.framework.view.Exception : JinjaParserException,
                               assertJinja = assertJinjaParser;
 }
 

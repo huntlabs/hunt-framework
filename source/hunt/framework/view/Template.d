@@ -1,32 +1,29 @@
-/**
-  * D implementation of Jinja2 templates
-  *
-  * Copyright:
-  *     Copyright (c) 2018, Maxim Tyapkin.
-  * Authors:
-  *     Maxim Tyapkin
-  * License:
-  *     This software is licensed under the terms of the BSD 3-clause license.
-  *     The full terms of the license can be found in the LICENSE.md file.
-  */
+/*
+ * Hunt - A high-level D Programming Language Web framework that encourages rapid development and clean, pragmatic design.
+ *
+ * Copyright (C) 2015-2019 HuntLabs
+ *
+ * Website: https://www.huntlabs.net/
+ *
+ * Licensed under the Apache-2.0 License.
+ *
+ */
 
-module hunt.framework.view.djinja.djinja;
+module hunt.framework.view.Template;
 
 private
 {
     import std.meta;
     import std.traits;
 
-    import hunt.framework.view.djinja.render;
-    import hunt.framework.view.djinja.lexer;
-    import hunt.framework.view.djinja.parser;
-    import hunt.framework.view.djinja.uninode;
-    import hunt.framework.view.djinja.ast;
+    import hunt.framework.view.Render;
+    import hunt.framework.view.Lexer;
+    import hunt.framework.view.Parser;
+    import hunt.framework.view.Uninode;
+    import hunt.framework.view.ast;
 }
 
-
-
-struct JinjaConfig
+struct TemplateConfig
 {
     string exprOpBegin  = "{{";
     string exprOpEnd    = "}}";
@@ -38,9 +35,7 @@ struct JinjaConfig
     string stmtOpInline = "#!";
 }
 
-
-
-TemplateNode loadData(JinjaConfig config = defaultConfig)(string tmpl)
+TemplateNode loadData(TemplateConfig config = defaultConfig)(string tmpl)
 {
     alias JinjaLexer = Lexer!(
                             config.exprOpBegin,
@@ -57,9 +52,7 @@ TemplateNode loadData(JinjaConfig config = defaultConfig)(string tmpl)
     return parser.parseTree(tmpl);
 }
 
-
-
-TemplateNode loadFile(JinjaConfig config = defaultConfig)(string path)
+TemplateNode loadFile(TemplateConfig config = defaultConfig)(string path)
 {
     alias JinjaLexer = Lexer!(
                             config.exprOpBegin,
@@ -75,8 +68,6 @@ TemplateNode loadFile(JinjaConfig config = defaultConfig)(string path)
     Parser!JinjaLexer parser;
     return parser.parseTreeFromFile(path);
 }
-
-
 
 string render(T...)(TemplateNode tree)
 {
@@ -98,21 +89,17 @@ string render(T...)(TemplateNode tree)
     return render.render(data.serialize);
 }
 
-
-
 string renderData(T...)(string tmpl)
 {
-    static if (T.length > 0 && is(typeof(T[0]) == JinjaConfig))
+    static if (T.length > 0 && is(typeof(T[0]) == TemplateConfig))
         return render!(T[1 .. $])(loadData!(T[0])(tmpl));
     else
         return render!(T)(loadData!defaultConfig(tmpl));
 }
 
-
-
 string renderFile(T...)(string path)
 {
-    static if (T.length > 0 && is(typeof(T[0]) == JinjaConfig))
+    static if (T.length > 0 && is(typeof(T[0]) == TemplateConfig))
         return render!(T[1 .. $])(loadFile!(T[0])(path));
     else
         return render!(T)(loadFile!defaultConfig(path));
@@ -126,15 +113,9 @@ void print(TemplateNode tree)
     tree.accept(printer);
 }
 
-
-
 private:
 
-
-
-enum defaultConfig = JinjaConfig.init;
-
-
+enum defaultConfig = TemplateConfig.init;
 
 template Ident(alias A)
 {
