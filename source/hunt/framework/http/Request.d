@@ -123,6 +123,11 @@ final class Request {
 			pipedStream = new ByteArrayPipedStream(cast(int) contentLength);
 		}
 	}
+
+	
+
+
+
 	private PipedStream pipedStream;
 
 	package(hunt.framework) void onContent(ByteBuffer buffer) {
@@ -198,6 +203,11 @@ final class Request {
 
 	string getMate(string key, string value = null) {
 		return _mate.get(key, value);
+	}
+
+	long size() @property
+	{
+		return _stringBody.length;
 	}
 
 	void addMate(string key, string value) {

@@ -32,12 +32,14 @@ import hunt.framework.Init;
 import hunt.framework.routing;
 import hunt.framework.security.acl.Manager;
 import hunt.framework.websocket.WebSocketMessageBroker;
+import hunt.framework.zipkin.Trace;
 
 public import hunt.framework.http;
 public import hunt.framework.i18n;
 public import hunt.framework.application.AppConfig;
 public import hunt.framework.application.MiddlewareInterface;
 
+public import zipkin;
 public import hunt.entity;
 public import hunt.event;
 public import hunt.event.EventLoopGroup;
@@ -52,6 +54,7 @@ import std.socket;
 import std.stdio;
 import std.string;
 import std.uni;
+
 
 /**
 */
@@ -197,6 +200,19 @@ final class Application : ApplicationContext {
         initCache(config.cache);
         initSessionStorage(config.session);
         _accessManager = new AccessManager(cache() , config.application.name , config.session.prefix, config.session.expire);
+        
+        auto local = new EndPoint();
+        local.serviceName = config.application.name;
+        local.ipv4 = config.http.address;
+        local.port = config.http.port;
+
+        if(config.zipkin.imfhost != "")
+        {
+            import zipkin.imf.client;
+            initIMF(config.zipkin.imfhost , config.zipkin.imfport);
+            Trace.upload = true;
+        }
+        Trace.localEndpoint = local;
     }
 
     void start() {

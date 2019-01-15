@@ -9,7 +9,8 @@
         "hunt-http": "~>0.0.12",
         "hunt-stomp": "~>0.0.2",
         "hunt-cache": "~>0.2.0",
-        "hunt-entity": "~>2.1.0"
+        "hunt-entity": "~>2.1.0",
+        "zipkin":"~>0.0.3"
     },
     "authors": [
         "huntlabs.net"

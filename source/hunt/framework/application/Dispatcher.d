@@ -20,6 +20,8 @@ import hunt.framework.routing;
 import hunt.framework.security.acl.Manager;
 import hunt.framework.security.acl.User;
 import hunt.framework.Simplify;
+import hunt.framework.zipkin.Trace;
+
 
 import hunt.logging;
 import hunt.Exceptions;
@@ -29,6 +31,8 @@ import std.stdio;
 import std.exception;
 import std.parallelism;
 import std.conv : to;
+
+
 
 class Dispatcher
 {
@@ -154,20 +158,26 @@ void doRequestHandle(RoutingHandler handle, Request req)
     
     // this thread _request
     request(req);
-
+    newFrameworkTrace(req);
     try
     {
         ///this group middleware.
         response = doGroupMiddleware(req);
         if(response is null)
         {
+
+            
             response = handle(req);
+            
+
             if (response is null)
                 response = new Response(req);
         }
+        finishFrameworkTrace(response);
     }
     catch (CreateResponseException e)
     {
+        finishFrameworkTrace(e.toString);
         collectException(error(e.toString));
     }
     catch (Exception e)
@@ -176,6 +186,7 @@ void doRequestHandle(RoutingHandler handle, Request req)
         response = new Response(req);
         response.setStatus(502);
         response.setContent(e.toString());
+        finishFrameworkTrace(response);
         // response.connectionClose();
         response.close();
     }
@@ -183,8 +194,11 @@ void doRequestHandle(RoutingHandler handle, Request req)
     {
         import std.stdio : writeln;
         import core.stdc.stdlib : exit;
-
-        collectException({ logError(e.toString); writeln(e.toString()); }());
+        finishFrameworkTrace(e.toString);
+        collectException({ logError(e.toString); 
+            
+            writeln(e.toString()); 
+        }());
         exit(-1);
     }
 
