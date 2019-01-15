@@ -16,7 +16,7 @@
 
 module hunt.framework.context.ApplicationEvent;
 
-import hunt.datetime;
+import hunt.util.DateTime;
 import hunt.util.ObjectUtils;
 
 /**

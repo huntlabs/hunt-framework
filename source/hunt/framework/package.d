@@ -30,7 +30,7 @@ public import hunt.framework.Simplify;
 
 debug {}
 else {
-    import hunt.lang.common;
+    import hunt.util.Common;
     static assert(CompilerHelper.isGreater(2082), 
         "The version of D compiler must be greater than 2.083 in release model.");
 }

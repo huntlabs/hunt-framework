@@ -64,7 +64,7 @@ class WebSocketAnnotationMethodMessageHandler : SimpAnnotationMethodMessageHandl
 		// if (context is null) {
 		// 	return;
 		// }
-		import hunt.lang.exception;
+		import hunt.Exceptions;
 		implementationMissing(false);
 		version(HUNT_DEBUG) {
 			// trace("Looking for @MessageExceptionHandler mappings: " ~ (cast(Object)context).toString());

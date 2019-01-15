@@ -24,7 +24,7 @@ import hunt.stomp.converter.MessageConverter;
 import hunt.stomp.simp.config.ChannelRegistration;
 import hunt.stomp.simp.config.MessageBrokerRegistry;
 
-import hunt.container.List;
+import hunt.collection.List;
 
 /**
  * Defines methods for configuring message handling with simple messaging

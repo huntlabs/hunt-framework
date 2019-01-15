@@ -12,10 +12,10 @@
 module hunt.framework.application.Application;
 
 import hunt.cache;
-import hunt.container;
-import hunt.io.common;
-import hunt.lang.exception;
-import hunt.lang.common;
+import hunt.collection;
+import hunt.io.Common;
+import hunt.Exceptions;
+import hunt.util.Common;
 import hunt.logging;
 import hunt.net.NetUtil;
 import hunt.http.codec.http.model;
@@ -41,6 +41,7 @@ public import hunt.framework.application.MiddlewareInterface;
 public import hunt.entity;
 public import hunt.event;
 public import hunt.event.EventLoopGroup;
+import hunt.Functions;
 
 import std.exception;
 import std.conv;

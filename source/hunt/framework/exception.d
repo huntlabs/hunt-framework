@@ -11,7 +11,7 @@
 
 module hunt.framework.exception;
 
-import hunt.lang.exception;
+import hunt.Exceptions;
 
 mixin ExceptionBuild!("Hunt","");
 

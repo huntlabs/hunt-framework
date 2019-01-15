@@ -26,7 +26,7 @@ module hunt.framework.websocket.server.WebSocketHttpRequestHandler;
 // import javax.servlet.http.HttpServletRequest;
 // import javax.servlet.http.HttpServletResponse;
 
-import hunt.container;
+import hunt.collection;
 import hunt.logging;
 
 

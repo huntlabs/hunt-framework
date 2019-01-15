@@ -1,10 +1,11 @@
 module hunt.framework.websocket.WebSocketController;
 
-import hunt.lang.common;
+import hunt.util.Common;
 import hunt.logging;
 import hunt.stomp.simp.annotation.SimpAnnotationMethodMessageHandler;
 import hunt.stomp.annotation;
 import hunt.stomp.Message;
+import hunt.Functions;
 
 import std.algorithm;
 import std.array;
@@ -46,7 +47,7 @@ mixin template ControllerExtensions(string moduleName = __MODULE__) {
     import hunt.stomp.converter.AbstractMessageConverter;
     import hunt.stomp.converter.MessageConverter;
     import hunt.stomp.converter.MessageConverterHelper;
-    import hunt.lang.Nullable;
+    import hunt.Nullable;
     import hunt.logging;
     import hunt.util.JsonHelper;
     import hunt.util.MimeType;

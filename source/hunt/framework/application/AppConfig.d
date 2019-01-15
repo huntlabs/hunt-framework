@@ -20,7 +20,7 @@ import std.string;
 import hunt.http.codec.http.model.MultipartConfig;
 import hunt.logging;
 import hunt.framework.Init;
-import hunt.util.configuration;
+import hunt.util.Configuration;
 
 
 @Configuration("hunt")

@@ -26,8 +26,8 @@ module hunt.framework.websocket.WebSocketSession;
 
 // import hunt.framework.http.HttpHeaders;
 
-import hunt.container;
-import hunt.lang.common;
+import hunt.collection;
+import hunt.util.Common;
 
 import hunt.http.codec.http.model.HttpURI;
 import hunt.http.codec.websocket.frame.WebSocketFrame;

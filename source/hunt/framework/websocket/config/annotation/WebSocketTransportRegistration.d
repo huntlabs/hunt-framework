@@ -17,7 +17,7 @@
 module hunt.framework.websocket.config.annotation.WebSocketTransportRegistration;
 
 
-import hunt.container;
+import hunt.collection;
 
 import hunt.framework.websocket.server.WebSocketHandlerDecorator;
 

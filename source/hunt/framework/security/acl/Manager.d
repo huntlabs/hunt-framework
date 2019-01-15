@@ -5,7 +5,7 @@ import hunt.framework.security.acl.User;
 import hunt.framework.security.acl.Permission;
 import hunt.framework.security.acl.AuthenticateProxy;
 import hunt.logging;
-import hunt.datetime;
+import hunt.util.DateTime;
 import hunt.cache;
 import hunt.framework.http.Request;
 import std.conv;

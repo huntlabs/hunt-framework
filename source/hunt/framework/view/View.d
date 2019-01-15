@@ -21,7 +21,7 @@ public import hunt.framework.view.Render;
 public import hunt.framework.view.Rule;
 public import hunt.framework.view.Util;
 
-public import hunt.util.serialize;
+public import hunt.util.Serialize;
 public import hunt.logging;
 
 import std.json : JSONValue;

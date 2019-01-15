@@ -341,7 +341,7 @@ public:
                 auto timestamp = eval_expression(element.args[1], data);
                 if (format.type == JSON_TYPE.STRING && timestamp.type == JSON_TYPE.INTEGER)
                 {
-                    import hunt.datetime;
+                    import hunt.util.DateTime;
 
                     result = date(format.str, timestamp.integer);
                 }

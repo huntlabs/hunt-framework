@@ -1,7 +1,7 @@
 module hunt.framework.websocket.exception;
 
 import hunt.http.codec.websocket.model.CloseStatus;
-import hunt.lang.exception;
+import hunt.Exceptions;
 
 class SessionLimitExceededException : RuntimeException {
     

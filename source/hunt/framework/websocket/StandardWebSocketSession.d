@@ -32,12 +32,12 @@ module hunt.framework.websocket.StandardWebSocketSession;
 import hunt.framework.websocket.WebSocketSession;
 import hunt.framework.websocket.AbstractWebSocketSession;
 
-import hunt.container;
+import hunt.collection;
 import hunt.http.codec.http.model.HttpFields;
 import hunt.http.codec.http.model.HttpURI;
 import hunt.http.codec.websocket.model.CloseStatus;
 import hunt.http.codec.websocket.stream.WebSocketConnection;
-import hunt.lang.exception;
+import hunt.Exceptions;
 import hunt.logging;
 import hunt.security.Principal;
 import std.socket;
