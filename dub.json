@@ -3,7 +3,7 @@
     "targetType": "library",
     "description": "A high performance full-stack Web framework.",
     "license": "Apache-2.0",
-    "copyright": "Copyright (C) 2015-2019 HuntLabs",
+    "copyright": "Copyright (C) 2015-2019, HuntLabs",
     "homepage": "https://www.huntlabs.net/",
     "dependencies": {
         "hunt": "~>1.0.0",

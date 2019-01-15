@@ -13,8 +13,8 @@ module hunt.framework.view.Uninode;
 
 public
 {
-    import hunt.util.uninode.core;
-    import hunt.util.uninode.serialization :
+    import hunt.framework.view.uninode.core;
+    import hunt.framework.view.uninode.serialization :
                 serialize = serializeToUniNode,
                 deserialize = deserializeUniNode;
 }
