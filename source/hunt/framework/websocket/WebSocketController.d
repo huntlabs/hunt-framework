@@ -49,7 +49,7 @@ mixin template ControllerExtensions(string moduleName = __MODULE__) {
     import hunt.stomp.converter.MessageConverterHelper;
     import hunt.Nullable;
     import hunt.logging;
-    import hunt.util.JsonHelper;
+    import hunt.text.JsonHelper;
     import hunt.util.MimeType;
     import std.json;
 

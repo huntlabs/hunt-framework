@@ -328,7 +328,7 @@ final class Request {
 
 		if(method() != "POST")
 			return null;
-		import hunt.util.JsonHelper;
+		import hunt.text.JsonHelper;
 
 		JSONValue jv;
 		foreach(string k, string[] values; xFormData()) {

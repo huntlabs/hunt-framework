@@ -11,14 +11,7 @@
 
 module hunt.framework.view.View;
 
-public import hunt.framework.view.AstNode;
-public import hunt.framework.view.AstCacheManager;
-public import hunt.framework.view.Element;
-public import hunt.framework.view.Environment;
-public import hunt.framework.view.Match;
-public import hunt.framework.view.Parser;
-public import hunt.framework.view.Render;
-public import hunt.framework.view.Rule;
+public import hunt.framework.view.djinja.Environment;
 public import hunt.framework.view.Util;
 
 public import hunt.util.Serialize;
@@ -90,9 +83,8 @@ class View
     public string render(string tempalteFile)
     {
         import std.stdio;
-
         version (HUNT_DEBUG) trace("---rend context :", _context.toString);
-        return _env.render_file(tempalteFile ~ _extName, _context);
+        return _env.renderFile(tempalteFile ~ _extName,_context);
     }
 
     public void assign(T)(string key, T t)
