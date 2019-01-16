@@ -505,7 +505,7 @@ struct UniNodeImpl(This)
     }
 
 
-    ulong toHash()
+    size_t toHash() const nothrow @safe
     {
         final switch (_kind) with (Kind)
         {
@@ -862,6 +862,11 @@ struct UniNode
     this(V)(V val) inout
     {
         node = UniNodeImpl!UniNode(val);
+    }
+
+    size_t toHash() const nothrow @safe
+    {
+        return node.toHash();
     }
 }
 
