@@ -45,7 +45,7 @@ import hunt.framework.websocket.WebSocketMessageHandler;
 import hunt.http.server.WebSocketHandler;
 
 import hunt.collection;
-import hunt.util.Common;
+import hunt.Functions;
 import hunt.logging;
 import hunt.Functions;
 

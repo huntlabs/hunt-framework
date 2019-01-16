@@ -15,7 +15,6 @@ import hunt.http.codec.websocket.stream.WebSocketConnection;
 import hunt.http.codec.websocket.stream.WebSocketPolicy;
 import hunt.framework.websocket.WebSocketController;
 import hunt.http.server.WebSocketHandler;
-import hunt.util.Common;
 import hunt.Functions;
 
 /**

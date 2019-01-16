@@ -7,10 +7,10 @@
     "homepage": "https://www.huntlabs.net/",
     "dependencies": {
         "hunt": "~>1.0.0",
-        "hunt-http": "~>0.0.12",
+        "hunt-http": "~>0.0.13",
         "hunt-stomp": "~>0.0.2",
         "hunt-cache": "~>0.2.0",
-        "hunt-entity": "~>2.1.0",
+        "hunt-entity": "~>2.1.1",
         "zipkin":"~>0.0.3"
     },
     "configurations": [

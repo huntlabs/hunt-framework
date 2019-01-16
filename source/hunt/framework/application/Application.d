@@ -15,7 +15,7 @@ import hunt.cache;
 import hunt.collection;
 import hunt.io.Common;
 import hunt.Exceptions;
-import hunt.util.Common;
+import hunt.Functions;
 import hunt.logging;
 import hunt.net.NetUtil;
 import hunt.http.codec.http.model;
