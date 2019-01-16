@@ -545,7 +545,7 @@ struct UniNodeImpl(This)
         node = UniNode(-22);
         assert(node.toHash() == -22);
         node = UniNode(22.22);
-        assert(node.toHash() == 1552493386);
+        assert(node.toHash() == 3683678524);
         node = UniNode("1");
         assert(node.toHash() == 2484513939);
         ubyte[] data = [1, 2, 3];
