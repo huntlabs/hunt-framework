@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.nt.framework.application.AppConfig;
+module hunt.framework.application.AppConfig;
 
 import std.exception;
 import std.parallelism : totalCPUs;

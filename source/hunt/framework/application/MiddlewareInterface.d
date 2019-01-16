@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.nt.framework.application.MiddlewareInterface;
+module hunt.framework.application.MiddlewareInterface;
 
 import hunt.framework.http.Request;
 import hunt.framework.http.Response;

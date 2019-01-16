@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.nt.framework.exception;
+module hunt.framework.exception;
 
 import hunt.Exceptions;
 
@@ -20,4 +20,3 @@ mixin ExceptionBuild!("Http","Hunt");
 mixin ExceptionBuild!("HttpErro","Http");
 
 mixin ExceptionBuild!("CreateResponse","HttpErro");
-

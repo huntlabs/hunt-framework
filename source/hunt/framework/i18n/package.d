@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.nt.framework.i18n;
+module hunt.framework.i18n;
 
 import std.path;
 import std.file;
