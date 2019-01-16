@@ -1,7 +1,7 @@
 module hunt.framework.http.session.SessionStorage;
 
 import hunt.cache;
-import hunt.framework.exception;
+import hunt.framework.Exception;
 import hunt.framework.util.random;
 
 import std.array;
