@@ -1,15 +1,15 @@
 ﻿/*
- * Hunt - Hunt is a high-level D Programming Language Web framework that encourages rapid development and clean, pragmatic design. It lets you build high-performance Web applications quickly and easily.
+ * Hunt - A high-level D Programming Language Web framework that encourages rapid development and clean, pragmatic design.
  *
- * Copyright (C) 2015-2018  Shanghai Putao Technology Co., Ltd
+ * Copyright (C) 2015-2019, HuntLabs
  *
- * Website: www.huntframework.com
+ * Website: https://www.huntlabs.net/
  *
  * Licensed under the Apache-2.0 License.
  *
  */
 
-module hunt.framework.routing.Define;
+module hunt.nt.framework.routing.Define;
 
 import hunt.logging;
 
