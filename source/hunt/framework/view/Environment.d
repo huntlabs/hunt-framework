@@ -90,7 +90,8 @@ public:
     {
         version (HUNT_DEBUG)
             trace("parse file path : ", input_path ~ filename);
-        return _parser.parseTreeFromFile(input_path ~ filename);
+        _parser.setPath(input_path);
+        return _parser.parseTreeFromFile(filename);
     }
 
     string render(TemplateNode tree,JSONValue data)

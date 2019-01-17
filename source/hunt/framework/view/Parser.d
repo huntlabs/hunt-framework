@@ -24,6 +24,7 @@ private
     import std.format: fmt = format;
     import std.range;
 
+    import hunt.logging;
     import hunt.framework.view.ast;
     import hunt.framework.view.Lexer;
     import hunt.framework.view.Exception : JinjaParserException,
@@ -47,8 +48,13 @@ struct Parser(Lexer)
         BlockNode[string] _blocks;
 
         ParserState[] _states;
+        string _path;
     }
 
+    void setPath(string path)
+    {
+        _path = path;
+    }
 
     void preprocess()
     {
@@ -141,8 +147,8 @@ struct Parser(Lexer)
 
     TemplateNode parseTreeFromFile(string path)
     {
-        path = path.absolute;
-
+        path = path.absolute(_path);
+        logDebug("parse file absolute path : ",path);
         if (auto cached = path in _parsedFiles)
         {
             if (*cached is null)
@@ -493,7 +499,7 @@ private:
     {
         auto pos = front.pos;
         pop(Keyword.Import);
-        auto path = pop(Type.String).value.absolute;
+        auto path = pop(Type.String).value.absolute(_path);
         bool withContext = false;
 
         if (front == Keyword.With)
@@ -510,7 +516,7 @@ private:
 
         pop(Type.StmtEnd);
 
-        assertJinja(path.exists, "Non existing file `%s`".fmt(path), pos);
+        assertJinja(path.fileExist(_path), "Non existing file `%s`".fmt(path), pos);
         
         auto stmtBlock = parseTreeFromFile(path);
         
@@ -522,7 +528,7 @@ private:
     {
         auto pos = front.pos;
         pop(Keyword.From);
-        auto path = pop(Type.String).value.absolute;
+        auto path = pop(Type.String).value.absolute(_path);
         pop(Keyword.Import);
 
         ImportNode.Rename[] macros;
@@ -563,7 +569,7 @@ private:
 
         pop(Type.StmtEnd);
 
-        assertJinja(path.exists, "Non existing file `%s`".fmt(path), pos);
+        assertJinja(path.fileExist(_path), "Non existing file `%s`".fmt(path), pos);
         
         auto stmtBlock = parseTreeFromFile(path);
         
@@ -619,7 +625,7 @@ private:
         pop(Type.StmtEnd);
 
         foreach (name; names)
-            if (name.exists)
+            if (name.fileExist(_path))
                 return new IncludeNode(pos, name, parseTreeFromFile(name), withContext);
  
         assertJinja(ignoreMissing, "No existing files `%s`".fmt(names), pos);
@@ -632,10 +638,10 @@ private:
     {
         auto pos = front.pos;
         pop(Keyword.Extends);
-        auto path = pop(Type.String).value.absolute;
+        auto path = pop(Type.String).value.absolute(_path);
         pop(Type.StmtEnd);
 
-        assertJinja(path.exists, "Non existing file `%s`".fmt(path), pos);
+        assertJinja(path.fileExist(_path), "Non existing file `%s`".fmt(path), pos);
         
         auto stmtBlock = parseTreeFromFile(path);
         
@@ -1269,12 +1275,20 @@ private:
 private:
 
 
-string absolute(string path)
+string absolute(string file,string path)
 {
     //TODO
-    return path;
+    // return path;
+    import std.path : absolutePath;
+    return (path ~ file).absolutePath;
 }
 
+bool fileExist(string file,string path)
+{
+    import std.path : absolutePath;
+    logDebug("path.absolutePath : ",(path ~ file).absolutePath);
+    return (file.exists) || ((path ~ file).absolutePath.exists);
+}
 
 string stripOnceRight(string str)
 {
