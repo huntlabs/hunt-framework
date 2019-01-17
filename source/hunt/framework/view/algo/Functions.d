@@ -31,7 +31,8 @@ Function[string] globalFunctions()
             "count": wrapper!length,
             "namespace": wrapper!namespace,
             "lang": wrapper!lang,
-            "date": wrapper!date
+            "date": wrapper!date,
+            "url": wrapper!url
         ];
 }
 
@@ -85,6 +86,11 @@ string lang(string la)
 }
 ///fake
 string date(string format , long timestamp)
+{
+    return null;     
+}
+///dummy
+string url(string format , string d)
 {
     return null;     
 }
