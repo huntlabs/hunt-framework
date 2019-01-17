@@ -45,12 +45,16 @@ bool undefined(UniNode value)
 
 bool number(UniNode value)
 {
+    import hunt.logging;
+    logDebug(value," kind :",value.kind);
     return value.isNumericNode;
 }
 
 
 bool list(UniNode value)
 {
+    import hunt.logging;
+    logDebug(value," kind :",value.kind);
     return value.kind == UniNode.Kind.array;
 }
 

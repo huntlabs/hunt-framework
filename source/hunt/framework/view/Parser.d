@@ -21,6 +21,7 @@ private
     import std.array : appender;
     import std.conv : to;
     import std.file : exists, read;
+    import std.path : dirName,absolutePath,dirSeparator;
     import std.format: fmt = format;
     import std.range;
 
@@ -48,12 +49,6 @@ struct Parser(Lexer)
         BlockNode[string] _blocks;
 
         ParserState[] _states;
-        string _path;
-    }
-
-    void setPath(string path)
-    {
-        _path = path;
     }
 
     void preprocess()
@@ -115,7 +110,7 @@ struct Parser(Lexer)
     }
 
 
-    TemplateNode parseTree(string str, string filename = "main")
+    TemplateNode parseTree(string str, string filename ,string dirPath)
     {
         stashState();
 
@@ -133,7 +128,7 @@ struct Parser(Lexer)
 
         preprocess();
 
-        auto root = parseStatementBlock();
+        auto root = parseStatementBlock(dirPath);
         auto blocks = _blocks;
 
         if (front.type != Type.EOF)
@@ -147,7 +142,8 @@ struct Parser(Lexer)
 
     TemplateNode parseTreeFromFile(string path)
     {
-        path = path.absolute(_path);
+        string dirPath = dirName(path) ~ dirSeparator;
+        // path = path.absolute(_path);
         logDebug("parse file absolute path : ",path);
         if (auto cached = path in _parsedFiles)
         {
@@ -160,7 +156,7 @@ struct Parser(Lexer)
         // Prevent recursive imports
         _parsedFiles[path] = null;
         auto str = cast(string)read(path);
-        _parsedFiles[path] = parseTree(str, path);
+        _parsedFiles[path] = parseTree(str, path,dirPath);
 
         return _parsedFiles[path];
     }
@@ -172,19 +168,19 @@ private:
     /**
       * exprblock = EXPRBEGIN expr (IF expr (ELSE expr)? )? EXPREND
       */
-    ExprNode parseExpression()
+    ExprNode parseExpression(string dirPath)
     {
         Node expr;
         auto pos = front.pos;
 
         pop(Type.ExprBegin);
-        expr = parseHighLevelExpression();
+        expr = parseHighLevelExpression(dirPath);
         pop(Type.ExprEnd);
 
         return new ExprNode(pos, expr);
     }
 
-    StmtBlockNode parseStatementBlock()
+    StmtBlockNode parseStatementBlock(string dirPath)
     {
         auto block = new StmtBlockNode(front.pos);
 
@@ -200,11 +196,11 @@ private:
                     break;
 
                 case ExprBegin:
-                    block.children ~= parseExpression();
+                    block.children ~= parseExpression(dirPath);
                     break;
 
                 case CmntBegin:
-                    parseComment();
+                    parseComment(dirPath);
                     break;
 
                 case CmntInline:
@@ -214,7 +210,7 @@ private:
                 case StmtBegin:
                     if (next.type == Type.Keyword
                         && next.value.toKeyword.isBeginingKeyword)
-                        block.children ~= parseStatement();
+                        block.children ~= parseStatement(dirPath);
                     else
                         return block;
                     break;
@@ -228,26 +224,26 @@ private:
     }
 
 
-    Node parseStatement()
+    Node parseStatement(string dirPath)
     {
         pop(Type.StmtBegin);
 
         switch(front.value) with (Keyword)
         {
-            case If:      return parseIf();
-            case For:     return parseFor();
-            case Set:     return parseSet();
-            case Macro:   return parseMacro();
-            case Call:    return parseCall();
-            case Filter:  return parseFilterBlock();
-            case With:    return parseWith();
-            case Import:  return parseImport();
-            case From:    return parseImportFrom();
-            case Include: return parseInclude();
-            case Extends: return parseExtends();
+            case If:      return parseIf(dirPath);
+            case For:     return parseFor(dirPath);
+            case Set:     return parseSet(dirPath);
+            case Macro:   return parseMacro(dirPath);
+            case Call:    return parseCall(dirPath);
+            case Filter:  return parseFilterBlock(dirPath);
+            case With:    return parseWith(dirPath);
+            case Import:  return parseImport(dirPath);
+            case From:    return parseImportFrom(dirPath);
+            case Include: return parseInclude(dirPath);
+            case Extends: return parseExtends(dirPath);
 
             case Block:
-                auto block = parseBlock();
+                auto block = parseBlock( dirPath);
                 _blocks[block.name] = block;
                 return block;
             default:
@@ -256,7 +252,7 @@ private:
     }
 
 
-    ForNode parseFor()
+    ForNode parseFor(string dirPath)
     {
         string[] keys;
         bool isRecursive = false;
@@ -278,16 +274,16 @@ private:
 
         switch (front.type) with (Type)
         {
-            case LParen:  iterable = parseTuple(); break;
-            case LSParen: iterable = parseList(); break;
-            case LBrace:  iterable = parseDict; break;
-            default:      iterable = parseIdent();
+            case LParen:  iterable = parseTuple(dirPath); break;
+            case LSParen: iterable = parseList(dirPath); break;
+            case LBrace:  iterable = parseDict(dirPath); break;
+            default:      iterable = parseIdent(dirPath);
         }
 
         if (front == Keyword.If)
         {
             pop(Keyword.If);
-            cond = parseHighLevelExpression();
+            cond = parseHighLevelExpression(dirPath);
         }
 
         if (front == Keyword.Recursive)
@@ -298,7 +294,7 @@ private:
 
         pop(Type.StmtEnd);
 
-        auto block = parseStatementBlock();
+        auto block = parseStatementBlock(dirPath);
 
         pop(Type.StmtBegin);
 
@@ -311,7 +307,7 @@ private:
             case Else:
                 pop(Keyword.Else);
                 pop(Type.StmtEnd);
-                auto other = parseStatementBlock();
+                auto other = parseStatementBlock(dirPath);
                 pop(Type.StmtBegin);
                 pop(Keyword.EndFor);
                 pop(Type.StmtEnd);
@@ -323,26 +319,26 @@ private:
     }
 
 
-    IfNode parseIf()
+    IfNode parseIf(string dirPath)
     {
         auto pos = front.pos;
         assertJinja(front == Keyword.If || front == Keyword.ElIf, "Expected If/Elif", pos);
         pop();
-        auto cond = parseHighLevelExpression();
+        auto cond = parseHighLevelExpression(dirPath);
         pop(Type.StmtEnd);
 
-        auto then = parseStatementBlock();
+        auto then = parseStatementBlock(dirPath);
 
         pop(Type.StmtBegin);
 
         switch (front.value) with (Keyword)
         {
             case ElIf:
-                auto other = parseIf();
+                auto other = parseIf(dirPath);
                 return new IfNode(pos, cond, then, other);
             case Else:
                 pop(Keyword.Else, Type.StmtEnd);
-                auto other = parseStatementBlock();
+                auto other = parseStatementBlock(dirPath);
                 pop(Type.StmtBegin, Keyword.EndIf, Type.StmtEnd);
                 return new IfNode(pos, cond, then, other);
             case EndIf:
@@ -355,18 +351,18 @@ private:
     }
 
 
-    SetNode parseSet()
+    SetNode parseSet(string dirPath)
     {
         auto setPos = front.pos;
 
         pop(Keyword.Set);
 
-        auto assigns = parseSequenceOf!parseAssignable(Type.Operator);
+        auto assigns = parseSequenceOf!parseAssignable(dirPath,Type.Operator);
 
         pop(Operator.Assign);
 
         auto listPos = front.pos;
-        auto exprs = parseSequenceOf!parseHighLevelExpression(Type.StmtEnd);
+        auto exprs = parseSequenceOf!parseHighLevelExpression(dirPath,Type.StmtEnd);
         Node expr = exprs.length == 1 ? exprs[0] : new ListNode(listPos, exprs);
 
         pop(Type.StmtEnd);
@@ -375,7 +371,7 @@ private:
     }
 
 
-    AssignableNode parseAssignable()
+    AssignableNode parseAssignable(string dirPath)
     {
         auto pos = front.pos;
         string name = pop(Type.Ident).value;
@@ -392,7 +388,7 @@ private:
                     break;
                 case LSParen:
                     pop(LSParen);
-                    subIdents ~= parseHighLevelExpression();
+                    subIdents ~= parseHighLevelExpression(dirPath);
                     pop(RSParen);
                     break;
                 default:
@@ -402,7 +398,7 @@ private:
     }
 
 
-    MacroNode parseMacro()
+    MacroNode parseMacro(string dirPath)
     {
         auto pos = front.pos;
         pop(Keyword.Macro);
@@ -413,13 +409,13 @@ private:
         if (front.type == Type.LParen)
         {
             pop(Type.LParen);
-            args = parseFormalArgs();
+            args = parseFormalArgs( dirPath);
             pop(Type.RParen);
         }
 
         pop(Type.StmtEnd);
 
-        auto block = parseStatementBlock();
+        auto block = parseStatementBlock( dirPath);
 
         pop(Type.StmtBegin, Keyword.EndMacro);
 
@@ -427,7 +423,7 @@ private:
         if (front.type == Type.Keyword && front.value == Keyword.Return)
         {
             pop(Keyword.Return);
-            block.children ~= parseHighLevelExpression();
+            block.children ~= parseHighLevelExpression(dirPath);
             ret = true;
         }
         else
@@ -439,7 +435,7 @@ private:
     }
 
     
-    CallNode parseCall()
+    CallNode parseCall(string dirPath)
     {
         auto pos = front.pos;
         pop(Keyword.Call);
@@ -449,16 +445,16 @@ private:
         if (front.type == Type.LParen)
         {
             pop(Type.LParen);
-            formalArgs = parseFormalArgs();
+            formalArgs = parseFormalArgs( dirPath);
             pop(Type.RParen);
         }
 
         auto macroName = front.value;
-        auto factArgs = parseCallExpr();
+        auto factArgs = parseCallExpr( dirPath);
 
         pop(Type.StmtEnd);
 
-        auto block = parseStatementBlock();
+        auto block = parseStatementBlock( dirPath);
         block.children ~= new NilNode; // void return
 
         pop(Type.StmtBegin, Keyword.EndCall, Type.StmtEnd);
@@ -467,17 +463,17 @@ private:
     }
 
 
-    FilterBlockNode parseFilterBlock()
+    FilterBlockNode parseFilterBlock(string dirPath)
     {
         auto pos = front.pos;
         pop(Keyword.Filter);
 
         auto filterName = front.value;
-        auto args = parseCallExpr();
+        auto args = parseCallExpr(dirPath);
 
         pop(Type.StmtEnd);
 
-        auto block = parseStatementBlock();
+        auto block = parseStatementBlock(dirPath);
 
         pop(Type.StmtBegin, Keyword.EndFilter, Type.StmtEnd);
 
@@ -485,21 +481,21 @@ private:
     }
     
 
-    StmtBlockNode parseWith()
+    StmtBlockNode parseWith(string dirPath)
     {
         pop(Keyword.With, Type.StmtEnd);
-        auto block = parseStatementBlock();
+        auto block = parseStatementBlock(dirPath);
         pop(Type.StmtBegin, Keyword.EndWith, Type.StmtEnd);
 
         return block;
     }
 
 
-    ImportNode parseImport()
+    ImportNode parseImport(string dirPath)
     {
         auto pos = front.pos;
         pop(Keyword.Import);
-        auto path = pop(Type.String).value.absolute(_path);
+        auto path = pop(Type.String).value.absolute(dirPath);
         bool withContext = false;
 
         if (front == Keyword.With)
@@ -516,7 +512,7 @@ private:
 
         pop(Type.StmtEnd);
 
-        assertJinja(path.fileExist(_path), "Non existing file `%s`".fmt(path), pos);
+        assertJinja(path.fileExist(dirPath), "Non existing file `%s`".fmt(path), pos);
         
         auto stmtBlock = parseTreeFromFile(path);
         
@@ -524,11 +520,11 @@ private:
     }
 
 
-    ImportNode parseImportFrom()
+    ImportNode parseImportFrom(string dirPath)
     {
         auto pos = front.pos;
         pop(Keyword.From);
-        auto path = pop(Type.String).value.absolute(_path);
+        auto path = pop(Type.String).value.absolute(dirPath);
         pop(Keyword.Import);
 
         ImportNode.Rename[] macros;
@@ -569,7 +565,7 @@ private:
 
         pop(Type.StmtEnd);
 
-        assertJinja(path.fileExist(_path), "Non existing file `%s`".fmt(path), pos);
+        assertJinja(path.fileExist(dirPath), "Non existing file `%s`".fmt(path), pos);
         
         auto stmtBlock = parseTreeFromFile(path);
         
@@ -577,7 +573,7 @@ private:
     }
 
 
-    IncludeNode parseInclude()
+    IncludeNode parseInclude(string dirPath)
     {
         auto pos = front.pos;
         pop(Keyword.Include);
@@ -625,8 +621,8 @@ private:
         pop(Type.StmtEnd);
 
         foreach (name; names)
-            if (name.fileExist(_path))
-                return new IncludeNode(pos, name, parseTreeFromFile(name), withContext);
+            if (name.fileExist(dirPath))
+                return new IncludeNode(pos, name, parseTreeFromFile(dirPath ~ name), withContext);
  
         assertJinja(ignoreMissing, "No existing files `%s`".fmt(names), pos);
         
@@ -634,14 +630,14 @@ private:
     }
 
 
-    ExtendsNode parseExtends()
+    ExtendsNode parseExtends(string dirPath)
     {
         auto pos = front.pos;
         pop(Keyword.Extends);
-        auto path = pop(Type.String).value.absolute(_path);
+        auto path = pop(Type.String).value.absolute(dirPath);
         pop(Type.StmtEnd);
 
-        assertJinja(path.fileExist(_path), "Non existing file `%s`".fmt(path), pos);
+        assertJinja(path.fileExist(dirPath), "Non existing file `%s`".fmt(path), pos);
         
         auto stmtBlock = parseTreeFromFile(path);
         
@@ -649,14 +645,14 @@ private:
     }
 
 
-    BlockNode parseBlock()
+    BlockNode parseBlock(string dirPath)
     {
         auto pos = front.pos;
         pop(Keyword.Block);
         auto name = pop(Type.Ident).value;
         pop(Type.StmtEnd);
 
-        auto stmt = parseStatementBlock();
+        auto stmt = parseStatementBlock( dirPath);
 
         pop(Type.StmtBegin, Keyword.EndBlock);
 
@@ -669,7 +665,7 @@ private:
         return new BlockNode(pos, name, stmt);
     }
 
-    Arg[] parseFormalArgs()
+    Arg[] parseFormalArgs(string dirPath)
     {
         Arg[] args = [];
         bool isVarargs = true;
@@ -683,7 +679,7 @@ private:
             {
                 isVarargs = false;
                 pop(Operator.Assign);
-                def = parseHighLevelExpression();
+                def = parseHighLevelExpression(dirPath);
             }
 
             args ~= Arg(name, def);
@@ -695,33 +691,33 @@ private:
     }
 
 
-    Node parseHighLevelExpression()
+    Node parseHighLevelExpression(string dirPath)
     {
-        return parseInlineIf();
+        return parseInlineIf(dirPath);
     }
 
 
     /**
       * inlineif = orexpr (IF orexpr (ELSE orexpr)? )?
       */
-    Node parseInlineIf()
+    Node parseInlineIf(string dirPath)
     {
         Node expr;
         Node cond = null;
         Node other = null;
 
         auto pos = front.pos;
-        expr = parseOrExpr();
+        expr = parseOrExpr( dirPath);
 
         if (front == Keyword.If)
         {
             pop(Keyword.If);
-            cond = parseOrExpr();
+            cond = parseOrExpr( dirPath);
 
             if (front == Keyword.Else)
             {
                 pop(Keyword.Else);
-                other = parseOrExpr();
+                other = parseOrExpr(dirPath);
             }
 
             return new InlineIfNode(pos, expr, cond, other);
@@ -734,9 +730,9 @@ private:
       * Parse Or Expression
       * or = and (OR or)?
       */
-    Node parseOrExpr()
+    Node parseOrExpr(string dirPath)
     {
-        auto lhs = parseAndExpr();
+        auto lhs = parseAndExpr(dirPath);
 
         while(true)
         {
@@ -744,7 +740,7 @@ private:
             {
                 auto pos = front.pos;
                 pop(Operator.Or);
-                auto rhs = parseAndExpr();
+                auto rhs = parseAndExpr( dirPath);
                 lhs = new BinOpNode(pos, Operator.Or, lhs, rhs);
             }
             else
@@ -756,9 +752,9 @@ private:
       * Parse And Expression:
       * and = inis (AND inis)*
       */
-    Node parseAndExpr()
+    Node parseAndExpr(string dirPath)
     {
-        auto lhs = parseInIsExpr();
+        auto lhs = parseInIsExpr( dirPath);
 
         while(true)
         {
@@ -766,7 +762,7 @@ private:
             {
                 auto pos = front.pos;
                 pop(Operator.And);
-                auto rhs = parseInIsExpr();
+                auto rhs = parseInIsExpr( dirPath);
                 lhs = new BinOpNode(pos, Operator.And, lhs, rhs);
             }
             else
@@ -778,9 +774,9 @@ private:
       * Parse inis:
       * inis = cmp ( (NOT)? (IN expr |IS callexpr) )?
       */
-    Node parseInIsExpr()
+    Node parseInIsExpr(string dirPath)
     {
-        auto inis = parseCmpExpr();
+        auto inis = parseCmpExpr( dirPath);
 
         auto notPos = front.pos;
         bool hasNot = false;
@@ -795,14 +791,14 @@ private:
         if (front == Operator.In)
         {
             auto op = pop().value;
-            auto rhs = parseHighLevelExpression();
+            auto rhs = parseHighLevelExpression( dirPath);
             inis = new BinOpNode(inisPos, op, inis, rhs);
         }
 
         if (front == Operator.Is)
         {
             auto op = pop().value;
-            auto rhs = parseCallExpr();
+            auto rhs = parseCallExpr( dirPath);
             inis = new BinOpNode(inisPos, op, inis, rhs);
         }
 
@@ -817,15 +813,15 @@ private:
       * Parse compare expression:
       * cmp = concatexpr (CMPOP concatexpr)?
       */
-    Node parseCmpExpr()
+    Node parseCmpExpr(string dirPath)
     {
-        auto lhs = parseConcatExpr();
+        auto lhs = parseConcatExpr( dirPath);
 
         if (front.type == Type.Operator && front.value.toOperator.isCmpOperator)
         {
             auto pos = front.pos;
             auto op = pop(Type.Operator).value;
-            return new BinOpNode(pos, op, lhs, parseConcatExpr());
+            return new BinOpNode(pos, op, lhs, parseConcatExpr( dirPath));
         }
 
         return lhs;
@@ -835,15 +831,15 @@ private:
       * Parse expression:
       * concatexpr = filterexpr (CONCAT filterexpr)*
       */
-    Node parseConcatExpr()
+    Node parseConcatExpr(string dirPath)
     {
-        auto lhsTerm = parseFilterExpr();
+        auto lhsTerm = parseFilterExpr( dirPath);
 
         while (front == Operator.Concat)
         {
             auto pos = front.pos;
             auto op = pop(Operator.Concat).value;
-            lhsTerm = new BinOpNode(pos, op, lhsTerm, parseFilterExpr());
+            lhsTerm = new BinOpNode(pos, op, lhsTerm, parseFilterExpr( dirPath));
         }
 
         return lhsTerm;
@@ -852,15 +848,15 @@ private:
     /**
       * filterexpr = mathexpr (FILTER callexpr)*
       */
-    Node parseFilterExpr()
+    Node parseFilterExpr(string dirPath)
     {
-        auto filterexpr = parseMathExpr();
+        auto filterexpr = parseMathExpr( dirPath);
 
         while (front == Operator.Filter)
         {
             auto pos = front.pos;
             auto op = pop(Operator.Filter).value;
-            filterexpr = new BinOpNode(pos, op, filterexpr, parseCallExpr());
+            filterexpr = new BinOpNode(pos, op, filterexpr, parseCallExpr( dirPath));
         }
 
         return filterexpr;
@@ -870,9 +866,9 @@ private:
       * Parse math expression:
       * mathexpr = term((PLUS|MINUS)term)*
       */
-    Node parseMathExpr()
+    Node parseMathExpr(string dirPath)
     {
-        auto lhsTerm = parseTerm();
+        auto lhsTerm = parseTerm( dirPath);
 
         while (true)
         {
@@ -885,7 +881,7 @@ private:
                 case Plus:
                 case Minus:
                     auto op = pop.value;
-                    lhsTerm = new BinOpNode(pos, op, lhsTerm, parseTerm());
+                    lhsTerm = new BinOpNode(pos, op, lhsTerm, parseTerm( dirPath));
                     break;
                 default:
                     return lhsTerm;
@@ -897,9 +893,9 @@ private:
       * Parse term:
       * term = unary((MUL|DIVI|DIVF|REM)unary)*
       */
-    Node parseTerm()
+    Node parseTerm(string dirPath)
     {
-        auto lhsFactor = parseUnary();
+        auto lhsFactor = parseUnary( dirPath);
 
         while(true)
         {
@@ -914,7 +910,7 @@ private:
                 case Mul:
                 case Rem:
                     auto op = pop.value;
-                    lhsFactor = new BinOpNode(pos, op, lhsFactor, parseUnary());
+                    lhsFactor = new BinOpNode(pos, op, lhsFactor, parseUnary( dirPath));
                     break;
                 default:
                     return lhsFactor;
@@ -926,10 +922,10 @@ private:
       * Parse unary:
       * unary = (pow | (PLUS|MINUS|NOT)unary)
       */
-    Node parseUnary()
+    Node parseUnary(string dirPath)
     {
         if (front.type != Type.Operator)
-            return parsePow();
+            return parsePow( dirPath);
 
         auto pos = front.pos;
         switch (front.value) with (Operator)
@@ -938,7 +934,7 @@ private:
             case Minus:
             case Not:
                 auto op = pop.value;
-                return new UnaryOpNode(pos, op, parseUnary());
+                return new UnaryOpNode(pos, op, parseUnary( dirPath));
             default:
                 assertJinja(0, "Unexpected operator `%s`".fmt(front.value), front.pos);
                 assert(0);
@@ -949,15 +945,15 @@ private:
       * Parse pow:
       * pow = factor (POW pow)?
       */
-    Node parsePow()
+    Node parsePow(string dirPath)
     {
-        auto lhs = parseFactor();
+        auto lhs = parseFactor(dirPath);
 
         if (front.type == Type.Operator && front.value == Operator.Pow)
         {
             auto pos = front.pos;
             auto op = pop(Operator.Pow).value;
-            return new BinOpNode(pos, op, lhs, parsePow());
+            return new BinOpNode(pos, op, lhs, parsePow( dirPath));
         }
 
         return lhs;
@@ -968,23 +964,23 @@ private:
       * Parse factor:
       * factor = (ident|(tuple|LPAREN HighLevelExpr RPAREN)|literal)
       */
-    Node parseFactor()
+    Node parseFactor(string dirPath)
     {
         switch (front.type) with (Type)
         {
             case Ident:
-                return parseIdent();
+                return parseIdent( dirPath);
 
             case LParen:
                 auto pos = front.pos;
                 pop(LParen);
                 bool hasCommas;
-                auto exprList = parseSequenceOf!parseHighLevelExpression(RParen, hasCommas);
+                auto exprList = parseSequenceOf!parseHighLevelExpression( dirPath,RParen, hasCommas);
                 pop(RParen);
                 return hasCommas ? new ListNode(pos, exprList) : exprList[0];
 
             default:
-                return parseLiteral();
+                return parseLiteral( dirPath);
         }
     }
 
@@ -992,14 +988,14 @@ private:
       * Parse ident:
       * ident = IDENT (LPAREN ARGS RPAREN)? (DOT IDENT (LP ARGS RP)?| LSPAREN STR LRPAREN)*
       */
-    Node parseIdent()
+    Node parseIdent(string dirPath)
     {
         string name = "";
         Node[] subIdents = [];
         auto pos = front.pos;
 
         if (next.type == Type.LParen)
-            subIdents ~= parseCallExpr();
+            subIdents ~= parseCallExpr( dirPath);
         else
             name = pop(Type.Ident).value;
 
@@ -1011,13 +1007,13 @@ private:
                     pop(Dot);
                     auto posStr = front.pos;
                     if (next.type == Type.LParen)
-                        subIdents ~= parseCallExpr();
+                        subIdents ~= parseCallExpr( dirPath);
                     else
                         subIdents ~= new StringNode(posStr, pop(Ident).value);
                     break;
                 case LSParen:
                     pop(LSParen);
-                    subIdents ~= parseHighLevelExpression();
+                    subIdents ~= parseHighLevelExpression( dirPath);
                     pop(RSParen);
                     break;
                 default:
@@ -1027,14 +1023,14 @@ private:
     }
 
 
-    IdentNode parseCallIdent()
+    IdentNode parseCallIdent(string dirPath)
     {
         auto pos = front.pos;
-        return new IdentNode(pos, "", [parseCallExpr()]);
+        return new IdentNode(pos, "", [parseCallExpr( dirPath)]);
     }
 
 
-    DictNode parseCallExpr()
+    DictNode parseCallExpr(string dirPath)
     {
         auto pos = front.pos;
         string name = pop(Type.Ident).value;
@@ -1042,17 +1038,17 @@ private:
         Node[string] kwargs;
 
         bool parsingKwargs = false;
-        void parse()
+        void parse(string dirPath)
         {
             if (parsingKwargs || front.type == Type.Ident && next.value == Operator.Assign)
             {
                 parsingKwargs = true;
                 auto name = pop(Type.Ident).value;
                 pop(Operator.Assign);
-                kwargs[name] = parseHighLevelExpression();
+                kwargs[name] = parseHighLevelExpression( dirPath);
             }
             else
-                varargs ~= parseHighLevelExpression();
+                varargs ~= parseHighLevelExpression( dirPath);
         }
 
         if (front.type == Type.LParen)
@@ -1061,7 +1057,7 @@ private:
 
             while (front.type != Type.EOF && front.type != Type.RParen)
             {
-                parse();
+                parse( dirPath);
 
                 if (front.type != Type.RParen)
                     pop(Type.Comma);
@@ -1081,7 +1077,7 @@ private:
     /**
       * literal = string|number|list|tuple|dict
       */
-    Node parseLiteral()
+    Node parseLiteral(string dirPath)
     {
         auto pos = front.pos;
         switch (front.type) with (Type)
@@ -1090,9 +1086,9 @@ private:
             case Float:   return new NumNode(pos, pop.value.to!double);
             case String:  return new StringNode(pos, pop.value);
             case Boolean: return new BooleanNode(pos, pop.value.to!bool);
-            case LParen:  return parseTuple();
-            case LSParen: return parseList();
-            case LBrace:  return parseDict();
+            case LParen:  return parseTuple( dirPath);
+            case LSParen: return parseList( dirPath);
+            case LBrace:  return parseDict( dirPath);
             default:
                 assertJinja(0, "Unexpected token while parsing expression: %s(%s)".fmt(front.type, front.value), front.pos);
                 assert(0);
@@ -1100,45 +1096,45 @@ private:
     }
 
 
-    Node parseTuple()
+    Node parseTuple(string dirPath)
     {
         //Literally array right now
 
         auto pos = front.pos;
         pop(Type.LParen);
-        auto tuple = parseSequenceOf!parseHighLevelExpression(Type.RParen);
+        auto tuple = parseSequenceOf!parseHighLevelExpression( dirPath,Type.RParen);
         pop(Type.RParen);
 
         return new ListNode(pos, tuple);
     }
 
 
-    Node parseList()
+    Node parseList(string dirPath)
     {
         auto pos = front.pos;
         pop(Type.LSParen);
-        auto list = parseSequenceOf!parseHighLevelExpression(Type.RSParen);
+        auto list = parseSequenceOf!parseHighLevelExpression( dirPath,Type.RSParen);
         pop(Type.RSParen);
 
         return new ListNode(pos, list);
     }
 
 
-    Node[] parseSequenceOf(alias parser)(Type stopSymbol)
+    Node[] parseSequenceOf(alias parser)(string dirPath,Type stopSymbol)
     {
         bool hasCommas;
-        return parseSequenceOf!parser(stopSymbol, hasCommas);
+        return parseSequenceOf!parser(dirPath,stopSymbol, hasCommas);
     }
 
 
-    Node[] parseSequenceOf(alias parser)(Type stopSymbol, ref bool hasCommas)
+    Node[] parseSequenceOf(alias parser)(string dirPath,Type stopSymbol, ref bool hasCommas)
     {
         Node[] seq;
 
         hasCommas = false;
         while (front.type != stopSymbol && front.type != Type.EOF)
         {
-            seq ~= parser();
+            seq ~= parser(dirPath);
 
             if (front.type != stopSymbol)
             {
@@ -1151,7 +1147,7 @@ private:
     }
 
 
-    Node parseDict()
+    Node parseDict(string dirPath)
     {
         Node[string] dict;
         auto pos = front.pos;
@@ -1171,7 +1167,7 @@ private:
                 key = pop(Type.String).value;
 
             pop(Type.Colon);
-            dict[key] = parseHighLevelExpression();
+            dict[key] = parseHighLevelExpression( dirPath);
             isFirst = false;
         }
 
@@ -1184,7 +1180,7 @@ private:
     }
 
 
-    void parseComment()
+    void parseComment(string dirPath)
     {
         pop(Type.CmntBegin);
         while (front.type != Type.CmntEnd && front.type != Type.EOF)
@@ -1280,7 +1276,7 @@ string absolute(string file,string path)
     //TODO
     // return path;
     import std.path : absolutePath;
-    return (path ~ file).absolutePath;
+    return (path ~ file);
 }
 
 bool fileExist(string file,string path)
