@@ -72,6 +72,11 @@ final class AppConfig
         size_t keepAliveTimeOut = 30;
         size_t maxHeaderSize = 60 * 1024;
         int cacheControl;
+        bool enableCors = false; // CORS support
+        string allowOrigin = "*";
+        string allowMethods = "*";
+        string allowHeaders = "*";
+        // DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type
     }
 
     struct HttpsConf

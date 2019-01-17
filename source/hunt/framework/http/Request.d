@@ -334,7 +334,7 @@ final class Request {
 	private string[][string] _xFormData;
 
 
-	public T bindForm(T)() {
+	T bindForm(T)() {
 
 		if(method() != "POST")
 			return null;
@@ -437,7 +437,7 @@ final class Request {
      *
      * @return array List of content types in preferable order
      */
-	public string[] getAcceptableContentTypes() {
+	string[] getAcceptableContentTypes() {
 		if (acceptableContentTypes is null) {
 			acceptableContentTypes = getFields().getValuesList("Accept");
 		}
@@ -643,13 +643,13 @@ final class Request {
      * @param  string|array|null  default
      * @return string|array
      */
-	// public string[string] old(string[string] defaults = null)
+	// string[string] old(string[string] defaults = null)
 	// {
 	// 	return this.hasSession() ? this.session().getOldInput(defaults) : defaults;
 	// }
 
 	// /// ditto
-	// public string old(string key, string defaults = null)
+	// string old(string key, string defaults = null)
 	// {
 	// 	return this.hasSession() ? this.session().getOldInput(key, defaults) : defaults;
 	// }
@@ -659,7 +659,7 @@ final class Request {
      *
      * @return void
      */
-	public void flash() {
+	void flash() {
 		if (hasSession())
 			_session.flashInput(this.input());
 	}
@@ -670,7 +670,7 @@ final class Request {
      * @param  array|mixed  keys
      * @return void
      */
-	public void flashOnly(string[] keys) {
+	void flashOnly(string[] keys) {
 		if (hasSession())
 			_session.flashInput(this.only(keys));
 
@@ -682,13 +682,13 @@ final class Request {
      * @param  array|mixed  keys
      * @return void
      */
-	public void flashExcept(string[] keys) {
+	void flashExcept(string[] keys) {
 		if (hasSession())
 			_session.flashInput(this.only(keys));
 
 	}
 
-	public string getMCA()
+	string getMCA()
 	{
 		string mca;
 		if (request.route.getModule() is null)
@@ -1135,7 +1135,7 @@ final class Request {
      *
      * @return string
      */
-	public string getScheme() {
+	string getScheme() {
 		return isSecure() ? "https" : "http";
 	}
 
@@ -1419,7 +1419,7 @@ final class Request {
      *
      * @return Closure
      */
-	public Closure getRouteResolver() {
+	Closure getRouteResolver() {
 		if (routeResolver is null)
 			return (Request) {  };
 

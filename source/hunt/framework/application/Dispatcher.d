@@ -209,13 +209,12 @@ void doRequestHandle(RoutingHandler handle, Request req)
 		http://www.cnblogs.com/feihong84/p/5678895.html
 		https://stackoverflow.com/questions/10093053/add-header-in-ajax-request-with-jquery
 		*/
-
-        response.setHeader("Access-Control-Allow-Origin", "*");
-        response.setHeader("Access-Control-Allow-Methods", "*");
-
-        response.setHeader("Access-Control-Allow-Headers",
-                "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With," ~
-                "If-Modified-Since,Cache-Control,Content-Type");
+        AppConfig.HttpConf httpConf = Config().app.http;
+        if(httpConf.enableCors) {
+            response.setHeader("Access-Control-Allow-Origin", httpConf.allowOrigin);
+            response.setHeader("Access-Control-Allow-Methods", httpConf.allowMethods);
+            response.setHeader("Access-Control-Allow-Headers", httpConf.allowHeaders);
+        }
         // if (response.dataHandler is null)
         //     response.dataHandler = req.responseHandler;
 
