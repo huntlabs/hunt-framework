@@ -90,6 +90,7 @@ public:
     {
         version (HUNT_DEBUG)
             trace("parse file path : ", input_path ~ filename);
+        // _parser.setPath(input_path);
         return _parser.parseTreeFromFile(input_path ~ filename);
     }
 
@@ -111,7 +112,7 @@ public:
     string render(string str,JSONValue data)
     {
         import hunt.framework.util.uninode.Serialization;
-        auto tree = _parser.parseTree(str);
+        auto tree = _parser.parseTree(str,"",input_path);
         auto render = new Render(tree);
         render.setRouteGroup(_routeGroup);
         render.setLocale(_locale);
