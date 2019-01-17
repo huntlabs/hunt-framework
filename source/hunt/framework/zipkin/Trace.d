@@ -43,7 +43,8 @@ private void finishFrameworkUpload(Trace trace)
     if(trace.upload)
         uploadFromIMF(trace.root ~ trace.children);
 
-    logInfo(" mca: " , trace.root.name , " duration: " , trace.root.duration / 1000 , " traceId: " , trace.root.traceId );
+    version(HUNT_DEBUG) logInfo(" mca: " , trace.root.name , " duration: " , 
+        trace.root.duration / 1000 , " traceId: " , trace.root.traceId );
 }
 
 
