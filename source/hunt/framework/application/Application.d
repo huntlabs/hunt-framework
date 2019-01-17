@@ -32,7 +32,7 @@ import hunt.framework.Init;
 import hunt.framework.routing;
 import hunt.framework.security.acl.Manager;
 import hunt.framework.websocket.WebSocketMessageBroker;
-import hunt.framework.zipkin.Trace;
+import hunt.framework.zipkin.Tracer;
 
 public import hunt.framework.http;
 public import hunt.framework.i18n;
@@ -209,9 +209,9 @@ final class Application : ApplicationContext {
         if(config.zipkin.imfhost != "")
         {
             initIMF(config.zipkin.imfhost , config.zipkin.imfport);
-            Trace.upload = true;
+            Tracer.upload = true;
         }
-        Trace.localEndpoint = local;
+        Tracer.localEndpoint = local;
     }
 
     void start() {
