@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.framework.context.ApplicationEvent;
+module hunt.framework.application.ApplicationEvent;
 
 import hunt.util.DateTime;
 import hunt.util.ObjectUtils;
@@ -57,8 +57,8 @@ abstract class ApplicationEvent : EventObject {
  * @since 1.1.1
  * @see ApplicationContext
  * @see ApplicationEventPublisherAware
- * @see hunt.framework.context.ApplicationEvent
- * @see hunt.framework.context.event.EventPublicationInterceptor
+ * @see hunt.framework.application.ApplicationEvent
+ * @see hunt.framework.application.event.EventPublicationInterceptor
  */
 interface ApplicationEventPublisher {
 

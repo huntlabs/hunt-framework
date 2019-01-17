@@ -21,7 +21,7 @@ module hunt.framework.websocket.messaging.WebSocketStompClient;
 
 
 // import hunt.util.SmartLifecycle;
-// import hunt.framework.context.SmartLifecycle;
+// import hunt.framework.application.SmartLifecycle;
 
 // import hunt.stomp.Message;
 // import hunt.stomp.simp.stomp.BufferingStompDecoder;

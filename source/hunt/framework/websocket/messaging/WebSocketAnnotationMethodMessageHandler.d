@@ -11,7 +11,7 @@
 
 module hunt.framework.websocket.messaging.WebSocketAnnotationMethodMessageHandler;
 
-import hunt.framework.context.ApplicationContext;
+import hunt.framework.application.ApplicationContext;
 // import hunt.framework.core.annotation.AnnotationAwareOrderComparator;
 import hunt.framework.websocket.WebSocketController;
 

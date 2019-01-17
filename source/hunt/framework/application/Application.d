@@ -27,7 +27,7 @@ import hunt.http.codec.websocket.stream.WebSocketPolicy;
 import hunt.http.server;
 
 import hunt.framework.application.Dispatcher;
-import hunt.framework.context.ApplicationContext;
+import hunt.framework.application.ApplicationContext;
 import hunt.framework.Init;
 import hunt.framework.routing;
 import hunt.framework.security.acl.Manager;

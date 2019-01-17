@@ -1,6 +1,6 @@
-module hunt.framework.context.ApplicationContext;
+module hunt.framework.application.ApplicationContext;
 
-import hunt.framework.context.ApplicationEvent;
+import hunt.framework.application.ApplicationEvent;
 
 import hunt.http.server.WebSocketHandler;
 
