@@ -39,7 +39,7 @@ public import hunt.framework.i18n;
 public import hunt.framework.application.AppConfig;
 public import hunt.framework.application.MiddlewareInterface;
 
-public import zipkin;
+public import hunt.trace;
 public import hunt.entity;
 public import hunt.event;
 public import hunt.event.EventLoopGroup;
@@ -208,7 +208,6 @@ final class Application : ApplicationContext {
 
         if(config.zipkin.imfhost != "")
         {
-            import zipkin.imf.client;
             initIMF(config.zipkin.imfhost , config.zipkin.imfport);
             Trace.upload = true;
         }

@@ -3,7 +3,7 @@ module hunt.framework.zipkin.Trace;
 import hunt.framework.http.Request;
 import hunt.framework.http.Response;
 
-import zipkin;
+import hunt.trace;
 import hunt.logging;
 
 import std.conv;
@@ -11,7 +11,7 @@ import std.conv;
 
 void newFrameworkTrace(Request req)
 {
-    auto trace = new Trace(req.getMCA());
+    auto trace = new Trace(req.getMCA() , req.headerExists("b3")?req.header("b3"):"");
     trace.root.addTag(HTTP_HOST , req.host);
     trace.root.addTag(HTTP_URL , req.url);
     trace.root.addTag(HTTP_PATH , req.path);
