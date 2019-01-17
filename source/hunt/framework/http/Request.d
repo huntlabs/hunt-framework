@@ -24,7 +24,7 @@ import hunt.util.Common;
 import hunt.util.MimeTypeUtils;
 
 import hunt.framework.application.AppConfig;
-import hunt.framework.exception;
+import hunt.framework.Exceptions;
 import hunt.framework.http.session;
 import hunt.framework.routing.Route;
 import hunt.framework.routing.Define;

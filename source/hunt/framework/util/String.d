@@ -9,7 +9,7 @@
  *
  */
  
-module hunt.framework.util.string;
+module hunt.framework.util.String;
 
 import std.datetime;
 import std.conv;

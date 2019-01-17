@@ -17,7 +17,7 @@ private
     import hunt.framework.view.Uninode;
 }
 
-
+// dfmt off
 Function[string] globalFilters()
 {
     return cast(immutable)
@@ -32,7 +32,7 @@ Function[string] globalFilters()
             "keys":    wrapper!keys,
         ];
 }
-
+// dfmt on
 
 UniNode defaultVal(UniNode value, UniNode default_value = UniNode(""), bool boolean = false)
 {

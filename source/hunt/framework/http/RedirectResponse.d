@@ -8,12 +8,12 @@ import hunt.http.codec.http.model.HttpHeader;
 import hunt.logging;
 import hunt.Exceptions;
 
-import hunt.framework.util.string;
+import hunt.framework.util.String;
 import hunt.framework.Version;
 import hunt.framework.http.Response;
 import hunt.framework.http.Request;
 import hunt.framework.http.session;
-import hunt.framework.exception;
+import hunt.framework.Exceptions;
 
 /**
  * RedirectResponse represents an HTTP response doing a redirect.

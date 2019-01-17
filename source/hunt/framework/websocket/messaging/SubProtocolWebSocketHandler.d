@@ -23,7 +23,7 @@ import hunt.util.Lifecycle;
 import hunt.stomp.Message;
 import hunt.stomp.MessageChannel;
 import hunt.stomp.MessagingException;
-import hunt.framework.websocket.exception;
+import hunt.framework.websocket.Exceptions;
 import hunt.framework.websocket.SubProtocolCapable;
 import hunt.framework.websocket.WebSocketMessageHandler;
 

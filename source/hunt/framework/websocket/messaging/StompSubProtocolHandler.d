@@ -39,7 +39,7 @@ import hunt.stomp.support.MessageHeaderAccessor;
 
 import hunt.framework.context.ApplicationEvent;
 // import hunt.framework.context.ApplicationEventPublisherAware;
-import hunt.framework.websocket.exception;
+import hunt.framework.websocket.Exceptions;
 // import hunt.framework.util.MimeTypeUtils;
 // import hunt.framework.websocket.BinaryMessage;
 // import hunt.framework.websocket.TextMessage;

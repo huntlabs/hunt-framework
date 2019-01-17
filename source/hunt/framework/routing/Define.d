@@ -29,55 +29,54 @@ enum HTTP_METHODS {
     POST,
     PUT,
     DELETE,
-	HEAD,
-	OPTIONS,
-	PATCH,
-	ALL
+    HEAD,
+    OPTIONS,
+    PATCH,
+    ALL
 }
 
-HTTP_METHODS getMethod(string method)
-{
-	with(HTTP_METHODS){
-    if(method == "POST")
-        return POST;
-    else if (method == "GET")
-        return GET;
-    else if (method == "PUT")
-        return PUT;
-    else if (method == "DELETE")
-        return DELETE;
-    else if (method == "HEAD")
-        return HEAD;
-    else if (method == "OPTIONS")
-        return OPTIONS;
-    else if (method == "PATCH")
-        return PATCH;
-    else if (method == "*")
-        return ALL;
-    else 
-        throw new Exception("unkonw method: (" ~ method ~")");
-	}
+HTTP_METHODS getMethod(string method) {
+    with (HTTP_METHODS) {
+        if (method == "POST")
+            return POST;
+        else if (method == "GET")
+            return GET;
+        else if (method == "PUT")
+            return PUT;
+        else if (method == "DELETE")
+            return DELETE;
+        else if (method == "HEAD")
+            return HEAD;
+        else if (method == "OPTIONS")
+            return OPTIONS;
+        else if (method == "PATCH")
+            return PATCH;
+        else if (method == "*")
+            return ALL;
+        else
+            throw new Exception("unkonw method: (" ~ method ~ ")");
+    }
 }
-HTTP_METHODS[] stringToHTTPMethods(string method)
-{
-	with(HTTP_METHODS){
-    if(method == "POST")
-        return [POST];
-    else if (method == "GET")
-        return [GET];
-    else if (method == "PUT")
-        return [PUT];
-    else if (method == "DELETE")
-        return [DELETE];
-    else if (method == "HEAD")
-        return [HEAD];
-    else if (method == "OPTIONS")
-        return [OPTIONS];
-    else if (method == "PATCH")
-        return [PATCH];
-    else if (method == "*")
-        return [GET,POST,PUT,DELETE,HEAD,OPTIONS,PATCH];
-    else 
-        throw new Exception("unkonw method");
-	}
+
+HTTP_METHODS[] stringToHTTPMethods(string method) {
+    with (HTTP_METHODS) {
+        if (method == "POST")
+            return [POST];
+        else if (method == "GET")
+            return [GET];
+        else if (method == "PUT")
+            return [PUT];
+        else if (method == "DELETE")
+            return [DELETE];
+        else if (method == "HEAD")
+            return [HEAD];
+        else if (method == "OPTIONS")
+            return [OPTIONS];
+        else if (method == "PATCH")
+            return [PATCH];
+        else if (method == "*")
+            return [GET, POST, PUT, DELETE, HEAD, OPTIONS, PATCH];
+        else
+            throw new Exception("unkonw method");
+    }
 }

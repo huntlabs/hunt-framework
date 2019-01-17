@@ -1,4 +1,4 @@
-module hunt.framework.websocket.exception;
+module hunt.framework.websocket.Exceptions;
 
 import hunt.http.codec.websocket.model.CloseStatus;
 import hunt.Exceptions;

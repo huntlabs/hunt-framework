@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.framework.util.url;
+module hunt.framework.util.Url;
 /**
 	* A URL handling library.
 	*

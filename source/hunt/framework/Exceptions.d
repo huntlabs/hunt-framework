@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.framework.exception;
+module hunt.framework.Exceptions;
 
 import hunt.Exceptions;
 

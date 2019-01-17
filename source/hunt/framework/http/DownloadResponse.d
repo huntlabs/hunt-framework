@@ -11,7 +11,7 @@ import std.stdio;
 import hunt.framework.Init;
 import hunt.framework.application.AppConfig;
 // import hunt.framework.http.cookie;
-import hunt.framework.util.string;
+import hunt.framework.util.String;
 import hunt.framework.Version;
 import hunt.framework.http.Response;
 import hunt.framework.http.Request;
@@ -38,7 +38,7 @@ class DownloadResponse : Response
     {
         string fullName = buildPath(APP_PATH, Config.app.download.path, fileName);
 
-        logDebug("downloading file: ", fullName);
+        debug logDebug("downloading file: ", fullName);
         if(exists(fullName) && !isDir(fullName))
         {
             // setData([0x11, 0x22]);
