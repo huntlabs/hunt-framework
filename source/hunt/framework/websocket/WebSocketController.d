@@ -130,10 +130,10 @@ class WebSocketControllerHelper {
 
         // 
         foreach (memberName; __traits(derivedMembers, T)) {
-            version (HUNT_DEBUG) pragma(msg, "member: " ~ memberName);
+            // version (HUNT_DEBUG) pragma(msg, "member: " ~ memberName);
 
             static if (isType!(__traits(getMember, T, memberName))) {
-                version (HUNT_DEBUG) pragma(msg, "skipping type defination: " ~ memberName);
+                // version (HUNT_DEBUG) pragma(msg, "skipping type defination: " ~ memberName);
             } else {
                 enum memberProtection = __traits(getProtection, __traits(getMember, T, memberName));
                 static if (memberProtection == "private"
@@ -189,15 +189,15 @@ class WebSocketControllerHelper {
         switch(methodName) {`;
 
         foreach (memberName; __traits(derivedMembers, T)) {
-                version (HUNT_DEBUG) pragma(msg, "member-caller: " ~ memberName);
+                // version (HUNT_DEBUG) pragma(msg, "member-caller: " ~ memberName);
 
                 static if (isType!(__traits(getMember, T, memberName))) {
-                    version (HUNT_DEBUG) pragma(msg, "skipping type defination: " ~ memberName);
+                    // version (HUNT_DEBUG) pragma(msg, "skipping type defination: " ~ memberName);
                 } else {
                     enum memberProtection = __traits(getProtection, __traits(getMember, T, memberName));
                     static if (memberProtection == "private"
                             || memberProtection == "protected" || memberProtection == "export") {
-                        version (HUNT_DEBUG) pragma(msg, "skip private member: " ~ memberName);
+                        // version (HUNT_DEBUG) pragma(msg, "skip private member: " ~ memberName);
                     } else {
                         import std.meta : Alias;
                         alias currentMember = Alias!(__traits(getMember, T, memberName));

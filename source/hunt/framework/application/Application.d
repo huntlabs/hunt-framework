@@ -374,7 +374,7 @@ final class Application : ApplicationContext {
         SimpleWebSocketHandler webSocketHandler = new SimpleWebSocketHandler();
         webSocketHandler.setWebSocketPolicy(_webSocketPolicy);
 
-        Http2Configuration configuration = new Http2Configuration();
+        HttpConfiguration configuration = new HttpConfiguration();
 
         _server = new HttpServer(conf.http.address, conf.http.port,
                 configuration, buildHttpHandlerAdapter(), webSocketHandler);
