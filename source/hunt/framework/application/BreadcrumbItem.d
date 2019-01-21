@@ -1,6 +1,6 @@
 module hunt.framework.application.BreadcrumbItem;
 
-struct BreadcrumbItem
+class BreadcrumbItem
 {
     string name;
     string link;
