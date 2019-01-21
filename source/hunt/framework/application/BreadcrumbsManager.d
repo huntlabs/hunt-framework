@@ -1,6 +1,5 @@
 module hunt.framework.application.BreadcrumbsManager;
 
-// import hunt.framework.application.Breadcrumbs;
 import hunt.framework.application.BreadcrumbItem;
 import hunt.framework.application.BreadcrumbsGenerator;
 
@@ -29,7 +28,7 @@ class BreadcrumbsManager {
         return itemPtr !is null;
     }
 
-    BreadcrumbItem[] generate(Handler[string] callbacks, string name, Object[] params...) {
+    BreadcrumbItem[] generate(string name, Object[] params...) {
         string origName = name;
 
         if (name.empty) {
@@ -42,6 +41,17 @@ class BreadcrumbsManager {
             return [];
         }
     }
+
+    string render(string name, Object[] params...) {
+        BreadcrumbItem[] breadcrumbs = generate(name, params);
+        string r;
+        foreach(BreadcrumbItem item; breadcrumbs) {
+            r ~= " | " ~ item.name ~ "[url=\"" ~ item.link ~ "\"]";
+        }
+        return r;
+    }
+
+
 }
 
 private __gshared BreadcrumbsManager _breadcrumbsManager;
