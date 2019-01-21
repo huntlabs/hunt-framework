@@ -34,11 +34,10 @@ class DownloadResponse : Response
         this.fileName = fileName;
     }
 
-    DownloadResponse loadData()
+    DownloadResponse loadData(string fullName)
     {
-        string fullName = buildPath(APP_PATH, Config.app.download.path, fileName);
-
         debug logDebug("downloading file: ", fullName);
+        
         if(exists(fullName) && !isDir(fullName))
         {
             // setData([0x11, 0x22]);

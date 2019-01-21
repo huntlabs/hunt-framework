@@ -257,7 +257,6 @@ final class AppConfig
     this()
     {
         http.workerThreads = totalCPUs;
-        download.path = DEFAULT_ATTACHMENT_PATH;
     }
 }
 

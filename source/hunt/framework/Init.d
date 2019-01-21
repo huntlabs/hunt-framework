@@ -24,7 +24,6 @@ __gshared string DEFAULT_PUBLIC_PATH = "public/";
 __gshared string DEFAULT_STORAGE_PATH = "storage/";
 __gshared string DEFAULT_LOG_PATH = "logs/";
 __gshared string DEFAULT_SESSION_PATH = "session/";
-__gshared string DEFAULT_ATTACHMENT_PATH = "attachments/";
 
 shared static this()
 {
@@ -36,5 +35,4 @@ shared static this()
     DEFAULT_STORAGE_PATH = buildPath(APP_PATH, DEFAULT_STORAGE_PATH);
     DEFAULT_LOG_PATH = buildPath(DEFAULT_STORAGE_PATH, DEFAULT_LOG_PATH);
     DEFAULT_SESSION_PATH = buildPath(DEFAULT_STORAGE_PATH, DEFAULT_SESSION_PATH);
-    DEFAULT_ATTACHMENT_PATH = buildPath(APP_PATH, DEFAULT_ATTACHMENT_PATH);
 }
