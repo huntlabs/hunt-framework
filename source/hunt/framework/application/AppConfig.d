@@ -12,9 +12,10 @@
 module hunt.framework.application.AppConfig;
 
 import std.exception;
-import std.parallelism : totalCPUs;
-import std.socket : Address, parseAddress;
 import std.format;
+import std.parallelism : totalCPUs;
+import std.process;
+import std.socket : Address, parseAddress;
 import std.string;
 
 import hunt.http.codec.http.model.MultipartConfig;
@@ -262,9 +263,11 @@ final class AppConfig
 
 import core.sync.rwmutex;
 
+import std.array;
 import std.file;
 import std.path;
 import std.exception : basicExceptionCtors;
+
 
 /**
 */
@@ -279,8 +282,16 @@ class ConfigManager
 {
     @property AppConfig app(string section="", string fileName = "application.conf")
     {
-        if (!_app)
+        if (!_app) {
+            if(fileName.empty) {
+                fileName = "application.conf";
+                string huntEnv = environment.get("HUNT_ENV", "");
+                if(!huntEnv.empty) {
+                    fileName = "application." ~ huntEnv ~ ".conf";
+                }
+            }
             setAppSection(section, fileName);
+        }
 
         return _app;
     }
