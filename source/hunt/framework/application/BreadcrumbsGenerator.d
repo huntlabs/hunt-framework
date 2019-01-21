@@ -27,10 +27,10 @@ class BreadcrumbsGenerator {
         this.call(name, params);
     }
 
-    void push(string name, string link) {
+    void push(string name, string[string] params) {
         BreadcrumbItem item = new BreadcrumbItem();
         item.name = name;
-        item.link = link;
+        item.link = createUrl(name, params);
 
         items ~= item;
     }

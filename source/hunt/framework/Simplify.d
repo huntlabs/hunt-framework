@@ -18,15 +18,13 @@ public import hunt.util.DateTime;
 
 string createUrl(string mca)
 {
-    return createUrl(mca, null, null);
+    return createUrl(mca, null);
 }
 
-string createUrl(string mca, string group)
+string createUrl(string mca, string[string] params)
 {
-    return createUrl(mca, null, group);
-}
-
-string createUrl(string mca, string[string] params = null, string group = null)
-{
+    // admin:user.user.view
+    group = null;
+    
     return app().router().createUrl(mca, params, group);
 }
