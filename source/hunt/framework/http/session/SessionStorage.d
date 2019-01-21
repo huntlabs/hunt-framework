@@ -47,6 +47,7 @@ class SessionStorage {
 			// return HttpSession.create(sessionId, _sessionStorage.expire);
 			return null;
 		} else {
+			_cache.put!string(getRealAddr(key) , s , _expire);
 			return HttpSession.fromJson(key, s);
 		}
 	}
