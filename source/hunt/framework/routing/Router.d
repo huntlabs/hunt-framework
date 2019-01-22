@@ -136,16 +136,12 @@ class Router {
     }
 
     RouteGroup getGroup(string group = DEFAULT_ROUTE_GROUP) {
-        if (false == this._supportMultipleGroup) {
+        if (!this._supportMultipleGroup || group == DEFAULT_ROUTE_GROUP) {
             return this._defaultGroup;
         }
+        // info("RouteGroup keys: ", this._groups.keys);
 
         RouteGroup routeGroup = this._groups.get(group, null);
-
-        if (routeGroup is null) {
-            return null;
-        }
-
         return routeGroup;
     }
 

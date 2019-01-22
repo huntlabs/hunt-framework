@@ -109,10 +109,6 @@ final class Application : ApplicationContext {
         return _server;
     }
 
-    // @property EventLoop mainLoop() {
-    //     return _server.eventLoop;
-    // }
-
     @property EventLoopGroup loopGroup() {
         return NetUtil.defaultEventLoopGroup();
     }
@@ -165,8 +161,6 @@ final class Application : ApplicationContext {
 
         _sessionStorage.setPrefix(config.prefix);
         _sessionStorage.expire = config.expire;
-
-        // writeln(" initSessionStorage " ,_sessionStorage);
     }
 
     EntityManagerFactory entityManagerFactory() {
@@ -178,7 +172,6 @@ final class Application : ApplicationContext {
     }
 
     SessionStorage sessionStorage() {
-        // writeln(" getSessionStorage " , _sessionStorage);
         return _sessionStorage;
     }
 

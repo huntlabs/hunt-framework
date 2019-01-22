@@ -33,13 +33,13 @@ class I18n {
         return _instance;
     }
 
-    bool loadLangResources(string path, lazy string ext = "res") {
+    bool loadLangResources(string path, lazy string ext = "ini") {
         _isResLoaded = false;
-        auto resfiles = std.file.dirEntries(path, "*.{res}", SpanMode.depth).filter!(a => a.isFile)
+        auto resfiles = std.file.dirEntries(path, "*.{" ~ ext ~ "}", SpanMode.depth).filter!(a => a.isFile)
             .map!(a => std.path.absolutePath(a.name))
             .array;
         if (resfiles.length == 0) {
-            logDebug("lang res file is empty");
+            logDebug("The lang resource file is empty");
             return false;
         }
 
