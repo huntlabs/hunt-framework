@@ -924,7 +924,7 @@ private:
                 import hunt.framework.i18n;
                 // logDebug("kind : ",args["varargs"][0].get!string);
                 auto message = args["varargs"][0].get!string;
-                return UniNode(getText(_locale,message, ""));
+                return UniNode(trans(_locale, message));
             }
         }
         else if(name == "date")
