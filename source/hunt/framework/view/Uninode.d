@@ -21,7 +21,7 @@ public
 
 private
 {
-    import std.array : array;
+    import std.array;
     import std.algorithm : among, map, sort;
     import std.conv : to;
     import std.format: fmt = format;
@@ -74,13 +74,18 @@ void toIterableNode(ref UniNode n)
         case array:
             return;
         case text:
-            n = UniNode(n.get!string.map!(a => UniNode(cast(string)[a])).array);
+            auto a = n.get!string.map!(a => UniNode(cast(string)[a])).array;
+            if(!a.empty())
+                n = UniNode(a);
             return;
         case object:
             UniNode[] arr;
-            foreach (key, val; n.get!(UniNode[string]))
-                arr ~= UniNode([UniNode(key), val]);
-            n = UniNode(arr);
+            auto items = n.get!(UniNode[string]);
+            if(items !is null) {
+                foreach (key, val; items)
+                    arr ~= UniNode([UniNode(key), val]);
+                n = UniNode(arr);
+            }
             return;
         default:
             throw new JinjaRenderException("Can't implicity convert type %s to iterable".fmt(n.kind));

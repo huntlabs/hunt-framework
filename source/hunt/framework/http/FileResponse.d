@@ -18,28 +18,28 @@ import hunt.framework.http.Request;
 import hunt.logging;
 
 import hunt.http.codec.http.model.HttpHeader;
+
 // import hunt.http.codec.http.model.AcceptMIMEType;
 // import hunt.http.codec.http.model.MimeTypes;
 
 /**
  * FileResponse represents an HTTP response delivering a file.
  */
-class FileResponse : Response
-{
+class FileResponse : Response {
     private string _file;
     private string _name = "undefined.file";
 
-    this(string filename)
-    {
+    this(string filename) {
         super(request());
-        
+
         this.setFile(filename);
     }
 
-    FileResponse setFile(string filename)
-    {
+    FileResponse setFile(string filename) {
         _file = buildPath(APP_PATH, filename);
         string contentType = getMimeContentTypeForFile(_file);
+
+        logInfof("xx=>%s, contentType=%s", _file, contentType);
 
         this.setMimeType(contentType);
         this.setName(baseName(filename));
@@ -47,46 +47,41 @@ class FileResponse : Response
         return this;
     }
 
-    FileResponse setName(string name)
-    {
+    FileResponse setName(string name) {
         _name = name;
         return this;
     }
 
-    FileResponse setMimeType(string contentType)
-    {
+    FileResponse setMimeType(string contentType) {
         setHeader(HttpHeader.CONTENT_TYPE, contentType);
         return this;
     }
 
-    FileResponse loadData()
-    {
+    FileResponse loadData() {
         debug logDebug("downloading file: ", _file);
 
-        if(exists(_file) && !isDir(_file))
-        {
+        if (exists(_file) && !isDir(_file)) {
             // setData([0x11, 0x22]);
             // FIXME: Needing refactor or cleanup -@zxp at 5/24/2018, 6:49:23 PM
             // download a huge file.
             // read file
             auto f = std.stdio.File(_file, "r");
-            scope(exit) f.close();
-        
+            scope (exit)
+                f.close();
+
             f.seek(0);
             // logDebug("file size: ", f.size);
-            auto buf = f.rawRead(new ubyte[cast(uint)f.size]);
+            auto buf = f.rawRead(new ubyte[cast(uint) f.size]);
             setData(buf);
-        }
-        else
+        } else
             throw new Exception("File does not exist: " ~ _file);
 
         return this;
     }
 
-    FileResponse setData(in ubyte[] data)
-    {
-        setHeader(HttpHeader.CONTENT_DISPOSITION, "attachment; filename=" ~ _name ~ "; size=" ~ (to!string(data.length)));
-
+    FileResponse setData(in ubyte[] data) {
+        setHeader(HttpHeader.CONTENT_DISPOSITION,
+                "attachment; filename=" ~ _name ~ "; size=" ~ (to!string(data.length)));
         setContent(data);
         return this;
     }

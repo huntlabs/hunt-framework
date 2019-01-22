@@ -22,7 +22,7 @@ import std.string;
 alias StrStr = string[string];
 alias StrStrStr = string[string][string];
 
-enum I18N_DEFAULT_LOCALE = "zh-cn";
+enum I18N_DEFAULT_LOCALE = "en-us";
 
 ///国际化
 class I18n
