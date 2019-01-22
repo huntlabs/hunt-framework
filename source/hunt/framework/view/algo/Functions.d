@@ -14,7 +14,7 @@ module hunt.framework.view.algo.Functions;
 private
 {
     import hunt.framework.view.algo.Wrapper;
-    import hunt.framework.view.Exception : assertJinja = assertJinjaException;
+    import hunt.framework.view.Exception : assertTemplate = assertTemplateException;
     import hunt.framework.view.Uninode;
 
     import std.functional : toDelegate;
@@ -43,8 +43,8 @@ UniNode range(UniNode params)
     import std.array : array;
     import std.algorithm : map;
 
-    assertJinja(params.kind == UniNode.Kind.object, "Non object params");
-    assertJinja(cast(bool)("varargs" in params), "Missing varargs in params");
+    assertTemplate(params.kind == UniNode.Kind.object, "Non object params");
+    assertTemplate(cast(bool)("varargs" in params), "Missing varargs in params");
 
     if (params["varargs"].length > 0)
     {
@@ -53,7 +53,7 @@ UniNode range(UniNode params)
         return UniNode(arr);
     }
 
-    assertJinja(0);
+    assertTemplate(0);
     assert(0);
 }
 
@@ -68,7 +68,7 @@ long length(UniNode value)
         case text:
             return value.get!string.length;
         default:
-            assertJinja(0, "Object of type `%s` has no length()".fmt(value.kind));
+            assertTemplate(0, "Object of type `%s` has no length()".fmt(value.kind));
     }
     assert(0);
 }

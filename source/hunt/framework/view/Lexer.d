@@ -14,7 +14,7 @@ module hunt.framework.view.Lexer;
 
 private
 {
-    import hunt.framework.view.Exception : JinjaException;
+    import hunt.framework.view.Exception : TemplateException;
 
     import std.conv : to;
     import std.traits : EnumMembers;

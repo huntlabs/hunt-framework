@@ -17,7 +17,7 @@ private
 }
 
 
-class JinjaException : Exception
+class TemplateException : Exception
 {
     this(string msg, string file = __FILE__, size_t line = __LINE__)
     {
@@ -27,7 +27,7 @@ class JinjaException : Exception
 
 
 
-class JinjaLexerException : JinjaException
+class TemplateLexerException : TemplateException
 {
     this(string msg, string file = __FILE__, size_t line = __LINE__)
     {
@@ -37,7 +37,7 @@ class JinjaLexerException : JinjaException
 
 
 
-class JinjaParserException : JinjaException
+class TemplateParserException : TemplateException
 {
     this(string msg, string file = __FILE__, size_t line = __LINE__)
     {
@@ -47,7 +47,7 @@ class JinjaParserException : JinjaException
 
 
 
-class JinjaRenderException : JinjaException
+class TemplateRenderException : TemplateException
 {
     this(string msg, string file = __FILE__, size_t line = __LINE__)
     {
@@ -56,7 +56,7 @@ class JinjaRenderException : JinjaException
 }
 
 
-void assertJinja(E : JinjaException)(bool expr, string msg = "", Position pos = Position.init, string file = __FILE__, size_t line = __LINE__)
+void assertTemplate(E : TemplateException)(bool expr, string msg = "", Position pos = Position.init, string file = __FILE__, size_t line = __LINE__)
 {
     if (!expr)
     {
@@ -68,7 +68,7 @@ void assertJinja(E : JinjaException)(bool expr, string msg = "", Position pos = 
 }
 
 
-alias assertJinjaException = assertJinja!JinjaException;
-alias assertJinjaLexer = assertJinja!JinjaLexerException;
-alias assertJinjaParser = assertJinja!JinjaParserException;
-alias assertJinjaRender = assertJinja!JinjaRenderException;
+alias assertTemplateException = assertTemplate!TemplateException;
+alias assertTemplateLexer = assertTemplate!TemplateLexerException;
+alias assertTemplateParser = assertTemplate!TemplateParserException;
+alias assertTemplateRender = assertTemplate!TemplateRenderException;

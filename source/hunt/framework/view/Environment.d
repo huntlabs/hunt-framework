@@ -42,10 +42,10 @@ class Environment
         string input_path;
         string output_path;
 
-        alias JinjaLexer = Lexer!(TemplateConfig.init.exprOpBegin,
+        alias TemplateLexer = Lexer!(TemplateConfig.init.exprOpBegin,
                 TemplateConfig.init.exprOpEnd, TemplateConfig.init.stmtOpBegin, TemplateConfig.init.stmtOpEnd,
                 TemplateConfig.init.cmntOpBegin, TemplateConfig.init.cmntOpEnd, TemplateConfig.init.stmtOpInline, TemplateConfig.init.cmntOpInline);
-        Parser!JinjaLexer _parser;
+        Parser!TemplateLexer _parser;
 
         string _routeGroup = DEFAULT_ROUTE_GROUP;
         string _locale = "en-us";

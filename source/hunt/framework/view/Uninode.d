@@ -28,8 +28,8 @@ private
     import std.typecons : Tuple, tuple;
 
     import hunt.framework.view.Lexer;
-    import hunt.framework.view.Exception : JinjaRenderException,
-                              assertJinja = assertJinjaRender;
+    import hunt.framework.view.Exception : TemplateRenderException,
+                              assertTemplate = assertTemplateRender;
 }
 
 
@@ -83,14 +83,14 @@ void toIterableNode(ref UniNode n)
             n = UniNode(arr);
             return;
         default:
-            throw new JinjaRenderException("Can't implicity convert type %s to iterable".fmt(n.kind));
+            throw new TemplateRenderException("Can't implicity convert type %s to iterable".fmt(n.kind));
     }
 }
 
 void toCommonNumType(ref UniNode n1, ref UniNode n2)
 {
-    assertJinja(n1.isNumericNode, "Not a numeric type of %s".fmt(n1));
-    assertJinja(n2.isNumericNode, "Not a numeric type of %s".fmt(n2));
+    assertTemplate(n1.isNumericNode, "Not a numeric type of %s".fmt(n1));
+    assertTemplate(n2.isNumericNode, "Not a numeric type of %s".fmt(n2));
 
     if (n1.isIntNode && n2.isFloatNode)
     {
@@ -114,7 +114,7 @@ void toCommonCmpType(ref UniNode n1, ref UniNode n2)
        return;
    }
    if (n1.kind != n2.kind)
-       throw new JinjaRenderException("Not comparable types %s and %s".fmt(n1.kind, n2.kind));
+       throw new TemplateRenderException("Not comparable types %s and %s".fmt(n1.kind, n2.kind));
 }
 
 
@@ -142,7 +142,7 @@ void toBoolType(ref UniNode n)
             n = UniNode(false);
             return;
         default:
-            throw new JinjaRenderException("Can't cast type %s to bool".fmt(n.kind));
+            throw new TemplateRenderException("Can't cast type %s to bool".fmt(n.kind));
     }
 }
 
@@ -197,7 +197,7 @@ string getAsString(UniNode n)
 void checkNodeType(ref UniNode n, UniNode.Kind kind, Position pos)
 {
     if (n.kind != kind)
-        assertJinja(0, "Unexpected expression type `%s`, expected `%s`".fmt(n.kind, kind), pos);
+        assertTemplate(0, "Unexpected expression type `%s`, expected `%s`".fmt(n.kind, kind), pos);
 }
 
 
@@ -207,7 +207,7 @@ UniNode unary(string op)(UniNode lhs)
                  Operator.Minus)
     )
 {
-    assertJinja(lhs.isNumericNode, "Expected int got %s".fmt(lhs.kind));
+    assertTemplate(lhs.isNumericNode, "Expected int got %s".fmt(lhs.kind));
 
     if (lhs.isIntNode)
         return UniNode(mixin(op ~ "lhs.get!long"));
@@ -244,8 +244,8 @@ UniNode binary(string op)(UniNode lhs, UniNode rhs)
 UniNode binary(string op)(UniNode lhs, UniNode rhs)
     if (op == Operator.DivInt)
 {
-    assertJinja(lhs.isIntNode, "Expected int got %s".fmt(lhs.kind));
-    assertJinja(rhs.isIntNode, "Expected int got %s".fmt(rhs.kind));
+    assertTemplate(lhs.isIntNode, "Expected int got %s".fmt(lhs.kind));
+    assertTemplate(rhs.isIntNode, "Expected int got %s".fmt(rhs.kind));
     return UniNode(lhs.get!long / rhs.get!long);
 }
 
@@ -259,12 +259,12 @@ UniNode binary(string op)(UniNode lhs, UniNode rhs)
 
     if (lhs.isIntNode)
     {
-        assertJinja(rhs.get!long != 0, "Division by zero!");
+        assertTemplate(rhs.get!long != 0, "Division by zero!");
         return UniNode(mixin("lhs.get!long" ~ op ~ "rhs.get!long"));
     }
     else
     {
-        assertJinja(rhs.get!double != 0, "Division by zero!");
+        assertTemplate(rhs.get!double != 0, "Division by zero!");
         return UniNode(mixin("lhs.get!double" ~ op ~ "rhs.get!double"));
     }
 }
@@ -310,7 +310,7 @@ UniNode binary(string op)(UniNode lhs, UniNode rhs)
         case text:
             return UniNode(mixin("lhs.get!string" ~ op ~ "rhs.get!string"));
         default:
-            throw new JinjaRenderException("Not comparable type %s".fmt(lhs.kind));
+            throw new TemplateRenderException("Not comparable type %s".fmt(lhs.kind));
     }
 }
 

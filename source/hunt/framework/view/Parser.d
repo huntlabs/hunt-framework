@@ -28,8 +28,8 @@ private
     import hunt.logging;
     import hunt.framework.view.ast;
     import hunt.framework.view.Lexer;
-    import hunt.framework.view.Exception : JinjaParserException,
-                              assertJinja = assertJinjaParser;
+    import hunt.framework.view.Exception : TemplateParserException,
+                              assertTemplate = assertTemplateParser;
 }
 
 
@@ -132,7 +132,7 @@ struct Parser(Lexer)
         auto blocks = _blocks;
 
         if (front.type != Type.EOF)
-            assertJinja(0, "Expected EOF found %s(%s)".fmt(front.type, front.value), front.pos);
+            assertTemplate(0, "Expected EOF found %s(%s)".fmt(front.type, front.value), front.pos);
 
         popState();
 
@@ -148,7 +148,7 @@ struct Parser(Lexer)
         if (auto cached = path in _parsedFiles)
         {
             if (*cached is null)
-                assertJinja(0, "Recursive imports/includes/extends not allowed: ".fmt(path), front.pos);
+                assertTemplate(0, "Recursive imports/includes/extends not allowed: ".fmt(path), front.pos);
             else
                 return *cached;
         }
@@ -313,7 +313,7 @@ private:
                 pop(Type.StmtEnd);
                 return new ForNode(pos, keys, iterable, block, other, cond, isRecursive);
             default:
-                assertJinja(0, "Unexpected token %s(%s)".fmt(front.type, front.value), front.pos);
+                assertTemplate(0, "Unexpected token %s(%s)".fmt(front.type, front.value), front.pos);
                 assert(0);
         }
     }
@@ -322,7 +322,7 @@ private:
     IfNode parseIf(string dirPath)
     {
         auto pos = front.pos;
-        assertJinja(front == Keyword.If || front == Keyword.ElIf, "Expected If/Elif", pos);
+        assertTemplate(front == Keyword.If || front == Keyword.ElIf, "Expected If/Elif", pos);
         pop();
         auto cond = parseHighLevelExpression(dirPath);
         pop(Type.StmtEnd);
@@ -345,7 +345,7 @@ private:
                 pop(Keyword.EndIf, Type.StmtEnd);
                 return new IfNode(pos, cond, then, null);
             default:
-                assertJinja(0, "Unexpected token %s(%s)".fmt(front.type, front.value), front.pos);
+                assertTemplate(0, "Unexpected token %s(%s)".fmt(front.type, front.value), front.pos);
                 assert(0);
         }
     }
@@ -512,7 +512,7 @@ private:
 
         pop(Type.StmtEnd);
 
-        assertJinja(path.fileExist(dirPath), "Non existing file `%s`".fmt(path), pos);
+        assertTemplate(path.fileExist(dirPath), "Non existing file `%s`".fmt(path), pos);
         
         auto stmtBlock = parseTreeFromFile(path);
         
@@ -565,7 +565,7 @@ private:
 
         pop(Type.StmtEnd);
 
-        assertJinja(path.fileExist(dirPath), "Non existing file `%s`".fmt(path), pos);
+        assertTemplate(path.fileExist(dirPath), "Non existing file `%s`".fmt(path), pos);
         
         auto stmtBlock = parseTreeFromFile(path);
         
@@ -624,7 +624,7 @@ private:
             if (name.fileExist(dirPath))
                 return new IncludeNode(pos, name, parseTreeFromFile(dirPath ~ name), withContext);
  
-        assertJinja(ignoreMissing, "No existing files `%s`".fmt(names), pos);
+        assertTemplate(ignoreMissing, "No existing files `%s`".fmt(names), pos);
         
         return new IncludeNode(pos, "", null, withContext);
     }
@@ -637,7 +637,7 @@ private:
         auto path = pop(Type.String).value.absolute(dirPath);
         pop(Type.StmtEnd);
 
-        assertJinja(path.fileExist(dirPath), "Non existing file `%s`".fmt(path), pos);
+        assertTemplate(path.fileExist(dirPath), "Non existing file `%s`".fmt(path), pos);
         
         auto stmtBlock = parseTreeFromFile(path);
         
@@ -658,7 +658,7 @@ private:
 
         auto posNameEnd = front.pos;
         if (front == Type.Ident)
-            assertJinja(pop.value == name, "Missmatching block's begin/end names", posNameEnd);
+            assertTemplate(pop.value == name, "Missmatching block's begin/end names", posNameEnd);
 
         pop(Type.StmtEnd);
 
@@ -936,7 +936,7 @@ private:
                 auto op = pop.value;
                 return new UnaryOpNode(pos, op, parseUnary( dirPath));
             default:
-                assertJinja(0, "Unexpected operator `%s`".fmt(front.value), front.pos);
+                assertTemplate(0, "Unexpected operator `%s`".fmt(front.value), front.pos);
                 assert(0);
         }
     }
@@ -1090,7 +1090,7 @@ private:
             case LSParen: return parseList( dirPath);
             case LBrace:  return parseDict( dirPath);
             default:
-                assertJinja(0, "Unexpected token while parsing expression: %s(%s)".fmt(front.type, front.value), front.pos);
+                assertTemplate(0, "Unexpected token while parsing expression: %s(%s)".fmt(front.type, front.value), front.pos);
                 assert(0);
         }
     }
@@ -1216,7 +1216,7 @@ private:
     Token pop(Type t)
     {
         if (front.type != t)
-            assertJinja(0, "Unexpected token %s(%s), expected: `%s`".fmt(front.type, front.value, t), front.pos);
+            assertTemplate(0, "Unexpected token %s(%s), expected: `%s`".fmt(front.type, front.value, t), front.pos);
         return pop();
     }
 
@@ -1224,7 +1224,7 @@ private:
     Token pop(Keyword kw)
     {
         if (front.type != Type.Keyword || front.value != kw)
-            assertJinja(0, "Unexpected token %s(%s), expected kw: %s".fmt(front.type, front.value, kw), front.pos);
+            assertTemplate(0, "Unexpected token %s(%s), expected kw: %s".fmt(front.type, front.value, kw), front.pos);
         return pop();
     }
 
@@ -1232,7 +1232,7 @@ private:
     Token pop(Operator op)
     {
         if (front.type != Type.Operator || front.value != op)
-            assertJinja(0, "Unexpected token %s(%s), expected op: %s".fmt(front.type, front.value, op), front.pos);
+            assertTemplate(0, "Unexpected token %s(%s), expected op: %s".fmt(front.type, front.value, op), front.pos);
         return pop();
     }
 
@@ -1258,7 +1258,7 @@ private:
 
     void popState()
     {
-        assertJinja(_states.length > 0, "Unexpected empty state stack");
+        assertTemplate(_states.length > 0, "Unexpected empty state stack");
 
         auto state = _states.back;
         _states.popBack;

@@ -16,15 +16,8 @@ public import hunt.util.DateTime;
 
 import std.string;
 
-deprecated("Using url instead.")
-alias createUrl = url;
-
 string url(string mca) {
     return url(mca, null);
-}
-
-string url(string mca, string[string] params, string group) {
-    return app().router().createUrl(mca, params, group);
 }
 
 string url(string mca, string[string] params) {
