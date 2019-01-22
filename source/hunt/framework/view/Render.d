@@ -22,8 +22,8 @@ private
     import hunt.framework.view.algo.Wrapper;
     import hunt.framework.view.Lexer;
     import hunt.framework.view.Parser;
-    import hunt.framework.view.Exception : JinjaRenderException,
-                              assertJinja = assertJinjaRender;
+    import hunt.framework.view.Exception : TemplateRenderException,
+                              assertTemplate = assertTemplateRender;
 
     import hunt.framework.view.Uninode;
 
@@ -120,7 +120,7 @@ class Context
         if (name in data)
             return &(data[name]);
         if (prev is null)
-            assertJinja(0, "Non declared var `%s`".fmt(name));
+            assertTemplate(0, "Non declared var `%s`".fmt(name));
         return prev.getPtr(name);
     }
     
@@ -145,7 +145,7 @@ class Context
         if (name in functions)
             return functions[name];
         if (prev is null)
-            assertJinja(0, "Non declared function `%s`".fmt(name));
+            assertTemplate(0, "Non declared function `%s`".fmt(name));
         return prev.getFunc(name);
     }
 
@@ -165,7 +165,7 @@ class Context
         if (name in macros)
             return macros[name];
         if (prev is null)
-            assertJinja(0, "Non declared macro `%s`".fmt(name));
+            assertTemplate(0, "Non declared macro `%s`".fmt(name));
         return prev.getMacro(name);
     }
 }
@@ -353,7 +353,7 @@ class Render : VisitorInterface
             else if (_context.hasMacro(name))
                 return visitMacro(name, args);
             else
-                assertJinja(0, "Undefined " ~ type ~ " %s".fmt(name), node.pos);
+                assertTemplate(0, "Undefined " ~ type ~ " %s".fmt(name), node.pos);
             assert(0);
         }
         
@@ -463,7 +463,7 @@ class Render : VisitorInterface
                     if (key.get!long < curr.length)
                         curr = curr[key.get!long];
                     else
-                        assertJinja(0, "Range violation  on %s...[%d]".fmt(node.name, key.get!long), sub.pos);
+                        assertTemplate(0, "Range violation  on %s...[%d]".fmt(node.name, key.get!long), sub.pos);
                     break;
 
                 // Key of dict
@@ -492,7 +492,7 @@ class Render : VisitorInterface
                     else
                     {
                         curr.checkNodeType(object, lastPos);
-                        assertJinja(0, "Unknown attribute %s".fmt(key.get!string), sub.pos);
+                        assertTemplate(0, "Unknown attribute %s".fmt(key.get!string), sub.pos);
                     }
                     break;
 
@@ -512,11 +512,11 @@ class Render : VisitorInterface
                         curr = visitMacro(name, key);
                     }
                     else
-                        assertJinja(0, "Not found any macro, function or filter `%s`".fmt(name), sub.pos);
+                        assertTemplate(0, "Not found any macro, function or filter `%s`".fmt(name), sub.pos);
                     break;
 
                 default:
-                    assertJinja(0, "Unknown attribute %s for %s".fmt(key.toString, node.name), sub.pos);
+                    assertTemplate(0, "Unknown attribute %s for %s".fmt(key.toString, node.name), sub.pos);
             }
             
             lastPos = sub.pos;
@@ -533,7 +533,7 @@ class Render : VisitorInterface
         if (!_context.has(node.name))
         {
             if (node.subIdents.length)
-                assertJinja(0, "Unknow variable %s".fmt(node.name), node.pos);
+                assertTemplate(0, "Unknow variable %s".fmt(node.name), node.pos);
             _context.data[node.name] = expr;
             return;
         }
@@ -561,7 +561,7 @@ class Render : VisitorInterface
                     if (key.get!long < curr.length)
                         curr = &((*curr)[key.get!long]);
                     else
-                        assertJinja(0, "Range violation  on %s...[%d]".fmt(node.name, key.get!long), node.subIdents[i].pos);
+                        assertTemplate(0, "Range violation  on %s...[%d]".fmt(node.name, key.get!long), node.subIdents[i].pos);
                     break;
 
                 // Key of dict
@@ -570,11 +570,11 @@ class Render : VisitorInterface
                     if (key.get!string in *curr)
                         curr = &((*curr)[key.get!string]);
                     else
-                        assertJinja(0, "Unknown attribute %s".fmt(key.get!string), node.subIdents[i].pos);
+                        assertTemplate(0, "Unknown attribute %s".fmt(key.get!string), node.subIdents[i].pos);
                     break;
 
                 default:
-                    assertJinja(0, "Unknown attribute %s for %s".fmt(key.toString, node.name), node.subIdents[i].pos);
+                    assertTemplate(0, "Unknown attribute %s for %s".fmt(key.toString, node.name), node.subIdents[i].pos);
             }
             lastPos = node.subIdents[i].pos;
         }
@@ -593,7 +593,7 @@ class Render : VisitorInterface
                     if (key.get!long < curr.length)
                         (*curr).opIndex(key.get!long) = expr; // ¯\_(ツ)_/¯
                     else
-                        assertJinja(0, "Range violation  on %s...[%d]".fmt(node.name, key.get!long), node.subIdents[$-1].pos);
+                        assertTemplate(0, "Range violation  on %s...[%d]".fmt(node.name, key.get!long), node.subIdents[$-1].pos);
                     break;
 
                 // Key of dict
@@ -603,7 +603,7 @@ class Render : VisitorInterface
                     break;
 
                 default:
-                    assertJinja(0, "Unknown attribute %s for %s".fmt(key.toString, node.name, node.subIdents[$-1].pos));
+                    assertTemplate(0, "Unknown attribute %s for %s".fmt(key.toString, node.name, node.subIdents[$-1].pos));
             }
         }
     }
@@ -704,7 +704,7 @@ class Render : VisitorInterface
                     else
                     {
                         iterable[i].checkNodeType(UniNode.Kind.array, node.iterable.pos);
-                        assertJinja(iterable[i].length >= node.keys.length, "Num of keys less then values", node.iterable.pos);
+                        assertTemplate(iterable[i].length >= node.keys.length, "Num of keys less then values", node.iterable.pos);
                         foreach(j, key; node.keys)
                             _context.data[key] = iterable[i][j];
                     }
@@ -741,7 +741,7 @@ class Render : VisitorInterface
                 else
                 {
                     iterable[i].checkNodeType(UniNode.Kind.array, node.iterable.pos);
-                    assertJinja(iterable[i].length >= node.keys.length, "Num of keys less then values", node.iterable.pos);
+                    assertTemplate(iterable[i].length >= node.keys.length, "Num of keys less then values", node.iterable.pos);
                     foreach(j, key; node.keys)
                         _context.data[key] = iterable[i][j];
                 }
@@ -776,7 +776,7 @@ class Render : VisitorInterface
             expr.checkNodeType(UniNode.Kind.array, node.expr.pos);
             
             if (expr.length < node.assigns.length)
-                assertJinja(0, "Iterable length less then number of assigns", node.expr.pos);
+                assertTemplate(0, "Iterable length less then number of assigns", node.expr.pos);
 
             foreach(idx, assign; node.assigns)
             {
@@ -871,7 +871,7 @@ class Render : VisitorInterface
         if (node.macrosNames.length)
             foreach (name; node.macrosNames)
             {
-                assertJinja(cast(bool)(name.was in macros), "Undefined macro `%s` in `%s`".fmt(name.was, node.fileName), node.pos);
+                assertTemplate(cast(bool)(name.was in macros), "Undefined macro `%s` in `%s`".fmt(name.was, node.fileName), node.pos);
                 _context.macros[name.become] = macros[name.was];
             }
         else
@@ -936,6 +936,8 @@ private:
         }
         else if(name == "url")
         {
+            import hunt.framework.Simplify : url;
+            
             auto mca = args["varargs"][0].get!string;
             auto params = args["varargs"][1].get!string;
             return UniNode(url(mca, Util.parseFormData(params), _routeGroup));
@@ -981,7 +983,7 @@ private:
 
         foreach(arg; macro_.args)
             if (arg.name !in _context.data)
-                assertJinja(0, "Missing value for argument `%s` in macro `%s`".fmt(arg.name, name));
+                assertTemplate(0, "Missing value for argument `%s` in macro `%s`".fmt(arg.name, name));
 
         if (!caller.isNull)
             _context.macros["caller"] = caller;
@@ -1051,7 +1053,7 @@ private:
     UniNode pop()
     {
         if (!_dataStack.length)
-            assertJinja(0, "Unexpected empty stack");
+            assertTemplate(0, "Unexpected empty stack");
 
         auto un = _dataStack.back;
         _dataStack.popBack;
@@ -1068,7 +1070,7 @@ private:
     void popFilter()
     {
         if (!_appliedFilters.length)
-            assertJinja(0, "Unexpected empty filter stack");
+            assertTemplate(0, "Unexpected empty filter stack");
 
         _appliedFilters.popBack;
     }

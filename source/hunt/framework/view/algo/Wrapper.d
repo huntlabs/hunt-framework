@@ -20,7 +20,7 @@ private
     import std.typecons : Tuple;
     import std.string : join;
 
-    import hunt.framework.view.Exception : assertJinja = assertJinjaException;
+    import hunt.framework.view.Exception : assertTemplate = assertTemplateException;
     import hunt.framework.view.Uninode;
 }
 
@@ -42,9 +42,9 @@ template wrapper(alias F)
     {
         UniNode func (UniNode params)
         {
-            assertJinja(params.kind == UniNode.Kind.object, "Non object params");
-            assertJinja(cast(bool)("varargs" in params), "Missing varargs in params");
-            assertJinja(cast(bool)("kwargs" in params), "Missing kwargs in params");
+            assertTemplate(params.kind == UniNode.Kind.object, "Non object params");
+            assertTemplate(cast(bool)("varargs" in params), "Missing varargs in params");
+            assertTemplate(cast(bool)("kwargs" in params), "Missing kwargs in params");
 
             bool[string] filled;
             PT args;
@@ -68,7 +68,7 @@ template wrapper(alias F)
                 try
                     args[idx] = val.deserialize!PType;
                 catch
-                    assertJinja(0, "Can't deserialize param `%s` from `%s` to `%s` in function `%s`"
+                    assertTemplate(0, "Can't deserialize param `%s` from `%s` to `%s` in function `%s`"
                                             .fmt(key, val.kind, PType.stringof, fullyQualifiedName!F));
             }
 
@@ -132,7 +132,7 @@ template wrapper(alias F)
                     missedArgs ~= key;
 
             if (missedArgs.length)
-                assertJinja(0, "Missed values for args `%s`".fmt(missedArgs.join(", ")));
+                assertTemplate(0, "Missed values for args `%s`".fmt(missedArgs.join(", ")));
 
             static if (is (RT == void))
             {

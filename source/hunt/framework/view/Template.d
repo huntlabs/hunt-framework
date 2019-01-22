@@ -37,7 +37,7 @@ struct TemplateConfig
 
 TemplateNode loadData(TemplateConfig config = defaultConfig)(string tmpl)
 {
-    alias JinjaLexer = Lexer!(
+    alias TemplateLexer = Lexer!(
                             config.exprOpBegin,
                             config.exprOpEnd,
                             config.stmtOpBegin,
@@ -48,13 +48,13 @@ TemplateNode loadData(TemplateConfig config = defaultConfig)(string tmpl)
                             config.cmntOpInline
                         );
 
-    Parser!JinjaLexer parser;
+    Parser!TemplateLexer parser;
     return parser.parseTree(tmpl);
 }
 
 TemplateNode loadFile(TemplateConfig config = defaultConfig)(string path)
 {
-    alias JinjaLexer = Lexer!(
+    alias TemplateLexer = Lexer!(
                             config.exprOpBegin,
                             config.exprOpEnd,
                             config.stmtOpBegin,
@@ -65,7 +65,7 @@ TemplateNode loadFile(TemplateConfig config = defaultConfig)(string path)
                             config.cmntOpInline
                         );
 
-    Parser!JinjaLexer parser;
+    Parser!TemplateLexer parser;
     return parser.parseTreeFromFile(path);
 }
 
