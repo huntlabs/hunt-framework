@@ -20,10 +20,6 @@ class BreadcrumbsManager {
     }
 
     bool exists(string name) {
-        if (name.empty) {
-            // TODO: Tasks pending completion -@zxp at 1/21/2019, 3:44:11 PM            
-            // 
-        }
         auto itemPtr = name in callbacks;
         return itemPtr !is null;
     }
@@ -45,8 +41,14 @@ class BreadcrumbsManager {
     string render(string name, Object[] params...) {
         BreadcrumbItem[] breadcrumbs = generate(name, params);
         string r;
+        bool isFirst = true;
         foreach(BreadcrumbItem item; breadcrumbs) {
-            r ~= " | " ~ item.name ~ "[url=\"" ~ item.link ~ "\"]";
+            if(isFirst) {
+                isFirst = false;
+            } else {
+                r ~= " / ";
+            }
+            r ~= item.title ~ "[url=\"" ~ item.link ~ "\"]";
         }
         return r;
     }

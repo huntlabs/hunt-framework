@@ -33,9 +33,9 @@ class BreadcrumbsGenerator {
     //     push(mca, createUrl(mca, params));
     // }
 
-    void push(string name, string url) {
+    void push(string title, string url) {
         BreadcrumbItem item = new BreadcrumbItem();
-        item.name = name;
+        item.title = title;
         item.link = url;
 
         items.insertBack(item);

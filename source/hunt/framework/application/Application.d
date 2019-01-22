@@ -38,6 +38,8 @@ public import hunt.framework.http;
 public import hunt.framework.i18n;
 public import hunt.framework.application.AppConfig;
 public import hunt.framework.application.MiddlewareInterface;
+import hunt.framework.application.BreadcrumbsManager;
+import hunt.framework.application.BreadcrumbsGenerator;
 
 public import hunt.trace;
 public import hunt.entity;
@@ -55,6 +57,7 @@ import std.stdio;
 import std.string;
 import std.uni;
 
+alias BreadcrumbsHandler = void delegate(BreadcrumbsManager manager);
 
 /**
 */
@@ -76,6 +79,11 @@ final class Application : ApplicationContext {
         i18n.loadLangResources(resPath);
         i18n.defaultLocale = defaultLocale;
 
+        return this;
+    }
+
+    Application onBreadcrumbsInitializing(BreadcrumbsHandler handler) {
+        _breadcrumbsHandler = handler;
         return this;
     }
 
@@ -214,6 +222,14 @@ final class Application : ApplicationContext {
         Tracer.localEndpoint = local;
     }
 
+    private void initilizeBreadcrumbs() {
+        BreadcrumbsManager breadcrumbs = breadcrumbsManager();
+        if(_breadcrumbsHandler !is null) {
+            _breadcrumbsHandler(breadcrumbs);
+        }
+
+    }
+
     void start() {
         foreach(WebSocketBuilder b; webSocketBuilders) {
             b.listenWebSocket();
@@ -221,10 +237,11 @@ final class Application : ApplicationContext {
 
         if(_broker !is null)
             _broker.listen();
-
         // foreach(WebSocketMessageBroker b; messageBrokers) {
         //     b.listen();
         // }
+
+        initilizeBreadcrumbs();
 
         if (_server.getHttp2Configuration.isSecureConnectionEnabled())
             writeln("Try to browse https://", addr.toString());
@@ -665,7 +682,7 @@ private:
     WebSocketHandler[string] webSocketHandlerMap;
     Array!WebSocketBuilder webSocketBuilders; 
     MiddlewareInterface[string][string]  _groupMiddlewares;
-    // Array!WebSocketMessageBroker messageBrokers; 
+    BreadcrumbsHandler _breadcrumbsHandler;
 
     version (NO_TASKPOOL) {
         // NOTHING TODO

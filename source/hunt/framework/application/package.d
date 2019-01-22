@@ -14,5 +14,7 @@ module hunt.framework.application;
 public import hunt.framework.application.Controller;
 public import hunt.framework.application.AppConfig;
 public import hunt.framework.application.Application;
+public import hunt.framework.application.BreadcrumbsGenerator;
+public import hunt.framework.application.BreadcrumbsManager;
 public import hunt.framework.application.MiddlewareInterface;
 public import hunt.framework.Simplify;
