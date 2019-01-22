@@ -936,6 +936,8 @@ private:
         }
         else if(name == "url")
         {
+            import hunt.framework.Simplify : url;
+            
             auto mca = args["varargs"][0].get!string;
             auto params = args["varargs"][1].get!string;
             return UniNode(url(mca, Util.parseFormData(params), _routeGroup));
