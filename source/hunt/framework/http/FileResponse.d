@@ -1,4 +1,4 @@
-module hunt.framework.http.DownloadResponse;
+module hunt.framework.http.FileResponse;
 
 import std.array;
 import std.conv;
@@ -10,7 +10,6 @@ import std.stdio;
 
 import hunt.framework.Init;
 import hunt.framework.application.AppConfig;
-// import hunt.framework.http.cookie;
 import hunt.framework.util.String;
 import hunt.framework.Version;
 import hunt.framework.http.Response;
@@ -19,8 +18,8 @@ import hunt.framework.http.Request;
 import hunt.logging;
 
 import hunt.http.codec.http.model.HttpHeader;
-import hunt.http.codec.http.model.AcceptMIMEType;
-import hunt.http.codec.http.model.MimeTypes;
+// import hunt.http.codec.http.model.AcceptMIMEType;
+// import hunt.http.codec.http.model.MimeTypes;
 
 /**
  * FileResponse represents an HTTP response delivering a file.
@@ -39,29 +38,25 @@ class FileResponse : Response
 
     FileResponse setFile(string filename)
     {
-        _file = filename;
-
-        if (_file[0] != "/")
-        {
-            _file = buildPath(APP_PATH, _file);
-        }
-
-        MimeTypes mimetypes = new MimeTypes();
-        string contentType = mimetypes.getMimeByExtension(_file);
+        _file = buildPath(APP_PATH, filename);
+        string contentType = getMimeContentTypeForFile(_file);
 
         this.setMimeType(contentType);
-        this.setName(baseName(fileName));
+        this.setName(baseName(filename));
         this.loadData();
+        return this;
     }
 
     FileResponse setName(string name)
     {
         _name = name;
+        return this;
     }
 
     FileResponse setMimeType(string contentType)
     {
         setHeader(HttpHeader.CONTENT_TYPE, contentType);
+        return this;
     }
 
     FileResponse loadData()

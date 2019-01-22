@@ -938,7 +938,7 @@ private:
         {
             auto mca = args["varargs"][0].get!string;
             auto params = args["varargs"][1].get!string;
-            return UniNode(createUrl(mca, Util.parseFormData(params), _routeGroup));
+            return UniNode(url(mca, Util.parseFormData(params), _routeGroup));
         }
         return _context.getFunc(name)(args);
     }
