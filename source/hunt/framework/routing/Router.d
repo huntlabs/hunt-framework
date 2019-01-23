@@ -42,17 +42,20 @@ class Router {
     }
 
     string createUrl(string mca, string[string] params = null, string group = null) {
-        if (group is null) {
+        if (group.empty && request() !is null) {
             import hunt.framework.http.Request;
-
-            group = request().route.getGroup();
+            Route route = request().route();
+            if(route !is null)
+                group = route.getGroup();
         }
+
+        if (group.empty)
+            group = DEFAULT_ROUTE_GROUP;
 
         // find Route
         RouteGroup routeGroup = this.getGroup(group);
-        if (routeGroup is null) {
+        if (routeGroup is null) 
             return null;
-        }
 
         Route route = routeGroup.getRoute("GET", mca);
         if (route is null) {

@@ -169,7 +169,7 @@ string trans(string key) {
         return p.get(key, defaultValue);
     }
 
-    logWarning("unsupport locale: ", i18n.defaultLocale);
+    logWarning("unsupported locale: ", i18n.defaultLocale);
 
     return defaultValue;
 }
@@ -195,7 +195,7 @@ string trans(string locale, string key) {
         return p.get(key, defaultValue);
     }
 
-    logDebug("unsupport locale: ", i18n.defaultLocale);
+    logDebug("unsupported locale: ", i18n.defaultLocale);
 
     return defaultValue;
 }
