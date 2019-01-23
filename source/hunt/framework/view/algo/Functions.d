@@ -32,7 +32,8 @@ Function[string] globalFunctions()
             "namespace": wrapper!namespace,
             "lang": wrapper!lang,
             "date": wrapper!date,
-            "url": wrapper!url
+            "url": wrapper!url,
+            "trans":toDelegate(&trans)
         ];
 }
 
@@ -79,12 +80,19 @@ UniNode namespace(UniNode kwargs)
     return kwargs;
 }
 
-///fake
+///dummy
 string lang(string la)
 {   
      return la;
 }
-///fake
+
+///dummy
+UniNode trans(UniNode node)
+{   
+     return UniNode(null);
+}
+
+///dummy
 string date(string format , long timestamp)
 {
     return null;     

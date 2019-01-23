@@ -927,6 +927,13 @@ private:
                 return UniNode(trans(_locale, message));
             }
         }
+        else if(name == "trans")
+        {
+            if("varargs" in args)
+            {
+                return doTrans(args);
+            }
+        }
         else if(name == "date")
         {
             import hunt.util.DateTime;
@@ -943,6 +950,36 @@ private:
             return UniNode(url(mca, Util.parseFormData(params), _routeGroup));
         }
         return _context.getFunc(name)(args);
+    }
+
+    private UniNode doTrans(UniNode arg)
+    {
+        import hunt.framework.i18n;
+        if(arg.length == 1)
+        {
+            return UniNode(trans(_locale,arg[0].get!string));
+        }
+        else if(arg.length == 2)
+        {
+            string msg = arg[0].get!string;
+            if(arg[1].kind == UniNode.Kind.text)
+            {
+                return UniNode(transf(_locale,msg,arg[1].get!string));
+            }
+            else if(arg[1].kind == UniNode.Kind.text.integer)
+            {
+                return UniNode(transf(_locale,msg,arg[1].get!long));
+            }
+            else if(arg[1].kind == UniNode.Kind.text.uinteger)
+            {
+                return UniNode(transf(_locale,msg,arg[1].get!ulong));
+            }
+        }
+        else
+        {
+            return UniNode(null);
+        }
+            
     }
 
 

@@ -97,7 +97,7 @@ private
         }
         else static if (is(T == struct) || is(T == class))
         {
-            return _jsonToUniNode(toJSON(object));
+            return _jsonToUniNode(toJson(object));
         }
         else static if (isStaticArray!T)
         {

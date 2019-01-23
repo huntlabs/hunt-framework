@@ -91,7 +91,7 @@ class View
 
     public void assign(T)(string key, T t)
     {
-		this.assign(key, toJSON(t , DEFAULT_LEVEL));
+		this.assign(key, toJson(t , DEFAULT_LEVEL));
     }
 
     public void assign(string key, JSONValue t)
