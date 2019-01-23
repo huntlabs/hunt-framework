@@ -49,7 +49,7 @@ class Dispatcher
             Route route;
 
             string cacheKey = request.header(
-                    HttpHeader.HOST) ~ "_" ~ request.method ~ "_" ~ request.path;
+                    HttpHeader.HOST) ~ "_" ~ request.methodAsString ~ "_" ~ request.path;
             route = this._cached.get(cacheKey, null);
 
             /// init this thread request for error return.
@@ -59,7 +59,7 @@ class Dispatcher
             {
                 import std.array : split;
                 string domain = split(request.header(HttpHeader.HOST), ":")[0];
-                route = this._router.match(domain, request.method, request.path);
+                route = this._router.match(domain, request.methodAsString, request.path);
 
                 if (route is null)
                 {

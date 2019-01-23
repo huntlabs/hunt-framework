@@ -15,7 +15,7 @@ void newFrameworkTrace(Request req)
     tracer.root.addTag(HTTP_HOST , req.host);
     tracer.root.addTag(HTTP_URL , req.url);
     tracer.root.addTag(HTTP_PATH , req.path);
-    tracer.root.addTag(HTTP_METHOD , req.method);
+    tracer.root.addTag(HTTP_METHOD , req.methodAsString);
     tracer.root.addTag(HTTP_REQUEST_SIZE ,  to!string(req.size));
     tracer.root.start();
     setTracer(tracer);

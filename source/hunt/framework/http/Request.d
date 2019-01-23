@@ -336,7 +336,7 @@ final class Request {
 
 	T bindForm(T)() {
 
-		if(method() != "POST")
+		if(methodAsString() != "POST")
 			return null;
 		import hunt.text.JsonHelper;
 
@@ -1104,8 +1104,12 @@ final class Request {
 		}
 	}
 
-	@property string method() {
+	@property string methodAsString() {
 		return _request.getMethod();
+	}
+
+	@property HttpMethod method() {
+		return HttpMethod.fromString(_request.getMethod());
 	}
 
 	@property string url() {
@@ -1307,7 +1311,7 @@ final class Request {
      * @return Request
      */
 	Request replace(string[string] input) {
-		if (isContained(this.method, ["GET", "HEAD"]))
+		if (isContained(this.methodAsString, ["GET", "HEAD"]))
 			_queryParams = input;
 		else {
 			foreach(string k, string v; input) {
@@ -1319,7 +1323,7 @@ final class Request {
 	}
 
 	protected string[string] getInputSource() {
-		if (isContained(this.method, ["GET", "HEAD"]))
+		if (isContained(this.methodAsString, ["GET", "HEAD"]))
 			return queries();
 		else {
 			string[string] r;
