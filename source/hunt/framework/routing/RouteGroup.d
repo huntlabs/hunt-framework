@@ -73,7 +73,7 @@ class RouteGroup
     RouteGroup setName(string name)
     {
         this._name = name;
-	return this;
+	    return this;
     }
 
     string getName()
@@ -84,7 +84,7 @@ class RouteGroup
     RouteGroup setType(string type)
     {
         this._type = type;
-	return this;
+	    return this;
     }
 
     string getType()
@@ -95,7 +95,7 @@ class RouteGroup
     RouteGroup setValue(string value)
     {
         this._value = value;
-	return this;
+	    return this;
     }
 
     string getValue()
@@ -136,6 +136,24 @@ class RouteGroup
         }
         return null;
     }
+
+version(HUNT_DEBUG) {
+    void iterateAll() {
+        // foreach (RoutePathInfo k, Route v; _routes)
+        // {
+        //     tracef("key path: path=%s, methods=%s", k.path, v.getMethods());
+        // }
+        // foreach (Route r; this._regexRoutes) {
+        //     tracef("regexRoutes: methods=%s", r.getMethods());
+        // }
+        import hunt.framework.Simplify;
+        foreach (RouteInfo key, Route value; _mcaRoutes)
+        {
+            info(url(key.mca));
+            tracef("_mcaRoutes: mca=%s, path=%s, methods=%s", key.mca,  key.path, value.getMethods());
+        }
+    }
+}    
 
     bool exists(string method, string path)
     {
@@ -193,8 +211,8 @@ class RouteGroup
     private
     {
         string _name;
-	string _type;
-	string _value;
+        string _type;
+        string _value;
 
         Route[RoutePathInfo] _routes;
         Route[RouteInfo] _mcaRoutes;

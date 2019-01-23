@@ -1,16 +1,16 @@
 module hunt.framework.application.BreadcrumbsManager;
 
 import hunt.framework.application.BreadcrumbItem;
-import hunt.framework.application.BreadcrumbsGenerator;
+import hunt.framework.application.Breadcrumbs;
 
 import std.array;
 
 class BreadcrumbsManager {
-    private BreadcrumbsGenerator generator;
+    private Breadcrumbs generator;
     private Handler[string] callbacks;
 
     this() {
-        generator = new BreadcrumbsGenerator();
+        generator = new Breadcrumbs();
     }
 
     void register(string name, Handler handler) {
