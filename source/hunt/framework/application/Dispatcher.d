@@ -20,7 +20,7 @@ import hunt.framework.routing;
 import hunt.framework.security.acl.Manager;
 import hunt.framework.security.acl.User;
 import hunt.framework.Simplify;
-import hunt.framework.zipkin.Tracer;
+import hunt.framework.trace.Tracer;
 
 
 import hunt.logging;

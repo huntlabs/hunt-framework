@@ -32,7 +32,7 @@ import hunt.framework.Init;
 import hunt.framework.routing;
 import hunt.framework.security.acl.Manager;
 import hunt.framework.websocket.WebSocketMessageBroker;
-import hunt.framework.zipkin.Tracer;
+import hunt.framework.trace.Tracer;
 
 public import hunt.framework.http;
 public import hunt.framework.i18n;

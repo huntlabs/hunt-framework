@@ -1,4 +1,4 @@
-module hunt.framework.zipkin.Tracer;
+module hunt.framework.trace.Tracer;
 
 import hunt.framework.http.Request;
 import hunt.framework.http.Response;
