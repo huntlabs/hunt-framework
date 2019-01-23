@@ -39,7 +39,7 @@ public import hunt.framework.i18n;
 public import hunt.framework.application.AppConfig;
 public import hunt.framework.application.MiddlewareInterface;
 import hunt.framework.application.BreadcrumbsManager;
-import hunt.framework.application.BreadcrumbsGenerator;
+import hunt.framework.application.Breadcrumbs;
 
 public import hunt.trace;
 public import hunt.entity;

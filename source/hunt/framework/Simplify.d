@@ -16,26 +16,23 @@ public import hunt.util.DateTime;
 
 import std.string;
 
-string url(string mca)
-{
+string url(string mca) {
     return url(mca, null);
 }
 
-string url(string mca, string[string] params, string group)
-{
+string url(string mca, string[string] params, string group) {
     return app().router().createUrl(mca, params, group);
 }
 
-string url(string mca, string[string] params)
-{
+string url(string mca, string[string] params) {
     // admin:user.user.view
     string[] items = mca.split(":");
     string group = "";
     string pathItem = "";
-    if(items.length==1) {
+    if (items.length == 1) {
         group = "";
         pathItem = mca;
-    } else if(items.length == 2) {
+    } else if (items.length == 2) {
         group = items[0];
         pathItem = items[1];
     } else {

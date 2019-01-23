@@ -1,13 +1,13 @@
-module hunt.framework.application.BreadcrumbsGenerator;
+module hunt.framework.application.Breadcrumbs;
 
 // import hunt.framework.Simplify;
 import hunt.framework.application.BreadcrumbItem;
 import std.container.array;
 import std.array;
 
-alias Handler = void delegate(BreadcrumbsGenerator crumb, Object[]...);
+alias Handler = void delegate(Breadcrumbs crumb, Object[]...);
 
-class BreadcrumbsGenerator {
+class Breadcrumbs {
     private Array!BreadcrumbItem items;
     private Handler[string] callbacks;
 
