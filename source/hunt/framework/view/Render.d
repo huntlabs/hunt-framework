@@ -917,21 +917,12 @@ private:
     UniNode visitFunc(string name, UniNode args)
     {
         version(HUNT_DEBUG)logDebug("---Func :",name," args: ",args);
-        if(name == "lang")
+        
+        if(name == "trans")
         {
             if("varargs" in args)
             {
-                import hunt.framework.i18n;
-                // logDebug("kind : ",args["varargs"][0].get!string);
-                auto message = args["varargs"][0].get!string;
-                return UniNode(trans(_locale, message));
-            }
-        }
-        else if(name == "trans")
-        {
-            if("varargs" in args)
-            {
-                return doTrans(args);
+                return doTrans(args["varargs"]);
             }
         }
         else if(name == "date")
@@ -957,29 +948,80 @@ private:
         import hunt.framework.i18n;
         if(arg.length == 1)
         {
-            return UniNode(trans(_locale,arg[0].get!string));
+            auto lang = trans(_locale,arg[0].get!string);
+            return UniNode(lang);
         }
         else if(arg.length == 2)
         {
             string msg = arg[0].get!string;
             if(arg[1].kind == UniNode.Kind.text)
             {
-                return UniNode(transf(_locale,msg,arg[1].get!string));
+                return UniNode(transfWithLocale(_locale,msg,arg[1].get!string));
             }
-            else if(arg[1].kind == UniNode.Kind.text.integer)
+            else if(arg[1].kind == UniNode.Kind.integer)
             {
-                return UniNode(transf(_locale,msg,arg[1].get!long));
+                return UniNode(transfWithLocale(_locale,msg,arg[1].get!long));
             }
-            else if(arg[1].kind == UniNode.Kind.text.uinteger)
+            else if(arg[1].kind == UniNode.Kind.uinteger)
             {
-                return UniNode(transf(_locale,msg,arg[1].get!ulong));
+                return UniNode(transfWithLocale(_locale,msg,arg[1].get!ulong));
             }
+       
         }
-        else
+        else if(arg.length == 3)
         {
-            return UniNode(null);
+            string msg = arg[0].get!string;
+            if(arg[1].kind == UniNode.Kind.text)
+            {   
+                auto arg1 = arg[1].get!string;
+                if(arg[2].kind == UniNode.Kind.text)
+                {
+                    return UniNode(transfWithLocale(_locale,msg,arg1,arg[2].get!string));
+                }
+                else if(arg[2].kind == UniNode.Kind.integer)
+                {
+                    return UniNode(transfWithLocale(_locale,msg,arg1,arg[2].get!long));
+                }
+                else if(arg[2].kind == UniNode.Kind.uinteger)
+                {
+                    return UniNode(transfWithLocale(_locale,msg,arg1,arg[2].get!ulong));
+                }
+            }
+            else if(arg[1].kind == UniNode.Kind.integer)
+            {
+                auto arg1 = arg[1].get!long;
+                if(arg[2].kind == UniNode.Kind.text)
+                {
+                    return UniNode(transfWithLocale(_locale,msg,arg1,arg[2].get!string));
+                }
+                else if(arg[2].kind == UniNode.Kind.integer)
+                {
+                    return UniNode(transfWithLocale(_locale,msg,arg1,arg[2].get!long));
+                }
+                else if(arg[2].kind == UniNode.Kind.uinteger)
+                {
+                    return UniNode(transfWithLocale(_locale,msg,arg1,arg[2].get!ulong));
+                }
+            }
+            else if(arg[1].kind == UniNode.Kind.uinteger)
+            {
+                auto arg1 = arg[1].get!ulong;
+                if(arg[2].kind == UniNode.Kind.text)
+                {
+                    return UniNode(transfWithLocale(_locale,msg,arg1,arg[2].get!string));
+                }
+                else if(arg[2].kind == UniNode.Kind.integer)
+                {
+                    return UniNode(transfWithLocale(_locale,msg,arg1,arg[2].get!long));
+                }
+                else if(arg[2].kind == UniNode.Kind.uinteger)
+                {
+                    return UniNode(transfWithLocale(_locale,msg,arg1,arg[2].get!ulong));
+                }
+            }
+       
         }
-            
+        throw new TemplateRenderException("unsupport param type!");
     }
 
 

@@ -30,7 +30,6 @@ Function[string] globalFunctions()
             "length": wrapper!length,
             "count": wrapper!length,
             "namespace": wrapper!namespace,
-            "lang": wrapper!lang,
             "date": wrapper!date,
             "url": wrapper!url,
             "trans":toDelegate(&trans)
@@ -78,12 +77,6 @@ long length(UniNode value)
 UniNode namespace(UniNode kwargs)
 {
     return kwargs;
-}
-
-///dummy
-string lang(string la)
-{   
-     return la;
 }
 
 ///dummy
