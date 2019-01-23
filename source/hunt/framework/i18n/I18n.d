@@ -130,11 +130,19 @@ private string _local /* = I18N_DEFAULT_LOCALE */ ;
 deprecated("Using trans instead.")
 alias getText = trans;
 
-
-string transf(A...)(sting key, lazy A args) {
+string transf(A...)(string key, lazy A args) {
     import std.format;
     Appender!string buffer;
     string text = trans(key);
+    formattedWrite(buffer, text, args);
+        
+    return buffer.data;
+}
+
+string transfWithLocale(A...)(string locale, string key, lazy A args) {
+    import std.format;
+    Appender!string buffer;
+    string text = trans(locale, key);
     formattedWrite(buffer, text, args);
         
     return buffer.data;
@@ -192,25 +200,29 @@ string trans(string locale, string key) {
     return defaultValue;
 }
 
-/*
-unittest{
+// unittest{
 	
-	I18n i18n = I18n.instance();
-	i18n.loadLangResources("./resources/lang");
-	i18n.defaultLocale = "en-us";
-	writeln(i18n.resources);
-	
-	
-	///
-	setLocale("en-br");
-	assert( getText("message.hello-world", "empty") == "Hello, world");
-	
-	///
-	setLocale("zh-cn");
-	assert( getText("email.subject", "empty") == "收件人");
+// 	I18n i18n = I18n.instance();
+// 	i18n.loadLangResources("./resources/translations");
+// 	i18n.defaultLocale = "en-us";
+// 	writeln(i18n.resources);
 	
 	
-	setLocale("en-us");
-	assert( getText("email.subject", "empty") == "empty");
-}
-*/
+// 	///
+// 	setLocale("en-br");
+// 	assert( trans("message.hello-world") == "Hello, world");
+	
+// 	///
+// 	setLocale("zh-cn");
+// 	assert( trans("email.subject") == "收件人");
+	
+	
+// 	setLocale("en-us");
+// 	assert( trans("email.subject") == "email.subject");
+
+//     assert(trans("message.title") == "%s Demo");
+//     assert(transf("message.title", "Hunt") == "Hunt Demo");
+
+//     assert(transfWithLocale("zh-cn", "message.title", "Hunt") == "Hunt 示例");
+// }
+
