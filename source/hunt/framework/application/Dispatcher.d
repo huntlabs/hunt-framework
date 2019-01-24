@@ -22,7 +22,6 @@ import hunt.framework.security.acl.User;
 import hunt.framework.Simplify;
 import hunt.framework.trace.Tracer;
 
-
 import hunt.logging;
 import hunt.Exceptions;
 import hunt.http.codec.http.model.HttpHeader;
@@ -32,14 +31,12 @@ import std.exception;
 import std.parallelism;
 import std.conv : to;
 
-
-
 class Dispatcher
 {
     this()
     {
         this._router = new Router;
-        this._router.setConfigPath(Config.path);
+        this._router.setConfigPath(DEFAULT_CONFIG_PATH);
     }
 
     void dispatch(Request request) nothrow
@@ -209,7 +206,7 @@ void doRequestHandle(RoutingHandler handle, Request req)
 		http://www.cnblogs.com/feihong84/p/5678895.html
 		https://stackoverflow.com/questions/10093053/add-header-in-ajax-request-with-jquery
 		*/
-        ApplicationConfig.HttpConf httpConf = Config().app.http;
+        ApplicationConfig.HttpConf httpConf = app().config().http;
         if(httpConf.enableCors) {
             response.setHeader("Access-Control-Allow-Origin", httpConf.allowOrigin);
             response.setHeader("Access-Control-Allow-Methods", httpConf.allowMethods);

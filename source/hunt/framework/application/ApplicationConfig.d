@@ -383,7 +383,7 @@ private:
     ReadWriteMutex _mutex;
 }
 
-@property ConfigManager Config()
+ConfigManager configManager()
 {
     return _manger;
 }

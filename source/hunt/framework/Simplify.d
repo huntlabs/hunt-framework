@@ -11,8 +11,9 @@
 
 module hunt.framework.Simplify;
 
-public import hunt.framework.application.Application : app;
+public import hunt.framework.application.Application : app, ApplicationConfig;
 public import hunt.util.DateTime;
+public import hunt.framework.Init;
 
 import std.string;
 

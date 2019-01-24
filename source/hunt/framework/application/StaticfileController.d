@@ -30,7 +30,7 @@ class StaticfileController : Controller
 		version (HUNT_DEBUG) logDebug("currentPath: ", currentPath);
         if (currentPath == string.init)
         {
-			currentPath = Config.app.http.path;
+			currentPath = app().config().http.path;
         }
 
         string staticFilename = mendPath(currentPath);
@@ -75,11 +75,11 @@ class StaticfileController : Controller
         response.setHeader(HttpHeader.LAST_MODIFIED, lastModified);
         response.setHeader(HttpHeader.ETAG, etag);
 
-        if (Config.app.application.staticFileCacheMinutes > 0)
+        if (app().config().application.staticFileCacheMinutes > 0)
 		{
-            auto expireTime = Clock.currTime(UTC()) + dur!"minutes"(Config.app.application.staticFileCacheMinutes);
+            auto expireTime = Clock.currTime(UTC()) + dur!"minutes"(app().config().application.staticFileCacheMinutes);
             response.setHeader(HttpHeader.EXPIRES, toRFC822DateTimeString(expireTime));
-            response.setHeader(HttpHeader.CACHE_CONTROL, "max-age=" ~ to!string(Config.app.application.staticFileCacheMinutes * 60));
+            response.setHeader(HttpHeader.CACHE_CONTROL, "max-age=" ~ to!string(app().config().application.staticFileCacheMinutes * 60));
         }
 
         if ((request.headerExists(HttpHeader.IF_MODIFIED_SINCE) && (request.header(HttpHeader.IF_MODIFIED_SINCE) == lastModified)) ||

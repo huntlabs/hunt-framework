@@ -300,7 +300,7 @@ private:
         import hunt.framework.application.ApplicationConfig;
 
         this.staticRootRoute = this.makeRoute("GET", "/",
-                "staticDir:" ~ Config.app.http.path, group);
+                "staticDir:" ~ app().config().http.path, group);
         if (!haveRootRoute)
             routeGroup.addRoute(staticRootRoute);
     }

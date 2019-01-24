@@ -16,7 +16,7 @@ public import hunt.framework.view.Template;
 public import hunt.framework.view.Util;
 public import hunt.framework.view.Exception;
 
-import hunt.framework.application.ApplicationConfig;
+import hunt.framework.Simplify;
 
 public import hunt.util.Serialize;
 public import hunt.logging;
@@ -39,8 +39,8 @@ class View
 
     this(Environment env)
     {
-        _templatePath = Config().app.view.path;
-        _extName = Config().app.view.ext;
+        _templatePath = app().config().view.path;
+        _extName = app().config().view.ext;
 
         _env = env;
     }
@@ -94,7 +94,7 @@ class View
 
     public void assign(T)(string key, T t)
     {
-		this.assign(key, toJson(t , Config.app.view.arrayDepth));
+		this.assign(key, toJson(t , app().config().view.arrayDepth));
     }
 
     public void assign(string key, JSONValue t)
@@ -114,6 +114,6 @@ View GetViewObject()
     }
     auto view = new View(_envInstance);
 
-    view.setTemplatePath(Config.app.view.path).setTemplateExt(Config.app.view.ext);
+    view.setTemplatePath(app().config().view.path).setTemplateExt(app().config().view.ext);
     return view;
 }

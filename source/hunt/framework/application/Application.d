@@ -114,7 +114,7 @@ final class Application : ApplicationContext {
     }
 
     @property ApplicationConfig config() {
-        return Config.app;
+        return configManager().app;
     }
 
     private void initDatabase(ApplicationConfig.DatabaseConf config) {
@@ -629,24 +629,24 @@ private:
         }
     }
 
-    version (USE_KISS_RPC) {
-        import kissrpc.RpcManager;
+    // version (USE_KISS_RPC) {
+    //     import kissrpc.RpcManager;
 
-        public void startRpcService(T, A...)() {
-            if (Config.app.rpc.enabled == false)
-                return;
-            string ip = Config.app.rpc.service.address;
-            ushort port = Config.app.rpc.service.port;
-            int threadNum = Config.app.rpc.service.workerThreads;
-            RpcManager.getInstance().startService!(T, A)(ip, port, threadNum);
-        }
+    //     public void startRpcService(T, A...)() {
+    //         if (app().config().rpc.enabled == false)
+    //             return;
+    //         string ip = app().config().rpc.service.address;
+    //         ushort port = app().config().rpc.service.port;
+    //         int threadNum = app().config().rpc.service.workerThreads;
+    //         RpcManager.getInstance().startService!(T, A)(ip, port, threadNum);
+    //     }
 
-        public void startRpcClient(T)(string ip, ushort port, int threadNum = 1) {
-            if (Config.app.rpc.enabled == false)
-                return;
-            RpcManager.getInstance().connectService!(T)(ip, port, threadNum);
-        }
-    }
+    //     public void startRpcClient(T)(string ip, ushort port, int threadNum = 1) {
+    //         if (app().config().rpc.enabled == false)
+    //             return;
+    //         RpcManager.getInstance().connectService!(T)(ip, port, threadNum);
+    //     }
+    // }
 
     this() {
         setDefaultLogging();
@@ -654,7 +654,7 @@ private:
         _manger = new CacheManger();
 
         this._dispatcher = new Dispatcher();
-        setConfig(Config.app);
+        setConfig(app().config());
         
     }
 

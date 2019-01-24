@@ -23,7 +23,7 @@ import hunt.Exceptions;
 import hunt.util.Common;
 import hunt.util.MimeTypeUtils;
 
-import hunt.framework.application.ApplicationConfig;
+import hunt.framework.Simplify;
 import hunt.framework.Exceptions;
 import hunt.framework.http.session;
 import hunt.framework.routing.Route;
@@ -124,10 +124,6 @@ final class Request {
 		}
 	}
 
-	
-
-
-
 	private PipedStream pipedStream;
 
 	package(hunt.framework) void onContent(ByteBuffer buffer) {
@@ -157,7 +153,7 @@ final class Request {
 			// version(HUNT_DEBUG) info(urlEncodedMap.toString());
 		} else if(contentType == "multipart/form-data") {
 			_isMultipart = true;
-			ApplicationConfig config = Config.app;
+			ApplicationConfig config = app().config();
 			import std.path;
 			import std.file;
 			import hunt.framework.Init;
