@@ -210,7 +210,6 @@ final class Application : ApplicationContext {
         if(config.trace.enable && config.trace.service.host != string.init)
         {
             initIMF(config.trace.service.host , config.trace.service.port);
-            Tracer.upload = true;
         }
         Tracer.localEndpoint = local;
     }

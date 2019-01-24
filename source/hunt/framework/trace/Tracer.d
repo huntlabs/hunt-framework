@@ -11,6 +11,9 @@ import std.conv;
 
 void newFrameworkTrace(Request req)
 {
+    if(!tracing)
+        return ;
+
     auto tracer = new Tracer(req.getMCA() , req.headerExists("b3")?req.header("b3"):"");
     tracer.root.addTag(HTTP_HOST , req.host);
     tracer.root.addTag(HTTP_URL , req.url);
@@ -24,6 +27,8 @@ void newFrameworkTrace(Request req)
 void finishFrameworkTrace(string error)
 {
     auto tracer = getTracer();
+    if(tracer is null)
+        return;
     tracer.root.addTag(SPAN_ERROR , error);
     finishFrameworkUpload(tracer);
 }
@@ -31,6 +36,9 @@ void finishFrameworkTrace(string error)
 void finishFrameworkTrace(Response response)
 {
     auto tracer = getTracer();
+    if(tracer is null)
+        return ;
+
     tracer.root.addTag(HTTP_STATUS_CODE , to!string(response.status));
     tracer.root.addTag(HTTP_RESPONSE_SIZE , to!string(response.size));
     finishFrameworkUpload(tracer);  
@@ -40,8 +48,7 @@ private void finishFrameworkUpload(Tracer tracer)
 {
     tracer.root.finish();
 
-    if(tracer.upload)
-        uploadFromIMF(tracer.root ~ tracer.children);
+    uploadFromIMF(tracer.root ~ tracer.children);
 
     version(HUNT_DEBUG) logInfo(" mca: " , tracer.root.name , " duration: " , 
         tracer.root.duration / 1000 , " traceId: " , tracer.root.traceId );
