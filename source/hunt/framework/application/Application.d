@@ -207,9 +207,9 @@ final class Application : ApplicationContext {
         local.ipv4 = config.http.address;
         local.port = config.http.port;
 
-        if(config.zipkin.imfhost != "")
+        if(config.trace.enable && config.trace.service.host != string.init)
         {
-            initIMF(config.zipkin.imfhost , config.zipkin.imfport);
+            initIMF(config.trace.service.host , config.trace.service.port);
             Tracer.upload = true;
         }
         Tracer.localEndpoint = local;

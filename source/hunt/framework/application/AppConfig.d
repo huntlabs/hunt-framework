@@ -215,10 +215,16 @@ final class AppConfig
         string ext = ".dhtml";
     }
 
-    struct ZipKin
+    struct TraceConf
     {
-        string  imfhost = "";
-        ushort  imfport = 0;
+        bool enable = false;
+        TraceService service;
+    }
+
+    struct TraceService
+    {
+        string host;
+        ushort port;
     }
 
     DatabaseConf database;
@@ -239,7 +245,7 @@ final class AppConfig
     MailConf mail;
     RpcConf rpc;
     View view;
-    ZipKin zipkin;
+    TraceConf trace;
 
 	MultipartConfig multiparConfig() {
         if(_multiparConfig is null) {
