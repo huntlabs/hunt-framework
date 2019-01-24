@@ -59,149 +59,149 @@ import hunt.http.server.WebSocketHandler;
 class WebSocketHttpRequestHandler : WebSocketHandler { // , Lifecycle, ServletContextAware 
 
 
-	private WebSocketMessageHandler wsHandler;
-	private StandardWebSocketSession wsSession;
+    private WebSocketMessageHandler wsHandler;
+    private StandardWebSocketSession wsSession;
 
-	// private HandshakeHandler handshakeHandler;
+    // private HandshakeHandler handshakeHandler;
 
-	// private List!(HandshakeInterceptor) interceptors = new ArrayList<>();
+    // private List!(HandshakeInterceptor) interceptors = new ArrayList<>();
 
-	private bool running = false;
-
-
-	this(WebSocketMessageHandler wsHandler) {
-		// this(wsHandler, new DefaultHandshakeHandler());
-		this.wsHandler = wsHandler; 
-	}
-
-	// this(WebSocketMessageHandler wsHandler, HandshakeHandler handshakeHandler) {
-	// 	assert(wsHandler, "wsHandler must not be null");
-	// 	assert(handshakeHandler, "handshakeHandler must not be null");
-	// 	this.wsHandler = wsHandler; // new ExceptionWebSocketHandlerDecorator(new LoggingWebSocketHandlerDecorator(wsHandler));
-	// 	this.handshakeHandler = handshakeHandler;
-	// }
+    private bool running = false;
 
 
-	/**
-	 * Return the WebSocketHandler.
-	 */
-	WebSocketMessageHandler getWebSocketHandler() {
-		return this.wsHandler;
-	}
+    this(WebSocketMessageHandler wsHandler) {
+        // this(wsHandler, new DefaultHandshakeHandler());
+        this.wsHandler = wsHandler; 
+    }
 
-	/**
-	 * Return the HandshakeHandler.
-	 */
-	// HandshakeHandler getHandshakeHandler() {
-	// 	return this.handshakeHandler;
-	// }
-
-	/**
-	 * Configure one or more WebSocket handshake request interceptors.
-	 */
-	// void setHandshakeInterceptors(List!(HandshakeInterceptor) interceptors) {
-	// 	this.interceptors.clear();
-	// 	if (interceptors !is null) {
-	// 		this.interceptors.addAll(interceptors);
-	// 	}
-	// }
-
-	/**
-	 * Return the configured WebSocket handshake request interceptors.
-	 */
-	// List!(HandshakeInterceptor) getHandshakeInterceptors() {
-	// 	return this.interceptors;
-	// }
-
-	// override
-	// void setServletContext(ServletContext servletContext) {
-	// 	if (this.handshakeHandler instanceof ServletContextAware) {
-	// 		((ServletContextAware) this.handshakeHandler).setServletContext(servletContext);
-	// 	}
-	// }
+    // this(WebSocketMessageHandler wsHandler, HandshakeHandler handshakeHandler) {
+    //     assert(wsHandler, "wsHandler must not be null");
+    //     assert(handshakeHandler, "handshakeHandler must not be null");
+    //     this.wsHandler = wsHandler; // new ExceptionWebSocketHandlerDecorator(new LoggingWebSocketHandlerDecorator(wsHandler));
+    //     this.handshakeHandler = handshakeHandler;
+    // }
 
 
-	// override
-	// void start() {
-	// 	if (!isRunning()) {
-	// 		this.running = true;
-	// 		if (this.handshakeHandler instanceof Lifecycle) {
-	// 			((Lifecycle) this.handshakeHandler).start();
-	// 		}
-	// 	}
-	// }
+    /**
+     * Return the WebSocketHandler.
+     */
+    WebSocketMessageHandler getWebSocketHandler() {
+        return this.wsHandler;
+    }
 
-	// override
-	// void stop() {
-	// 	if (isRunning()) {
-	// 		this.running = false;
-	// 		if (this.handshakeHandler instanceof Lifecycle) {
-	// 			((Lifecycle) this.handshakeHandler).stop();
-	// 		}
-	// 	}
-	// }
+    /**
+     * Return the HandshakeHandler.
+     */
+    // HandshakeHandler getHandshakeHandler() {
+    //     return this.handshakeHandler;
+    // }
 
-	// override
-	bool isRunning() {
-		return this.running;
-	}
+    /**
+     * Configure one or more WebSocket handshake request interceptors.
+     */
+    // void setHandshakeInterceptors(List!(HandshakeInterceptor) interceptors) {
+    //     this.interceptors.clear();
+    //     if (interceptors !is null) {
+    //         this.interceptors.addAll(interceptors);
+    //     }
+    // }
 
-	override void onConnect(WebSocketConnection session) {
-		version(HUNT_DEBUG)
-		info("WebSocket connection on: ", session.getUpgradeRequest.getURI.toString());
+    /**
+     * Return the configured WebSocket handshake request interceptors.
+     */
+    // List!(HandshakeInterceptor) getHandshakeInterceptors() {
+    //     return this.interceptors;
+    // }
 
-		this.wsSession.initializeNativeSession(session);
-		this.wsHandler.afterConnectionEstablished(this.wsSession);
-	}
+    // override
+    // void setServletContext(ServletContext servletContext) {
+    //     if (this.handshakeHandler instanceof ServletContextAware) {
+    //         ((ServletContextAware) this.handshakeHandler).setServletContext(servletContext);
+    //     }
+    // }
 
-	override void onFrame(Frame frame, WebSocketConnection connection) {
-		this.wsHandler.handleMessage(this.wsSession, cast(WebSocketFrame)frame);
-	}
 
-	override void onError(Exception t, WebSocketConnection connection) {
-		this.wsHandler.handleTransportError(this.wsSession, t);
-	}
+    // override
+    // void start() {
+    //     if (!isRunning()) {
+    //         this.running = true;
+    //         if (this.handshakeHandler instanceof Lifecycle) {
+    //             ((Lifecycle) this.handshakeHandler).start();
+    //         }
+    //     }
+    // }
 
-	override
-	bool acceptUpgrade(HttpRequest request, HttpResponse response, 
+    // override
+    // void stop() {
+    //     if (isRunning()) {
+    //         this.running = false;
+    //         if (this.handshakeHandler instanceof Lifecycle) {
+    //             ((Lifecycle) this.handshakeHandler).stop();
+    //         }
+    //     }
+    // }
+
+    // override
+    bool isRunning() {
+        return this.running;
+    }
+
+    override void onConnect(WebSocketConnection session) {
+        version(HUNT_DEBUG)
+        info("WebSocket connection on: ", session.getUpgradeRequest.getURI.toString());
+
+        this.wsSession.initializeNativeSession(session);
+        this.wsHandler.afterConnectionEstablished(this.wsSession);
+    }
+
+    override void onFrame(Frame frame, WebSocketConnection connection) {
+        this.wsHandler.handleMessage(this.wsSession, cast(WebSocketFrame)frame);
+    }
+
+    override void onError(Exception t, WebSocketConnection connection) {
+        this.wsHandler.handleTransportError(this.wsSession, t);
+    }
+
+    override
+    bool acceptUpgrade(HttpRequest request, HttpResponse response, 
             HttpOutputStream output, HttpConnection connection) {
 
-		// HandshakeInterceptorChain chain = new HandshakeInterceptorChain(this.interceptors, this.wsHandler);
-		// HandshakeFailureException failure = null;
+        // HandshakeInterceptorChain chain = new HandshakeInterceptorChain(this.interceptors, this.wsHandler);
+        // HandshakeFailureException failure = null;
 
-		try {
-			version(HUNT_DEBUG) { 
-				info("Upgrade handshaking...");
-				trace(request.getMethod() ~ " " ~ request.getURIString());
-			}
+        try {
+            version(HUNT_DEBUG) { 
+                info("Upgrade handshaking...");
+                trace(request.getMethod() ~ " " ~ request.getURIString());
+            }
 
-			wsSession = new StandardWebSocketSession(request.getFields(), null,
-				connection.getLocalAddress(), connection.getRemoteAddress(), null); // user
+            wsSession = new StandardWebSocketSession(request.getFields(), null,
+                connection.getLocalAddress(), connection.getRemoteAddress(), null); // user
 
-			// Map!(string, Object) attributes = new HashMap<>();
-			// if (!chain.applyBeforeHandshake(request, response, attributes)) {
-			// 	return;
-			// }
-			// this.handshakeHandler.doHandshake(request, response, this.wsHandler, attributes);
-			// chain.applyAfterHandshake(request, response, null);
-			// response.close();
-		}
-		// catch (HandshakeFailureException ex) {
-		// 	failure = ex;
-		// }
-		catch (Throwable ex) {
-			errorf("Uncaught failure for request " ~ request.getURI().toString() ~ "\n", ex);
-			// failure = new HandshakeFailureException("Uncaught failure for request " ~ request.getURI(), ex);
-		}
-		finally {
-			// if (failure !is null) {
-			// 	chain.applyAfterHandshake(request, response, failure);
-			// 	throw failure;
-			// }
-		}
+            // Map!(string, Object) attributes = new HashMap<>();
+            // if (!chain.applyBeforeHandshake(request, response, attributes)) {
+            //     return;
+            // }
+            // this.handshakeHandler.doHandshake(request, response, this.wsHandler, attributes);
+            // chain.applyAfterHandshake(request, response, null);
+            // response.close();
+        }
+        // catch (HandshakeFailureException ex) {
+        //     failure = ex;
+        // }
+        catch (Throwable ex) {
+            errorf("Uncaught failure for request " ~ request.getURI().toString() ~ "\n", ex);
+            // failure = new HandshakeFailureException("Uncaught failure for request " ~ request.getURI(), ex);
+        }
+        finally {
+            // if (failure !is null) {
+            //     chain.applyAfterHandshake(request, response, failure);
+            //     throw failure;
+            // }
+        }
 
-		return true;
-	}
-	
+        return true;
+    }
+    
 
 }

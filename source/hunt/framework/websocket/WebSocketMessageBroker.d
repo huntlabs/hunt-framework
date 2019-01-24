@@ -46,10 +46,10 @@ class WebSocketMessageBroker  {
         return this;
     }
 
-	WebSocketMessageBroker onStompEndpointsRegister(Action1!(StompEndpointRegistry) handler) {
-		brokerConfiguration.endpointRegistryHandler = handler;
+    WebSocketMessageBroker onStompEndpointsRegister(Action1!(StompEndpointRegistry) handler) {
+        brokerConfiguration.endpointRegistryHandler = handler;
         return this;
-	}
+    }
 
     void start() {
         appContext.start();

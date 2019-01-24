@@ -30,65 +30,65 @@ import hunt.framework.websocket.WebSocketMessageHandler;
  */
 // class WebSocketHandlerDecorator : WebSocketHandler {
 
-// 	private final WebSocketHandler delegate;
+//     private final WebSocketHandler delegate;
 
 
-// 	WebSocketHandlerDecorator(WebSocketHandler delegate) {
-// 		assert(delegate, "Delegate must not be null");
-// 		this.delegate = delegate;
-// 	}
+//     WebSocketHandlerDecorator(WebSocketHandler delegate) {
+//         assert(delegate, "Delegate must not be null");
+//         this.delegate = delegate;
+//     }
 
 
-// 	WebSocketHandler getDelegate() {
-// 		return this.delegate;
-// 	}
+//     WebSocketHandler getDelegate() {
+//         return this.delegate;
+//     }
 
-// 	WebSocketHandler getLastHandler() {
-// 		WebSocketHandler result = this.delegate;
-// 		while (result instanceof WebSocketHandlerDecorator) {
-// 			result = ((WebSocketHandlerDecorator) result).getDelegate();
-// 		}
-// 		return result;
-// 	}
+//     WebSocketHandler getLastHandler() {
+//         WebSocketHandler result = this.delegate;
+//         while (result instanceof WebSocketHandlerDecorator) {
+//             result = ((WebSocketHandlerDecorator) result).getDelegate();
+//         }
+//         return result;
+//     }
 
-// 	static WebSocketHandler unwrap(WebSocketHandler handler) {
-// 		if (handler instanceof WebSocketHandlerDecorator) {
-// 			return ((WebSocketHandlerDecorator) handler).getLastHandler();
-// 		}
-// 		else {
-// 			return handler;
-// 		}
-// 	}
+//     static WebSocketHandler unwrap(WebSocketHandler handler) {
+//         if (handler instanceof WebSocketHandlerDecorator) {
+//             return ((WebSocketHandlerDecorator) handler).getLastHandler();
+//         }
+//         else {
+//             return handler;
+//         }
+//     }
 
-// 	override
-// 	void afterConnectionEstablished(WebSocketSession session) throws Exception {
-// 		this.delegate.afterConnectionEstablished(session);
-// 	}
+//     override
+//     void afterConnectionEstablished(WebSocketSession session) throws Exception {
+//         this.delegate.afterConnectionEstablished(session);
+//     }
 
-// 	override
-// 	void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
-// 		this.delegate.handleMessage(session, message);
-// 	}
+//     override
+//     void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
+//         this.delegate.handleMessage(session, message);
+//     }
 
-// 	override
-// 	void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
-// 		this.delegate.handleTransportError(session, exception);
-// 	}
+//     override
+//     void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
+//         this.delegate.handleTransportError(session, exception);
+//     }
 
-// 	override
-// 	void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
-// 		this.delegate.afterConnectionClosed(session, closeStatus);
-// 	}
+//     override
+//     void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
+//         this.delegate.afterConnectionClosed(session, closeStatus);
+//     }
 
-// 	override
-// 	boolsupportsPartialMessages() {
-// 		return this.delegate.supportsPartialMessages();
-// 	}
+//     override
+//     boolsupportsPartialMessages() {
+//         return this.delegate.supportsPartialMessages();
+//     }
 
-// 	override
-// 	string toString() {
-// 		return TypeUtils.getSimpleName(typeid(this)) ~ " [delegate=" ~ this.delegate ~ "]";
-// 	}
+//     override
+//     string toString() {
+//         return TypeUtils.getSimpleName(typeid(this)) ~ " [delegate=" ~ this.delegate ~ "]";
+//     }
 
 // }
 
@@ -107,12 +107,12 @@ import hunt.framework.websocket.WebSocketMessageHandler;
  */
 interface WebSocketHandlerDecoratorFactory {
 
-	/**
-	 * Decorate the given WebSocketHandler.
-	 * @param handler the handler to be decorated.
-	 * @return the same handler or the handler wrapped with a sub-class of
-	 * {@code WebSocketHandlerDecorator}.
-	 */
-	WebSocketMessageHandler decorate(WebSocketMessageHandler handler);
+    /**
+     * Decorate the given WebSocketHandler.
+     * @param handler the handler to be decorated.
+     * @return the same handler or the handler wrapped with a sub-class of
+     * {@code WebSocketHandlerDecorator}.
+     */
+    WebSocketMessageHandler decorate(WebSocketMessageHandler handler);
 
 }

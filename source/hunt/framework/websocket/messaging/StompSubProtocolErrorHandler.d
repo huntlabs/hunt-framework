@@ -27,43 +27,43 @@ import hunt.stomp.support.MessageHeaderAccessor;
  */
 class StompSubProtocolErrorHandler : SubProtocolErrorHandler!(byte[]) {
 
-	private enum byte[] EMPTY_PAYLOAD = [];
+    private enum byte[] EMPTY_PAYLOAD = [];
 
 
-	override
-	Message!(byte[]) handleClientMessageProcessingError(Message!(byte[]) clientMessage, Throwable ex) {
-		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
-		accessor.setMessage(ex.msg);
-		accessor.setLeaveMutable(true);
+    override
+    Message!(byte[]) handleClientMessageProcessingError(Message!(byte[]) clientMessage, Throwable ex) {
+        StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
+        accessor.setMessage(ex.msg);
+        accessor.setLeaveMutable(true);
 
-		StompHeaderAccessor clientHeaderAccessor = null;
-		if (clientMessage !is null) {
-			clientHeaderAccessor = MessageHeaderAccessor.getAccessor!(StompHeaderAccessor)(clientMessage);
-			if (clientHeaderAccessor !is null) {
-				string receiptId = clientHeaderAccessor.getReceipt();
-				if (receiptId !is null) {
-					accessor.setReceiptId(receiptId);
-				}
-			}
-		}
+        StompHeaderAccessor clientHeaderAccessor = null;
+        if (clientMessage !is null) {
+            clientHeaderAccessor = MessageHeaderAccessor.getAccessor!(StompHeaderAccessor)(clientMessage);
+            if (clientHeaderAccessor !is null) {
+                string receiptId = clientHeaderAccessor.getReceipt();
+                if (receiptId !is null) {
+                    accessor.setReceiptId(receiptId);
+                }
+            }
+        }
 
-		return handleInternal(accessor, EMPTY_PAYLOAD, ex, clientHeaderAccessor);
-	}
+        return handleInternal(accessor, EMPTY_PAYLOAD, ex, clientHeaderAccessor);
+    }
 
-	override
-	Message!(byte[]) handleErrorMessageToClient(Message!(byte[]) errorMessage) {
-		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor!(StompHeaderAccessor)(errorMessage);
-		assert(accessor, "No StompHeaderAccessor");
-		if (!accessor.isMutable()) {
-			accessor = StompHeaderAccessor.wrap(errorMessage);
-		}
-		return handleInternal(accessor, errorMessage.getPayload(), null, null);
-	}
+    override
+    Message!(byte[]) handleErrorMessageToClient(Message!(byte[]) errorMessage) {
+        StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor!(StompHeaderAccessor)(errorMessage);
+        assert(accessor, "No StompHeaderAccessor");
+        if (!accessor.isMutable()) {
+            accessor = StompHeaderAccessor.wrap(errorMessage);
+        }
+        return handleInternal(accessor, errorMessage.getPayload(), null, null);
+    }
 
-	protected Message!(byte[]) handleInternal(StompHeaderAccessor errorHeaderAccessor, byte[] errorPayload,
-			Throwable cause, StompHeaderAccessor clientHeaderAccessor) {
+    protected Message!(byte[]) handleInternal(StompHeaderAccessor errorHeaderAccessor, byte[] errorPayload,
+            Throwable cause, StompHeaderAccessor clientHeaderAccessor) {
 
-		return MessageHelper.createMessage(errorPayload, errorHeaderAccessor.getMessageHeaders());
-	}
+        return MessageHelper.createMessage(errorPayload, errorHeaderAccessor.getMessageHeaders());
+    }
 
 }

@@ -201,24 +201,24 @@ string trans(string locale, string key) {
 }
 
 // unittest{
-	
-// 	I18n i18n = I18n.instance();
-// 	i18n.loadLangResources("./resources/translations");
-// 	i18n.defaultLocale = "en-us";
-// 	writeln(i18n.resources);
-	
-	
-// 	///
-// 	setLocale("en-br");
-// 	assert( trans("message.hello-world") == "Hello, world");
-	
-// 	///
-// 	setLocale("zh-cn");
-// 	assert( trans("email.subject") == "收件人");
-	
-	
-// 	setLocale("en-us");
-// 	assert( trans("email.subject") == "email.subject");
+    
+//     I18n i18n = I18n.instance();
+//     i18n.loadLangResources("./resources/translations");
+//     i18n.defaultLocale = "en-us";
+//     writeln(i18n.resources);
+    
+    
+//     ///
+//     setLocale("en-br");
+//     assert( trans("message.hello-world") == "Hello, world");
+    
+//     ///
+//     setLocale("zh-cn");
+//     assert( trans("email.subject") == "收件人");
+    
+    
+//     setLocale("en-us");
+//     assert( trans("email.subject") == "email.subject");
 
 //     assert(trans("message.title") == "%s Demo");
 //     assert(transf("message.title", "Hunt") == "Hunt Demo");

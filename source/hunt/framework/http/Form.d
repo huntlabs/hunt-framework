@@ -20,5 +20,5 @@ interface Form : Valid
 
 mixin template MakeForm()
 {
-	mixin MakeValid;
+    mixin MakeValid;
 }

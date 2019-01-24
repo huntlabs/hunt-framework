@@ -10,8 +10,8 @@ module hunt.framework.websocket.SubProtocolCapable;
  */
 interface SubProtocolCapable {
 
-	/**
-	 * Return the list of supported sub-protocols.
-	 */
-	string[] getSubProtocols();
+    /**
+     * Return the list of supported sub-protocols.
+     */
+    string[] getSubProtocols();
 }

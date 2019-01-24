@@ -5,16 +5,16 @@ import hunt.Exceptions;
 
 class SessionLimitExceededException : RuntimeException {
     
-	private CloseStatus status;
+    private CloseStatus status;
 
-	this(string message, CloseStatus status) {
-		super(message);
-		this.status = (status !is null ? status : CloseStatus.NO_STATUS_CODE);
-	}
+    this(string message, CloseStatus status) {
+        super(message);
+        this.status = (status !is null ? status : CloseStatus.NO_STATUS_CODE);
+    }
 
 
-	CloseStatus getStatus() {
-		return this.status;
-	}
+    CloseStatus getStatus() {
+        return this.status;
+    }
 
 }

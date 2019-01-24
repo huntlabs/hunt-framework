@@ -17,12 +17,12 @@ import std.regex;
 class Util
 {
     static string[string] parseFormData(string idstring)
-	{
+    {
         import std.string;
-		string[string] params;
-		auto idstr = strip(idstring);
+        string[string] params;
+        auto idstr = strip(idstring);
         string[] param_section;
-		param_section = split(idstr, '&');
+        param_section = split(idstr, '&');
         foreach(section; param_section) {
             auto param = split(section,"=");
             if(param.length == 2)
@@ -30,7 +30,7 @@ class Util
                 params[param[0]] = param[1];
             }
         }
-		
-		return params;
-	}
+        
+        return params;
+    }
 }

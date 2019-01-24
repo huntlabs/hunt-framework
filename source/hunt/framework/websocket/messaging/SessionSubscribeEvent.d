@@ -26,12 +26,12 @@ import hunt.stomp.Message;
 
 class SessionSubscribeEvent : AbstractSubProtocolEvent {
 
-	this(Object source, Message!(byte[]) message) {
-		super(source, message);
-	}
+    this(Object source, Message!(byte[]) message) {
+        super(source, message);
+    }
 
-	this(Object source, Message!(byte[]) message, Principal user) {
-		super(source, message, user);
-	}
+    this(Object source, Message!(byte[]) message, Principal user) {
+        super(source, message, user);
+    }
 
 }

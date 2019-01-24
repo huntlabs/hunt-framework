@@ -47,191 +47,191 @@ alias HttpHeaders = HttpFields;
  */
 class StandardWebSocketSession : AbstractWebSocketSession!(WebSocketConnection) {
 
-	private string id;
-	
-	private HttpURI uri;
+    private string id;
+    
+    private HttpURI uri;
 
-	private HttpHeaders handshakeHeaders;
+    private HttpHeaders handshakeHeaders;
 
-	private string acceptedProtocol;
+    private string acceptedProtocol;
 
-	// private List!(WebSocketExtension) extensions;
-	
-	private Principal user;
-	
-	private Address localAddress;
-	
-	private Address remoteAddress;
-
-
-	/**
-	 * Constructor for a standard WebSocket session.
-	 * @param headers the headers of the handshake request
-	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket
-	 * session; the provided attributes are copied, the original map is not used.
-	 * @param localAddress the address on which the request was received
-	 * @param remoteAddress the address of the remote client
-	 */
-	this(HttpHeaders headers, Map!(string, Object) attributes,
-			Address localAddress, Address remoteAddress) {
-
-		this(headers, attributes, localAddress, remoteAddress, null);
-	}
-
-	/**
-	 * Constructor that associates a user with the WebSocket session.
-	 * @param headers the headers of the handshake request
-	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket session
-	 * @param localAddress the address on which the request was received
-	 * @param remoteAddress the address of the remote client
-	 * @param user the user associated with the session; if {@code null} we'll
-	 * fallback on the user available in the underlying WebSocket session
-	 */
-	this(HttpHeaders headers, Map!(string, Object) attributes,
-			Address localAddress, Address remoteAddress, Principal user) {
-
-		super(attributes);
-		this.id = idGenerator.generateId().toString();
-		headers = (headers !is null ? headers : new HttpHeaders());
-		this.handshakeHeaders = headers;
-		this.user = user;
-		this.localAddress = localAddress;
-		this.remoteAddress = remoteAddress;
-	}
+    // private List!(WebSocketExtension) extensions;
+    
+    private Principal user;
+    
+    private Address localAddress;
+    
+    private Address remoteAddress;
 
 
-	// override
-	string getId() {
-		return this.id;
-	}
+    /**
+     * Constructor for a standard WebSocket session.
+     * @param headers the headers of the handshake request
+     * @param attributes attributes from the HTTP handshake to associate with the WebSocket
+     * session; the provided attributes are copied, the original map is not used.
+     * @param localAddress the address on which the request was received
+     * @param remoteAddress the address of the remote client
+     */
+    this(HttpHeaders headers, Map!(string, Object) attributes,
+            Address localAddress, Address remoteAddress) {
 
-	// override
-	HttpURI getUri() {
-		checkNativeSessionInitialized();
-		return this.uri;
-	}
+        this(headers, attributes, localAddress, remoteAddress, null);
+    }
 
-	// override
-	HttpHeaders getHandshakeHeaders() {
-		return this.handshakeHeaders;
-	}
+    /**
+     * Constructor that associates a user with the WebSocket session.
+     * @param headers the headers of the handshake request
+     * @param attributes attributes from the HTTP handshake to associate with the WebSocket session
+     * @param localAddress the address on which the request was received
+     * @param remoteAddress the address of the remote client
+     * @param user the user associated with the session; if {@code null} we'll
+     * fallback on the user available in the underlying WebSocket session
+     */
+    this(HttpHeaders headers, Map!(string, Object) attributes,
+            Address localAddress, Address remoteAddress, Principal user) {
 
-	// override
-	string getAcceptedProtocol() {
-		checkNativeSessionInitialized();
-		return this.acceptedProtocol;
-	}
+        super(attributes);
+        this.id = idGenerator.generateId().toString();
+        headers = (headers !is null ? headers : new HttpHeaders());
+        this.handshakeHeaders = headers;
+        this.user = user;
+        this.localAddress = localAddress;
+        this.remoteAddress = remoteAddress;
+    }
 
-	// override
-	// List!(WebSocketExtension) getExtensions() {
-	// 	assert(this.extensions !is null, "WebSocket session is not yet initialized");
-	// 	return this.extensions;
-	// }
 
-	Principal getPrincipal() {
-		return this.user;
-	}
+    // override
+    string getId() {
+        return this.id;
+    }
 
-	// override	
-	Address getLocalAddress() {
-		return this.localAddress;
-	}
+    // override
+    HttpURI getUri() {
+        checkNativeSessionInitialized();
+        return this.uri;
+    }
 
-	// override	
-	Address getRemoteAddress() {
-		return this.remoteAddress;
-	}
+    // override
+    HttpHeaders getHandshakeHeaders() {
+        return this.handshakeHeaders;
+    }
 
-	// override
-	void setTextMessageSizeLimit(int messageSizeLimit) {
-		checkNativeSessionInitialized();
-		// getNativeSession().setMaxTextMessageBufferSize(messageSizeLimit);
-		implementationMissing(false);
-	}
+    // override
+    string getAcceptedProtocol() {
+        checkNativeSessionInitialized();
+        return this.acceptedProtocol;
+    }
 
-	// override
-	int getTextMessageSizeLimit() {
-		checkNativeSessionInitialized();
-		// return getNativeSession().getMaxTextMessageBufferSize();
-		implementationMissing(false);
-		return 0;
-	}
+    // override
+    // List!(WebSocketExtension) getExtensions() {
+    //     assert(this.extensions !is null, "WebSocket session is not yet initialized");
+    //     return this.extensions;
+    // }
 
-	// override
-	void setBinaryMessageSizeLimit(int messageSizeLimit) {
-		checkNativeSessionInitialized();
-		// getNativeSession().setMaxBinaryMessageBufferSize(messageSizeLimit);
+    Principal getPrincipal() {
+        return this.user;
+    }
 
-		implementationMissing(false);
-	}
+    // override    
+    Address getLocalAddress() {
+        return this.localAddress;
+    }
 
-	// override
-	int getBinaryMessageSizeLimit() {
-		checkNativeSessionInitialized();
-		// return getNativeSession().getMaxBinaryMessageBufferSize();
-		implementationMissing(false);
-		return 0;
-	}
+    // override    
+    Address getRemoteAddress() {
+        return this.remoteAddress;
+    }
 
-	// override
-	bool isOpen() {
-		return getNativeSession().isOpen();
-	}
+    // override
+    void setTextMessageSizeLimit(int messageSizeLimit) {
+        checkNativeSessionInitialized();
+        // getNativeSession().setMaxTextMessageBufferSize(messageSizeLimit);
+        implementationMissing(false);
+    }
 
-	override
-	void initializeNativeSession(WebSocketConnection session) {
-		super.initializeNativeSession(session);
+    // override
+    int getTextMessageSizeLimit() {
+        checkNativeSessionInitialized();
+        // return getNativeSession().getMaxTextMessageBufferSize();
+        implementationMissing(false);
+        return 0;
+    }
 
-		this.uri = session.getUpgradeRequest().getURI();
-		// TODO: Tasks pending completion -@zxp at 11/4/2018, 10:15:44 AM
-		// 
-		// this.acceptedProtocol = session.getNegotiatedSubprotocol();
-		this.acceptedProtocol = "";
+    // override
+    void setBinaryMessageSizeLimit(int messageSizeLimit) {
+        checkNativeSessionInitialized();
+        // getNativeSession().setMaxBinaryMessageBufferSize(messageSizeLimit);
 
-		// List!(Extension) standardExtensions = getNativeSession().getNegotiatedExtensions();
-		// if (!CollectionUtils.isEmpty(standardExtensions)) {
-		// 	this.extensions = new ArrayList<>(standardExtensions.size());
-		// 	for (Extension standardExtension : standardExtensions) {
-		// 		this.extensions.add(new StandardToWebSocketExtensionAdapter(standardExtension));
-		// 	}
-		// 	this.extensions = Collections.unmodifiableList(this.extensions);
-		// }
-		// else {
-		// 	this.extensions = Collections.emptyList();
-		// }
+        implementationMissing(false);
+    }
 
-		// if (this.user is null) {
-		// 	this.user = session.getUserPrincipal();
-		// }
-	}
+    // override
+    int getBinaryMessageSizeLimit() {
+        checkNativeSessionInitialized();
+        // return getNativeSession().getMaxBinaryMessageBufferSize();
+        implementationMissing(false);
+        return 0;
+    }
 
-	override
-	void sendTextMessage(string message) {
-		// getNativeSession().getBasicRemote().sendText(message.getPayload(), message.isLast());
-		getNativeSession().sendText(message);
+    // override
+    bool isOpen() {
+        return getNativeSession().isOpen();
+    }
 
-	}
+    override
+    void initializeNativeSession(WebSocketConnection session) {
+        super.initializeNativeSession(session);
 
-	override
-	void sendBinaryMessage(byte[] message) {
-		// getNativeSession().getBasicRemote().sendBinary(message.getPayload(), message.isLast());
-		getNativeSession().sendData(message);
-	}
+        this.uri = session.getUpgradeRequest().getURI();
+        // TODO: Tasks pending completion -@zxp at 11/4/2018, 10:15:44 AM
+        // 
+        // this.acceptedProtocol = session.getNegotiatedSubprotocol();
+        this.acceptedProtocol = "";
 
-	// override
-	// protected void sendPingMessage(PingMessage message) {
-	// 	getNativeSession().getBasicRemote().sendPing(message.getPayload());
-	// }
+        // List!(Extension) standardExtensions = getNativeSession().getNegotiatedExtensions();
+        // if (!CollectionUtils.isEmpty(standardExtensions)) {
+        //     this.extensions = new ArrayList<>(standardExtensions.size());
+        //     for (Extension standardExtension : standardExtensions) {
+        //         this.extensions.add(new StandardToWebSocketExtensionAdapter(standardExtension));
+        //     }
+        //     this.extensions = Collections.unmodifiableList(this.extensions);
+        // }
+        // else {
+        //     this.extensions = Collections.emptyList();
+        // }
 
-	// override
-	// protected void sendPongMessage(PongMessage message) {
-	// 	getNativeSession().getBasicRemote().sendPong(message.getPayload());
-	// }
+        // if (this.user is null) {
+        //     this.user = session.getUserPrincipal();
+        // }
+    }
 
-	override
-	protected void closeInternal(CloseStatus status) {
-		getNativeSession().close();
-		// getNativeSession().close(new CloseReason(CloseCodes.getCloseCode(status.getCode()), status.getReason()));
-	}
+    override
+    void sendTextMessage(string message) {
+        // getNativeSession().getBasicRemote().sendText(message.getPayload(), message.isLast());
+        getNativeSession().sendText(message);
+
+    }
+
+    override
+    void sendBinaryMessage(byte[] message) {
+        // getNativeSession().getBasicRemote().sendBinary(message.getPayload(), message.isLast());
+        getNativeSession().sendData(message);
+    }
+
+    // override
+    // protected void sendPingMessage(PingMessage message) {
+    //     getNativeSession().getBasicRemote().sendPing(message.getPayload());
+    // }
+
+    // override
+    // protected void sendPongMessage(PongMessage message) {
+    //     getNativeSession().getBasicRemote().sendPong(message.getPayload());
+    // }
+
+    override
+    protected void closeInternal(CloseStatus status) {
+        getNativeSession().close();
+        // getNativeSession().close(new CloseReason(CloseCodes.getCloseCode(status.getCode()), status.getReason()));
+    }
 
 }

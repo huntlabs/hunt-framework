@@ -27,17 +27,17 @@ import hunt.security.Principal;
 
 class SessionConnectedEvent : AbstractSubProtocolEvent {
 
-	/**
-	 * Create a new SessionConnectedEvent.
-	 * @param source the component that published the event (never {@code null})
-	 * @param message the connected message (never {@code null})
-	 */
-	this(Object source, Message!(byte[]) message) {
-		super(source, message);
-	}
+    /**
+     * Create a new SessionConnectedEvent.
+     * @param source the component that published the event (never {@code null})
+     * @param message the connected message (never {@code null})
+     */
+    this(Object source, Message!(byte[]) message) {
+        super(source, message);
+    }
 
-	this(Object source, Message!(byte[]) message, Principal user) {
-		super(source, message, user);
-	}
+    this(Object source, Message!(byte[]) message, Principal user) {
+        super(source, message, user);
+    }
 
 }

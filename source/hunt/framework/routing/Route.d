@@ -186,16 +186,16 @@ class Route
                 
         @property staticFilePath()
         {
-        	return this._staticFilePath;
+            return this._staticFilePath;
         }
         
         @property void staticFilePath(string path)
         {
-        	this._staticFilePath = path;
+            this._staticFilePath = path;
         }
     }
 
-	public string path;
+    public string path;
     private
     {
         // Route group name

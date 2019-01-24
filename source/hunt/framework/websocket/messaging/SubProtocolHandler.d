@@ -40,50 +40,50 @@ import hunt.stomp.MessageChannel;
  */
 interface SubProtocolHandler {
 
-	/**
-	 * Return the list of sub-protocols supported by this handler (never {@code null}).
-	 */
-	string[] getSupportedProtocols();
+    /**
+     * Return the list of sub-protocols supported by this handler (never {@code null}).
+     */
+    string[] getSupportedProtocols();
 
-	/**
-	 * Handle the given {@link WebSocketMessage} received from a client.
-	 * @param session the client session
-	 * @param message the client message
-	 * @param outputChannel an output channel to send messages to
-	 */
-	void handleMessageFromClient(WebSocketSession session, WebSocketMessage message, MessageChannel outputChannel);
+    /**
+     * Handle the given {@link WebSocketMessage} received from a client.
+     * @param session the client session
+     * @param message the client message
+     * @param outputChannel an output channel to send messages to
+     */
+    void handleMessageFromClient(WebSocketSession session, WebSocketMessage message, MessageChannel outputChannel);
 
-	/**
-	 * Handle the given {@link Message} to the client associated with the given WebSocket session.
-	 * @param session the client session
-	 * @param message the client message
-	 */
-	void handleMessageToClient(WebSocketSession session, MessageBase message);
+    /**
+     * Handle the given {@link Message} to the client associated with the given WebSocket session.
+     * @param session the client session
+     * @param message the client message
+     */
+    void handleMessageToClient(WebSocketSession session, MessageBase message);
 
-	/**
-	 * Resolve the session id from the given message or return {@code null}.
-	 * @param message the message to resolve the session id from
-	 */
-	
-	string resolveSessionId(MessageBase message);
+    /**
+     * Resolve the session id from the given message or return {@code null}.
+     * @param message the message to resolve the session id from
+     */
+    
+    string resolveSessionId(MessageBase message);
 
-	/**
-	 * Invoked after a {@link WebSocketSession} has started.
-	 * @param session the client session
-	 * @param outputChannel a channel
-	 */
-	void afterSessionStarted(WebSocketSession session, MessageChannel outputChannel);
+    /**
+     * Invoked after a {@link WebSocketSession} has started.
+     * @param session the client session
+     * @param outputChannel a channel
+     */
+    void afterSessionStarted(WebSocketSession session, MessageChannel outputChannel);
 
-	/**
-	 * Invoked after a {@link WebSocketSession} has ended.
-	 * @param session the client session
-	 * @param closeStatus the reason why the session was closed
-	 * @param outputChannel a channel
-	 */
-	void afterSessionEnded(WebSocketSession session, 
-		CloseStatus closeStatus, MessageChannel outputChannel);
+    /**
+     * Invoked after a {@link WebSocketSession} has ended.
+     * @param session the client session
+     * @param closeStatus the reason why the session was closed
+     * @param outputChannel a channel
+     */
+    void afterSessionEnded(WebSocketSession session, 
+        CloseStatus closeStatus, MessageChannel outputChannel);
 
-	
-	int opCmp(SubProtocolHandler o);
+    
+    int opCmp(SubProtocolHandler o);
 
 }

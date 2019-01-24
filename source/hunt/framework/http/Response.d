@@ -245,7 +245,7 @@ class Response : Closeable {
             return;
         ///set session
 
-		_request.flush(); // assure the sessiondata flushed;
+        _request.flush(); // assure the sessiondata flushed;
         HttpSession session = _request.session();
         if (session !is null && session.isNewSession()) {
             withCookie(new Cookie(DefaultSessionIdName, session.getId(), session.getMaxInactiveInterval(),
@@ -380,9 +380,9 @@ string errorPageHtml(int code , string _body = "")
     html ~= text;
     html ~= `</h1>
     <p>Sorry!! Unable to complete your request :(</p>
-	`;
-	if(_body.length > 0)
-		html ~= "<p>" ~ _body ~ "</p>";
+    `;
+    if(_body.length > 0)
+        html ~= "<p>" ~ _body ~ "</p>";
 html ~= `
 </body>
 </html>

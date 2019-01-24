@@ -73,7 +73,7 @@ class RouteGroup
     RouteGroup setName(string name)
     {
         this._name = name;
-	    return this;
+        return this;
     }
 
     string getName()
@@ -84,7 +84,7 @@ class RouteGroup
     RouteGroup setType(string type)
     {
         this._type = type;
-	    return this;
+        return this;
     }
 
     string getType()
@@ -95,7 +95,7 @@ class RouteGroup
     RouteGroup setValue(string value)
     {
         this._value = value;
-	    return this;
+        return this;
     }
 
     string getValue()

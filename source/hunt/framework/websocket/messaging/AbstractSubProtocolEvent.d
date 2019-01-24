@@ -29,59 +29,59 @@ import std.conv;
 
 abstract class AbstractSubProtocolEvent : ApplicationEvent {
 
-	private Message!(byte[]) message;
-	
-	private Principal user;
+    private Message!(byte[]) message;
+    
+    private Principal user;
 
 
-	/**
-	 * Create a new AbstractSubProtocolEvent.
-	 * @param source the component that published the event (never {@code null})
-	 * @param message the incoming message (never {@code null})
-	 */
-	protected this(Object source, Message!(byte[]) message) {
-		this(source, message, null);
-	}
+    /**
+     * Create a new AbstractSubProtocolEvent.
+     * @param source the component that published the event (never {@code null})
+     * @param message the incoming message (never {@code null})
+     */
+    protected this(Object source, Message!(byte[]) message) {
+        this(source, message, null);
+    }
 
-	/**
-	 * Create a new AbstractSubProtocolEvent.
-	 * @param source the component that published the event (never {@code null})
-	 * @param message the incoming message (never {@code null})
-	 */
-	protected this(Object source, Message!(byte[]) message, Principal user) { 
-		super(source);
-		assert(message, "Message must not be null");
-		this.message = message;
-		this.user = user;
-	}
+    /**
+     * Create a new AbstractSubProtocolEvent.
+     * @param source the component that published the event (never {@code null})
+     * @param message the incoming message (never {@code null})
+     */
+    protected this(Object source, Message!(byte[]) message, Principal user) { 
+        super(source);
+        assert(message, "Message must not be null");
+        this.message = message;
+        this.user = user;
+    }
 
 
-	/**
-	 * Return the Message associated with the event. Here is an example of
-	 * obtaining information about the session id or any headers in the
-	 * message:
-	 * <pre class="code">
-	 * StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-	 * headers.getSessionId();
-	 * headers.getSessionAttributes();
-	 * headers.getPrincipal();
-	 * </pre>
-	 */
-	Message!(byte[]) getMessage() {
-		return this.message;
-	}
+    /**
+     * Return the Message associated with the event. Here is an example of
+     * obtaining information about the session id or any headers in the
+     * message:
+     * <pre class="code">
+     * StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
+     * headers.getSessionId();
+     * headers.getSessionAttributes();
+     * headers.getPrincipal();
+     * </pre>
+     */
+    Message!(byte[]) getMessage() {
+        return this.message;
+    }
 
-	/**
-	 * Return the user for the session associated with the event.
-	 */
-	
-	Principal getUser() {
-		return this.user;
-	}
+    /**
+     * Return the user for the session associated with the event.
+     */
+    
+    Principal getUser() {
+        return this.user;
+    }
 
-	override
-	string toString() {
-		return TypeUtils.getSimpleName(typeid(this)) ~ " [" ~ this.message.to!string() ~ "]";
-	}
+    override
+    string toString() {
+        return TypeUtils.getSimpleName(typeid(this)) ~ " [" ~ this.message.to!string() ~ "]";
+    }
 
 }

@@ -94,7 +94,7 @@ class View
 
     public void assign(T)(string key, T t)
     {
-		this.assign(key, toJson(t , app().config().view.arrayDepth));
+        this.assign(key, toJson(t , app().config().view.arrayDepth));
     }
 
     public void assign(string key, JSONValue t)

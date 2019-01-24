@@ -30,59 +30,59 @@ import hunt.http.codec.websocket.model.CloseStatus;
 
 class SessionDisconnectEvent : AbstractSubProtocolEvent {
 
-	private string sessionId;
+    private string sessionId;
 
-	private CloseStatus status;
-
-
-	/**
-	 * Create a new SessionDisconnectEvent.
-	 * @param source the component that published the event (never {@code null})
-	 * @param message the message (never {@code null})
-	 * @param sessionId the disconnect message
-	 * @param closeStatus the status object
-	 */
-	this(Object source, Message!(byte[]) message, string sessionId,
-			CloseStatus closeStatus) {
-		this(source, message, sessionId, closeStatus, null);
-	}
-
-	/**
-	 * Create a new SessionDisconnectEvent.
-	 * @param source the component that published the event (never {@code null})
-	 * @param message the message (never {@code null})
-	 * @param sessionId the disconnect message
-	 * @param closeStatus the status object
-	 * @param user the current session user
-	 */
-	this(Object source, Message!(byte[]) message, string sessionId,
-			CloseStatus closeStatus, Principal user) {
-		super(source, message, user);
-		assert(sessionId, "Session id must not be null");
-		this.sessionId = sessionId;
-		this.status = closeStatus;
-	}
+    private CloseStatus status;
 
 
-	/**
-	 * Return the session id.
-	 */
-	string getSessionId() {
-		return this.sessionId;
-	}
+    /**
+     * Create a new SessionDisconnectEvent.
+     * @param source the component that published the event (never {@code null})
+     * @param message the message (never {@code null})
+     * @param sessionId the disconnect message
+     * @param closeStatus the status object
+     */
+    this(Object source, Message!(byte[]) message, string sessionId,
+            CloseStatus closeStatus) {
+        this(source, message, sessionId, closeStatus, null);
+    }
 
-	/**
-	 * Return the status with which the session was closed.
-	 */
-	CloseStatus getCloseStatus() {
-		return this.status;
-	}
+    /**
+     * Create a new SessionDisconnectEvent.
+     * @param source the component that published the event (never {@code null})
+     * @param message the message (never {@code null})
+     * @param sessionId the disconnect message
+     * @param closeStatus the status object
+     * @param user the current session user
+     */
+    this(Object source, Message!(byte[]) message, string sessionId,
+            CloseStatus closeStatus, Principal user) {
+        super(source, message, user);
+        assert(sessionId, "Session id must not be null");
+        this.sessionId = sessionId;
+        this.status = closeStatus;
+    }
 
 
-	override
-	string toString() {
-		return "SessionDisconnectEvent[sessionId=" ~ this.sessionId ~ 
-			", " ~ this.status.toString() ~ "]";
-	}
+    /**
+     * Return the session id.
+     */
+    string getSessionId() {
+        return this.sessionId;
+    }
+
+    /**
+     * Return the status with which the session was closed.
+     */
+    CloseStatus getCloseStatus() {
+        return this.status;
+    }
+
+
+    override
+    string toString() {
+        return "SessionDisconnectEvent[sessionId=" ~ this.sessionId ~ 
+            ", " ~ this.status.toString() ~ "]";
+    }
 
 }

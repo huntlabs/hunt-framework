@@ -37,77 +37,77 @@ import hunt.logging;
  */
 class WebSocketAnnotationMethodMessageHandler : SimpAnnotationMethodMessageHandler {
 
-	this(SubscribableChannel clientInChannel,
-			MessageChannel clientOutChannel, SimpMessageSendingOperations brokerTemplate) {
+    this(SubscribableChannel clientInChannel,
+            MessageChannel clientOutChannel, SimpMessageSendingOperations brokerTemplate) {
 
-		super(clientInChannel, clientOutChannel, brokerTemplate);
-	}
+        super(clientInChannel, clientOutChannel, brokerTemplate);
+    }
 
 
-	override
-	void afterPropertiesSet() {
-		initControllerAdviceCache();
-		super.afterPropertiesSet();
-	}
+    override
+    void afterPropertiesSet() {
+        initControllerAdviceCache();
+        super.afterPropertiesSet();
+    }
 
-	// ApplicationContext getApplicationContext() {
-	// 	return this.applicationContext;
-	// }
+    // ApplicationContext getApplicationContext() {
+    //     return this.applicationContext;
+    // }
 
-	private void initControllerAdviceCache() {
-		// ApplicationContext context = getApplicationContext();
-		// if (context is null) {
-		// 	return;
-		// }
-		import hunt.Exceptions;
-		implementationMissing(false);
-		version(HUNT_DEBUG) {
-			// trace("Looking for @MessageExceptionHandler mappings: " ~ (cast(Object)context).toString());
-		}
-		// TODO: Tasks pending completion -@zxp at 10/30/2018, 2:39:18 PM
-		// 
-		// ControllerAdviceBean[] beans = ControllerAdviceBean.findAnnotatedBeans(context);
-		// AnnotationAwareOrderComparator.sort(beans);
-		// initMessagingAdviceCache(MessagingControllerAdviceBean.createFromList(beans));
-	}
+    private void initControllerAdviceCache() {
+        // ApplicationContext context = getApplicationContext();
+        // if (context is null) {
+        //     return;
+        // }
+        import hunt.Exceptions;
+        implementationMissing(false);
+        version(HUNT_DEBUG) {
+            // trace("Looking for @MessageExceptionHandler mappings: " ~ (cast(Object)context).toString());
+        }
+        // TODO: Tasks pending completion -@zxp at 10/30/2018, 2:39:18 PM
+        // 
+        // ControllerAdviceBean[] beans = ControllerAdviceBean.findAnnotatedBeans(context);
+        // AnnotationAwareOrderComparator.sort(beans);
+        // initMessagingAdviceCache(MessagingControllerAdviceBean.createFromList(beans));
+    }
 
-	override protected void handleMessageInternal(MessageBase message, string lookupDestination) {
-		// FIXME: Needing refactor or cleanup -@zxp at 11/13/2018, 3:07:59 PM
-		// more tests
-		try {
-			WebSocketControllerHelper.invoke(lookupDestination, message, 
-				(Object returnValue, TypeInfo returnType, string[] destinations) {
-				handleReturnValue(returnValue, returnType, message, destinations);
-			});
-		}
-		catch (Exception ex) {
-			warning(ex.msg);
-			// processHandlerMethodException(handlerMethod, ex, message);
-		}
-		catch (Throwable ex) {
-			warning(ex.msg);
-			Exception handlingException = new MessageHandlingException(message, 
-				"Unexpected handler method invocation error", ex);
-		}
-	}
+    override protected void handleMessageInternal(MessageBase message, string lookupDestination) {
+        // FIXME: Needing refactor or cleanup -@zxp at 11/13/2018, 3:07:59 PM
+        // more tests
+        try {
+            WebSocketControllerHelper.invoke(lookupDestination, message, 
+                (Object returnValue, TypeInfo returnType, string[] destinations) {
+                handleReturnValue(returnValue, returnType, message, destinations);
+            });
+        }
+        catch (Exception ex) {
+            warning(ex.msg);
+            // processHandlerMethodException(handlerMethod, ex, message);
+        }
+        catch (Throwable ex) {
+            warning(ex.msg);
+            Exception handlingException = new MessageHandlingException(message, 
+                "Unexpected handler method invocation error", ex);
+        }
+    }
 
-	// private void initMessagingAdviceCache(MessagingAdviceBean[] beans) {
-	// 	if (beans is null) {
-	// 		return;
-	// 	}
-	// 	foreach (MessagingAdviceBean bean ; beans) {
-	// 		TypeInfo_Class type = bean.getBeanType();
-	// 		if (type !is null) {
-	// 			AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(type);
-	// 			if (resolver.hasExceptionMappings()) {
-	// 				registerExceptionHandlerAdvice(bean, resolver);
-	// 				version(HUNT_DEBUG) {
-	// 					trace("Detected @MessageExceptionHandler methods in " ~ bean);
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// }
+    // private void initMessagingAdviceCache(MessagingAdviceBean[] beans) {
+    //     if (beans is null) {
+    //         return;
+    //     }
+    //     foreach (MessagingAdviceBean bean ; beans) {
+    //         TypeInfo_Class type = bean.getBeanType();
+    //         if (type !is null) {
+    //             AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(type);
+    //             if (resolver.hasExceptionMappings()) {
+    //                 registerExceptionHandlerAdvice(bean, resolver);
+    //                 version(HUNT_DEBUG) {
+    //                     trace("Detected @MessageExceptionHandler methods in " ~ bean);
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 
 }
 
@@ -117,38 +117,38 @@ class WebSocketAnnotationMethodMessageHandler : SimpAnnotationMethodMessageHandl
  */
 // private final class MessagingControllerAdviceBean : MessagingAdviceBean {
 
-// 	private final ControllerAdviceBean adviceBean;
+//     private final ControllerAdviceBean adviceBean;
 
-// 	private this(ControllerAdviceBean adviceBean) {
-// 		this.adviceBean = adviceBean;
-// 	}
+//     private this(ControllerAdviceBean adviceBean) {
+//         this.adviceBean = adviceBean;
+//     }
 
-// 	static MessagingAdviceBean[] createFromList(ControllerAdviceBean[] beans) {
-// 		MessagingAdviceBean[] result;
-// 		foreach (ControllerAdviceBean bean ; beans) {
-// 			result ~= new MessagingControllerAdviceBean(bean);
-// 		}
-// 		return result;
-// 	}
+//     static MessagingAdviceBean[] createFromList(ControllerAdviceBean[] beans) {
+//         MessagingAdviceBean[] result;
+//         foreach (ControllerAdviceBean bean ; beans) {
+//             result ~= new MessagingControllerAdviceBean(bean);
+//         }
+//         return result;
+//     }
 
-// 	override
-	
-// 	TypeInfo_Class getBeanType() {
-// 		return this.adviceBean.getBeanType();
-// 	}
+//     override
+    
+//     TypeInfo_Class getBeanType() {
+//         return this.adviceBean.getBeanType();
+//     }
 
-// 	override
-// 	Object resolveBean() {
-// 		return this.adviceBean.resolveBean();
-// 	}
+//     override
+//     Object resolveBean() {
+//         return this.adviceBean.resolveBean();
+//     }
 
-// 	override
-// 	boolisApplicableToBeanType(TypeInfo_Class beanType) {
-// 		return this.adviceBean.isApplicableToBeanType(beanType);
-// 	}
+//     override
+//     boolisApplicableToBeanType(TypeInfo_Class beanType) {
+//         return this.adviceBean.isApplicableToBeanType(beanType);
+//     }
 
-// 	override
-// 	int getOrder() {
-// 		return this.adviceBean.getOrder();
-// 	}
+//     override
+//     int getOrder() {
+//         return this.adviceBean.getOrder();
+//     }
 // }
