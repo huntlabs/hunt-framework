@@ -956,10 +956,11 @@ private:
             {
                 string msg = arg[0].get!string;
                 UniNode[] args;
-                for(int i=0; i < arg.length ; i++)
+                for(int i=1; i < arg.length ; i++)
                 {
                      args ~= arg[i];
                 }
+                
                 return UniNode(transfWithLocale(_locale,msg,uniNodeToJSON(UniNode(args))));
             }
         }
