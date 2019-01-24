@@ -6,6 +6,7 @@ import std.algorithm;
 import std.array;
 import std.stdio;
 import std.string;
+import std.json;
 
 import hunt.logging;
 
@@ -146,6 +147,12 @@ string transfWithLocale(A...)(string locale, string key, lazy A args) {
     formattedWrite(buffer, text, args);
 
     return buffer.data;
+}
+
+string transfWithLocale(string locale, string key, JSONValue args) {
+    import hunt.framework.util.Formatter;
+    string text = trans(locale, key);
+    return StrFormat(text, args);
 }
 
 ///key is [filename.key]

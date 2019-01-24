@@ -944,82 +944,26 @@ private:
     private UniNode doTrans(UniNode arg)
     {
         import hunt.framework.i18n;
-        if(arg.length == 1)
-        {
-            auto lang = trans(_locale,arg[0].get!string);
-            return UniNode(lang);
-        }
-        else if(arg.length == 2)
-        {
-            string msg = arg[0].get!string;
-            if(arg[1].kind == UniNode.Kind.text)
-            {
-                return UniNode(transfWithLocale(_locale,msg,arg[1].get!string));
-            }
-            else if(arg[1].kind == UniNode.Kind.integer)
-            {
-                return UniNode(transfWithLocale(_locale,msg,arg[1].get!long));
-            }
-            else if(arg[1].kind == UniNode.Kind.uinteger)
-            {
-                return UniNode(transfWithLocale(_locale,msg,arg[1].get!ulong));
-            }
+        import hunt.framework.util.uninode.Serialization;
 
-        }
-        else if(arg.length == 3)
+        if(arg.kind == UniNode.Kind.array)
         {
-            string msg = arg[0].get!string;
-            if(arg[1].kind == UniNode.Kind.text)
+            if(arg.length == 1)
             {
-                auto arg1 = arg[1].get!string;
-                if(arg[2].kind == UniNode.Kind.text)
-                {
-                    return UniNode(transfWithLocale(_locale,msg,arg1,arg[2].get!string));
-                }
-                else if(arg[2].kind == UniNode.Kind.integer)
-                {
-                    return UniNode(transfWithLocale(_locale,msg,arg1,arg[2].get!long));
-                }
-                else if(arg[2].kind == UniNode.Kind.uinteger)
-                {
-                    return UniNode(transfWithLocale(_locale,msg,arg1,arg[2].get!ulong));
-                }
+                return UniNode(trans(_locale,arg[0].get!string));
             }
-            else if(arg[1].kind == UniNode.Kind.integer)
+            else if(arg.length > 1)
             {
-                auto arg1 = arg[1].get!long;
-                if(arg[2].kind == UniNode.Kind.text)
+                string msg = arg[0].get!string;
+                UniNode[] args;
+                for(int i=0; i < arg.length ; i++)
                 {
-                    return UniNode(transfWithLocale(_locale,msg,arg1,arg[2].get!string));
+                     args ~= arg[i];
                 }
-                else if(arg[2].kind == UniNode.Kind.integer)
-                {
-                    return UniNode(transfWithLocale(_locale,msg,arg1,arg[2].get!long));
-                }
-                else if(arg[2].kind == UniNode.Kind.uinteger)
-                {
-                    return UniNode(transfWithLocale(_locale,msg,arg1,arg[2].get!ulong));
-                }
+                return UniNode(transfWithLocale(_locale,msg,uniNodeToJSON(UniNode(args))));
             }
-            else if(arg[1].kind == UniNode.Kind.uinteger)
-            {
-                auto arg1 = arg[1].get!ulong;
-                if(arg[2].kind == UniNode.Kind.text)
-                {
-                    return UniNode(transfWithLocale(_locale,msg,arg1,arg[2].get!string));
-                }
-                else if(arg[2].kind == UniNode.Kind.integer)
-                {
-                    return UniNode(transfWithLocale(_locale,msg,arg1,arg[2].get!long));
-                }
-                else if(arg[2].kind == UniNode.Kind.uinteger)
-                {
-                    return UniNode(transfWithLocale(_locale,msg,arg1,arg[2].get!ulong));
-                }
-            }
-
         }
-        throw new TemplateRenderException("unsupport param type!");
+        throw new TemplateRenderException("unsupport param : " ~ arg.toString);
     }
 
 
