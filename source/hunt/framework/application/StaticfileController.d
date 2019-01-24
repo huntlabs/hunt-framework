@@ -4,6 +4,7 @@ import core.time;
 import std.conv;
 import std.string;
 import std.datetime;
+import std.file;
 import std.path;
 import std.digest.md;
 import std.stdio;

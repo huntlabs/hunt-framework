@@ -81,6 +81,9 @@ class I18n {
         string _res_file_name = baseName(fileName, extension(fileName));
         string _loc = baseName(dirName(fileName));
 
+        trace("fileName=>", fileName);
+        trace("xxxxxxx=>", _loc);
+
         int line = 1;
         while (!f.eof()) {
             scope (exit)
@@ -109,7 +112,7 @@ class I18n {
             }
             string value = str[site + 1 .. $].strip;
 
-            this._res[_loc][_res_file_name ~ "." ~ key] = value;
+            this._res[_loc][key] = value; // _res_file_name ~ "." ~
         }
         return true;
     }

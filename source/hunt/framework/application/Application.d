@@ -56,6 +56,7 @@ import std.socket;
 import std.stdio;
 import std.string;
 import std.uni;
+import std.container.array;
 
 alias BreadcrumbsHandler = void delegate(BreadcrumbsManager manager);
 
@@ -73,11 +74,14 @@ final class Application : ApplicationContext {
     }
 
     // enable i18n
-    Application enableLocale(string resPath = DEFAULT_LANGUAGE_PATH, string defaultLocale = "en-us") {
+    Application enableLocale(string resPath = DEFAULT_LANGUAGE_PATH) {
         I18n i18n = I18n.instance();
 
+        i18n.defaultLocale = configManager().config().application.defaultLanguage;
         i18n.loadLangResources(resPath);
-        i18n.defaultLocale = defaultLocale;
+
+        hunt.logging.trace(i18n.defaultLocale);
+        hunt.logging.trace(configManager().config().application.languages);
 
         return this;
     }
@@ -188,6 +192,7 @@ final class Application : ApplicationContext {
 
     void setConfig(ApplicationConfig config) {
         setLogConfig(config.logging);
+        enableLocale();
         upConfig(config);
         //setRedis(config.redis);
         //setMemcache(config.memcache);

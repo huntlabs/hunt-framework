@@ -1035,13 +1035,12 @@ final class Request {
      */
     string locale()
     {
-        string locale = "en-us";
-        locale = cookie("Content-Language");
-        if(locale is null)
-        {
-            locale = header("Content-Language","en-us");
-        }
-        return toLower(locale);
+        string l;
+        l = cookie("Content-Language");
+        if(l is null)
+            l = config().application.defaultLanguage;
+
+        return toLower(l);
     }
     /**
      * Get an array of all cookies.

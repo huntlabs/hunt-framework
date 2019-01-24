@@ -2,7 +2,6 @@ module hunt.framework.trace.Tracer;
 
 import hunt.framework.http.Request;
 import hunt.framework.http.Response;
-
 import hunt.trace;
 import hunt.logging;
 
@@ -11,7 +10,7 @@ import std.conv;
 
 void newFrameworkTrace(Request req)
 {
-    if(!tracing)
+    if(!tracing())
         return ;
 
     auto tracer = new Tracer(req.getMCA() , req.headerExists("b3")?req.header("b3"):"");
