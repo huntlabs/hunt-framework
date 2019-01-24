@@ -12,7 +12,7 @@
 module hunt.framework.application;
 
 public import hunt.framework.application.Controller;
-public import hunt.framework.application.AppConfig;
+public import hunt.framework.application.ApplicationConfig;
 public import hunt.framework.application.Application;
 public import hunt.framework.application.Breadcrumbs;
 public import hunt.framework.application.BreadcrumbsManager;

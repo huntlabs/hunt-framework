@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.framework.application.AppConfig;
+module hunt.framework.application.ApplicationConfig;
 
 import std.exception;
 import std.format;
@@ -23,9 +23,8 @@ import hunt.logging;
 import hunt.framework.Init;
 import hunt.util.Configuration;
 
-
 @Configuration("hunt")
-final class AppConfig
+final class ApplicationConfig
 {
     struct ApplicationConf
     {
@@ -122,11 +121,9 @@ final class AppConfig
 
     struct UploadConf
     {
-        string path = "./attachments";
-        string tempDir = "./attachments/temp";
+        string path = "/tmp";
         uint maxSize = 4 * 1024 * 1024;
     }
-
 
     struct MailSmtpConf
     {
@@ -211,8 +208,9 @@ final class AppConfig
 
     struct View
     {
-        string path = "./views/";
-        string ext = ".dhtml";
+        string path = "./resources/views/";
+        string ext = ".html";
+        uint arrayDepth = 3;
     }
 
     struct TraceConf
@@ -239,7 +237,6 @@ final class AppConfig
     RedisConf redis;
     LoggingConfig logging;
     UploadConf upload;
-    UploadConf download () { return upload;}
     CornConf cron;
     DateConf date;
     MailConf mail;
@@ -247,11 +244,16 @@ final class AppConfig
     View view;
     TraceConf trace;
 
-	MultipartConfig multiparConfig() {
-        if(_multiparConfig is null) {
-            string path = buildPath(APP_PATH, upload.path);
+	MultipartConfig multiparConfig()
+    {
+        if(_multiparConfig is null)
+        {
+            string path = buildPath(DEFAULT_STORAGE_PATH, upload.path);
             if(!path.exists())
+            {
+                // for Exception now?
                 path.mkdirRecurse();
+            }
             // _multiparConfig = new MultipartConfig(path, 1024, 3072, 50); 
             _multiparConfig = new MultipartConfig(path, upload.maxSize, upload.maxSize, 50); 
         }
@@ -262,7 +264,9 @@ final class AppConfig
 
     this()
     {
-        http.workerThreads = totalCPUs;
+        http.workerThreads = totalCPUs * 4;
+        upload.path = DEFAULT_TEMP_PATH;
+        view.path = DEFAULT_TEMPLATE_PATH;
     }
 }
 
@@ -272,7 +276,6 @@ import std.array;
 import std.file;
 import std.path;
 import std.exception : basicExceptionCtors;
-
 
 /**
 */
@@ -285,7 +288,7 @@ class ConfigNotFoundException : Exception
 */
 class ConfigManager
 {
-    @property AppConfig app(string section="", string fileName = "application.conf")
+    @property ApplicationConfig app(string section="", string fileName = "application.conf")
     {
         if (!_app) {
             if(fileName.empty) {
@@ -324,13 +327,13 @@ class ConfigManager
         {
             logDebugf("using the config file: %s", fullName);
             ConfigBuilder con = new ConfigBuilder(fullName, sec);
-            _app = con.build!(AppConfig, "hunt")();
+            _app = con.build!(ApplicationConfig, "hunt")();
             addConfig("hunt", con);
         }
         else
         {
             logDebug("using default settings.");
-            _app = new AppConfig();
+            _app = new ApplicationConfig();
         }
     }
 
@@ -374,7 +377,7 @@ private:
         _mutex.destroy;
     }
 
-    AppConfig _app;
+    ApplicationConfig _app;
     ConfigBuilder[string] _conf;
     string _path;
     ReadWriteMutex _mutex;

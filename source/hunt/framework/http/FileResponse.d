@@ -9,7 +9,7 @@ import std.file;
 import std.stdio;
 
 import hunt.framework.Init;
-import hunt.framework.application.AppConfig;
+import hunt.framework.application.ApplicationConfig;
 import hunt.framework.util.String;
 import hunt.framework.Version;
 import hunt.framework.http.Response;

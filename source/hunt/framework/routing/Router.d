@@ -297,7 +297,7 @@ private:
                 routeGroup.addRoute(route);
             }
         }
-        import hunt.framework.application.AppConfig;
+        import hunt.framework.application.ApplicationConfig;
 
         this.staticRootRoute = this.makeRoute("GET", "/",
                 "staticDir:" ~ Config.app.http.path, group);

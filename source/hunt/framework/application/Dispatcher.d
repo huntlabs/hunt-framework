@@ -12,7 +12,7 @@
 module hunt.framework.application.Dispatcher;
 
 import hunt.framework.application.Controller;
-import hunt.framework.application.AppConfig;
+import hunt.framework.application.ApplicationConfig;
 import hunt.framework.Exceptions;
 import hunt.framework.http.Request;
 import hunt.framework.http.Response;
@@ -209,7 +209,7 @@ void doRequestHandle(RoutingHandler handle, Request req)
 		http://www.cnblogs.com/feihong84/p/5678895.html
 		https://stackoverflow.com/questions/10093053/add-header-in-ajax-request-with-jquery
 		*/
-        AppConfig.HttpConf httpConf = Config().app.http;
+        ApplicationConfig.HttpConf httpConf = Config().app.http;
         if(httpConf.enableCors) {
             response.setHeader("Access-Control-Allow-Origin", httpConf.allowOrigin);
             response.setHeader("Access-Control-Allow-Methods", httpConf.allowMethods);

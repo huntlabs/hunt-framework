@@ -23,7 +23,7 @@ import hunt.Exceptions;
 import hunt.util.Common;
 import hunt.util.MimeTypeUtils;
 
-import hunt.framework.application.AppConfig;
+import hunt.framework.application.ApplicationConfig;
 import hunt.framework.Exceptions;
 import hunt.framework.http.session;
 import hunt.framework.routing.Route;
@@ -157,11 +157,11 @@ final class Request {
 			// version(HUNT_DEBUG) info(urlEncodedMap.toString());
 		} else if(contentType == "multipart/form-data") {
 			_isMultipart = true;
-			AppConfig config = Config.app;
+			ApplicationConfig config = Config.app;
 			import std.path;
 			import std.file;
 			import hunt.framework.Init;
-			string tempDir = buildPath(APP_PATH, config.upload.tempDir);
+			string tempDir = DEFAULT_TEMP_PATH;
             if(!tempDir.exists())
                 tempDir.mkdirRecurse();
 			// version (HUNT_DEBUG) info("temp dir for upload: ",tempDir);

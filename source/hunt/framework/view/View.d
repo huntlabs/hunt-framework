@@ -16,6 +16,8 @@ public import hunt.framework.view.Template;
 public import hunt.framework.view.Util;
 public import hunt.framework.view.Exception;
 
+import hunt.framework.application.ApplicationConfig;
+
 public import hunt.util.Serialize;
 public import hunt.logging;
 
@@ -23,8 +25,6 @@ import std.json : JSONValue;
 import std.path;
 
 import hunt.framework.routing;
-
-enum DEFAULT_LEVEL = 3;
 
 class View
 {
@@ -39,6 +39,9 @@ class View
 
     this(Environment env)
     {
+        _templatePath = Config().app.view.path;
+        _extName = Config().app.view.ext;
+
         _env = env;
     }
 
@@ -91,7 +94,7 @@ class View
 
     public void assign(T)(string key, T t)
     {
-		this.assign(key, toJson(t , DEFAULT_LEVEL));
+		this.assign(key, toJson(t , Config.app.view.arrayDepth));
     }
 
     public void assign(string key, JSONValue t)
@@ -104,7 +107,7 @@ __gshared private Environment _envInstance;
 
 View GetViewObject()
 {
-    import hunt.framework.application.AppConfig;
+    import hunt.framework.application.ApplicationConfig;
     if (_envInstance is null)
     {
         _envInstance = new Environment;

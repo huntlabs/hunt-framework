@@ -36,7 +36,7 @@ import hunt.framework.trace.Tracer;
 
 public import hunt.framework.http;
 public import hunt.framework.i18n;
-public import hunt.framework.application.AppConfig;
+public import hunt.framework.application.ApplicationConfig;
 public import hunt.framework.application.MiddlewareInterface;
 import hunt.framework.application.BreadcrumbsManager;
 import hunt.framework.application.Breadcrumbs;
@@ -113,11 +113,11 @@ final class Application : ApplicationContext {
         return NetUtil.defaultEventLoopGroup();
     }
 
-    @property AppConfig config() {
+    @property ApplicationConfig config() {
         return Config.app;
     }
 
-    private void initDatabase(AppConfig.DatabaseConf config) {
+    private void initDatabase(ApplicationConfig.DatabaseConf config) {
         if (config.defaultOptions.url.empty) {
             logWarning("No database configured!");
         }
@@ -151,11 +151,11 @@ final class Application : ApplicationContext {
         }
     }
 
-    private void initCache(AppConfig.CacheConf config) {
+    private void initCache(ApplicationConfig.CacheConf config) {
         _manger.createCache("default", config.storage, config.args, config.enableL2);
     }
 
-    private void initSessionStorage(AppConfig.SessionConf config) {
+    private void initSessionStorage(ApplicationConfig.SessionConf config) {
         _sessionStorage = new SessionStorage(UCache.CreateUCache(config.storage,
                 config.args, false));
 
@@ -190,7 +190,7 @@ final class Application : ApplicationContext {
         start();
     }
 
-    void setConfig(AppConfig config) {
+    void setConfig(ApplicationConfig config) {
         setLogConfig(config.logging);
         upConfig(config);
         //setRedis(config.redis);
@@ -377,7 +377,7 @@ final class Application : ApplicationContext {
         return adapter;
     }
 
-    private void buildHttpServer(AppConfig conf) {
+    private void buildHttpServer(ApplicationConfig conf) {
         version(HUNT_DEBUG) logDebug("addr:", conf.http.address, ":", conf.http.port);
 
         SimpleWebSocketHandler webSocketHandler = new SimpleWebSocketHandler();
@@ -390,7 +390,7 @@ final class Application : ApplicationContext {
     }
 
 private:
-    void upConfig(AppConfig conf) {
+    void upConfig(ApplicationConfig conf) {
         addr = parseAddress(conf.http.address, conf.http.port);
 
         _maxBodySize = conf.upload.maxSize;
@@ -448,7 +448,7 @@ private:
 
 
 
-    void setLogConfig(ref AppConfig.LoggingConfig conf) {
+    void setLogConfig(ref ApplicationConfig.LoggingConfig conf) {
         version(HUNT_DEBUG) {
             hunt.logging.LogLevel level = hunt.logging.LogLevel.Trace;
             switch (toLower(conf.level)) {

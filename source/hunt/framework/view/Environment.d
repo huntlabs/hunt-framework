@@ -19,7 +19,7 @@ import std.stdio;
 
 import hunt.logging;
 
-import hunt.framework.application.AppConfig;
+import hunt.framework.application.ApplicationConfig;
 import hunt.framework.view.Template;
 import hunt.framework.routing;
 
