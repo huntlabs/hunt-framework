@@ -10,7 +10,7 @@
         "hunt-http": "~>0.0.14",
         "hunt-stomp": "~>0.0.3",
         "hunt-cache": "~>0.2.2",
-        "hunt-entity": "~>2.1.1",
+        "hunt-entity": "~>2.2.0",
         "hunt-trace":"~>0.1.6"
     },
     "configurations": [
