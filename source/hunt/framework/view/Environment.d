@@ -54,7 +54,7 @@ class Environment
 public:
     this()
     {
-        auto tpl_path = app().config().view.path;
+        auto tpl_path = config().view.path;
         if (tpl_path.length == 0)
             tpl_path = "./views/";
         input_path = output_path = buildNormalizedPath(tpl_path) ~ dirSeparator;

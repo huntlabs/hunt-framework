@@ -105,7 +105,7 @@ class Context
             return false;
         return prev.has(name);
     }
-    
+
     UniNode get(string name)
     {
         if (name in data)
@@ -123,12 +123,11 @@ class Context
             assertTemplate(0, "Non declared var `%s`".fmt(name));
         return prev.getPtr(name);
     }
-    
+
     T get(T)(string name)
     {
         return this.get(name).get!T;
     }
-    
 
     bool hasFunc(string name)
     {
@@ -139,7 +138,7 @@ class Context
         return prev.hasFunc(name);
     }
 
-    
+
     Function getFunc(string name)
     {
         if (name in functions)
@@ -159,7 +158,7 @@ class Context
         return prev.hasMacro(name);
     }
 
-    
+
     Macro getMacro(string name)
     {
         if (name in macros)
@@ -347,7 +346,7 @@ class Render : VisitorInterface
             auto args = pop();
             auto name = args["name"].get!string;
             args["varargs"] = UniNode([lhs] ~ args["varargs"].get!(UniNode[]));
-            
+
             if (_context.hasFunc(name))
                 return visitFunc(name, args);
             else if (_context.hasMacro(name))
@@ -356,7 +355,7 @@ class Render : VisitorInterface
                 assertTemplate(0, "Undefined " ~ type ~ " %s".fmt(name), node.pos);
             assert(0);
         }
-        
+
         UniNode calcFilter()
         {
             return calcCall!"filter";
@@ -518,7 +517,7 @@ class Render : VisitorInterface
                 default:
                     assertTemplate(0, "Unknown attribute %s for %s".fmt(key.toString, node.name), sub.pos);
             }
-            
+
             lastPos = sub.pos;
         }
 
@@ -655,8 +654,7 @@ class Render : VisitorInterface
     override void visit(ForNode node)
     {
         bool iterated = false;
-        int depth = 0; 
-
+        int depth = 0;
         bool calcCondition()
         {
             bool condition = true;
@@ -769,12 +767,12 @@ class Render : VisitorInterface
         tryAccept(node.expr);
 
         if (node.assigns.length == 1)
-            tryAccept(node.assigns[0]);            
+            tryAccept(node.assigns[0]);
         else
         {
             auto expr = pop();
             expr.checkNodeType(UniNode.Kind.array, node.expr.pos);
-            
+
             if (expr.length < node.assigns.length)
                 assertTemplate(0, "Iterable length less then number of assigns", node.expr.pos);
 
@@ -917,7 +915,7 @@ private:
     UniNode visitFunc(string name, UniNode args)
     {
         version(HUNT_DEBUG)logDebug("---Func :",name," args: ",args);
-        
+
         if(name == "trans")
         {
             if("varargs" in args)
@@ -935,7 +933,7 @@ private:
         else if(name == "url")
         {
             import hunt.framework.Simplify : url;
-            
+
             auto mca = args["varargs"][0].get!string;
             auto params = args["varargs"][1].get!string;
             return UniNode(url(mca, Util.parseFormData(params), _routeGroup));
@@ -966,13 +964,13 @@ private:
             {
                 return UniNode(transfWithLocale(_locale,msg,arg[1].get!ulong));
             }
-       
+
         }
         else if(arg.length == 3)
         {
             string msg = arg[0].get!string;
             if(arg[1].kind == UniNode.Kind.text)
-            {   
+            {
                 auto arg1 = arg[1].get!string;
                 if(arg[2].kind == UniNode.Kind.text)
                 {
@@ -1019,7 +1017,7 @@ private:
                     return UniNode(transfWithLocale(_locale,msg,arg1,arg[2].get!ulong));
                 }
             }
-       
+
         }
         throw new TemplateRenderException("unsupport param type!");
     }
@@ -1085,9 +1083,7 @@ private:
         }
         else
         {
-            UniNode curr = UniNode(str); 
-
-
+            UniNode curr = UniNode(str);
             foreach_reverse (filter; _appliedFilters)
             {
                 auto args = filter.args;
@@ -1122,7 +1118,7 @@ private:
         _context = _context.previos;
     }
 
-    
+
     void push(UniNode un)
     {
         _dataStack ~= un;

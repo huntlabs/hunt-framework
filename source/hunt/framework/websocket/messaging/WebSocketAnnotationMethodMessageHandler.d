@@ -132,7 +132,7 @@ class WebSocketAnnotationMethodMessageHandler : SimpAnnotationMethodMessageHandl
 //     }
 
 //     override
-    
+
 //     TypeInfo_Class getBeanType() {
 //         return this.adviceBean.getBeanType();
 //     }

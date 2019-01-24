@@ -183,12 +183,12 @@ class Route
             this._handle = handle;
             return this;
         }
-                
+
         @property staticFilePath()
         {
             return this._staticFilePath;
         }
-        
+
         @property void staticFilePath(string path)
         {
             this._staticFilePath = path;
@@ -232,7 +232,7 @@ class Route
 
         // allowd http methods
         HTTP_METHODS[] _methods = [ HTTP_METHODS.GET, HTTP_METHODS.POST, HTTP_METHODS.PUT, HTTP_METHODS.DELETE ];
-        
+
         // staticDir:path
         string _staticFilePath;
     }

@@ -70,7 +70,7 @@ class SubProtocolWebSocketHandler : WebSocketMessageHandler,
     private Map!(string, SubProtocolHandler) protocolHandlerLookup;
 
     private Set!(SubProtocolHandler) protocolHandlers;
-    
+
     private SubProtocolHandler defaultProtocolHandler;
 
     private Map!(string, WebSocketSessionHolder) sessions;
@@ -100,7 +100,7 @@ class SubProtocolWebSocketHandler : WebSocketMessageHandler,
     this(MessageChannel clientInboundChannel, SubscribableChannel clientOutboundChannel) {
         assert(clientInboundChannel, "Inbound MessageChannel must not be null");
         assert(clientOutboundChannel, "Outbound MessageChannel must not be null");
-        
+
         // TODO: Tasks pending completion -@zxp at 10/28/2018, 8:14:10 PM
         // 
         // protocolHandlerLookup = new TreeMap!(string, SubProtocolHandler)(string.CASE_INSENSITIVE_ORDER);
@@ -177,7 +177,7 @@ class SubProtocolWebSocketHandler : WebSocketMessageHandler,
     /**
      * Return the default sub-protocol handler to use.
      */
-    
+
     SubProtocolHandler getDefaultProtocolHandler() {
         return this.defaultProtocolHandler;
     }
@@ -455,7 +455,7 @@ class SubProtocolWebSocketHandler : WebSocketMessageHandler,
         return handler;
     }
 
-    
+
     private string resolveSessionId(MessageBase message) {
         foreach (SubProtocolHandler handler ; this.protocolHandlerLookup.byValue) {
             string sessionId = handler.resolveSessionId(message);

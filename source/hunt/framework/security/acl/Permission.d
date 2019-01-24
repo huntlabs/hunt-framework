@@ -5,7 +5,7 @@ class Permission
     int    id;
     string key;
     string name;
-    
+
     this()
     {
 

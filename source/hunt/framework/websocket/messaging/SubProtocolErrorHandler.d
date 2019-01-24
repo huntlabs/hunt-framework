@@ -35,7 +35,7 @@ interface SubProtocolErrorHandler(T) {
      * @return the error message to send to the client, or {@code null} in which
      * case no message will be sent.
      */
-    
+
     Message!(T) handleClientMessageProcessingError(Message!(T) clientMessage, Throwable ex);
 
     /**
@@ -47,7 +47,7 @@ interface SubProtocolErrorHandler(T) {
      * @return the error message to send to the client, or {@code null} in which
      * case no message will be sent.
      */
-    
+
     Message!(T) handleErrorMessageToClient(Message!(T) errorMessage);
 
 }

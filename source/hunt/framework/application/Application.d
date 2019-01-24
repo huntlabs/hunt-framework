@@ -113,10 +113,6 @@ final class Application : ApplicationContext {
         return NetUtil.defaultEventLoopGroup();
     }
 
-    @property ApplicationConfig config() {
-        return configManager().app;
-    }
-
     private void initDatabase(ApplicationConfig.DatabaseConf config) {
         if (config.defaultOptions.url.empty) {
             logWarning("No database configured!");
@@ -201,7 +197,7 @@ final class Application : ApplicationContext {
         initCache(config.cache);
         initSessionStorage(config.session);
         _accessManager = new AccessManager(cache() , config.application.name , config.session.prefix, config.session.expire);
-        
+
         auto local = new EndPoint();
         local.serviceName = config.application.name;
         local.ipv4 = config.http.address;
@@ -239,7 +235,7 @@ final class Application : ApplicationContext {
             writeln("Try to browse https://", addr.toString());
         else
             writeln("Try to browse http://", addr.toString());
-        
+
         _server.start();
     }
 
@@ -284,7 +280,7 @@ final class Application : ApplicationContext {
     WebSocketMessageBroker getStompBroker() {
         return _broker;
     }
-    
+
     Application addGroupMiddleware(MiddlewareInterface mw , string group = "default")
     {
         _groupMiddlewares[group][mw.name()] = mw;
@@ -509,7 +505,7 @@ private:
 
             logLoadConf(logconf);
         }
-        
+
     }
 
     /**
@@ -633,16 +629,16 @@ private:
     //     import kissrpc.RpcManager;
 
     //     public void startRpcService(T, A...)() {
-    //         if (app().config().rpc.enabled == false)
+    //         if (config().rpc.enabled == false)
     //             return;
-    //         string ip = app().config().rpc.service.address;
-    //         ushort port = app().config().rpc.service.port;
-    //         int threadNum = app().config().rpc.service.workerThreads;
+    //         string ip = config().rpc.service.address;
+    //         ushort port = config().rpc.service.port;
+    //         int threadNum = config().rpc.service.workerThreads;
     //         RpcManager.getInstance().startService!(T, A)(ip, port, threadNum);
     //     }
 
     //     public void startRpcClient(T)(string ip, ushort port, int threadNum = 1) {
-    //         if (app().config().rpc.enabled == false)
+    //         if (config().rpc.enabled == false)
     //             return;
     //         RpcManager.getInstance().connectService!(T)(ip, port, threadNum);
     //     }
@@ -650,12 +646,11 @@ private:
 
     this() {
         setDefaultLogging();
-        
+
         _manger = new CacheManger();
 
         this._dispatcher = new Dispatcher();
-        setConfig(app().config());
-        
+        setConfig(configManager().config());
     }
 
     __gshared static Application _app;

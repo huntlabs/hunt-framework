@@ -71,7 +71,7 @@ abstract class AbstractWebSocketSession(T) : WebSocketSession {
         return this.nativeSession;
     }
 
-    
+
     // override
     // <R> R getNativeSession(Class!(R) requiredType) {
     //     return (requiredType is null || requiredType.isInstance(this.nativeSession) ? (R) this.nativeSession : null);

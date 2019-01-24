@@ -35,7 +35,7 @@ abstract class WebSocketController {
     }
 
     protected void __invoke(string methodName, MessageBase message, ReturnHandler handler );
-    
+
 }
 
 
@@ -53,22 +53,22 @@ mixin template ControllerExtensions(string moduleName = __MODULE__) {
     import std.json;
 
     alias This = typeof(this);
-    
+
     shared static this() {
         WebSocketControllerHelper.registerController!This();
     }
 
-    
+
     override protected void __invoke(string methodName, MessageBase message, ReturnHandler handler ) {
 
         version(HUNT_DEBUG) infof("invoking %s ...", methodName);
-        
+
         MessageConverter messageConverter = 
             annotationHandler.getMessageConverter();
 
         // MimeType mt = messageConverter.getMimeType();
         // info(mt.toString());
-            
+
         Object ob = messageConverter.fromMessage(message, typeid(JSONValue));
         if(ob is null)
             warning("no payload");
@@ -106,7 +106,7 @@ class WebSocketControllerHelper {
             MessageMappingInfo m = r.front;
             WebSocketController c = controllers[m.controller].controller;
             c.__invoke(m.method, message, 
-                (Object r, TypeInfo t) {  
+                (Object r, TypeInfo t) {
                     if(handler !is null) handler(r, t, m.receivers); 
                 }
             );
@@ -204,7 +204,7 @@ class WebSocketControllerHelper {
                         alias memberType = typeof(currentMember);
                         static if (is(memberType == function)) {
                             foreach (t; __traits(getOverloads, T, memberName)) {
-                                enum hasMessageMapping = hasUDA!(t, MessageMapping);                        
+                                enum hasMessageMapping = hasUDA!(t, MessageMapping);
                                 static if (hasMessageMapping) {
                                     c ~= generateMethodSwitchCases!(t, moduleName, memberName);
                                 }
@@ -212,14 +212,12 @@ class WebSocketControllerHelper {
                         }
                     }
                 }
-            }                
-                
-
+            }
             c ~= `default : {
                     version(HUNT_DEBUG) warning("do nothing for invoking " ~ methodName);
                 }
             }`;
-        
+
         return c;
     }
 
@@ -245,8 +243,7 @@ class WebSocketControllerHelper {
 
                     JSONValue ` ~ parametersInJson ~` = temp.value;
                     version(HUNT_DEBUG) tracef("incoming message");
-            `; 
-
+            `;
         enum argumentsNumber = arity!symbol;
         enum identifiers = ParameterIdentifierTuple!symbol;
         alias parameterTypes = Parameters!symbol;
@@ -272,7 +269,7 @@ class WebSocketControllerHelper {
                     enum pn = identifiers[0];
                     s ~= format(`        %1$s %2$s = JsonHelper.getItemAs!(%1$s)(%3$s, "%4$s");` ~ "\n",
                             pt, varName, parametersInJson, pn);
-                }                
+                }
             }
 
             static if(is(returnType == void)) {
@@ -297,8 +294,7 @@ class WebSocketControllerHelper {
                     if(pn == "__body" && (pt == "JSONValue" || pt == "const(JSONValue)") ) {
                         tempVarName = parametersInJson;
                     } 
-                } 
-                
+                }
                 if(tempVarName != parametersInJson) {
                     // s ~= `           item = parametersInJson["` ~ pn ~ `"];` ~ "\n";
                     s ~= format(`           %1$s %2$s = JsonHelper.getItemAs!(%1$s)(%3$s, "%4$s");` ~ "\n\n",
@@ -311,7 +307,7 @@ class WebSocketControllerHelper {
                     invokingStatement ~= ", " ~ tempVarName;
                 }
             }
-            
+
             invokingStatement ~= ");";
 
             static if(is(returnType == void)) {
@@ -327,16 +323,15 @@ class WebSocketControllerHelper {
                         JSONValue resultInJson = JsonHelper.toJson(r);
                         string resultInString = resultInJson.toString();
                         version(HUNT_DEBUG) tracef("outgoing message: %s", resultInString);
-                        handler(new Nullable!string(resultInString), typeid(string));  
-                    }`;     
+                        handler(new Nullable!string(resultInString), typeid(string));
+                    }`;
         }
 
         s ~= `
                     break;
                 }
-                
-                `;   
-        
+
+                `;
         return s;
 
     }

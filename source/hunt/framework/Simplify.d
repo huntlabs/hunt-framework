@@ -11,11 +11,17 @@
 
 module hunt.framework.Simplify;
 
-public import hunt.framework.application.Application : app, ApplicationConfig;
-public import hunt.util.DateTime;
+public import hunt.framework.application.Application : app;
+public import hunt.framework.application.ApplicationConfig : configManager, ApplicationConfig;
+public import hunt.util.DateTime : time, date;
 public import hunt.framework.Init;
 
 import std.string;
+
+ApplicationConfig config()
+{
+    return configManager().config();
+}
 
 string url(string mca) {
     return url(mca, null);

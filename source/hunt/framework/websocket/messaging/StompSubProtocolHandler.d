@@ -98,9 +98,9 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
     private MessageHeaderInitializer headerInitializer;
 
     private Map!(string, Principal) stompAuthentications;
-    
+
     private Boolean immutableMessageInterceptorPresent;
-    
+
     private ApplicationEventPublisher eventPublisher;
 
     // private Stats stats = new Stats();
@@ -128,7 +128,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
     /**
      * Return the configured error handler.
      */
-    
+
     StompSubProtocolErrorHandler getErrorHandler() {
         return this.errorHandler;
     }
@@ -183,7 +183,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
     /**
      * Return the configured header initializer.
      */
-    
+
     MessageHeaderInitializer getHeaderInitializer() {
         return this.headerInitializer;
     }
@@ -341,7 +341,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
         }
     }
 
-    
+
     private Principal getUser(WebSocketSession session) {
         // Principal user = this.stompAuthentications.get(session.getId());
         // return (user !is null ? user : session.getPrincipal());
@@ -530,7 +530,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
     private StompHeaderAccessor getStompHeaderAccessor(MessageBase message) {
         MessageHeaderAccessor accessor = 
             MessageHeaderAccessor.getAccessor!(MessageHeaderAccessor)(message);
-        
+
         auto ac = cast(StompHeaderAccessor) accessor;
         if (ac !is null) {
             return ac;
@@ -614,7 +614,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
         return connectedHeaders;
     }
 
-    
+
     private string getDisconnectReceipt(SimpMessageHeaderAccessor simpHeaders) {
         string name = StompHeaderAccessor.DISCONNECT_MESSAGE_HEADER;
         MessageBase message = cast(MessageBase) simpHeaders.getHeader(name);
@@ -655,7 +655,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
     }
 
     override
-    
+
     string resolveSessionId(MessageBase message) {
         return SimpMessageHeaderAccessor.getSessionId(message.getHeaders());
     }

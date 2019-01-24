@@ -56,9 +56,7 @@ import hunt.http.server.WebSocketHandler;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-class WebSocketHttpRequestHandler : WebSocketHandler { // , Lifecycle, ServletContextAware 
-
-
+class WebSocketHttpRequestHandler : WebSocketHandler { // , Lifecycle, ServletContextAware
     private WebSocketMessageHandler wsHandler;
     private StandardWebSocketSession wsSession;
 
@@ -202,6 +200,5 @@ class WebSocketHttpRequestHandler : WebSocketHandler { // , Lifecycle, ServletCo
 
         return true;
     }
-    
 
 }

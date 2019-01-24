@@ -162,9 +162,7 @@ struct Parser(Lexer)
     }
 
 
-private: 
-
-
+private:
     /**
       * exprblock = EXPRBEGIN expr (IF expr (ELSE expr)? )? EXPREND
       */
@@ -269,7 +267,7 @@ private:
         }
 
         pop(Operator.In);
-        
+
         Node iterable;
 
         switch (front.type) with (Type)
@@ -434,12 +432,12 @@ private:
         return new MacroNode(pos, name, args, block, ret);
     }
 
-    
+
     CallNode parseCall(string dirPath)
     {
         auto pos = front.pos;
         pop(Keyword.Call);
-        
+
         Arg[] formalArgs;
 
         if (front.type == Type.LParen)
@@ -479,7 +477,6 @@ private:
 
         return new FilterBlockNode(pos, filterName, args, block);
     }
-    
 
     StmtBlockNode parseWith(string dirPath)
     {
@@ -513,9 +510,9 @@ private:
         pop(Type.StmtEnd);
 
         assertTemplate(path.fileExist(dirPath), "Non existing file `%s`".fmt(path), pos);
-        
+
         auto stmtBlock = parseTreeFromFile(path);
-        
+
         return new ImportNode(pos, path, cast(ImportNode.Rename[])[], stmtBlock, withContext);
     }
 
@@ -566,9 +563,9 @@ private:
         pop(Type.StmtEnd);
 
         assertTemplate(path.fileExist(dirPath), "Non existing file `%s`".fmt(path), pos);
-        
+
         auto stmtBlock = parseTreeFromFile(path);
-        
+
         return new ImportNode(pos, path, macros, stmtBlock, withContext);
     }
 
@@ -625,7 +622,7 @@ private:
                 return new IncludeNode(pos, name, parseTreeFromFile(dirPath ~ name), withContext);
  
         assertTemplate(ignoreMissing, "No existing files `%s`".fmt(names), pos);
-        
+
         return new IncludeNode(pos, "", null, withContext);
     }
 
@@ -638,9 +635,9 @@ private:
         pop(Type.StmtEnd);
 
         assertTemplate(path.fileExist(dirPath), "Non existing file `%s`".fmt(path), pos);
-        
+
         auto stmtBlock = parseTreeFromFile(path);
-        
+
         return new ExtendsNode(pos, path, stmtBlock);
     }
 
@@ -683,7 +680,7 @@ private:
             }
 
             args ~= Arg(name, def);
-            
+
             if (front.type != Type.RParen)
                 pop(Type.Comma);
         }
@@ -901,7 +898,7 @@ private:
         {
             if (front.type != Type.Operator)
                 return lhsFactor;
-        
+
             auto pos = front.pos;
             switch (front.value) with (Operator)
             {

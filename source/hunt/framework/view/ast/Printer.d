@@ -118,7 +118,7 @@ class Printer : NullVisitor
             node.cond.accept(this);
             _tab--;
         }
-        
+
         print("Expression:");
         _tab++;
         node.expr.accept(this);

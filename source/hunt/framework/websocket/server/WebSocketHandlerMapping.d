@@ -27,8 +27,7 @@ module hunt.framework.websocket.server.WebSocketHandlerMapping;
  * @author Rossen Stoyanchev
  * @since 4.2
  */
-public class WebSocketHandlerMapping { // extends SimpleUrlHandlerMapping implements SmartLifecycle 
-
+public class WebSocketHandlerMapping { // extends SimpleUrlHandlerMapping implements SmartLifecycle
     private bool running = false;
 
 

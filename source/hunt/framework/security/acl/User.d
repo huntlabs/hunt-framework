@@ -5,7 +5,7 @@ import hunt.framework.security.acl.Permission;
 import hunt.framework.application.Application;
 
 class User
-{   
+{
     int                     id;
     Role[]                  roles;
 
@@ -41,7 +41,5 @@ class User
                 this.roles ~= role[0];
         }
         return this;
-    } 
-
-
+    }
 }

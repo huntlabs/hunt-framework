@@ -50,7 +50,7 @@ abstract class Controller
             _view.setRouteGroup(this.request.route.getGroup());
             _view.setLocale(this.request.locale());
         }
-       
+
         return _view;
     }
 
@@ -162,7 +162,7 @@ mixin template HuntDynamicCallFun(T, string moduleName)
 public:
     // version (HUNT_DEBUG) 
     // pragma(msg, __createCallActionMethod!(T, moduleName));
-    
+
     mixin(__createCallActionMethod!(T, moduleName));
     shared static this()
     {
@@ -271,7 +271,7 @@ string __createCallActionMethod(T, string moduleName)()
                             varName = "";
                         }
                     }
-                    
+
                     // call Action
                     str ~= "\t\t" ~ ReturnType!t.stringof ~ " result = this." ~ memberName ~ "(" ~ paramString ~ ");\n";
 
@@ -322,7 +322,7 @@ string __createRouteMap(T, string moduleName)()
 
     enum len = "Controller".length;
     string controllerName = moduleName[0..$-len];
-    
+
     foreach (memberName; __traits(allMembers, T))
     {
         static if (is(typeof(__traits(getMember, T, memberName)) == function))

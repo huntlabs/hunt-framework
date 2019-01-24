@@ -92,11 +92,11 @@ class Router {
         }
 
         if (routeGroup.getType() == "domain") {
-            url = (app().config.https.enabled ? "https://" : "http://") ~ routeGroup.getValue()
+            url = (config().https.enabled ? "https://" : "http://") ~ routeGroup.getValue()
                 ~ url;
         }
         else {
-            url = app().config.application.baseUrl ~ routeGroup.getValue() ~ url;
+            url = config().application.baseUrl ~ routeGroup.getValue() ~ url;
         }
 
         return url ~ (params.length > 0 ? ("?" ~ buildUriQueryString(params)) : "");
@@ -280,8 +280,8 @@ private:
             return;
 
         // read file content
-        RouteConfig config;
-        RouteItem[] items = config.loadConfig(configFile);
+        RouteConfig routeConfig;
+        RouteItem[] items = routeConfig.loadConfig(configFile);
 
         bool haveRootRoute = false;
         Route route;
@@ -300,7 +300,7 @@ private:
         import hunt.framework.application.ApplicationConfig;
 
         this.staticRootRoute = this.makeRoute("GET", "/",
-                "staticDir:" ~ app().config().http.path, group);
+                "staticDir:" ~ config().http.path, group);
         if (!haveRootRoute)
             routeGroup.addRoute(staticRootRoute);
     }

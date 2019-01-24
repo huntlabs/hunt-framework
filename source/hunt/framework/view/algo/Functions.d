@@ -81,17 +81,17 @@ UniNode namespace(UniNode kwargs)
 
 ///dummy
 UniNode trans(UniNode node)
-{   
+{
      return UniNode(null);
 }
 
 ///dummy
 string date(string format , long timestamp)
 {
-    return null;     
+    return null;
 }
 ///dummy
 string url(string format , string d)
 {
-    return null;     
+    return null;
 }

@@ -135,7 +135,7 @@ string transf(A...)(string key, lazy A args) {
     Appender!string buffer;
     string text = trans(key);
     formattedWrite(buffer, text, args);
-        
+
     return buffer.data;
 }
 
@@ -144,7 +144,7 @@ string transfWithLocale(A...)(string locale, string key, lazy A args) {
     Appender!string buffer;
     string text = trans(locale, key);
     formattedWrite(buffer, text, args);
-        
+
     return buffer.data;
 }
 
@@ -201,22 +201,20 @@ string trans(string locale, string key) {
 }
 
 // unittest{
-    
+
 //     I18n i18n = I18n.instance();
 //     i18n.loadLangResources("./resources/translations");
 //     i18n.defaultLocale = "en-us";
 //     writeln(i18n.resources);
-    
-    
+
 //     ///
 //     setLocale("en-br");
 //     assert( trans("message.hello-world") == "Hello, world");
-    
+
 //     ///
 //     setLocale("zh-cn");
 //     assert( trans("email.subject") == "收件人");
-    
-    
+
 //     setLocale("en-us");
 //     assert( trans("email.subject") == "email.subject");
 

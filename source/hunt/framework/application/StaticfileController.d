@@ -22,7 +22,7 @@ import hunt.http.codec.http.model.HttpStatus;
 class StaticfileController : Controller
 {
     mixin MakeController;
-    
+
     @Action
     Response doStaticFile()
     {
@@ -30,7 +30,7 @@ class StaticfileController : Controller
         version (HUNT_DEBUG) logDebug("currentPath: ", currentPath);
         if (currentPath == string.init)
         {
-            currentPath = app().config().http.path;
+            currentPath = config().http.path;
         }
 
         string staticFilename = mendPath(currentPath);
@@ -71,15 +71,15 @@ class StaticfileController : Controller
         FileInfo fi = makeFileInfo(staticFilename);
         auto lastModified = toRFC822DateTimeString(fi.timeModified.toUTC());
         auto etag = "\"" ~ hexDigest!MD5(staticFilename ~ ":" ~ lastModified ~ ":" ~ to!string(fi.size)).idup ~ "\"";
-    
+
         response.setHeader(HttpHeader.LAST_MODIFIED, lastModified);
         response.setHeader(HttpHeader.ETAG, etag);
 
-        if (app().config().application.staticFileCacheMinutes > 0)
+        if (config().application.staticFileCacheMinutes > 0)
         {
-            auto expireTime = Clock.currTime(UTC()) + dur!"minutes"(app().config().application.staticFileCacheMinutes);
+            auto expireTime = Clock.currTime(UTC()) + dur!"minutes"(config().application.staticFileCacheMinutes);
             response.setHeader(HttpHeader.EXPIRES, toRFC822DateTimeString(expireTime));
-            response.setHeader(HttpHeader.CACHE_CONTROL, "max-age=" ~ to!string(app().config().application.staticFileCacheMinutes * 60));
+            response.setHeader(HttpHeader.CACHE_CONTROL, "max-age=" ~ to!string(config().application.staticFileCacheMinutes * 60));
         }
 
         if ((request.headerExists(HttpHeader.IF_MODIFIED_SINCE) && (request.header(HttpHeader.IF_MODIFIED_SINCE) == lastModified)) ||
@@ -88,7 +88,7 @@ class StaticfileController : Controller
                 response.setStatus(HttpStatus.NOT_MODIFIED_304);
                 return response;
         }
-    
+
         auto mimetype = getMimeContentTypeForFile(staticFilename);
         response.setHeader(HttpHeader.CONTENT_TYPE, mimetype ~ ";charset=utf-8");
 
@@ -102,7 +102,7 @@ class StaticfileController : Controller
             // Range can be in form "-\d", "\d-" or "\d-\d"
             auto range = request.header(HttpHeader.RANGE).chompPrefix("bytes=");
             auto s = range.split("-");
-            
+
             if (s.length != 2)
             {
                 throw new Exception("bad request.");
@@ -119,7 +119,7 @@ class StaticfileController : Controller
                 {
                     rangeEnd = fi.size;
                     auto len = s[1].to!ulong;
-                    
+
                     if (len >= rangeEnd)
                     {
                         rangeStart = 0;
@@ -138,23 +138,23 @@ class StaticfileController : Controller
             {
                 throw new Exception("bad request." ~ e.msg);
             }
-            
+
             if (rangeEnd > fi.size)
             {
                 rangeEnd = fi.size;
             }
-            
+
             if (rangeStart > rangeEnd)
             {
                 rangeStart = rangeEnd;
             }
-            
+
             if (rangeEnd)
             {
                 rangeEnd--; // End is inclusive, so one less than length
             }
             // potential integer overflow with rangeEnd - rangeStart == size_t.max is intended. This only happens with empty files, the + 1 will then put it back to 0
-            
+
             response.setHeader(HttpHeader.CONTENT_LENGTH, to!string(rangeEnd - rangeStart + 1));
             response.setHeader(HttpHeader.CONTENT_RANGE, "bytes %s-%s/%s".format(rangeStart < rangeEnd ? rangeStart : rangeEnd, rangeEnd, fi.size));
             response.setStatus(HttpStatus.PARTIAL_CONTENT_206);
@@ -164,18 +164,18 @@ class StaticfileController : Controller
             rangeEnd = fi.size - 1;
             response.setHeader(HttpHeader.CONTENT_LENGTH, fi.size.to!string);
         }
-        
+
         // write out the file contents
         auto f = std.stdio.File(staticFilename, "r");
         scope(exit) f.close();
-    
+
         f.seek(rangeStart);
         auto buf = f.rawRead(new ubyte[rangeEnd.to!uint - rangeStart.to!uint + 1]);
         response.setContent(buf);
 
         return response;
     }
-    
+
     private string mendPath(string path)
     {
         if (!path.startsWith("./"))
@@ -185,12 +185,12 @@ class StaticfileController : Controller
                 path = "./" ~ path;
             }
         }
-        
+
         if (!path.endsWith("/"))
         {
             path ~= "/";
         }
-        
+
         return path ~ chompPrefix(request.path, request.route.getPattern());
     }
 
@@ -202,7 +202,7 @@ class StaticfileController : Controller
         bool isSymlink;
         bool isDirectory;
     }
-    
+
     private FileInfo makeFileInfo(string fileName)
     {
         FileInfo fi;
@@ -214,10 +214,10 @@ class StaticfileController : Controller
         else fi.timeCreated = ent.timeLastModified;
         fi.isSymlink = ent.isSymlink;
         fi.isDirectory = ent.isDir;
-        
+
         return fi;
     }
-    
+
     private bool isCompressedFormat(string mimetype)
     {
         switch (mimetype)

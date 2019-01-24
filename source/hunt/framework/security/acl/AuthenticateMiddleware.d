@@ -18,7 +18,7 @@ class AuthenticateMiddleware : MiddlewareInterface
 
     Response onProcess(Request request, Response response = null)
     {
-       import std.algorithm.searching;  
+       import std.algorithm.searching;
        auto mca = request.getMCA();
        auto white = find!(" a == b")(mcaList , mca);
        if( white.length > 0 )
@@ -27,7 +27,7 @@ class AuthenticateMiddleware : MiddlewareInterface
        auto am = app().accessManager;
        if(am.checkAuth())
             return null;
-  
+
         auto permission = am.getPermission(mca);
         response = new Response(request);
         if(permission !is null)
@@ -38,5 +38,5 @@ class AuthenticateMiddleware : MiddlewareInterface
     }
 
     protected string[] mcaList;
-  
+
 }

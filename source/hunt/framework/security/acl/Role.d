@@ -23,19 +23,19 @@ class Role
 
     bool can(string key )
     {
-        import std.algorithm.searching;  
+        import std.algorithm.searching;
         return find!("a.key == b")(permissions , key).length > 0;
     }
 
     Role addPermissionIds(int[] permissionIds ... )
-    {   
-        import std.algorithm.searching;     
+    {
+        import std.algorithm.searching;
         auto permissions = app().accessManager.permissions;
         foreach(id ; permissionIds)
         {
             auto per = find!(" a.id == b")(permissions , id);
             if(per.length > 0)
-                this.permissions ~= per[0];            
+                this.permissions ~= per[0];
         }
         return this;
     }

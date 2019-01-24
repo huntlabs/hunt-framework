@@ -282,7 +282,7 @@ module hunt.framework.websocket.messaging.WebSocketStompClient;
 
 //         private final StompWebSocketMessageCodec codec = new StompWebSocketMessageCodec(getInboundMessageSizeLimit());
 
-        
+
 //         private WebSocketSession session;
 
 //         private long lastReadTime = -1;

@@ -4,7 +4,7 @@ import hunt.http.codec.websocket.model.CloseStatus;
 import hunt.Exceptions;
 
 class SessionLimitExceededException : RuntimeException {
-    
+
     private CloseStatus status;
 
     this(string message, CloseStatus status) {

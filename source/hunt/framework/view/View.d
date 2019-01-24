@@ -39,8 +39,8 @@ class View
 
     this(Environment env)
     {
-        _templatePath = app().config().view.path;
-        _extName = app().config().view.ext;
+        _templatePath = config().view.path;
+        _extName = config().view.ext;
 
         _env = env;
     }
@@ -94,7 +94,7 @@ class View
 
     public void assign(T)(string key, T t)
     {
-        this.assign(key, toJson(t , app().config().view.arrayDepth));
+        this.assign(key, toJson(t , config().view.arrayDepth));
     }
 
     public void assign(string key, JSONValue t)
@@ -114,6 +114,6 @@ View GetViewObject()
     }
     auto view = new View(_envInstance);
 
-    view.setTemplatePath(app().config().view.path).setTemplateExt(app().config().view.ext);
+    view.setTemplatePath(config().view.path).setTemplateExt(config().view.ext);
     return view;
 }

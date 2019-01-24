@@ -29,7 +29,7 @@ enum Type
     Raw,
     Keyword,
     Operator,
-    
+
     StmtBegin,
     StmtEnd,
     ExprBegin,
@@ -457,7 +457,7 @@ struct Lexer(
             case '"':
             case '\'':
                 return Token(Type.String, popString(), _beginPos);
-                
+
             case '(': return Token(Type.LParen, popChar, _beginPos);
             case ')': return Token(Type.RParen, popChar, _beginPos);
             case '[': return Token(Type.LSParen, popChar, _beginPos);
@@ -685,7 +685,7 @@ private:
                 return raw;
             if (cmntOpInline == sliceOp!cmntOpInline)
                 return raw;
-            
+
             raw ~= pop();
         }
     }

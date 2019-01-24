@@ -30,7 +30,7 @@ import std.conv;
 abstract class AbstractSubProtocolEvent : ApplicationEvent {
 
     private Message!(byte[]) message;
-    
+
     private Principal user;
 
 
@@ -74,7 +74,7 @@ abstract class AbstractSubProtocolEvent : ApplicationEvent {
     /**
      * Return the user for the session associated with the event.
      */
-    
+
     Principal getUser() {
         return this.user;
     }

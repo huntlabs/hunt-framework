@@ -64,7 +64,7 @@ interface SubProtocolHandler {
      * Resolve the session id from the given message or return {@code null}.
      * @param message the message to resolve the session id from
      */
-    
+
     string resolveSessionId(MessageBase message);
 
     /**
@@ -83,7 +83,7 @@ interface SubProtocolHandler {
     void afterSessionEnded(WebSocketSession session, 
         CloseStatus closeStatus, MessageChannel outputChannel);
 
-    
+
     int opCmp(SubProtocolHandler o);
 
 }

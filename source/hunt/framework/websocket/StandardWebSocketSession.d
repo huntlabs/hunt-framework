@@ -48,7 +48,7 @@ alias HttpHeaders = HttpFields;
 class StandardWebSocketSession : AbstractWebSocketSession!(WebSocketConnection) {
 
     private string id;
-    
+
     private HttpURI uri;
 
     private HttpHeaders handshakeHeaders;
@@ -56,11 +56,11 @@ class StandardWebSocketSession : AbstractWebSocketSession!(WebSocketConnection) 
     private string acceptedProtocol;
 
     // private List!(WebSocketExtension) extensions;
-    
+
     private Principal user;
-    
+
     private Address localAddress;
-    
+
     private Address remoteAddress;
 
 
@@ -132,12 +132,12 @@ class StandardWebSocketSession : AbstractWebSocketSession!(WebSocketConnection) 
         return this.user;
     }
 
-    // override    
+    // override
     Address getLocalAddress() {
         return this.localAddress;
     }
 
-    // override    
+    // override
     Address getRemoteAddress() {
         return this.remoteAddress;
     }

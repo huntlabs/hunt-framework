@@ -13,7 +13,7 @@ import std.conv;
 
 class AccessManager
 {
-public:    
+public:
     Role[] 			        roles;
 	Permission[]            permissions;
 
@@ -24,7 +24,7 @@ private:
     UCache                  cache;
     string                  name;
     string                  prefix;
-    int                     expired;                   
+    int                     expired;
 public:
     this(UCache cache , string name , string prefix , int expired)
     {
@@ -70,17 +70,17 @@ public:
             {
                 logError(" can't find id " , id);
                 return null;
-            }  
+            }
             user = users[0];
         }
 
         cache.put!User(prefix ~ name ~ "_user_" ~ to!string(id) , user , expired);
         int[] ids = cache.get!(int[])(prefix ~ name ~ "_userids");
-        
+
         import std.algorithm.searching;
         auto f = find!("a == b")(ids , id);
         if(f.length == 0)
-        {    
+        {
             ids ~= id;
         }
         cache.put!(int[])(prefix ~ name ~ "_userids" , ids , expired);

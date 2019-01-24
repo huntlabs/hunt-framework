@@ -153,8 +153,7 @@ version(HUNT_DEBUG) {
             tracef("_mcaRoutes: mca=%s, path=%s, methods=%s", key.mca,  key.path, value.getMethods());
         }
     }
-}    
-
+}
     bool exists(string method, string path)
     {
         Route r = match(method, path);

@@ -77,7 +77,7 @@ string render(T...)(TemplateNode tree)
     auto render = new Render(tree);
 
     auto data = UniNode.emptyObject();
-    
+
     foreach (i, arg; Args)
     {
         static if (isSomeFunction!arg)

@@ -41,7 +41,7 @@ void finishFrameworkTrace(Response response)
 
     tracer.root.addTag(HTTP_STATUS_CODE , to!string(response.status));
     tracer.root.addTag(HTTP_RESPONSE_SIZE , to!string(response.size));
-    finishFrameworkUpload(tracer);  
+    finishFrameworkUpload(tracer);
 }
 
 private void finishFrameworkUpload(Tracer tracer)

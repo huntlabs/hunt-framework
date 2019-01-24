@@ -99,7 +99,7 @@ private :
 
 public :
     this()
-    {      
+    {
         _mutex = new ReadWriteMutex();
     }
 

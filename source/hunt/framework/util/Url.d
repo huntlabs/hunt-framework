@@ -126,22 +126,21 @@ struct URL
     {
         return asTuple().toHash();
     }
-    
 
     /// The URL scheme. For instance, ssh, ftp, or https.
     string scheme;
-    
+
     /// The username in this URL. Usually absent. If present, there will also be a password.
     string user;
-    
+
     /// The password in this URL. Usually absent.
     string pass;
-    
+
     /// The hostname.
     string host;
 
     string[string] queryArr;
-    
+
     /**
       * The port.
         *
@@ -162,7 +161,7 @@ struct URL
         }
         return 0;
     }
-    
+
     /**
       * Set the port.
         *
@@ -172,10 +171,10 @@ struct URL
     {
         return providedPort = value;
     }
-    
+
     /// The port that was explicitly provided in the URL.
     ushort providedPort;
-    
+
     /**
       * The path.
       *
@@ -183,18 +182,18 @@ struct URL
       * "/news/story/17774".
       */
     string path;
-    
+
     /**
         * The query parameters associated with this URL.
         */
     string query;
-    
+
     /**
       * The fragment. In web documents, this typically refers to an anchor element.
       * For instance, in the URL https://cnn.com/news/story/17774#header2, the fragment is "header2".
       */
     string fragment;
-    
+
     /**
       * Convert this URL to a string.
       * The string is properly formatted and usable for, eg, a web request.
@@ -203,7 +202,7 @@ struct URL
     {
         return toString(false);
     }
-    
+
     /**
         * Convert this URL to a string.
         *
@@ -213,7 +212,7 @@ struct URL
     {
         return toString(true);
     }
-    
+
     ///
     unittest
     {
@@ -221,13 +220,13 @@ struct URL
         assert(url.toString == "https://xn--m3h.xn--n3h.org/?hi=bye", url.toString);
         assert(url.toHumanReadableString == "https://☂.☃.org/?hi=bye", url.toString);
     }
-    
+
     unittest
     {
         assert("http://example.org/some_path".parseURL.toHumanReadableString ==
             "http://example.org/some_path");
     }
-    
+
     private string toString(bool humanReadable) const
     {
         import std.array : Appender;
@@ -266,17 +265,17 @@ struct URL
         if (query.length) {
             s ~= '?';
             s ~= query;
-        }        
+        }
         if (fragment) {
             s ~= '#';
             s ~= fragment.percentEncode;
         }
         return s.data;
     }
-    
+
     /// Implicitly convert URLs to strings.
     alias toString this;
-    
+
     /**
       Compare two URLs.
 
@@ -292,13 +291,13 @@ struct URL
     {
         return asTuple.opCmp(other.asTuple);
     }
-    
+
     private auto asTuple() const nothrow
     {
         import std.typecons : tuple;
         return tuple(host, scheme, port, user, pass, path, query);
     }
-    
+
     /// Equality checks.
     bool opEquals(string other) const
     {
@@ -309,19 +308,19 @@ struct URL
         }
         return asTuple() == o.asTuple();
     }
-    
+
     /// Ditto
     bool opEquals(ref const URL other) const
     {
         return asTuple() == other.asTuple();
     }
-    
+
     /// Ditto
     bool opEquals(const URL other) const
     {
         return asTuple() == other.asTuple();
     }
-    
+
     unittest
     {
         import std.algorithm, std.array, std.format;
@@ -348,7 +347,7 @@ struct URL
         ];
         assert(cmp(urls, expected) == 0, "expected:\n%s\ngot:\n%s".format(expected, urls));
     }
-    
+
     unittest
     {
         auto a = "http://x.org/a?b=c".parseURL;
@@ -358,7 +357,7 @@ struct URL
         assert(c < b);
         assert(c < a);
     }
-    
+
     /**
         * The append operator (~).
         *
@@ -381,7 +380,7 @@ struct URL
         other ~= subsequentPath;
         return other;
     }
-    
+
     /**
         * The append-in-place operator (~=).
         *
@@ -412,7 +411,7 @@ struct URL
         }
         return this;
     }
-    
+
     /**
         * Convert a relative URL to an absolute URL.
         *
@@ -460,7 +459,7 @@ struct URL
                 return other.parseURL;
             }
         }
-        
+
         URL ret = this;
         ret.path = "";
         if (other[0] != '/')
@@ -511,28 +510,28 @@ struct URL
         parsePathAndQuery(ret, other);
         return ret;
     }
-    
+
     unittest
     {
         auto a = "http://alcyius.com/dndtools/index.html".parseURL;
         auto b = a.resolve("contacts/index.html");
         assert(b.toString == "http://alcyius.com/dndtools/contacts/index.html");
     }
-    
+
     unittest
     {
         auto a = "http://alcyius.com/dndtools/index.html?a=b".parseURL;
         auto b = a.resolve("contacts/index.html?foo=bar");
         assert(b.toString == "http://alcyius.com/dndtools/contacts/index.html?foo=bar");
     }
-    
+
     unittest
     {
         auto a = "http://alcyius.com/dndtools/index.html".parseURL;
         auto b = a.resolve("../index.html");
         assert(b.toString == "http://alcyius.com/index.html", b.toString);
     }
-    
+
     unittest
     {
         auto a = "http://alcyius.com/dndtools/foo/bar/index.html".parseURL;
@@ -569,7 +568,7 @@ bool tryParseURL(string value, out URL url)
         url.host = value.fromPuny;
         return true;
     }
-    
+
     if (value[i] == ':') {
         // This could be between username and password, or it could be between host and port.
         auto j = value.indexOfAny(['@', '/']);
@@ -583,14 +582,14 @@ bool tryParseURL(string value, out URL url)
             value = value[j+1 .. $];
         }
     }
-    
+
     // It's trying to be a host/port, not a user/pass.
     i = value.indexOfAny([':', '/', '[']);
     if (i == -1) {
         url.host = value.fromPuny;
         return true;
     }
-    
+
     // Find the hostname. It's either an ipv6 address (which has special rules) or not (which doesn't
     // have special rules). -- The main sticking point is that ipv6 addresses have colons, which we
     // handle specially, and are offset with square brackets.
@@ -615,7 +614,7 @@ bool tryParseURL(string value, out URL url)
         url.host = value[0..i].fromPuny;
         value = value[i .. $];
     }
-    
+
     if (value[0] == ':') {
         auto end = value.indexOf('/');
         if (end == -1) {
@@ -642,7 +641,7 @@ private bool parsePathAndQuery(ref URL url, string value)
         url.path = value.percentDecode;
         return true;
     }
-    
+
     try
     {
         url.path = value[0..i].percentDecode;
@@ -651,7 +650,7 @@ private bool parsePathAndQuery(ref URL url, string value)
     {
         return false;
     }
-    
+
     auto c = value[i];
     value = value[i + 1 .. $];
     if (c == '?')
@@ -679,7 +678,7 @@ private bool parsePathAndQuery(ref URL url, string value)
             }
         }
     }
-    
+
     try
     {
         url.fragment = value.percentDecode;
@@ -688,7 +687,7 @@ private bool parsePathAndQuery(ref URL url, string value)
     {
         return false;
     }
-    
+
     return true;
 }
 
@@ -775,13 +774,13 @@ unittest
         assert(url.port == 2771, url.port.to!string);
         assert(url.path == "/foo/bar", url.path);
     }
-    
+
     // minimal
     {
         auto url = parseURL("[::1]");
         assert(url.host == "[::1]", url.host);
     }
-    
+
     // some random bits
     {
         auto url = parseURL("http://[::1]/foo");
@@ -789,7 +788,7 @@ unittest
         assert(url.host == "[::1]", url.host);
         assert(url.path == "/foo", url.path);
     }
-    
+
     {
         auto url = parseURL("https://[2001:0db8:0:0:0:0:1428:57ab]/?login=true#justkidding");
         assert(url.scheme == "https");
@@ -891,7 +890,7 @@ unittest {
 
 unittest {
     // Percent decoding.
-    
+
     // http://#:!:@
     auto urlString = "http://%23:%21%3A@example.org/%7B/%7D?%3B&%26=%3D#%23hash%EF%BF%BD";
     auto url = urlString.parseURL;
@@ -902,7 +901,7 @@ unittest {
     //assert(url.queryParams[";"].front == "");
     //assert(url.queryParams["&"].front == "=");
     assert(url.fragment == "#hash�");
-    
+
     // Round trip.
     assert(urlString == urlString.parseURL.toString, urlString.parseURL.toString);
     assert(urlString == urlString.parseURL.toString.parseURL.toString);
@@ -930,7 +929,7 @@ unittest {
     assert(url2.toString == "http://example.org/foo/bar", url2.toString);
     url ~= "bar";
     assert(url.toString == "http://example.org/foo/bar");
-    
+
     // Path already ends with a slash; don't add another.
     url = parseURL("http://example.org/foo/");
     assert((url ~ "bar").toString == "http://example.org/foo/bar");
@@ -938,21 +937,21 @@ unittest {
     assert((url ~ "/bar").toString == "http://example.org/foo/bar");
     url ~= "/bar";
     assert(url.toString == "http://example.org/foo/bar");
-    
+
     // No path.
     url = parseURL("http://example.org");
     assert((url ~ "bar").toString == "http://example.org/bar");
     assert((url ~ "/bar").toString == "http://example.org/bar");
     url ~= "bar";
     assert(url.toString == "http://example.org/bar");
-    
+
     // Path is just a slash.
     url = parseURL("http://example.org/");
     assert((url ~ "bar").toString == "http://example.org/bar");
     assert((url ~ "/bar").toString == "http://example.org/bar");
     url ~= "bar";
     assert(url.toString == "http://example.org/bar", url.toString);
-    
+
     // No path, just fragment.
     url = "ircs://irc.freenode.com/#d".parseURL;
     assert(url.toString == "ircs://irc.freenode.com/#d", url.toString);
@@ -966,7 +965,7 @@ unittest
         assert(base.resolve("/that") == "https://example.org/that");
         assert(base.resolve("//example.net/that") == "https://example.net/that");
     }
-    
+
     // ensure we don't preserve query params
     {
         auto base = "https://example.org/this?query=value&other=value2".parseURL;
@@ -1101,15 +1100,15 @@ unittest {
 unittest {
     assert(parseURL("http://example.org").port == 80);
     assert(parseURL("http://example.org:5326").port == 5326);
-    
+
     auto url = parseURL("redis://admin:password@redisbox.local:2201/path?query=value#fragment");
     assert(url.scheme == "redis");
     assert(url.user == "admin");
     assert(url.pass == "password");
-    
+
     assert(parseURL("example.org").toString == "http://example.org/");
     assert(parseURL("http://example.org:80").toString == "http://example.org/");
-    
+
     assert(parseURL("localhost:8070").toString == "http://localhost:8070/");
 }
 
@@ -1155,9 +1154,9 @@ unittest {
     assert(percentEncode("IDontNeedNoPercentEncoding") == "IDontNeedNoPercentEncoding");
     assert(percentEncode("~~--..__") == "~~--..__");
     assert(percentEncode("0123456789") == "0123456789");
-    
+
     string e;
-    
+
     e = percentEncode("☃");
     assert(e == "%E2%98%83", "expected %E2%98%83 but got" ~ e);
 }
@@ -1193,22 +1192,22 @@ unittest {
     assert(percentDecode("IDontNeedNoPercentDecoding") == "IDontNeedNoPercentDecoding");
     assert(percentDecode("~~--..__") == "~~--..__");
     assert(percentDecode("0123456789") == "0123456789");
-    
+
     string e;
-    
+
     e = percentDecode("%E2%98%83");
     assert(e == "☃", "expected a snowman but got" ~ e);
-    
+
     e = percentDecode("%e2%98%83");
     assert(e == "☃", "expected a snowman but got" ~ e);
-    
+
     try {
         // %ES is an invalid percent sequence: 'S' is not a hex digit.
         percentDecode("%es");
         assert(false, "expected exception not thrown");
     } catch (URLException) {
     }
-    
+
     try {
         percentDecode("%e");
         assert(false, "expected exception not thrown");
@@ -1311,7 +1310,7 @@ private {
     enum ulong base = 36;
     enum ulong initialBias = 72;
     enum dchar initialN = cast(dchar)128;
-    
+
     ulong adapt(ulong delta, ulong numPoints, bool firstTime) {
         if (firstTime) {
             delta /= damp;
@@ -1440,10 +1439,10 @@ string punyDecode(string input) {
         return input;
     }
     input = input[marker.length..$];
-    
+
     // let n = initial_n
     dchar n = cast(dchar)128;
-    
+
     // let i = 0
     // let bias = initial_bias
     // let output = an empty string indexed from 0
@@ -1453,7 +1452,7 @@ string punyDecode(string input) {
     // This reserves a bit more than necessary, but it should be more efficient overall than just
     // appending and inserting volo-nolo.
     output.reserve(input.length);
-    
+
     // consume all code points before the last delimiter (if there is one)
     //   and copy them to output, fail on any non-basic code point
     // if more than zero code points were consumed then consume one more
@@ -1465,7 +1464,7 @@ string punyDecode(string input) {
         }
         input = input[end+1 .. $];
     }
-    
+
     // while the input is not exhausted do begin
     size_t pos = 0;
     while (pos < input.length) {
@@ -1553,12 +1552,12 @@ unittest {
         auto b = punyEncode(a);
         assert(b == "xn--bcher-kvaf", b);
     }
-    
+
     {
         auto a = "mañana";
         assert(punyEncode(a) == "xn--maana-pta");
     }
-    
+
     {
         auto a = "\u0644\u064A\u0647\u0645\u0627\u0628\u062A\u0643\u0644"
             ~ "\u0645\u0648\u0634\u0639\u0631\u0628\u064A\u061F";

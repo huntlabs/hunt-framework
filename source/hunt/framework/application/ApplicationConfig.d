@@ -259,7 +259,7 @@ final class ApplicationConfig
         }
         return _multiparConfig;
     }
-    
+
     private MultipartConfig _multiparConfig;
 
     this()
@@ -288,9 +288,9 @@ class ConfigNotFoundException : Exception
 */
 class ConfigManager
 {
-    @property ApplicationConfig app(string section="", string fileName = "application.conf")
+    ApplicationConfig config(string section="", string fileName = "application.conf")
     {
-        if (!_app) {
+        if (!_appConfig) {
             if(fileName.empty) {
                 fileName = "application.conf";
                 string huntEnv = environment.get("HUNT_ENV", "");
@@ -301,7 +301,7 @@ class ConfigManager
             setAppSection(section, fileName);
         }
 
-        return _app;
+        return _appConfig;
     }
 
     @property string path()
@@ -327,13 +327,13 @@ class ConfigManager
         {
             logDebugf("using the config file: %s", fullName);
             ConfigBuilder con = new ConfigBuilder(fullName, sec);
-            _app = con.build!(ApplicationConfig, "hunt")();
+            _appConfig = con.build!(ApplicationConfig, "hunt")();
             addConfig("hunt", con);
         }
         else
         {
             logDebug("using default settings.");
-            _app = new ApplicationConfig();
+            _appConfig = new ApplicationConfig();
         }
     }
 
@@ -377,7 +377,7 @@ private:
         _mutex.destroy;
     }
 
-    ApplicationConfig _app;
+    ApplicationConfig _appConfig;
     ConfigBuilder[string] _conf;
     string _path;
     ReadWriteMutex _mutex;

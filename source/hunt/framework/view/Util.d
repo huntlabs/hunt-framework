@@ -30,7 +30,7 @@ class Util
                 params[param[0]] = param[1];
             }
         }
-        
+
         return params;
     }
 }

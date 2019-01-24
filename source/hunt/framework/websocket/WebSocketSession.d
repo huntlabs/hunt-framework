@@ -47,7 +47,7 @@ interface WebSocketSession : Closeable {
     /**
      * Return the URI used to open the WebSocket connection.
      */
-    
+
     HttpURI getUri();
 
     /**
@@ -71,19 +71,19 @@ interface WebSocketSession : Closeable {
      * of the authenticated user.
      * <p>If the user has not been authenticated, the method returns <code>null</code>.
      */
-    
+
     // Principal getPrincipal();
 
     /**
      * Return the address on which the request was received.
      */
-    
+
     // InetSocketAddress getLocalAddress();
 
     /**
      * Return the address of the remote client.
      */
-    
+
     // InetSocketAddress getRemoteAddress();
 
     /**
@@ -91,7 +91,7 @@ interface WebSocketSession : Closeable {
      * @return the protocol identifier, or {@code null} if no protocol
      * was specified or negotiated successfully
      */
-    
+
     string getAcceptedProtocol();
 
     /**

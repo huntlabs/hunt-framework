@@ -153,7 +153,7 @@ final class Request {
             // version(HUNT_DEBUG) info(urlEncodedMap.toString());
         } else if(contentType == "multipart/form-data") {
             _isMultipart = true;
-            ApplicationConfig config = app().config();
+            ApplicationConfig config = config();
             import std.path;
             import std.file;
             import hunt.framework.Init;
@@ -172,7 +172,7 @@ final class Request {
             stringBody = IOUtils.toString(inputStream);
             version (HUNT_DEBUG)
                 trace("body content: ", stringBody);
-        }        
+        }
     }
 
     MultipartFormInputStream multiPartForm() { return _multipartForm; }
@@ -1075,7 +1075,7 @@ final class Request {
      * @param  string  key
      * @return bool
      */
-    bool hasFile(string key) {    
+    bool hasFile(string key) {
         if(_multipartForm is null) {
             return false;
         } else {
@@ -1573,7 +1573,7 @@ package {
     const HEADER_X_FORWARDED_PROTO = 0b01000;
     const HEADER_X_FORWARDED_PORT = 0b10000;
     const HEADER_X_FORWARDED_ALL = 0b11110; // All "X-Forwarded-*" headers
-    const HEADER_X_FORWARDED_AWS_ELB = 0b11010; // AWS ELB doesn"t send X-Forwarded-Host    
+    const HEADER_X_FORWARDED_AWS_ELB = 0b11010; // AWS ELB doesn"t send X-Forwarded-Host
 }
 
 static this() {

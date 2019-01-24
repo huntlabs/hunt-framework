@@ -88,7 +88,7 @@ class Dispatcher
             else {
                 // add handle task to taskPool
                 this._taskPool.put(task!doRequestHandle(route.handle, request));
-            }            
+            }
         }
         catch (Exception e)
         {
@@ -132,13 +132,13 @@ Response doGroupMiddleware(Request request)
     auto mids = app().getGroupMiddlewares(request.route.getGroup());
     if( mids.length == 0)
         return null;
-    
+
     string mca = request.getMCA();
-    
+
     if(mca == "hunt.application.staticfile.staticfile.doStaticFile" ||
         mca == "staticfile.doStaticFile" )
         return null;
-        
+
     Response response;
     foreach(m ; mids)
     {
@@ -152,7 +152,7 @@ Response doGroupMiddleware(Request request)
 void doRequestHandle(RoutingHandler handle, Request req)
 {
     Response response;
-    
+
     // this thread _request
     request(req);
     newFrameworkTrace(req);
@@ -163,9 +163,8 @@ void doRequestHandle(RoutingHandler handle, Request req)
         if(response is null)
         {
 
-            
+
             response = handle(req);
-            
 
             if (response is null)
                 response = new Response(req);
@@ -192,8 +191,7 @@ void doRequestHandle(RoutingHandler handle, Request req)
         import std.stdio : writeln;
         import core.stdc.stdlib : exit;
         finishFrameworkTrace(e.toString);
-        collectException({ logError(e.toString); 
-            
+        collectException({ logError(e.toString);
             writeln(e.toString()); 
         }());
         exit(-1);
@@ -206,7 +204,7 @@ void doRequestHandle(RoutingHandler handle, Request req)
         http://www.cnblogs.com/feihong84/p/5678895.html
         https://stackoverflow.com/questions/10093053/add-header-in-ajax-request-with-jquery
         */
-        ApplicationConfig.HttpConf httpConf = app().config().http;
+        ApplicationConfig.HttpConf httpConf = config().http;
         if(httpConf.enableCors) {
             response.setHeader("Access-Control-Allow-Origin", httpConf.allowOrigin);
             response.setHeader("Access-Control-Allow-Methods", httpConf.allowMethods);
