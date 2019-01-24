@@ -112,6 +112,20 @@ public:
         return true;
     }
 
+    bool removeAuth()
+    {
+        auto session = request().session(true);
+        if(session.exists("auth_userid"))
+        {
+            session.remove("auth_userid");
+        }
+        if(!session.exists("auth_userid")) 
+        {
+            return true;
+        }
+        return false;
+    }
+
     private User getUser(int id)
     {
         updataData();
