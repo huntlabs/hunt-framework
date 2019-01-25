@@ -195,7 +195,7 @@ private
         }
         else static if (is(T == struct) || is(T == class))
         {
-            return toOBJ!T(_uniNodeToJSON(src));
+            return toObject!T(_uniNodeToJSON(src));
         }
         else
         {
