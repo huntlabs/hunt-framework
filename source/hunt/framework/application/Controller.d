@@ -77,7 +77,7 @@ abstract class Controller
     ///return true is ok, the named middleware is already exist return false
     bool addMiddleware(MiddlewareInterface m)
     {
-        if(m is null || this.middlewares.get(m.name(), null) is null)
+        if(m is null || this.middlewares.get(m.name(), null) !is null)
         {
             return false;
         }
