@@ -1078,8 +1078,13 @@ final class Request {
         if(_multipartForm is null) {
             return false;
         } else {
-            Part part = _multipartForm.getPart(key);
-            return part !is null;
+            try {
+                Part part = _multipartForm.getPart(key);
+                return part !is null;
+            } catch(Exception ex) {
+                warning(ex.msg);
+                return false;
+            }
         }
     }
 
