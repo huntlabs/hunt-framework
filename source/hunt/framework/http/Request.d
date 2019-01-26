@@ -193,7 +193,7 @@ final class Request {
     private bool _isMultipart = false;
     private bool _isXFormUrlencoded = false;
     private UploadedFile[] _convertedAllFiles;
-    private UploadedFile[string][] _convertedMultiFiles;
+    private UploadedFile[][string] _convertedMultiFiles;
 
     package(hunt.framework) void onMessageCompleted() {
         version(HUNT_DEBUG) info("do nothing");
