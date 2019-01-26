@@ -29,6 +29,8 @@ import hunt.framework.http.session;
 import hunt.framework.routing.Route;
 import hunt.framework.routing.Define;
 import hunt.framework.security.acl.User;
+import hunt.framework.file.UploadedFile;
+import hunt.framework.util.Array;
 
 import core.time : MonoTime, Duration;
 import std.algorithm;
@@ -163,10 +165,8 @@ final class Request {
             // version (HUNT_DEBUG) info("temp dir for upload: ",tempDir);
             // ByteBuffer buffer = requestBody.get(0);
             // ByteArrayInputStream inputStream = new ByteArrayInputStream(BufferUtils.toArray(buffer));
-            contentType = _httpFields.get(HttpHeader.CONTENT_TYPE);
-            _multipartForm = new MultipartFormInputStream(inputStream,
-                contentType, config.multiparConfig, tempDir);
-
+            
+            this.convertUploadedFiles(new MultipartFormInputStream(inputStream, _httpFields.get(HttpHeader.CONTENT_TYPE), config.multiparConfig, tempDir));
         } else {
             warningf("Can't handle content type: %s", contentType);
             stringBody = IOUtils.toString(inputStream);
@@ -175,10 +175,20 @@ final class Request {
         }
     }
 
-    MultipartFormInputStream multiPartForm() { return _multipartForm; }
-    private MultipartFormInputStream _multipartForm;
+    private void convertUploadedFiles(MultipartFormInputStream multipartForm)
+    {
+        foreach (part; multipartForm.getParts())
+        {
+            auto multipart = cast(MultipartFormInputStream.MultiPart) part;
+            // TODO: for upload failed? What's the errorCode? use multipart.isWriteToFile?
+            int errorCode = 0;
+            this._convertedFiles[part.getName()] = new UploadedFile(multipart.getFile(), multipart.getSubmittedFileName(), multipart.getContentType(), errorCode);
+        }
+    }
+
     private bool _isMultipart = false;
     private bool _isXFormUrlencoded = false;
+    private UploadedFile[string] _convertedFiles;
 
     package(hunt.framework) void onMessageCompleted() {
         version(HUNT_DEBUG) info("do nothing");
@@ -1061,11 +1071,8 @@ final class Request {
      *
      * @return array
      */
-    Part[] allFiles() {
-        if(_multipartForm is null)
-            return null;
-        else 
-            return _multipartForm.getParts();
+    UploadedFile[string] allFiles() {
+        return _convertedFiles;
     }
 
     /**
@@ -1075,16 +1082,14 @@ final class Request {
      * @return bool
      */
     bool hasFile(string key) {
-        if(_multipartForm is null) {
+        if(_convertedFiles is null) {
             return false;
         } else {
-            try {
-                Part part = _multipartForm.getPart(key);
-                return part !is null;
-            } catch(Exception ex) {
-                warning(ex.msg);
+            if (_convertedFiles.get(key, null) is null)
+            {
                 return false;
             }
+            return true;
         }
     }
 
@@ -1093,15 +1098,16 @@ final class Request {
      *
      * @param  string  key
      * @param  mixed default
-     * @return HttpForm.FormFile
+     * @return UploadedFile
      */
-    MultipartFormInputStream.MultiPart file(string key)    {
-        if(_multipartForm is null) {
-            return null;
-        } else {
-            Part part = _multipartForm.getPart(key);
-            return cast(MultipartFormInputStream.MultiPart)part;
+    UploadedFile file(string key)
+    {
+        if (this.hasFile(key))
+        {
+            return this._convertedFiles[key];
         }
+
+        return null;
     }
 
     @property string methodAsString() {

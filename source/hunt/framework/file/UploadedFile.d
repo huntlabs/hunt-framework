@@ -16,9 +16,8 @@ import hunt.framework.Simplify;
 
 class UploadedFile : File
 {
-    private bool _test = false;
     private int _errorCode = 0;
-    private string _errorMessage;
+    private string _errorMessage = "Unknow error.";
     private string _originalName;
     private string _mimeType;
 
@@ -101,7 +100,7 @@ class UploadedFile : File
      *
      * @see getMimeType()
      */
-    public string getClientMimeType()
+    override public string mimeType()
     {
         return this._mimeType;
     }
@@ -123,7 +122,7 @@ class UploadedFile : File
      * @see guessExtension()
      * @see getClientMimeType()
      */
-    public string guessClientExtension()
+    override public string extension()
     {
         // return MimeTypes::getDefault()->getExtensions(this.getClientMimeType())[0] ?? null;
         return null;
