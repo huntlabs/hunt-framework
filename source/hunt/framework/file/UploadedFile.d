@@ -75,7 +75,7 @@ class UploadedFile : File
      *
      * @return string The extension
      */
-    public string extension()
+    override public string extension()
     {
         import std.string : lastIndexOf, replace;
 
@@ -133,9 +133,20 @@ class UploadedFile : File
      *
      * @return int The maximum size of an uploaded file in bytes
      */
-    public static long getMaxFilesize()
+    public static long maxSize()
     {
         return config().upload.maxSize;
+    }
+
+    /**
+     * Store the uploaded file on a filesystem disk.
+     *
+     * @param  string  path
+     * @return false
+     */
+    public bool store(string path)
+    {
+        return this.move(path);
     }
 
     /**
