@@ -62,7 +62,7 @@ class UploadedFile : File
      *
      * @return string|null The original name
      */
-    public string getClientOriginalName()
+    public string originalName()
     {
         return this._originalName;
     }
@@ -75,7 +75,7 @@ class UploadedFile : File
      *
      * @return string The extension
      */
-    public string getClientOriginalExtension()
+    public string extension()
     {
         import std.string : lastIndexOf, replace;
 
@@ -103,29 +103,6 @@ class UploadedFile : File
     override public string mimeType()
     {
         return this._mimeType;
-    }
-
-    /**
-     * Returns the extension based on the client mime type.
-     *
-     * If the mime type is unknown, returns null.
-     *
-     * This method uses the mime type as guessed by getClientMimeType()
-     * to guess the file extension. As such, the extension returned
-     * by this method cannot be trusted.
-     *
-     * For a trusted extension, use guessExtension() instead (which guesses
-     * the extension based on the guessed mime type for the file).
-     *
-     * @return string|null The guessed extension or null if it cannot be guessed
-     *
-     * @see guessExtension()
-     * @see getClientMimeType()
-     */
-    override public string extension()
-    {
-        // return MimeTypes::getDefault()->getExtensions(this.getClientMimeType())[0] ?? null;
-        return null;
     }
 
     /**
