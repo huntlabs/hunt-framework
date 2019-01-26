@@ -37,7 +37,7 @@ class FileResponse : Response {
 
     FileResponse setFile(string filename) {
         _file = buildPath(APP_PATH, filename);
-        string contentType = getMimeContentTypeForFile(_file);
+        string contentType = getMimeTypeByFilename(_file);
 
         logInfof("xx=>%s, contentType=%s", _file, contentType);
 

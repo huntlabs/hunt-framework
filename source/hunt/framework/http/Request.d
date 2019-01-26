@@ -1557,7 +1557,6 @@ private:
     string[string] _mate;
     // CookieManager _cookieManager;
     JSONValue _json;
-    uint _maxBodySize;
     string _action;
 }
 

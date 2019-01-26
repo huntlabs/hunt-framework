@@ -122,7 +122,7 @@ final class ApplicationConfig
     struct UploadConf
     {
         string path = "/tmp";
-        uint maxSize = 4 * 1024 * 1024;
+        long maxSize = 4 * 1024 * 1024;
     }
 
     struct MailSmtpConf

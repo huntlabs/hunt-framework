@@ -394,7 +394,6 @@ private:
     void upConfig(ApplicationConfig conf) {
         addr = parseAddress(conf.http.address, conf.http.port);
 
-        _maxBodySize = conf.upload.maxSize;
         version (NO_TASKPOOL) {
             // NOTHING
         }
@@ -664,7 +663,6 @@ private:
 
     Address addr;
     HttpServer _server;
-    uint _maxBodySize;
     Dispatcher _dispatcher;
     EntityManagerFactory _entityManagerFactory;
     CacheManger _manger;

@@ -19,7 +19,8 @@ import hunt.http.codec.http.model.HttpHeader;
 import hunt.http.codec.http.model.HttpStatus;
 
 /**
-*/
+ * TODO: This module can use FileResponse send file.
+ */
 class StaticfileController : Controller
 {
     mixin MakeController;
@@ -90,7 +91,7 @@ class StaticfileController : Controller
                 return response;
         }
 
-        auto mimetype = getMimeContentTypeForFile(staticFilename);
+        auto mimetype = getMimeTypeByFilename(staticFilename);
         response.setHeader(HttpHeader.CONTENT_TYPE, mimetype ~ ";charset=utf-8");
 
         response.setHeader(HttpHeader.ACCEPT_RANGES, "bytes");

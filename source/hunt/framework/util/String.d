@@ -213,7 +213,7 @@ string mimeContentType(string ext)
 }
 
 /// get mime content type by filename
-string getMimeContentTypeForFile(string filename)
+string getMimeTypeByFilename(string filename)
 {
     string ext = extension(filename);
 
