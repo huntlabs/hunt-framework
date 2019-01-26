@@ -21,7 +21,7 @@ import std.format;
 
 class File
 {
-    string _path;
+    private string _path;
 
     /**
      * Constructs a new file from the given path.
@@ -40,19 +40,14 @@ class File
         this._path = buildPath(APP_PATH, path);
     }
 
-    public string getPath()
-    {
-        return dirName(this._path);
-    }
-
-    public string getRealPath()
+    public string path()
     {
         return this._path;
     }
 
-    public long getSize()
+    public long size()
     {
-        return .getSize(this._path);
+        return getSize(this._path);
     }
 
     /**
@@ -68,7 +63,7 @@ class File
      * @see MimeTypes
      * @see getMimeType()
      */
-    public string guessExtension()
+    public string extension()
     {
         // return MimeTypes::getDefault().getExtensions(this.getMimeType())[0] ?? null;
         return null;
@@ -85,9 +80,9 @@ class File
      *
      * @see MimeTypes
      */
-    public string getMimeType()
+    public string mimeType()
     {
-        return getMimeTypeByFilename(this.getRealPath());
+        return getMimeTypeByFilename(this.path());
     }
 
     /**
@@ -104,7 +99,7 @@ class File
         string target = this.getTargetFile(path);
         
         // error to throw FileException
-        rename(this.getRealPath(), target);
+        rename(this.path(), target);
 
         version (Posix)
         {
@@ -140,13 +135,22 @@ class File
      *
      * @return string containing
      */
-    protected string getName(string name)
+    protected string getName(string name = null)
     {
         import std.string : lastIndexOf, replace;
 
         string originalName;
 
-        originalName = name.replace("\\", "/");
+        if (name.length == 0)
+        {
+            originalName = this._path;
+        }
+        else
+        {
+            originalName = name;
+        }
+
+        originalName = originalName.replace("\\", "/");
         originalName = originalName[lastIndexOf(originalName, '/')..$];
 
         return originalName;

@@ -82,7 +82,7 @@ class UploadedFile : File
 
         string extensionName;
 
-        extensionName = this.getRealPath().replace("\\", "/");
+        extensionName = this.path().replace("\\", "/");
         extensionName = extensionName[lastIndexOf(extensionName, '/')..$];
         
         return extensionName;
