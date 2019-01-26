@@ -182,13 +182,18 @@ final class Request {
             auto multipart = cast(MultipartFormInputStream.MultiPart) part;
             // TODO: for upload failed? What's the errorCode? use multipart.isWriteToFile?
             int errorCode = 0;
-            this._convertedFiles[part.getName()] = new UploadedFile(multipart.getFile(), multipart.getSubmittedFileName(), multipart.getContentType(), errorCode);
+            auto file = new UploadedFile(multipart.getFile(), multipart.getSubmittedFileName(), multipart.getContentType(), errorCode);
+ 
+            this._convertedMultiFiles[multipart.getName()] ~= file;
+            this._convertedAllFiles ~= file;
+ 
         }
     }
 
     private bool _isMultipart = false;
     private bool _isXFormUrlencoded = false;
-    private UploadedFile[string] _convertedFiles;
+    private UploadedFile[] _convertedAllFiles;
+    private UploadedFile[string][] _convertedMultiFiles;
 
     package(hunt.framework) void onMessageCompleted() {
         version(HUNT_DEBUG) info("do nothing");
@@ -1071,8 +1076,8 @@ final class Request {
      *
      * @return array
      */
-    UploadedFile[string] allFiles() {
-        return _convertedFiles;
+    UploadedFile[] allFiles() {
+        return _convertedAllFiles;
     }
 
     /**
@@ -1082,10 +1087,10 @@ final class Request {
      * @return bool
      */
     bool hasFile(string key) {
-        if(_convertedFiles is null) {
+        if(_convertedMultiFiles is null) {
             return false;
         } else {
-            if (_convertedFiles.get(key, null) is null)
+            if (_convertedMultiFiles.get(key, null) is null)
             {
                 return false;
             }
@@ -1104,7 +1109,17 @@ final class Request {
     {
         if (this.hasFile(key))
         {
-            return this._convertedFiles[key];
+            return this._convertedMultiFiles[key][0];
+        }
+
+        return null;
+    }
+
+    UploadedFile[] files(string key)
+    {
+        if (this.hasFile(key))
+        {
+            return this._convertedMultiFiles[key];
         }
 
         return null;
