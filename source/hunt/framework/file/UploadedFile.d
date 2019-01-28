@@ -14,6 +14,7 @@ module hunt.framework.file.UploadedFile;
 import hunt.framework.file.File;
 import hunt.framework.Simplify;
 
+
 class UploadedFile : File
 {
     private int _errorCode = 0;
@@ -51,7 +52,7 @@ class UploadedFile : File
         this._mimeType = mimeType is null ? "application/octet-stream" : mimeType;
         this._errorCode = errorCode;
         
-        super(path);
+        super(path, false);
     }
 
     /**

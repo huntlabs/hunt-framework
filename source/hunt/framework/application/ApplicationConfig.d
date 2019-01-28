@@ -244,23 +244,22 @@ final class ApplicationConfig
     View view;
     TraceConf trace;
 
-    MultipartConfig multiparConfig()
+    MultipartConfig multipartConfig()
     {
-        if(_multiparConfig is null)
+        if(_multipartConfig is null)
         {
-            string path = buildPath(DEFAULT_STORAGE_PATH, upload.path);
+            string path = buildPath(DEFAULT_TEMP_PATH, upload.path);
             if(!path.exists())
             {
                 // for Exception now?
                 path.mkdirRecurse();
             }
-            // _multiparConfig = new MultipartConfig(path, 1024, 3072, 50); 
-            _multiparConfig = new MultipartConfig(path, upload.maxSize, upload.maxSize, 50); 
+            _multipartConfig = new MultipartConfig(path, upload.maxSize, upload.maxSize, 50); 
         }
-        return _multiparConfig;
+        return _multipartConfig;
     }
 
-    private MultipartConfig _multiparConfig;
+    private MultipartConfig _multipartConfig;
 
     this()
     {

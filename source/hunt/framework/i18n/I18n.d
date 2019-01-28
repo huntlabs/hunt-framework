@@ -84,7 +84,7 @@ class I18n {
         string _res_file_name = baseName(fileName, extension(fileName));
         string _loc = baseName(dirName(fileName));
 
-        trace("fileName=>", fileName);
+        version(HUNT_DEBUG) trace("Reading lang resource file: ", fileName);
 
         int line = 1;
         while (!f.eof()) {

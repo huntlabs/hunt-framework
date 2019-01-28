@@ -23,6 +23,7 @@ import hunt.Exceptions;
 import hunt.util.Common;
 import hunt.util.MimeTypeUtils;
 
+import hunt.framework.application.ApplicationConfig;
 import hunt.framework.Simplify;
 import hunt.framework.Exceptions;
 import hunt.framework.http.session;
@@ -162,11 +163,12 @@ final class Request {
             string tempDir = DEFAULT_TEMP_PATH;
             if(!tempDir.exists())
                 tempDir.mkdirRecurse();
-            // version (HUNT_DEBUG) info("temp dir for upload: ",tempDir);
+            version (HUNT_DEBUG) info("temp dir for upload: ",tempDir);
             // ByteBuffer buffer = requestBody.get(0);
             // ByteArrayInputStream inputStream = new ByteArrayInputStream(BufferUtils.toArray(buffer));
             
-            this.convertUploadedFiles(new MultipartFormInputStream(inputStream, _httpFields.get(HttpHeader.CONTENT_TYPE), config.multiparConfig, tempDir));
+            this.convertUploadedFiles(new MultipartFormInputStream(inputStream, 
+                _httpFields.get(HttpHeader.CONTENT_TYPE), config.multipartConfig, tempDir));
         } else {
             warningf("Can't handle content type: %s", contentType);
             stringBody = IOUtils.toString(inputStream);
@@ -177,16 +179,31 @@ final class Request {
 
     private void convertUploadedFiles(MultipartFormInputStream multipartForm)
     {
-        foreach (part; multipartForm.getParts())
+        foreach (Part part; multipartForm.getParts())
         {
-            auto multipart = cast(MultipartFormInputStream.MultiPart) part;
-            // TODO: for upload failed? What's the errorCode? use multipart.isWriteToFile?
-            int errorCode = 0;
-            auto file = new UploadedFile(multipart.getFile(), multipart.getSubmittedFileName(), multipart.getContentType(), errorCode);
- 
-            this._convertedMultiFiles[multipart.getName()] ~= file;
-            this._convertedAllFiles ~= file;
- 
+            MultipartFormInputStream.MultiPart multipart = cast(MultipartFormInputStream.MultiPart) part;
+
+            version(HUNT_DEBUG) {
+                tracef("File: key=%s, fileName=%s, actualFile=%s, ContentType=%s, content=%s",
+                    multipart.getName(), multipart.getSubmittedFileName(), 
+                    multipart.getFile(), multipart.getContentType(), cast(string) multipart.getBytes());
+            }
+
+            string contentType = multipart.getContentType();
+            string submittedFileName = multipart.getSubmittedFileName();
+            string key = multipart.getName();
+            if(!submittedFileName.empty) {
+                // TODO: for upload failed? What's the errorCode? use multipart.isWriteToFile?
+                int errorCode = 0;
+                multipart.flush();
+                auto file = new UploadedFile(multipart.getFile(), submittedFileName, 
+                    contentType, errorCode);
+    
+                this._convertedMultiFiles[key] ~= file;
+                this._convertedAllFiles ~= file;
+            } else {
+                this._xFormData[key] ~= cast(string) multipart.getBytes();
+            }
         }
     }
 

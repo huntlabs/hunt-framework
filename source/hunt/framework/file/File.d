@@ -103,11 +103,11 @@ class File
 
         version (Posix)
         {
-            import std.exception : assertThrown;
+            import std.exception : assertNotThrown;
             import std.conv : octal;
             import std.file : setAttributes;
 
-            assertThrown!FileException(target.setAttributes(octal!644));
+            assertNotThrown!FileException(target.setAttributes(octal!644));
         }
         
         return true;
@@ -116,9 +116,9 @@ class File
     protected string getTargetFile(string path)
     {
         string target = buildPath(APP_PATH, path);
-        if (isDir(target)) {
-            throw new FileException(format("Unable to create the \"%s\" directory.", target));
-        }
+        // if (isDir(target)) {
+        //     throw new FileException(format("Unable to create the \"%s\" directory.", target));
+        // }
 
         if (exists(target))
         {
@@ -151,7 +151,10 @@ class File
         }
 
         originalName = originalName.replace("\\", "/");
-        originalName = originalName[lastIndexOf(originalName, '/')..$];
+        ptrdiff_t index = lastIndexOf(originalName, '/');
+        if(index>=0) {
+            originalName = originalName[index..$];
+        }
 
         return originalName;
     }
