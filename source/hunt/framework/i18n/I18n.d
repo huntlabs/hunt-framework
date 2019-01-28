@@ -36,6 +36,9 @@ class I18n {
 
     bool loadLangResources(string path, lazy string ext = "ini") {
         _isResLoaded = false;
+        if(!path.exists()) {
+            return false;
+        }
         auto resfiles = std.file.dirEntries(path, "*.{" ~ ext ~ "}", SpanMode.depth).filter!(a => a.isFile)
             .map!(a => std.path.absolutePath(a.name))
             .array;
@@ -82,7 +85,6 @@ class I18n {
         string _loc = baseName(dirName(fileName));
 
         trace("fileName=>", fileName);
-        trace("xxxxxxx=>", _loc);
 
         int line = 1;
         while (!f.eof()) {
@@ -163,7 +165,7 @@ string trans(string key) {
     string defaultValue = key;
     I18n i18n = I18n.instance();
     if (!i18n.isResLoaded) {
-        logWarning("The lang resources has't loaded yet!");
+        logWarning("The lang resources haven't loaded yet!");
         return key;
     }
 

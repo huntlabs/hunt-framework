@@ -30,7 +30,7 @@ import hunt.framework.routing.Route;
 import hunt.framework.routing.Define;
 import hunt.framework.security.acl.User;
 import hunt.framework.file.UploadedFile;
-import hunt.framework.util.Array;
+import hunt.Functions;
 
 import core.time : MonoTime, Duration;
 import std.algorithm;
