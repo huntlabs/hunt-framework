@@ -136,32 +136,39 @@ private string _local /* = I18N_DEFAULT_LOCALE */ ;
 deprecated("Using trans instead.")
 alias getText = trans;
 
-string transf(A...)(string key, lazy A args) {
+deprecated("Using trans instead.")
+alias transf = trans;
+
+string trans(A...)(string key, lazy A args) {
     import std.format;
     Appender!string buffer;
-    string text = trans(key);
+    string text = _trans(key);
+    version(HUNT_DEBUG) tracef("format string: %s, key: %s, args.length: ", text, key, args.length);
     formattedWrite(buffer, text, args);
 
     return buffer.data;
 }
 
-string transfWithLocale(A...)(string locale, string key, lazy A args) {
+deprecated("Using transWithLocale instead.")
+alias transfWithLocale = transWithLocale;
+
+string transWithLocale(A...)(string locale, string key, lazy A args) {
     import std.format;
     Appender!string buffer;
-    string text = trans(locale, key);
+    string text = _transWithLocale(locale, key);
     formattedWrite(buffer, text, args);
 
     return buffer.data;
 }
 
-string transfWithLocale(string locale, string key, JSONValue args) {
+string transWithLocale(string locale, string key, JSONValue args) {
     import hunt.framework.util.Formatter;
-    string text = trans(locale, key);
+    string text = _transWithLocale(locale, key);
     return StrFormat(text, args);
 }
 
 ///key is [filename.key]
-string trans(string key) {
+private string _trans(string key) {
     string defaultValue = key;
     I18n i18n = I18n.instance();
     if (!i18n.isResLoaded) {
@@ -187,7 +194,7 @@ string trans(string key) {
 }
 
 ///key is [filename.key]
-string trans(string locale, string key) {
+private string _transWithLocale(string locale, string key) {
     string defaultValue = key;
     I18n i18n = I18n.instance();
     if (!i18n.isResLoaded) {

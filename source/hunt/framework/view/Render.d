@@ -950,7 +950,7 @@ private:
         {
             if(arg.length == 1)
             {
-                return UniNode(trans(_locale,arg[0].get!string));
+                return UniNode(transWithLocale(_locale,arg[0].get!string));
             }
             else if(arg.length > 1)
             {
@@ -961,7 +961,7 @@ private:
                      args ~= arg[i];
                 }
                 
-                return UniNode(transfWithLocale(_locale,msg,uniNodeToJSON(UniNode(args))));
+                return UniNode(transWithLocale(_locale,msg,uniNodeToJSON(UniNode(args))));
             }
         }
         throw new TemplateRenderException("unsupport param : " ~ arg.toString);
