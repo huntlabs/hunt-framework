@@ -19,6 +19,7 @@ private
 
     import std.functional : toDelegate;
     import std.format : fmt = format;
+    import std.conv;
 }
 
 
@@ -32,6 +33,8 @@ Function[string] globalFunctions()
             "namespace": wrapper!namespace,
             "date": wrapper!date,
             "url": wrapper!url,
+            "int": wrapper!Int,
+            "string": wrapper!String,
             "trans":toDelegate(&trans)
         ];
 }
@@ -73,6 +76,41 @@ long length(UniNode value)
     assert(0);
 }
 
+int Int(UniNode value)
+{
+    switch (value.kind) with (UniNode.Kind)
+    {
+        case integer:
+            return cast(int)(value.get!long);
+        case uinteger:
+            return cast(int)(value.get!ulong);
+        case boolean:
+            return value.get!bool ? 1 : 0;
+        case text:
+            return value.get!string.to!int;
+        default:
+            assertTemplate(0, "Object of type `%s` has no int()".fmt(value.kind));
+    }
+    assert(0);
+}
+
+string String(UniNode value)
+{
+    switch (value.kind) with (UniNode.Kind)
+    {
+        case integer:
+            return to!string(value.get!long);
+        case uinteger:
+            return to!string(value.get!ulong);
+        case boolean:
+            return value.get!bool ? "true" : "false";
+        case text:
+            return value.get!string;
+        default:
+            assertTemplate(0, "Object of type `%s` has no string()".fmt(value.kind));
+    }
+    assert(0);
+}
 
 UniNode namespace(UniNode kwargs)
 {
