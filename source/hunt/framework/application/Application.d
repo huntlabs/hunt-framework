@@ -80,14 +80,13 @@ final class Application : ApplicationContext {
         i18n.defaultLocale = configManager().config().application.defaultLanguage;
         i18n.loadLangResources(resPath);
 
-        hunt.logging.trace(i18n.defaultLocale);
-        hunt.logging.trace(configManager().config().application.languages);
-
         return this;
     }
 
-    Application onBreadcrumbsInitializing(BreadcrumbsHandler handler) {
+    Application onBreadcrumbsInitializing(BreadcrumbsHandler handler)
+    {
         _breadcrumbsHandler = handler;
+
         return this;
     }
 
