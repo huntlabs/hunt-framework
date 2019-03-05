@@ -31,14 +31,13 @@ class JsonResponse : Response
     this()
     {
         super(request());
-        setHeader(HttpHeader.CONTENT_TYPE, JsonContentType);
     }
 
     this(T)(T data)
     {
         super(request());
-        setHeader(HttpHeader.CONTENT_TYPE, JsonContentType);
-        setContent(data.toJson().toString());
+        
+        this.setJson(data.toJson())
     }
 
     /**
@@ -58,10 +57,11 @@ class JsonResponse : Response
      *
      * @return this
      */
-    JsonResponse json(JSONValue data)
+    JsonResponse setJson(JSONValue data)
     {
+        this.setHeader(HttpHeader.CONTENT_TYPE, JsonContentType);
         this.setContent(data.toString());
+
         return this;
     }
-
 }
