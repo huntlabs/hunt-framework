@@ -30,6 +30,7 @@ class JsonResponse : Response
 {
     this()
     {
+        super(request());
         setHeader(HttpHeader.CONTENT_TYPE, JsonContentType);
     }
 
