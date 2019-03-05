@@ -170,7 +170,7 @@ final class ApplicationConfig
         string password = "";
         string charset = "utf8";
         string prefix = "";
-        bool enabled = true;
+        bool enabled = false;
     }
 
     struct DatabaseConf
