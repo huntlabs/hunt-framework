@@ -37,7 +37,7 @@ class JsonResponse : Response
     {
         super(request());
         
-        this.setJson(data.toJson())
+        this.setJson(data.toJson());
     }
 
     /**
