@@ -14,6 +14,8 @@ import hunt.framework.http.Request;
 
 import hunt.http.codec.http.model.HttpHeader;
 
+import hunt.util.Serialize;
+
 /**
  * Response represents an HTTP response in JSON format.
  *
@@ -26,22 +28,16 @@ import hunt.http.codec.http.model.HttpHeader;
  */
 class JsonResponse : Response
 {
-    this(Request request, string contentType = JsonContentType)
+    this()
     {
-        super(request);
-        setHeader(HttpHeader.CONTENT_TYPE, contentType);
+        setHeader(HttpHeader.CONTENT_TYPE, JsonContentType);
     }
 
-    this(Request request, JSONValue data, string contentType = JsonContentType)
+    this(T)(T data)
     {
-        this(request, data.toString(), contentType);
-    }
-
-    this(Request request, string data, string contentType = JsonContentType)
-    {
-        super(request);
-        setHeader(HttpHeader.CONTENT_TYPE, contentType);
-        setContent(data);
+        super(request());
+        setHeader(HttpHeader.CONTENT_TYPE, JsonContentType);
+        setContent(data.toJson().toString());
     }
 
     /**
