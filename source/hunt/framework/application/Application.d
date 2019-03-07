@@ -397,6 +397,11 @@ private:
             // NOTHING
         }
         else {
+            int minThreadCount = totalCPUs/4 + 1;
+            if(conf.http.workerThreads < minThreadCount) {
+                warningf("The number of worker thread can't be less than %d", minThreadCount);
+                conf.http.workerThreads = minThreadCount;
+            }
             _tpool = new TaskPool(conf.http.workerThreads);
             _tpool.isDaemon = true;
         }
