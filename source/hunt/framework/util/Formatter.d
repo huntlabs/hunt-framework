@@ -108,7 +108,7 @@ unittest
     import std.stdio;
 
     string message = "hello %s, your id is %2d, 
-                                        your score is %.2f, byte!";
+                                        your score is %.2f, bye!";
 	JSONValue data = [JSONValue("gaoxincheng"),JSONValue(100),JSONValue(89.345)];
 
 	writeln("format message : ",StrFormat(message,data));

@@ -22,7 +22,7 @@ private
     import std.conv;
 }
 
-
+// dfmt off
 Function[string] globalFunctions()
 {
     return cast(immutable)
@@ -35,10 +35,11 @@ Function[string] globalFunctions()
             "url": wrapper!url,
             "int": wrapper!Int,
             "string": wrapper!String,
-            "trans":toDelegate(&trans)
+            "trans":toDelegate(&trans),
+            "format" : toDelegate(&doFormat)
         ];
 }
-
+// dfmt on
 
 UniNode range(UniNode params)
 {
@@ -60,18 +61,17 @@ UniNode range(UniNode params)
     assert(0);
 }
 
-
 long length(UniNode value)
 {
     switch (value.kind) with (UniNode.Kind)
     {
-        case array:
-        case object:
-            return value.length;
-        case text:
-            return value.get!string.length;
-        default:
-            assertTemplate(0, "Object of type `%s` has no length()".fmt(value.kind));
+    case array:
+    case object:
+        return value.length;
+    case text:
+        return value.get!string.length;
+    default:
+        assertTemplate(0, "Object of type `%s` has no length()".fmt(value.kind));
     }
     assert(0);
 }
@@ -80,16 +80,17 @@ int Int(UniNode value)
 {
     switch (value.kind) with (UniNode.Kind)
     {
-        case integer:
-            return cast(int)(value.get!long);
-        case uinteger:
-            return cast(int)(value.get!ulong);
-        case boolean:
-            return value.get!bool ? 1 : 0;
-        case text:
-            return value.get!string.to!int;
-        default:
-            assertTemplate(0, "Object of type `%s` has no int()".fmt(value.kind));
+    case integer:
+        return cast(int)(value.get!long);
+    case uinteger:
+        return cast(int)(value.get!ulong);
+    case boolean:
+        return value.get!bool ? 1 : 0;
+    case text:
+        return value.get!string
+            .to!int;
+    default:
+        assertTemplate(0, "Object of type `%s` has no int()".fmt(value.kind));
     }
     assert(0);
 }
@@ -98,16 +99,16 @@ string String(UniNode value)
 {
     switch (value.kind) with (UniNode.Kind)
     {
-        case integer:
-            return to!string(value.get!long);
-        case uinteger:
-            return to!string(value.get!ulong);
-        case boolean:
-            return value.get!bool ? "true" : "false";
-        case text:
-            return value.get!string;
-        default:
-            assertTemplate(0, "Object of type `%s` has no string()".fmt(value.kind));
+    case integer:
+        return to!string(value.get!long);
+    case uinteger:
+        return to!string(value.get!ulong);
+    case boolean:
+        return value.get!bool ? "true" : "false";
+    case text:
+        return value.get!string;
+    default:
+        assertTemplate(0, "Object of type `%s` has no string()".fmt(value.kind));
     }
     assert(0);
 }
@@ -120,16 +121,47 @@ UniNode namespace(UniNode kwargs)
 ///dummy
 UniNode trans(UniNode node)
 {
-     return UniNode(null);
+    return UniNode(null);
 }
 
 ///dummy
-string date(string format , long timestamp)
+string date(string format, long timestamp)
 {
     return null;
 }
 ///dummy
-string url(string format , string d)
+string url(string format, string d)
 {
     return null;
+}
+
+UniNode doFormat(UniNode args)
+{
+    import hunt.framework.util.Formatter;
+    import hunt.framework.util.uninode.Serialization;
+
+    if ("varargs" in args)
+    {
+        args = args["varargs"];
+    }
+
+    if (args.kind == UniNode.Kind.array)
+    {
+        if (args.length == 1)
+        {
+            return args[0];
+        }
+        else if (args.length > 1)
+        {
+            string msg = args[0].get!string;
+            UniNode[] params;
+            for (int i = 1; i < args.length; i++)
+            {
+                params ~= args[i];
+            }
+
+            return UniNode(StrFormat(msg, uniNodeToJSON(UniNode(params))));
+        }
+    }
+    throw new TemplateRenderException("unsupport param : " ~ args.toString);
 }
