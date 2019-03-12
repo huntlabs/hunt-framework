@@ -737,7 +737,7 @@ final class Request {
      * @return void
      */
     void flush() {
-        if (hasSession())
+        if (_session !is null)
             _sessionStorage.put(_session);
     }
 
@@ -756,11 +756,11 @@ final class Request {
             _session = _sessionStorage.get(sessionId);
         }
 
-        version(HUNT_DEBUG) info("last session: " ~ sessionId);
+        version(HUNT_DEBUG) warning("last session: " ~ sessionId);
 
         if (_session is null && canCreate) {
             sessionId = HttpSession.generateSessionId();
-            version(HUNT_DEBUG) info("new session: " ~ sessionId);
+            version(HUNT_DEBUG) warning("new session: " ~ sessionId);
             _session = HttpSession.create(sessionId, _sessionStorage.expire);
             // _sessionStorage.put(sessionId, _session);
         }
