@@ -114,6 +114,8 @@ View GetViewObject()
     }
     auto view = new View(_envInstance);
 
-    view.setTemplatePath(config().view.path).setTemplateExt(config().view.ext);
+    string path = buildPath(APP_PATH, config().view.path);
+
+    view.setTemplatePath(path).setTemplateExt(config().view.ext);
     return view;
 }
