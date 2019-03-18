@@ -15,6 +15,7 @@ public import hunt.framework.application.Application : app;
 public import hunt.framework.application.ApplicationConfig : configManager, ApplicationConfig;
 public import hunt.util.DateTime : time, date;
 public import hunt.framework.Init;
+public import hunt.storage.redis : redis;
 
 import std.string;
 
