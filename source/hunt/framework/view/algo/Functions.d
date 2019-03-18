@@ -14,7 +14,7 @@ module hunt.framework.view.algo.Functions;
 private
 {
     import hunt.framework.view.algo.Wrapper;
-    import hunt.framework.view.Exception : assertTemplate = assertTemplateException;
+    import hunt.framework.view.Exception : assertTemplate = assertTemplateException, TemplateRenderException;
     import hunt.framework.view.Uninode;
 
     import std.functional : toDelegate;

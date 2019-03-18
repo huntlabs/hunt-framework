@@ -39,7 +39,7 @@ class View
 
     this(Environment env)
     {
-        _templatePath = config().view.path;
+        _templatePath = buildPath(APP_PATH, config().view.path);
         _extName = config().view.ext;
 
         _env = env;
