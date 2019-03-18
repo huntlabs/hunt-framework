@@ -8,7 +8,7 @@ static private Redis _redis;
 
 Redis redis()
 {
-    if (_redis is null)
+    if (_redis is null && config().redis.enabled)
     {
         _redis = new Redis(config().redis.host, config().redis.port, config().redis.password);
     }
