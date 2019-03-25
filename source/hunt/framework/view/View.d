@@ -87,8 +87,10 @@ class View
 
     public string render(string tempalteFile)
     {
-        import std.stdio;
-        version (HUNT_DEBUG) trace("---rend context :", _context.toString);
+        version (HUNT_DEBUG) {
+            tracef("---tempalteFile: %s, _extName:%s, rend context: %s", 
+                tempalteFile, _extName, _context.toString);
+        }
         return _env.renderFile(tempalteFile ~ _extName,_context);
     }
 
@@ -116,6 +118,9 @@ View GetViewObject()
 
     string path = buildPath(APP_PATH, config().view.path);
 
+    version (HUNT_DEBUG) {
+        tracef("setting view path: %s", path);
+    }
     view.setTemplatePath(path).setTemplateExt(config().view.ext);
     return view;
 }
