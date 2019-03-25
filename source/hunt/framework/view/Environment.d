@@ -89,7 +89,6 @@ public:
 
     TemplateNode parse_template(string filename)
     {
-        string p = buildPath()
         version (HUNT_DEBUG) trace("parse template file: ", input_path ~ filename);
         return _parser.parseTreeFromFile(input_path ~ filename);
     }
