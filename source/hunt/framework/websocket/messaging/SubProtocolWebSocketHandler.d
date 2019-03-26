@@ -439,7 +439,10 @@ class SubProtocolWebSocketHandler : WebSocketMessageHandler,
                 handler = this.defaultProtocolHandler;
             }
             else if (this.protocolHandlers.size() == 1) {
-                handler = this.protocolHandlers.iterator.front() ;
+                foreach(SubProtocolHandler h ; this.protocolHandlers) {
+                    handler = h;
+                    break;
+                }
             }
             else {
                 throw new IllegalStateException("Multiple protocol handlers configured and " ~
