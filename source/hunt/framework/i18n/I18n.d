@@ -54,6 +54,24 @@ class I18n {
         return true;
     }
 
+    bool clear()
+    {
+        // TODO
+        return false;
+    }
+
+    I18n add(string key, string value)
+    {
+        //
+        return this;
+    }
+
+    I18n merge(string local, string[string] data)
+    {
+        //
+        return this;
+    }
+
     @property bool isResLoaded() {
         return _isResLoaded;
     }
