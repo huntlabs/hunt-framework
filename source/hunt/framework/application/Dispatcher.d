@@ -155,7 +155,12 @@ void doRequestHandle(RoutingHandler handle, Request req)
 
     // this thread _request
     request(req);
-    newFrameworkTrace(req);
+
+    version(WITH_HUNT_TRACE)
+    {
+        newFrameworkTrace(req);
+    }
+
     try
     {
         ///this group middleware.
@@ -169,11 +174,17 @@ void doRequestHandle(RoutingHandler handle, Request req)
             if (response is null)
                 response = new Response(req);
         }
-        finishFrameworkTrace(response);
+        version(WITH_HUNT_TRACE)
+        {
+            finishFrameworkTrace(response);
+        }
     }
     catch (CreateResponseException e)
     {
-        finishFrameworkTrace(e.toString);
+        version(WITH_HUNT_TRACE)
+        {
+            finishFrameworkTrace(e.toString);
+        }
         collectException(error(e.toString));
     }
     catch (Exception e)
@@ -182,7 +193,12 @@ void doRequestHandle(RoutingHandler handle, Request req)
         response = new Response(req);
         response.setStatus(502);
         response.setContent(e.toString());
-        finishFrameworkTrace(response);
+        
+        version(WITH_HUNT_TRACE)
+        {
+            finishFrameworkTrace(response);
+        }
+
         // response.connectionClose();
         response.close();
     }
@@ -190,7 +206,11 @@ void doRequestHandle(RoutingHandler handle, Request req)
     {
         import std.stdio : writeln;
         import core.stdc.stdlib : exit;
-        finishFrameworkTrace(e.toString);
+        version(WITH_HUNT_TRACE)
+        {
+            finishFrameworkTrace(e.toString);
+        }
+        
         collectException({ logError(e.toString);
             writeln(e.toString()); 
         }());
