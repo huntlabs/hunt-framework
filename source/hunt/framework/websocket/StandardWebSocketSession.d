@@ -99,7 +99,7 @@ version(Have_hunt_security) {
      */
     this(HttpHeaders headers, Map!(string, Object) attributes,
             Address localAddress, Address remoteAddress, Principal user) {
-        this(headers, attributes, localAddress, remoteAddress, null);
+        this(headers, attributes, localAddress, remoteAddress);
         this.user = user;
     }
 
