@@ -302,6 +302,8 @@ string __createCallActionMethod(T, string moduleName)()
     }
 
     str ~= "\tdefault:\n\tbreak;\n\t}\n\n";
+    str ~= "\timport hunt.framework.Simplify;\n";
+    str ~= "\tcloseDefaultEntityManager();\n";
     str ~= "\treturn actionResult;\n";
     str ~= "}";
 
