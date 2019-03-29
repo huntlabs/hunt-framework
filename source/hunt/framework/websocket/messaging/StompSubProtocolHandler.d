@@ -469,9 +469,14 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
                     // SimpAttributes simpAttributes = 
                     //     new SimpAttributes(session.getSessionId(), session.getAttributes());
                     // SimpAttributesContextHolder.setAttributes(simpAttributes);
-                    version(Have_hunt_security) Principal user = null; // getUser(session);
-                    publishEvent(this.eventPublisher, new SessionConnectedEvent(this, 
-                        cast(Message!(byte[])) message, user));
+                    version(Have_hunt_security) {
+                        Principal user = null; // getUser(session);
+                        publishEvent(this.eventPublisher, new SessionConnectedEvent(this, 
+                            cast(Message!(byte[])) message, user));
+                    } else {
+                        publishEvent(this.eventPublisher, new SessionConnectedEvent(this, 
+                            cast(Message!(byte[])) message));                        
+                    }
                 }
                 finally {
                     // SimpAttributesContextHolder.resetAttributes();
@@ -698,7 +703,9 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
             outputChannel.send(message);
         }
         finally {
-            this.stompAuthentications.remove(session.getId());
+            version(Have_hunt_security) {
+                this.stompAuthentications.remove(session.getId());
+            }
             // SimpAttributesContextHolder.resetAttributes();
             simpAttributes.sessionCompleted();
         }

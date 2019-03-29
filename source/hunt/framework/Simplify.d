@@ -55,7 +55,7 @@ version(WITH_HUNT_ENTITY) {
 
     public import hunt.entity.EntityManager;
     public import hunt.entity.DefaultEntityManagerFactory;
-    
+
     //global entity manager
     private EntityManager _em;
     EntityManager defaultEntityManager()
@@ -67,9 +67,12 @@ version(WITH_HUNT_ENTITY) {
         return _em;
     }
 
-    //close global entity manager
-    void closeDefaultEntityManager()
-    {
+}
+
+//close global entity manager
+void closeDefaultEntityManager()
+{
+    version(WITH_HUNT_ENTITY)  {
         if(_em !is null)
         {
             _em.close();

@@ -173,8 +173,13 @@ class WebSocketHttpRequestHandler : WebSocketHandler { // , Lifecycle, ServletCo
                 trace(request.getMethod() ~ " " ~ request.getURIString());
             }
 
-            wsSession = new StandardWebSocketSession(request.getFields(), null,
-                connection.getLocalAddress(), connection.getRemoteAddress(), null); // user
+            version(Have_hunt_security) {
+                wsSession = new StandardWebSocketSession(request.getFields(), null,
+                    connection.getLocalAddress(), connection.getRemoteAddress(), null); // user
+            } else {
+                wsSession = new StandardWebSocketSession(request.getFields(), null,
+                    connection.getLocalAddress(), connection.getRemoteAddress()); 
+            }
 
             // Map!(string, Object) attributes = new HashMap<>();
             // if (!chain.applyBeforeHandshake(request, response, attributes)) {

@@ -82,7 +82,6 @@ class StandardWebSocketSession : AbstractWebSocketSession!(WebSocketConnection) 
         this.id = idGenerator.generateId().toString();
         headers = (headers !is null ? headers : new HttpHeaders());
         this.handshakeHeaders = headers;
-        this.user = user;
         this.localAddress = localAddress;
         this.remoteAddress = remoteAddress;
     }

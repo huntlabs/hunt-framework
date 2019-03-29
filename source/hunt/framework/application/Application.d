@@ -185,11 +185,12 @@ final class Application : ApplicationContext {
         _sessionStorage.expire = config.expire;
     }
 
-version(WITH_HUNT_ENTITY) {
-    EntityManagerFactory entityManagerFactory() {
-        return _entityManagerFactory;
+    version(WITH_HUNT_ENTITY)
+    {
+        EntityManagerFactory entityManagerFactory() {
+            return _entityManagerFactory;
+        }
     }
-}
 
     CacheManger cacheManger() {
         return _manger;
@@ -227,18 +228,18 @@ version(WITH_HUNT_ENTITY) {
         initSessionStorage(config.session);
         _accessManager = new AccessManager(cache() , config.application.name , config.session.prefix, config.session.expire);
 
-        auto local = new EndPoint();
-        local.serviceName = config.application.name;
-        local.ipv4 = config.http.address;
-        local.port = config.http.port;
-
-        if(config.trace.enable && config.trace.service.host != string.init)
-        {
-            initIMF(config.trace.service.host , config.trace.service.port);
-        }
-
         version(WITH_HUNT_TRACE)
         {
+            auto local = new EndPoint();
+            local.serviceName = config.application.name;
+            local.ipv4 = config.http.address;
+            local.port = config.http.port;
+
+            if(config.trace.enable && config.trace.service.host != string.init)
+            {
+                initIMF(config.trace.service.host , config.trace.service.port);
+            }
+
             Tracer.localEndpoint = local;
         }
     }
@@ -697,7 +698,12 @@ private:
     Address addr;
     HttpServer _server;
     Dispatcher _dispatcher;
-    version(WITH_HUNT_ENTITY) EntityManagerFactory _entityManagerFactory;
+
+    version(WITH_HUNT_ENTITY)
+    {
+        EntityManagerFactory _entityManagerFactory;
+    }
+
     CacheManger _manger;
     SessionStorage _sessionStorage;
     AccessManager _accessManager;
