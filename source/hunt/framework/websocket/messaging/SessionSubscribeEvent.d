@@ -13,7 +13,10 @@ module hunt.framework.websocket.messaging.SessionSubscribeEvent;
 
 import hunt.framework.websocket.messaging.AbstractSubProtocolEvent;
 
-import hunt.security.Principal;
+version(Have_hunt_security) {
+    import hunt.security.Principal;
+}
+
 import hunt.stomp.Message;
 
 /**
@@ -30,6 +33,7 @@ class SessionSubscribeEvent : AbstractSubProtocolEvent {
         super(source, message);
     }
 
+    version(Have_hunt_security) 
     this(Object source, Message!(byte[]) message, Principal user) {
         super(source, message, user);
     }

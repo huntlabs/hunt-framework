@@ -15,8 +15,7 @@ public import hunt.framework.application.Application : app;
 public import hunt.framework.application.ApplicationConfig : configManager, ApplicationConfig;
 public import hunt.util.DateTime : time, date;
 public import hunt.framework.Init;
-public import hunt.entity.EntityManager;
-public import hunt.entity.DefaultEntityManagerFactory;
+
 
 import std.string;
 
@@ -51,23 +50,30 @@ string url(string mca, string[string] params) {
     return app().router().createUrl(pathItem, params, group);
 }
 
-//global entity manager
-private EntityManager _em;
-EntityManager defaultEntityManager()
-{
-    if (_em is null)
-    {
-        _em = defaultEntityManagerFactory().createEntityManager();
-    }
-    return _em;
-}
 
-//close global entity manager
-void closeDefaultEntityManager()
-{
-    if(_em !is null)
+version(WITH_HUNT_ENTITY) {
+
+    public import hunt.entity.EntityManager;
+    public import hunt.entity.DefaultEntityManagerFactory;
+    
+    //global entity manager
+    private EntityManager _em;
+    EntityManager defaultEntityManager()
     {
-        _em.close();
-        _em = null;
+        if (_em is null)
+        {
+            _em = defaultEntityManagerFactory().createEntityManager();
+        }
+        return _em;
+    }
+
+    //close global entity manager
+    void closeDefaultEntityManager()
+    {
+        if(_em !is null)
+        {
+            _em.close();
+            _em = null;
+        }
     }
 }

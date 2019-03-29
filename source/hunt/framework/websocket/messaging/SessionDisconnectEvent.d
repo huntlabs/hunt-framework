@@ -14,7 +14,10 @@ module hunt.framework.websocket.messaging.SessionDisconnectEvent;
 import hunt.framework.websocket.messaging.AbstractSubProtocolEvent;
 import hunt.stomp.Message;
 
-import hunt.security.Principal;
+version(Have_hunt_security) {
+    import hunt.security.Principal;
+}
+
 import hunt.http.codec.websocket.model.CloseStatus;
 
 /**
@@ -44,9 +47,13 @@ class SessionDisconnectEvent : AbstractSubProtocolEvent {
      */
     this(Object source, Message!(byte[]) message, string sessionId,
             CloseStatus closeStatus) {
-        this(source, message, sessionId, closeStatus, null);
+        super(source, message);
+        assert(sessionId, "Session id must not be null");
+        this.sessionId = sessionId;
+        this.status = closeStatus;
     }
 
+version(Have_hunt_security) {
     /**
      * Create a new SessionDisconnectEvent.
      * @param source the component that published the event (never {@code null})
@@ -62,7 +69,7 @@ class SessionDisconnectEvent : AbstractSubProtocolEvent {
         this.sessionId = sessionId;
         this.status = closeStatus;
     }
-
+}
 
     /**
      * Return the session id.

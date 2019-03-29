@@ -52,7 +52,11 @@ import hunt.Boolean;
 import hunt.Exceptions;
 import hunt.Nullable;
 import hunt.logging;
-import hunt.security.Principal;
+
+version(Have_hunt_security) {
+    import hunt.security.Principal;
+}
+
 
 import std.algorithm;
 import std.conv;
@@ -97,8 +101,6 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 
     private MessageHeaderInitializer headerInitializer;
 
-    private Map!(string, Principal) stompAuthentications;
-
     private Boolean immutableMessageInterceptorPresent;
 
     private ApplicationEventPublisher eventPublisher;
@@ -110,10 +112,23 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
         stompDecoder = new StompDecoder();
         immutableMessageInterceptorPresent = Boolean.valueOf(false);
         decoders = new HashMap!(string, BufferingStompDecoder)();
-        stompAuthentications = new HashMap!(string, Principal)(); 
+        version (Have_hunt_security) stompAuthentications = new HashMap!(string, Principal)(); 
     }
 
 
+    version (Have_hunt_security) {
+        private Principal getUser(WebSocketSession session) {
+            // Principal user = this.stompAuthentications.get(session.getId());
+            // return (user !is null ? user : session.getPrincipal());
+            // implementationMissing(false);
+            // TODO: Tasks pending completion -@zxp at 11/13/2018, 3:27:06 PM
+            // 
+            return null;
+        }
+
+        private Map!(string, Principal) stompAuthentications;
+
+    }
     /**
      * Configure a handler for error messages sent to clients which allows
      * customizing the error messages or preventing them from being sent.
@@ -313,7 +328,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 
             if (sent) {
                 if (isConnect) {
-                    Principal user = null; // headerAccessor.getUser();
+                    version(Have_hunt_security) Principal user = null; // headerAccessor.getUser();
                     // if (user !is null && user != session.getPrincipal()) {
                     //     this.stompAuthentications.put(session.getSessionId(), user);
                     // }
@@ -342,14 +357,6 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
     }
 
 
-    private Principal getUser(WebSocketSession session) {
-        // Principal user = this.stompAuthentications.get(session.getId());
-        // return (user !is null ? user : session.getPrincipal());
-        // implementationMissing(false);
-        // TODO: Tasks pending completion -@zxp at 11/13/2018, 3:27:06 PM
-        // 
-        return null;
-    }
 
     private void handleError(WebSocketSession session, Throwable ex, 
         Message!(byte[]) clientMessage) {
@@ -462,7 +469,7 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
                     // SimpAttributes simpAttributes = 
                     //     new SimpAttributes(session.getSessionId(), session.getAttributes());
                     // SimpAttributesContextHolder.setAttributes(simpAttributes);
-                    Principal user = null; // getUser(session);
+                    version(Have_hunt_security) Principal user = null; // getUser(session);
                     publishEvent(this.eventPublisher, new SessionConnectedEvent(this, 
                         cast(Message!(byte[])) message, user));
                 }
@@ -637,10 +644,12 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
 
         version(HUNT_DEBUG) tracef("STOMP session connected:", session.getId());
 
-        Principal principal = getUser(session);
-        if (principal !is null) {
-            accessor = toMutableAccessor(accessor, message);
-            accessor.setNativeHeader(CONNECTED_USER_HEADER, principal.getName());
+        version(Have_hunt_security) {
+            Principal principal = getUser(session);
+            if (principal !is null) {
+                accessor = toMutableAccessor(accessor, message);
+                accessor.setNativeHeader(CONNECTED_USER_HEADER, principal.getName());
+            }
         }
 
         long[] heartbeat = accessor.getHeartbeat();

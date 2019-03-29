@@ -13,7 +13,10 @@ module hunt.framework.websocket.messaging.SessionUnsubscribeEvent;
 
 import hunt.framework.websocket.messaging.AbstractSubProtocolEvent;
 import hunt.stomp.Message;
-import hunt.security.Principal;
+
+version(Have_hunt_security) {
+    import hunt.security.Principal;
+}
 
 /**
  * Event raised when a new WebSocket client using a Simple Messaging Protocol
@@ -29,6 +32,7 @@ class SessionUnsubscribeEvent : AbstractSubProtocolEvent {
 		super(source, message);
 	}
 
+	version(Have_hunt_security) 
 	this(Object source, Message!(byte[]) message, Principal user) {
 		super(source, message, user);
 	}

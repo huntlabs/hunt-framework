@@ -14,7 +14,10 @@ module hunt.framework.websocket.messaging.AbstractSubProtocolEvent;
 import hunt.framework.application.ApplicationEvent;
 import hunt.stomp.Message;
 
-import hunt.security.Principal;
+version(Have_hunt_security) {
+    import hunt.security.Principal;
+}
+
 import hunt.util.TypeUtils;
 
 import std.conv;
@@ -31,8 +34,6 @@ abstract class AbstractSubProtocolEvent : ApplicationEvent {
 
     private Message!(byte[]) message;
 
-    private Principal user;
-
 
     /**
      * Create a new AbstractSubProtocolEvent.
@@ -40,21 +41,33 @@ abstract class AbstractSubProtocolEvent : ApplicationEvent {
      * @param message the incoming message (never {@code null})
      */
     protected this(Object source, Message!(byte[]) message) {
-        this(source, message, null);
+        super(source);
+        assert(message, "Message must not be null");
+        this.message = message;
     }
 
+version(Have_hunt_security) {
     /**
      * Create a new AbstractSubProtocolEvent.
      * @param source the component that published the event (never {@code null})
      * @param message the incoming message (never {@code null})
      */
     protected this(Object source, Message!(byte[]) message, Principal user) { 
-        super(source);
-        assert(message, "Message must not be null");
-        this.message = message;
+        this(source, message);
         this.user = user;
     }
 
+
+    /**
+     * Return the user for the session associated with the event.
+     */
+
+    Principal getUser() {
+        return this.user;
+    }
+
+    private Principal user;
+}
 
     /**
      * Return the Message associated with the event. Here is an example of
@@ -71,13 +84,6 @@ abstract class AbstractSubProtocolEvent : ApplicationEvent {
         return this.message;
     }
 
-    /**
-     * Return the user for the session associated with the event.
-     */
-
-    Principal getUser() {
-        return this.user;
-    }
 
     override
     string toString() {

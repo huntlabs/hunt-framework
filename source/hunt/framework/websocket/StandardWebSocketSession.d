@@ -34,7 +34,11 @@ import hunt.http.codec.websocket.model.CloseStatus;
 import hunt.http.codec.websocket.stream.WebSocketConnection;
 import hunt.Exceptions;
 import hunt.logging;
-import hunt.security.Principal;
+
+version(Have_hunt_security) {
+    import hunt.security.Principal;
+}
+
 import std.socket;
 
 alias HttpHeaders = HttpFields;
@@ -57,7 +61,7 @@ class StandardWebSocketSession : AbstractWebSocketSession!(WebSocketConnection) 
 
     // private List!(WebSocketExtension) extensions;
 
-    private Principal user;
+    version(Have_hunt_security) private Principal user;
 
     private Address localAddress;
 
@@ -74,9 +78,16 @@ class StandardWebSocketSession : AbstractWebSocketSession!(WebSocketConnection) 
      */
     this(HttpHeaders headers, Map!(string, Object) attributes,
             Address localAddress, Address remoteAddress) {
-
-        this(headers, attributes, localAddress, remoteAddress, null);
+        super(attributes);
+        this.id = idGenerator.generateId().toString();
+        headers = (headers !is null ? headers : new HttpHeaders());
+        this.handshakeHeaders = headers;
+        this.user = user;
+        this.localAddress = localAddress;
+        this.remoteAddress = remoteAddress;
     }
+
+version(Have_hunt_security) {
 
     /**
      * Constructor that associates a user with the WebSocket session.
@@ -89,16 +100,15 @@ class StandardWebSocketSession : AbstractWebSocketSession!(WebSocketConnection) 
      */
     this(HttpHeaders headers, Map!(string, Object) attributes,
             Address localAddress, Address remoteAddress, Principal user) {
-
-        super(attributes);
-        this.id = idGenerator.generateId().toString();
-        headers = (headers !is null ? headers : new HttpHeaders());
-        this.handshakeHeaders = headers;
+        this(headers, attributes, localAddress, remoteAddress, null);
         this.user = user;
-        this.localAddress = localAddress;
-        this.remoteAddress = remoteAddress;
     }
 
+
+    Principal getPrincipal() {
+        return this.user;
+    }
+}
 
     // override
     string getId() {
@@ -127,10 +137,6 @@ class StandardWebSocketSession : AbstractWebSocketSession!(WebSocketConnection) 
     //     assert(this.extensions !is null, "WebSocket session is not yet initialized");
     //     return this.extensions;
     // }
-
-    Principal getPrincipal() {
-        return this.user;
-    }
 
     // override
     Address getLocalAddress() {

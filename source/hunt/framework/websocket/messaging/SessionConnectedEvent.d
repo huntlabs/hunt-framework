@@ -14,8 +14,9 @@ module hunt.framework.websocket.messaging.SessionConnectedEvent;
 import hunt.framework.websocket.messaging.AbstractSubProtocolEvent;
 import hunt.stomp.Message;
 
-import hunt.security.Principal;
-
+version (Have_hunt_security) {
+    import hunt.security.Principal;
+}
 
 /**
  * A connected event represents the server response to a client's connect request.
@@ -36,8 +37,9 @@ class SessionConnectedEvent : AbstractSubProtocolEvent {
         super(source, message);
     }
 
-    this(Object source, Message!(byte[]) message, Principal user) {
-        super(source, message, user);
+    version (Have_hunt_security) {
+        this(Object source, Message!(byte[]) message, Principal user) {
+            super(source, message, user);
+        }
     }
-
 }

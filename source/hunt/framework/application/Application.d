@@ -185,9 +185,11 @@ final class Application : ApplicationContext {
         _sessionStorage.expire = config.expire;
     }
 
+version(WITH_HUNT_ENTITY) {
     EntityManagerFactory entityManagerFactory() {
         return _entityManagerFactory;
     }
+}
 
     CacheManger cacheManger() {
         return _manger;
@@ -695,7 +697,7 @@ private:
     Address addr;
     HttpServer _server;
     Dispatcher _dispatcher;
-    EntityManagerFactory _entityManagerFactory;
+    version(WITH_HUNT_ENTITY) EntityManagerFactory _entityManagerFactory;
     CacheManger _manger;
     SessionStorage _sessionStorage;
     AccessManager _accessManager;
