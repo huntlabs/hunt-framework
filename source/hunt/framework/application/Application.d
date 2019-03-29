@@ -11,7 +11,6 @@
 
 module hunt.framework.application.Application;
 
-import hunt.cache;
 import hunt.collection;
 import hunt.io.Common;
 import hunt.Exceptions;
@@ -41,10 +40,24 @@ public import hunt.framework.application.MiddlewareInterface;
 import hunt.framework.application.BreadcrumbsManager;
 import hunt.framework.application.Breadcrumbs;
 
-public import hunt.trace;
-public import hunt.entity;
+// version(WITH_HUNT_CACHE)
+// {
+    public import hunt.cache;
+// }
+
+version(WITH_HUNT_ENTITY)
+{
+    public import hunt.entity;
+}
+
+version(WITH_HUNT_TRACE)
+{
+    public import hunt.trace;
+}
+
 public import hunt.event;
 public import hunt.event.EventLoopGroup;
+
 import hunt.Functions;
 
 import std.exception;
@@ -116,37 +129,47 @@ final class Application : ApplicationContext {
         return NetUtil.defaultEventLoopGroup();
     }
 
-    private void initDatabase(ApplicationConfig.DatabaseConf config) {
-        if (config.defaultOptions.url.empty) {
-            logWarning("No database configured!");
+    private void initDatabase(ApplicationConfig.DatabaseConf config)
+    {
+        version(WITH_HUNT_ENTITY)
+        {
+            if (config.defaultOptions.url.empty)
+            {
+                logWarning("No database configured!");
+            } else {
+                import hunt.entity.EntityOption;
+
+                auto option = new EntityOption;
+
+                // database options
+                option.database.driver = config.defaultOptions.driver;
+                option.database.host = config.defaultOptions.host;
+                option.database.username = config.defaultOptions.username;
+                option.database.password = config.defaultOptions.password;
+                option.database.port = config.defaultOptions.port;
+                option.database.database = config.defaultOptions.database;
+                option.database.charset = config.defaultOptions.charset;
+                option.database.prefix = config.defaultOptions.prefix;
+
+                // database pool options
+                option.pool.minIdle = config.pool.minIdle;
+                option.pool.idleTimeout = config.pool.idleTimeout;
+                option.pool.maxPoolSize = config.pool.maxPoolSize;
+                option.pool.minPoolSize = config.pool.minPoolSize;
+                option.pool.maxLifetime = config.pool.maxLifetime;
+                option.pool.connectionTimeout = config.pool.connectionTimeout;
+                option.pool.maxConnection = config.pool.maxConnection;
+                option.pool.minConnection = config.pool.minConnection;
+
+                _entityManagerFactory = Persistence.createEntityManagerFactory("default", option);
+            }
         }
-        else {
-            import hunt.entity.EntityOption;
-
-            auto option = new EntityOption;
-
-            // database options
-            option.database.driver = config.defaultOptions.driver;
-            option.database.host = config.defaultOptions.host;
-            option.database.username = config.defaultOptions.username;
-            option.database.password = config.defaultOptions.password;
-            option.database.port = config.defaultOptions.port;
-            option.database.database = config.defaultOptions.database;
-            option.database.charset = config.defaultOptions.charset;
-            option.database.prefix = config.defaultOptions.prefix;
-
-            // database pool options
-            option.pool.minIdle = config.pool.minIdle;
-            option.pool.idleTimeout = config.pool.idleTimeout;
-            option.pool.maxPoolSize = config.pool.maxPoolSize;
-            option.pool.minPoolSize = config.pool.minPoolSize;
-            option.pool.maxLifetime = config.pool.maxLifetime;
-            option.pool.connectionTimeout = config.pool.connectionTimeout;
-            option.pool.maxConnection = config.pool.maxConnection;
-            option.pool.minConnection = config.pool.minConnection;
-
-            _entityManagerFactory = Persistence.createEntityManagerFactory("default", option);
-
+        else
+        {
+            if (config.defaultOptions.enabled)
+            {
+                logWarning("Please add hunt-entity to dependency.");
+            }
         }
     }
 
@@ -211,7 +234,11 @@ final class Application : ApplicationContext {
         {
             initIMF(config.trace.service.host , config.trace.service.port);
         }
-        Tracer.localEndpoint = local;
+
+        version(WITH_HUNT_TRACE)
+        {
+            Tracer.localEndpoint = local;
+        }
     }
 
     private void initilizeBreadcrumbs() {

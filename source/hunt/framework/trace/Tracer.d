@@ -1,5 +1,7 @@
 module hunt.framework.trace.Tracer;
 
+version(WITH_HUNT_TRACE) :
+
 import hunt.framework.http.Request;
 import hunt.framework.http.Response;
 import hunt.trace;

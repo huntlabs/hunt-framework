@@ -8,43 +8,6 @@
     "dependencies": {
         "hunt-http": "~>0.2.0",
         "hunt-stomp": "~>0.2.0",
-        "hunt-cache": "~>0.4.0",
-        "hunt-entity": "~>2.3.0",
-        "hunt-trace": "~>0.2.0"
-    },
-    "configurations": [
-        {
-            "name": "default"
-        },
-        {
-            "name":"lite",
-            "subConfigurations": {
-                "hunt-entity": "empty"
-            }
-        },
-        {
-            "name": "full",
-            "subConfigurations": {
-                "hunt-entity": "full"
-            }
-        },
-        {
-            "name": "mysql",
-            "subConfigurations": {
-                "hunt-entity": "mysql"
-            }
-        },
-        {
-            "name": "sqlite",
-            "subConfigurations": {
-                "hunt-entity": "sqlite"
-            }
-        },
-        {
-            "name": "postgresql",
-            "subConfigurations": {
-                "hunt-entity": "postgresql"
-            }
-        }
-    ]
+        "hunt-cache": "~>0.4.0"
+    }
 }
