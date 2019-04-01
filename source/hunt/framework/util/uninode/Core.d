@@ -483,9 +483,9 @@ struct UniNodeImpl(This)
     /**
      * Iteration by UnoNode array or object
      */
-    int opApply(scope int delegate(ref ulong idx, ref This node) dg)
+    int opApply(scope int delegate(ref size_t idx, ref This node) dg)
     {
-        return _opApply!(int delegate(ref ulong idx, ref This node))(dg);
+        return _opApply!(int delegate(ref size_t idx, ref This node))(dg);
     }
 
     /**

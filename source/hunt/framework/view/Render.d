@@ -459,10 +459,10 @@ class Render : VisitorInterface
                 case integer:
                 case uinteger:
                     curr.checkNodeType(array, lastPos);
-                    if (key.get!long < curr.length)
-                        curr = curr[key.get!long];
+                    if (key.get!size_t < curr.length)
+                        curr = curr[key.get!size_t];
                     else
-                        assertTemplate(0, "Range violation  on %s...[%d]".fmt(node.name, key.get!long), sub.pos);
+                        assertTemplate(0, "Range violation  on %s...[%d]".fmt(node.name, key.get!size_t), sub.pos);
                     break;
 
                 // Key of dict
@@ -546,7 +546,7 @@ class Render : VisitorInterface
         }
 
         auto lastPos = node.pos;
-        for(int i = 0; i < cast(long)(node.subIdents.length) - 1; i++)
+        for(int i = 0; i < cast(int)(node.subIdents.length) - 1; i++)
         {
             tryAccept(node.subIdents[i]);
             auto key = pop();
@@ -557,10 +557,10 @@ class Render : VisitorInterface
                 case integer:
                 case uinteger:
                     checkNodeType(*curr, array, lastPos);
-                    if (key.get!long < curr.length)
-                        curr = &((*curr)[key.get!long]);
+                    if (key.get!size_t < curr.length)
+                        curr = &((*curr)[key.get!size_t]);
                     else
-                        assertTemplate(0, "Range violation  on %s...[%d]".fmt(node.name, key.get!long), node.subIdents[i].pos);
+                        assertTemplate(0, "Range violation  on %s...[%d]".fmt(node.name, key.get!size_t), node.subIdents[i].pos);
                     break;
 
                 // Key of dict
@@ -589,10 +589,10 @@ class Render : VisitorInterface
                 case integer:
                 case uinteger:
                     checkNodeType(*curr, array, lastPos);
-                    if (key.get!long < curr.length)
-                        (*curr).opIndex(key.get!long) = expr; // ¯\_(ツ)_/¯
+                    if (key.get!size_t < curr.length)
+                        (*curr).opIndex(key.get!size_t) = expr; // ¯\_(ツ)_/¯
                     else
-                        assertTemplate(0, "Range violation  on %s...[%d]".fmt(node.name, key.get!long), node.subIdents[$-1].pos);
+                        assertTemplate(0, "Range violation  on %s...[%d]".fmt(node.name, key.get!size_t), node.subIdents[$-1].pos);
                     break;
 
                 // Key of dict
@@ -672,7 +672,7 @@ class Render : VisitorInterface
         {
             if (!varargs.length)
                 return UniNode(null);
-            return varargs[loop["index0"].get!long % varargs.length];
+            return varargs[loop["index0"].get!size_t % varargs.length];
         }
 
 
