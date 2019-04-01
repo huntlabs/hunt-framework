@@ -65,6 +65,24 @@ View [hunt-skeleton](https://github.com/huntlabs/hunt-skeleton) or [hunt-example
 9. Security
 10. WebSocket (with STOMP)
 
+## Additional package dependencies
+| package | version | purpose |
+|--------|--------|--------|
+| hunt-entity |  0.3.1 above |  ORM support  |
+| hunt-trace |  0.2.0 above |  Tracing for API requests  |
+| hunt-security |  0.2.0 above |  Some core APIs for security  |
+
+**Note:**
+To use ORM, you must add these packages to your project:
+1. hunt-entity
+
+To support request tracing, you must add these packages to your project:
+1. hunt-trace
+
+To support SSL, you must add these packages to your project:
+1. hunt-security
+1. boringssl or openssl
+
 ## Community
 QQ Group: 184183224 
 
