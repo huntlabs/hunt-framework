@@ -1,6 +1,6 @@
 {
     "name": "hunt-framework",
-    "targetType": "library",
+    "targetType": "sourceLibrary",
     "description": "A high performance full-stack Web framework.",
     "copyright": "Copyright (C) 2015-2019, HuntLabs",
     "homepage": "https://www.huntlabs.net",
