@@ -161,6 +161,7 @@ final class Application : ApplicationContext {
                 option.pool.maxConnection = config.pool.maxConnection;
                 option.pool.minConnection = config.pool.minConnection;
 
+                infof("using database: ", config.defaultOptions.driver);
                 _entityManagerFactory = Persistence.createEntityManagerFactory("default", option);
             }
         }
@@ -221,9 +222,13 @@ final class Application : ApplicationContext {
         upConfig(config);
         //setRedis(config.redis);
         //setMemcache(config.memcache);
-
-        if (config.database.defaultOptions.enabled)
-            initDatabase(config.database);
+        version(WITH_HUNT_ENTITY) {
+            if (config.database.defaultOptions.enabled) {
+                initDatabase(config.database);
+            } else {
+                warning("The database is disabled.");
+            }
+        }
         initCache(config.cache);
         initSessionStorage(config.session);
         _accessManager = new AccessManager(cache() , config.application.name , config.session.prefix, config.session.expire);
