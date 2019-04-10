@@ -19,7 +19,7 @@
 
 # DUB
 .dub
-dub.selections.json
+dub.*.json
 docs.json
 __dummy.html
 docs/
