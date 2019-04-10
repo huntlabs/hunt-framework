@@ -331,15 +331,24 @@ final class Request {
 
     // get queries
     @property ref string[string] queries() {
-        if (_queryParams is null) {
+        if (!_isQueryParamsSet) {
             MultiMap!string map = new MultiMap!string();
             getURI().decodeQueryTo(map);
-            foreach (string key; map.byKey()) {
-                _queryParams[key] = map.getValue(key, 0);
+            foreach (string key, List!(string) values; map) {
+                version(HUNT_DEBUG) {
+                    infof("query parameter: key=%s, values=%s", key, values[0]);
+                }
+                if(values is null || values.size()<1) {
+                    _queryParams[key] = ""; 
+                } else {
+                    _queryParams[key] = values[0];
+                }
             }
+            _isQueryParamsSet = true;
         }
         return _queryParams;
     }
+    private bool _isQueryParamsSet = false;
 
     void putQueryParameter(string key, string value) {
         _queryParams[key] = value;
