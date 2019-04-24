@@ -216,21 +216,20 @@ string __createCallActionMethod(T, string moduleName)()
 
                     static if (hasUDA!(t, Action) || _isActionMember)
                     {
+                        //before
+                        str ~= q{
+                            if(this.getMiddlewares().length)
+                            {
+                                auto response = this.doMiddleware();
 
-            //before
-            str ~= q{
-                if(this.getMiddlewares().length)
-                {
-                    auto response = this.doMiddleware();
+                                if (response !is null)
+                                {
+                                    return response;
+                                }
+                            }
 
-                    if (response !is null)
-                    {
-                        return response;
-                    }
-                }
-
-                this.before();
-};
+                            if (!this.before()) return response;
+                        };
                     }
 
                     // Action parameters
