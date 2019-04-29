@@ -129,8 +129,10 @@ class HttpSession {
     }
 
     void remove(string key) {
-        JSONValue json;
+        if(attributes.isNull)
+            return;
 
+        JSONValue json;
         foreach (string _key, ref value; attributes) {
             if (_key != key) {
                 json[_key] = value;
@@ -143,9 +145,12 @@ class HttpSession {
     alias forget = remove;
 
     string[] keys() {
+        if(attributes.isNull)
+            return null;
+            
         string[] ret;
 
-        foreach (string key, value; attributes) {
+        foreach (string key, ref value; attributes) {
             ret ~= key;
         }
 
