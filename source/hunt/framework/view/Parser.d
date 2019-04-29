@@ -144,7 +144,7 @@ struct Parser(Lexer)
     {
         string dirPath = dirName(path) ~ dirSeparator;
         // path = path.absolute(_path);
-        logDebug("parse file absolute path : ",path);
+        version(HUNT_DEBUG) logDebug("parse file absolute path : ",path);
         if (auto cached = path in _parsedFiles)
         {
             if (*cached is null)
