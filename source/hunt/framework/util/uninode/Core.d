@@ -868,6 +868,11 @@ struct UniNode
     {
         return node.toHash();
     }
+
+    bool opEquals(const UniNode other) const
+    {
+        return node.opEquals(other);
+    }
 }
 
 /**
