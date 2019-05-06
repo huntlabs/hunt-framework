@@ -56,19 +56,27 @@ class I18n {
 
     bool clear()
     {
-        // TODO
+        this._res = null;
         return false;
     }
 
-    I18n add(string key, string value)
+    bool clear(string local)
     {
-        //
+        this._res[local] = null;
+        return false;
+    }
+
+    I18n add(string local, string key, string value)
+    {
+        this._res[local][key] = value;
         return this;
     }
 
     I18n merge(string local, string[string] data)
     {
-        //
+        foreach(string key, string value; data) {
+            this._res[local][key] = value;
+        }
         return this;
     }
 
