@@ -406,12 +406,12 @@ class StompSubProtocolHandler : SubProtocolHandler { // , ApplicationEventPublis
             foreach (ChannelInterceptor interceptor ; ch.getInterceptors()) {
                 auto it = cast(ImmutableMessageChannelInterceptor)interceptor;
                 if (it !is null) {
-                    this.immutableMessageInterceptorPresent = true;
+                    this.immutableMessageInterceptorPresent =  Boolean.TRUE;
                     return true;
                 }
             }
         }
-        this.immutableMessageInterceptorPresent = false;
+        this.immutableMessageInterceptorPresent =  Boolean.FALSE;
         return false;
     }
 
