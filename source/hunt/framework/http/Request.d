@@ -1014,11 +1014,37 @@ final class Request {
         if(key in form) {
             string[] _v = form[key];
             if (_v.length > 0) {
-                return _v[0];
-            } else
-                return v;
-        } else
+                static if(is(T == string))
+                    v = _v[0];
+                else {
+                    v = to!T(_v[0]);
+                }
+            } 
+        } 
+
+        return v;
+    }
+
+    T[] posts(T = string)(string key, T[] v = null) {
+        string[][string] form = xFormData();
+        if (form is null)
             return v;
+            
+        if(key in form) {
+            string[] _v = form[key];
+            if (_v.length > 0) {
+                static if(is(T == string))
+                    v = _v[];
+                else {
+                    v = new T[_v.length];
+                    for(size i =0; i<v.length; i++) {
+                        v[i] = to!T(_v[i]);
+                    }
+                }
+            } 
+        } 
+
+        return v;
     }
 
     /**

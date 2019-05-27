@@ -434,7 +434,7 @@ private:
         else {
             int minThreadCount = totalCPUs/4 + 1;
             if(conf.http.workerThreads < minThreadCount) {
-                warningf("It's better that the number of worker thread is greater than %d", minThreadCount);
+                warningf("It's better to make the number of worker thread greater than %d", minThreadCount);
                 // conf.http.workerThreads = minThreadCount;
             }
             _tpool = new TaskPool(conf.http.workerThreads);
