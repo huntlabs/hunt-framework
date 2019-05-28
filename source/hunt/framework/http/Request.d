@@ -58,6 +58,7 @@ final class Request {
     private Cookie[] _cookies;
     private HttpSession _session;
     private MonoTime _monoCreated;
+    private Object[string] _attributes;
 
     HttpConnection _connection;
     // Action1!ByteBuffer content;
@@ -1623,6 +1624,19 @@ final class Request {
     //     implementationMissing(false);
     //     return false;
     // }
+
+    Object getAttribute(string name) {
+        auto itemPtr = name in _attributes;
+        if(itemPtr is null)
+            return null;
+        return *itemPtr;
+    }
+
+    void setAttribute(string name, Object o) {
+        this._attributes[name] = o;
+    }
+
+    // enum string Subject = "subject";
 
 private:
     User _user;
