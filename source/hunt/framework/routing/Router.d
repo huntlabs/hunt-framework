@@ -87,36 +87,41 @@ class Router {
                 }
             }
         }
-        else {
+        else
+        {
             url = route.getPattern();
         }
 
-        if (routeGroup.getType() == "domain") {
-            url = (config().https.enabled ? "https://" : "http://") ~ routeGroup.getValue()
-                ~ url;
+        if (routeGroup.getType() == "domain")
+        {
+            url = (config().https.enabled ? "https://" : "http://") ~ routeGroup.getValue() ~ url;
         }
-        else {
-            url = config().application.baseUrl ~ routeGroup.getValue() ~ url;
+        else
+        {
+            url = (routeGroup.getValue().length > 0 ? (config().application.baseUrl ~ routeGroup.getValue()) : strip(config().application.baseUrl, "", "/")) ~ url;
         }
 
         return url ~ (params.length > 0 ? ("?" ~ buildUriQueryString(params)) : "");
     }
 
-    string buildUriQueryString(string[string] params) {
+    string buildUriQueryString(string[string] params)
+    {
         if (params.length == 0) {
             return "";
         }
 
         string uriQueryString;
 
-        foreach (k, v; params) {
+        foreach (k, v; params)
+        {
             uriQueryString ~= (uriQueryString ? "&" : "") ~ k ~ "=" ~ v;
         }
 
         return uriQueryString;
     }
 
-    void addGroup(string group, string method, string value) {
+    void addGroup(string group, string method, string value)
+    {
         RouteGroup routeGroup = ("domain" == method) ? _domainGroups.get(group,
                 null) : _directoryGroups.get(group, null);
 

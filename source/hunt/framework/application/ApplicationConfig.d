@@ -29,7 +29,7 @@ final class ApplicationConfig
     struct ApplicationConf
     {
         string name = "Hunt Application";
-        string baseUrl = "http://localhost:8080/";
+        string baseUrl = "http://localhost:8080";
         string defaultCookieDomain = "localhost";
         string defaultLanguage = "en-US";
         string languages = "zh-CN,en-US";
