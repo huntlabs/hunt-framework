@@ -58,6 +58,7 @@ final class Request {
     private Cookie[] _cookies;
     private HttpSession _session;
     private MonoTime _monoCreated;
+    private Object[string] _attributes;
 
     HttpConnection _connection;
     // Action1!ByteBuffer content;
@@ -1014,11 +1015,37 @@ final class Request {
         if(key in form) {
             string[] _v = form[key];
             if (_v.length > 0) {
-                return _v[0];
-            } else
-                return v;
-        } else
+                static if(is(T == string))
+                    v = _v[0];
+                else {
+                    v = to!T(_v[0]);
+                }
+            } 
+        } 
+
+        return v;
+    }
+
+    T[] posts(T = string)(string key, T[] v = null) {
+        string[][string] form = xFormData();
+        if (form is null)
             return v;
+            
+        if(key in form) {
+            string[] _v = form[key];
+            if (_v.length > 0) {
+                static if(is(T == string))
+                    v = _v[];
+                else {
+                    v = new T[_v.length];
+                    for(size i =0; i<v.length; i++) {
+                        v[i] = to!T(_v[i]);
+                    }
+                }
+            } 
+        } 
+
+        return v;
     }
 
     /**
@@ -1597,6 +1624,19 @@ final class Request {
     //     implementationMissing(false);
     //     return false;
     // }
+
+    Object getAttribute(string name) {
+        auto itemPtr = name in _attributes;
+        if(itemPtr is null)
+            return null;
+        return *itemPtr;
+    }
+
+    void setAttribute(string name, Object o) {
+        this._attributes[name] = o;
+    }
+
+    // enum string Subject = "subject";
 
 private:
     User _user;
