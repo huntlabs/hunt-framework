@@ -6,10 +6,9 @@
     "homepage": "https://www.huntlabs.net",
     "license": "Apache-2.0",
     "dependencies": {
-        "hunt-http": "~>0.2.0",
-        "hunt-entity": "~>2.3.4",
-        "hunt-validation": "~>0.1.1",
-        "hunt-stomp": "~>0.2.0",
-        "hunt-cache": "~>0.4.0"
+        "hunt-http": "~>0.3.0-rc.1",
+        "hunt-entity": "~>2.4.0",
+        "hunt-stomp": "~>0.3.0",
+        "hunt-cache": "~>0.5.0"
     }
 }
