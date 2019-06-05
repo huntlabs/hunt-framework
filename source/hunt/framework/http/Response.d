@@ -72,7 +72,6 @@ class Response : Closeable {
         this._response.setStatus(status);
         this._response.setHttpVersion(HttpVersion.HTTP_1_1);
         this.setContent(content);
-
     }
 
     HttpResponse httpResponse() {
