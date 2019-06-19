@@ -171,10 +171,11 @@ final class Request {
             this.convertUploadedFiles(new MultipartFormInputStream(inputStream, 
                 _httpFields.get(HttpHeader.CONTENT_TYPE), config.multipartConfig, tempDir));
         } else {
-            warningf("Can't handle content type: %s", contentType);
             stringBody = IOUtils.toString(inputStream);
-            version (HUNT_DEBUG)
-                trace("body content: ", stringBody);
+            version (HUNT_DEBUG) {
+                tracef("Do nothing for this content type: %s", contentType);
+                // trace("body content: ", stringBody);
+            }
         }
     }
 
@@ -214,7 +215,7 @@ final class Request {
     private UploadedFile[][string] _convertedMultiFiles;
 
     package(hunt.framework) void onMessageCompleted() {
-        version(HUNT_DEBUG) info("do nothing");
+        version(HUNT_DEBUG_MORE) trace("do nothing");
     }
 
     bool isChunked() {
@@ -377,7 +378,7 @@ final class Request {
 
         if(methodAsString() != "POST")
             return null;
-        import hunt.text.JsonHelper;
+        import hunt.serialization.JsonSerializer;
 
         JSONValue jv;
         foreach(string k, string[] values; xFormData()) {
@@ -389,7 +390,7 @@ final class Request {
                 warningf("null value for %s in form data: ", k);
             }
         }
-        return JsonHelper.getAs!T(jv);
+        return JsonSerializer.fromJson!T(jv);
     }
     /**
    * Sets the query parameter with the specified name to the specified value.
@@ -765,15 +766,13 @@ final class Request {
         isSessionRetrieved = true;
         if (!sessionId.empty) {
             _session = _sessionStorage.get(sessionId);
+            version(HUNT_DEBUG) trace("last session: " ~ sessionId);
         }
-
-        version(HUNT_DEBUG) warning("last session: " ~ sessionId);
 
         if (_session is null && canCreate) {
             sessionId = HttpSession.generateSessionId();
-            version(HUNT_DEBUG) warning("new session: " ~ sessionId);
+            version(HUNT_DEBUG) info("new session: " ~ sessionId);
             _session = HttpSession.create(sessionId, _sessionStorage.expire);
-            // _sessionStorage.put(sessionId, _session);
         }
 
         return _session;

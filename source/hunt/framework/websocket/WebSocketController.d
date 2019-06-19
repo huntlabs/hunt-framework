@@ -48,7 +48,7 @@ mixin template ControllerExtensions(string moduleName = __MODULE__) {
     import hunt.stomp.converter.MessageConverterHelper;
     import hunt.Nullable;
     import hunt.logging;
-    import hunt.text.JsonHelper;
+    import hunt.serialization.JsonSerializer;
     import hunt.util.MimeType;
     import std.json;
 
@@ -263,11 +263,11 @@ class WebSocketControllerHelper {
                 enum pt = parameterType.stringof;
                 enum varName = "parameterModel";
                 static if(is(parameterType == class) || is(parameterType == struct)) {
-                    s ~= format(`        %1$s %2$s = JsonHelper.getAs!(%1$s)(%3$s);` ~ "\n",
+                    s ~= format(`        %1$s %2$s = JsonSerializer.fromJson!(%1$s)(%3$s);` ~ "\n",
                             pt, varName, parametersInJson);
                 } else {
                     enum pn = identifiers[0];
-                    s ~= format(`        %1$s %2$s = JsonHelper.getItemAs!(%1$s)(%3$s, "%4$s");` ~ "\n",
+                    s ~= format(`        %1$s %2$s = JsonSerializer.getItemAs!(%1$s)(%3$s, "%4$s");` ~ "\n",
                             pt, varName, parametersInJson, pn);
                 }
             }
@@ -297,7 +297,7 @@ class WebSocketControllerHelper {
                 }
                 if(tempVarName != parametersInJson) {
                     // s ~= `           item = parametersInJson["` ~ pn ~ `"];` ~ "\n";
-                    s ~= format(`           %1$s %2$s = JsonHelper.getItemAs!(%1$s)(%3$s, "%4$s");` ~ "\n\n",
+                    s ~= format(`           %1$s %2$s = JsonSerializer.getItemAs!(%1$s)(%3$s, "%4$s");` ~ "\n\n",
                             pt, tempVarName, parametersInJson, pn);
                 }
 
@@ -320,7 +320,7 @@ class WebSocketControllerHelper {
         static if(!is(returnType == void)) {
             s ~=`
                     if(handler !is null) {
-                        JSONValue resultInJson = JsonHelper.toJson(r);
+                        JSONValue resultInJson = JsonSerializer.toJson(r);
                         string resultInString = resultInJson.toString();
                         version(HUNT_DEBUG) tracef("outgoing message: %s", resultInString);
                         handler(new Nullable!string(resultInString), typeid(string));
