@@ -378,7 +378,8 @@ final class Request {
 
         if(methodAsString() != "POST")
             return null;
-        import hunt.serialization.JsonSerializer;
+        // import hunt.serialization.JsonSerializer;
+        import hunt.util.Serialize;
 
         JSONValue jv;
         foreach(string k, string[] values; xFormData()) {
@@ -390,7 +391,8 @@ final class Request {
                 warningf("null value for %s in form data: ", k);
             }
         }
-        return JsonSerializer.fromJson!T(jv);
+        // return JsonSerializer.fromJson!T(jv);
+        return toObject!T(jv);
     }
     /**
    * Sets the query parameter with the specified name to the specified value.

@@ -166,7 +166,7 @@ final class Application : ApplicationContext {
                 option.pool.maxConnection = config.pool.maxConnection;
                 option.pool.minConnection = config.pool.minConnection;
 
-                infof("using database: ", config.defaultOptions.driver);
+                infof("using database: %s", config.defaultOptions.driver);
                 _entityManagerFactory = Persistence.createEntityManagerFactory("default", option);
             }
         }
