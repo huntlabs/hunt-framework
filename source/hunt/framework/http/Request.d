@@ -294,7 +294,7 @@ final class Request {
     }
 
     @property Address clientAddress() {
-        return _connection.getLocalAddress();
+        return _connection.getRemoteAddress();
     }
 
     @property JSONValue json() {
