@@ -95,8 +95,8 @@ class StaticfileController : Controller
         response.setHeader(HttpHeader.CONTENT_TYPE, mimetype ~ ";charset=utf-8");
 
         response.setHeader(HttpHeader.ACCEPT_RANGES, "bytes");
-        ulong rangeStart = 0;
-        ulong rangeEnd = 0;
+        size_t rangeStart = 0;
+        size_t rangeEnd = 0;
 
         if (request.headerExists(HttpHeader.RANGE))
         {
@@ -172,8 +172,13 @@ class StaticfileController : Controller
         scope(exit) f.close();
 
         f.seek(rangeStart);
-        auto buf = f.rawRead(new ubyte[rangeEnd.to!uint - rangeStart.to!uint + 1]);
-        response.setContent(buf);
+        int remainingSize = rangeEnd.to!uint - rangeStart.to!uint + 1;
+        if(remainingSize <= 0) {
+            warningf("actualSize:%d, remainingSize=%d", fi.size, remainingSize);
+        } else {
+            auto buf = f.rawRead(new ubyte[remainingSize]);
+            response.setContent(buf);
+        }
 
         return response;
     }
