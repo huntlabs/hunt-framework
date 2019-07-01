@@ -290,9 +290,9 @@ class ConfigManager
     ApplicationConfig config(string section="", string fileName = "application.conf")
     {
         if (!_appConfig) {
-            if(fileName.empty) {
-                fileName = "application.conf";
+            if(fileName == "application.conf") {
                 string huntEnv = environment.get("HUNT_ENV", "");
+                version(HUNT_DEBUG) tracef("huntEnv=%s", huntEnv);
                 if(!huntEnv.empty) {
                     fileName = "application." ~ huntEnv ~ ".conf";
                 }
@@ -324,7 +324,7 @@ class ConfigManager
         string fullName = buildPath(path, fileName);
         if (exists(fullName))
         {
-            logDebugf("using the config file: %s", fullName);
+            infof("using the config file: %s", fullName);
             ConfigBuilder con = new ConfigBuilder(fullName, sec);
             _appConfig = con.build!(ApplicationConfig, "hunt")();
             addConfig("hunt", con);
