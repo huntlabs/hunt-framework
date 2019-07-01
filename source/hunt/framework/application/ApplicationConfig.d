@@ -290,6 +290,7 @@ class ConfigManager
     ApplicationConfig config(string section="", string fileName = "application.conf")
     {
         if (!_appConfig) {
+                
             if(fileName == "application.conf") {
                 string huntEnv = environment.get("HUNT_ENV", "");
                 version(HUNT_DEBUG) tracef("huntEnv=%s", huntEnv);
@@ -297,6 +298,10 @@ class ConfigManager
                     fileName = "application." ~ huntEnv ~ ".conf";
                 }
             }
+            
+            if(fileName.empty)
+                fileName = "application.conf";
+
             setAppSection(section, fileName);
         }
 
