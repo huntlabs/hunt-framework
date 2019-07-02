@@ -83,3 +83,7 @@ To support SSL, you must add these packages to your project:
 QQ Group: 184183224 
 
 [Github](https://github.com/huntlabs/hunt-framework/issues)
+
+## For Chinese users
+[D语言中文社区](https://forums.dlangchina.com/)
+
