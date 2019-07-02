@@ -1,6 +1,7 @@
 module hunt.framework.application.StaticfileController;
 
 import core.time;
+import std.array;
 import std.conv;
 import std.string;
 import std.datetime;
@@ -29,16 +30,20 @@ class StaticfileController : Controller
     Response doStaticFile()
     {
         string currentPath = request.route.staticFilePath;
-        version (HUNT_DEBUG) logDebug("currentPath: ", currentPath);
-        if (currentPath == string.init)
-        {
+        if (currentPath.empty)
             currentPath = config().http.path;
-        }
+        version (HUNT_DEBUG) logDebug("currentPath: ", currentPath);
 
         string staticFilename = mendPath(currentPath);
-        version (HUNT_DEBUG) logDebug ("staticFilename: ", staticFilename);
+        version (HUNT_DEBUG) {
+            logDebug ("staticFilename: ", staticFilename);
+        }
+        staticFilename = buildPath(APP_PATH, staticFilename);
+        version (HUNT_DEBUG) {
+            info("fullname: ", staticFilename);
+        }
 
-        if (staticFilename == string.init)
+        if (staticFilename.empty)
         {
             response.do404();
             return response;
@@ -65,7 +70,7 @@ class StaticfileController : Controller
 
         if (!isFileExisted)
         {
-            logWarning("No default index files (like index.html) found in: ", currentPath);
+            logWarning("No default index files (like index.html) in: ", currentPath);
             response.do404();
             return response;
         }
