@@ -31,6 +31,6 @@ public import hunt.framework.Simplify;
 debug {}
 else {
     import hunt.util.Common;
-    static assert(CompilerHelper.isGreater(2082), 
+    static assert(CompilerHelper.isGreaterThan(2082), 
         "The version of D compiler must be greater than 2.083 in release model.");
 }

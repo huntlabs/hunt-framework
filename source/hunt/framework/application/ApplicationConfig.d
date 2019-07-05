@@ -330,16 +330,22 @@ class ConfigManager
         if (exists(fullName))
         {
             infof("using the config file: %s", fullName);
-            ConfigBuilder con = new ConfigBuilder(fullName, sec);
-            _appConfig = con.build!(ApplicationConfig, "hunt")();
-            addConfig("hunt", con);
+            _defaultBuilder = new ConfigBuilder(fullName, sec);
+            _appConfig = _defaultBuilder.build!(ApplicationConfig, "hunt")();
+            addConfig("hunt", _defaultBuilder);
         }
         else
         {
+            _defaultBuilder = new ConfigBuilder();
             logDebug("using default settings.");
             _appConfig = new ApplicationConfig();
         }
     }
+
+    ConfigBuilder defaultBuilder() {
+        return _defaultBuilder;
+    }
+    private ConfigBuilder _defaultBuilder;
 
     ConfigBuilder config(string key)
     {
