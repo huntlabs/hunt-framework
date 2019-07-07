@@ -442,7 +442,8 @@ private:
                 conf.http.workerThreads = minThreadCount;
                 
             if(conf.http.workerThreads < minThreadCount) {
-                warningf("It's better to make the number of worker thread greater than %d", minThreadCount);
+                warningf("It's better to make the number of worker thread greater than %d, current: %d",
+                    minThreadCount, conf.http.workerThreads);
                 // conf.http.workerThreads = minThreadCount;
             }
             _tpool = new TaskPool(conf.http.workerThreads);

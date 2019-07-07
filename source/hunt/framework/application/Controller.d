@@ -31,7 +31,6 @@ enum Action;
 
 abstract class Controller
 {
-    // mixin MakeController;
 
     protected
     {
@@ -149,6 +148,10 @@ abstract class Controller
         // }
 
         return res;
+    }
+
+    void dispose() {
+
     }
 }
 
@@ -353,7 +356,10 @@ Response callHandler(T, string method)(Request req)
 {
     T controller = new T();
     import core.memory;
-    scope(exit){if(!controller.isAsync){controller.destroy(); GC.free(cast(void *)controller);}}
+    scope(exit) {
+        controller.dispose();
+        if(!controller.isAsync){controller.destroy(); GC.free(cast(void *)controller);}
+    }
 
     req.action = method;
     return controller.callActionMethod(method, req);

@@ -1279,7 +1279,7 @@ string absolute(string file,string path)
 bool fileExist(string file,string path)
 {
     import std.path : absolutePath;
-    logDebug("path.absolutePath : ",(path ~ file).absolutePath);
+    version(HUNT_DEBUG) logDebug("path.absolutePath : ",(path ~ file).absolutePath);
     return (file.exists) || ((path ~ file).absolutePath.exists);
 }
 

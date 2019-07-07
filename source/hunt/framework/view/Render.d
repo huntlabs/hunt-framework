@@ -914,7 +914,7 @@ private:
 
     UniNode visitFunc(string name, UniNode args)
     {
-        version(HUNT_DEBUG)logDebug("---Func :",name," args: ",args);
+        version(HUNT_DEBUG) logDebug("---Func :",name," args: ",args);
 
         if(name == "trans")
         {
