@@ -306,8 +306,8 @@ private:
 
         this.staticRootRoute = this.makeRoute("GET", "/",
                 "staticDir:" ~ config().http.path, group);
-        if (!haveRootRoute)
-            routeGroup.addRoute(staticRootRoute);
+        // if (!haveRootRoute)
+        //     routeGroup.addRoute(staticRootRoute);
     }
 
     RouteGroup getGroupByDomain(string domain) {
