@@ -275,6 +275,19 @@ final class Application : ApplicationContext {
 
         initilizeBreadcrumbs();
 
+        string cliText = `
+
+ ___  ___     ___  ___     ________      _________   
+|\  \|\  \   |\  \|\  \   |\   ___  \   |\___   ___\     Hunt Framework ` ~ HUNT_VERSION ~ `
+\ \  \\\  \  \ \  \\\  \  \ \  \\ \  \  \|___ \  \_|     
+ \ \   __  \  \ \  \\\  \  \ \  \\ \  \      \ \  \      Listening: ` ~ addr.toString() ~ `
+  \ \  \ \  \  \ \  \\\  \  \ \  \\ \  \      \ \  \     TLS: ` ~ (_server.getHttp2Configuration.isSecureConnectionEnabled() ? "Enabled" : "Disabled") ~ `
+   \ \__\ \__\  \ \_______\  \ \__\\ \__\      \ \__\    
+    \|__|\|__|   \|_______|   \|__| \|__|       \|__|    https://www.huntframework.com
+
+`;
+        writeln(cliText);
+
         if (_server.getHttp2Configuration.isSecureConnectionEnabled())
             writeln("Try to browse https://", addr.toString());
         else
