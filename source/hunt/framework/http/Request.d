@@ -392,8 +392,11 @@ final class Request {
             }
         }
         // return JsonSerializer.fromJson!T(jv);
-        return toObject!T(jv);
+        T obj = toObject!T(jv);
+
+        return (obj is null) ? (new T) : obj;
     }
+    
     /**
    * Sets the query parameter with the specified name to the specified value.
    *
