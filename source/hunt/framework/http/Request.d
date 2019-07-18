@@ -377,9 +377,9 @@ final class Request {
     T bindForm(T)() {
 
         if(methodAsString() != "POST")
-            return null;
-        // import hunt.serialization.JsonSerializer;
-        import hunt.util.Serialize;
+            return T.init;
+        import hunt.serialization.JsonSerializer;
+        // import hunt.util.Serialize;
 
         JSONValue jv;
         foreach(string k, string[] values; xFormData()) {
@@ -391,10 +391,10 @@ final class Request {
                 warningf("null value for %s in form data: ", k);
             }
         }
-        // return JsonSerializer.fromJson!T(jv);
-        T obj = toObject!T(jv);
+        return JsonSerializer.fromJson!T(jv);
+        // T obj = toObject!T(jv);
 
-        return (obj is null) ? (new T) : obj;
+        // return (obj is null) ? (new T()) : obj;
     }
     
     /**
