@@ -297,6 +297,36 @@ final class Request {
         return _connection.getRemoteAddress();
     }
 
+    @property string realClientIP() {
+        string s = this.header(HttpHeader.X_FORWARDED_FOR);
+        if(s.empty) {
+            s = this.header("Proxy-Client-IP");
+        } else {
+            auto arr = s.split(",");
+            if(arr.length >= 0)
+                s = arr[0];
+        }
+
+        if(s.empty) {
+            s = this.header("WL-Proxy-Client-IP");
+        }
+
+        if(s.empty) {
+            s = this.header("HTTP_CLIENT_IP");
+        }
+
+        if(s.empty) {
+            s = this.header("HTTP_X_FORWARDED_FOR");
+        } 
+
+        if(s.empty) {
+            Address ad = clientAddress();
+            s = ad.toAddrString();
+        }
+
+        return s;
+    }    
+
     @property JSONValue json() {
         if (_json == JSONValue.init)
             _json = parseJSON(getBodyAsString());
