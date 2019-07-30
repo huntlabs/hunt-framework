@@ -21,12 +21,12 @@ private:
     AuthenticateProxy       auth;
     int                     updatedTick;
 
-    UCache                  cache;
+    Cache                   cache;
     string                  name;
     string                  prefix;
     int                     expired;
 public:
-    this(UCache cache , string name , string prefix , int expired)
+    this(Cache cache , string name , string prefix , int expired)
     {
          this.cache = cache;
          this.name = name;
@@ -51,7 +51,7 @@ public:
     void refresh()
     {
         import core.stdc.time : time;
-        cache.put!int(prefix ~ name ~ "_permissions" , cast(int)time(null));
+        cache.set(prefix ~ name ~ "_permissions" , cast(int)time(null));
     }
 
     User addUser(int id)
@@ -74,7 +74,7 @@ public:
             user = users[0];
         }
 
-        cache.put!User(prefix ~ name ~ "_user_" ~ to!string(id) , user , expired);
+        cache.set(prefix ~ name ~ "_user_" ~ to!string(id) , user , expired);
         int[] ids = cache.get!(int[])(prefix ~ name ~ "_userids");
 
         import std.algorithm.searching;
@@ -83,7 +83,7 @@ public:
         {
             ids ~= id;
         }
-        cache.put!(int[])(prefix ~ name ~ "_userids" , ids , expired);
+        cache.set(prefix ~ name ~ "_userids" , ids , expired);
         logInfo(prefix ~ name ~ "_userids" , ids);
         auto session = request().session(true);
         session.set("auth_userid" , to!string(id));
@@ -151,7 +151,7 @@ public:
                 auto users = auth.getAllUsers(ids);
                 foreach(u ; users)
                 {
-                    cache.put!User(prefix ~ name ~ "_user_" ~ to!string(u.id) , u , expired);
+                    cache.set(prefix ~ name ~ "_user_" ~ to!string(u.id) , u , expired);
                 }
             }
             updatedTick = updated + 1;

@@ -23,6 +23,8 @@ import hunt.logging;
 import hunt.framework.Init;
 import hunt.util.Configuration;
 
+import hunt.cache.CacheOption;
+
 @Configuration("hunt")
 final class ApplicationConfig
 {
@@ -55,12 +57,11 @@ final class ApplicationConfig
         uint expire = 3600; // in seconds
     }
 
-    struct CacheConf
-    {
-        string storage = "memory";
-        string args = "/tmp";
-        bool enableL2 = false;
-    }
+    // struct CacheConf
+    // {
+    //     string adapter = "memory";
+    //     bool enableL2 = false;
+    // }
 
     struct HttpConf
     {
@@ -229,7 +230,7 @@ final class ApplicationConfig
     ApplicationConf application;
     CookieConf cookie;
     SessionConf session;
-    CacheConf cache;
+    CacheOption cache;
     HttpConf http;
     HttpsConf https;
     RouteConf route;

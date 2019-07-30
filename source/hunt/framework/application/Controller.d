@@ -91,16 +91,11 @@ abstract class Controller
         return this.middlewares;
     }
 
-    @property UCache cache()
+    Cache cache()
     {
         return app().cache();
     }
-
-    @property cacheManger()
-    {
-        return app().cacheManger();
-    }
-
+    
     protected final Response doMiddleware()
     {
         version (HUNT_DEBUG) logDebug("doMiddlware ..");

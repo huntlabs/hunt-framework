@@ -25,7 +25,7 @@ import hunt.framework.http.session.HttpSession;
 /**
 */
 class SessionStorage {
-	this(UCache cache) {
+	this(Cache cache) {
 		_cache = cache;
 	}
 
@@ -36,7 +36,7 @@ class SessionStorage {
 		if(_expire < expire)
 			expire = _expire;
 		string key = session.getId();
-		_cache.put!string(getRealAddr(key), HttpSession.toJson(session), _expire);
+		_cache.set(getRealAddr(key), HttpSession.toJson(session), _expire);
 		return true;
 	}
 
@@ -47,7 +47,7 @@ class SessionStorage {
 			// return HttpSession.create(sessionId, _sessionStorage.expire);
 			return null;
 		} else {
-			_cache.put!string(getRealAddr(key) , s , _expire);
+			_cache.set(getRealAddr(key) , s , _expire);
 			return HttpSession.fromJson(key, s);
 		}
 	}
@@ -58,7 +58,7 @@ class SessionStorage {
 
 	// alias isset = containsKey;
 	bool containsKey(string key) {
-		return _cache.containsKey(getRealAddr(key));
+		return _cache.hasKey(getRealAddr(key));
 	}
 
 	// alias del = erase;
@@ -108,6 +108,6 @@ class SessionStorage {
 		string _sessionId;
 
 		int _expire;
-		UCache _cache;
+		Cache _cache;
 	}
 }

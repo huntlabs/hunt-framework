@@ -179,13 +179,12 @@ final class Application : ApplicationContext {
         }
     }
 
-    private void initCache(ApplicationConfig.CacheConf config) {
-        _manger.createCache("default", config.storage, config.args, config.enableL2);
+    private void initCache(CacheOption option) {
+        _cache = CacheFectory.create(option);
     }
 
     private void initSessionStorage(ApplicationConfig.SessionConf config) {
-        _sessionStorage = new SessionStorage(UCache.CreateUCache(config.storage,
-                config.args, false));
+        _sessionStorage = new SessionStorage(_cache);
 
         _sessionStorage.setPrefix(config.prefix);
         _sessionStorage.expire = config.expire;
@@ -198,16 +197,12 @@ final class Application : ApplicationContext {
         }
     }
 
-    CacheManger cacheManger() {
-        return _manger;
-    }
-
     SessionStorage sessionStorage() {
         return _sessionStorage;
     }
 
-    UCache cache() {
-        return _manger.getCache("default");
+    Cache cache() {
+        return _cache;
     }
 
     AccessManager accessManager() @property {
@@ -712,8 +707,6 @@ private:
     this() {
         setDefaultLogging();
 
-        _manger = new CacheManger();
-
         this._dispatcher = new Dispatcher();
         setConfig(configManager().config());
     }
@@ -731,7 +724,7 @@ private:
         EntityManagerFactory _entityManagerFactory;
     }
 
-    CacheManger _manger;
+    Cache _cache;
     SessionStorage _sessionStorage;
     AccessManager _accessManager;
     WebSocketPolicy _webSocketPolicy;
