@@ -46,13 +46,14 @@ class Response : Closeable {
     protected HttpURI _uri;
     protected BufferedOutputStream _bufferedOutput;
     protected int _bufferSize = 8 * 1024;
+    protected size_t totalBytes;
 
     this(Request request, int bufferSize = 8 * 1024) {
         initialize(request, bufferSize);
 
         this._response.setStatus(HttpStatus.OK_200);
         this._response.setHttpVersion(HttpVersion.HTTP_1_1);
-
+        totalBytes = 0;
     }
 
     // this(HttpResponse response, HttpOutputStream output, HttpURI uri, int bufferSize = 8 * 1024) {
@@ -153,18 +154,20 @@ class Response : Closeable {
 
     // ditto
     Response setContent(const(ubyte)[] content) {
+        totalBytes += content.length;
         getOutputStream().write(cast(byte[]) content, 0, cast(int) content.length);
 
         return this;
     }
 
-    void writeContent(string content) {
-        writeContent(cast(const(ubyte)[]) content);
-    }
+    alias writeContent = setContent;
+    // void writeContent(string content) {
+    //     writeContent(cast(const(ubyte)[]) content);
+    // }
 
-    void writeContent(const(ubyte)[] content) {
-        getOutputStream().write(cast(byte[]) content, 0, cast(int) content.length);
-    }
+    // void writeContent(const(ubyte)[] content) {
+    //     getOutputStream().write(cast(byte[]) content, 0, cast(int) content.length);
+    // }
 
     /**
      * Get the content of the response.
@@ -252,6 +255,15 @@ class Response : Closeable {
         }
         setHeader("Date", date("Y-m-d H:i:s"));
         setHeader(HttpHeader.X_POWERED_BY, XPoweredBy);
+
+        if(!this.getFields().contains(HttpHeader.CONTENT_TYPE)) {
+            this.header(HttpHeader.CONTENT_TYPE, HtmlContentType);
+        }
+
+        if(!this.getFields().contains(HttpHeader.CONTENT_LENGTH)) {
+            this.header(HttpHeader.CONTENT_LENGTH, totalBytes.to!string());
+        }
+
         try {
             this.close();
         }
@@ -319,7 +331,6 @@ class Response : Closeable {
 
 private:
     bool _isDone = false;
-    // ResponseCookieEncoder _cookieEncoder;
 }
 
 // dfmt off
