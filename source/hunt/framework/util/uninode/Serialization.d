@@ -129,35 +129,35 @@ private
     */
     UniNode _jsonToUniNode(JSONValue data)
     {
-        if (data.type == JSONType.INTEGER)
+        if (data.type == JSONType.integer)
         {
             return UniNode(data.integer);
         }
-        else if (data.type == JSONType.NULL)
+        else if (data.type == JSONType.null_)
         {
             return UniNode((null));
         }
-        else if (data.type == JSONType.STRING)
+        else if (data.type == JSONType.string)
         {
             return UniNode(data.str);
         }
-        else if (data.type == JSONType.FALSE)
+        else if (data.type == JSONType.false_)
         {
             return UniNode(false);
         }
-        else if (data.type == JSONType.TRUE)
+        else if (data.type == JSONType.true_)
         {
             return UniNode(true);
         }
-        else if (data.type == JSONType.FLOAT)
+        else if (data.type == JSONType.float_)
         {
             return UniNode(data.floating);
         }
-        else if (data.type == JSONType.UINTEGER)
+        else if (data.type == JSONType.uinteger)
         {
             return UniNode(data.uinteger);
         }
-        else if (data.type == JSONType.ARRAY)
+        else if (data.type == JSONType.array)
         {
             UniNode[] nodes;
             foreach (value; data.array)
@@ -166,7 +166,7 @@ private
             }
             return UniNode(nodes);
         }
-        else if (data.type == JSONType.OBJECT)
+        else if (data.type == JSONType.object)
         {
             UniNode[string] node;
             foreach (k, v; data.object)
