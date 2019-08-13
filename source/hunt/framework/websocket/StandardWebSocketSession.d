@@ -27,13 +27,15 @@ module hunt.framework.websocket.StandardWebSocketSession;
 import hunt.framework.websocket.WebSocketSession;
 import hunt.framework.websocket.AbstractWebSocketSession;
 
-import hunt.collection;
-import hunt.http.codec.http.model.HttpFields;
-import hunt.http.codec.http.model.HttpURI;
-import hunt.http.codec.websocket.model.CloseStatus;
-import hunt.http.codec.websocket.stream.WebSocketConnection;
 import hunt.Exceptions;
 import hunt.logging;
+import hunt.collection;
+
+import hunt.net.util.HttpURI;
+
+import hunt.http.codec.http.model.HttpFields;
+import hunt.http.codec.websocket.model.CloseStatus;
+import hunt.http.codec.websocket.stream.WebSocketConnection;
 
 version(Have_hunt_security) {
     import hunt.security.Principal;

@@ -12,9 +12,9 @@
 module hunt.framework.http.Request;
 
 import hunt.http.codec.http.model;
-import hunt.http.codec.http.stream.HttpConnection;
+import hunt.http.HttpConnection;
 import hunt.http.codec.http.stream.HttpOutputStream;
-import hunt.http.util.UrlEncoded;
+import hunt.net.util.UrlEncoded;
 
 import hunt.collection;
 import hunt.io;

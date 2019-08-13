@@ -276,14 +276,14 @@ final class Application : ApplicationContext {
 |\  \|\  \   |\  \|\  \   |\   ___  \   |\___   ___\     Hunt Framework ` ~ HUNT_VERSION ~ `
 \ \  \\\  \  \ \  \\\  \  \ \  \\ \  \  \|___ \  \_|     
  \ \   __  \  \ \  \\\  \  \ \  \\ \  \      \ \  \      Listening: ` ~ addr.toString() ~ `
-  \ \  \ \  \  \ \  \\\  \  \ \  \\ \  \      \ \  \     TLS: ` ~ (_server.getHttp2Configuration.isSecureConnectionEnabled() ? "Enabled" : "Disabled") ~ `
+  \ \  \ \  \  \ \  \\\  \  \ \  \\ \  \      \ \  \     TLS: ` ~ (_server.getHttpOptions().isSecureConnectionEnabled() ? "Enabled" : "Disabled") ~ `
    \ \__\ \__\  \ \_______\  \ \__\\ \__\      \ \__\    
     \|__|\|__|   \|_______|   \|__| \|__|       \|__|    https://www.huntframework.com
 
 `;
         writeln(cliText);
 
-        if (_server.getHttp2Configuration.isSecureConnectionEnabled())
+        if (_server.getHttpOptions().isSecureConnectionEnabled())
             writeln("Try to browse https://", addr.toString());
         else
             writeln("Try to browse http://", addr.toString());
@@ -431,10 +431,10 @@ final class Application : ApplicationContext {
         SimpleWebSocketHandler webSocketHandler = new SimpleWebSocketHandler();
         webSocketHandler.setWebSocketPolicy(_webSocketPolicy);
 
-        HttpConfiguration configuration = new HttpConfiguration();
+        HttpServerOptions options = new HttpServerOptions();
 
         _server = new HttpServer(conf.http.address, conf.http.port,
-                configuration, buildHttpHandlerAdapter(), webSocketHandler);
+                options, buildHttpHandlerAdapter(), webSocketHandler);
     }
 
 private:

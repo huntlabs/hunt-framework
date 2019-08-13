@@ -24,7 +24,8 @@ module hunt.framework.websocket.WebSocketSession;
 import hunt.collection;
 import hunt.util.Common;
 
-import hunt.http.codec.http.model.HttpURI;
+import hunt.net.util.HttpURI;
+
 import hunt.http.codec.websocket.frame.WebSocketFrame;
 import hunt.http.codec.websocket.model.CloseStatus;
 
