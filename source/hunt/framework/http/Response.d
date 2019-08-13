@@ -254,7 +254,7 @@ class Response : Closeable {
                     "/", null, false, false));
         }
         setHeader("Date", date("Y-m-d H:i:s"));
-        setHeader(HttpHeader.X_POWERED_BY, XPoweredBy);
+        setHeader(HttpHeader.X_POWERED_BY, HUNT_X_POWERED_BY);
 
         if(!this.getFields().contains(HttpHeader.CONTENT_TYPE)) {
             this.header(HttpHeader.CONTENT_TYPE, HtmlContentType);
