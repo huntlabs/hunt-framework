@@ -294,10 +294,10 @@ final class Request {
     }
 
     @property Address clientAddress() {
-        return _connection.getRemoteAddress();
+        return _connection.getTcpConnection().getRemoteAddress();
     }
 
-    @property string realClientIP() {
+    @property string ip() {
         string s = this.header(HttpHeader.X_FORWARDED_FOR);
         if(s.empty) {
             s = this.header("Proxy-Client-IP");

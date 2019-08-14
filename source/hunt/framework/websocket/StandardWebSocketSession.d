@@ -182,7 +182,7 @@ version(Have_hunt_security) {
 
     // override
     bool isOpen() {
-        return getNativeSession().isOpen();
+        return getNativeSession().getIOState().isOpen();
     }
 
     override
@@ -237,7 +237,8 @@ version(Have_hunt_security) {
 
     override
     protected void closeInternal(CloseStatus status) {
-        getNativeSession().close();
+        this.close();
+        // getNativeSession().close();
         // getNativeSession().close(new CloseReason(CloseCodes.getCloseCode(status.getCode()), status.getReason()));
     }
 

@@ -175,10 +175,10 @@ class WebSocketHttpRequestHandler : WebSocketHandler { // , Lifecycle, ServletCo
 
             version(Have_hunt_security) {
                 wsSession = new StandardWebSocketSession(request.getFields(), null,
-                    connection.getLocalAddress(), connection.getRemoteAddress(), null); // user
+                    connection.getTcpConnection().getLocalAddress(), connection.getTcpConnection().getRemoteAddress(), null); // user
             } else {
                 wsSession = new StandardWebSocketSession(request.getFields(), null,
-                    connection.getLocalAddress(), connection.getRemoteAddress()); 
+                    connection.getTcpConnection().getLocalAddress(), connection.getTcpConnection().getRemoteAddress()); 
             }
 
             // Map!(string, Object) attributes = new HashMap<>();
