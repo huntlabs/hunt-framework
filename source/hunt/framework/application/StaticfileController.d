@@ -9,6 +9,7 @@ import std.file;
 import std.path;
 import std.digest.md;
 import std.stdio;
+import std.algorithm.searching : canFind;
 
 import hunt.logging;
 
@@ -75,7 +76,17 @@ class StaticfileController : Controller
             return response;
         }
 
-        FileInfo fi = makeFileInfo(staticFilename);
+        FileInfo fi;
+        try
+        {
+            fi = makeFileInfo(staticFilename);
+        }
+        catch (Exception e)
+        {
+            response.doError(HttpStatus.INTERNAL_SERVER_ERROR_500);
+            return response;
+        }
+
         auto lastModified = toRFC822DateTimeString(fi.timeModified.toUTC());
         auto etag = "\"" ~ hexDigest!MD5(staticFilename ~ ":" ~ lastModified ~ ":" ~ to!string(fi.size)).idup ~ "\"";
 
@@ -108,11 +119,17 @@ class StaticfileController : Controller
             // https://tools.ietf.org/html/rfc7233
             // Range can be in form "-\d", "\d-" or "\d-\d"
             auto range = request.header(HttpHeader.RANGE).chompPrefix("bytes=");
+            if (range.canFind(','))
+            {
+                response.doError(HttpStatus.NOT_IMPLEMENTED_501);
+                return response;
+            }
             auto s = range.split("-");
 
             if (s.length != 2)
             {
-                throw new Exception("bad request.");
+                response.doError(HttpStatus.BAD_REQUEST_400);
+                return response;
             }
 
             try
@@ -138,12 +155,14 @@ class StaticfileController : Controller
                 }
                 else
                 {
-                    throw new Exception("bad request");
+                    response.doError(HttpStatus.BAD_REQUEST_400);
+                    return response;
                 }
             }
             catch (ConvException e)
             {
-                throw new Exception("bad request." ~ e.msg);
+                response.doError(HttpStatus.BAD_REQUEST_400, e.msg);
+                return response;
             }
 
             if (rangeEnd > fi.size)
@@ -190,12 +209,9 @@ class StaticfileController : Controller
 
     private string mendPath(string path)
     {
-        if (!path.startsWith("./"))
+        if (!path.startsWith(".") && !isAbsolute(path))
         {
-            if (!path.startsWith("/"))
-            {
-                path = "./" ~ path;
-            }
+            path = "./" ~ path;
         }
 
         if (!path.endsWith("/"))
