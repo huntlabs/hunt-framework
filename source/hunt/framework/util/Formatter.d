@@ -48,22 +48,22 @@ string StrFormat(string message, JSONValue data)
     {
         switch (item.type) with (JSONType)
         {
-        case INTEGER:
+        case integer:
             formattedWrite(buffer, text, item.integer);
             break;
-        case UINTEGER:
+        case uinteger:
             formattedWrite(buffer, text, item.uinteger);
             break;
-        case FLOAT:
+        case float_:
             formattedWrite(buffer, text, item.floating);
             break;
-        case STRING:
+        case string:
             formattedWrite(buffer, text, item.str);
             break;
-        case TRUE:
+        case true_:
             formattedWrite(buffer, text, true);
             break;
-        case FALSE:
+        case false_:
             formattedWrite(buffer, text, false);
             break;
         default:

@@ -168,7 +168,7 @@ class HttpSession {
 
         string[string] v;
         foreach (string key, ref JSONValue value; attributes) {
-            if (value.type == JSON_TYPE.STRING)
+            if (value.type == JSONType.string)
                 v[key] = value.str;
             else
                 v[key] = value.toString();
