@@ -361,7 +361,7 @@ final class Application : ApplicationContext {
         ServerHttpHandlerAdapter adapter = new ServerHttpHandlerAdapter();
         adapter.acceptConnection((HttpConnection c) {
             version (HUNT_DEBUG)
-                logDebugf("new request from: %s", c.getRemoteAddress.toString());
+                logDebugf("new request from: %s", c.getTcpConnection().getRemoteAddress().toString());
 
             // }).acceptHttpTunnelConnection((request, response, ot, connection) {
             //     Request r = new Request(request, response, ot, cast(HttpConnection)connection, _sessionStorage);
@@ -634,7 +634,7 @@ private:
             HttpOutputStream output, HttpConnection connection) {
             version(HUNT_DEBUG) {
                 logInfof("The connection %s will upgrade to WebSocket connection",
-                        connection.getSessionId());
+                        connection.getId());
             }
             string path = request.getURI().getPath();
             WebSocketHandler handler = webSocketHandlerMap.get(path, null);
