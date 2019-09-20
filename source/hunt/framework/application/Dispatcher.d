@@ -22,7 +22,7 @@ import hunt.framework.security.acl.User;
 import hunt.framework.Simplify;
 import hunt.framework.trace.Tracer;
 
-import hunt.logging;
+import hunt.logging.ConsoleLogger;
 import hunt.Exceptions;
 import hunt.http.codec.http.model.HttpHeader;
 
@@ -151,24 +151,26 @@ Response doGroupMiddleware(Request request)
 
 void doRequestHandle(RoutingHandler handle, Request req)
 {
+    import std.stdio : writeln;
+    import core.stdc.stdlib : exit;
+
     Response response;
-
-    // this thread _request
-    request(req);
-
-    version(WITH_HUNT_TRACE)
-    {
-        newFrameworkTrace(req);
-    }
 
     try
     {
+
+        // this thread _request
+        request(req);
+
+        version(WITH_HUNT_TRACE)
+        {
+            newFrameworkTrace(req);
+        }
+
         ///this group middleware.
         response = doGroupMiddleware(req);
         if(response is null)
         {
-
-
             response = handle(req);
 
             if (response is null)
@@ -185,11 +187,15 @@ void doRequestHandle(RoutingHandler handle, Request req)
         {
             finishFrameworkTrace(e.toString);
         }
-        collectException(error(e.toString));
+        
+        version(HUNT_DEBUG) warning(e);
+        else warning(e.msg);
     }
     catch (Exception e)
     {
-        collectException(error(e.toString));
+        version(HUNT_DEBUG) warning(e);
+        else warning(e.msg);
+
         response = new Response(req);
         response.setStatus(502);
         response.setContent(e.toString());
@@ -204,16 +210,18 @@ void doRequestHandle(RoutingHandler handle, Request req)
     }
     catch (Error e)
     {
-        import std.stdio : writeln;
-        import core.stdc.stdlib : exit;
         version(WITH_HUNT_TRACE)
         {
             finishFrameworkTrace(e.toString);
         }
         
-        collectException({ logError(e.toString);
-            writeln(e.toString()); 
-        }());
+        version(HUNT_DEBUG) error(e);
+        else error(e.msg);
+
+        exit(-1);
+    } catch(Throwable t) {
+        version(HUNT_DEBUG) error(t);
+        else error(t.msg);
         exit(-1);
     }
 
@@ -232,7 +240,11 @@ void doRequestHandle(RoutingHandler handle, Request req)
         }
         // if (response.dataHandler is null)
         //     response.dataHandler = req.responseHandler;
-
-        collectException(() { response.done(); }());
+        try {
+            response.done();
+        } catch(Throwable t) {
+            version(HUNT_DEBUG) warning(t);
+            else warning(t.msg);
+        }
     }
 }
