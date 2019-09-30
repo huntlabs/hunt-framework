@@ -158,7 +158,7 @@ class Router {
 
         if (this._supportMultipleGroup) {
             version (HUNT_DEBUG)
-                logDebug("Router multiple route group is enabled..");
+                info("Router multiple route group is enabled..");
             // load this group routes from config file
             foreach (key, obj; this._groups) {
                 this.loadConfig(key);
@@ -166,7 +166,7 @@ class Router {
         }
         else {
             version (HUNT_DEBUG)
-                logDebug("Router multiple route group is disabled!");
+                info("Router multiple route group is disabled!");
         }
 
     }

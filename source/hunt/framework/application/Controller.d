@@ -155,7 +155,7 @@ mixin template MakeController(string moduleName = __MODULE__)
     mixin HuntDynamicCallFun!(typeof(this), moduleName);
 }
 
-mixin template HuntDynamicCallFun(T, string moduleName)
+mixin template HuntDynamicCallFun(T, string moduleName) if(is(T : Controller))
 {
 public:
     // version (HUNT_DEBUG) 
@@ -200,8 +200,13 @@ string __createCallActionMethod(T, string moduleName)()
 
     foreach (memberName; __traits(allMembers, T))
     {
+        // TODO: Tasks pending completion -@zhangxueping at 2019-09-24T11:47:45+08:00
+        // Can't detect the error: void test(error);
+        // pragma(msg, "memberName: ", memberName);
         static if (is(typeof(__traits(getMember, T, memberName)) == function))
         {
+            // pragma(msg, "got: ", memberName);
+
             enum _isActionMember = isActionMember(memberName);
             foreach (t; __traits(getOverloads, T, memberName))
             {
@@ -324,6 +329,8 @@ string __createRouteMap(T, string moduleName)()
 
     foreach (memberName; __traits(allMembers, T))
     {
+        // pragma(msg, "memberName: ", memberName);
+
         static if (is(typeof(__traits(getMember, T, memberName)) == function))
         {
             foreach (t; __traits(getOverloads, T, memberName))

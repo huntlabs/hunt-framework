@@ -223,7 +223,7 @@ class Render : VisitorInterface
     string render(UniNode data)
     {
         import hunt.logging;
-        version(HUNT_DEBUG)logDebug("----render data : ",data);
+        version(HUNT_VIEW_DEBUG) logDebug("----render data : ", data);
         _context = new Context(_rootContext, data);
         _globalContext = _context;
 
@@ -914,7 +914,7 @@ private:
 
     UniNode visitFunc(string name, UniNode args)
     {
-        version(HUNT_DEBUG) logDebug("---Func :",name," args: ",args);
+        version(HUNT_VIEW_DEBUG) logDebug("---Func :",name," args: ",args);
 
         if(name == "trans")
         {

@@ -450,7 +450,7 @@ private:
                 conf.http.workerThreads = minThreadCount;
                 
             if(conf.http.workerThreads < minThreadCount) {
-                warningf("It's better to make the number of worker thread greater than %d, current: %d",
+                warningf("It's better to make the number of worker threads >= %d. The current value is: %d",
                     minThreadCount, conf.http.workerThreads);
                 // conf.http.workerThreads = minThreadCount;
             }
@@ -463,7 +463,7 @@ private:
         //if(conf.webSocketFactory)
         //    _wfactory = conf.webSocketFactory;
 
-        version(HUNT_DEBUG) logDebug(conf.route.groups);
+        version(HUNT_DEBUG) info(conf.route.groups);
 
         version (NO_TASKPOOL) {
         }

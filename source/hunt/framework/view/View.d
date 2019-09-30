@@ -87,7 +87,7 @@ class View
 
     public string render(string tempalteFile)
     {
-        version (HUNT_DEBUG) {
+        version (HUNT_VIEW_DEBUG) {
             tracef("---tempalteFile: %s, _extName:%s, rend context: %s", 
                 tempalteFile, _extName, _context.toString);
         }

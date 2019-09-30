@@ -218,11 +218,11 @@ void doRequestHandle(RoutingHandler handle, Request req)
         version(HUNT_DEBUG) error(e);
         else error(e.msg);
 
-        exit(-1);
+        // exit(-1);
     } catch(Throwable t) {
         version(HUNT_DEBUG) error(t);
         else error(t.msg);
-        exit(-1);
+        // exit(-1);
     }
 
     if (response !is null)
