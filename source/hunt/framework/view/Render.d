@@ -239,14 +239,14 @@ class Render : VisitorInterface
 
     override void visit(TemplateNode node)
     {
-        tryAccept(node.stmt);
+        tryAccept(node.stmt.get());
     }
 
     override void visit(BlockNode node)
     {
         void super_()
         {
-            tryAccept(node.stmt);
+            tryAccept(node.stmt.get());
         }
 
         foreach (tmpl; _extends[0 .. $-1])
@@ -254,7 +254,7 @@ class Render : VisitorInterface
             {
                 pushNewContext();
                 _context.functions["super"] = wrapper!super_;
-                tryAccept(tmpl.blocks[node.name].stmt);
+                tryAccept(tmpl.blocks[node.name].stmt.get());
                 popContext();
                 return;
             }
@@ -278,7 +278,7 @@ class Render : VisitorInterface
 
     override void visit(ExprNode node)
     {
-        tryAccept(node.expr);
+        tryAccept(node.expr.get());
         auto n = pop();
         n.toStringType;
         writeToResult(n.get!string);
@@ -290,7 +290,7 @@ class Render : VisitorInterface
 
         if (!node.cond.isNull)
         {
-            tryAccept(node.cond);
+            tryAccept(node.cond.get());
             auto res = pop();
             res.toBoolType;
             condition = res.get!bool;
@@ -298,11 +298,11 @@ class Render : VisitorInterface
 
         if (condition)
         {
-            tryAccept(node.expr);
+            tryAccept(node.expr.get());
         }
         else if (!node.other.isNull)
         {
-            tryAccept(node.other);
+            tryAccept(node.other.get());
         }
         else
         {
@@ -660,7 +660,7 @@ class Render : VisitorInterface
             bool condition = true;
             if (!node.cond.isNull)
             {
-                tryAccept(node.cond);
+                tryAccept(node.cond.get());
                 auto cond = pop();
                 cond.toBoolType;
                 condition = cond.get!bool;
@@ -701,8 +701,9 @@ class Render : VisitorInterface
                         _context.data[node.keys[0]] = iterable[i];
                     else
                     {
-                        iterable[i].checkNodeType(UniNode.Kind.array, node.iterable.pos);
-                        assertTemplate(iterable[i].length >= node.keys.length, "Num of keys less then values", node.iterable.pos);
+                        iterable[i].checkNodeType(UniNode.Kind.array, node.iterable.get().pos);
+                        assertTemplate(iterable[i].length >= node.keys.length, "Num of keys less then values", 
+                            node.iterable.get().pos);
                         foreach(j, key; node.keys)
                             _context.data[key] = iterable[i][j];
                     }
@@ -738,13 +739,13 @@ class Render : VisitorInterface
                     _context.data[node.keys[0]] = iterable[i];
                 else
                 {
-                    iterable[i].checkNodeType(UniNode.Kind.array, node.iterable.pos);
-                    assertTemplate(iterable[i].length >= node.keys.length, "Num of keys less then values", node.iterable.pos);
+                    iterable[i].checkNodeType(UniNode.Kind.array, node.iterable.get().pos);
+                    assertTemplate(iterable[i].length >= node.keys.length, "Num of keys less then values", node.iterable.get().pos);
                     foreach(j, key; node.keys)
                         _context.data[key] = iterable[i][j];
                 }
 
-                tryAccept(node.block);
+                tryAccept(node.block.get());
                 iterated = true;
             }
             popContext();
@@ -753,12 +754,12 @@ class Render : VisitorInterface
 
 
 
-        tryAccept(node.iterable);
+        tryAccept(node.iterable.get());
         UniNode iterable = pop();
         loop(iterable);
 
         if (!iterated && !node.other.isNull)
-            tryAccept(node.other);
+            tryAccept(node.other.get());
     }
 
 
@@ -795,12 +796,12 @@ class Render : VisitorInterface
                 args ~= FormArg(arg.name);
             else
             {
-                tryAccept(arg.defaultExpr);
+                tryAccept(arg.defaultExpr.get());
                 args ~= FormArg(arg.name, pop());
             }
         }
 
-        _context.macros[node.name] = Macro(args, _context, node.block);
+        _context.macros[node.name] = Macro(args, _context, node.block.get());
     }
 
 
@@ -814,14 +815,14 @@ class Render : VisitorInterface
                 args ~= FormArg(arg.name);
             else
             {
-                tryAccept(arg.defaultExpr);
+                tryAccept(arg.defaultExpr.get());
                 args ~= FormArg(arg.name, pop());
             }
         }
 
-        auto caller = Macro(args, _context, node.block);
+        auto caller = Macro(args, _context, node.block.get());
 
-        tryAccept(node.factArgs);
+        tryAccept(node.factArgs.get());
         auto factArgs = pop();
 
         visitMacro(node.macroName, factArgs, caller.nullable);
@@ -830,11 +831,11 @@ class Render : VisitorInterface
 
     override void visit(FilterBlockNode node)
     {
-        tryAccept(node.args);
+        tryAccept(node.args.get());
         auto args = pop();
 
         pushFilter(node.filterName, args);
-        tryAccept(node.block);
+        tryAccept(node.block.get());
         popFilter();
     }
 
@@ -854,7 +855,7 @@ class Render : VisitorInterface
 
         pushNewContext();
 
-        foreach (child; node.tmplBlock.stmt.children)
+        foreach (child; node.tmplBlock.get().stmt.get().children)
             tryAccept(child);
 
         auto macros = _context.macros;
@@ -888,7 +889,7 @@ class Render : VisitorInterface
         if (!node.withContext)
             _context = _globalContext;
 
-        tryAccept(node.tmplBlock);
+        tryAccept(node.tmplBlock.get());
 
         if (!node.withContext)
             _context = stashedContext;
@@ -898,7 +899,7 @@ class Render : VisitorInterface
     override void visit(ExtendsNode node)
     {
         _extends ~= node.tmplBlock;
-        tryAccept(node.tmplBlock);
+        tryAccept(node.tmplBlock.get());
         _extends.popBack;
         _isExtended = true;
     }
@@ -982,7 +983,7 @@ private:
 
         foreach(arg; macro_.args)
             if (!arg.def.isNull)
-                _context.data[arg.name] = arg.def;
+                _context.data[arg.name] = arg.def.get();
 
         for(int i = 0; i < args["varargs"].length; i++)
         {
@@ -1010,7 +1011,7 @@ private:
         if (!caller.isNull)
             _context.macros["caller"] = caller;
 
-        tryAccept(macro_.block);
+        tryAccept(macro_.block.get());
         result = pop();
 
         popContext();
