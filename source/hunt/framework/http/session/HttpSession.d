@@ -7,7 +7,7 @@ import hunt.framework.util.Random;
 import std.algorithm;
 import std.array;
 import std.conv;
-import std.datetime;
+// import std.datetime;
 import std.digest.sha;
 import std.json;
 import std.string;
@@ -86,7 +86,7 @@ class HttpSession {
     }
 
     bool isValid() {
-        long currentTime = DateTimeHelper.currentTimeMillis();
+        long currentTime = DateTime.currentTimeMillis();
         return (currentTime - lastAccessedTime) < (maxInactiveInterval * 1000);
     }
 
@@ -418,7 +418,7 @@ class HttpSession {
     }
 
     static HttpSession create(string id, int maxInactiveInterval) {
-        long currentTime = DateTimeHelper.currentTimeMillis();
+        long currentTime = DateTime.currentTimeMillis();
         HttpSession session = new HttpSession();
         session.setId(id);
         session.setMaxInactiveInterval(maxInactiveInterval);
@@ -438,7 +438,7 @@ class HttpSession {
 
     static HttpSession fromJson(string id, string json) {
         JSONValue j = parseJSON(json);
-        long currentTime = DateTimeHelper.currentTimeMillis();
+        long currentTime = DateTime.currentTimeMillis();
         HttpSession session = new HttpSession();
         session.setId(id);
         session.setCreationTime(j["CreationTime"].integer);

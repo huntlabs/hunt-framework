@@ -108,7 +108,7 @@ class SubProtocolWebSocketHandler : WebSocketMessageHandler,
         protocolHandlers = new LinkedHashSet!(SubProtocolHandler)();
         // sessions = new ConcurrentHashMap!(string, WebSocketSessionHolder)();
         sessions = new HashMap!(string, WebSocketSessionHolder)();
-        lastSessionCheckTime = DateTimeHelper.currentTimeMillis();
+        lastSessionCheckTime = DateTime.currentTimeMillis();
         // stats = new Stats();
         lifecycleMonitor = new Object();
         this.clientInboundChannel = clientInboundChannel;
@@ -484,7 +484,7 @@ class SubProtocolWebSocketHandler : WebSocketMessageHandler,
      * connected for more than 60 seconds without having received a single message.
      */
     private void checkSessions() {
-        long currentTime = DateTimeHelper.currentTimeMillis();
+        long currentTime = DateTime.currentTimeMillis();
         if (!isRunning() || (currentTime - this.lastSessionCheckTime < getTimeToFirstMessage())) {
             return;
         }
@@ -633,7 +633,7 @@ private class WebSocketSessionHolder {
 
     this(WebSocketSession session) {
         this.session = session;
-        this.createTime = DateTimeHelper.currentTimeMillis();
+        this.createTime = DateTime.currentTimeMillis();
     }
 
     WebSocketSession getSession() {

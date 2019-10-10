@@ -7,8 +7,8 @@
     "license": "Apache-2.0",
     "dependencies": {
         "hunt-http": "~>0.4.0-beta.1",
-        "hunt-entity": "~>2.4.3",
-        "hunt-stomp": "~>0.3.0",
+        "hunt-entity": "~>2.5.0-beta.2",
+        "hunt-stomp": "~>0.3.3",
         "hunt-cache": "~>0.6.0-rc.1",
         "hunt-redis": "~>1.0.0-rc.3"
     }
