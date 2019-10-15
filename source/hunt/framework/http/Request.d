@@ -394,8 +394,10 @@ final class Request {
             UrlEncoded map = new UrlEncoded();
             map.decode(stringBody);
             foreach (string key; map.byKey()) {
-                foreach(string v; map.getValues(key))
-                    _xFormData[key] ~= v;
+                foreach(string v; map.getValues(key)) {
+                    key = key.strip();
+                    _xFormData[key] ~= v.strip();
+                }
             }
         }
         return _xFormData;
@@ -412,6 +414,8 @@ final class Request {
         // import hunt.util.Serialize;
 
         JSONValue jv;
+        if(xFormData() is null)
+            return new T();        
         foreach(string k, string[] values; xFormData()) {
             if(values.length > 1) {
                 jv[k] = JSONValue(values);
