@@ -27,6 +27,7 @@ import hunt.framework.application.ApplicationConfig;
 import hunt.framework.Simplify;
 import hunt.framework.Exceptions;
 import hunt.framework.http.session;
+import hunt.framework.Init;
 import hunt.framework.routing.Route;
 import hunt.framework.routing.Define;
 import hunt.framework.security.acl.User;
@@ -41,7 +42,9 @@ import std.conv;
 import std.digest;
 import std.digest.sha;
 import std.exception;
+import std.file;
 import std.json;
+import std.path;
 import std.regex;
 import std.string;
 import std.socket : Address;
@@ -121,9 +124,11 @@ final class Request {
 
         if(_isChunked) {
             pipedStream = new ByteArrayPipedStream(4 * 1024);
+            // FIXME: Needing refactor or cleanup -@zhangxueping at 2019-10-16T11:01:18+08:00
+            // 
+        // } else if(contentLength > configuration.getBodyBufferThreshold()) {
+        //             pipedStream = new FilePipedStream(configuration.getTempFilePath());
         } else if(contentLength>0) {
-            // if (contentLength > configuration.getBodyBufferThreshold()) {
-            //         pipedStream = new FilePipedStream(configuration.getTempFilePath());
             pipedStream = new ByteArrayPipedStream(cast(int) contentLength);
         }
     }
@@ -131,7 +136,10 @@ final class Request {
     private PipedStream pipedStream;
 
     package(hunt.framework) void onContent(ByteBuffer buffer) {
-        version(HUNT_DEBUG) info(BufferUtils.toString(buffer));
+        version(HUNT_DEBUG) {
+            if(buffer.remaining() < 1024)
+                info(BufferUtils.toString(buffer));
+        }
         if(pipedStream is null)
             requestBody.add(buffer);
         else
@@ -158,9 +166,6 @@ final class Request {
         } else if(contentType == "multipart/form-data") {
             _isMultipart = true;
             ApplicationConfig config = config();
-            import std.path;
-            import std.file;
-            import hunt.framework.Init;
             string tempDir = DEFAULT_TEMP_PATH;
             if(!tempDir.exists())
                 tempDir.mkdirRecurse();

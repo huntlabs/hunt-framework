@@ -39,7 +39,7 @@ class FileResponse : Response {
         _file = buildPath(APP_PATH, filename);
         string contentType = getMimeTypeByFilename(_file);
 
-        logInfof("xx=>%s, contentType=%s", _file, contentType);
+        version(HUNT_DEBUG) logInfof("_file=>%s, contentType=%s", _file, contentType);
 
         this.setMimeType(contentType);
         this.setName(baseName(filename));
@@ -58,7 +58,7 @@ class FileResponse : Response {
     }
 
     FileResponse loadData() {
-        debug logDebug("downloading file: ", _file);
+        version(HUNT_DEBUG) logDebug("downloading file: ", _file);
 
         if (exists(_file) && !isDir(_file)) {
             // setData([0x11, 0x22]);
