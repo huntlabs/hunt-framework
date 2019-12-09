@@ -33,14 +33,14 @@ class StaticfileController : Controller
         string currentPath = request.route.staticFilePath;
         if (currentPath.empty)
             currentPath = config().http.path;
-        version (HUNT_DEBUG) logDebug("currentPath: ", currentPath);
+        version (HUNT_HTTP_DEBUG) logDebug("currentPath: ", currentPath);
 
         string staticFilename = mendPath(currentPath);
-        version (HUNT_DEBUG) {
+        version (HUNT_HTTP_DEBUG) {
             logDebug ("staticFilename: ", staticFilename);
         }
         staticFilename = buildPath(APP_PATH, staticFilename);
-        version (HUNT_DEBUG) {
+        version (HUNT_HTTP_DEBUG) {
             info("fullname: ", staticFilename);
         }
 

@@ -57,12 +57,6 @@ final class ApplicationConfig
         uint expire = 3600; // in seconds
     }
 
-    // struct CacheConf
-    // {
-    //     string adapter = "memory";
-    //     bool enableL2 = false;
-    // }
-
     struct HttpConf
     {
         string address = "0.0.0.0";
@@ -118,6 +112,7 @@ final class ApplicationConfig
         ushort database = 0;
         ushort port = 6379;
         uint timeout = 0;
+        ClusterOption cluster;
     }
 
     struct UploadConf
@@ -337,10 +332,12 @@ class ConfigManager
         }
         else
         {
+            warningf("Configure file does not exist: %s", fullName);
             _defaultBuilder = new ConfigBuilder();
-            logDebug("using default settings.");
+            info("Using default settings.");
             _appConfig = new ApplicationConfig();
         }
+
     }
 
     ConfigBuilder defaultBuilder() {
