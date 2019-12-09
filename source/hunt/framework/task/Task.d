@@ -25,7 +25,7 @@ enum TaskStatus : ubyte
     INVAILD,
 }
 
-class Task
+abstract class Task
 {
     alias FinishFunc = void delegate(Task) nothrow;
 
@@ -90,7 +90,14 @@ private:
     FinishFunc _finishFunc;
 }
 
-final class TaskManager
+interface TaskManager {
+    void setEventLoop(EventLoop);
+    void run();
+    size_t put(Task, Duration);
+    bool del(size_t);
+}
+
+final class DefaultTaskManager : TaskManager
 {
 private :
     EventLoop _taskLoop;
@@ -126,7 +133,7 @@ public :
         auto interval = cast(size_t) t.interval.total!("msecs");
         if (interval == 0)
         {
-            GetTaskMObject().del(t.tid);
+            taskManager().del(t.tid);
         }
     }
 
@@ -136,7 +143,7 @@ public :
         add(t);
         if (d.total!"seconds" == 0)
         {
-            taskPool.put(std.parallelism.task!(TaskManager.doJob, Task)(t));
+            taskPool.put(std.parallelism.task!(doJob, Task)(t));
             return t.tid;
         }
         new Timer(_taskLoop).interval(d).onTick(delegate void(Object sender) {
@@ -148,7 +155,7 @@ public :
             }
             else
             {
-                taskPool.put(std.parallelism.task!(TaskManager.doJob, Task)(t));
+                taskPool.put(std.parallelism.task!(doJob, Task)(t));
             }
         }).start();
         return t.tid;
@@ -199,13 +206,17 @@ private :
 
 __gshared private TaskManager _taskMInstance;
 
-TaskManager GetTaskMObject()
+
+deprecated("Using taskManager instead.")
+alias GetTaskMObject = taskManager;
+
+TaskManager taskManager()
 {
     if (_taskMInstance is null) {
         import hunt.event;
         import hunt.net.NetUtil;
         EventLoopGroup eg = NetUtil.defaultEventLoopGroup();
-        _taskMInstance = new TaskManager();
+        _taskMInstance = new DefaultTaskManager();
         _taskMInstance.setEventLoop(eg[0]);
     }
     return _taskMInstance;
