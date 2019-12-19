@@ -41,13 +41,14 @@ class SessionStorage {
 	}
 
 	HttpSession get(string key) {
-		string s = cast(string) _cache.get!string(getRealAddr(key));
+		string keyWithPrefix = getRealAddr(key);
+		string s = cast(string) _cache.get!string(keyWithPrefix);
 		if(s.empty) {
 			// string sessionId = HttpSession.generateSessionId();
 			// return HttpSession.create(sessionId, _sessionStorage.expire);
 			return null;
 		} else {
-			_cache.set(getRealAddr(key) , s , _expire);
+			_cache.set(keyWithPrefix , s , _expire);
 			return HttpSession.fromJson(key, s);
 		}
 	}

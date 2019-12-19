@@ -249,8 +249,9 @@ class Response : Closeable {
 
         _request.flush(); // assure the sessiondata flushed;
         HttpSession session = _request.session(false);
-        if (session !is null && session.isNewSession()) {
-            withCookie(new Cookie(DefaultSessionIdName, session.getId(), session.getMaxInactiveInterval(),
+        if (session !is null ) // && session.isNewSession()
+        {
+            withCookie(new Cookie(DefaultSessionIdName, session.getId(), session.getMaxInactiveInterval(), 
                     "/", null, false, false));
         }
         setHeader("Date", date("Y-m-d H:i:s"));

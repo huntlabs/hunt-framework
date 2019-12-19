@@ -810,12 +810,13 @@ final class Request {
         isSessionRetrieved = true;
         if (!sessionId.empty) {
             _session = _sessionStorage.get(sessionId);
-            version(HUNT_DEBUG) trace("last session: " ~ sessionId);
+            _session.setMaxInactiveInterval(_sessionStorage.expire);
+            version(HUNT_HTTP_DEBUG) tracef("existed session: %s, expire: %d", sessionId, _session.getMaxInactiveInterval());
         }
 
         if (_session is null && canCreate) {
             sessionId = HttpSession.generateSessionId();
-            version(HUNT_DEBUG) info("new session: " ~ sessionId);
+            version(HUNT_DEBUG) infof("new session: %s, expire: %d", sessionId, _sessionStorage.expire);
             _session = HttpSession.create(sessionId, _sessionStorage.expire);
         }
 
