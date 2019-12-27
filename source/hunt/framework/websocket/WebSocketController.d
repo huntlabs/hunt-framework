@@ -263,7 +263,7 @@ class WebSocketControllerHelper {
                 enum pt = parameterType.stringof;
                 enum varName = "parameterModel";
                 static if(is(parameterType == class) || is(parameterType == struct)) {
-                    s ~= format(`        %1$s %2$s = JsonSerializer.fromJson!(%1$s)(%3$s);` ~ "\n",
+                    s ~= format(`        %1$s %2$s = JsonSerializer.toObject!(%1$s)(%3$s);` ~ "\n",
                             pt, varName, parametersInJson);
                 } else {
                     enum pn = identifiers[0];

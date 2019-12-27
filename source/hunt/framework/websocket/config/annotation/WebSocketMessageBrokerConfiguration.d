@@ -116,8 +116,8 @@ class WebSocketMessageBrokerConfiguration : AbstractMessageBrokerConfiguration {
 		// registry.setApplicationContext(applicationContext);
 		onRegisterStompEndpoints(registry);
 		Map!(string, WebSocketHandler) mappings = registry.getHandlerMapping();
-		foreach(string path, WebSocketHandler handler; mappings) {
-			applicationContext.registerWebSocket(path, handler);
+		foreach(string path, WebSocketHandler wsHandler; mappings) {
+			applicationContext.registerWebSocket(path, wsHandler);
 		}
 
 		// 

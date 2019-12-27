@@ -430,7 +430,7 @@ final class Request {
                 warningf("null value for %s in form data: ", k);
             }
         }
-        return JsonSerializer.fromJson!T(jv);
+        return JsonSerializer.toObject!T(jv);
         // T obj = toObject!T(jv);
 
         // return (obj is null) ? (new T()) : obj;

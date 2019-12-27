@@ -180,7 +180,7 @@ final class Application : ApplicationContext {
     }
 
     private void initCache(CacheOption option) {
-        _cache = CacheFectory.create(option);
+        _cache = CacheFactory.create(option);
     }
 
     private void initSessionStorage(ApplicationConfig.SessionConf config) {
