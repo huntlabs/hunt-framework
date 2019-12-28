@@ -146,7 +146,7 @@ abstract class Controller
     }
 
     void dispose() {
-
+        version(HUNT_HTTP_DEBUG) trace("Do nothing");
     }
 }
 

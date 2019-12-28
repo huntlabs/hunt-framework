@@ -212,7 +212,7 @@ class Router {
 
     Route match(string domain, string method, string path) {
         Route r;
-        version (HUNT_DEBUG)
+        version (HUNT_FM_DEBUG)
             tracef("matching: domain=%s, method=%s, path=%s", domain, method, path);
         path = this.mendPath(path);
 
@@ -244,7 +244,7 @@ class Router {
             }
         }
 
-        version (HUNT_DEBUG)
+        version (HUNT_FM_DEBUG)
             tracef("matching2: domain=%s, method=%s, path=%s", domain, method, path);
         r = routeGroup.match(method, path);
         if (path[0] == '/' && r is null)

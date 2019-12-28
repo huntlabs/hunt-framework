@@ -162,10 +162,10 @@ void doRequestHandle(RoutingHandler handle, Request req)
         // this thread _request
         request(req);
 
-        version(WITH_HUNT_TRACE)
-        {
-            newFrameworkTrace(req);
-        }
+        // version(WITH_HUNT_TRACE)
+        // {
+        //     newFrameworkTrace(req);
+        // }
 
         ///this group middleware.
         response = doGroupMiddleware(req);
@@ -176,17 +176,17 @@ void doRequestHandle(RoutingHandler handle, Request req)
             if (response is null)
                 response = new Response(req);
         }
-        version(WITH_HUNT_TRACE)
-        {
-            finishFrameworkTrace(response);
-        }
+        // version(WITH_HUNT_TRACE)
+        // {
+        //     finishFrameworkTrace(response);
+        // }
     }
     catch (CreateResponseException e)
     {
-        version(WITH_HUNT_TRACE)
-        {
-            finishFrameworkTrace(e.toString);
-        }
+        // version(WITH_HUNT_TRACE)
+        // {
+        //     finishFrameworkTrace(e.toString);
+        // }
         
         version(HUNT_DEBUG) warning(e);
         else warning(e.msg);
@@ -200,20 +200,20 @@ void doRequestHandle(RoutingHandler handle, Request req)
         response.setStatus(502);
         response.setContent(e.toString());
         
-        version(WITH_HUNT_TRACE)
-        {
-            finishFrameworkTrace(response);
-        }
+        // version(WITH_HUNT_TRACE)
+        // {
+        //     finishFrameworkTrace(response);
+        // }
 
         // response.connectionClose();
         response.close();
     }
     catch (Error e)
     {
-        version(WITH_HUNT_TRACE)
-        {
-            finishFrameworkTrace(e.toString);
-        }
+        // version(WITH_HUNT_TRACE)
+        // {
+        //     finishFrameworkTrace(e.toString);
+        // }
         
         version(HUNT_DEBUG) error(e);
         else error(e.msg);

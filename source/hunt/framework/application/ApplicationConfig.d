@@ -212,7 +212,9 @@ final class ApplicationConfig
     struct TraceConf
     {
         bool enable = false;
+        bool b3Required = true;
         TraceService service;
+        string zipkin = "http://127.0.0.1:9411/api/v2/spans";
     }
 
     struct TraceService

@@ -49,6 +49,11 @@ import std.regex;
 import std.string;
 import std.socket : Address;
 
+
+version(WITH_HUNT_TRACE) {
+    import hunt.trace.Tracer;
+}
+
 alias RequestEventHandler = void delegate(Request sender);
 alias Closure = RequestEventHandler;
 
@@ -91,6 +96,10 @@ final class Request {
         .request(this);
     }
 
+version(WITH_HUNT_TRACE) {
+    Tracer tracer;
+}
+
     // alias _request this;
     @property int elapsed()    {
         Duration timeElapsed = MonoTime.currTime - _monoCreated;
@@ -116,11 +125,11 @@ final class Request {
     package(hunt.framework) void onHeaderCompleted() {
         _httpFields = _request.getFields();
         string transferEncoding = _httpFields.get(HttpHeader.TRANSFER_ENCODING);
-        long contentLength = _request.getContentLength();
+        _contentLength = _request.getContentLength();
 
         _isChunked = (HttpHeaderValue.CHUNKED.asString() == transferEncoding
                 || (_request.getHttpVersion() == HttpVersion.HTTP_2
-                    && contentLength < 0));
+                    && _contentLength < 0));
 
         if(_isChunked) {
             pipedStream = new ByteArrayPipedStream(4 * 1024);
@@ -128,12 +137,17 @@ final class Request {
             // 
         // } else if(contentLength > configuration.getBodyBufferThreshold()) {
         //             pipedStream = new FilePipedStream(configuration.getTempFilePath());
-        } else if(contentLength>0) {
-            pipedStream = new ByteArrayPipedStream(cast(int) contentLength);
+        } else if(_contentLength>0) {
+            pipedStream = new ByteArrayPipedStream(cast(int) _contentLength);
         }
     }
 
+    long getContentLength() {
+        return _contentLength;
+    }
+
     private PipedStream pipedStream;
+    private long _contentLength = -1;
 
     package(hunt.framework) void onContent(ByteBuffer buffer) {
         version(HUNT_DEBUG) {

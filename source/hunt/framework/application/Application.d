@@ -45,19 +45,24 @@ public import hunt.framework.application.MiddlewareInterface;
 import hunt.framework.application.BreadcrumbsManager;
 import hunt.framework.application.Breadcrumbs;
 
-// version(WITH_HUNT_CACHE)
-// {
-    public import hunt.cache;
-// }
+public import hunt.cache;
 
 version(WITH_HUNT_ENTITY)
 {
     public import hunt.entity;
 }
 
-version(WITH_HUNT_TRACE)
-{
-    public import hunt.trace;
+
+version(WITH_HUNT_TRACE) {
+    import hunt.net.util.HttpURI;
+    import hunt.trace.Constrants;
+    import hunt.trace.Endpoint;
+    import hunt.trace.Span;
+    import hunt.trace.Tracer;
+    import hunt.trace.HttpSender;
+
+    import std.conv;
+    import std.format;
 }
 
 public import hunt.event;
@@ -67,6 +72,7 @@ import hunt.Functions;
 
 import std.exception;
 import std.conv;
+import std.container.array;
 import std.file;
 import std.path;
 import std.parallelism;
@@ -74,7 +80,6 @@ import std.socket;
 import std.stdio;
 import std.string;
 import std.uni;
-import std.container.array;
 
 alias BreadcrumbsHandler = void delegate(BreadcrumbsManager manager);
 
@@ -235,19 +240,16 @@ final class Application : ApplicationContext {
 
         version(WITH_HUNT_TRACE)
         {
-            auto local = new EndPoint();
-            local.serviceName = config.application.name;
-            local.ipv4 = config.http.address;
-            local.port = config.http.port;
+            _localServiceName = config.application.name;
+            _isTraceEnabled = config.trace.enable;
+            _isB3HeaderRequired = config.trace.b3Required;
 
-            if(config.trace.enable && config.trace.service.host != string.init)
-            {
-                initIMF(config.trace.service.host , config.trace.service.port);
-            }
-
-            Tracer.localEndpoint = local;
+            // initialize HttpSender
+            httpSender().endpoint(config.trace.zipkin);
         }
     }
+
+    private string _localServiceName;
 
     private void initilizeBreadcrumbs() {
         BreadcrumbsManager breadcrumbs = breadcrumbsManager();
@@ -377,6 +379,7 @@ final class Application : ApplicationContext {
             //     _headerComplete(r);
             // }
             r.onHeaderCompleted();
+            version(WITH_HUNT_TRACE) initializeTracer(r, connection);
             return false;
         }).content((buffer, request, response, ot, connection) {
             Request r = cast(Request) request.getAttachment();
@@ -395,19 +398,22 @@ final class Application : ApplicationContext {
             r.onMessageCompleted();
             handleRequest(r);
 
+            version(WITH_HUNT_TRACE) endTraceSpan(r, response.getStatus());
             // IO.close(r.getResponse());
             return true;
         }).badMessage((status, reason, request, response, ot, connection) {
             if (_badMessage !is null) {
+                Request r;
                 if (request.getAttachment() !is null) {
-                    Request r = cast(Request) request.getAttachment();
+                    r = cast(Request) request.getAttachment();
                     _badMessage(status, reason, r);
-                }
-                else {
-                    Request r = new Request(request, response, ot, connection, _sessionStorage);
+                } else {
+                    r = new Request(request, response, ot, connection, _sessionStorage);
                     request.setAttachment(r);
                     _badMessage(status, reason, r);
                 }
+
+                version(WITH_HUNT_TRACE) endTraceSpan(r, status, reason);
             }
         }).earlyEOF((request, response, ot, connection) {
             if (_earlyEof !is null) {
@@ -424,6 +430,88 @@ final class Application : ApplicationContext {
         });
         return adapter;
     }
+
+
+version(WITH_HUNT_TRACE) {
+    private void initializeTracer(Request request, HttpConnection connection) {
+
+        if(!_isTraceEnabled) return;
+
+        import std.socket;
+        string reqPath = request.getURI().getPath();
+        Tracer tracer;
+
+        string b3 = request.header("b3");
+         if(b3.empty()) {
+            if(_isB3HeaderRequired) return;
+
+            tracer = new Tracer(reqPath);
+        } else {
+            version(HUNT_HTTP_DEBUG) {
+                warningf("initializing tracer for %s, with %s", reqPath, b3);
+            }
+
+            tracer = new Tracer(reqPath, b3);
+        }
+
+        Span span = tracer.root;
+        
+        // 
+        // Address local = connection.getLocalAddress();
+        // EndPoint localEndpoint = new EndPoint();
+        // localEndpoint.serviceName = _localServiceName;
+        // localEndpoint.ipv4 = local.toAddrString();
+        // localEndpoint.port = local.toPortString().to!int();
+        // span.localEndpoint = localEndpoint; 
+        span.initializeLocalEndpoint(_localServiceName);
+
+        // 
+        Address remote = connection.getRemoteAddress;
+        EndPoint remoteEndpoint = new EndPoint();
+        remoteEndpoint.ipv4 = remote.toAddrString();
+        remoteEndpoint.port = remote.toPortString().to!int;
+        span.remoteEndpoint = remoteEndpoint;
+        //
+
+        span.start();
+        // request.setAttribute("tracer", t);
+        request.tracer = tracer;
+    } 
+
+
+    private void endTraceSpan(Request request, int status, string message = null) {
+
+        if(!_isTraceEnabled) return;
+
+        Tracer tracer = request.tracer;
+        if(tracer is null) {
+            version(HTTP_DEBUG) warning("no tracer defined");
+            return;
+        }
+
+        HttpURI uri = request.getURI();
+        string[string] tags;
+        tags[HTTP_HOST] = uri.getHost();
+        tags[HTTP_URL] = uri.getPathQuery();
+        tags[HTTP_PATH] = uri.getPath();
+        tags[HTTP_REQUEST_SIZE] = request.getContentLength().to!string();
+        tags[HTTP_METHOD] = request.methodAsString();
+
+        Span span = tracer.root;
+        if(span !is null) {
+            tags[HTTP_STATUS_CODE] = to!string(status);
+            traceSpanAfter(span, tags, message);
+            httpSender().sendSpans(span);
+        } else {
+            warning("No span sent");
+        }
+    }
+    
+    private bool _isTraceEnabled = true;          
+} else {
+    private bool _isTraceEnabled = false;
+}
+    private bool _isB3HeaderRequired = true;
 
     private void buildHttpServer(ApplicationConfig conf) {
         version(HUNT_DEBUG) logDebug("addr:", conf.http.address, ":", conf.http.port);
