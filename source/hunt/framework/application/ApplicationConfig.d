@@ -18,12 +18,13 @@ import std.process;
 import std.socket : Address, parseAddress;
 import std.string;
 
+import hunt.cache.CacheOption;
 import hunt.http.codec.http.model.MultipartConfig;
 import hunt.logging;
 import hunt.framework.Init;
+import hunt.redis.RedisPoolConfig;
 import hunt.util.Configuration;
 
-import hunt.cache.CacheOption;
 
 @Configuration("hunt")
 final class ApplicationConfig
@@ -112,7 +113,15 @@ final class ApplicationConfig
         ushort database = 0;
         ushort port = 6379;
         uint timeout = 0;
+        RedisPoolConf pool;
         ClusterOption cluster;
+    }
+
+    struct RedisPoolConf {
+        bool enabled = false;
+        uint maxWait = 5000; // millisecond
+        uint maxIdle = 50;  // millisecond
+        uint minIdle = 5;   // millisecond
     }
 
     struct UploadConf

@@ -12,14 +12,12 @@
 module hunt.framework.application.Application;
 
 import hunt.collection;
-import hunt.logging;
-
-import hunt.io.Common;
-
 import hunt.Exceptions;
 import hunt.Functions;
-
+import hunt.io.Common;
+import hunt.logging;
 import hunt.net.NetUtil;
+
 
 import hunt.http.codec.http.model;
 import hunt.http.codec.http.stream;
@@ -28,6 +26,8 @@ import hunt.http.codec.websocket.stream.AbstractWebSocketBuilder;
 import hunt.http.codec.websocket.stream.WebSocketConnection;
 import hunt.http.codec.websocket.stream.WebSocketPolicy;
 import hunt.http.server;
+
+import hunt.redis;
 
 import hunt.framework.application.Dispatcher;
 import hunt.framework.application.ApplicationContext;
@@ -225,6 +225,20 @@ final class Application : ApplicationContext {
         setLogConfig(config.logging);
         enableLocale();
         upConfig(config);
+
+        // setting redis
+        auto redisSettings = config.redis;
+        if(redisSettings.pool.enabled) {
+            RedisPoolConfig poolConfig = new RedisPoolConfig();
+            poolConfig.host = redisSettings.host;
+            poolConfig.port = cast(int)redisSettings.port;
+            poolConfig.password = redisSettings.password;
+            poolConfig.database = cast(int)redisSettings.database;
+            poolConfig.soTimeout = cast(int)redisSettings.pool.maxIdle;
+
+            hunt.redis.RedisPool.defalutPoolConfig = poolConfig;
+        }
+
         //setRedis(config.redis);
         //setMemcache(config.memcache);
         version(WITH_HUNT_ENTITY) {
@@ -442,7 +456,7 @@ version(WITH_HUNT_TRACE) {
         Tracer tracer;
 
         string b3 = request.header("b3");
-         if(b3.empty()) {
+        if(b3.empty()) {
             if(_isB3HeaderRequired) return;
 
             tracer = new Tracer(reqPath);
@@ -455,14 +469,6 @@ version(WITH_HUNT_TRACE) {
         }
 
         Span span = tracer.root;
-        
-        // 
-        // Address local = connection.getLocalAddress();
-        // EndPoint localEndpoint = new EndPoint();
-        // localEndpoint.serviceName = _localServiceName;
-        // localEndpoint.ipv4 = local.toAddrString();
-        // localEndpoint.port = local.toPortString().to!int();
-        // span.localEndpoint = localEndpoint; 
         span.initializeLocalEndpoint(_localServiceName);
 
         // 
@@ -474,7 +480,6 @@ version(WITH_HUNT_TRACE) {
         //
 
         span.start();
-        // request.setAttribute("tracer", t);
         request.tracer = tracer;
     } 
 
