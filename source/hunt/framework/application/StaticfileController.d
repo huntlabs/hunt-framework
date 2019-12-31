@@ -111,8 +111,8 @@ class StaticfileController : Controller
         response.setHeader(HttpHeader.CONTENT_TYPE, mimetype ~ ";charset=utf-8");
 
         response.setHeader(HttpHeader.ACCEPT_RANGES, "bytes");
-        size_t rangeStart = 0;
-        size_t rangeEnd = 0;
+        ulong rangeStart = 0;
+        ulong rangeEnd = 0;
 
         if (request.headerExists(HttpHeader.RANGE))
         {
