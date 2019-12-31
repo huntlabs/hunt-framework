@@ -31,6 +31,20 @@ import std.exception;
 import std.parallelism;
 import std.conv : to;
 
+
+version(WITH_HUNT_TRACE) {
+    import hunt.net.util.HttpURI;
+    import hunt.trace.Constrants;
+    import hunt.trace.Endpoint;
+    import hunt.trace.Span;
+    import hunt.trace.Tracer;
+    import hunt.trace.HttpSender;
+
+    import std.conv;
+    import std.format;
+}
+
+
 class Dispatcher
 {
     this()
@@ -183,43 +197,29 @@ void doRequestHandle(RoutingHandler handle, Request req)
     }
     catch (CreateResponseException e)
     {
-        // version(WITH_HUNT_TRACE)
-        // {
-        //     finishFrameworkTrace(e.toString);
-        // }
+        version(WITH_HUNT_TRACE) {
+            endTraceSpan(req, 502, e.msg);
+        }
         
         version(HUNT_DEBUG) warning(e);
         else warning(e.msg);
     }
     catch (Exception e)
     {
+        version(WITH_HUNT_TRACE) {
+            endTraceSpan(req, 502, e.msg);
+        }
         version(HUNT_DEBUG) warning(e);
         else warning(e.msg);
 
         response = new Response(req);
         response.setStatus(502);
         response.setContent(e.toString());
-        
-        // version(WITH_HUNT_TRACE)
-        // {
-        //     finishFrameworkTrace(response);
-        // }
-
-        // response.connectionClose();
         response.close();
-    }
-    catch (Error e)
-    {
-        // version(WITH_HUNT_TRACE)
-        // {
-        //     finishFrameworkTrace(e.toString);
-        // }
-        
-        version(HUNT_DEBUG) error(e);
-        else error(e.msg);
-
-        // exit(-1);
     } catch(Throwable t) {
+        version(WITH_HUNT_TRACE) {
+            endTraceSpan(req, 502, t.msg);
+        }
         version(HUNT_DEBUG) error(t);
         else error(t.msg);
         // exit(-1);

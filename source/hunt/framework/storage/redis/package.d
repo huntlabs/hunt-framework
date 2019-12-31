@@ -4,33 +4,10 @@ import hunt.redis;
 import hunt.framework.Simplify;
 import hunt.logging;
 
-private Redis _redis;
 private RedisCluster _redisCluster;
 
-Redis getRedis(bool fromPool = false)() {
-    static if(fromPool) {
-        return defaultRedisPool.getResource();
-    } else {
-        if (_redis is null || _redis.getClient().isBroken()) {
-            auto redisSettings = config().redis;
-            version (HUNT_DEBUG) {
-                tracef("Create a redis connection with %s:%d, password:%s", 
-                    redisSettings.host, redisSettings.port, redisSettings.password);
-            }
-
-            if (redisSettings.enabled) {
-                _redis = new Redis(redisSettings.host, redisSettings.port, redisSettings.timeout, redisSettings.timeout);
-                _redis.connect();
-                if (redisSettings.password.length > 0)
-                    _redis.auth(redisSettings.password);
-                _redis.select(redisSettings.database);
-            } else {
-                warning("Please set config hunt.redis.enabled = true");
-            }
-        }
-
-        return _redis;
-    }
+Redis getRedis() {
+    return defaultRedisPool.getResource();
 }
 
 /**

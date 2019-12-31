@@ -60,6 +60,7 @@ version(WITH_HUNT_TRACE) {
     import hunt.trace.Span;
     import hunt.trace.Tracer;
     import hunt.trace.HttpSender;
+    import hunt.framework.trace.Tracer;
 
     import std.conv;
     import std.format;
@@ -255,7 +256,7 @@ final class Application : ApplicationContext {
         version(WITH_HUNT_TRACE)
         {
             _localServiceName = config.application.name;
-            _isTraceEnabled = config.trace.enable;
+            isTraceEnabled = config.trace.enable;
             _isB3HeaderRequired = config.trace.b3Required;
 
             // initialize HttpSender
@@ -449,7 +450,7 @@ final class Application : ApplicationContext {
 version(WITH_HUNT_TRACE) {
     private void initializeTracer(Request request, HttpConnection connection) {
 
-        if(!_isTraceEnabled) return;
+        if(!isTraceEnabled) return;
 
         import std.socket;
         string reqPath = request.getURI().getPath();
@@ -484,37 +485,37 @@ version(WITH_HUNT_TRACE) {
     } 
 
 
-    private void endTraceSpan(Request request, int status, string message = null) {
+    // private void endTraceSpan(Request request, int status, string message = null) {
 
-        if(!_isTraceEnabled) return;
+    //     if(!isTraceEnabled) return;
 
-        Tracer tracer = request.tracer;
-        if(tracer is null) {
-            version(HTTP_DEBUG) warning("no tracer defined");
-            return;
-        }
+    //     Tracer tracer = request.tracer;
+    //     if(tracer is null) {
+    //         version(HTTP_DEBUG) warning("no tracer defined");
+    //         return;
+    //     }
 
-        HttpURI uri = request.getURI();
-        string[string] tags;
-        tags[HTTP_HOST] = uri.getHost();
-        tags[HTTP_URL] = uri.getPathQuery();
-        tags[HTTP_PATH] = uri.getPath();
-        tags[HTTP_REQUEST_SIZE] = request.getContentLength().to!string();
-        tags[HTTP_METHOD] = request.methodAsString();
+    //     HttpURI uri = request.getURI();
+    //     string[string] tags;
+    //     tags[HTTP_HOST] = uri.getHost();
+    //     tags[HTTP_URL] = uri.getPathQuery();
+    //     tags[HTTP_PATH] = uri.getPath();
+    //     tags[HTTP_REQUEST_SIZE] = request.getContentLength().to!string();
+    //     tags[HTTP_METHOD] = request.methodAsString();
 
-        Span span = tracer.root;
-        if(span !is null) {
-            tags[HTTP_STATUS_CODE] = to!string(status);
-            traceSpanAfter(span, tags, message);
-            httpSender().sendSpans(span);
-        } else {
-            warning("No span sent");
-        }
-    }
+    //     Span span = tracer.root;
+    //     if(span !is null) {
+    //         tags[HTTP_STATUS_CODE] = to!string(status);
+    //         traceSpanAfter(span, tags, message);
+    //         httpSender().sendSpans(span);
+    //     } else {
+    //         warning("No span sent");
+    //     }
+    // }
     
-    private bool _isTraceEnabled = true;          
+    // private bool isTraceEnabled = true;          
 } else {
-    private bool _isTraceEnabled = false;
+    // private bool isTraceEnabled = false;
 }
     private bool _isB3HeaderRequired = true;
 

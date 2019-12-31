@@ -1,13 +1,17 @@
 module hunt.framework.trace.Tracer;
 
-// version(WITH_HUNT_TRACE) :
+version(WITH_HUNT_TRACE) :
 
-// import hunt.framework.http.Request;
+import hunt.net.util.HttpURI;
+import hunt.framework.http.Request;
 // import hunt.framework.http.Response;
-// import hunt.trace;
-// import hunt.logging;
+import hunt.trace;
+import hunt.logging.ConsoleLogger;
 
-// import std.conv;
+import std.conv;
+import std.format;
+
+__gshared isTraceEnabled = true;
 
 // void newFrameworkTrace(Request req) {
 //     version (WITH_HUNT_TRACE) {
@@ -58,3 +62,32 @@ module hunt.framework.trace.Tracer;
 //                     tracer.root.duration / 1000, " traceId: ", tracer.root.traceId);
 //     }
 // }
+
+
+void endTraceSpan(Request request, int status, string message = null) {
+
+    if(!isTraceEnabled) return;
+
+    Tracer tracer = request.tracer;
+    if(tracer is null) {
+        version(HTTP_DEBUG) warning("no tracer defined");
+        return;
+    }
+
+    HttpURI uri = request.getURI();
+    string[string] tags;
+    tags[HTTP_HOST] = uri.getHost();
+    tags[HTTP_URL] = uri.getPathQuery();
+    tags[HTTP_PATH] = uri.getPath();
+    tags[HTTP_REQUEST_SIZE] = request.getContentLength().to!string();
+    tags[HTTP_METHOD] = request.methodAsString();
+
+    Span span = tracer.root;
+    if(span !is null) {
+        tags[HTTP_STATUS_CODE] = to!string(status);
+        traceSpanAfter(span, tags, message);
+        httpSender().sendSpans(span);
+    } else {
+        warning("No span sent");
+    }
+}
