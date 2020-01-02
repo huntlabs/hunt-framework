@@ -34,7 +34,7 @@ import hunt.framework.application.ApplicationContext;
 import hunt.framework.Init;
 import hunt.framework.routing;
 import hunt.framework.security.acl.Manager;
-import hunt.framework.websocket.WebSocketMessageBroker;
+// import hunt.framework.websocket.WebSocketMessageBroker;
 import hunt.framework.trace.Tracer;
 
 public import hunt.framework.http;
@@ -279,8 +279,8 @@ final class Application : ApplicationContext {
             b.listenWebSocket();
         }
 
-        if(_broker !is null)
-            _broker.listen();
+        // if(_broker !is null)
+        //     _broker.listen();
         // foreach(WebSocketMessageBroker b; messageBrokers) {
         //     b.listen();
         // }
@@ -337,18 +337,18 @@ final class Application : ApplicationContext {
         return webSocketBuilder;
     }
 
-    WebSocketMessageBroker withStompBroker() {
-        if(_broker is null) {
-            WebSocketMessageBroker broker = new WebSocketMessageBroker(this);
-            this._broker = broker;
-        }
-        return _broker;
-    }
-    private WebSocketMessageBroker _broker;
+    // WebSocketMessageBroker withStompBroker() {
+    //     if(_broker is null) {
+    //         WebSocketMessageBroker broker = new WebSocketMessageBroker(this);
+    //         this._broker = broker;
+    //     }
+    //     return _broker;
+    // }
+    // private WebSocketMessageBroker _broker;
 
-    WebSocketMessageBroker getStompBroker() {
-        return _broker;
-    }
+    // WebSocketMessageBroker getStompBroker() {
+    //     return _broker;
+    // }
 
     Application addGroupMiddleware(MiddlewareInterface mw , string group = "default")
     {
