@@ -930,14 +930,16 @@ private:
             auto timestamp = args["varargs"][1].get!int;
             return UniNode(date(format, timestamp));
         }
-        else if(name == "url")
-        {
-            import hunt.framework.Simplify : url;
+        // TODO: Tasks pending completion -@zhangxueping at 2020-01-02T18:26:20+08:00
+        // 
+        // else if(name == "url")
+        // {
+        //     import hunt.framework.Simplify : url;
 
-            auto mca = args["varargs"][0].get!string;
-            auto params = args["varargs"][1].get!string;
-            return UniNode(url(mca, Util.parseFormData(params), _routeGroup));
-        }
+        //     auto mca = args["varargs"][0].get!string;
+        //     auto params = args["varargs"][1].get!string;
+        //     return UniNode(url(mca, Util.parseFormData(params), _routeGroup));
+        // }
         return _context.getFunc(name)(args);
     }
 

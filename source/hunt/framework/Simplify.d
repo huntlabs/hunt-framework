@@ -24,31 +24,31 @@ ApplicationConfig config()
     return configManager().config();
 }
 
-string url(string mca) {
-    return url(mca, null);
-}
+// string url(string mca) {
+//     return url(mca, null);
+// }
 
-string url(string mca, string[string] params, string group) {
-    return app().router().createUrl(mca, params, group);
-}
+// string url(string mca, string[string] params, string group) {
+//     return app().router().createUrl(mca, params, group);
+// }
 
-string url(string mca, string[string] params) {
-    // admin:user.user.view
-    string[] items = mca.split(":");
-    string group = "";
-    string pathItem = "";
-    if (items.length == 1) {
-        group = "";
-        pathItem = mca;
-    } else if (items.length == 2) {
-        group = items[0];
-        pathItem = items[1];
-    } else {
-        throw new Exception("Bad format for mca");
-    }
+// string url(string mca, string[string] params) {
+//     // admin:user.user.view
+//     string[] items = mca.split(":");
+//     string group = "";
+//     string pathItem = "";
+//     if (items.length == 1) {
+//         group = "";
+//         pathItem = mca;
+//     } else if (items.length == 2) {
+//         group = items[0];
+//         pathItem = items[1];
+//     } else {
+//         throw new Exception("Bad format for mca");
+//     }
 
-    return app().router().createUrl(pathItem, params, group);
-}
+//     return app().router().createUrl(pathItem, params, group);
+// }
 
 
 version(WITH_HUNT_ENTITY) {

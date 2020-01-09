@@ -11,17 +11,21 @@
 
 module hunt.framework.routing.Define;
 
-import hunt.logging;
+// import hunt.logging;
 
-import hunt.framework.http.Request;
-import hunt.framework.http.Response;
+// import hunt.framework.http.Request;
+// import hunt.framework.http.Response;
+
+// import hunt.http.routing.RoutingContext;
 
 import std.exception;
 
 // default route group name
 enum DEFAULT_ROUTE_GROUP = "default";
 
-alias RoutingHandler = Response function(Request);
+// alias RoutingHandler = Response function(Request);
+
+// alias RoutingHandler = void delegate(RoutingContext context);
 
 // support methods
 enum HTTP_METHODS {

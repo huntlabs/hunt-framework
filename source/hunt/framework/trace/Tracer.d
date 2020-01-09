@@ -64,30 +64,30 @@ __gshared isTraceEnabled = true;
 // }
 
 
-void endTraceSpan(Request request, int status, string message = null) {
+// void endTraceSpan(Request request, int status, string message = null) {
 
-    if(!isTraceEnabled) return;
+//     if(!isTraceEnabled) return;
 
-    Tracer tracer = request.tracer;
-    if(tracer is null) {
-        version(HTTP_DEBUG) warning("no tracer defined");
-        return;
-    }
+//     Tracer tracer = request.tracer;
+//     if(tracer is null) {
+//         version(HTTP_DEBUG) warning("no tracer defined");
+//         return;
+//     }
 
-    HttpURI uri = request.getURI();
-    string[string] tags;
-    tags[HTTP_HOST] = uri.getHost();
-    tags[HTTP_URL] = uri.getPathQuery();
-    tags[HTTP_PATH] = uri.getPath();
-    tags[HTTP_REQUEST_SIZE] = request.getContentLength().to!string();
-    tags[HTTP_METHOD] = request.methodAsString();
+//     HttpURI uri = request.getURI();
+//     string[string] tags;
+//     tags[HTTP_HOST] = uri.getHost();
+//     tags[HTTP_URL] = uri.getPathQuery();
+//     tags[HTTP_PATH] = uri.getPath();
+//     tags[HTTP_REQUEST_SIZE] = request.getContentLength().to!string();
+//     tags[HTTP_METHOD] = request.methodAsString();
 
-    Span span = tracer.root;
-    if(span !is null) {
-        tags[HTTP_STATUS_CODE] = to!string(status);
-        traceSpanAfter(span, tags, message);
-        httpSender().sendSpans(span);
-    } else {
-        warning("No span sent");
-    }
-}
+//     Span span = tracer.root;
+//     if(span !is null) {
+//         tags[HTTP_STATUS_CODE] = to!string(status);
+//         traceSpanAfter(span, tags, message);
+//         httpSender().sendSpans(span);
+//     } else {
+//         warning("No span sent");
+//     }
+// }

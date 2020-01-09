@@ -11,6 +11,8 @@
 
 module hunt.framework.application.ApplicationConfig;
 
+import hunt.framework.Init;
+
 import std.exception;
 import std.format;
 import std.parallelism : totalCPUs;
@@ -19,9 +21,8 @@ import std.socket : Address, parseAddress;
 import std.string;
 
 import hunt.cache.CacheOption;
-import hunt.http.codec.http.model.MultipartConfig;
+import hunt.http.MultipartOptions;
 import hunt.logging;
-import hunt.framework.Init;
 import hunt.redis.RedisPoolConfig;
 import hunt.util.Configuration;
 
@@ -251,7 +252,7 @@ final class ApplicationConfig
     View view;
     TraceConf trace;
 
-    MultipartConfig multipartConfig()
+    MultipartOptions multipartConfig()
     {
         if(_multipartConfig is null)
         {
@@ -261,12 +262,12 @@ final class ApplicationConfig
                 // for Exception now?
                 path.mkdirRecurse();
             }
-            _multipartConfig = new MultipartConfig(path, upload.maxSize, upload.maxSize, 50); 
+            _multipartConfig = new MultipartOptions(path, upload.maxSize, upload.maxSize, 50); 
         }
         return _multipartConfig;
     }
 
-    private MultipartConfig _multipartConfig;
+    private MultipartOptions _multipartConfig;
 
     this()
     {
@@ -290,8 +291,9 @@ class ConfigNotFoundException : Exception
     mixin basicExceptionCtors;
 }
 
-/**
-*/
+/** 
+ * 
+ */
 class ConfigManager
 {
     ApplicationConfig config(string section="", string fileName = "application.conf")

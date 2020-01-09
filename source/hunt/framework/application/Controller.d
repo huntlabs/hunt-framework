@@ -11,13 +11,15 @@
 
 module hunt.framework.application.Controller;
 
-import hunt.logging;
+import hunt.logging.ConsoleLogger;
 
 public import hunt.framework.http.Response;
 public import hunt.framework.http.Request;
 public import hunt.framework.routing;
 public import hunt.framework.application.MiddlewareInterface;
 
+import hunt.http.server;
+import hunt.http.routing;
 import hunt.cache;
 import hunt.framework.Simplify;
 import hunt.framework.view;
@@ -29,12 +31,20 @@ import std.traits;
 
 enum Action;
 
+alias Request = HttpServerRequest;
+alias Response = HttpServerResponse;
+
+/**
+ * 
+ */
 abstract class Controller
 {
+    // private OutputStream _outputStream;
+    
 
     protected
     {
-        Request request;
+        RoutingContext _routingContext;
         Response _response;
         View _view;
         ///called before all actions
@@ -46,18 +56,22 @@ abstract class Controller
         if (_view is null)
         {
             _view = GetViewObject();
-            _view.setRouteGroup(this.request.route.getGroup());
-            _view.setLocale(this.request.locale());
+            // TODO: Tasks pending completion -@zhangxueping at 2020-01-02T18:16:11+08:00
+            // 
+            // _view.setRouteGroup(this.request.route.getGroup());
+            // _view.setLocale(this.request.locale());
         }
 
         return _view;
     }
 
+    Request request() {
+        return _routingContext.getRequest();
+    }
+
     final @property Response response()
     {
-        if (_response is null)
-            _response = new Response(request);
-        return _response;
+        return _routingContext.getResponse();
     }
 
     /// called before action  return true is continue false is finish
@@ -100,6 +114,9 @@ abstract class Controller
     {
         version (HUNT_DEBUG) logDebug("doMiddlware ..");
 
+        // TODO: Tasks pending completion -@zhangxueping at 2020-01-02T18:24:39+08:00
+        // 
+
         foreach (m; middlewares)
         {
             version (HUNT_DEBUG) logDebugf("do %s onProcess ..", m.name());
@@ -136,6 +153,8 @@ abstract class Controller
 
     Response processResponse(Response res)
     {
+        // TODO: Tasks pending completion -@zhangxueping at 2020-01-06T14:01:43+08:00
+        // 
         // have ResponseHandler binding?
         // if (res.httpResponse() is null)
         // {
@@ -158,14 +177,17 @@ mixin template MakeController(string moduleName = __MODULE__)
 mixin template HuntDynamicCallFun(T, string moduleName) if(is(T : Controller))
 {
 public:
+    enum allActions = __createCallActionMethod!(T, moduleName);
     // version (HUNT_DEBUG) 
-    // pragma(msg, __createCallActionMethod!(T, moduleName));
+    pragma(msg, allActions);
 
-    mixin(__createCallActionMethod!(T, moduleName));
+    mixin(allActions);
+    
     shared static this()
     {
-        // pragma(msg, __createRouteMap!(T, moduleName));
-        mixin(__createRouteMap!(T, moduleName));
+        enum routemap = __createRouteMap!(T, moduleName);
+        // pragma(msg, routemap);
+        mixin(routemap);
     }
 }
 
@@ -185,17 +207,25 @@ string __createCallActionMethod(T, string moduleName)()
     import std.traits;
     import std.format;
     import std.string;
-    import hunt.logging;
     import std.conv;
+    
+    import hunt.logging.ConsoleLogger;
 
     string str = `
-        Response callActionMethod(string methodName, Request req) {
-        this.request = req; 
-        Response actionResult=null;
-        version (HUNT_DEBUG) logDebug("methodName=", methodName);
-        import std.conv;
 
-        switch(methodName){
+        import hunt.http.server.HttpServerRequest;
+        import hunt.http.server.HttpServerResponse;
+        import hunt.http.routing.RoutingContext;
+        import hunt.http.HttpBody;
+
+        void callActionMethod(string methodName, RoutingContext context) {
+            _routingContext = context;
+            Response actionResponse=null;
+            HttpBody rb;
+            version (HUNT_FM_DEBUG) logDebug("methodName=", methodName);
+            import std.conv;
+
+            switch(methodName){
     `;
 
     foreach (memberName; __traits(allMembers, T))
@@ -210,28 +240,31 @@ string __createCallActionMethod(T, string moduleName)()
             enum _isActionMember = isActionMember(memberName);
             foreach (t; __traits(getOverloads, T, memberName))
             {
-                // version (HUNT_DEBUG) pragma(msg, "memberName: " ~ memberName);
+                // alias RT = ReturnType!(t);
 
                 //alias pars = ParameterTypeTuple!(t);
                 static if (hasUDA!(t, Action) || _isActionMember)
                 {
-                    str ~= "\tcase \"" ~ memberName ~ "\": {\n";
+                    str ~= "\t\tcase \"" ~ memberName ~ "\": {\n";
 
                     static if (hasUDA!(t, Action) || _isActionMember)
                     {
                         //before
                         str ~= q{
-                            if(this.getMiddlewares().length)
-                            {
+                            if(this.getMiddlewares().length) {
                                 auto response = this.doMiddleware();
 
-                                if (response !is null)
-                                {
-                                    return response;
+                                if (response !is null) {
+                                    // return response;
+                                    _routingContext.response = response;
+                                    return;
                                 }
                             }
 
-                            if (!this.before()) return response;
+                            if (!this.before()) {
+                                _routingContext.response = response;
+                                return;
+                            }
                         };
                     }
 
@@ -256,16 +289,15 @@ string __createCallActionMethod(T, string moduleName)()
                             }
                             else
                             {
-                                static if (paramsType[i].stringof == "int" || paramsType[i].stringof == "long" || paramsType[i].stringof == "short" || paramsType[i].stringof == "float" || paramsType[i].stringof == "double"
-                                || paramsType[i].stringof == "uint" || paramsType[i].stringof == "ulong" || paramsType[i].stringof == "ushort" || paramsType[i].stringof == "ifloat" || paramsType[i].stringof == "idouble"
-                                 || paramsType[i].stringof == "cfloat" || paramsType[i].stringof == "cdouble")
-                                    str ~= "\t\tauto " ~ varName ~ " = this.processGetNumericString(request.get(\"" ~ params[i] ~ "\")).to!" ~ paramsType[i].stringof ~ ";\n";
-                                else static if(is(paramsType[i] : Form))
-                                {
+                                static if (isNumeric!(paramsType[i])) {
+                                    str ~= "\t\tauto " ~ varName ~ " = this.processGetNumericString(request.get(\"" ~ 
+                                        params[i] ~ "\")).to!" ~ paramsType[i].stringof ~ ";\n";
+                                } else static if(is(paramsType[i] : Form)) {
                                     str ~= "\t\tauto " ~ varName ~ " = request.bindForm!" ~ paramsType[i].stringof ~ "();\n";
+                                } else {
+                                    str ~= "\t\tauto " ~ varName ~ " = request.get(\"" ~ params[i] ~ "\").to!" ~ 
+                                            paramsType[i].stringof ~ ";\n";
                                 }
-                                else
-                                    str ~= "\t\tauto " ~ varName ~ " = request.get(\"" ~ params[i] ~ "\").to!" ~ paramsType[i].stringof ~ ";\n";
                             }
 
                             paramString ~= i == 0 ? varName : ", " ~ varName;
@@ -275,23 +307,26 @@ string __createCallActionMethod(T, string moduleName)()
                     }
 
                     // call Action
-                    str ~= "\t\t" ~ ReturnType!t.stringof ~ " result = this." ~ memberName ~ "(" ~ paramString ~ ");\n";
+                    static if (is(ReturnType!t == void)) {
+                        str ~= "\t\tthis." ~ memberName ~ "(" ~ paramString ~ ");\n";
+                    } else {
+                        str ~= "\t\t" ~ ReturnType!t.stringof ~ " result = this." ~ 
+                                memberName ~ "(" ~ paramString ~ ");\n";
 
-                    static if (is(ReturnType!t : Response))
-                    {
-                        str ~= "\t\tactionResult = result;\n";
-                    }
-                    else
-                    {
-                        str ~= "\t\tactionResult = this.response;\n";
-
-                        static if (!is(ReturnType!t == void))
+                        static if (is(ReturnType!t : Response))
                         {
-                            str ~= "\t\tactionResult.setContent(to!string(result));\n";
+                            str ~= "\t\t_routingContext.response = result;\n";
+                        }
+                        else
+                        {
+                            // str ~= "\t\tactionResponse = this.response;\n";
+
+                            str ~="\t\trb = HttpBody.create(result);
+                            this.response.setBody(rb);\n";
                         }
                     }
 
-                    str ~= "\t\tactionResult = this.processResponse(actionResult);\n";
+                    // str ~= "\t\tactionResponse = this.processResponse(actionResponse);\n";
 
                     static if(hasUDA!(t, Action) || _isActionMember)
                     {
@@ -304,9 +339,8 @@ string __createCallActionMethod(T, string moduleName)()
     }
 
     str ~= "\tdefault:\n\tbreak;\n\t}\n\n";
-    str ~= "\timport hunt.framework.Simplify;\n";
-    str ~= "\tcloseDefaultEntityManager();\n";
-    str ~= "\treturn actionResult;\n";
+    // str ~= "\t _routingContext.response = actionResponse;\n";
+    // str ~= "\treturn actionResponse;\n";
     str ~= "}";
 
     return str;
@@ -318,11 +352,11 @@ string __createRouteMap(T, string moduleName)()
 
     // pragma(msg, "moduleName: ", moduleName);
 
-    str ~= q{
-        import hunt.framework.application.StaticfileController;
-        addRouteList("hunt.application.staticfile.StaticfileController.doStaticFile", 
-            &callHandler!(StaticfileController, "doStaticFile"));
-    };
+    // str ~= q{
+    //     import hunt.framework.application.StaticfileController;
+    //     registerRouteHandler("hunt.application.staticfile.StaticfileController.doStaticFile", 
+    //         &callHandler!(StaticfileController, "doStaticFile"));
+    // };
 
     enum len = "Controller".length;
     string controllerName = moduleName[0..$-len];
@@ -337,14 +371,18 @@ string __createRouteMap(T, string moduleName)()
             {
                 static if ( /*ParameterTypeTuple!(t).length == 0 && */ hasUDA!(t, Action))
                 {
-                    str ~= "\n\taddRouteList(\"" ~ controllerName ~ "." ~ T.stringof ~ "." ~ memberName
-                        ~ "\",&callHandler!(" ~ T.stringof ~ ",\"" ~ memberName ~ "\"));\n";
+                    str ~= "\n\tregisterRouteHandler(\"" ~ controllerName ~ "." ~ T.stringof ~ "." ~ memberName
+                        ~ "\", (context) { 
+                            callHandler!(" ~ T.stringof ~ ",\"" ~ memberName ~ "\")(context);
+                    });\n";
                 }
                 else static if (isActionMember(memberName))
                 {
                     enum strippedMemberName = memberName[0 .. $ - actionNameLength];
-                    str ~= "\n\taddRouteList(\"" ~ controllerName ~ "." ~ T.stringof ~ "." ~ strippedMemberName
-                        ~ "\",&callHandler!(" ~ T.stringof ~ ",\"" ~ memberName ~ "\"));\n";
+                    str ~= "\n\tregisterRouteHandler(\"" ~ controllerName ~ "." ~ T.stringof ~ "." ~ strippedMemberName
+                        ~ "\", (context) { 
+                            callHandler!(" ~ T.stringof ~ ",\"" ~ memberName ~ "\")(context);
+                    });\n";
                 }
             }
         }
@@ -353,37 +391,44 @@ string __createRouteMap(T, string moduleName)()
     return str;
 }
 
-Response callHandler(T, string method)(Request req)
-        if (is(T == class) || is(T == struct) && hasMember!(T, "__CALLACTION__"))
+void callHandler(T, string method)(RoutingContext context)
+        if (is(T == class) || (is(T == struct) && hasMember!(T, "__CALLACTION__")))
 {
     T controller = new T();
     import core.memory;
     scope(exit) {
+        // TODO: Tasks pending completion -@zhangxueping at 2020-01-08T11:43:51+08:00
+        // 
+    // str ~= "\timport hunt.framework.Simplify;\n";
+    // str ~= "\tcloseDefaultEntityManager();\n";
         controller.dispose();
         if(!controller.isAsync){controller.destroy(); GC.free(cast(void *)controller);}
     }
 
-    req.action = method;
-    return controller.callActionMethod(method, req);
+    // req.action = method;
+    // auto req = context.getRequest();
+    controller.callActionMethod(method, context);
+
+    context.end();
 }
 
-RoutingHandler getRouteFromList(string str)
+RoutingHandler getRouteHandler(string str)
 {
-    if (!_init)
-        _init = true;
-    return __routerList.get(str, null);
+    // if (!_init)
+    //     _init = true;
+    return _actions.get(str, null);
 }
 
-void addRouteList(string str, RoutingHandler method)
+void registerRouteHandler(string str, RoutingHandler method)
 {
-    version (HUNT_DEBUG) logDebug("add router: ", str);
-    if (!_init)
+    version (HUNT_DEBUG) logDebug("add route handler: ", str);
+    // if (!_init)
     {
         import std.string : toLower;
-        __routerList[str.toLower] = method;
+        _actions[str.toLower] = method;
     }
 }
 
 private:
-__gshared bool _init = false;
-__gshared RoutingHandler[string] __routerList;
+// __gshared bool _init = false;
+__gshared RoutingHandler[string] _actions;
