@@ -48,13 +48,12 @@ final class RouteGroupInfo {
     }
 }
 
-enum RouteGroupType {
-    Host,
-    Path
-}
+// enum RouteGroupType {
+//     Host,
+//     Path
+// }
 
 alias RouteGroupHandler = void delegate(RouteGroupInfo group, RouteItem[] routes);
-
 alias RouteParsingHandler = void delegate(RouteItem route);
 
 /** 

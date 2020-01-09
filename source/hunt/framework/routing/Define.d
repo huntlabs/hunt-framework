@@ -18,69 +18,69 @@ module hunt.framework.routing.Define;
 
 // import hunt.http.routing.RoutingContext;
 
-import std.exception;
+// import std.exception;
 
-// default route group name
-enum DEFAULT_ROUTE_GROUP = "default";
+// // default route group name
+// enum DEFAULT_ROUTE_GROUP = "default";
 
-// alias RoutingHandler = Response function(Request);
+// // alias RoutingHandler = Response function(Request);
 
-// alias RoutingHandler = void delegate(RoutingContext context);
+// // alias RoutingHandler = void delegate(RoutingContext context);
 
-// support methods
-enum HTTP_METHODS {
-    GET = 1,
-    POST,
-    PUT,
-    DELETE,
-    HEAD,
-    OPTIONS,
-    PATCH,
-    ALL
-}
+// // support methods
+// enum HTTP_METHODS {
+//     GET = 1,
+//     POST,
+//     PUT,
+//     DELETE,
+//     HEAD,
+//     OPTIONS,
+//     PATCH,
+//     ALL
+// }
 
-HTTP_METHODS getMethod(string method) {
-    with (HTTP_METHODS) {
-        if (method == "POST")
-            return POST;
-        else if (method == "GET")
-            return GET;
-        else if (method == "PUT")
-            return PUT;
-        else if (method == "DELETE")
-            return DELETE;
-        else if (method == "HEAD")
-            return HEAD;
-        else if (method == "OPTIONS")
-            return OPTIONS;
-        else if (method == "PATCH")
-            return PATCH;
-        else if (method == "*")
-            return ALL;
-        else
-            throw new Exception("unkonw method: (" ~ method ~ ")");
-    }
-}
+// HTTP_METHODS getMethod(string method) {
+//     with (HTTP_METHODS) {
+//         if (method == "POST")
+//             return POST;
+//         else if (method == "GET")
+//             return GET;
+//         else if (method == "PUT")
+//             return PUT;
+//         else if (method == "DELETE")
+//             return DELETE;
+//         else if (method == "HEAD")
+//             return HEAD;
+//         else if (method == "OPTIONS")
+//             return OPTIONS;
+//         else if (method == "PATCH")
+//             return PATCH;
+//         else if (method == "*")
+//             return ALL;
+//         else
+//             throw new Exception("unkonw method: (" ~ method ~ ")");
+//     }
+// }
 
-HTTP_METHODS[] stringToHTTPMethods(string method) {
-    with (HTTP_METHODS) {
-        if (method == "POST")
-            return [POST];
-        else if (method == "GET")
-            return [GET];
-        else if (method == "PUT")
-            return [PUT];
-        else if (method == "DELETE")
-            return [DELETE];
-        else if (method == "HEAD")
-            return [HEAD];
-        else if (method == "OPTIONS")
-            return [OPTIONS];
-        else if (method == "PATCH")
-            return [PATCH];
-        else if (method == "*")
-            return [GET, POST, PUT, DELETE, HEAD, OPTIONS, PATCH];
-        else
-            throw new Exception("unkonw method");
-    }
-}
+// HTTP_METHODS[] stringToHTTPMethods(string method) {
+//     with (HTTP_METHODS) {
+//         if (method == "POST")
+//             return [POST];
+//         else if (method == "GET")
+//             return [GET];
+//         else if (method == "PUT")
+//             return [PUT];
+//         else if (method == "DELETE")
+//             return [DELETE];
+//         else if (method == "HEAD")
+//             return [HEAD];
+//         else if (method == "OPTIONS")
+//             return [OPTIONS];
+//         else if (method == "PATCH")
+//             return [PATCH];
+//         else if (method == "*")
+//             return [GET, POST, PUT, DELETE, HEAD, OPTIONS, PATCH];
+//         else
+//             throw new Exception("unkonw method");
+//     }
+// }

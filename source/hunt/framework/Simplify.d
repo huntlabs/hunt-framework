@@ -24,6 +24,9 @@ ApplicationConfig config()
     return configManager().config();
 }
 
+// default route group name
+enum DEFAULT_ROUTE_GROUP = "default";
+
 // string url(string mca) {
 //     return url(mca, null);
 // }

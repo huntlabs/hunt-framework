@@ -451,20 +451,16 @@ private:
                     warningf("No handler found for group route {%s}", item.toString());
                 } else {
                     version(HUNT_DEBUG) infof("handler found for group route {%s}", item.toString());
-                    // hsb.addRoute([item.path], item.methods, handler, group.name);
+                    hsb.addRoute([item.path], item.methods, handler, group.name);
                 }
             }
         });
 
-        // loadDefaultRoutes((RouteItem route) {
-
-        // });
 
         string routeConfigFile = buildPath(_configRootPath, DEFAULT_ROUTE_CONFIG);
         if (!exists(routeConfigFile)) {
             warningf("Config file does not exist: %s", routeConfigFile);
         } else {
-
             RouteItem[] routes = RouteConfig.load(routeConfigFile);
             foreach(RouteItem item; routes) {
                 string handlerKey = makeRouteHandlerKey(item);
@@ -477,18 +473,6 @@ private:
                 }
             }
         }
-        
-
-        // binding route with a handler
-        // foreach(Route r; routes) {
-        //     version(HUNT_FM_DEBUG) tracef("Route: %s", r);
-        //     RoutingHandler handler = r.handle;
-        //     if(handler is null) {
-        //         warningf("No handler found for path [%s], methods: %s", r.path, r.getMethods());
-        //     } else {
-        //         hsb.addRoute(r.path, handler);
-        //     }
-        // }
 
         _server = hsb.build();
     }
@@ -500,7 +484,6 @@ private:
         
         assert(handler !is null);
         version(HUNT_DEBUG) info(conf.route.groups);
-
 
         string[] groupConfig;
         foreach (v; split(conf.route.groups, ',')) {
@@ -530,11 +513,6 @@ private:
                     warningf("Config file does not exist: %s", routeConfigFile);
                 } else {
                     RouteItem[] routes = RouteConfig.load(routeConfigFile);
-
-                    // Array!RouteItem routes;
-                    // loadRoutes(groupInfo, (RouteItem route) {
-                    //     routes.insertBack(route);
-                    // });
 
                     if(routes.length > 0) {
                         handler(groupInfo, routes);
