@@ -24,8 +24,6 @@ public import hunt.logging;
 import std.json : JSONValue;
 import std.path;
 
-import hunt.framework.routing;
-
 class View
 {
     private

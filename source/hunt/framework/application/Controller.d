@@ -15,7 +15,6 @@ import hunt.logging.ConsoleLogger;
 
 public import hunt.framework.http.Response;
 public import hunt.framework.http.Request;
-public import hunt.framework.routing;
 public import hunt.framework.application.MiddlewareInterface;
 
 import hunt.http.server;

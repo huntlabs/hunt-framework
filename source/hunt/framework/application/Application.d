@@ -38,10 +38,8 @@ import hunt.redis;
 
 import hunt.framework.application.ApplicationContext;
 import hunt.framework.application.Controller;
-import hunt.framework.application.Dispatcher;
 import hunt.framework.application.RouteConfig;
 import hunt.framework.Init;
-import hunt.framework.routing;
 // import hunt.framework.security.acl.Manager;
 // import hunt.framework.websocket.WebSocketMessageBroker;
 import hunt.framework.trace.Tracer;
@@ -424,25 +422,19 @@ private:
         if(conf.http.workerThreads <= 1) {
             conf.http.workerThreads = 2;
         }
-        // _tpool = new TaskPool(conf.http.workerThreads);
-        // _tpool.isDaemon = true;
 
         // SimpleWebSocketHandler webSocketHandler = new SimpleWebSocketHandler();
         // webSocketHandler.setWebSocketPolicy(_webSocketPolicy);
 
-        // HttpServerOptions options = new HttpServerOptions();
-
         //if(conf.webSocketFactory)
         //    _wfactory = conf.webSocketFactory;
 
-        // Build http server
+        // Building http server
         // HttpServerOptions options = new HttpServerOptions();
         HttpServer.Builder hsb = HttpServer.builder()
             .setListener(conf.http.port, conf.http.address);
 
-        // load routes
-        // this._router = new Router(conf);
-        // this._router.setConfigPath(DEFAULT_CONFIG_PATH);
+        // loading routes
         loadGroupRoutes(conf, (RouteGroupInfo group, RouteItem[] routes) {
             foreach(RouteItem item; routes) {
                 string handlerKey = makeRouteHandlerKey(item, group);
@@ -717,7 +709,6 @@ private:
         setDefaultLogging();
         _configRootPath = configManager().path();
 
-        // this._dispatcher = new Dispatcher();
         setConfig(configManager().config());
     }
 
@@ -728,8 +719,6 @@ private:
     Address addr;
     HttpServer _server;
     string _configRootPath;
-    // Router _router;
-    // Dispatcher _dispatcher;
 
     version(WITH_HUNT_ENTITY)
     {

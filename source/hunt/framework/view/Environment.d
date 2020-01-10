@@ -21,7 +21,6 @@ import hunt.logging;
 
 import hunt.framework.Simplify;
 import hunt.framework.view.Template;
-import hunt.framework.routing;
 
 private
 {
