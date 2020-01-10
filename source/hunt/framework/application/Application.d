@@ -27,6 +27,7 @@ import hunt.net.NetUtil;
 // import hunt.http.codec.websocket.stream.WebSocketPolicy;
 
 import hunt.http.routing.RoutingContext;
+import hunt.http.routing.RouterManager;
 import hunt.http.server.HttpServer;
 import hunt.http.server.HttpServerOptions;
 import hunt.http.server.WebSocketHandler;
@@ -450,8 +451,14 @@ private:
                 if(handler is null) {
                     warningf("No handler found for group route {%s}", item.toString());
                 } else {
-                    version(HUNT_DEBUG) infof("handler found for group route {%s}", item.toString());
-                    hsb.addRoute([item.path], item.methods, handler, group.name);
+                    version(HUNT_DEBUG) tracef("handler found for group route {%s}", item.toString());
+                    if(group.type == "host") {
+                        hsb.addRoute([item.path], item.methods, handler, group.value, RouteGroupType.Host);
+                    } else if(group.type == "path") {
+                        hsb.addRoute([item.path], item.methods, handler, group.value, RouteGroupType.Path);
+                    } else {
+                        errorf("Unknown route group type: %s", group.type);
+                    }
                 }
             }
         });
@@ -504,7 +511,7 @@ private:
                 groupInfo.type = strip(groupConfig[1]);
                 groupInfo.value = strip(value);
 
-                version(HUNT_FM_DEBUG) tracef("route group: %s", groupInfo);
+                version(HUNT_FM_DEBUG) infof("route group: %s", groupInfo);
                 
                 string routeConfigFile = groupInfo.name ~ ROUTE_CONFIG_EXT;
                 routeConfigFile = buildPath(_configRootPath, routeConfigFile);
