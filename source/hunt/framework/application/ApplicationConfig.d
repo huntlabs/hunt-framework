@@ -22,7 +22,7 @@ import hunt.cache.CacheOption;
 import hunt.http.codec.http.model.MultipartConfig;
 import hunt.logging;
 import hunt.framework.Init;
-import hunt.redis.RedisPoolConfig;
+// import hunt.redis.RedisPoolConfig;
 import hunt.util.Configuration;
 
 
@@ -99,6 +99,14 @@ final class ApplicationConfig
         uint maxNum = 8;
     }
 
+    struct CacheConf
+    {
+        string storage = "memory";
+        string args = "/tmp";
+        bool enableL2 = false;
+    }
+
+
     struct MemcacheConf
     {
         bool enabled = false;
@@ -113,8 +121,8 @@ final class ApplicationConfig
         ushort database = 0;
         ushort port = 6379;
         uint timeout = 0;
-        RedisPoolConf pool;
-        ClusterOption cluster;
+        // RedisPoolConf pool;
+        // ClusterOption cluster;
     }
 
     struct RedisPoolConf {
@@ -236,7 +244,8 @@ final class ApplicationConfig
     ApplicationConf application;
     CookieConf cookie;
     SessionConf session;
-    CacheOption cache;
+    // CacheOption cache;
+    CacheConf cache;
     HttpConf http;
     HttpsConf https;
     RouteConf route;

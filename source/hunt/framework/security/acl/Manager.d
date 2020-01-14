@@ -10,6 +10,7 @@ import hunt.cache;
 import hunt.framework.http.Request;
 import std.conv;
 
+alias Cache = UCache;
 
 class AccessManager
 {
