@@ -386,7 +386,7 @@ version(WITH_HUNT_TRACE) {
             MultiMap!string map = new MultiMap!string();
             getURI().decodeQueryTo(map);
             foreach (string key, List!(string) values; map) {
-                version(HUNT_DEBUG) {
+                version(HUNT_HTTP_DEBUG) {
                     infof("query parameter: key=%s, values=%s", key, values[0]);
                 }
                 if(values is null || values.size()<1) {
