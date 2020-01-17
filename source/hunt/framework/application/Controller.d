@@ -28,7 +28,6 @@ import std.exception;
 import std.traits;
 
 enum Action;
-alias Cache = UCache;
 
 abstract class Controller
 {

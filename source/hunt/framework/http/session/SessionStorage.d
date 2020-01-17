@@ -22,9 +22,6 @@ import hunt.Exceptions;
 
 import hunt.framework.http.session.HttpSession;
 
-alias Cache = UCache;
-
-
 /**
 */
 class SessionStorage {
@@ -62,8 +59,7 @@ class SessionStorage {
 
 	// alias isset = containsKey;
 	bool containsKey(string key) {
-		// return _cache.hasKey(getRealAddr(key));
-		return _cache.containsKey(getRealAddr(key));
+		return _cache.hasKey(getRealAddr(key));
 	}
 
 	// alias del = erase;

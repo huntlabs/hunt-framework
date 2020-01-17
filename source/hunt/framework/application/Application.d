@@ -27,7 +27,7 @@ import hunt.http.codec.websocket.stream.WebSocketConnection;
 import hunt.http.codec.websocket.stream.WebSocketPolicy;
 import hunt.http.server;
 
-// import hunt.redis;
+import hunt.redis;
 
 import hunt.framework.application.Dispatcher;
 import hunt.framework.application.ApplicationContext;
@@ -185,18 +185,12 @@ final class Application : ApplicationContext {
         }
     }
 
-    // private void initCache(CacheOption option) {
-    //     _cache = CacheFactory.create(option);
-    // }
-    private void initCache(ApplicationConfig.CacheConf config) {
-        _manger.createCache("default", config.storage, config.args, config.enableL2);
+    private void initCache(CacheOption option) {
+        _cache = CacheFactory.create(option);
     }
 
     private void initSessionStorage(ApplicationConfig.SessionConf config) {
-        // _sessionStorage = new SessionStorage(_cache);
-
-        _sessionStorage = new SessionStorage(UCache.CreateUCache(config.storage,
-                config.args, false));
+        _sessionStorage = new SessionStorage(_cache);
 
         _sessionStorage.setPrefix(config.prefix);
         _sessionStorage.expire = config.expire;
@@ -214,12 +208,7 @@ final class Application : ApplicationContext {
     }
 
     Cache cache() {
-        // return _cache;
-        return _manger.getCache("default");
-    }
-
-    CacheManger cacheManger() {
-        return _manger;
+        return _cache;
     }
 
     AccessManager accessManager() @property {
@@ -239,18 +228,20 @@ final class Application : ApplicationContext {
         upConfig(config);
 
         // setting redis
-        // auto redisSettings = config.redis;
-        // if(redisSettings.pool.enabled) {
-        //     RedisPoolConfig poolConfig = new RedisPoolConfig();
-        //     poolConfig.host = redisSettings.host;
-        //     poolConfig.port = cast(int)redisSettings.port;
-        //     poolConfig.password = redisSettings.password;
-        //     poolConfig.database = cast(int)redisSettings.database;
-        //     poolConfig.soTimeout = cast(int)redisSettings.pool.maxIdle;
+        auto redisSettings = config.redis;
+        if(redisSettings.pool.enabled) {
+            RedisPoolConfig poolConfig = new RedisPoolConfig();
+            poolConfig.host = redisSettings.host;
+            poolConfig.port = cast(int)redisSettings.port;
+            poolConfig.password = redisSettings.password;
+            poolConfig.database = cast(int)redisSettings.database;
+            poolConfig.soTimeout = cast(int)redisSettings.pool.maxIdle;
 
-        //     hunt.redis.RedisPool.defalutPoolConfig = poolConfig;
-        // }
+            hunt.redis.RedisPool.defalutPoolConfig = poolConfig;
+        }
 
+        //setRedis(config.redis);
+        //setMemcache(config.memcache);
         version(WITH_HUNT_ENTITY) {
             if (config.database.defaultOptions.enabled) {
                 initDatabase(config.database);
@@ -809,11 +800,10 @@ private:
     // }
 
     this() {
-        _manger = new CacheManger();
         setDefaultLogging();
 
         this._dispatcher = new Dispatcher();
-        setConfig(configManager().config()); 
+        setConfig(configManager().config());
     }
 
     __gshared static Application _app;
@@ -829,9 +819,7 @@ private:
         EntityManagerFactory _entityManagerFactory;
     }
 
-    // Cache _cache;
-
-    CacheManger _manger;
+    Cache _cache;
     SessionStorage _sessionStorage;
     AccessManager _accessManager;
     WebSocketPolicy _webSocketPolicy;
