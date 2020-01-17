@@ -366,6 +366,22 @@ Response callHandler(T, string method)(Request req)
 
     req.action = method;
     return controller.callActionMethod(method, req);
+    // Response res;
+    // try {
+    //     res = controller.callActionMethod(method, req);
+    // } catch(Throwable e) {
+    //     warning(e.msg);
+    //     version(HUNT_DEBUG) warning(e);
+    //     res = new Response(req);
+    //     import hunt.http.codec.http.model.HttpStatus;
+    //     res.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
+    //     version(HUNT_DEBUG) {
+    //         res.setContent(e.toString());
+    //     } else {
+    //         res.setContent(e.msg);
+    //     }
+    // }
+    // return res;
 }
 
 RoutingHandler getRouteFromList(string str)

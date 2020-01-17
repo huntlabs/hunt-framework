@@ -654,8 +654,9 @@ private:
             }
         }
 
-        version(HUNT_DEBUG) {}
-        else {
+        version(HUNT_DEBUG) {
+            ConsoleLogger.setLogLevel(level);
+        } else {
             LogConf logconf;
             logconf.level = level;
             logconf.disableConsole = conf.disableConsole;
