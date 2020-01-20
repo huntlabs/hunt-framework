@@ -2,6 +2,7 @@ module hunt.framework.application.RouteConfig;
 
 import hunt.logging.ConsoleLogger;
 
+import std.algorithm;
 import std.array;
 import std.conv;
 import std.file;
@@ -13,11 +14,16 @@ import std.string;
 /**
  * 
  */
-final class RouteItem {
-
+class RouteItem {
     string[] methods;
 
     string path;
+}
+
+/**
+ * 
+ */
+final class ActionRouteItem : RouteItem {
 
     bool isRegex = false;
 
@@ -32,6 +38,21 @@ final class RouteItem {
 
     override string toString() {
         return "path: " ~ path ~ ", methods: " ~ methods.to!string() ~ ", mca: " ~ makeRouteHandlerKey(this);
+    }
+}
+
+/**
+ * 
+ */
+final class ResourceRouteItem : RouteItem {
+
+    /// Is a folder for static content?
+    bool canListing = false;
+
+    string resourcePath;
+
+    override string toString() {
+        return "path: " ~ path ~ ", methods: " ~ methods.to!string() ~ ", resource path: " ~ resourcePath;
     }
 }
 
@@ -94,7 +115,7 @@ struct RouteConfig {
 
 
         // match example: 
-        // GET, POST    /users    module.controller.action | staticDir:public
+        // GET, POST    /users    module.controller.action | staticDir:wwwroot
         auto matched = line.match(
                 regex(`([^/]+)\s+(/[\S]*?)\s+((staticDir[\:][\w|\/|\\]+)|([\w\.]+))`));
 
@@ -105,11 +126,38 @@ struct RouteConfig {
             return null;
         }
 
-        RouteItem item = new RouteItem();
+        //
+        RouteItem item;
+        string part3 = matched.captures[3].to!string.strip;
+        
+        // 
+        if (part3.startsWith("staticDir:")) {
+            ResourceRouteItem routeItem = new ResourceRouteItem();
+            routeItem.resourcePath = part3.chompPrefix("staticDir:");
+            item = routeItem;
+        } else {
+            ActionRouteItem routeItem = new ActionRouteItem();
+            // mca
+            string mca = part3;
+            string[] mcaArray = split(mca, ".");
 
-        // path
-        item.path = matched.captures[2].to!string.strip;
+            if (mcaArray.length > 3 || mcaArray.length < 2) {
+                logWarningf("this route config mca length is: %d (%s)", mcaArray.length, mca);
+                return null;
+            }
 
+            if (mcaArray.length == 2) {
+                routeItem.controller = mcaArray[0];
+                routeItem.action = mcaArray[1];
+            }
+            else {
+                routeItem.action = mcaArray[0];
+                routeItem.controller = mcaArray[1];
+                routeItem.action = mcaArray[2];
+            }
+            item = routeItem;
+        }
+        
         // methods
         string methods = matched.captures[1].to!string.strip;
         methods = methods.toUpper();
@@ -125,33 +173,18 @@ struct RouteConfig {
             item.methods = split(methods, ",");
         }
 
-        // mca
-        string mca = matched.captures[3].to!string.strip;
-
-        string[] mcaArray = split(mca, ".");
-
-        if (mcaArray.length > 3 || mcaArray.length < 2) {
-            logWarningf("this route config mca length is: %d (%s)", mcaArray.length, mca);
-            return null;
-        }
-
-        if (mcaArray.length == 2) {
-            item.controller = mcaArray[0];
-            item.action = mcaArray[1];
-        }
-        else {
-            item.action = mcaArray[0];
-            item.controller = mcaArray[1];
-            item.action = mcaArray[2];
-        }
+        // path
+        item.path = matched.captures[2].to!string.strip;
 
         return item;
     }
 }
 
 
-
-string makeRouteHandlerKey(RouteItem route, RouteGroupInfo group = null) {
+/**
+ * 
+ */
+string makeRouteHandlerKey(ActionRouteItem route, RouteGroupInfo group = null) {
     string moduleName = route.moduleName;
     string controller = route.controller;
 
@@ -160,28 +193,5 @@ string makeRouteHandlerKey(RouteItem route, RouteGroupInfo group = null) {
         group is null ? "" : group.name ~ ".",
         controller, 
         controller, route.action);
-
-    // if (route.staticFilePath == string.init) {
-    // if (route.moduleName is null) {
-    //     handleKey = "app.controller." ~ ((route.getGroup() == DEFAULT_ROUTE_GROUP)
-    //             ? "" : route.getGroup() ~ ".") ~ route.getController() ~ "." ~ route.getController()
-    //         ~ "controller." ~ route.getAction();
-    // }
-    // else {
-    //     handleKey = "app." ~ route.moduleName ~ ".controller." ~ ((route.getGroup() == DEFAULT_ROUTE_GROUP)
-    //             ? "" : route.getGroup() ~ ".") ~ route.getController() ~ "." ~ route.getController()
-    //         ~ "controller." ~ route.getAction();
-
-    //     // if (getRouteHandler(handleKey) is null) {
-    //     //     handleKey = "app.component." ~ route.moduleName ~ ".controller." ~ (
-    //     //             (route.getGroup() == DEFAULT_ROUTE_GROUP) ? "" : route.getGroup() ~ ".")
-    //     //         ~ route.getController() ~ "." ~ route.getController() ~ "controller." ~ route.getAction();
-    //     // }
-    // }
-    // }
-    // else {
-    //     handleKey = "hunt.application.staticfile.StaticfileController.doStaticFile";
-    // }
-
     return key.toLower();
 }

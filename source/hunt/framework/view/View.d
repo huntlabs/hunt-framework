@@ -114,7 +114,7 @@ View GetViewObject()
     }
     auto view = new View(_envInstance);
 
-    string path = buildPath(APP_PATH, config().view.path);
+    string path = buildNormalizedPath(APP_PATH, config().view.path);
 
     version (HUNT_DEBUG) {
         tracef("setting view path: %s", path);

@@ -28,6 +28,7 @@ __gshared string DEFAULT_LOG_PATH = "logs/";
 __gshared string DEFAULT_SESSION_PATH = "session/";
 
 enum string DEFAULT_ROUTE_CONFIG = "./routes";
+enum string DEFAULT_STATIC_FILES_PATH = "wwwroot/";
 enum string ROUTE_CONFIG_EXT = ".routes";
 
 shared static this()

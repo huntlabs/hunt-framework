@@ -26,7 +26,9 @@ import hunt.validation;
 import hunt.framework.http.Form;
 
 import std.exception;
+import std.string;
 import std.traits;
+
 
 enum Action;
 
@@ -57,8 +59,9 @@ abstract class Controller
             _view = GetViewObject();
             // TODO: Tasks pending completion -@zhangxueping at 2020-01-02T18:16:11+08:00
             // 
-            // _view.setRouteGroup(this.request.route.getGroup());
-            // _view.setLocale(this.request.locale());
+            _view.setRouteGroup(_routingContext.groupName());
+            // _view.setRouteGroup("default");
+            _view.setLocale(this.request.locale());
         }
 
         return _view;
@@ -178,7 +181,7 @@ mixin template HuntDynamicCallFun(T, string moduleName) if(is(T : Controller))
 public:
     enum allActions = __createCallActionMethod!(T, moduleName);
     // version (HUNT_DEBUG) 
-    pragma(msg, allActions);
+    // pragma(msg, allActions);
 
     mixin(allActions);
     
@@ -358,28 +361,36 @@ string __createRouteMap(T, string moduleName)()
     // };
 
     enum len = "Controller".length;
-    string controllerName = moduleName[0..$-len];
+    enum controllerName = moduleName[0..$-len];
+
+    // format: app.controller.{group}.{name}controller
+    // app.controller.admin.IndexController
+    enum string[] parts = moduleName.split(".");
+    // string groupName = "default";
+    static if(parts.length == 4) {
+        enum GroupName = parts[2];
+    } else {
+        enum GroupName = "default";
+    }
 
     foreach (memberName; __traits(allMembers, T))
     {
         // pragma(msg, "memberName: ", memberName);
 
-        static if (is(typeof(__traits(getMember, T, memberName)) == function))
-        {
-            foreach (t; __traits(getOverloads, T, memberName))
-            {
-                static if ( /*ParameterTypeTuple!(t).length == 0 && */ hasUDA!(t, Action))
-                {
-                    str ~= "\n\tregisterRouteHandler(\"" ~ controllerName ~ "." ~ T.stringof ~ "." ~ memberName
-                        ~ "\", (context) { 
-                            callHandler!(" ~ T.stringof ~ ",\"" ~ memberName ~ "\")(context);
-                    });\n";
+        static if (is(typeof(__traits(getMember, T, memberName)) == function)) {
+            foreach (t; __traits(getOverloads, T, memberName)) {
+                static if (hasUDA!(t, Action)) {
+                    enum string MemberName = memberName;
+                } else static if (isActionMember(memberName)) {
+                    enum string MemberName = memberName[0 .. $ - actionNameLength];
+                } else {
+                    enum string MemberName = "";
                 }
-                else static if (isActionMember(memberName))
-                {
-                    enum strippedMemberName = memberName[0 .. $ - actionNameLength];
-                    str ~= "\n\tregisterRouteHandler(\"" ~ controllerName ~ "." ~ T.stringof ~ "." ~ strippedMemberName
+
+                static if(MemberName.length > 0) {
+                    str ~= "\n\tregisterRouteHandler(\"" ~ controllerName ~ "." ~ T.stringof ~ "." ~ MemberName
                         ~ "\", (context) { 
+                            context.groupName = \"" ~ GroupName ~ "\";
                             callHandler!(" ~ T.stringof ~ ",\"" ~ memberName ~ "\")(context);
                     });\n";
                 }
@@ -406,6 +417,7 @@ void callHandler(T, string method)(RoutingContext context)
 
     // req.action = method;
     // auto req = context.getRequest();
+    // warningf("group name: %s", context.groupName());
     controller.callActionMethod(method, context);
 
     context.end();

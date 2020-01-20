@@ -436,23 +436,20 @@ private:
 
         // loading routes
         loadGroupRoutes(conf, (RouteGroupInfo group, RouteItem[] routes) {
-            foreach(RouteItem item; routes) {
-                string handlerKey = makeRouteHandlerKey(item, group);
-                RoutingHandler handler = getRouteHandler(handlerKey);
-                // warning(item.toString());
-                if(handler is null) {
-                    warningf("No handler found for group route {%s}", item.toString());
-                } else {
-                    version(HUNT_DEBUG) tracef("handler found for group route {%s}", item.toString());
-                    if(group.type == "host") {
-                        hsb.addRoute([item.path], item.methods, handler, group.value, RouteGroupType.Host);
-                    } else if(group.type == "path") {
-                        hsb.addRoute([item.path], item.methods, handler, group.value, RouteGroupType.Path);
-                    } else {
-                        errorf("Unknown route group type: %s", group.type);
-                    }
-                }
+            // bool isRootStaticPathAdded = false;
+            RouteGroupType groupType = RouteGroupType.Host;
+            if(group.type == "path") {
+                groupType = RouteGroupType.Path;
             }
+
+            foreach(RouteItem item; routes) {
+                addRoute(hsb, item, group);
+            }
+
+            // if(!isRootStaticPathAdded) {
+                // default static files
+                hsb.resource("/", DEFAULT_STATIC_FILES_PATH, false, group.value, groupType); 
+            // }
         });
 
 
@@ -462,18 +459,53 @@ private:
         } else {
             RouteItem[] routes = RouteConfig.load(routeConfigFile);
             foreach(RouteItem item; routes) {
-                string handlerKey = makeRouteHandlerKey(item);
-                RoutingHandler handler = getRouteHandler(handlerKey);
-                if(handler is null) {
-                    warningf("No handler found for route {%s}", item.toString());
+                addRoute(hsb, item, null);
+            }
+        }
+        
+        // default static files
+        hsb.resource("/", DEFAULT_STATIC_FILES_PATH, false); 
+        _server = hsb.build();
+    }
+
+    void addRoute(HttpServer.Builder hsb, RouteItem item, RouteGroupInfo group) {
+        ResourceRouteItem resourceItem = cast(ResourceRouteItem)item;
+
+        // add route for static files 
+        if(resourceItem !is null) {
+            // if(resourceItem.path == "/") isRootStaticPathAdded = true;
+            if(group is null) {
+                hsb.resource(resourceItem.path, resourceItem.resourcePath, 
+                    resourceItem.canListing);
+            } else if(group.type == "host") {
+                hsb.resource(resourceItem.path, resourceItem.resourcePath, 
+                    resourceItem.canListing, group.value, RouteGroupType.Host);
+            } else if(group.type == "path") {
+                hsb.resource(resourceItem.path, resourceItem.resourcePath, 
+                    resourceItem.canListing, group.value, RouteGroupType.Path);
+            } else {
+                errorf("Unknown route group type: %s", group.type);
+            }
+        } else { // add route for controller action
+            string handlerKey = makeRouteHandlerKey(cast(ActionRouteItem)item, group);
+            RoutingHandler handler = getRouteHandler(handlerKey);
+            // warning(item.toString());
+            if(handler is null) {
+                warningf("No handler found for group route {%s}", item.toString());
+            } else {
+                version(HUNT_DEBUG) tracef("handler found for group route {%s}", item.toString());
+                if(group is null) {
+                    infof("adding %s", item.path);
+                    hsb.addRoute([item.path], item.methods, handler);
+                } else if(group.type == "host") {
+                    hsb.addRoute([item.path], item.methods, handler, group.value, RouteGroupType.Host);
+                } else if(group.type == "path") {
+                    hsb.addRoute([item.path], item.methods, handler, group.value, RouteGroupType.Path);
                 } else {
-                    version(HUNT_DEBUG) infof("handler found for route {%s}", item.toString());
-                    hsb.addRoute([item.path], item.methods, handler, null);
+                    errorf("Unknown route group type: %s", group.type);
                 }
             }
         }
-
-        _server = hsb.build();
     }
 
     void loadGroupRoutes(const ref ApplicationConfig conf, RouteGroupHandler handler) {

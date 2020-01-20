@@ -62,7 +62,7 @@ final class ApplicationConfig
     struct HttpConf
     {
         string address = "0.0.0.0";
-        string path = "wwwroot/";
+        string path = DEFAULT_STATIC_FILES_PATH;
         ushort port = 8080;
         uint workerThreads = 4;
         uint ioThreads = 2;
