@@ -350,20 +350,11 @@ string __createCallActionMethod(T, string moduleName)()
 
 string __createRouteMap(T, string moduleName)()
 {
-    string str = "";
-
-    // pragma(msg, "moduleName: ", moduleName);
-
-    // str ~= q{
-    //     import hunt.framework.application.StaticfileController;
-    //     registerRouteHandler("hunt.application.staticfile.StaticfileController.doStaticFile", 
-    //         &callHandler!(StaticfileController, "doStaticFile"));
-    // };
 
     enum len = "Controller".length;
     enum controllerName = moduleName[0..$-len];
 
-    // format: app.controller.{group}.{name}controller
+    // The format: app.controller.{group}.{name}controller
     // app.controller.admin.IndexController
     enum string[] parts = moduleName.split(".");
     // string groupName = "default";
@@ -373,6 +364,7 @@ string __createRouteMap(T, string moduleName)()
         enum GroupName = "default";
     }
 
+    string str = "";
     foreach (memberName; __traits(allMembers, T))
     {
         // pragma(msg, "memberName: ", memberName);
