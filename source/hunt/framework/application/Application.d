@@ -228,6 +228,7 @@ final class Application : ApplicationContext {
     }
 
     void setConfig(ApplicationConfig config) {
+        _appConfig = config;
         setLogConfig(config.logging);
         enableLocale();
         buildHttpServer(config);
@@ -352,6 +353,69 @@ final class Application : ApplicationContext {
     }
 
 
+    string createUrl(string mca, string[string] params = null, string group = null) {
+        
+        if (group.empty)
+            group = DEFAULT_ROUTE_GROUP;
+
+        // find Route
+        RouteGroup routeGroup = RouteConfig.getRouteGroupe(group);
+        if (routeGroup is null) 
+            return null;
+
+        RouteItem route = RouteConfig.getRoute(group, mca);
+        if (route is null) {
+            return null;
+        }
+
+        string url;
+        if (route.isRegex) {
+            if (params.length == 0) {
+                logWarningf("this route need params (%s).", mca);
+                return null;
+            }
+
+            if (!route.paramKeys.empty) {
+                url = route.urlTemplate;
+                foreach (i, key; route.paramKeys) {
+                    string value = params.get(key, null);
+
+                    if (value is null) {
+                        logWarningf("this route template need param (%s).", key);
+                        return null;
+                    }
+
+                    params.remove(key);
+                    url = url.replaceFirst("{" ~ key ~ "}", value);
+                }
+            }
+        } else {
+            url = route.pattern;
+        }
+
+        string groupValue = routeGroup.value;
+        if (routeGroup.type == RouteGroup.HOST) {
+            url = (_appConfig.https.enabled ? "https://" : "http://") ~ groupValue ~ url;
+        } else {
+            url = (!groupValue.empty ? (_appConfig.application.baseUrl ~ groupValue) 
+                    : strip(_appConfig.application.baseUrl, "", "/")) ~ url;
+        }
+
+        return url ~ (params.length > 0 ? ("?" ~ buildUriQueryString(params)) : "");
+    }
+
+    static string buildUriQueryString(string[string] params) {
+        if (params.length == 0) {
+            return "";
+        }
+
+        string r;
+        foreach (k, v; params) {
+            r ~= (r ? "&" : "") ~ k ~ "=" ~ v;
+        }
+
+        return r;
+    }
 
 // version(WITH_HUNT_TRACE) {
 //     private void initializeTracer(Request request, HttpConnection connection) {
@@ -435,8 +499,11 @@ private:
             .setListener(conf.http.port, conf.http.address);
 
         // loading routes
-        loadGroupRoutes(conf, (RouteGroupInfo group, RouteItem[] routes) {
+        loadGroupRoutes(conf, (RouteGroup group, RouteItem[] routes) {
             // bool isRootStaticPathAdded = false;
+            RouteConfig.allRouteItems[group.name] = routes;
+            RouteConfig.allRouteGroups ~= group;
+
             RouteGroupType groupType = RouteGroupType.Host;
             if(group.type == "path") {
                 groupType = RouteGroupType.Path;
@@ -452,13 +519,21 @@ private:
             // }
         });
 
-
+        // load default routes
         string routeConfigFile = buildPath(_configRootPath, DEFAULT_ROUTE_CONFIG);
         if (!exists(routeConfigFile)) {
-            warningf("Config file does not exist: %s", routeConfigFile);
+            warningf("The config file for route does not exist: %s", routeConfigFile);
         } else {
             RouteItem[] routes = RouteConfig.load(routeConfigFile);
-            foreach(RouteItem item; routes) {
+            RouteConfig.allRouteItems[DEFAULT_ROUTE_GROUP] = routes;
+
+            RouteGroup defaultGroup = new RouteGroup();
+            defaultGroup.name = DEFAULT_ROUTE_GROUP;
+            defaultGroup.type = RouteGroup.DEFAULT;
+
+            RouteConfig.allRouteGroups ~= defaultGroup;
+
+            foreach(RouteItem item; routes) {                
                 addRoute(hsb, item, null);
             }
         }
@@ -468,7 +543,7 @@ private:
         _server = hsb.build();
     }
 
-    void addRoute(HttpServer.Builder hsb, RouteItem item, RouteGroupInfo group) {
+    void addRoute(HttpServer.Builder hsb, RouteItem item, RouteGroup group) {
         ResourceRouteItem resourceItem = cast(ResourceRouteItem)item;
 
         // add route for static files 
@@ -477,10 +552,10 @@ private:
             if(group is null) {
                 hsb.resource(resourceItem.path, resourceItem.resourcePath, 
                     resourceItem.canListing);
-            } else if(group.type == "host") {
+            } else if(group.type == RouteGroup.HOST) {
                 hsb.resource(resourceItem.path, resourceItem.resourcePath, 
                     resourceItem.canListing, group.value, RouteGroupType.Host);
-            } else if(group.type == "path") {
+            } else if(group.type == RouteGroup.PATH) {
                 hsb.resource(resourceItem.path, resourceItem.resourcePath, 
                     resourceItem.canListing, group.value, RouteGroupType.Path);
             } else {
@@ -497,9 +572,9 @@ private:
                 if(group is null) {
                     infof("adding %s", item.path);
                     hsb.addRoute([item.path], item.methods, handler);
-                } else if(group.type == "host") {
+                } else if(group.type == RouteGroup.HOST) {
                     hsb.addRoute([item.path], item.methods, handler, group.value, RouteGroupType.Host);
-                } else if(group.type == "path") {
+                } else if(group.type == RouteGroup.PATH) {
                     hsb.addRoute([item.path], item.methods, handler, group.value, RouteGroupType.Path);
                 } else {
                     errorf("Unknown route group type: %s", group.type);
@@ -509,7 +584,6 @@ private:
     }
 
     void loadGroupRoutes(const ref ApplicationConfig conf, RouteGroupHandler handler) {
-
         if (conf.route.groups.empty) 
             return;
         
@@ -530,7 +604,7 @@ private:
                     }
                 }
 
-                RouteGroupInfo groupInfo = new RouteGroupInfo();
+                RouteGroup groupInfo = new RouteGroup();
                 groupInfo.name = strip(groupConfig[0]);
                 groupInfo.type = strip(groupConfig[1]);
                 groupInfo.value = strip(value);
@@ -750,6 +824,7 @@ private:
 
     Address addr;
     HttpServer _server;
+    ApplicationConfig _appConfig;
     string _configRootPath;
 
     version(WITH_HUNT_ENTITY)

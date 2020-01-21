@@ -24,53 +24,46 @@ ApplicationConfig config()
     return configManager().config();
 }
 
-// default route group name
-enum DEFAULT_ROUTE_GROUP = "default";
+string url(string mca) {
+    return url(mca, null);
+}
 
-// string url(string mca) {
-//     return url(mca, null);
-// }
+string url(string mca, string[string] params, string group) {
+    return app().createUrl(mca, params, group);
+}
 
-// string url(string mca, string[string] params, string group) {
-//     return app().router().createUrl(mca, params, group);
-// }
-
-// string url(string mca, string[string] params) {
-//     // admin:user.user.view
-//     string[] items = mca.split(":");
-//     string group = "";
-//     string pathItem = "";
-//     if (items.length == 1) {
-//         group = "";
-//         pathItem = mca;
-//     } else if (items.length == 2) {
-//         group = items[0];
-//         pathItem = items[1];
-//     } else {
-//         throw new Exception("Bad format for mca");
-//     }
-
-//     return app().router().createUrl(pathItem, params, group);
-// }
-
-
-version(WITH_HUNT_ENTITY) {
-
-    public import hunt.entity.EntityManager;
-    public import hunt.entity.DefaultEntityManagerFactory;
-
-    //global entity manager
-    private EntityManager _em;
-    EntityManager defaultEntityManager()
-    {
-        if (_em is null)
-        {
-            _em = defaultEntityManagerFactory().createEntityManager();
-        }
-        return _em;
+string url(string mca, string[string] params) {
+    // admin:user.user.view
+    string[] items = mca.split(":");
+    string group = "";
+    string pathItem = "";
+    if (items.length == 1) {
+        group = "";
+        pathItem = mca;
+    } else if (items.length == 2) {
+        group = items[0];
+        pathItem = items[1];
+    } else {
+        throw new Exception("Bad format for mca");
     }
 
+    return app().createUrl(pathItem, params, group);
 }
+
+public import hunt.entity.EntityManager;
+public import hunt.entity.DefaultEntityManagerFactory;
+
+//global entity manager
+private EntityManager _em;
+EntityManager defaultEntityManager()
+{
+    if (_em is null)
+    {
+        _em = defaultEntityManagerFactory().createEntityManager();
+    }
+    return _em;
+}
+
 
 //close global entity manager
 void closeDefaultEntityManager()

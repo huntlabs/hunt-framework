@@ -409,10 +409,13 @@ void callHandler(T, string method)(RoutingContext context)
     scope(exit) {
         // TODO: Tasks pending completion -@zhangxueping at 2020-01-08T11:43:51+08:00
         // 
-    // str ~= "\timport hunt.framework.Simplify;\n";
-    // str ~= "\tcloseDefaultEntityManager();\n";
+        // str ~= "\timport hunt.framework.Simplify;\n";
+        // str ~= "\tcloseDefaultEntityManager();\n";
         controller.dispose();
-        if(!controller.isAsync){controller.destroy(); GC.free(cast(void *)controller);}
+        if(!controller.isAsync) { 
+            controller.destroy(); 
+            GC.free(cast(void *)controller);
+        }
     }
 
     // req.action = method;

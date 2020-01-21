@@ -18,14 +18,18 @@ class RouteItem {
     string[] methods;
 
     string path;
+    string urlTemplate;
+    string pattern;
+    string[int] paramKeys;
+
+    bool isRegex = false;
+
 }
 
 /**
  * 
  */
 final class ActionRouteItem : RouteItem {
-
-    bool isRegex = false;
 
     // hunt module
     string moduleName;
@@ -36,8 +40,12 @@ final class ActionRouteItem : RouteItem {
     // hunt action
     string action;
 
+    string mca() {
+        return (moduleName ? moduleName ~ "." : "") ~ controller ~ "." ~ action;
+    }
+
     override string toString() {
-        return "path: " ~ path ~ ", methods: " ~ methods.to!string() ~ ", mca: " ~ makeRouteHandlerKey(this);
+        return "path: " ~ path ~ ", methods: " ~ methods.to!string() ~ ", mca: " ~ mca;
     }
 }
 
@@ -59,7 +67,13 @@ final class ResourceRouteItem : RouteItem {
 /**
  * 
  */
-final class RouteGroupInfo {
+final class RouteGroup {
+    
+    // type
+    enum string DEFAULT = "default";
+    enum string HOST = "host";
+    enum string PATH = "path";
+
     string name;
     string type;
     string value;
@@ -69,18 +83,38 @@ final class RouteGroupInfo {
     }
 }
 
-// enum RouteGroupType {
-//     Host,
-//     Path
-// }
-
-alias RouteGroupHandler = void delegate(RouteGroupInfo group, RouteItem[] routes);
+alias RouteGroupHandler = void delegate(RouteGroup group, RouteItem[] routes);
 alias RouteParsingHandler = void delegate(RouteItem route);
 
 /** 
  * 
  */
 struct RouteConfig {
+
+    __gshared RouteItem[][string] allRouteItems;
+    __gshared RouteGroup[] allRouteGroups;
+
+    static ActionRouteItem getRoute(string group, string mca) {
+        auto itemPtr = group in allRouteItems;
+        if(itemPtr is null)
+            return null;
+        
+        foreach(RouteItem item; *itemPtr) {
+            ActionRouteItem actionItem = cast(ActionRouteItem)item;
+            if(actionItem is null) continue;
+            if(actionItem.mca ==  mca) return actionItem;
+        }
+
+        return null;
+    }
+
+    static RouteGroup getRouteGroupe(string name) {
+        auto item = allRouteGroups.find!(g => g.name == name).takeOne;
+        if(item.empty)
+            return null;
+        return item.front;
+    }
+
     static RouteItem[] load(string filename) {
         import std.stdio;
 
@@ -174,7 +208,30 @@ struct RouteConfig {
         }
 
         // path
-        item.path = matched.captures[2].to!string.strip;
+        string path = matched.captures[2].to!string.strip;
+        item.path = path;
+
+        // regex path
+        auto matches = path.matchAll(regex(`\{(\w+)(<([^>]+)>)?\}`));
+        if (matches) {
+            string[int] paramKeys;
+            int paramCount = 0;
+            string pattern = path;
+            string urlTemplate = path;
+
+            foreach (m; matches) {
+                paramKeys[paramCount] = m[1];
+                string reg = m[3].length ? m[3] : "\\w+";
+                pattern = pattern.replaceFirst(m[0], "(" ~ reg ~ ")");
+                urlTemplate = urlTemplate.replaceFirst(m[0], "{" ~ m[1] ~ "}");
+                paramCount++;
+            }
+
+            item.isRegex = true;
+            item.pattern = pattern;
+            item.paramKeys = paramKeys;
+            item.urlTemplate = urlTemplate;
+        }
 
         return item;
     }
@@ -184,7 +241,7 @@ struct RouteConfig {
 /**
  * 
  */
-string makeRouteHandlerKey(ActionRouteItem route, RouteGroupInfo group = null) {
+string makeRouteHandlerKey(ActionRouteItem route, RouteGroup group = null) {
     string moduleName = route.moduleName;
     string controller = route.controller;
 

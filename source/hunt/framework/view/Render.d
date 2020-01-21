@@ -902,16 +902,14 @@ class Render : VisitorInterface
         _isExtended = true;
     }
 
-private:
-
-    void tryAccept(Node node)
+    private void tryAccept(Node node)
     {
         if (!_isExtended)
             node.accept(this);
     }
 
 
-    UniNode visitFunc(string name, UniNode args)
+    private UniNode visitFunc(string name, UniNode args)
     {
         version(HUNT_VIEW_DEBUG) logDebug("---Func :",name," args: ",args);
 
@@ -929,16 +927,14 @@ private:
             auto timestamp = args["varargs"][1].get!int;
             return UniNode(date(format, timestamp));
         }
-        // TODO: Tasks pending completion -@zhangxueping at 2020-01-02T18:26:20+08:00
-        // 
-        // else if(name == "url")
-        // {
-        //     import hunt.framework.Simplify : url;
+        else if(name == "url")
+        {
+            import hunt.framework.Simplify : url;
 
-        //     auto mca = args["varargs"][0].get!string;
-        //     auto params = args["varargs"][1].get!string;
-        //     return UniNode(url(mca, Util.parseFormData(params), _routeGroup));
-        // }
+            auto mca = args["varargs"][0].get!string;
+            auto params = args["varargs"][1].get!string;
+            return UniNode(url(mca, Util.parseFormData(params), _routeGroup));
+        }
         return _context.getFunc(name)(args);
     }
 
@@ -969,7 +965,7 @@ private:
     }
 
 
-    UniNode visitMacro(string name, UniNode args, Nullable!Macro caller = Nullable!Macro.init)
+    private UniNode visitMacro(string name, UniNode args, Nullable!Macro caller = Nullable!Macro.init)
     {
         UniNode result;
 
@@ -1020,8 +1016,7 @@ private:
         return result;
     }
 
-
-    void writeToResult(string str)
+    private void writeToResult(string str)
     {
         if (!_appliedFilters.length)
         {
@@ -1049,29 +1044,25 @@ private:
         }
     }
 
-
-private:
-
-
-    void pushNewContext()
+    private void pushNewContext()
     {
         _context = new Context(_context, UniNode.emptyObject);
     }
 
 
-    void popContext()
+    private void popContext()
     {
         _context = _context.previos;
     }
 
 
-    void push(UniNode un)
+    private void push(UniNode un)
     {
         _dataStack ~= un;
     }
 
 
-    UniNode pop()
+    private UniNode pop()
     {
         if (!_dataStack.length)
             assertTemplate(0, "Unexpected empty stack");
@@ -1082,13 +1073,13 @@ private:
     }
 
 
-    void pushFilter(string name, UniNode args)
+    private void pushFilter(string name, UniNode args)
     {
         _appliedFilters ~= AppliedFilter(name, args);
     }
 
 
-    void popFilter()
+    private void popFilter()
     {
         if (!_appliedFilters.length)
             assertTemplate(0, "Unexpected empty filter stack");
@@ -1111,10 +1102,7 @@ void registerFunction(alias func)(Render render)
 }
 
 
-private:
-
-
-bool has(FormArg[] arr, string name)
+private bool has(FormArg[] arr, string name)
 {
     foreach(a; arr)
         if (a.name == name)
