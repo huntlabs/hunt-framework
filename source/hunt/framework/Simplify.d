@@ -59,7 +59,7 @@ EntityManager defaultEntityManager()
 {
     if (_em is null)
     {
-        _em = defaultEntityManagerFactory().createEntityManager();
+        _em = defaultEntityManagerFactory().currentEntityManager();
     }
     return _em;
 }

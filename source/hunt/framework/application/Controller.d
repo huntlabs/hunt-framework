@@ -420,19 +420,13 @@ void callHandler(T, string method)(RoutingContext context)
 
 RoutingHandler getRouteHandler(string str)
 {
-    // if (!_init)
-    //     _init = true;
     return _actions.get(str, null);
 }
 
 void registerRouteHandler(string str, RoutingHandler method)
 {
-    version (HUNT_DEBUG) logDebug("add route handler: ", str);
-    // if (!_init)
-    {
-        import std.string : toLower;
-        _actions[str.toLower] = method;
-    }
+    version (HUNT_HTTP_DEBUG) logDebug("add route handler: ", str);
+    _actions[str.toLower] = method;
 }
 
 private:

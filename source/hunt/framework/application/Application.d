@@ -97,7 +97,9 @@ alias BreadcrumbsHandler = void delegate(BreadcrumbsManager manager);
  */
 final class Application : ApplicationContext {
 
-    static Application getInstance() @property {
+    alias getInstance = instance;
+
+    static Application instance() @property {
         if (_app is null)
             _app = new Application();
         return _app;

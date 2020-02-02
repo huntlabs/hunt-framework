@@ -18,3 +18,5 @@ public import hunt.framework.application.Breadcrumbs;
 public import hunt.framework.application.BreadcrumbsManager;
 public import hunt.framework.application.MiddlewareInterface;
 public import hunt.framework.Simplify;
+
+public import hunt.framework.application.ServeCommand;
