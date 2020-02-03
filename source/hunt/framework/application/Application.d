@@ -30,6 +30,7 @@ import hunt.cache;
 import hunt.console;
 import hunt.entity;
 import hunt.event;
+
 // import hunt.event.EventLoopGroup;
 import hunt.Functions;
 
@@ -47,8 +48,7 @@ import hunt.framework.application.ServeCommand;
 
 import hunt.redis;
 
-
-version(WITH_HUNT_TRACE) {
+version (WITH_HUNT_TRACE) {
     import hunt.net.util.HttpURI;
     import hunt.trace.Constrants;
     import hunt.trace.Endpoint;
@@ -60,7 +60,6 @@ version(WITH_HUNT_TRACE) {
     import std.conv;
     import std.format;
 }
-
 
 import std.array;
 import std.exception;
@@ -80,6 +79,24 @@ alias BreadcrumbsHandler = void delegate(BreadcrumbsManager manager);
  * 
  */
 final class Application {
+
+    private string _name = "HuntApp";
+    private string _description = "An application bootstrapped by Hunt Framework";
+    private string _ver = "1.0.0";
+
+    private string _configRootPath;
+    private Address _bindingAddress;
+    private HttpServer _server;
+    private ApplicationConfig _appConfig;
+    private EntityManagerFactory _entityManagerFactory;
+
+    private Cache _cache;
+    private SessionStorage _sessionStorage;
+    private WebSocketPolicy _webSocketPolicy;
+    private WebSocketHandler[string] webSocketHandlerMap;
+    private MiddlewareInterface[string][string] _groupMiddlewares;
+    private BreadcrumbsHandler _breadcrumbsHandler;
+
     private __gshared Application _app;
 
     static Application instance() {
@@ -92,7 +109,7 @@ final class Application {
         this("HuntApp", "1.0.0", "An application bootstrapped by Hunt Framework");
     }
 
-    this(string name, string ver = "1.0.0", string description="") {
+    this(string name, string ver = "1.0.0", string description = "") {
         _name = name;
         _ver = ver;
         _description = description;
@@ -110,59 +127,45 @@ final class Application {
         return this;
     }
 
-    Application onBreadcrumbsInitializing(BreadcrumbsHandler handler)
-    {
+    Application onBreadcrumbsInitializing(BreadcrumbsHandler handler) {
         _breadcrumbsHandler = handler;
-
         return this;
     }
 
-    @property HttpServer server() {
-        return _server;
-    }
+    // @property HttpServer server() {
+    //     return _server;
+    // }
 
-    private void initDatabase(ApplicationConfig.DatabaseConf config)
-    {
-        version(WITH_HUNT_ENTITY)
-        {
-            if (config.defaultOptions.url.empty)
-            {
-                logWarning("No database configured!");
-            } else {
-                import hunt.entity.EntityOption;
+    private void initDatabase(ApplicationConfig.DatabaseConf config) {
+        if (config.defaultOptions.url.empty) {
+            logWarning("No database configured!");
+        } else {
+            import hunt.entity.EntityOption;
 
-                auto option = new EntityOption;
+            auto option = new EntityOption;
 
-                // database options
-                option.database.driver = config.defaultOptions.driver;
-                option.database.host = config.defaultOptions.host;
-                option.database.username = config.defaultOptions.username;
-                option.database.password = config.defaultOptions.password;
-                option.database.port = config.defaultOptions.port;
-                option.database.database = config.defaultOptions.database;
-                option.database.charset = config.defaultOptions.charset;
-                option.database.prefix = config.defaultOptions.prefix;
+            // database options
+            option.database.driver = config.defaultOptions.driver;
+            option.database.host = config.defaultOptions.host;
+            option.database.username = config.defaultOptions.username;
+            option.database.password = config.defaultOptions.password;
+            option.database.port = config.defaultOptions.port;
+            option.database.database = config.defaultOptions.database;
+            option.database.charset = config.defaultOptions.charset;
+            option.database.prefix = config.defaultOptions.prefix;
 
-                // database pool options
-                option.pool.minIdle = config.pool.minIdle;
-                option.pool.idleTimeout = config.pool.idleTimeout;
-                option.pool.maxPoolSize = config.pool.maxPoolSize;
-                option.pool.minPoolSize = config.pool.minPoolSize;
-                option.pool.maxLifetime = config.pool.maxLifetime;
-                option.pool.connectionTimeout = config.pool.connectionTimeout;
-                option.pool.maxConnection = config.pool.maxConnection;
-                option.pool.minConnection = config.pool.minConnection;
+            // database pool options
+            option.pool.minIdle = config.pool.minIdle;
+            option.pool.idleTimeout = config.pool.idleTimeout;
+            option.pool.maxPoolSize = config.pool.maxPoolSize;
+            option.pool.minPoolSize = config.pool.minPoolSize;
+            option.pool.maxLifetime = config.pool.maxLifetime;
+            option.pool.connectionTimeout = config.pool.connectionTimeout;
+            option.pool.maxConnection = config.pool.maxConnection;
+            option.pool.minConnection = config.pool.minConnection;
 
-                infof("using database: %s", config.defaultOptions.driver);
-                _entityManagerFactory = Persistence.createEntityManagerFactory("default", option);
-            }
-        }
-        else
-        {
-            if (config.defaultOptions.enabled)
-            {
-                logWarning("Please add hunt-entity to dependency.");
-            }
+            infof("using database: %s", config.defaultOptions.driver);
+            _entityManagerFactory = Persistence.createEntityManagerFactory("default", option);
         }
     }
 
@@ -177,11 +180,8 @@ final class Application {
         _sessionStorage.expire = config.expire;
     }
 
-    version(WITH_HUNT_ENTITY)
-    {
-        EntityManagerFactory entityManagerFactory() {
-            return _entityManagerFactory;
-        }
+    EntityManagerFactory entityManagerFactory() {
+        return _entityManagerFactory;
     }
 
     SessionStorage sessionStorage() {
@@ -197,10 +197,11 @@ final class Application {
      */
     void run(string[] args) {
 
-        if(args.length > 1) {
+        if (args.length > 1) {
             ServeCommand serveCommand = new ServeCommand();
-            serveCommand.onInput( (ServeSignature signature) {
-                version(HUNT_DEBUG) tracef(signature.to!string);
+            serveCommand.onInput((ServeSignature signature) {
+                version (HUNT_DEBUG)
+                    tracef(signature.to!string);
                 ConfigManager manager = configManager();
                 manager.configPath = signature.configPath;
                 manager.configFile = signature.configFile;
@@ -228,20 +229,20 @@ final class Application {
 
         // setting redis
         auto redisSettings = config.redis;
-        if(redisSettings.pool.enabled) {
+        if (redisSettings.pool.enabled) {
             RedisPoolConfig poolConfig = new RedisPoolConfig();
             poolConfig.host = redisSettings.host;
-            poolConfig.port = cast(int)redisSettings.port;
+            poolConfig.port = cast(int) redisSettings.port;
             poolConfig.password = redisSettings.password;
-            poolConfig.database = cast(int)redisSettings.database;
-            poolConfig.soTimeout = cast(int)redisSettings.pool.maxIdle;
+            poolConfig.database = cast(int) redisSettings.database;
+            poolConfig.soTimeout = cast(int) redisSettings.pool.maxIdle;
 
             hunt.redis.RedisPool.defalutPoolConfig = poolConfig;
         }
 
         //setRedis(config.redis);
         //setMemcache(config.memcache);
-        version(WITH_HUNT_ENTITY) {
+        version (WITH_HUNT_ENTITY) {
             if (config.database.defaultOptions.enabled) {
                 initDatabase(config.database);
             } else {
@@ -252,8 +253,7 @@ final class Application {
         initSessionStorage(config.session);
         // _accessManager = new AccessManager(cache() , config.application.name , config.session.prefix, config.session.expire);
 
-        version(WITH_HUNT_TRACE)
-        {
+        version (WITH_HUNT_TRACE) {
             _localServiceName = config.application.name;
             isTraceEnabled = config.trace.enable;
             // _isB3HeaderRequired = config.trace.b3Required;
@@ -267,7 +267,7 @@ final class Application {
 
     private void initilizeBreadcrumbs() {
         BreadcrumbsManager breadcrumbs = breadcrumbsManager();
-        if(_breadcrumbsHandler !is null) {
+        if (_breadcrumbsHandler !is null) {
             _breadcrumbsHandler(breadcrumbs);
         }
 
@@ -292,7 +292,7 @@ final class Application {
         // }
 
         initilizeBreadcrumbs();
-
+        // dfmt off
         string cliText = `
 
  ___  ___     ___  ___     ________      _________   
@@ -305,6 +305,7 @@ final class Application {
 
 `;
         writeln(cliText);
+        // dfmt on
 
         if (_server.getHttpOptions().isSecureConnectionEnabled())
             writeln("Try to browse https://", _bindingAddress.toString());
@@ -320,7 +321,6 @@ final class Application {
     void stop() {
         _server.stop();
     }
-
 
     // Application registerWebSocket(string uri, WebSocketHandler webSocketHandler) {
     //     webSocketHandlerMap[uri] = webSocketHandler;
@@ -338,29 +338,26 @@ final class Application {
     //     return webSocketBuilder;
     // }
 
-    Application addGroupMiddleware(MiddlewareInterface mw , string group = "default")
-    {
+    Application addGroupMiddleware(MiddlewareInterface mw, string group = "default") {
         _groupMiddlewares[group][mw.name()] = mw;
         return this;
     }
 
-    MiddlewareInterface[string] getGroupMiddlewares(string group)
-    {
-        if(group in _groupMiddlewares)
+    MiddlewareInterface[string] getGroupMiddlewares(string group) {
+        if (group in _groupMiddlewares)
             return _groupMiddlewares[group];
         else
-         return null;
+            return null;
     }
 
-
     string createUrl(string mca, string[string] params = null, string group = null) {
-        
+
         if (group.empty)
             group = DEFAULT_ROUTE_GROUP;
 
         // find Route
         RouteGroup routeGroup = RouteConfig.getRouteGroupe(group);
-        if (routeGroup is null) 
+        if (routeGroup is null)
             return null;
 
         RouteItem route = RouteConfig.getRoute(group, mca);
@@ -397,8 +394,9 @@ final class Application {
         if (routeGroup.type == RouteGroup.HOST) {
             url = (_appConfig.https.enabled ? "https://" : "http://") ~ groupValue ~ url;
         } else {
-            url = (!groupValue.empty ? (_appConfig.application.baseUrl ~ groupValue) 
-                    : strip(_appConfig.application.baseUrl, "", "/")) ~ url;
+            url = (!groupValue.empty
+                    ? (_appConfig.application.baseUrl ~ groupValue) : strip(
+                        _appConfig.application.baseUrl, "", "/")) ~ url;
         }
 
         return url ~ (params.length > 0 ? ("?" ~ buildUriQueryString(params)) : "");
@@ -417,44 +415,44 @@ final class Application {
         return r;
     }
 
-// version(WITH_HUNT_TRACE) {
-//     private void initializeTracer(Request request, HttpConnection connection) {
+    // version(WITH_HUNT_TRACE) {
+    //     private void initializeTracer(Request request, HttpConnection connection) {
 
-//         if(!isTraceEnabled) return;
+    //         if(!isTraceEnabled) return;
 
-//         import std.socket;
-//         string reqPath = request.getURI().getPath();
-//         Tracer tracer;
+    //         import std.socket;
+    //         string reqPath = request.getURI().getPath();
+    //         Tracer tracer;
 
-//         string b3 = request.header("b3");
-//         if(b3.empty()) {
-//             if(_isB3HeaderRequired) return;
+    //         string b3 = request.header("b3");
+    //         if(b3.empty()) {
+    //             if(_isB3HeaderRequired) return;
 
-//             tracer = new Tracer(reqPath);
-//         } else {
-//             version(HUNT_HTTP_DEBUG) {
-//                 warningf("initializing tracer for %s, with %s", reqPath, b3);
-//             }
+    //             tracer = new Tracer(reqPath);
+    //         } else {
+    //             version(HUNT_HTTP_DEBUG) {
+    //                 warningf("initializing tracer for %s, with %s", reqPath, b3);
+    //             }
 
-//             tracer = new Tracer(reqPath, b3);
-//         }
+    //             tracer = new Tracer(reqPath, b3);
+    //         }
 
-//         Span span = tracer.root;
-//         span.initializeLocalEndpoint(_localServiceName);
+    //         Span span = tracer.root;
+    //         span.initializeLocalEndpoint(_localServiceName);
 
-//         // 
-//         Address remote = connection.getRemoteAddress;
-//         EndPoint remoteEndpoint = new EndPoint();
-//         remoteEndpoint.ipv4 = remote.toAddrString();
-//         remoteEndpoint.port = remote.toPortString().to!int;
-//         span.remoteEndpoint = remoteEndpoint;
-//         //
+    //         // 
+    //         Address remote = connection.getRemoteAddress;
+    //         EndPoint remoteEndpoint = new EndPoint();
+    //         remoteEndpoint.ipv4 = remote.toAddrString();
+    //         remoteEndpoint.port = remote.toPortString().to!int;
+    //         span.remoteEndpoint = remoteEndpoint;
+    //         //
 
-//         span.start();
-//         request.tracer = tracer;
-//     } 
-// } 
-//     private bool _isB3HeaderRequired = true;
+    //         span.start();
+    //         request.tracer = tracer;
+    //     } 
+    // } 
+    //     private bool _isB3HeaderRequired = true;
 
     // private void buildHttpServer(ApplicationConfig conf) {
     //     version(HUNT_DEBUG) logDebug("_bindingAddress:", conf.http.address, ":", conf.http.port);
@@ -468,22 +466,21 @@ final class Application {
     //             options, buildHttpHandlerAdapter(), webSocketHandler);
     // }
 
-private:
-    void buildHttpServer(ApplicationConfig conf) {
+    private void buildHttpServer(ApplicationConfig conf) {
         _bindingAddress = parseAddress(conf.http.address, conf.http.port);
 
         // Worker pool
-        int minThreadCount = totalCPUs/4 + 1;
-        if(conf.http.workerThreads == 0)
+        int minThreadCount = totalCPUs / 4 + 1;
+        if (conf.http.workerThreads == 0)
             conf.http.workerThreads = minThreadCount;
-            
-        if(conf.http.workerThreads < minThreadCount) {
+
+        if (conf.http.workerThreads < minThreadCount) {
             warningf("It's better to set the number of worker threads >= %d. The current is: %d",
-                minThreadCount, conf.http.workerThreads);
+                    minThreadCount, conf.http.workerThreads);
             // conf.http.workerThreads = minThreadCount;
         }
-        
-        if(conf.http.workerThreads <= 1) {
+
+        if (conf.http.workerThreads <= 1) {
             conf.http.workerThreads = 2;
         }
 
@@ -505,17 +502,17 @@ private:
             RouteConfig.allRouteGroups ~= group;
 
             RouteGroupType groupType = RouteGroupType.Host;
-            if(group.type == "path") {
+            if (group.type == "path") {
                 groupType = RouteGroupType.Path;
             }
 
-            foreach(RouteItem item; routes) {
+            foreach (RouteItem item; routes) {
                 addRoute(hsb, item, group);
             }
 
             // if(!isRootStaticPathAdded) {
-                // default static files
-                hsb.resource("/", DEFAULT_STATIC_FILES_LACATION, false, group.value, groupType); 
+            // default static files
+            hsb.resource("/", DEFAULT_STATIC_FILES_LACATION, false, group.value, groupType);
             // }
         });
 
@@ -533,49 +530,52 @@ private:
 
             RouteConfig.allRouteGroups ~= defaultGroup;
 
-            foreach(RouteItem item; routes) {                
+            foreach (RouteItem item; routes) {
                 addRoute(hsb, item, null);
             }
         }
-        
+
         // default static files
-        hsb.resource("/", DEFAULT_STATIC_FILES_LACATION, false); 
+        hsb.resource("/", DEFAULT_STATIC_FILES_LACATION, false);
         _server = hsb.build();
     }
 
-    void addRoute(HttpServer.Builder hsb, RouteItem item, RouteGroup group) {
-        ResourceRouteItem resourceItem = cast(ResourceRouteItem)item;
+    private void addRoute(HttpServer.Builder hsb, RouteItem item, RouteGroup group) {
+        ResourceRouteItem resourceItem = cast(ResourceRouteItem) item;
 
         // add route for static files 
-        if(resourceItem !is null) {
+        if (resourceItem !is null) {
             // if(resourceItem.path == "/") isRootStaticPathAdded = true;
-            if(group is null) {
-                hsb.resource(resourceItem.path, resourceItem.resourcePath, 
-                    resourceItem.canListing);
-            } else if(group.type == RouteGroup.HOST) {
-                hsb.resource(resourceItem.path, resourceItem.resourcePath, 
-                    resourceItem.canListing, group.value, RouteGroupType.Host);
-            } else if(group.type == RouteGroup.PATH) {
-                hsb.resource(resourceItem.path, resourceItem.resourcePath, 
-                    resourceItem.canListing, group.value, RouteGroupType.Path);
+            if (group is null) {
+                hsb.resource(resourceItem.path, resourceItem.resourcePath,
+                        resourceItem.canListing);
+            } else if (group.type == RouteGroup.HOST) {
+                hsb.resource(resourceItem.path, resourceItem.resourcePath,
+                        resourceItem.canListing, group.value, RouteGroupType.Host);
+            } else if (group.type == RouteGroup.PATH) {
+                hsb.resource(resourceItem.path, resourceItem.resourcePath,
+                        resourceItem.canListing, group.value, RouteGroupType.Path);
             } else {
                 errorf("Unknown route group type: %s", group.type);
             }
         } else { // add route for controller action
-            string handlerKey = makeRouteHandlerKey(cast(ActionRouteItem)item, group);
+            string handlerKey = makeRouteHandlerKey(cast(ActionRouteItem) item, group);
             RoutingHandler handler = getRouteHandler(handlerKey);
             // warning(item.toString());
-            if(handler is null) {
+            if (handler is null) {
                 warningf("No handler found for group route {%s}", item.toString());
             } else {
-                version(HUNT_DEBUG) tracef("handler found for group route {%s}", item.toString());
-                if(group is null) {
+                version (HUNT_DEBUG)
+                    tracef("handler found for group route {%s}", item.toString());
+                if (group is null) {
                     infof("adding %s", item.path);
                     hsb.addRoute([item.path], item.methods, handler);
-                } else if(group.type == RouteGroup.HOST) {
-                    hsb.addRoute([item.path], item.methods, handler, group.value, RouteGroupType.Host);
-                } else if(group.type == RouteGroup.PATH) {
-                    hsb.addRoute([item.path], item.methods, handler, group.value, RouteGroupType.Path);
+                } else if (group.type == RouteGroup.HOST) {
+                    hsb.addRoute([item.path], item.methods, handler,
+                            group.value, RouteGroupType.Host);
+                } else if (group.type == RouteGroup.PATH) {
+                    hsb.addRoute([item.path], item.methods, handler,
+                            group.value, RouteGroupType.Path);
                 } else {
                     errorf("Unknown route group type: %s", group.type);
                 }
@@ -583,12 +583,13 @@ private:
         }
     }
 
-    void loadGroupRoutes(const ref ApplicationConfig conf, RouteGroupHandler handler) {
-        if (conf.route.groups.empty) 
+    private void loadGroupRoutes(const ref ApplicationConfig conf, RouteGroupHandler handler) {
+        if (conf.route.groups.empty)
             return;
-        
+
         assert(handler !is null);
-        version(HUNT_DEBUG) info(conf.route.groups);
+        version (HUNT_DEBUG)
+            info(conf.route.groups);
 
         string[] groupConfig;
         foreach (v; split(conf.route.groups, ',')) {
@@ -609,20 +610,22 @@ private:
                 groupInfo.type = strip(groupConfig[1]);
                 groupInfo.value = strip(value);
 
-                version(HUNT_FM_DEBUG) infof("route group: %s", groupInfo);
-                
+                version (HUNT_FM_DEBUG)
+                    infof("route group: %s", groupInfo);
+
                 string routeConfigFile = groupInfo.name ~ ROUTE_CONFIG_EXT;
                 routeConfigFile = buildPath(_configRootPath, routeConfigFile);
-                
+
                 if (!exists(routeConfigFile)) {
                     warningf("Config file does not exist: %s", routeConfigFile);
                 } else {
                     RouteItem[] routes = RouteConfig.load(routeConfigFile);
 
-                    if(routes.length > 0) {
+                    if (routes.length > 0) {
                         handler(groupInfo, routes);
                     } else {
-                        version(HUNT_DEBUG) warningf("No routes defined for group %s", groupInfo.name);
+                        version (HUNT_DEBUG)
+                            warningf("No routes defined for group %s", groupInfo.name);
                     }
                 }
             }
@@ -630,8 +633,8 @@ private:
 
     }
 
-    void setLogConfig(ref ApplicationConfig.LoggingConfig conf) {
-        version(HUNT_DEBUG) {
+    private void setLogConfig(ref ApplicationConfig.LoggingConfig conf) {
+        version (HUNT_DEBUG) {
             hunt.logging.LogLevel level = hunt.logging.LogLevel.Trace;
             switch (toLower(conf.level)) {
             case "critical":
@@ -677,8 +680,8 @@ private:
             }
         }
 
-        version(HUNT_DEBUG) {}
-        else {
+        version (HUNT_DEBUG) {
+        } else {
             LogConf logconf;
             logconf.level = level;
             logconf.disableConsole = conf.disableConsole;
@@ -695,8 +698,8 @@ private:
     }
 
     private void setDefaultLogging() {
-        version(HUNT_DEBUG) {} 
-        else {
+        version (HUNT_DEBUG) {
+        } else {
             LogConf logconf;
             logconf.level = hunt.logging.LogLevel.LOG_Off;
             logconf.disableConsole = true;
@@ -704,25 +707,6 @@ private:
         }
     }
 
-private:
-
-    string _name = "HuntApp";
-    string _description = "An application bootstrapped by Hunt Framework";
-    string _ver = "1.0.0";
-
-    string _configRootPath;
-    Address _bindingAddress;
-    HttpServer _server;
-    ApplicationConfig _appConfig;
-    EntityManagerFactory _entityManagerFactory;
-
-    Cache _cache;
-    SessionStorage _sessionStorage;
-    WebSocketPolicy _webSocketPolicy;
-    WebSocketHandler[string] webSocketHandlerMap;
-    // Array!WebSocketBuilder webSocketBuilders; 
-    MiddlewareInterface[string][string]  _groupMiddlewares;
-    BreadcrumbsHandler _breadcrumbsHandler;
 }
 
 /**
@@ -731,5 +715,3 @@ private:
 Application app() {
     return Application.instance();
 }
-
-
