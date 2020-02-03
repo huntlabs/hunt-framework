@@ -26,12 +26,9 @@ import hunt.logging;
 import hunt.redis.RedisPoolConfig;
 import hunt.util.Configuration;
 
-
 @Configuration("hunt")
-final class ApplicationConfig
-{
-    struct ApplicationConf
-    {
+final class ApplicationConfig {
+    struct ApplicationConf {
         string name = "Hunt Application";
         string baseUrl = "http://localhost:8080";
         string defaultCookieDomain = "localhost";
@@ -42,8 +39,7 @@ final class ApplicationConfig
         int staticFileCacheMinutes = 30;
     }
 
-    struct CookieConf
-    {
+    struct CookieConf {
         string domain = "";
         string path = "/";
         int expires = 3600;
@@ -51,18 +47,16 @@ final class ApplicationConfig
         bool httpOnly = true;
     }
 
-    struct SessionConf
-    {
+    struct SessionConf {
         string storage = "memory";
         string prefix = "huntsession_";
         string args = "/tmp";
         uint expire = 3600; // in seconds
     }
 
-    struct HttpConf
-    {
+    struct HttpConf {
         string address = "0.0.0.0";
-        string path = DEFAULT_STATIC_FILES_PATH;
+        string path = DEFAULT_STATIC_FILES_LACATION;
         ushort port = 8080;
         uint workerThreads = 4;
         uint ioThreads = 2;
@@ -76,8 +70,7 @@ final class ApplicationConfig
         // DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type
     }
 
-    struct HttpsConf
-    {
+    struct HttpsConf {
         bool enabled = false;
         string protocol;
         string keyStore;
@@ -85,13 +78,11 @@ final class ApplicationConfig
         string keyStorePassword;
     }
 
-    struct RouteConf
-    {
+    struct RouteConf {
         string groups;
     }
 
-    struct LoggingConfig
-    {
+    struct LoggingConfig {
         string level = "all";
         string path;
         string file = "";
@@ -100,14 +91,12 @@ final class ApplicationConfig
         uint maxNum = 8;
     }
 
-    struct MemcacheConf
-    {
+    struct MemcacheConf {
         bool enabled = false;
         string servers;
     }
 
-    struct RedisConf
-    {
+    struct RedisConf {
         bool enabled = false;
         string host = "127.0.0.1";
         string password = "";
@@ -121,18 +110,16 @@ final class ApplicationConfig
     struct RedisPoolConf {
         bool enabled = false;
         uint maxWait = 5000; // millisecond
-        uint maxIdle = 50;  // millisecond
-        uint minIdle = 5;   // millisecond
+        uint maxIdle = 50; // millisecond
+        uint minIdle = 5; // millisecond
     }
 
-    struct UploadConf
-    {
+    struct UploadConf {
         string path = "/tmp";
         long maxSize = 4 * 1024 * 1024;
     }
 
-    struct MailSmtpConf
-    {
+    struct MailSmtpConf {
         string host;
         string channel;
         ushort port;
@@ -141,13 +128,11 @@ final class ApplicationConfig
         string password;
     }
 
-    struct MailConf
-    {
+    struct MailConf {
         MailSmtpConf smtp;
     }
 
-    struct DbPoolConf
-    {
+    struct DbPoolConf {
         string name = "";
         int minIdle = 5;
         int idleTimeout = 30000;
@@ -159,10 +144,8 @@ final class ApplicationConfig
         int minConnection = 5;
     }
 
-    struct DBConfig
-    {
-        string url()
-        {
+    struct DBConfig {
+        string url() {
             string s = format("%s://%s:%s@%s:%d/%s?prefix=%s&charset=%s",
                     driver, username, password, host, port, database, prefix, charset);
             return s;
@@ -179,56 +162,48 @@ final class ApplicationConfig
         bool enabled = false;
     }
 
-    struct DatabaseConf
-    {
+    struct DatabaseConf {
         @Value("default")
         DBConfig defaultOptions;
 
         DbPoolConf pool;
     }
 
-    struct DateConf
-    {
+    struct DateConf {
         string format;
         string timeZone;
     }
 
-    struct CornConf
-    {
+    struct CornConf {
         string noon;
     }
 
-    struct ServiceConf
-    {
+    struct ServiceConf {
         string address = "127.0.0.1";
         ushort port = 8080;
         int workerThreads = 1;
         string password;
     }
 
-    struct RpcConf
-    {
+    struct RpcConf {
         bool enabled = true;
         ServiceConf service;
     }
 
-    struct View
-    {
+    struct View {
         string path = "./resources/views/";
         string ext = ".html";
         uint arrayDepth = 3;
     }
 
-    struct TraceConf
-    {
+    struct TraceConf {
         bool enable = false;
         bool b3Required = true;
         TraceService service;
         string zipkin = "http://127.0.0.1:9411/api/v2/spans";
     }
 
-    struct TraceService
-    {
+    struct TraceService {
         string host;
         ushort port;
     }
@@ -252,25 +227,21 @@ final class ApplicationConfig
     View view;
     TraceConf trace;
 
-    MultipartOptions multipartConfig()
-    {
-        if(_multipartConfig is null)
-        {
+    MultipartOptions multipartConfig() {
+        if (_multipartConfig is null) {
             string path = buildPath(DEFAULT_TEMP_PATH, upload.path);
-            if(!path.exists())
-            {
+            if (!path.exists()) {
                 // for Exception now?
                 path.mkdirRecurse();
             }
-            _multipartConfig = new MultipartOptions(path, upload.maxSize, upload.maxSize, 50); 
+            _multipartConfig = new MultipartOptions(path, upload.maxSize, upload.maxSize, 50);
         }
         return _multipartConfig;
     }
 
     private MultipartOptions _multipartConfig;
 
-    this()
-    {
+    this() {
         http.workerThreads = totalCPUs * 4;
         upload.path = DEFAULT_TEMP_PATH;
         view.path = DEFAULT_TEMPLATE_PATH;
@@ -286,44 +257,39 @@ import std.exception : basicExceptionCtors;
 
 /**
 */
-class ConfigNotFoundException : Exception
-{
+class ConfigNotFoundException : Exception {
     mixin basicExceptionCtors;
 }
 
 /** 
  * 
  */
-class ConfigManager
-{
-    ApplicationConfig config(string section="", string fileName = "application.conf")
-    {
+class ConfigManager {
+    ApplicationConfig config() {
         if (!_appConfig) {
-                
-            if(fileName == "application.conf") {
+
+            if (_fileName == DEFAULT_CONFIG_FILE) {
                 string huntEnv = environment.get("HUNT_ENV", "");
-                version(HUNT_DEBUG) tracef("huntEnv=%s", huntEnv);
-                if(!huntEnv.empty) {
-                    fileName = "application." ~ huntEnv ~ ".conf";
+                // version(HUNT_DEBUG) tracef("huntEnv=%s", huntEnv);
+                if (!huntEnv.empty) {
+                    _fileName = "application." ~ huntEnv ~ ".conf";
                 }
             }
-            
-            if(fileName.empty)
-                fileName = "application.conf";
 
-            setAppSection(section, fileName);
+            if (_fileName.empty)
+                _fileName = DEFAULT_CONFIG_FILE;
+
+            load();
         }
 
         return _appConfig;
     }
 
-    @property string path()
-    {
+    string configPath() {
         return this._path;
     }
 
-    void setConfigPath(string path)
-    {
+    void configPath(string path) {
         if (path.empty)
             return;
 
@@ -333,84 +299,86 @@ class ConfigManager
             this._path = path ~ "/";
     }
 
-    void setAppSection(string sec, string fileName = "application.conf")
-    {
-        string fullName = buildPath(path, fileName);
-        if (exists(fullName))
-        {
+    void configFile(string name) {
+        _fileName = name;
+    }
+
+    string configFile() {
+        return _fileName;
+    }
+
+    void configSection(string name) {
+        _section = name;
+    }
+
+    string configSection() {
+        return _section;
+    }
+
+    void httpBind(string host, ushort port) {
+        _appConfig.http.address = host;
+        _appConfig.http.port = port;
+    }
+
+    ConfigManager load() {
+        string fullName = buildPath(APP_PATH, _path, _fileName);
+        if (exists(fullName)) {
             infof("using the config file: %s", fullName);
-            _defaultBuilder = new ConfigBuilder(fullName, sec);
+            _defaultBuilder = new ConfigBuilder(fullName, _section);
             _appConfig = _defaultBuilder.build!(ApplicationConfig, "hunt")();
             addConfig("hunt", _defaultBuilder);
-        }
-        else
-        {
-            warningf("Configure file does not exist: %s", fullName);
+        } else {
+            warningf("The configure file does not exist: %s", fullName);
             _defaultBuilder = new ConfigBuilder();
-            info("Using default settings.");
             _appConfig = new ApplicationConfig();
         }
 
+        return this;
     }
 
     ConfigBuilder defaultBuilder() {
         return _defaultBuilder;
     }
-    private ConfigBuilder _defaultBuilder;
 
-    ConfigBuilder config(string key)
-    {
+    ConfigBuilder config(string key) {
         import std.format;
 
         ConfigBuilder v = null;
-        synchronized (_mutex.reader)
-        {
-            v = _conf.get(key, null);
-        }
+        v = _conf.get(key, null);
 
         enforce!ConfigNotFoundException(v, format(" %s is not created! ", key));
 
         return v;
     }
 
-    void addConfig(string key, ConfigBuilder conf)
-    {
-        _mutex.writer.lock();
-        scope (exit)
-            _mutex.writer.unlock();
+    void addConfig(string key, ConfigBuilder conf) {
         _conf[key] = conf;
     }
 
-    auto opDispatch(string s)()
-    {
+    auto opDispatch(string s)() {
         return config(s);
     }
 
 private:
-    this()
-    {
-        _mutex = new ReadWriteMutex();
+    this() {
         _path = DEFAULT_CONFIG_PATH;
+        _fileName = DEFAULT_CONFIG_FILE;
     }
 
-    ~this()
-    {
-        _mutex.destroy;
-    }
-
+    ConfigBuilder _defaultBuilder;
     ApplicationConfig _appConfig;
     ConfigBuilder[string] _conf;
-    string _path;
-    ReadWriteMutex _mutex;
+
+    string _path = DEFAULT_CONFIG_LACATION;
+    string _fileName = DEFAULT_CONFIG_FILE;
+    string _section = "";
 }
 
-ConfigManager configManager()
-{
+ConfigManager configManager() {
     return _manger;
 }
 
-shared static this()
-{
+shared static this() {
     _manger = new ConfigManager();
 }
 

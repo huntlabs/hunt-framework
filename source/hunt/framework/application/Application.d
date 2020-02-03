@@ -18,14 +18,6 @@ import hunt.io.Common;
 import hunt.logging;
 import hunt.net.NetUtil;
 
-
-// import hunt.http.codec.http.model;
-// import hunt.http.codec.http.stream;
-// import hunt.http.codec.websocket.frame.Frame;
-// import hunt.http.codec.websocket.stream.AbstractWebSocketBuilder;
-// import hunt.http.codec.websocket.stream.WebSocketConnection;
-// import hunt.http.codec.websocket.stream.WebSocketPolicy;
-
 import hunt.http.routing.RoutingContext;
 import hunt.http.routing.RouterManager;
 import hunt.http.server.HttpServer;
@@ -34,30 +26,26 @@ import hunt.http.server.WebSocketHandler;
 import hunt.http.WebSocketPolicy;
 import hunt.http.WebSocketCommon;
 
-import hunt.redis;
+import hunt.cache;
+import hunt.console;
+import hunt.entity;
+import hunt.event;
+// import hunt.event.EventLoopGroup;
+import hunt.Functions;
 
-import hunt.framework.application.ApplicationContext;
+import hunt.framework.Init;
+import hunt.framework.trace.Tracer;
+import hunt.framework.http;
+import hunt.framework.i18n;
 import hunt.framework.application.Controller;
 import hunt.framework.application.RouteConfig;
-import hunt.framework.Init;
-// import hunt.framework.security.acl.Manager;
-// import hunt.framework.websocket.WebSocketMessageBroker;
-import hunt.framework.trace.Tracer;
-
-public import hunt.framework.http;
-public import hunt.framework.i18n;
-public import hunt.framework.application.ApplicationConfig;
-public import hunt.framework.application.MiddlewareInterface;
-
+import hunt.framework.application.ApplicationConfig;
+import hunt.framework.application.MiddlewareInterface;
 import hunt.framework.application.BreadcrumbsManager;
 import hunt.framework.application.Breadcrumbs;
+import hunt.framework.application.ServeCommand;
 
-public import hunt.cache;
-
-version(WITH_HUNT_ENTITY)
-{
-    public import hunt.entity;
-}
+import hunt.redis;
 
 
 version(WITH_HUNT_TRACE) {
@@ -73,10 +61,6 @@ version(WITH_HUNT_TRACE) {
     import std.format;
 }
 
-public import hunt.event;
-public import hunt.event.EventLoopGroup;
-
-import hunt.Functions;
 
 import std.array;
 import std.exception;
@@ -95,18 +79,25 @@ alias BreadcrumbsHandler = void delegate(BreadcrumbsManager manager);
 /**
  * 
  */
-final class Application : ApplicationContext {
+final class Application {
+    private __gshared Application _app;
 
-    alias getInstance = instance;
-
-    static Application instance() @property {
+    static Application instance() {
         if (_app is null)
             _app = new Application();
         return _app;
     }
 
-    Address binded() {
-        return addr;
+    this() {
+        this("HuntApp", "1.0.0", "An application bootstrapped by Hunt Framework");
+    }
+
+    this(string name, string ver = "1.0.0", string description="") {
+        _name = name;
+        _ver = ver;
+        _description = description;
+
+        setDefaultLogging();
     }
 
     // enable i18n
@@ -126,25 +117,8 @@ final class Application : ApplicationContext {
         return this;
     }
 
-    // version (NO_TASKPOOL) {
-    // }
-    // else {
-    //     @property TaskPool taskPool() {
-    //         return _tpool;
-    //     }
-    // }
-
-    /// get the router.
-    // @property Router router() {
-    //     return this._dispatcher.router();
-    // }
-
     @property HttpServer server() {
         return _server;
-    }
-
-    @property EventLoopGroup loopGroup() {
-        return NetUtil.defaultEventLoopGroup();
     }
 
     private void initDatabase(ApplicationConfig.DatabaseConf config)
@@ -218,18 +192,35 @@ final class Application : ApplicationContext {
         return _cache;
     }
 
-    // AccessManager accessManager() @property {
-    //     return _accessManager;
-    // }
-
     /**
       Start the HttpServer , and block current thread.
      */
-    void run() {
-        start();
+    void run(string[] args) {
+
+        if(args.length > 1) {
+            ServeCommand serveCommand = new ServeCommand();
+            serveCommand.onInput( (ServeSignature signature) {
+                version(HUNT_DEBUG) tracef(signature.to!string);
+                ConfigManager manager = configManager();
+                manager.configPath = signature.configPath;
+                manager.configFile = signature.configFile;
+                manager.load();
+                manager.httpBind(signature.host, signature.port);
+
+                doRun();
+            });
+
+            Console console = new Console(_description, _ver);
+            console.setAutoExit(false);
+            console.add(serveCommand);
+            console.run(args);
+
+        } else {
+            doRun();
+        }
     }
 
-    void setConfig(ApplicationConfig config) {
+    private void setConfig(ApplicationConfig config) {
         _appConfig = config;
         setLogConfig(config.logging);
         enableLocale();
@@ -282,7 +273,14 @@ final class Application : ApplicationContext {
 
     }
 
-    void start() {
+    private void doRun() {
+
+        _configRootPath = configManager().configPath();
+
+        warning(_configRootPath);
+
+        setConfig(configManager().config());
+
         // foreach(WebSocketBuilder b; webSocketBuilders) {
         //     b.listenWebSocket();
         // }
@@ -300,7 +298,7 @@ final class Application : ApplicationContext {
  ___  ___     ___  ___     ________      _________   
 |\  \|\  \   |\  \|\  \   |\   ___  \   |\___   ___\     Hunt Framework ` ~ HUNT_VERSION ~ `
 \ \  \\\  \  \ \  \\\  \  \ \  \\ \  \  \|___ \  \_|     
- \ \   __  \  \ \  \\\  \  \ \  \\ \  \      \ \  \      Listening: ` ~ addr.toString() ~ `
+ \ \   __  \  \ \  \\\  \  \ \  \\ \  \      \ \  \      Listening: ` ~ _bindingAddress.toString() ~ `
   \ \  \ \  \  \ \  \\\  \  \ \  \\ \  \      \ \  \     TLS: ` ~ (_server.getHttpOptions().isSecureConnectionEnabled() ? "Enabled" : "Disabled") ~ `
    \ \__\ \__\  \ \_______\  \ \__\\ \__\      \ \__\    
     \|__|\|__|   \|_______|   \|__| \|__|       \|__|    https://www.huntframework.com
@@ -309,9 +307,9 @@ final class Application : ApplicationContext {
         writeln(cliText);
 
         if (_server.getHttpOptions().isSecureConnectionEnabled())
-            writeln("Try to browse https://", addr.toString());
+            writeln("Try to browse https://", _bindingAddress.toString());
         else
-            writeln("Try to browse http://", addr.toString());
+            writeln("Try to browse http://", _bindingAddress.toString());
 
         _server.start();
     }
@@ -459,7 +457,7 @@ final class Application : ApplicationContext {
 //     private bool _isB3HeaderRequired = true;
 
     // private void buildHttpServer(ApplicationConfig conf) {
-    //     version(HUNT_DEBUG) logDebug("addr:", conf.http.address, ":", conf.http.port);
+    //     version(HUNT_DEBUG) logDebug("_bindingAddress:", conf.http.address, ":", conf.http.port);
 
     //     SimpleWebSocketHandler webSocketHandler = new SimpleWebSocketHandler();
     //     webSocketHandler.setWebSocketPolicy(_webSocketPolicy);
@@ -472,7 +470,7 @@ final class Application : ApplicationContext {
 
 private:
     void buildHttpServer(ApplicationConfig conf) {
-        addr = parseAddress(conf.http.address, conf.http.port);
+        _bindingAddress = parseAddress(conf.http.address, conf.http.port);
 
         // Worker pool
         int minThreadCount = totalCPUs/4 + 1;
@@ -517,7 +515,7 @@ private:
 
             // if(!isRootStaticPathAdded) {
                 // default static files
-                hsb.resource("/", DEFAULT_STATIC_FILES_PATH, false, group.value, groupType); 
+                hsb.resource("/", DEFAULT_STATIC_FILES_LACATION, false, group.value, groupType); 
             // }
         });
 
@@ -541,7 +539,7 @@ private:
         }
         
         // default static files
-        hsb.resource("/", DEFAULT_STATIC_FILES_PATH, false); 
+        hsb.resource("/", DEFAULT_STATIC_FILES_LACATION, false); 
         _server = hsb.build();
     }
 
@@ -696,147 +694,30 @@ private:
 
     }
 
-    // /**
-    // Raw WebSocket Request Handler
-    // */
-    // class WebSocketBuilder : AbstractWebSocketBuilder {
-    //     protected string path;
-    //     protected Action1!(WebSocketConnection) _connectHandler;
-
-    //     this(string path) {
-    //         this.path = path;
-    //     }
-
-    //     WebSocketBuilder onConnect(Action1!(WebSocketConnection) handler) {
-    //         this._connectHandler = handler;
-    //         return this;
-    //     }
-
-    //     override WebSocketBuilder onText(Action2!(string, WebSocketConnection) handler) {
-    //         super.onText(handler);
-    //         return this;
-    //     }
-
-    //     override WebSocketBuilder onData(Action2!(ByteBuffer, WebSocketConnection) handler) {
-    //         super.onData(handler);
-    //         return this;
-    //     }
-
-    //     override WebSocketBuilder onError(Action2!(Throwable, WebSocketConnection) handler) {
-    //         super.onError(handler);
-    //         return this;
-    //     }
-
-    //     alias onError = AbstractWebSocketBuilder.onError;
-
-    //     void start() {
-    //         this.outer.start();
-    //     }
-
-    //     private void listenWebSocket() {
-    //         this.outer.registerWebSocket(path, new class WebSocketHandler {
-
-    //             override void onConnect(WebSocketConnection webSocketConnection) {
-    //                 if(_connectHandler !is null) 
-    //                     _connectHandler(webSocketConnection);
-    //             }
-
-    //             override void onFrame(Frame frame, WebSocketConnection connection) {
-    //                 this.outer.onFrame(frame, connection);
-    //             }
-
-    //             override void onError(Exception t, WebSocketConnection connection) {
-    //                 this.outer.onError(t, connection);
-    //             }
-    //         });
-
-    //         // router().addRoute("*", path, handler( (ctx) { })); 
-    //     }
-    // }
-
-    // /**
-    // Raw WebSocket protocol Handler
-    // */
-    // class SimpleWebSocketHandler : WebSocketHandler {
-    //     override bool acceptUpgrade(HttpRequest request, HttpResponse response, 
-    //         HttpOutputStream output, HttpConnection connection) {
-    //         version(HUNT_DEBUG) {
-    //             logInfof("The connection %s will upgrade to WebSocket connection",
-    //                     connection.getId());
-    //         }
-    //         string path = request.getURI().getPath();
-    //         WebSocketHandler handler = webSocketHandlerMap.get(path, null);
-    //         if (handler is null) {
-    //             response.setStatus(HttpStatus.BAD_REQUEST_400);
-    //             try {
-    //                 output.write(cast(byte[])("The " ~ path 
-    //                     ~ " can not upgrade to WebSocket"));
-    //             }catch (IOException e) {
-    //                 logErrorf("Write http message exception", e);
-    //             }
-    //             return false;
-    //         }
-    //         else {
-    //             return handler.acceptUpgrade(request, response, output, connection);
-    //         }
-    //     }
-
-    //     override void onConnect(WebSocketConnection connection) {
-    //         string path = connection.getUpgradeRequest().getURI().getPath();
-    //         WebSocketHandler handler = webSocketHandlerMap.get(path, null);
-    //         if (handler !is null) {
-    //             try {
-    //                 handler.onConnect(connection);
-    //             } catch (Exception e) {
-    //                 logErrorf("WebSocket connection failed: ", e.msg);
-    //             }
-    //         }
-    //     }
-
-    //     override void onFrame(Frame frame, WebSocketConnection connection) {
-    //         string path = connection.getUpgradeRequest().getURI().getPath();
-    //         WebSocketHandler handler = webSocketHandlerMap.get(path, null);
-    //         if (handler !is null) {
-    //             try {
-    //                 handler.onFrame(frame, connection);
-    //             } catch (Exception e) {
-    //                 logErrorf("WebSocket frame handling failed: ", e.msg);
-    //             }
-    //         }
-    //     }
-
-    //     override void onError(Exception t, WebSocketConnection connection) {
-    //         string path = connection.getUpgradeRequest().getURI().getPath();
-    //         WebSocketHandler handler = webSocketHandlerMap.get(path, null);
-    //         if (handler !is null)
-    //             handler.onError(t, connection);
-    //     }
-    // }
-
-    this() {
-        setDefaultLogging();
-        _configRootPath = configManager().path();
-
-        setConfig(configManager().config());
+    private void setDefaultLogging() {
+        version(HUNT_DEBUG) {} 
+        else {
+            LogConf logconf;
+            logconf.level = hunt.logging.LogLevel.LOG_Off;
+            logconf.disableConsole = true;
+            logLoadConf(logconf);
+        }
     }
-
-    __gshared Application _app;
 
 private:
 
-    Address addr;
+    string _name = "HuntApp";
+    string _description = "An application bootstrapped by Hunt Framework";
+    string _ver = "1.0.0";
+
+    string _configRootPath;
+    Address _bindingAddress;
     HttpServer _server;
     ApplicationConfig _appConfig;
-    string _configRootPath;
-
-    version(WITH_HUNT_ENTITY)
-    {
-        EntityManagerFactory _entityManagerFactory;
-    }
+    EntityManagerFactory _entityManagerFactory;
 
     Cache _cache;
     SessionStorage _sessionStorage;
-    // AccessManager _accessManager;
     WebSocketPolicy _webSocketPolicy;
     WebSocketHandler[string] webSocketHandlerMap;
     // Array!WebSocketBuilder webSocketBuilders; 
@@ -844,20 +725,11 @@ private:
     BreadcrumbsHandler _breadcrumbsHandler;
 }
 
+/**
+ * 
+ */
 Application app() {
-    return Application.getInstance();
+    return Application.instance();
 }
 
-void setDefaultLogging() {
-    version(HUNT_DEBUG) {} 
-    else {
-        LogConf logconf;
-        logconf.level = hunt.logging.LogLevel.LOG_Off;
-        logconf.disableConsole = true;
-        logLoadConf(logconf);
-    }
-}
 
-shared static this() {
-    setDefaultLogging();
-}

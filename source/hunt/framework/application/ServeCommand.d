@@ -6,6 +6,8 @@ import hunt.console;
 import hunt.logging.ConsoleLogger;
 
 import core.stdc.stdlib : exit;
+
+import std.conv;
 import std.format;
 import std.range;
 import std.string;
@@ -17,14 +19,24 @@ class ServeCommand : Command {
     enum string HostNameOption = "hostname";
     enum string PortOption = "port";
     enum string BindOption = "bind";
-    enum string ConfigOption = "config";
+    enum string ConfigPathOption = "config-path";
+    enum string ConfigFileOption = "config-file";
+    enum string EnvironmentOption = "env"; // Development, Prodction, Staging
+
+    private CommandInputHandler _inputHandler;
 
 
     this() {
         super("serve");
     }
 
+    void onInput(CommandInputHandler handler) {
+        _inputHandler = handler;
+    }
+
     override protected void configure() {
+        // https://symfony.com/doc/current/components/console/console_arguments.html
+        // https://symfony.com/doc/current/console/input.html
         setDescription("Begins serving the app over HTTP.");
 
         addOption(HostNameOption, "H", InputOption.VALUE_OPTIONAL,
@@ -39,11 +51,19 @@ class ServeCommand : Command {
             "Convenience for setting hostname and port together.",
             "0.0.0.0:8080");
 
-        addOption(ConfigOption, "c", InputOption.VALUE_OPTIONAL,
-            "Set the config file",
-            "config/application.conf");
+        addOption(ConfigPathOption, "cp", InputOption.VALUE_OPTIONAL,
+            "Set the location for config files",
+            DEFAULT_CONFIG_LACATION);
 
-        // addArgument(ConfigOption, InputArgument.OPTIONAL, 
+        addOption(ConfigFileOption, "cf", InputOption.VALUE_OPTIONAL,
+            "Set the name of the main config file",
+            DEFAULT_CONFIG_FILE);
+
+        // addOption(EnvironmentOption, "e", InputOption.VALUE_OPTIONAL,
+        //     "Set the location for config files",
+        //     DEFAULT_CONFIG_LACATION);
+
+        // addArgument(ConfigPathOption, InputArgument.OPTIONAL, 
         //     "Set the config file (Default: config/application.conf)");
 
     }
@@ -52,13 +72,14 @@ class ServeCommand : Command {
         string hostname = input.getOption(HostNameOption);
         string port = input.getOption(PortOption);
         string bind = input.getOption(BindOption);
-        string config = input.getOption(ConfigOption);
+        string configPath = input.getOption(ConfigPathOption);
+        string configFile = input.getOption(ConfigFileOption);
 
         if (!bind.empty && bind != "0.0.0.0:8080") {
             // 0.0.0.0:8080, 0.0.0.0, parse hostname and port
             string[] parts = bind.split(":");
             if(parts.length<2) {
-                output.writeln("Wrong format for the bind argument.");
+                output.writeln("Wrong format for the bind option.");
                 exit(1);
             }
 
@@ -66,8 +87,12 @@ class ServeCommand : Command {
             port = parts[1];
         }
 
-        output.writeln(format("launching server, %s:%s", hostname, port));
-        output.writeln(format("using config, %s", hostname, port));
+        if(_inputHandler !is null) {
+            ServeSignature signature = ServeSignature(hostname, port.to!ushort, 
+                configPath, configFile);
+                
+            _inputHandler(signature);
+        }
 
         return 0;
     }
@@ -80,3 +105,15 @@ class ServeCommand : Command {
         // }
     }
 }
+
+/**
+ * 
+ */
+struct ServeSignature {
+    string host = "0.0.0.0";
+    ushort port = 8080;
+    string configPath = DEFAULT_CONFIG_LACATION;
+    string configFile = DEFAULT_CONFIG_FILE;
+}
+
+alias CommandInputHandler = void delegate(ServeSignature signature);

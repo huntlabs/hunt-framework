@@ -27,18 +27,22 @@ __gshared string DEFAULT_TEMP_PATH = "tmp/";
 __gshared string DEFAULT_LOG_PATH = "logs/";
 __gshared string DEFAULT_SESSION_PATH = "session/";
 
+
+enum string DEFAULT_CONFIG_LACATION = "config/";
+enum string DEFAULT_STATIC_FILES_LACATION = "wwwroot/";
+
+enum string DEFAULT_CONFIG_FILE = "application.conf";
 enum string DEFAULT_ROUTE_CONFIG = "./routes";
 
 // default route group name
 enum string DEFAULT_ROUTE_GROUP = "default";
-
-enum string DEFAULT_STATIC_FILES_PATH = "wwwroot/";
 enum string ROUTE_CONFIG_EXT = ".routes";
+
 
 shared static this()
 {
     APP_PATH = dirName(thisExePath());
-    DEFAULT_CONFIG_PATH = buildPath(APP_PATH, DEFAULT_CONFIG_PATH);
+    DEFAULT_CONFIG_PATH = buildPath(APP_PATH, DEFAULT_CONFIG_LACATION);
     DEFAULT_RESOURCE_PATH = buildPath(APP_PATH, DEFAULT_RESOURCE_PATH);
     DEFAULT_TEMPLATE_PATH = buildPath(DEFAULT_RESOURCE_PATH, DEFAULT_TEMPLATE_PATH);
     DEFAULT_LANGUAGE_PATH = buildPath(DEFAULT_RESOURCE_PATH, DEFAULT_LANGUAGE_PATH);
