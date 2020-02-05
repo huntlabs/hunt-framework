@@ -45,6 +45,7 @@ import hunt.framework.application.MiddlewareInterface;
 import hunt.framework.application.BreadcrumbsManager;
 import hunt.framework.application.Breadcrumbs;
 import hunt.framework.application.ServeCommand;
+import hunt.framework.service;
 
 import hunt.redis;
 
@@ -60,6 +61,8 @@ version (WITH_HUNT_TRACE) {
     import std.conv;
     import std.format;
 }
+
+import poodinis;
 
 import std.array;
 import std.exception;
@@ -113,12 +116,142 @@ final class Application {
         _name = name;
         _ver = ver;
         _description = description;
+        _serviceContainer = new DependencyContainer();
 
         setDefaultLogging();
     }
 
+    shared(DependencyContainer) serviceContainer() {
+        return _serviceContainer;
+    }
+    private shared DependencyContainer _serviceContainer;
+
+    void register(T)() if(is(T : ServiceProvider)) {
+        if(_isBooted) {
+            warning("A provider can't be registered: %s after the app has been booted.", typeid(T));
+            return;
+        }
+
+        ServiceProvider provider = new T();
+        provider._container = _serviceContainer;
+        // provider.register();
+        _serviceContainer.register!(ServiceProvider, T)().existingInstance(provider);
+        // _serviceContainer.autowire(provider);
+    }
+    private bool _isBooted = false;
+
+    private void loadConfiguration() {
+        infof("Loading config...");
+
+        _configRootPath = configManager().configPath();
+        // setConfig(configManager().config());
+        ApplicationConfig config = configManager().config();
+        _serviceContainer.register!(ApplicationConfig, ApplicationConfig)().existingInstance(config);
+    }
+
+    private void showLogo() {
+        // dfmt off
+        string cliText = `
+
+ ___  ___     ___  ___     ________      _________   
+|\  \|\  \   |\  \|\  \   |\   ___  \   |\___   ___\     Hunt Framework ` ~ HUNT_VERSION ~ `
+\ \  \\\  \  \ \  \\\  \  \ \  \\ \  \  \|___ \  \_|     
+ \ \   __  \  \ \  \\\  \  \ \  \\ \  \      \ \  \      Listening: ` ~ _bindingAddress.toString() ~ `
+  \ \  \ \  \  \ \  \\\  \  \ \  \\ \  \      \ \  \     TLS: ` ~ (_server.getHttpOptions().isSecureConnectionEnabled() ? "Enabled" : "Disabled") ~ `
+   \ \__\ \__\  \ \_______\  \ \__\\ \__\      \ \__\    
+    \|__|\|__|   \|_______|   \|__| \|__|       \|__|    https://www.huntframework.com
+
+`;
+        writeln(cliText);
+        // dfmt on
+    }
+
+    private void initializeProviders() {
+        // RegisterProviders
+        ServiceProvider[] providers = _serviceContainer.resolveAll!(ServiceProvider);
+        infof("Registering service providers (%d)...", providers.length);
+
+        foreach(ServiceProvider p; providers) {
+            p.register();
+            _serviceContainer.autowire(p);
+        }
+
+        // initializeProviders
+        infof("Booting service providers (%d)...", providers.length);
+
+        foreach(ServiceProvider p; providers) {
+            p.boot();
+        }
+        _isBooted = true;
+    }
+
+    private void initializeLogger() {
+        ApplicationConfig appConfig = _serviceContainer.resolve!ApplicationConfig();
+        ApplicationConfig.LoggingConfig conf = appConfig.logging;
+        version (HUNT_DEBUG) {
+            hunt.logging.LogLevel level = hunt.logging.LogLevel.Trace;
+            switch (toLower(conf.level)) {
+            case "critical":
+            case "error":
+                level = hunt.logging.LogLevel.Error;
+                break;
+            case "fatal":
+                level = hunt.logging.LogLevel.Fatal;
+                break;
+            case "warning":
+                level = hunt.logging.LogLevel.Warning;
+                break;
+            case "info":
+                level = hunt.logging.LogLevel.Info;
+                break;
+            case "off":
+                level = hunt.logging.LogLevel.Off;
+                break;
+            default:
+                break;
+            }
+        } else {
+            hunt.logging.LogLevel level = hunt.logging.LogLevel.LOG_DEBUG;
+            switch (toLower(conf.level)) {
+            case "critical":
+            case "error":
+                level = hunt.logging.LogLevel.LOG_ERROR;
+                break;
+            case "fatal":
+                level = hunt.logging.LogLevel.LOG_FATAL;
+                break;
+            case "warning":
+                level = hunt.logging.LogLevel.LOG_WARNING;
+                break;
+            case "info":
+                level = hunt.logging.LogLevel.LOG_INFO;
+                break;
+            case "off":
+                level = hunt.logging.LogLevel.LOG_Off;
+                break;
+            default:
+                break;
+            }
+        }
+
+        version (HUNT_DEBUG) {
+        } else {
+            LogConf logconf;
+            logconf.level = level;
+            logconf.disableConsole = conf.disableConsole;
+
+            if (!conf.file.empty)
+                logconf.fileName = buildPath(conf.path, conf.file);
+
+            logconf.maxSize = conf.maxSize;
+            logconf.maxNum = conf.maxNum;
+
+            logLoadConf(logconf);
+        }        
+    }
+
     // enable i18n
-    Application enableLocale(string resPath = DEFAULT_LANGUAGE_PATH) {
+    Application initializeLocale(string resPath = DEFAULT_LANGUAGE_PATH) {
         I18n i18n = I18n.instance();
 
         i18n.defaultLocale = configManager().config().application.defaultLanguage;
@@ -208,7 +341,7 @@ final class Application {
                 manager.load();
                 manager.httpBind(signature.host, signature.port);
 
-                doRun();
+                bootstrap();
             });
 
             Console console = new Console(_description, _ver);
@@ -217,14 +350,13 @@ final class Application {
             console.run(args);
 
         } else {
-            doRun();
+            bootstrap();
         }
     }
 
-    private void setConfig(ApplicationConfig config) {
+    private void setConfig() {
+        ApplicationConfig config = _serviceContainer.resolve!ApplicationConfig();
         _appConfig = config;
-        setLogConfig(config.logging);
-        enableLocale();
         buildHttpServer(config);
 
         // setting redis
@@ -273,13 +405,32 @@ final class Application {
 
     }
 
-    private void doRun() {
+    /**
+     * https://laravel.com/docs/6.x/lifecycle
+     */
+    private void bootstrap() {
+        // LoadEnvironmentVariables
+        // LoadConfiguration
+        loadConfiguration();
+        initializeLogger();
+        initializeLocale();
 
-        _configRootPath = configManager().configPath();
+        //
+        showLogo();
 
-        warning(_configRootPath);
 
-        setConfig(configManager().config());
+        // loadConfig();
+        // loadRoutes();
+
+        // initializeCache();
+        // initializeDatabase();
+        // initializeScheduler();
+        // initializeHttpServer();
+
+        setConfig();
+
+        // 
+        initializeProviders();
 
         // foreach(WebSocketBuilder b; webSocketBuilders) {
         //     b.listenWebSocket();
@@ -292,20 +443,6 @@ final class Application {
         // }
 
         initilizeBreadcrumbs();
-        // dfmt off
-        string cliText = `
-
- ___  ___     ___  ___     ________      _________   
-|\  \|\  \   |\  \|\  \   |\   ___  \   |\___   ___\     Hunt Framework ` ~ HUNT_VERSION ~ `
-\ \  \\\  \  \ \  \\\  \  \ \  \\ \  \  \|___ \  \_|     
- \ \   __  \  \ \  \\\  \  \ \  \\ \  \      \ \  \      Listening: ` ~ _bindingAddress.toString() ~ `
-  \ \  \ \  \  \ \  \\\  \  \ \  \\ \  \      \ \  \     TLS: ` ~ (_server.getHttpOptions().isSecureConnectionEnabled() ? "Enabled" : "Disabled") ~ `
-   \ \__\ \__\  \ \_______\  \ \__\\ \__\      \ \__\    
-    \|__|\|__|   \|_______|   \|__| \|__|       \|__|    https://www.huntframework.com
-
-`;
-        writeln(cliText);
-        // dfmt on
 
         if (_server.getHttpOptions().isSecureConnectionEnabled())
             writeln("Try to browse https://", _bindingAddress.toString());
@@ -629,70 +766,6 @@ final class Application {
                     }
                 }
             }
-        }
-
-    }
-
-    private void setLogConfig(ref ApplicationConfig.LoggingConfig conf) {
-        version (HUNT_DEBUG) {
-            hunt.logging.LogLevel level = hunt.logging.LogLevel.Trace;
-            switch (toLower(conf.level)) {
-            case "critical":
-            case "error":
-                level = hunt.logging.LogLevel.Error;
-                break;
-            case "fatal":
-                level = hunt.logging.LogLevel.Fatal;
-                break;
-            case "warning":
-                level = hunt.logging.LogLevel.Warning;
-                break;
-            case "info":
-                level = hunt.logging.LogLevel.Info;
-                break;
-            case "off":
-                level = hunt.logging.LogLevel.Off;
-                break;
-            default:
-                break;
-            }
-        } else {
-            hunt.logging.LogLevel level = hunt.logging.LogLevel.LOG_DEBUG;
-            switch (toLower(conf.level)) {
-            case "critical":
-            case "error":
-                level = hunt.logging.LogLevel.LOG_ERROR;
-                break;
-            case "fatal":
-                level = hunt.logging.LogLevel.LOG_FATAL;
-                break;
-            case "warning":
-                level = hunt.logging.LogLevel.LOG_WARNING;
-                break;
-            case "info":
-                level = hunt.logging.LogLevel.LOG_INFO;
-                break;
-            case "off":
-                level = hunt.logging.LogLevel.LOG_Off;
-                break;
-            default:
-                break;
-            }
-        }
-
-        version (HUNT_DEBUG) {
-        } else {
-            LogConf logconf;
-            logconf.level = level;
-            logconf.disableConsole = conf.disableConsole;
-
-            if (!conf.file.empty)
-                logconf.fileName = buildPath(conf.path, conf.file);
-
-            logconf.maxSize = conf.maxSize;
-            logconf.maxNum = conf.maxNum;
-
-            logLoadConf(logconf);
         }
 
     }
