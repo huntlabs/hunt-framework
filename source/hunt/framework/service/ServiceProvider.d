@@ -2,11 +2,14 @@ module hunt.framework.service.ServiceProvider;
 
 import poodinis;
 
+/**
+ * https://code.tutsplus.com/tutorials/how-to-register-use-laravel-service-providers--cms-28966
+ */
 abstract class ServiceProvider {
 
-    package DependencyContainer _container;
+    package(hunt.framework) shared DependencyContainer _container;
 
-    DependencyContainer container() {
+    shared(DependencyContainer) container() {
         return _container;
     }
 

@@ -144,9 +144,9 @@ final class Application {
         infof("Loading config...");
 
         _configRootPath = configManager().configPath();
-        // setConfig(configManager().config());
-        ApplicationConfig config = configManager().config();
-        _serviceContainer.register!(ApplicationConfig, ApplicationConfig)().existingInstance(config);
+        _appConfig = configManager().config();
+        _serviceContainer.register!(ApplicationConfig)().existingInstance(_appConfig);
+        _bindingAddress = parseAddress(_appConfig.http.address, _appConfig.http.port);
     }
 
     private void showLogo() {
@@ -167,6 +167,10 @@ final class Application {
     }
 
     private void initializeProviders() {
+
+        // Register all the default providers
+        register!RedisServiceProvider();
+
         // RegisterProviders
         ServiceProvider[] providers = _serviceContainer.resolveAll!(ServiceProvider);
         infof("Registering service providers (%d)...", providers.length);
@@ -186,8 +190,8 @@ final class Application {
     }
 
     private void initializeLogger() {
-        ApplicationConfig appConfig = _serviceContainer.resolve!ApplicationConfig();
-        ApplicationConfig.LoggingConfig conf = appConfig.logging;
+        // ApplicationConfig appConfig = _serviceContainer.resolve!ApplicationConfig();
+        ApplicationConfig.LoggingConfig conf = _appConfig.logging;
         version (HUNT_DEBUG) {
             hunt.logging.LogLevel level = hunt.logging.LogLevel.Trace;
             switch (toLower(conf.level)) {
@@ -355,24 +359,10 @@ final class Application {
     }
 
     private void setConfig() {
-        ApplicationConfig config = _serviceContainer.resolve!ApplicationConfig();
-        _appConfig = config;
+        ApplicationConfig config = _appConfig; // _serviceContainer.resolve!ApplicationConfig();
+        // _appConfig = config;
         buildHttpServer(config);
 
-        // setting redis
-        auto redisSettings = config.redis;
-        if (redisSettings.pool.enabled) {
-            RedisPoolConfig poolConfig = new RedisPoolConfig();
-            poolConfig.host = redisSettings.host;
-            poolConfig.port = cast(int) redisSettings.port;
-            poolConfig.password = redisSettings.password;
-            poolConfig.database = cast(int) redisSettings.database;
-            poolConfig.soTimeout = cast(int) redisSettings.pool.maxIdle;
-
-            hunt.redis.RedisPool.defalutPoolConfig = poolConfig;
-        }
-
-        //setRedis(config.redis);
         //setMemcache(config.memcache);
         version (WITH_HUNT_ENTITY) {
             if (config.database.defaultOptions.enabled) {
@@ -410,17 +400,12 @@ final class Application {
      */
     private void bootstrap() {
         // LoadEnvironmentVariables
-        // LoadConfiguration
+        // Load configuration
         loadConfiguration();
+        
+        //
         initializeLogger();
         initializeLocale();
-
-        //
-        showLogo();
-
-
-        // loadConfig();
-        // loadRoutes();
 
         // initializeCache();
         // initializeDatabase();
@@ -428,6 +413,9 @@ final class Application {
         // initializeHttpServer();
 
         setConfig();
+
+        //
+        showLogo();
 
         // 
         initializeProviders();
@@ -604,7 +592,6 @@ final class Application {
     // }
 
     private void buildHttpServer(ApplicationConfig conf) {
-        _bindingAddress = parseAddress(conf.http.address, conf.http.port);
 
         // Worker pool
         int minThreadCount = totalCPUs / 4 + 1;
