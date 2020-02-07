@@ -140,8 +140,206 @@ final class Application {
     }
     private bool _isBooted = false;
 
+    EntityManagerFactory entityManagerFactory() {
+        return _entityManagerFactory;
+    }
+
+    SessionStorage sessionStorage() {
+        return _sessionStorage;
+    }
+
+    Cache cache() {
+        return _cache;
+    }
+
+    // @property HttpServer server() {
+    //     return _server;
+    // }
+
+    Application onBreadcrumbsInitializing(BreadcrumbsHandler handler) {
+        _breadcrumbsHandler = handler;
+        return this;
+    }
+
+    /**
+      Start the HttpServer , and block current thread.
+     */
+    void run(string[] args) {
+
+        if (args.length > 1) {
+            ServeCommand serveCommand = new ServeCommand();
+            serveCommand.onInput((ServeSignature signature) {
+                version (HUNT_DEBUG)
+                    tracef(signature.to!string);
+                ConfigManager manager = configManager();
+                manager.configPath = signature.configPath;
+                manager.configFile = signature.configFile;
+                manager.load();
+                manager.httpBind(signature.host, signature.port);
+
+                bootstrap();
+            });
+
+            Console console = new Console(_description, _ver);
+            console.setAutoExit(false);
+            console.add(serveCommand);
+            console.run(args);
+
+        } else {
+            bootstrap();
+        }
+    }
+
+    /**
+      Stop the server.
+     */
+    void stop() {
+        _server.stop();
+    }
+
+    /**
+     * https://laravel.com/docs/6.x/lifecycle
+     */
+    private void bootstrap() {
+        // LoadEnvironmentVariables
+        // Load configuration
+        loadConfiguration();
+        
+        //
+        initializeLogger();
+        initializeLocale();
+
+        initializeCache();
+        initializeDatabase();
+        initializeSessionStorage();
+        version(WITH_HUNT_TRACE) { 
+            initializeTracer();
+        }
+        initializeWorkerPool();
+        initializeHttpServer();
+
+        //
+        showLogo();
+
+        // 
+        initializeProviders();
+
+        // foreach(WebSocketBuilder b; webSocketBuilders) {
+        //     b.listenWebSocket();
+        // }
+
+        // if(_broker !is null)
+        //     _broker.listen();
+        // foreach(WebSocketMessageBroker b; messageBrokers) {
+        //     b.listen();
+        // }
+
+        initilizeBreadcrumbs();
+
+        if (_server.getHttpOptions().isSecureConnectionEnabled())
+            writeln("Try to browse https://", _bindingAddress.toString());
+        else
+            writeln("Try to browse http://", _bindingAddress.toString());
+
+        _server.start();
+    }
+
+    // Application registerWebSocket(string uri, WebSocketHandler webSocketHandler) {
+    //     webSocketHandlerMap[uri] = webSocketHandler;
+    //     return this;
+    // }
+
+    // Application webSocketPolicy(WebSocketPolicy w) {
+    //     this._webSocketPolicy = w;
+    //     return this;
+    // }
+
+    // WebSocketBuilder webSocket(string path) {
+    //     WebSocketBuilder webSocketBuilder = new WebSocketBuilder(path);
+    //     webSocketBuilders.insertBack(webSocketBuilder);
+    //     return webSocketBuilder;
+    // }
+
+    Application addGroupMiddleware(MiddlewareInterface mw, string group = "default") {
+        _groupMiddlewares[group][mw.name()] = mw;
+        return this;
+    }
+
+    MiddlewareInterface[string] getGroupMiddlewares(string group) {
+        if (group in _groupMiddlewares)
+            return _groupMiddlewares[group];
+        else
+            return null;
+    }
+
+    string createUrl(string mca, string[string] params = null, string group = null) {
+
+        if (group.empty)
+            group = DEFAULT_ROUTE_GROUP;
+
+        // find Route
+        RouteGroup routeGroup = RouteConfig.getRouteGroupe(group);
+        if (routeGroup is null)
+            return null;
+
+        RouteItem route = RouteConfig.getRoute(group, mca);
+        if (route is null) {
+            return null;
+        }
+
+        string url;
+        if (route.isRegex) {
+            if (params.length == 0) {
+                logWarningf("this route need params (%s).", mca);
+                return null;
+            }
+
+            if (!route.paramKeys.empty) {
+                url = route.urlTemplate;
+                foreach (i, key; route.paramKeys) {
+                    string value = params.get(key, null);
+
+                    if (value is null) {
+                        logWarningf("this route template need param (%s).", key);
+                        return null;
+                    }
+
+                    params.remove(key);
+                    url = url.replaceFirst("{" ~ key ~ "}", value);
+                }
+            }
+        } else {
+            url = route.pattern;
+        }
+
+        string groupValue = routeGroup.value;
+        if (routeGroup.type == RouteGroup.HOST) {
+            url = (_appConfig.https.enabled ? "https://" : "http://") ~ groupValue ~ url;
+        } else {
+            url = (!groupValue.empty
+                    ? (_appConfig.application.baseUrl ~ groupValue) : strip(
+                        _appConfig.application.baseUrl, "", "/")) ~ url;
+        }
+
+        return url ~ (params.length > 0 ? ("?" ~ buildUriQueryString(params)) : "");
+    }
+
+    static string buildUriQueryString(string[string] params) {
+        if (params.length == 0) {
+            return "";
+        }
+
+        string r;
+        foreach (k, v; params) {
+            r ~= (r ? "&" : "") ~ k ~ "=" ~ v;
+        }
+
+        return r;
+    }
+
+
     private void loadConfiguration() {
-        infof("Loading config...");
+        version(HUNT_DEBUG) infof("Loading config...");
 
         _configRootPath = configManager().configPath();
         _appConfig = configManager().config();
@@ -264,16 +462,18 @@ final class Application {
         return this;
     }
 
-    Application onBreadcrumbsInitializing(BreadcrumbsHandler handler) {
-        _breadcrumbsHandler = handler;
-        return this;
+
+    private void initializeCache() {
+        _cache = CacheFactory.create(_appConfig.cache);
     }
 
-    // @property HttpServer server() {
-    //     return _server;
-    // }
+    private void initializeDatabase() {
+        ApplicationConfig.DatabaseConf config = _appConfig.database;
+        if (!config.defaultOptions.enabled) {
+            warning("The database is disabled.");
+            return;
+        }
 
-    private void initDatabase(ApplicationConfig.DatabaseConf config) {
         if (config.defaultOptions.url.empty) {
             logWarning("No database configured!");
         } else {
@@ -306,308 +506,83 @@ final class Application {
         }
     }
 
-    private void initCache(CacheOption option) {
-        _cache = CacheFactory.create(option);
-    }
-
-    private void initSessionStorage(ApplicationConfig.SessionConf config) {
+    private void initializeSessionStorage() {
+        ApplicationConfig.SessionConf config = _appConfig.session;
         _sessionStorage = new SessionStorage(_cache);
 
         _sessionStorage.setPrefix(config.prefix);
         _sessionStorage.expire = config.expire;
     }
 
-    EntityManagerFactory entityManagerFactory() {
-        return _entityManagerFactory;
-    }
+    version(WITH_HUNT_TRACE) {
 
-    SessionStorage sessionStorage() {
-        return _sessionStorage;
-    }
-
-    Cache cache() {
-        return _cache;
-    }
-
-    /**
-      Start the HttpServer , and block current thread.
-     */
-    void run(string[] args) {
-
-        if (args.length > 1) {
-            ServeCommand serveCommand = new ServeCommand();
-            serveCommand.onInput((ServeSignature signature) {
-                version (HUNT_DEBUG)
-                    tracef(signature.to!string);
-                ConfigManager manager = configManager();
-                manager.configPath = signature.configPath;
-                manager.configFile = signature.configFile;
-                manager.load();
-                manager.httpBind(signature.host, signature.port);
-
-                bootstrap();
-            });
-
-            Console console = new Console(_description, _ver);
-            console.setAutoExit(false);
-            console.add(serveCommand);
-            console.run(args);
-
-        } else {
-            bootstrap();
-        }
-    }
-
-    private void setConfig() {
-        ApplicationConfig config = _appConfig; // _serviceContainer.resolve!ApplicationConfig();
-        // _appConfig = config;
-        buildHttpServer(config);
-
-        //setMemcache(config.memcache);
-        version (WITH_HUNT_ENTITY) {
-            if (config.database.defaultOptions.enabled) {
-                initDatabase(config.database);
-            } else {
-                warning("The database is disabled.");
-            }
-        }
-        initCache(config.cache);
-        initSessionStorage(config.session);
-        // _accessManager = new AccessManager(cache() , config.application.name , config.session.prefix, config.session.expire);
-
-        version (WITH_HUNT_TRACE) {
-            _localServiceName = config.application.name;
-            isTraceEnabled = config.trace.enable;
+        private void initializeTracer() {
+            _localServiceName = _appConfig.application.name;
+            isTraceEnabled = _appConfig.trace.enable;
             // _isB3HeaderRequired = config.trace.b3Required;
 
             // initialize HttpSender
-            httpSender().endpoint(config.trace.zipkin);
+            httpSender().endpoint(_appConfig.trace.zipkin);
         }
-    }
-
-    private string _localServiceName;
-
-    private void initilizeBreadcrumbs() {
-        BreadcrumbsManager breadcrumbs = breadcrumbsManager();
-        if (_breadcrumbsHandler !is null) {
-            _breadcrumbsHandler(breadcrumbs);
-        }
-
-    }
-
-    /**
-     * https://laravel.com/docs/6.x/lifecycle
-     */
-    private void bootstrap() {
-        // LoadEnvironmentVariables
-        // Load configuration
-        loadConfiguration();
         
-        //
-        initializeLogger();
-        initializeLocale();
+        private void initializeTracer(Request request, HttpConnection connection) {
 
-        // initializeCache();
-        // initializeDatabase();
-        // initializeScheduler();
-        // initializeHttpServer();
+            if(!isTraceEnabled) return;
 
-        setConfig();
+            import std.socket;
+            string reqPath = request.getURI().getPath();
+            Tracer tracer;
 
-        //
-        showLogo();
+            string b3 = request.header("b3");
+            if(b3.empty()) {
+                if(_isB3HeaderRequired) return;
 
-        // 
-        initializeProviders();
-
-        // foreach(WebSocketBuilder b; webSocketBuilders) {
-        //     b.listenWebSocket();
-        // }
-
-        // if(_broker !is null)
-        //     _broker.listen();
-        // foreach(WebSocketMessageBroker b; messageBrokers) {
-        //     b.listen();
-        // }
-
-        initilizeBreadcrumbs();
-
-        if (_server.getHttpOptions().isSecureConnectionEnabled())
-            writeln("Try to browse https://", _bindingAddress.toString());
-        else
-            writeln("Try to browse http://", _bindingAddress.toString());
-
-        _server.start();
-    }
-
-    /**
-      Stop the server.
-     */
-    void stop() {
-        _server.stop();
-    }
-
-    // Application registerWebSocket(string uri, WebSocketHandler webSocketHandler) {
-    //     webSocketHandlerMap[uri] = webSocketHandler;
-    //     return this;
-    // }
-
-    // Application webSocketPolicy(WebSocketPolicy w) {
-    //     this._webSocketPolicy = w;
-    //     return this;
-    // }
-
-    // WebSocketBuilder webSocket(string path) {
-    //     WebSocketBuilder webSocketBuilder = new WebSocketBuilder(path);
-    //     webSocketBuilders.insertBack(webSocketBuilder);
-    //     return webSocketBuilder;
-    // }
-
-    Application addGroupMiddleware(MiddlewareInterface mw, string group = "default") {
-        _groupMiddlewares[group][mw.name()] = mw;
-        return this;
-    }
-
-    MiddlewareInterface[string] getGroupMiddlewares(string group) {
-        if (group in _groupMiddlewares)
-            return _groupMiddlewares[group];
-        else
-            return null;
-    }
-
-    string createUrl(string mca, string[string] params = null, string group = null) {
-
-        if (group.empty)
-            group = DEFAULT_ROUTE_GROUP;
-
-        // find Route
-        RouteGroup routeGroup = RouteConfig.getRouteGroupe(group);
-        if (routeGroup is null)
-            return null;
-
-        RouteItem route = RouteConfig.getRoute(group, mca);
-        if (route is null) {
-            return null;
-        }
-
-        string url;
-        if (route.isRegex) {
-            if (params.length == 0) {
-                logWarningf("this route need params (%s).", mca);
-                return null;
-            }
-
-            if (!route.paramKeys.empty) {
-                url = route.urlTemplate;
-                foreach (i, key; route.paramKeys) {
-                    string value = params.get(key, null);
-
-                    if (value is null) {
-                        logWarningf("this route template need param (%s).", key);
-                        return null;
-                    }
-
-                    params.remove(key);
-                    url = url.replaceFirst("{" ~ key ~ "}", value);
+                tracer = new Tracer(reqPath);
+            } else {
+                version(HUNT_HTTP_DEBUG) {
+                    warningf("initializing tracer for %s, with %s", reqPath, b3);
                 }
+
+                tracer = new Tracer(reqPath, b3);
             }
-        } else {
-            url = route.pattern;
-        }
 
-        string groupValue = routeGroup.value;
-        if (routeGroup.type == RouteGroup.HOST) {
-            url = (_appConfig.https.enabled ? "https://" : "http://") ~ groupValue ~ url;
-        } else {
-            url = (!groupValue.empty
-                    ? (_appConfig.application.baseUrl ~ groupValue) : strip(
-                        _appConfig.application.baseUrl, "", "/")) ~ url;
-        }
+            Span span = tracer.root;
+            span.initializeLocalEndpoint(_localServiceName);
 
-        return url ~ (params.length > 0 ? ("?" ~ buildUriQueryString(params)) : "");
-    }
+            // 
+            Address remote = connection.getRemoteAddress;
+            EndPoint remoteEndpoint = new EndPoint();
+            remoteEndpoint.ipv4 = remote.toAddrString();
+            remoteEndpoint.port = remote.toPortString().to!int;
+            span.remoteEndpoint = remoteEndpoint;
+            //
 
-    static string buildUriQueryString(string[string] params) {
-        if (params.length == 0) {
-            return "";
-        }
+            span.start();
+            request.tracer = tracer;
+        } 
 
-        string r;
-        foreach (k, v; params) {
-            r ~= (r ? "&" : "") ~ k ~ "=" ~ v;
-        }
+        private string _localServiceName;
+        private bool _isB3HeaderRequired = true;
+    } 
 
-        return r;
-    }
-
-    // version(WITH_HUNT_TRACE) {
-    //     private void initializeTracer(Request request, HttpConnection connection) {
-
-    //         if(!isTraceEnabled) return;
-
-    //         import std.socket;
-    //         string reqPath = request.getURI().getPath();
-    //         Tracer tracer;
-
-    //         string b3 = request.header("b3");
-    //         if(b3.empty()) {
-    //             if(_isB3HeaderRequired) return;
-
-    //             tracer = new Tracer(reqPath);
-    //         } else {
-    //             version(HUNT_HTTP_DEBUG) {
-    //                 warningf("initializing tracer for %s, with %s", reqPath, b3);
-    //             }
-
-    //             tracer = new Tracer(reqPath, b3);
-    //         }
-
-    //         Span span = tracer.root;
-    //         span.initializeLocalEndpoint(_localServiceName);
-
-    //         // 
-    //         Address remote = connection.getRemoteAddress;
-    //         EndPoint remoteEndpoint = new EndPoint();
-    //         remoteEndpoint.ipv4 = remote.toAddrString();
-    //         remoteEndpoint.port = remote.toPortString().to!int;
-    //         span.remoteEndpoint = remoteEndpoint;
-    //         //
-
-    //         span.start();
-    //         request.tracer = tracer;
-    //     } 
-    // } 
-    //     private bool _isB3HeaderRequired = true;
-
-    // private void buildHttpServer(ApplicationConfig conf) {
-    //     version(HUNT_DEBUG) logDebug("_bindingAddress:", conf.http.address, ":", conf.http.port);
-
-    //     SimpleWebSocketHandler webSocketHandler = new SimpleWebSocketHandler();
-    //     webSocketHandler.setWebSocketPolicy(_webSocketPolicy);
-
-    //     HttpServerOptions options = new HttpServerOptions();
-
-    //     _server = new HttpServer(conf.http.address, conf.http.port,
-    //             options, buildHttpHandlerAdapter(), webSocketHandler);
-    // }
-
-    private void buildHttpServer(ApplicationConfig conf) {
-
+    private void initializeWorkerPool() {
         // Worker pool
         int minThreadCount = totalCPUs / 4 + 1;
-        if (conf.http.workerThreads == 0)
-            conf.http.workerThreads = minThreadCount;
+        if (_appConfig.http.workerThreads == 0)
+            _appConfig.http.workerThreads = minThreadCount;
 
-        if (conf.http.workerThreads < minThreadCount) {
+        if (_appConfig.http.workerThreads < minThreadCount) {
             warningf("It's better to set the number of worker threads >= %d. The current is: %d",
-                    minThreadCount, conf.http.workerThreads);
-            // conf.http.workerThreads = minThreadCount;
+                    minThreadCount, _appConfig.http.workerThreads);
+            // _appConfig.http.workerThreads = minThreadCount;
         }
 
-        if (conf.http.workerThreads <= 1) {
-            conf.http.workerThreads = 2;
+        if (_appConfig.http.workerThreads <= 1) {
+            _appConfig.http.workerThreads = 2;
         }
+    }
 
+    private void initializeHttpServer() {
         // SimpleWebSocketHandler webSocketHandler = new SimpleWebSocketHandler();
         // webSocketHandler.setWebSocketPolicy(_webSocketPolicy);
 
@@ -617,10 +592,10 @@ final class Application {
         // Building http server
         // HttpServerOptions options = new HttpServerOptions();
         HttpServer.Builder hsb = HttpServer.builder()
-            .setListener(conf.http.port, conf.http.address);
+            .setListener(_appConfig.http.port, _appConfig.http.address);
 
         // loading routes
-        loadGroupRoutes(conf, (RouteGroup group, RouteItem[] routes) {
+        loadGroupRoutes(_appConfig, (RouteGroup group, RouteItem[] routes) {
             // bool isRootStaticPathAdded = false;
             RouteConfig.allRouteItems[group.name] = routes;
             RouteConfig.allRouteGroups ~= group;
