@@ -732,6 +732,14 @@ final class Application {
 
     }
 
+    private void initilizeBreadcrumbs() {
+        BreadcrumbsManager breadcrumbs = breadcrumbsManager();
+        if (_breadcrumbsHandler !is null) {
+            _breadcrumbsHandler(breadcrumbs);
+        }
+
+    }
+    
     private void setDefaultLogging() {
         version (HUNT_DEBUG) {
         } else {

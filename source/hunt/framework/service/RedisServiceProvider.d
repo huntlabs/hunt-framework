@@ -14,27 +14,43 @@ class RedisServiceProvider : ServiceProvider {
 
     override void register() {
         container.register!(RedisPoolConfig)().singleInstance();
-        // FIXME: Needing refactor or cleanup -@zhangxueping at 2020-02-06T14:40:43+08:00
-        // using a lazy initializer.
-        container.register!(RedisPool)().singleInstance();
+        container.register!(RedisPool)({
+            ApplicationConfig config = container.resolve!ApplicationConfig();
+
+            auto redisSettings = config.redis;
+            if (redisSettings.pool.enabled) {
+                //  new RedisPoolConfig();
+                RedisPoolConfig poolConfig = container.resolve!RedisPoolConfig(); 
+                poolConfig.host = redisSettings.host;
+                poolConfig.port = cast(int) redisSettings.port;
+                poolConfig.password = redisSettings.password;
+                poolConfig.database = cast(int) redisSettings.database;
+                poolConfig.soTimeout = cast(int) redisSettings.pool.maxIdle;
+
+                return new RedisPool(poolConfig); 
+            } else {
+                warning("RedisPool has been disabled.");
+                return new RedisPool();
+            }
+        }).singleInstance();
     }
 
     override void boot() {
         warning("Booting redis...");
-        ApplicationConfig config = container.resolve!ApplicationConfig();
+        // ApplicationConfig config = container.resolve!ApplicationConfig();
 
-        auto redisSettings = config.redis;
-        if (redisSettings.pool.enabled) {
-            //  new RedisPoolConfig();
-            RedisPoolConfig poolConfig = container.resolve!RedisPoolConfig(); 
-            poolConfig.host = redisSettings.host;
-            poolConfig.port = cast(int) redisSettings.port;
-            poolConfig.password = redisSettings.password;
-            poolConfig.database = cast(int) redisSettings.database;
-            poolConfig.soTimeout = cast(int) redisSettings.pool.maxIdle;
+        // auto redisSettings = config.redis;
+        // if (redisSettings.pool.enabled) {
+        //     //  new RedisPoolConfig();
+        //     RedisPoolConfig poolConfig = container.resolve!RedisPoolConfig(); 
+        //     poolConfig.host = redisSettings.host;
+        //     poolConfig.port = cast(int) redisSettings.port;
+        //     poolConfig.password = redisSettings.password;
+        //     poolConfig.database = cast(int) redisSettings.database;
+        //     poolConfig.soTimeout = cast(int) redisSettings.pool.maxIdle;
 
-            RedisPool pool = container.resolve!RedisPool();
-            pool.initPool(poolConfig);
-        }
+        //     RedisPool pool = container.resolve!RedisPool();
+        //     pool.initPool(poolConfig);
+        // }
     }
 }
