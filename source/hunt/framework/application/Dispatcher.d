@@ -209,8 +209,13 @@ void doRequestHandle(RoutingHandler handle, Request req)
         version(WITH_HUNT_TRACE) {
             endTraceSpan(req, 502, e.msg);
         }
-        version(HUNT_DEBUG) warning(e);
-        else warning(e.msg);
+        auto next = e.next;
+        if(next !is null) {
+            warning(next.toString());
+        }
+        warning(e.toString());
+        // version(HUNT_DEBUG) warning(e);
+        // else warning(e.msg);
 
         response = new Response(req);
         response.setStatus(502);

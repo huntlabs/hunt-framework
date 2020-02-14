@@ -386,7 +386,7 @@ version(WITH_HUNT_TRACE) {
             MultiMap!string map = new MultiMap!string();
             getURI().decodeQueryTo(map);
             foreach (string key, List!(string) values; map) {
-                version(HUNT_DEBUG) {
+                version(HUNT_HTTP_DEBUG) {
                     infof("query parameter: key=%s, values=%s", key, values[0]);
                 }
                 if(values is null || values.size()<1) {
@@ -824,8 +824,12 @@ version(WITH_HUNT_TRACE) {
         isSessionRetrieved = true;
         if (!sessionId.empty) {
             _session = _sessionStorage.get(sessionId);
-            _session.setMaxInactiveInterval(_sessionStorage.expire);
-            version(HUNT_HTTP_DEBUG) tracef("existed session: %s, expire: %d", sessionId, _session.getMaxInactiveInterval());
+            if(_session !is null) {
+                _session.setMaxInactiveInterval(_sessionStorage.expire);
+                version(HUNT_HTTP_DEBUG) {
+                    tracef("existed session: %s, expire: %d", sessionId, _session.getMaxInactiveInterval());
+                }
+            }
         }
 
         if (_session is null && canCreate) {
