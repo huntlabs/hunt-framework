@@ -105,20 +105,22 @@ class View
     }
 }
 
-__gshared private Environment _envInstance;
+// import std.concurrency : initOnce;
+
+// static Environment envInstance() {
+//     __gshared Environment inst;
+//     return initOnce!inst(new Environment);
+// }
 
 View GetViewObject()
 {
     import hunt.framework.application.ApplicationConfig;
-    if (_envInstance is null)
-    {
-        _envInstance = new Environment;
-    }
-    auto view = new View(_envInstance);
-
+    // auto view = new View(envInstance());
+    View view = new View(new Environment());
     string path = buildPath(APP_PATH, config().view.path);
 
-    version (HUNT_DEBUG) {
+    version (HUNT_DEBUG) 
+    {
         tracef("setting view path: %s", path);
     }
     view.setTemplatePath(path).setTemplateExt(config().view.ext);
