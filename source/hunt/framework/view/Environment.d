@@ -54,6 +54,7 @@ class Environment
 public:
     this()
     {
+        _parser = new Parser!TemplateLexer();
         auto tpl_path = config().view.path;
         if (tpl_path.length == 0)
             tpl_path = "./views/";
@@ -63,11 +64,13 @@ public:
 
     this(string global_path)
     {
+        _parser = new Parser!TemplateLexer();
         input_path = output_path = buildNormalizedPath(global_path) ~ dirSeparator;
     }
 
     this(string input_path, string output_path)
     {
+        _parser = new Parser!TemplateLexer();
         this.input_path = buildNormalizedPath(input_path) ~ dirSeparator;
         this.output_path = buildNormalizedPath(output_path) ~ dirSeparator;
     }
@@ -89,8 +92,11 @@ public:
 
     TemplateNode parse_template(string filename)
     {
-        version (HUNT_FM_DEBUG) trace("parse template file: ", input_path ~ filename);
-        return _parser.parseTreeFromFile(input_path ~ filename);
+        string p = input_path ~ filename;
+        version (HUNT_FM_DEBUG) {
+            tracef("parse template file: %s", p);
+        }
+        return _parser.parseTreeFromFile(p);
     }
 
     string render(TemplateNode tree,JSONValue data)
@@ -117,4 +123,4 @@ public:
         render.setLocale(_locale);
         return render.render(jsonToUniNode(data));
     } 
-};
+}

@@ -33,7 +33,7 @@ private
 }
 
 
-struct Parser(Lexer)
+final class Parser(Lexer)
 {
     struct ParserState
     {
@@ -142,23 +142,27 @@ struct Parser(Lexer)
 
     TemplateNode parseTreeFromFile(string path)
     {
+        TemplateNode r;
         string dirPath = dirName(path) ~ dirSeparator;
         // path = path.absolute(_path);
-        version(HUNT_DEBUG) logDebug("parse file absolute path : ",path);
-        if (auto cached = path in _parsedFiles)
+        version(HUNT_DEBUG) logDebugf("parse file absolute path(%d): %s", _parsedFiles.length, path);
+        auto cached = path in _parsedFiles;
+        if (cached !is null)
         {
-            if (*cached is null)
-                assertTemplate(0, "Recursive imports/includes/extends not allowed: ".fmt(path), front.pos);
-            else
+            if (*cached is null) {
+                assertTemplate(0, fmt("Recursive imports/includes/extends not allowed: %s", path), front.pos);
+            } else {
                 return *cached;
+            }
         }
 
         // Prevent recursive imports
         _parsedFiles[path] = null;
         auto str = cast(string)read(path);
-        _parsedFiles[path] = parseTree(str, path,dirPath);
+        r = parseTree(str, path,dirPath);
+        _parsedFiles[path] = r;
 
-        return _parsedFiles[path];
+        return r;
     }
 
 
