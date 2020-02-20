@@ -9,6 +9,6 @@
         "hunt-http": "~>0.4.0",
         "hunt-entity": "~>2.5.4",
         "hunt-stomp": "~>0.3.5",
-        "hunt-cache": "~>0.6.2"
+        "hunt-cache": "~>0.6.3"
     }
 }

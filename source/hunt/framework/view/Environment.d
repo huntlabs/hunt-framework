@@ -66,7 +66,6 @@ class Environment
     {
         _parser = new Parser!TemplateLexer();
         _parser.cacheEnabled = config.view.cacheEnabled;
-        warning("ddd=>", _parser.cacheEnabled);
         input_path = output_path = buildNormalizedPath(global_path) ~ dirSeparator;
     }
 
@@ -74,7 +73,6 @@ class Environment
     {
         _parser = new Parser!TemplateLexer();
         _parser.cacheEnabled = config.view.cacheEnabled;
-        warning("ddd=>", _parser.cacheEnabled);
         this.input_path = buildNormalizedPath(input_path) ~ dirSeparator;
         this.output_path = buildNormalizedPath(output_path) ~ dirSeparator;
     }
