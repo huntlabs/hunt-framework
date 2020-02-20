@@ -44,11 +44,20 @@ final class Parser(Lexer)
     private
     {
         TemplateNode[string] _parsedFiles;
+        bool _cacheEnabled = true;
 
         Token[] _tokens;
         BlockNode[string] _blocks;
 
         ParserState[] _states;
+    }
+
+    bool cacheEnabled() {
+        return _cacheEnabled;
+    }
+
+    void cacheEnabled(bool value) {
+        _cacheEnabled = value;
     }
 
     void preprocess()
@@ -142,27 +151,32 @@ final class Parser(Lexer)
 
     TemplateNode parseTreeFromFile(string path)
     {
-        TemplateNode r;
-        string dirPath = dirName(path) ~ dirSeparator;
-        // path = path.absolute(_path);
-        version(HUNT_FM_DEBUG) logDebugf("parse file absolute path(%d): %s", _parsedFiles.length, path);
-        auto cached = path in _parsedFiles;
-        if (cached !is null)
-        {
-            if (*cached is null) {
-                assertTemplate(0, fmt("Recursive imports/includes/extends not allowed: %s", path), front.pos);
-            } else {
-                return *cached;
+        if(_cacheEnabled) {
+            // path = path.absolute(_path);
+            version(HUNT_FM_DEBUG) logDebugf("parse file absolute path(%d): %s", _parsedFiles.length, path);
+            auto cached = path in _parsedFiles;
+            if (cached !is null)
+            {
+                if (*cached is null) {
+                    assertTemplate(0, fmt("Recursive imports/includes/extends not allowed: %s", path), front.pos);
+                } else {
+                    return *cached;
+                }
             }
+
+            string dirPath = dirName(path) ~ dirSeparator;
+            // Prevent recursive imports
+            _parsedFiles[path] = null;
+            auto str = cast(string)read(path);
+            TemplateNode r = parseTree(str, path, dirPath);
+            _parsedFiles[path] = r;
+
+            return r;
+        } else {
+            string dirPath = dirName(path) ~ dirSeparator;
+            auto str = cast(string)read(path);
+            return parseTree(str, path, dirPath);
         }
-
-        // Prevent recursive imports
-        _parsedFiles[path] = null;
-        auto str = cast(string)read(path);
-        r = parseTree(str, path,dirPath);
-        _parsedFiles[path] = r;
-
-        return r;
     }
 
 

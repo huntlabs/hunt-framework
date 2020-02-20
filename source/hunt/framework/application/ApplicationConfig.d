@@ -216,6 +216,7 @@ final class ApplicationConfig
         string path = "./resources/views/";
         string ext = ".html";
         uint arrayDepth = 3;
+        bool cacheEnabled = true;
     }
 
     struct TraceConf

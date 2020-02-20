@@ -51,10 +51,10 @@ class Environment
         string _locale = "en-us";
     }
 
-public:
     this()
     {
         _parser = new Parser!TemplateLexer();
+        _parser.cacheEnabled = config.view.cacheEnabled;
         auto tpl_path = config().view.path;
         if (tpl_path.length == 0)
             tpl_path = "./views/";
@@ -65,12 +65,16 @@ public:
     this(string global_path)
     {
         _parser = new Parser!TemplateLexer();
+        _parser.cacheEnabled = config.view.cacheEnabled;
+        warning("ddd=>", _parser.cacheEnabled);
         input_path = output_path = buildNormalizedPath(global_path) ~ dirSeparator;
     }
 
     this(string input_path, string output_path)
     {
         _parser = new Parser!TemplateLexer();
+        _parser.cacheEnabled = config.view.cacheEnabled;
+        warning("ddd=>", _parser.cacheEnabled);
         this.input_path = buildNormalizedPath(input_path) ~ dirSeparator;
         this.output_path = buildNormalizedPath(output_path) ~ dirSeparator;
     }
