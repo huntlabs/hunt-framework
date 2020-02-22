@@ -1,4 +1,4 @@
-module hunt.framework.service.ServiceProvider;
+module hunt.framework.provider.ServiceProvider;
 
 import poodinis;
 

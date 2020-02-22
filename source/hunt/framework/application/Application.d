@@ -45,7 +45,7 @@ import hunt.framework.application.MiddlewareInterface;
 import hunt.framework.application.BreadcrumbsManager;
 import hunt.framework.application.Breadcrumbs;
 import hunt.framework.application.ServeCommand;
-import hunt.framework.service;
+import hunt.framework.provider;
 
 import hunt.redis;
 
