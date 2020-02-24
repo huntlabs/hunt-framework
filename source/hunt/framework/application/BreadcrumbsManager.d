@@ -5,6 +5,9 @@ import hunt.framework.application.Breadcrumbs;
 
 import std.array;
 
+/**
+ * 
+ */
 class BreadcrumbsManager {
     private Breadcrumbs generator;
     private Handler[string] callbacks;
@@ -56,12 +59,12 @@ class BreadcrumbsManager {
 
 }
 
-private __gshared BreadcrumbsManager _breadcrumbsManager;
+// private __gshared BreadcrumbsManager _breadcrumbsManager;
 
-BreadcrumbsManager breadcrumbsManager() {
-    if (_breadcrumbsManager is null) {
-        _breadcrumbsManager = new BreadcrumbsManager;
-    }
+// BreadcrumbsManager breadcrumbsManager() {
+//     if (_breadcrumbsManager is null) {
+//         _breadcrumbsManager = new BreadcrumbsManager;
+//     }
 
-    return _breadcrumbsManager;
-}
+//     return _breadcrumbsManager;
+// }

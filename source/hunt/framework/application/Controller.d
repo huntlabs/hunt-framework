@@ -11,7 +11,7 @@
 
 module hunt.framework.application.Controller;
 
-import hunt.logging.ConsoleLogger;
+import hunt.framework.application.Application;
 
 public import hunt.framework.http.Response;
 public import hunt.framework.http.Request;
@@ -22,13 +22,15 @@ import hunt.http.routing;
 import hunt.cache;
 import hunt.framework.Simplify;
 import hunt.framework.view;
+import hunt.logging.ConsoleLogger;
 import hunt.validation;
 import hunt.framework.http.Form;
+
+import poodinis;
 
 import std.exception;
 import std.string;
 import std.traits;
-
 
 enum Action;
 
@@ -40,9 +42,6 @@ alias Response = HttpServerResponse;
  */
 abstract class Controller
 {
-    // private OutputStream _outputStream;
-    
-
     protected
     {
         RoutingContext _routingContext;
@@ -50,6 +49,10 @@ abstract class Controller
         View _view;
         ///called before all actions
         MiddlewareInterface[string] middlewares;
+    }
+
+    shared(DependencyContainer) serviceContainer() {
+        return Application.instance().serviceContainer();
     }
 
     @property View view()
@@ -71,10 +74,10 @@ abstract class Controller
         return _routingContext.getRequest();
     }
 
-    final @property Response response()
-    {
+    final @property Response response() {
         return _routingContext.getResponse();
     }
+
 
     /// called before action  return true is continue false is finish
     bool before()

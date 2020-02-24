@@ -76,8 +76,6 @@ import std.stdio;
 import std.string;
 import std.uni;
 
-alias BreadcrumbsHandler = void delegate(BreadcrumbsManager manager);
-
 /**
  * 
  */
@@ -98,7 +96,6 @@ final class Application {
     private WebSocketPolicy _webSocketPolicy;
     private WebSocketHandler[string] webSocketHandlerMap;
     private MiddlewareInterface[string][string] _groupMiddlewares;
-    private BreadcrumbsHandler _breadcrumbsHandler;
 
     private __gshared Application _app;
 
@@ -156,10 +153,6 @@ final class Application {
     //     return _server;
     // }
 
-    Application onBreadcrumbsInitializing(BreadcrumbsHandler handler) {
-        _breadcrumbsHandler = handler;
-        return this;
-    }
 
     /**
       Start the HttpServer , and block current thread.
@@ -234,7 +227,6 @@ final class Application {
         //     b.listen();
         // }
 
-        initilizeBreadcrumbs();
 
         if (_server.getHttpOptions().isSecureConnectionEnabled())
             writeln("Try to browse https://", _bindingAddress.toString());
@@ -378,7 +370,7 @@ final class Application {
             _serviceContainer.autowire(p);
         }
 
-        // initializeProviders
+        // Booting all the providers
         infof("Booting service providers (%d)...", providers.length);
 
         foreach(ServiceProvider p; providers) {
@@ -728,14 +720,6 @@ final class Application {
                     }
                 }
             }
-        }
-
-    }
-
-    private void initilizeBreadcrumbs() {
-        BreadcrumbsManager breadcrumbs = breadcrumbsManager();
-        if (_breadcrumbsHandler !is null) {
-            _breadcrumbsHandler(breadcrumbs);
         }
 
     }
