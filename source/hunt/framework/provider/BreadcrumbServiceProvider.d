@@ -17,6 +17,6 @@ class BreadcrumbServiceProvider : ServiceProvider {
     }
 
     override void register() {
-        container.register!(BreadcrumbsManager)().singleInstance();
+        container.register!(BreadcrumbsManager).singleInstance();
     }
 }

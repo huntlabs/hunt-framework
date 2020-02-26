@@ -13,14 +13,15 @@ import poodinis;
 class RedisServiceProvider : ServiceProvider {
 
     override void register() {
-        container.register!(RedisPoolConfig)().singleInstance();
+        // container.register!(RedisPoolConfig)().singleInstance();
+
         container.register!(RedisPool)({
             ApplicationConfig config = container.resolve!ApplicationConfig();
 
             auto redisSettings = config.redis;
             if (redisSettings.pool.enabled) {
-                //  new RedisPoolConfig();
-                RedisPoolConfig poolConfig = container.resolve!RedisPoolConfig(); 
+                RedisPoolConfig poolConfig = new RedisPoolConfig();
+                // RedisPoolConfig poolConfig = container.resolve!RedisPoolConfig(); 
                 poolConfig.host = redisSettings.host;
                 poolConfig.port = cast(int) redisSettings.port;
                 poolConfig.password = redisSettings.password;

@@ -329,7 +329,6 @@ final class Application {
         return r;
     }
 
-
     private void loadConfiguration() {
         version(HUNT_DEBUG) infof("Loading config...");
 
@@ -356,7 +355,39 @@ final class Application {
         // dfmt on
     }
 
+    Application providerLisener(ServiceProviderListener listener)
+    {
+        _providerListener = listener;
+        return this;
+    }
+
+    ServiceProviderListener providerLisener()
+    {
+        return _providerListener;
+    }
+    private ServiceProviderListener _providerListener;
+
+    private void initializeProviderListener()
+    {
+        if (_providerListener is null)
+        {
+            _providerListener = new class ServiceProviderListener {
+                void registered(TypeInfo_Class info)
+                {
+                    warningf("Service Provider Loaded: %s", info.toString());
+                }
+
+                void booted(TypeInfo_Class info)
+                {
+                    warningf("Service Provider Booted: %s", info.toString());
+                }
+            };
+        }
+    }
+
     private void initializeProviders() {
+
+        initializeProviderListener();
 
         // Register all the default providers
         register!RedisServiceProvider();
@@ -367,6 +398,7 @@ final class Application {
 
         foreach(ServiceProvider p; providers) {
             p.register();
+            _providerListener.registered(typeid(p));
             _serviceContainer.autowire(p);
         }
 
@@ -375,6 +407,7 @@ final class Application {
 
         foreach(ServiceProvider p; providers) {
             p.boot();
+            _providerListener.booted(typeid(p));
         }
         _isBooted = true;
     }
