@@ -26,24 +26,21 @@ import hunt.http.server.WebSocketHandler;
 import hunt.http.WebSocketPolicy;
 import hunt.http.WebSocketCommon;
 
-// import hunt.cache;
 import hunt.console;
-// import hunt.entity;
 import hunt.event;
 
-// import hunt.event.EventLoopGroup;
 import hunt.Functions;
 
 import hunt.framework.Init;
 import hunt.framework.trace.Tracer;
 import hunt.framework.http;
-import hunt.framework.i18n;
+// import hunt.framework.i18n;
 import hunt.framework.application.Controller;
 import hunt.framework.application.RouteConfig;
 import hunt.framework.application.ApplicationConfig;
 import hunt.framework.application.MiddlewareInterface;
-import hunt.framework.application.BreadcrumbsManager;
-import hunt.framework.application.Breadcrumbs;
+// import hunt.framework.application.BreadcrumbsManager;
+// import hunt.framework.application.Breadcrumbs;
 import hunt.framework.application.ServeCommand;
 import hunt.framework.provider;
 
@@ -201,13 +198,9 @@ final class Application {
         //
         initializeLogger();
 
-        // initializeCache();
-        // initializeDatabase();
-        // initializeSessionStorage();
         version(WITH_HUNT_TRACE) { 
             initializeTracer();
         }
-        initializeWorkerPool();
         initializeHttpServer();
 
         //
@@ -335,6 +328,8 @@ final class Application {
         _appConfig = configManager().config();
         serviceContainer().register!(ApplicationConfig)().existingInstance(_appConfig);
         _bindingAddress = parseAddress(_appConfig.http.address, _appConfig.http.port);
+        
+        checkWorkerThreads();
     }
 
     private void showLogo() {
@@ -389,7 +384,7 @@ final class Application {
 
         // Register all the default service providers
         register!RedisServiceProvider();
-        register!I18nServiceProvider();
+        register!TranslationServiceProvider();
         register!BreadcrumbServiceProvider();
         register!CacheServiceProvider();
         register!SessionServiceProvider();
@@ -480,58 +475,6 @@ final class Application {
         }        
     }
 
-
-    // private void initializeCache() {
-        // _cache = CacheFactory.create(_appConfig.cache);
-    // }
-
-    // private void initializeDatabase() {
-    //     ApplicationConfig.DatabaseConf config = _appConfig.database;
-    //     if (!config.defaultOptions.enabled) {
-    //         warning("The database is disabled.");
-    //         return;
-    //     }
-
-    //     if (config.defaultOptions.url.empty) {
-    //         logWarning("No database configured!");
-    //     } else {
-    //         import hunt.entity.EntityOption;
-
-    //         auto option = new EntityOption;
-
-    //         // database options
-    //         option.database.driver = config.defaultOptions.driver;
-    //         option.database.host = config.defaultOptions.host;
-    //         option.database.username = config.defaultOptions.username;
-    //         option.database.password = config.defaultOptions.password;
-    //         option.database.port = config.defaultOptions.port;
-    //         option.database.database = config.defaultOptions.database;
-    //         option.database.charset = config.defaultOptions.charset;
-    //         option.database.prefix = config.defaultOptions.prefix;
-
-    //         // database pool options
-    //         option.pool.minIdle = config.pool.minIdle;
-    //         option.pool.idleTimeout = config.pool.idleTimeout;
-    //         option.pool.maxPoolSize = config.pool.maxPoolSize;
-    //         option.pool.minPoolSize = config.pool.minPoolSize;
-    //         option.pool.maxLifetime = config.pool.maxLifetime;
-    //         option.pool.connectionTimeout = config.pool.connectionTimeout;
-    //         option.pool.maxConnection = config.pool.maxConnection;
-    //         option.pool.minConnection = config.pool.minConnection;
-
-    //         infof("using database: %s", config.defaultOptions.driver);
-    //         _entityManagerFactory = Persistence.createEntityManagerFactory("default", option);
-    //     }
-    // }
-
-    // private void initializeSessionStorage() {
-    //     ApplicationConfig.SessionConf config = _appConfig.session;
-    //     _sessionStorage = new SessionStorage(_cache);
-
-    //     _sessionStorage.setPrefix(config.prefix);
-    //     _sessionStorage.expire = config.expire;
-    // }
-
     version(WITH_HUNT_TRACE) {
 
         private void initializeTracer() {
@@ -583,7 +526,7 @@ final class Application {
         private bool _isB3HeaderRequired = true;
     } 
 
-    private void initializeWorkerPool() {
+    private void checkWorkerThreads() {
         // Worker pool
         int minThreadCount = totalCPUs / 4 + 1;
         if (_appConfig.http.workerThreads == 0)
@@ -700,7 +643,7 @@ final class Application {
         }
     }
 
-    private void loadGroupRoutes(const ref ApplicationConfig conf, RouteGroupHandler handler) {
+    private static void loadGroupRoutes(const ref ApplicationConfig conf, RouteGroupHandler handler) {
         if (conf.route.groups.empty)
             return;
 

@@ -1,4 +1,4 @@
-module hunt.framework.provider.I18nServiceProvider;
+module hunt.framework.provider.TranslationServiceProvider;
 
 import hunt.framework.provider.ServiceProvider;
 import hunt.framework.application.ApplicationConfig;
@@ -11,7 +11,7 @@ import poodinis;
 /**
  * 
  */
-class I18nServiceProvider : ServiceProvider {
+class TranslationServiceProvider : ServiceProvider {
 
     override void register() {
         container.register!(I18n)(() {
