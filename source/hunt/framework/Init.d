@@ -16,6 +16,11 @@ public import hunt.framework.Version;
 import std.path : buildPath, dirName;
 import std.file : thisExePath;
 
+// APP_BASE_PATH
+// APP_NAME
+// APP_ENV
+// APP_KEY
+
 __gshared string APP_PATH;
 __gshared string DEFAULT_CONFIG_PATH = "config/";
 __gshared string DEFAULT_RESOURCE_PATH = "resources/";

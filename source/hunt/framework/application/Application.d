@@ -11,36 +11,21 @@
 
 module hunt.framework.application.Application;
 
-import hunt.collection;
-import hunt.Exceptions;
-import hunt.Functions;
-import hunt.io.Common;
 import hunt.logging;
-import hunt.net.NetUtil;
 
-import hunt.http.routing.RoutingContext;
-import hunt.http.routing.RouterManager;
 import hunt.http.server.HttpServer;
-import hunt.http.server.HttpServerOptions;
 import hunt.http.server.WebSocketHandler;
 import hunt.http.WebSocketPolicy;
 import hunt.http.WebSocketCommon;
 
 import hunt.console;
-import hunt.event;
-
-import hunt.Functions;
 
 import hunt.framework.Init;
 import hunt.framework.trace.Tracer;
 import hunt.framework.http;
-// import hunt.framework.i18n;
-import hunt.framework.application.Controller;
 import hunt.framework.application.RouteConfig;
 import hunt.framework.application.ApplicationConfig;
 import hunt.framework.application.MiddlewareInterface;
-// import hunt.framework.application.BreadcrumbsManager;
-// import hunt.framework.application.Breadcrumbs;
 import hunt.framework.application.ServeCommand;
 import hunt.framework.provider;
 
@@ -55,23 +40,17 @@ version (WITH_HUNT_TRACE) {
     import hunt.trace.HttpSender;
     import hunt.framework.trace.Tracer;
 
-    import std.conv;
     import std.format;
 }
 
 import poodinis;
 
 import std.array;
-import std.exception;
 import std.conv;
-import std.container.array;
-import std.file;
-import std.path;
-import std.parallelism;
-import std.socket;
+import std.parallelism : totalCPUs;
+import std.socket : Address, parseAddress;
 import std.stdio;
 import std.string;
-import std.uni;
 
 /**
  * 
@@ -82,14 +61,10 @@ final class Application {
     private string _description = "An application bootstrapped by Hunt Framework";
     private string _ver = "1.0.0";
 
-    private string _configRootPath;
     private Address _bindingAddress;
     private HttpServer _server;
     private ApplicationConfig _appConfig;
-    // private EntityManagerFactory _entityManagerFactory;
 
-    // private Cache _cache;
-    // private SessionStorage _sessionStorage;
     private WebSocketPolicy _webSocketPolicy;
     private WebSocketHandler[string] webSocketHandlerMap;
     private MiddlewareInterface[string][string] _groupMiddlewares;
@@ -115,11 +90,6 @@ final class Application {
         setDefaultLogging();
     }
 
-    // shared(DependencyContainer) serviceContainer() {
-    //     return serviceContainer();
-    // }
-    // private shared DependencyContainer serviceContainer();
-
     void register(T)() if(is(T : ServiceProvider)) {
         if(_isBooted) {
             warning("A provider can't be registered: %s after the app has been booted.", typeid(T));
@@ -133,23 +103,6 @@ final class Application {
         // serviceContainer().autowire(provider);
     }
     private bool _isBooted = false;
-
-    // EntityManagerFactory entityManagerFactory() {
-    //     return _entityManagerFactory;
-    // }
-
-    // SessionStorage sessionStorage() {
-    //     return _sessionStorage;
-    // }
-
-    // Cache cache() {
-    //     return _cache;
-    // }
-
-    // @property HttpServer server() {
-    //     return _server;
-    // }
-
 
     /**
       Start the HttpServer , and block current thread.
@@ -201,13 +154,15 @@ final class Application {
         version(WITH_HUNT_TRACE) { 
             initializeTracer();
         }
-        initializeHttpServer();
-
-        //
-        showLogo();
 
         // 
         initializeProviders();
+        
+        // Resolve the HTTP server
+        _server = serviceContainer.resolve!(HttpServer);
+
+        //
+        showLogo();
 
         // foreach(WebSocketBuilder b; webSocketBuilders) {
         //     b.listenWebSocket();
@@ -218,7 +173,6 @@ final class Application {
         // foreach(WebSocketMessageBroker b; messageBrokers) {
         //     b.listen();
         // }
-
 
         if (_server.getHttpOptions().isSecureConnectionEnabled())
             writeln("Try to browse https://", _bindingAddress.toString());
@@ -324,7 +278,7 @@ final class Application {
     private void loadConfiguration() {
         version(HUNT_DEBUG) infof("Loading config...");
 
-        _configRootPath = configManager().configPath();
+        // _configRootPath = configManager().configPath();
         _appConfig = configManager().config();
         serviceContainer().register!(ApplicationConfig)().existingInstance(_appConfig);
         _bindingAddress = parseAddress(_appConfig.http.address, _appConfig.http.port);
@@ -389,6 +343,7 @@ final class Application {
         register!CacheServiceProvider();
         register!SessionServiceProvider();
         register!DatabaseServiceProvider();
+        register!HttpServiceProvider();
 
         // Register all the service provided by the providers
         ServiceProvider[] providers = serviceContainer().resolveAll!(ServiceProvider);
@@ -541,156 +496,6 @@ final class Application {
         if (_appConfig.http.workerThreads <= 1) {
             _appConfig.http.workerThreads = 2;
         }
-    }
-
-    private void initializeHttpServer() {
-        // SimpleWebSocketHandler webSocketHandler = new SimpleWebSocketHandler();
-        // webSocketHandler.setWebSocketPolicy(_webSocketPolicy);
-
-        //if(conf.webSocketFactory)
-        //    _wfactory = conf.webSocketFactory;
-
-        // Building http server
-        // HttpServerOptions options = new HttpServerOptions();
-        HttpServer.Builder hsb = HttpServer.builder()
-            .setListener(_appConfig.http.port, _appConfig.http.address);
-
-        // loading routes
-        loadGroupRoutes(_appConfig, (RouteGroup group, RouteItem[] routes) {
-            // bool isRootStaticPathAdded = false;
-            RouteConfig.allRouteItems[group.name] = routes;
-            RouteConfig.allRouteGroups ~= group;
-
-            RouteGroupType groupType = RouteGroupType.Host;
-            if (group.type == "path") {
-                groupType = RouteGroupType.Path;
-            }
-
-            foreach (RouteItem item; routes) {
-                addRoute(hsb, item, group);
-            }
-
-            // if(!isRootStaticPathAdded) {
-            // default static files
-            hsb.resource("/", DEFAULT_STATIC_FILES_LACATION, false, group.value, groupType);
-            // }
-        });
-
-        // load default routes
-        string routeConfigFile = buildPath(_configRootPath, DEFAULT_ROUTE_CONFIG);
-        if (!exists(routeConfigFile)) {
-            warningf("The config file for route does not exist: %s", routeConfigFile);
-        } else {
-            RouteItem[] routes = RouteConfig.load(routeConfigFile);
-            RouteConfig.allRouteItems[DEFAULT_ROUTE_GROUP] = routes;
-
-            RouteGroup defaultGroup = new RouteGroup();
-            defaultGroup.name = DEFAULT_ROUTE_GROUP;
-            defaultGroup.type = RouteGroup.DEFAULT;
-
-            RouteConfig.allRouteGroups ~= defaultGroup;
-
-            foreach (RouteItem item; routes) {
-                addRoute(hsb, item, null);
-            }
-        }
-
-        // default static files
-        hsb.resource("/", DEFAULT_STATIC_FILES_LACATION, false);
-        _server = hsb.build();
-    }
-
-    private void addRoute(HttpServer.Builder hsb, RouteItem item, RouteGroup group) {
-        ResourceRouteItem resourceItem = cast(ResourceRouteItem) item;
-
-        // add route for static files 
-        if (resourceItem !is null) {
-            // if(resourceItem.path == "/") isRootStaticPathAdded = true;
-            if (group is null) {
-                hsb.resource(resourceItem.path, resourceItem.resourcePath,
-                        resourceItem.canListing);
-            } else if (group.type == RouteGroup.HOST) {
-                hsb.resource(resourceItem.path, resourceItem.resourcePath,
-                        resourceItem.canListing, group.value, RouteGroupType.Host);
-            } else if (group.type == RouteGroup.PATH) {
-                hsb.resource(resourceItem.path, resourceItem.resourcePath,
-                        resourceItem.canListing, group.value, RouteGroupType.Path);
-            } else {
-                errorf("Unknown route group type: %s", group.type);
-            }
-        } else { // add route for controller action
-            string handlerKey = makeRouteHandlerKey(cast(ActionRouteItem) item, group);
-            RoutingHandler handler = getRouteHandler(handlerKey);
-            // warning(item.toString());
-            if (handler is null) {
-                warningf("No handler found for group route {%s}", item.toString());
-            } else {
-                version (HUNT_DEBUG)
-                    tracef("handler found for group route {%s}", item.toString());
-                if (group is null) {
-                    infof("adding %s", item.path);
-                    hsb.addRoute([item.path], item.methods, handler);
-                } else if (group.type == RouteGroup.HOST) {
-                    hsb.addRoute([item.path], item.methods, handler,
-                            group.value, RouteGroupType.Host);
-                } else if (group.type == RouteGroup.PATH) {
-                    hsb.addRoute([item.path], item.methods, handler,
-                            group.value, RouteGroupType.Path);
-                } else {
-                    errorf("Unknown route group type: %s", group.type);
-                }
-            }
-        }
-    }
-
-    private static void loadGroupRoutes(const ref ApplicationConfig conf, RouteGroupHandler handler) {
-        if (conf.route.groups.empty)
-            return;
-
-        assert(handler !is null);
-        version (HUNT_DEBUG)
-            info(conf.route.groups);
-
-        string[] groupConfig;
-        foreach (v; split(conf.route.groups, ',')) {
-            groupConfig = split(v, ":");
-
-            if (groupConfig.length != 3 && groupConfig.length != 4) {
-                logWarningf("Group config format error ( %s ).", v);
-            } else {
-                string value = groupConfig[2];
-                if (groupConfig.length == 4) {
-                    if (std.conv.to!int(groupConfig[3]) > 0) {
-                        value ~= ":" ~ groupConfig[3];
-                    }
-                }
-
-                RouteGroup groupInfo = new RouteGroup();
-                groupInfo.name = strip(groupConfig[0]);
-                groupInfo.type = strip(groupConfig[1]);
-                groupInfo.value = strip(value);
-
-                version (HUNT_FM_DEBUG)
-                    infof("route group: %s", groupInfo);
-
-                string routeConfigFile = groupInfo.name ~ ROUTE_CONFIG_EXT;
-                routeConfigFile = buildPath(_configRootPath, routeConfigFile);
-
-                if (!exists(routeConfigFile)) {
-                    warningf("Config file does not exist: %s", routeConfigFile);
-                } else {
-                    RouteItem[] routes = RouteConfig.load(routeConfigFile);
-
-                    if (routes.length > 0) {
-                        handler(groupInfo, routes);
-                    } else {
-                        version (HUNT_DEBUG)
-                            warningf("No routes defined for group %s", groupInfo.name);
-                    }
-                }
-            }
-        }
-
     }
     
     private void setDefaultLogging() {
