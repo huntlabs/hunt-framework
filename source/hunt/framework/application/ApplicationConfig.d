@@ -37,6 +37,7 @@ final class ApplicationConfig {
         string secret = "CD6CABB1123C86EDAD9";
         string encoding = "utf-8";
         int staticFileCacheMinutes = 30;
+        string langLocation = "./translations";
     }
 
     struct CookieConf {
@@ -245,6 +246,7 @@ final class ApplicationConfig {
         http.workerThreads = totalCPUs * 4;
         upload.path = DEFAULT_TEMP_PATH;
         view.path = DEFAULT_TEMPLATE_PATH;
+        application.langLocation = DEFAULT_LANGUAGE_PATH;
     }
 }
 

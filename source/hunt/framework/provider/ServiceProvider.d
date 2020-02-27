@@ -28,3 +28,12 @@ abstract class ServiceProvider {
      */
     void boot() {}
 }
+
+
+import std.concurrency : initOnce;
+
+private shared DependencyContainer _serviceContainer;
+
+shared(DependencyContainer) serviceContainer() {
+    return initOnce!_serviceContainer(new shared DependencyContainer());
+}

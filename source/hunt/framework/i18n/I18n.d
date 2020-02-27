@@ -15,11 +15,12 @@ alias StrStrStr = string[string][string];
 enum I18N_DEFAULT_LOCALE = "en-us";
 
 /**
-*/
+ * 
+ */
 class I18n {
     private {
         StrStrStr _res;
-        __gshared I18n _instance;
+        // __gshared I18n _instance;
         string _default;
     }
 
@@ -27,12 +28,12 @@ class I18n {
         _default = I18N_DEFAULT_LOCALE;
     }
 
-    static I18n instance() {
-        if (_instance is null) {
-            _instance = new I18n();
-        }
-        return _instance;
-    }
+    // static I18n instance() {
+    //     if (_instance is null) {
+    //         _instance = new I18n();
+    //     }
+    //     return _instance;
+    // }
 
     bool loadLangResources(string path, lazy string ext = "ini") {
         _isResLoaded = false;
@@ -147,103 +148,97 @@ class I18n {
 
 }
 
-private string _local /* = I18N_DEFAULT_LOCALE */ ;
+// private string _local /* = I18N_DEFAULT_LOCALE */ ;
 
-@property string getLocale() {
-    if (_local)
-        return _local;
-    return I18n.instance().defaultLocale;
-}
+// @property string getLocale() {
+//     if (_local)
+//         return _local;
+//     return I18n.instance().defaultLocale;
+// }
 
-@property setLocale(string _l) {
-    _local = toLower(_l);
-}
+// @property setLocale(string _l) {
+//     _local = toLower(_l);
+// }
 
-deprecated("Using trans instead.")
-alias getText = trans;
+// string trans(A...)(string key, lazy A args) {
+//     import std.format;
+//     Appender!string buffer;
+//     string text = _trans(key);
+//     version(HUNT_DEBUG) tracef("format string: %s, key: %s, args.length: ", text, key, args.length);
+//     formattedWrite(buffer, text, args);
 
-deprecated("Using trans instead.")
-alias transf = trans;
+//     return buffer.data;
+// }
 
-string trans(A...)(string key, lazy A args) {
-    import std.format;
-    Appender!string buffer;
-    string text = _trans(key);
-    version(HUNT_DEBUG) tracef("format string: %s, key: %s, args.length: ", text, key, args.length);
-    formattedWrite(buffer, text, args);
+// deprecated("Using transWithLocale instead.")
+// alias transfWithLocale = transWithLocale;
 
-    return buffer.data;
-}
+// string transWithLocale(A...)(string locale, string key, lazy A args) {
+//     import std.format;
+//     Appender!string buffer;
+//     string text = _transWithLocale(locale, key);
+//     formattedWrite(buffer, text, args);
 
-deprecated("Using transWithLocale instead.")
-alias transfWithLocale = transWithLocale;
+//     return buffer.data;
+// }
 
-string transWithLocale(A...)(string locale, string key, lazy A args) {
-    import std.format;
-    Appender!string buffer;
-    string text = _transWithLocale(locale, key);
-    formattedWrite(buffer, text, args);
+// string transWithLocale(string locale, string key, JSONValue args) {
+//     import hunt.framework.util.Formatter;
+//     string text = _transWithLocale(locale, key);
+//     return StrFormat(text, args);
+// }
 
-    return buffer.data;
-}
+// ///key is [filename.key]
+// private string _trans(string key) {
+//     string defaultValue = key;
+//     I18n i18n = I18n.instance();
+//     if (!i18n.isResLoaded) {
+//         logWarning("The lang resources haven't loaded yet!");
+//         return key;
+//     }
 
-string transWithLocale(string locale, string key, JSONValue args) {
-    import hunt.framework.util.Formatter;
-    string text = _transWithLocale(locale, key);
-    return StrFormat(text, args);
-}
+//     auto p = getLocale in i18n.resources;
+//     if (p !is null) {
+//         return p.get(key, defaultValue);
+//     }
+//     logWarning("unsupported local: ", getLocale, ", use default now: ", i18n.defaultLocale);
 
-///key is [filename.key]
-private string _trans(string key) {
-    string defaultValue = key;
-    I18n i18n = I18n.instance();
-    if (!i18n.isResLoaded) {
-        logWarning("The lang resources haven't loaded yet!");
-        return key;
-    }
+//     p = i18n.defaultLocale in i18n.resources;
 
-    auto p = getLocale in i18n.resources;
-    if (p !is null) {
-        return p.get(key, defaultValue);
-    }
-    logWarning("unsupported local: ", getLocale, ", use default now: ", i18n.defaultLocale);
+//     if (p !is null) {
+//         return p.get(key, defaultValue);
+//     }
 
-    p = i18n.defaultLocale in i18n.resources;
+//     logWarning("unsupported locale: ", i18n.defaultLocale);
 
-    if (p !is null) {
-        return p.get(key, defaultValue);
-    }
+//     return defaultValue;
+// }
 
-    logWarning("unsupported locale: ", i18n.defaultLocale);
+// ///key is [filename.key]
+// private string _transWithLocale(string locale, string key) {
+//     string defaultValue = key;
+//     I18n i18n = I18n.instance();
+//     if (!i18n.isResLoaded) {
+//         logWarning("The lang resources has't loaded yet!");
+//         return key;
+//     }
 
-    return defaultValue;
-}
+//     auto p = locale in i18n.resources;
+//     if (p !is null) {
+//         return p.get(key, defaultValue);
+//     }
+//     logWarning("unsupported locale: ", locale, ", use default now: ", i18n.defaultLocale);
 
-///key is [filename.key]
-private string _transWithLocale(string locale, string key) {
-    string defaultValue = key;
-    I18n i18n = I18n.instance();
-    if (!i18n.isResLoaded) {
-        logWarning("The lang resources has't loaded yet!");
-        return key;
-    }
+//     p = i18n.defaultLocale in i18n.resources;
 
-    auto p = locale in i18n.resources;
-    if (p !is null) {
-        return p.get(key, defaultValue);
-    }
-    logWarning("unsupported locale: ", locale, ", use default now: ", i18n.defaultLocale);
+//     if (p !is null) {
+//         return p.get(key, defaultValue);
+//     }
 
-    p = i18n.defaultLocale in i18n.resources;
+//     logDebug("unsupported locale: ", i18n.defaultLocale);
 
-    if (p !is null) {
-        return p.get(key, defaultValue);
-    }
-
-    logDebug("unsupported locale: ", i18n.defaultLocale);
-
-    return defaultValue;
-}
+//     return defaultValue;
+// }
 
 // unittest{
 

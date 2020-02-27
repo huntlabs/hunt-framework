@@ -113,15 +113,15 @@ final class Application {
         _name = name;
         _ver = ver;
         _description = description;
-        _serviceContainer = new DependencyContainer();
+        // serviceContainer() = new DependencyContainer();
 
         setDefaultLogging();
     }
 
-    shared(DependencyContainer) serviceContainer() {
-        return _serviceContainer;
-    }
-    private shared DependencyContainer _serviceContainer;
+    // shared(DependencyContainer) serviceContainer() {
+    //     return serviceContainer();
+    // }
+    // private shared DependencyContainer serviceContainer();
 
     void register(T)() if(is(T : ServiceProvider)) {
         if(_isBooted) {
@@ -130,10 +130,10 @@ final class Application {
         }
 
         ServiceProvider provider = new T();
-        provider._container = _serviceContainer;
+        provider._container = serviceContainer();
         // provider.register();
-        _serviceContainer.register!(ServiceProvider, T)().existingInstance(provider);
-        // _serviceContainer.autowire(provider);
+        serviceContainer().register!(ServiceProvider, T)().existingInstance(provider);
+        // serviceContainer().autowire(provider);
     }
     private bool _isBooted = false;
 
@@ -200,7 +200,7 @@ final class Application {
         
         //
         initializeLogger();
-        initializeLocale();
+        // initializeLocale();
 
         initializeCache();
         initializeDatabase();
@@ -334,7 +334,7 @@ final class Application {
 
         _configRootPath = configManager().configPath();
         _appConfig = configManager().config();
-        _serviceContainer.register!(ApplicationConfig)().existingInstance(_appConfig);
+        serviceContainer().register!(ApplicationConfig)().existingInstance(_appConfig);
         _bindingAddress = parseAddress(_appConfig.http.address, _appConfig.http.port);
     }
 
@@ -386,20 +386,21 @@ final class Application {
     }
 
     private void initializeProviders() {
-
         initializeProviderListener();
 
-        // Register all the default providers
+        // Register all the default service providers
         register!RedisServiceProvider();
+        register!I18nServiceProvider();
+        register!BreadcrumbServiceProvider();
 
-        // RegisterProviders
-        ServiceProvider[] providers = _serviceContainer.resolveAll!(ServiceProvider);
+        // Register all the service provided by the providers
+        ServiceProvider[] providers = serviceContainer().resolveAll!(ServiceProvider);
         infof("Registering service providers (%d)...", providers.length);
 
         foreach(ServiceProvider p; providers) {
             p.register();
             _providerListener.registered(typeid(p));
-            _serviceContainer.autowire(p);
+            serviceContainer().autowire(p);
         }
 
         // Booting all the providers
@@ -413,7 +414,7 @@ final class Application {
     }
 
     private void initializeLogger() {
-        // ApplicationConfig appConfig = _serviceContainer.resolve!ApplicationConfig();
+        // ApplicationConfig appConfig = serviceContainer().resolve!ApplicationConfig();
         ApplicationConfig.LoggingConfig conf = _appConfig.logging;
         version (HUNT_DEBUG) {
             hunt.logging.LogLevel level = hunt.logging.LogLevel.Trace;
@@ -475,16 +476,6 @@ final class Application {
 
             logLoadConf(logconf);
         }        
-    }
-
-    // enable i18n
-    Application initializeLocale(string resPath = DEFAULT_LANGUAGE_PATH) {
-        I18n i18n = I18n.instance();
-
-        i18n.defaultLocale = configManager().config().application.defaultLanguage;
-        i18n.loadLangResources(resPath);
-
-        return this;
     }
 
 

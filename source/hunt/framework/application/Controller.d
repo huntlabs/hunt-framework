@@ -12,10 +12,11 @@
 module hunt.framework.application.Controller;
 
 import hunt.framework.application.Application;
+import hunt.framework.application.MiddlewareInterface;
 
 public import hunt.framework.http.Response;
 public import hunt.framework.http.Request;
-public import hunt.framework.application.MiddlewareInterface;
+public import hunt.framework.provider;
 
 import hunt.http.server;
 import hunt.http.routing;
@@ -51,9 +52,9 @@ abstract class Controller
         MiddlewareInterface[string] middlewares;
     }
 
-    shared(DependencyContainer) serviceContainer() {
-        return Application.instance().serviceContainer();
-    }
+    // shared(DependencyContainer) serviceContainer() {
+    //     return Application.instance().serviceContainer();
+    // }
 
     @property View view()
     {
