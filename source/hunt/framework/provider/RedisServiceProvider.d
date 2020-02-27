@@ -37,7 +37,7 @@ class RedisServiceProvider : ServiceProvider {
     }
 
     override void boot() {
-        warning("Booting redis...");
+        // trace("Booting redis...");
         // ApplicationConfig config = container.resolve!ApplicationConfig();
 
         // auto redisSettings = config.redis;

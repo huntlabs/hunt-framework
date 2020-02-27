@@ -26,9 +26,9 @@ import hunt.http.server.WebSocketHandler;
 import hunt.http.WebSocketPolicy;
 import hunt.http.WebSocketCommon;
 
-import hunt.cache;
+// import hunt.cache;
 import hunt.console;
-import hunt.entity;
+// import hunt.entity;
 import hunt.event;
 
 // import hunt.event.EventLoopGroup;
@@ -89,10 +89,10 @@ final class Application {
     private Address _bindingAddress;
     private HttpServer _server;
     private ApplicationConfig _appConfig;
-    private EntityManagerFactory _entityManagerFactory;
+    // private EntityManagerFactory _entityManagerFactory;
 
     // private Cache _cache;
-    private SessionStorage _sessionStorage;
+    // private SessionStorage _sessionStorage;
     private WebSocketPolicy _webSocketPolicy;
     private WebSocketHandler[string] webSocketHandlerMap;
     private MiddlewareInterface[string][string] _groupMiddlewares;
@@ -137,13 +137,13 @@ final class Application {
     }
     private bool _isBooted = false;
 
-    EntityManagerFactory entityManagerFactory() {
-        return _entityManagerFactory;
-    }
+    // EntityManagerFactory entityManagerFactory() {
+    //     return _entityManagerFactory;
+    // }
 
-    SessionStorage sessionStorage() {
-        return _sessionStorage;
-    }
+    // SessionStorage sessionStorage() {
+    //     return _sessionStorage;
+    // }
 
     // Cache cache() {
     //     return _cache;
@@ -194,7 +194,7 @@ final class Application {
      * https://laravel.com/docs/6.x/lifecycle
      */
     private void bootstrap() {
-        // LoadEnvironmentVariables
+        // Load environment variables
         // Load configuration
         loadConfiguration();
         
@@ -202,7 +202,7 @@ final class Application {
         initializeLogger();
 
         // initializeCache();
-        initializeDatabase();
+        // initializeDatabase();
         // initializeSessionStorage();
         version(WITH_HUNT_TRACE) { 
             initializeTracer();
@@ -373,12 +373,12 @@ final class Application {
             _providerListener = new class ServiceProviderListener {
                 void registered(TypeInfo_Class info)
                 {
-                    warningf("Service Provider Loaded: %s", info.toString());
+                    version(HUNT_DEBUG) tracef("Service Provider Loaded: %s", info.toString());
                 }
 
                 void booted(TypeInfo_Class info)
                 {
-                    warningf("Service Provider Booted: %s", info.toString());
+                    version(HUNT_DEBUG) tracef("Service Provider Booted: %s", info.toString());
                 }
             };
         }
@@ -393,6 +393,7 @@ final class Application {
         register!BreadcrumbServiceProvider();
         register!CacheServiceProvider();
         register!SessionServiceProvider();
+        register!DatabaseServiceProvider();
 
         // Register all the service provided by the providers
         ServiceProvider[] providers = serviceContainer().resolveAll!(ServiceProvider);
@@ -484,44 +485,44 @@ final class Application {
         // _cache = CacheFactory.create(_appConfig.cache);
     // }
 
-    private void initializeDatabase() {
-        ApplicationConfig.DatabaseConf config = _appConfig.database;
-        if (!config.defaultOptions.enabled) {
-            warning("The database is disabled.");
-            return;
-        }
+    // private void initializeDatabase() {
+    //     ApplicationConfig.DatabaseConf config = _appConfig.database;
+    //     if (!config.defaultOptions.enabled) {
+    //         warning("The database is disabled.");
+    //         return;
+    //     }
 
-        if (config.defaultOptions.url.empty) {
-            logWarning("No database configured!");
-        } else {
-            import hunt.entity.EntityOption;
+    //     if (config.defaultOptions.url.empty) {
+    //         logWarning("No database configured!");
+    //     } else {
+    //         import hunt.entity.EntityOption;
 
-            auto option = new EntityOption;
+    //         auto option = new EntityOption;
 
-            // database options
-            option.database.driver = config.defaultOptions.driver;
-            option.database.host = config.defaultOptions.host;
-            option.database.username = config.defaultOptions.username;
-            option.database.password = config.defaultOptions.password;
-            option.database.port = config.defaultOptions.port;
-            option.database.database = config.defaultOptions.database;
-            option.database.charset = config.defaultOptions.charset;
-            option.database.prefix = config.defaultOptions.prefix;
+    //         // database options
+    //         option.database.driver = config.defaultOptions.driver;
+    //         option.database.host = config.defaultOptions.host;
+    //         option.database.username = config.defaultOptions.username;
+    //         option.database.password = config.defaultOptions.password;
+    //         option.database.port = config.defaultOptions.port;
+    //         option.database.database = config.defaultOptions.database;
+    //         option.database.charset = config.defaultOptions.charset;
+    //         option.database.prefix = config.defaultOptions.prefix;
 
-            // database pool options
-            option.pool.minIdle = config.pool.minIdle;
-            option.pool.idleTimeout = config.pool.idleTimeout;
-            option.pool.maxPoolSize = config.pool.maxPoolSize;
-            option.pool.minPoolSize = config.pool.minPoolSize;
-            option.pool.maxLifetime = config.pool.maxLifetime;
-            option.pool.connectionTimeout = config.pool.connectionTimeout;
-            option.pool.maxConnection = config.pool.maxConnection;
-            option.pool.minConnection = config.pool.minConnection;
+    //         // database pool options
+    //         option.pool.minIdle = config.pool.minIdle;
+    //         option.pool.idleTimeout = config.pool.idleTimeout;
+    //         option.pool.maxPoolSize = config.pool.maxPoolSize;
+    //         option.pool.minPoolSize = config.pool.minPoolSize;
+    //         option.pool.maxLifetime = config.pool.maxLifetime;
+    //         option.pool.connectionTimeout = config.pool.connectionTimeout;
+    //         option.pool.maxConnection = config.pool.maxConnection;
+    //         option.pool.minConnection = config.pool.minConnection;
 
-            infof("using database: %s", config.defaultOptions.driver);
-            _entityManagerFactory = Persistence.createEntityManagerFactory("default", option);
-        }
-    }
+    //         infof("using database: %s", config.defaultOptions.driver);
+    //         _entityManagerFactory = Persistence.createEntityManagerFactory("default", option);
+    //     }
+    // }
 
     // private void initializeSessionStorage() {
     //     ApplicationConfig.SessionConf config = _appConfig.session;
