@@ -23,10 +23,12 @@ import hunt.Exceptions;
 import hunt.framework.http.session.HttpSession;
 
 /**
-*/
+ * 
+ */
 class SessionStorage {
-	this(Cache cache) {
+	this(Cache cache, int expire = 3600) {
 		_cache = cache;
+		_expire = expire;
 	}
 
 	alias set = put;
@@ -84,9 +86,9 @@ class SessionStorage {
 		return str;
 	}
 
-	void setPrefix(string prefix) {
-		_prefix = prefix;
-	}
+	// void setPrefix(string prefix) {
+	// 	_prefix = prefix;
+	// }
 
 	void expire(int expire) @property {
 		_expire = expire;
@@ -108,7 +110,7 @@ class SessionStorage {
 		string _prefix;
 		string _sessionId;
 
-		int _expire;
+		int _expire = 3600;
 		Cache _cache;
 	}
 }

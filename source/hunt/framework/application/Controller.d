@@ -111,10 +111,10 @@ abstract class Controller
         return this.middlewares;
     }
 
-    Cache cache()
-    {
-        return app().cache();
-    }
+    // Cache cache()
+    // {
+    //     return app().cache();
+    // }
     
     protected final Response doMiddleware()
     {

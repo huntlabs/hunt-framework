@@ -1,5 +1,6 @@
 module hunt.framework.provider.ServiceProvider;
 
+import std.concurrency : initOnce;
 import poodinis;
 
 /**
@@ -20,17 +21,14 @@ abstract class ServiceProvider {
      */
     void register();
 
-
     /**
      * Bootstrap the application events.
      *
      * @return void
      */
-    void boot() {}
+    void boot() {
+    }
 }
-
-
-import std.concurrency : initOnce;
 
 private shared DependencyContainer _serviceContainer;
 

@@ -91,7 +91,7 @@ final class Application {
     private ApplicationConfig _appConfig;
     private EntityManagerFactory _entityManagerFactory;
 
-    private Cache _cache;
+    // private Cache _cache;
     private SessionStorage _sessionStorage;
     private WebSocketPolicy _webSocketPolicy;
     private WebSocketHandler[string] webSocketHandlerMap;
@@ -145,9 +145,9 @@ final class Application {
         return _sessionStorage;
     }
 
-    Cache cache() {
-        return _cache;
-    }
+    // Cache cache() {
+    //     return _cache;
+    // }
 
     // @property HttpServer server() {
     //     return _server;
@@ -200,11 +200,10 @@ final class Application {
         
         //
         initializeLogger();
-        // initializeLocale();
 
-        initializeCache();
+        // initializeCache();
         initializeDatabase();
-        initializeSessionStorage();
+        // initializeSessionStorage();
         version(WITH_HUNT_TRACE) { 
             initializeTracer();
         }
@@ -392,6 +391,8 @@ final class Application {
         register!RedisServiceProvider();
         register!I18nServiceProvider();
         register!BreadcrumbServiceProvider();
+        register!CacheServiceProvider();
+        register!SessionServiceProvider();
 
         // Register all the service provided by the providers
         ServiceProvider[] providers = serviceContainer().resolveAll!(ServiceProvider);
@@ -479,9 +480,9 @@ final class Application {
     }
 
 
-    private void initializeCache() {
-        _cache = CacheFactory.create(_appConfig.cache);
-    }
+    // private void initializeCache() {
+        // _cache = CacheFactory.create(_appConfig.cache);
+    // }
 
     private void initializeDatabase() {
         ApplicationConfig.DatabaseConf config = _appConfig.database;
@@ -522,13 +523,13 @@ final class Application {
         }
     }
 
-    private void initializeSessionStorage() {
-        ApplicationConfig.SessionConf config = _appConfig.session;
-        _sessionStorage = new SessionStorage(_cache);
+    // private void initializeSessionStorage() {
+    //     ApplicationConfig.SessionConf config = _appConfig.session;
+    //     _sessionStorage = new SessionStorage(_cache);
 
-        _sessionStorage.setPrefix(config.prefix);
-        _sessionStorage.expire = config.expire;
-    }
+    //     _sessionStorage.setPrefix(config.prefix);
+    //     _sessionStorage.expire = config.expire;
+    // }
 
     version(WITH_HUNT_TRACE) {
 
