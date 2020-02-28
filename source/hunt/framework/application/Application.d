@@ -274,16 +274,6 @@ final class Application {
         return r;
     }
 
-    // private void loadConfiguration() {
-    //     version(HUNT_DEBUG) infof("Loading config...");
-    //     _appConfig = configManager().config();
-    //     serviceContainer().register!(ApplicationConfig).existingInstance(_appConfig);
-
-    //     // Update some config items with environment variables
-
-    //     checkWorkerThreads();
-    // }
-
     private void showLogo() {
         Address bindingAddress = parseAddress(_appConfig.http.address, _appConfig.http.port);
         // dfmt off
@@ -480,23 +470,6 @@ final class Application {
         private bool _isB3HeaderRequired = true;
     } 
 
-    // private void checkWorkerThreads() {
-    //     // Worker pool
-    //     int minThreadCount = totalCPUs / 4 + 1;
-    //     if (_appConfig.http.workerThreads == 0)
-    //         _appConfig.http.workerThreads = minThreadCount;
-
-    //     if (_appConfig.http.workerThreads < minThreadCount) {
-    //         warningf("It's better to set the number of worker threads >= %d. The current is: %d",
-    //                 minThreadCount, _appConfig.http.workerThreads);
-    //         // _appConfig.http.workerThreads = minThreadCount;
-    //     }
-
-    //     if (_appConfig.http.workerThreads <= 1) {
-    //         _appConfig.http.workerThreads = 2;
-    //     }
-    // }
-    
     private void setDefaultLogging() {
         version (HUNT_DEBUG) {
         } else {
