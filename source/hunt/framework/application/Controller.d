@@ -60,7 +60,8 @@ abstract class Controller
     {
         if (_view is null)
         {
-            _view = GetViewObject();
+            // _view = GetViewObject();
+            _view = serviceContainer.resolve!View();
             // TODO: Tasks pending completion -@zhangxueping at 2020-01-02T18:16:11+08:00
             // 
             _view.setRouteGroup(_routingContext.groupName());

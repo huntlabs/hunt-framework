@@ -334,6 +334,7 @@ final class Application {
         register!SessionServiceProvider();
         register!DatabaseServiceProvider();
         register!HttpServiceProvider();
+        register!ViewServiceProvider();
 
         // Register all the service provided by the providers
         ServiceProvider[] providers = serviceContainer().resolveAll!(ServiceProvider);

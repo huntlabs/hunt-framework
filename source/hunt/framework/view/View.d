@@ -11,64 +11,55 @@
 
 module hunt.framework.view.View;
 
-public import hunt.framework.view.Environment;
-public import hunt.framework.view.Template;
-public import hunt.framework.view.Util;
-public import hunt.framework.view.Exception;
+import hunt.framework.view.Environment;
+import hunt.framework.view.Template;
+import hunt.framework.view.Util;
+import hunt.framework.view.Exception;
+import hunt.framework.Init;
 
-import hunt.framework.Simplify;
+// import hunt.framework.Simplify;
 
-public import hunt.util.Serialize;
-public import hunt.logging;
+import hunt.util.Serialize;
+import hunt.logging;
 
 import std.json : JSONValue;
 import std.path;
 
-class View
-{
-    private
-    {
+class View {
+    private {
         string _templatePath = "./views/";
         string _extName = ".html";
+        uint _arrayDepth = 3;
         Environment _env;
         string _routeGroup = DEFAULT_ROUTE_GROUP;
         JSONValue _context;
     }
 
-    this(Environment env)
-    {
-        _templatePath = buildPath(APP_PATH, config().view.path);
-        _extName = config().view.ext;
-
+    this(Environment env) {
         _env = env;
     }
 
-    public Environment env()
-    {
+    Environment env() {
         return _env;
     }
 
-    public View setTemplatePath(string path)
-    {
+    View setTemplatePath(string path) {
         _templatePath = path;
         _env.setTemplatePath(path);
 
         return this;
     }
 
-    public View setTemplateExt(string fileExt)
-    {
+    View setTemplateExt(string fileExt) {
         _extName = fileExt;
         return this;
     }
 
-    public string getTemplatePath()
-    {
+    string getTemplatePath() {
         return _templatePath;
     }
 
-    public View setRouteGroup(string rg)
-    {
+    View setRouteGroup(string rg) {
         _routeGroup = rg;
         //if (_routeGroup != DEFAULT_ROUTE_GROUP)
         _env.setRouteGroup(rg);
@@ -77,48 +68,49 @@ class View
         return this;
     }
 
-    public View setLocale(string locale)
-    {
+    View setLocale(string locale) {
         _env.setLocale(locale);
         return this;
     }
 
-    public string render(string tempalteFile)
-    {
+    int arrayDepth() {
+        return _arrayDepth;
+    }
+
+    View arrayDepth(int value) {
+        _arrayDepth = value;
+        return this;
+    }
+
+    string render(string tempalteFile) {
         version (HUNT_VIEW_DEBUG) {
-            tracef("---tempalteFile: %s, _extName:%s, rend context: %s", 
-                tempalteFile, _extName, _context.toString);
+            tracef("---tempalteFile: %s, _extName:%s, rend context: %s",
+                    tempalteFile, _extName, _context.toString);
         }
-        return _env.renderFile(tempalteFile ~ _extName,_context);
+        return _env.renderFile(tempalteFile ~ _extName, _context);
     }
 
-    public void assign(T)(string key, T t)
-    {
-        this.assign(key, toJson(t , config().view.arrayDepth));
+    void assign(T)(string key, T t) {
+        this.assign(key, toJson(t, _arrayDepth));
     }
 
-    public void assign(string key, JSONValue t)
-    {
+    void assign(string key, JSONValue t) {
         _context[key] = t;
     }
 }
 
-__gshared private Environment _envInstance;
+// __gshared private Environment _envInstance;
 
-View GetViewObject()
-{
-    import hunt.framework.application.ApplicationConfig;
-    if (_envInstance is null)
-    {
-        _envInstance = new Environment;
-    }
-    auto view = new View(_envInstance);
+// View GetViewObject()
+// {
+//     import hunt.framework.application.ApplicationConfig;
+//     auto view = new View(new Environment);
 
-    string path = buildNormalizedPath(APP_PATH, config().view.path);
+//     string path = buildNormalizedPath(APP_PATH, config().view.path);
 
-    version (HUNT_DEBUG) {
-        tracef("setting view path: %s", path);
-    }
-    view.setTemplatePath(path).setTemplateExt(config().view.ext);
-    return view;
-}
+//     version (HUNT_DEBUG) {
+//         tracef("setting view path: %s", path);
+//     }
+//     view.setTemplatePath(path).setTemplateExt(config().view.ext);
+//     return view;
+// }
