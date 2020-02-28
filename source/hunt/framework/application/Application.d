@@ -102,6 +102,7 @@ final class Application {
         provider.register();
         serviceContainer().register!(ServiceProvider, T)().existingInstance(provider);
         serviceContainer().autowire(provider);
+        _providerListener.registered(typeid(T));
     }
     private bool _isBooted = false;
 
@@ -146,7 +147,6 @@ final class Application {
      * https://laravel.com/docs/6.x/lifecycle
      */
     private void bootstrap() {
-        // Load environment variables
         // Load configuration
         // loadConfiguration();
 

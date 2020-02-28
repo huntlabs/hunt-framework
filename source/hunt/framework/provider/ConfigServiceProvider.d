@@ -21,7 +21,7 @@ class ConfigServiceProvider : ServiceProvider {
 
         container.register!(ApplicationConfig)(() {
             ConfigManager configManager = container.resolve!ConfigManager();
-            ApplicationConfig  config = configManager.config();
+            ApplicationConfig config = configManager.config();
             return config;
         }).singleInstance();
     }

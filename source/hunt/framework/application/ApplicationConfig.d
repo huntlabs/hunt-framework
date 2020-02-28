@@ -26,7 +26,7 @@ import hunt.logging.ConsoleLogger;
 import hunt.redis.RedisPoolConfig;
 import hunt.util.Configuration;
 
-
+// 
 enum ENV_APP_NAME = "APP_NAME";
 enum ENV_APP_VERSION = "APP_VERSION";
 enum ENV_APP_ENV = "APP_ENV";
@@ -268,8 +268,9 @@ import std.file;
 import std.path;
 import std.exception : basicExceptionCtors;
 
-/**
-*/
+/** 
+ * 
+ */
 class ConfigNotFoundException : Exception {
     mixin basicExceptionCtors;
 }
@@ -283,8 +284,13 @@ class ConfigManager {
 
             if (_fileName == DEFAULT_CONFIG_FILE) {
                 string huntEnv = environment.get("HUNT_ENV", "");
-                // version(HUNT_DEBUG) tracef("huntEnv=%s", huntEnv);
-                if (!huntEnv.empty) {
+                if (huntEnv.empty) {
+                    huntEnv = environment.get(ENV_APP_ENV, "");
+                }
+                
+                version(HUNT_DEBUG) tracef("%s=%s", ENV_APP_ENV, huntEnv);
+
+                if(!huntEnv.empty) {
                     _fileName = "application." ~ huntEnv ~ ".conf";
                 }
             }
@@ -334,6 +340,11 @@ class ConfigManager {
     }
 
     void load() {
+        string configBase = environment.get(ENV_CONFIG_BASE_PATH, "");
+        if(!configBase.empty) {
+            _path = configBase;
+        }
+
         string fullName = buildPath(APP_PATH, _path, _fileName);
         if (exists(fullName)) {
             infof("using the config file: %s", fullName);
@@ -344,6 +355,27 @@ class ConfigManager {
             warningf("The configure file does not exist: %s", fullName);
             _defaultBuilder = new ConfigBuilder();
             _appConfig = new ApplicationConfig();
+        }
+
+        // update the config item with the environment variable if it exists
+        string value = environment.get(ENV_APP_NAME, "");
+        if(!value.empty) {
+            _appConfig.application.name = value;
+        }
+
+        // value = environment.get(ENV_APP_VERSION, "");
+        // if(!value.empty) {
+        //     _appConfig.application.version = value;
+        // }
+
+        value = environment.get(ENV_APP_LANG, "");
+        if(!value.empty) {
+            _appConfig.application.defaultLanguage = value;
+        }
+
+        value = environment.get(ENV_APP_KEY, "");
+        if(!value.empty) {
+            _appConfig.application.secret = value;
         }
     }
 
