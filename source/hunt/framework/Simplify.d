@@ -12,10 +12,10 @@
 module hunt.framework.Simplify;
 
 public import hunt.framework.application.Application : app;
-public import hunt.framework.application.ApplicationConfig : configManager, ApplicationConfig;
+public import hunt.framework.application.ApplicationConfig : ApplicationConfig;
 public import hunt.util.DateTime : time, date;
 public import hunt.framework.Init;
-import hunt.framework.provider.ServiceProvider;
+import hunt.framework.provider;
 
 import hunt.logging.ConsoleLogger;
 
@@ -27,7 +27,8 @@ import std.json;
 
 ApplicationConfig config()
 {
-    return configManager().config();
+    // return configManager().config();
+    return serviceContainer().resolve!(ApplicationConfig);
 }
 
 string url(string mca) {

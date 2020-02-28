@@ -22,9 +22,19 @@ import std.string;
 
 import hunt.cache.CacheOption;
 import hunt.http.MultipartOptions;
-import hunt.logging;
+import hunt.logging.ConsoleLogger;
 import hunt.redis.RedisPoolConfig;
 import hunt.util.Configuration;
+
+
+enum ENV_APP_NAME = "APP_NAME";
+enum ENV_APP_VERSION = "APP_VERSION";
+enum ENV_APP_ENV = "APP_ENV";
+enum ENV_APP_LANG = "APP_LANG";
+enum ENV_APP_KEY = "APP_KEY";
+enum ENV_APP_BASE_PATH = "APP_BASE_PATH";
+enum ENV_CONFIG_BASE_PATH = "CONFIG_BASE_PATH";
+
 
 @Configuration("hunt")
 final class ApplicationConfig {
@@ -247,6 +257,7 @@ final class ApplicationConfig {
         upload.path = DEFAULT_TEMP_PATH;
         view.path = DEFAULT_TEMPLATE_PATH;
         application.langLocation = DEFAULT_LANGUAGE_PATH;
+        warning("111=>", application.langLocation);
     }
 }
 
@@ -322,7 +333,7 @@ class ConfigManager {
         _appConfig.http.port = port;
     }
 
-    ConfigManager load() {
+    void load() {
         string fullName = buildPath(APP_PATH, _path, _fileName);
         if (exists(fullName)) {
             infof("using the config file: %s", fullName);
@@ -334,8 +345,6 @@ class ConfigManager {
             _defaultBuilder = new ConfigBuilder();
             _appConfig = new ApplicationConfig();
         }
-
-        return this;
     }
 
     ConfigBuilder defaultBuilder() {
@@ -361,11 +370,12 @@ class ConfigManager {
         return config(s);
     }
 
-private:
     this() {
         _path = DEFAULT_CONFIG_PATH;
         _fileName = DEFAULT_CONFIG_FILE;
     }
+
+private:
 
     ConfigBuilder _defaultBuilder;
     ApplicationConfig _appConfig;
@@ -376,13 +386,13 @@ private:
     string _section = "";
 }
 
-ConfigManager configManager() {
-    return _manger;
-}
+// ConfigManager configManager() {
+//     return _manger;
+// }
 
-shared static this() {
-    _manger = new ConfigManager();
-}
+// shared static this() {
+//     _manger = new ConfigManager();
+// }
 
-private:
-__gshared ConfigManager _manger;
+// private:
+// __gshared ConfigManager _manger;

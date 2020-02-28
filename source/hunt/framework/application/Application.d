@@ -57,11 +57,10 @@ import std.string;
  */
 final class Application {
 
-    private string _name = "HuntApp";
-    private string _description = "An application bootstrapped by Hunt Framework";
-    private string _ver = "1.0.0";
+    private string _name = DEFAULT_APP_NAME;
+    private string _description = DEFAULT_APP_DESCRIPTION;
+    private string _ver = DEFAULT_APP_VERSION;
 
-    private Address _bindingAddress;
     private HttpServer _server;
     private ApplicationConfig _appConfig;
 
@@ -78,16 +77,18 @@ final class Application {
     }
 
     this() {
-        this("HuntApp", "1.0.0", "An application bootstrapped by Hunt Framework");
+        setDefaultLogging();
+        initializeProviderListener();
     }
 
-    this(string name, string ver = "1.0.0", string description = "") {
+    this(string name, string ver = DEFAULT_APP_VERSION, string description = DEFAULT_APP_DESCRIPTION) {
         _name = name;
         _ver = ver;
         _description = description;
         // serviceContainer() = new DependencyContainer();
 
         setDefaultLogging();
+        initializeProviderListener();
     }
 
     void register(T)() if(is(T : ServiceProvider)) {
@@ -98,9 +99,9 @@ final class Application {
 
         ServiceProvider provider = new T();
         provider._container = serviceContainer();
-        // provider.register();
+        provider.register();
         serviceContainer().register!(ServiceProvider, T)().existingInstance(provider);
-        // serviceContainer().autowire(provider);
+        serviceContainer().autowire(provider);
     }
     private bool _isBooted = false;
 
@@ -108,13 +109,14 @@ final class Application {
       Start the HttpServer , and block current thread.
      */
     void run(string[] args) {
+        register!ConfigServiceProvider();
 
         if (args.length > 1) {
             ServeCommand serveCommand = new ServeCommand();
             serveCommand.onInput((ServeSignature signature) {
                 version (HUNT_DEBUG)
                     tracef(signature.to!string);
-                ConfigManager manager = configManager();
+                ConfigManager manager = serviceContainer().resolve!ConfigManager;
                 manager.configPath = signature.configPath;
                 manager.configFile = signature.configFile;
                 manager.load();
@@ -146,7 +148,11 @@ final class Application {
     private void bootstrap() {
         // Load environment variables
         // Load configuration
-        loadConfiguration();
+        // loadConfiguration();
+
+        // 
+        initializeProviders();
+        _appConfig = serviceContainer().resolve!ApplicationConfig();
         
         //
         initializeLogger();
@@ -155,8 +161,6 @@ final class Application {
             initializeTracer();
         }
 
-        // 
-        initializeProviders();
         
         // Resolve the HTTP server
         _server = serviceContainer.resolve!(HttpServer);
@@ -173,11 +177,6 @@ final class Application {
         // foreach(WebSocketMessageBroker b; messageBrokers) {
         //     b.listen();
         // }
-
-        if (_server.getHttpOptions().isSecureConnectionEnabled())
-            writeln("Try to browse https://", _bindingAddress.toString());
-        else
-            writeln("Try to browse http://", _bindingAddress.toString());
 
         _server.start();
     }
@@ -275,25 +274,25 @@ final class Application {
         return r;
     }
 
-    private void loadConfiguration() {
-        version(HUNT_DEBUG) infof("Loading config...");
+    // private void loadConfiguration() {
+    //     version(HUNT_DEBUG) infof("Loading config...");
+    //     _appConfig = configManager().config();
+    //     serviceContainer().register!(ApplicationConfig).existingInstance(_appConfig);
 
-        // _configRootPath = configManager().configPath();
-        _appConfig = configManager().config();
-        serviceContainer().register!(ApplicationConfig)().existingInstance(_appConfig);
-        _bindingAddress = parseAddress(_appConfig.http.address, _appConfig.http.port);
-        
-        checkWorkerThreads();
-    }
+    //     // Update some config items with environment variables
+
+    //     checkWorkerThreads();
+    // }
 
     private void showLogo() {
+        Address bindingAddress = parseAddress(_appConfig.http.address, _appConfig.http.port);
         // dfmt off
         string cliText = `
 
  ___  ___     ___  ___     ________      _________   
 |\  \|\  \   |\  \|\  \   |\   ___  \   |\___   ___\     Hunt Framework ` ~ HUNT_VERSION ~ `
 \ \  \\\  \  \ \  \\\  \  \ \  \\ \  \  \|___ \  \_|     
- \ \   __  \  \ \  \\\  \  \ \  \\ \  \      \ \  \      Listening: ` ~ _bindingAddress.toString() ~ `
+ \ \   __  \  \ \  \\\  \  \ \  \\ \  \      \ \  \      Listening: ` ~ bindingAddress.toString() ~ `
   \ \  \ \  \  \ \  \\\  \  \ \  \\ \  \      \ \  \     TLS: ` ~ (_server.getHttpOptions().isSecureConnectionEnabled() ? "Enabled" : "Disabled") ~ `
    \ \__\ \__\  \ \_______\  \ \__\\ \__\      \ \__\    
     \|__|\|__|   \|_______|   \|__| \|__|       \|__|    https://www.huntframework.com
@@ -301,6 +300,11 @@ final class Application {
 `;
         writeln(cliText);
         // dfmt on
+        
+        if (_server.getHttpOptions().isSecureConnectionEnabled())
+            writeln("Try to browse https://", bindingAddress.toString());
+        else
+            writeln("Try to browse http://", bindingAddress.toString());
     }
 
     Application providerLisener(ServiceProviderListener listener)
@@ -317,24 +321,20 @@ final class Application {
 
     private void initializeProviderListener()
     {
-        if (_providerListener is null)
-        {
-            _providerListener = new class ServiceProviderListener {
-                void registered(TypeInfo_Class info)
-                {
-                    version(HUNT_DEBUG) tracef("Service Provider Loaded: %s", info.toString());
-                }
+        _providerListener = new class ServiceProviderListener {
+            void registered(TypeInfo_Class info)
+            {
+                version(HUNT_DEBUG) tracef("Service Provider Loaded: %s", info.toString());
+            }
 
-                void booted(TypeInfo_Class info)
-                {
-                    version(HUNT_DEBUG) tracef("Service Provider Booted: %s", info.toString());
-                }
-            };
-        }
+            void booted(TypeInfo_Class info)
+            {
+                version(HUNT_DEBUG) tracef("Service Provider Booted: %s", info.toString());
+            }
+        };
     }
 
     private void initializeProviders() {
-        initializeProviderListener();
 
         // Register all the default service providers
         register!RedisServiceProvider();
@@ -349,11 +349,11 @@ final class Application {
         ServiceProvider[] providers = serviceContainer().resolveAll!(ServiceProvider);
         infof("Registering service providers (%d)...", providers.length);
 
-        foreach(ServiceProvider p; providers) {
-            p.register();
-            _providerListener.registered(typeid(p));
-            serviceContainer().autowire(p);
-        }
+        // foreach(ServiceProvider p; providers) {
+        //     p.register();
+        //     _providerListener.registered(typeid(p));
+        //     serviceContainer().autowire(p);
+        // }
 
         // Booting all the providers
         infof("Booting service providers (%d)...", providers.length);
@@ -366,7 +366,6 @@ final class Application {
     }
 
     private void initializeLogger() {
-        // ApplicationConfig appConfig = serviceContainer().resolve!ApplicationConfig();
         ApplicationConfig.LoggingConfig conf = _appConfig.logging;
         version (HUNT_DEBUG) {
             hunt.logging.LogLevel level = hunt.logging.LogLevel.Trace;
@@ -481,22 +480,22 @@ final class Application {
         private bool _isB3HeaderRequired = true;
     } 
 
-    private void checkWorkerThreads() {
-        // Worker pool
-        int minThreadCount = totalCPUs / 4 + 1;
-        if (_appConfig.http.workerThreads == 0)
-            _appConfig.http.workerThreads = minThreadCount;
+    // private void checkWorkerThreads() {
+    //     // Worker pool
+    //     int minThreadCount = totalCPUs / 4 + 1;
+    //     if (_appConfig.http.workerThreads == 0)
+    //         _appConfig.http.workerThreads = minThreadCount;
 
-        if (_appConfig.http.workerThreads < minThreadCount) {
-            warningf("It's better to set the number of worker threads >= %d. The current is: %d",
-                    minThreadCount, _appConfig.http.workerThreads);
-            // _appConfig.http.workerThreads = minThreadCount;
-        }
+    //     if (_appConfig.http.workerThreads < minThreadCount) {
+    //         warningf("It's better to set the number of worker threads >= %d. The current is: %d",
+    //                 minThreadCount, _appConfig.http.workerThreads);
+    //         // _appConfig.http.workerThreads = minThreadCount;
+    //     }
 
-        if (_appConfig.http.workerThreads <= 1) {
-            _appConfig.http.workerThreads = 2;
-        }
-    }
+    //     if (_appConfig.http.workerThreads <= 1) {
+    //         _appConfig.http.workerThreads = 2;
+    //     }
+    // }
     
     private void setDefaultLogging() {
         version (HUNT_DEBUG) {

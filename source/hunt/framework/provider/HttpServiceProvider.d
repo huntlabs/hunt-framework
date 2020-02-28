@@ -40,8 +40,8 @@ class HttpServiceProvider : ServiceProvider {
     }
 
     private HttpServer buildServer() {
-
-        _configRootPath = configManager().configPath();
+        ConfigManager manager = container.resolve!ConfigManager;
+        _configRootPath = manager.configPath();
         ApplicationConfig appConfig = container.resolve!ApplicationConfig();
         // SimpleWebSocketHandler webSocketHandler = new SimpleWebSocketHandler();
         // webSocketHandler.setWebSocketPolicy(_webSocketPolicy);
@@ -173,7 +173,7 @@ class HttpServiceProvider : ServiceProvider {
                 version (HUNT_FM_DEBUG)
                     infof("route group: %s", groupInfo);
 
-                string routeConfigFile = groupInfo.name ~ ROUTE_CONFIG_EXT;
+                string routeConfigFile = groupInfo.name ~ DEFAULT_ROUTE_CONFIG_EXT;
                 routeConfigFile = buildPath(_configRootPath, routeConfigFile);
 
                 if (!exists(routeConfigFile)) {

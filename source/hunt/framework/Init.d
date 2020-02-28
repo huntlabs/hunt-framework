@@ -16,10 +16,6 @@ public import hunt.framework.Version;
 import std.path : buildPath, dirName;
 import std.file : thisExePath;
 
-// APP_BASE_PATH
-// APP_NAME
-// APP_ENV
-// APP_KEY
 
 __gshared string APP_PATH;
 __gshared string DEFAULT_CONFIG_PATH = "config/";
@@ -33,6 +29,11 @@ __gshared string DEFAULT_LOG_PATH = "logs/";
 __gshared string DEFAULT_SESSION_PATH = "session/";
 
 
+enum string DEFAULT_APP_NAME = "HuntApp";
+enum string DEFAULT_APP_VERSION = "1.0.0";
+enum string DEFAULT_APP_DESCRIPTION = "An application bootstrapped by Hunt Framework";
+enum string DEFAULT_APP_Locale = "en-US";
+
 enum string DEFAULT_CONFIG_LACATION = "config/";
 enum string DEFAULT_STATIC_FILES_LACATION = "wwwroot/";
 
@@ -41,7 +42,7 @@ enum string DEFAULT_ROUTE_CONFIG = "./routes";
 
 // default route group name
 enum string DEFAULT_ROUTE_GROUP = "default";
-enum string ROUTE_CONFIG_EXT = ".routes";
+enum string DEFAULT_ROUTE_CONFIG_EXT = ".routes";
 
 
 shared static this()

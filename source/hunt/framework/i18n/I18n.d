@@ -38,6 +38,7 @@ class I18n {
     bool loadLangResources(string path, lazy string ext = "ini") {
         _isResLoaded = false;
         if(!path.exists()) {
+            warningf("The resource does not exist: %s", path);
             return false;
         }
         auto resfiles = std.file.dirEntries(path, "*.{" ~ ext ~ "}", SpanMode.depth).filter!(a => a.isFile)
