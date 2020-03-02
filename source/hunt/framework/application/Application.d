@@ -14,7 +14,8 @@ module hunt.framework.application.Application;
 import hunt.logging;
 
 import hunt.http.server.HttpServer;
-import hunt.http.server.WebSocketHandler;
+import hunt.http.server.HttpServerOptions;
+// import hunt.http.server.WebSocketHandler;
 import hunt.http.WebSocketPolicy;
 import hunt.http.WebSocketCommon;
 
@@ -62,10 +63,11 @@ final class Application {
     private string _ver = DEFAULT_APP_VERSION;
 
     private HttpServer _server;
+    private HttpServerOptions _serverOptions;
     private ApplicationConfig _appConfig;
 
-    private WebSocketPolicy _webSocketPolicy;
-    private WebSocketHandler[string] webSocketHandlerMap;
+    // private WebSocketPolicy _webSocketPolicy;
+    // private WebSocketHandler[string] webSocketHandlerMap;
     private MiddlewareInterface[string][string] _groupMiddlewares;
 
     private __gshared Application _app;
@@ -147,9 +149,6 @@ final class Application {
      * https://laravel.com/docs/6.x/lifecycle
      */
     private void bootstrap() {
-        // Load configuration
-        // loadConfiguration();
-
         // 
         initializeProviders();
         _appConfig = serviceContainer().resolve!ApplicationConfig();
@@ -161,41 +160,15 @@ final class Application {
             initializeTracer();
         }
 
-        
         // Resolve the HTTP server
         _server = serviceContainer.resolve!(HttpServer);
+        _serverOptions = _server.getHttpOptions();
 
         //
         showLogo();
 
-        // foreach(WebSocketBuilder b; webSocketBuilders) {
-        //     b.listenWebSocket();
-        // }
-
-        // if(_broker !is null)
-        //     _broker.listen();
-        // foreach(WebSocketMessageBroker b; messageBrokers) {
-        //     b.listen();
-        // }
-
         _server.start();
     }
-
-    // Application registerWebSocket(string uri, WebSocketHandler webSocketHandler) {
-    //     webSocketHandlerMap[uri] = webSocketHandler;
-    //     return this;
-    // }
-
-    // Application webSocketPolicy(WebSocketPolicy w) {
-    //     this._webSocketPolicy = w;
-    //     return this;
-    // }
-
-    // WebSocketBuilder webSocket(string path) {
-    //     WebSocketBuilder webSocketBuilder = new WebSocketBuilder(path);
-    //     webSocketBuilders.insertBack(webSocketBuilder);
-    //     return webSocketBuilder;
-    // }
 
     Application addGroupMiddleware(MiddlewareInterface mw, string group = "default") {
         _groupMiddlewares[group][mw.name()] = mw;
@@ -275,7 +248,8 @@ final class Application {
     }
 
     private void showLogo() {
-        Address bindingAddress = parseAddress(_appConfig.http.address, _appConfig.http.port);
+        Address bindingAddress = parseAddress(_serverOptions.getHost(), cast(ushort)_serverOptions.getPort());
+        
         // dfmt off
         string cliText = `
 
@@ -283,7 +257,7 @@ final class Application {
 |\  \|\  \   |\  \|\  \   |\   ___  \   |\___   ___\     Hunt Framework ` ~ HUNT_VERSION ~ `
 \ \  \\\  \  \ \  \\\  \  \ \  \\ \  \  \|___ \  \_|     
  \ \   __  \  \ \  \\\  \  \ \  \\ \  \      \ \  \      Listening: ` ~ bindingAddress.toString() ~ `
-  \ \  \ \  \  \ \  \\\  \  \ \  \\ \  \      \ \  \     TLS: ` ~ (_server.getHttpOptions().isSecureConnectionEnabled() ? "Enabled" : "Disabled") ~ `
+  \ \  \ \  \  \ \  \\\  \  \ \  \\ \  \      \ \  \     TLS: ` ~ (_serverOptions.isSecureConnectionEnabled() ? "Enabled" : "Disabled") ~ `
    \ \__\ \__\  \ \_______\  \ \__\\ \__\      \ \__\    
     \|__|\|__|   \|_______|   \|__| \|__|       \|__|    https://www.huntframework.com
 
@@ -291,7 +265,7 @@ final class Application {
         writeln(cliText);
         // dfmt on
         
-        if (_server.getHttpOptions().isSecureConnectionEnabled())
+        if (_serverOptions.isSecureConnectionEnabled())
             writeln("Try to browse https://", bindingAddress.toString());
         else
             writeln("Try to browse http://", bindingAddress.toString());

@@ -257,7 +257,6 @@ final class ApplicationConfig {
         upload.path = DEFAULT_TEMP_PATH;
         view.path = DEFAULT_TEMPLATE_PATH;
         application.langLocation = DEFAULT_LANGUAGE_PATH;
-        warning("111=>", application.langLocation);
     }
 }
 
