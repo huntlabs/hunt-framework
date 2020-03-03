@@ -16,6 +16,7 @@ public import hunt.framework.http.Request;
 public import hunt.framework.http.Response;
 public import hunt.framework.http.FileResponse;
 public import hunt.framework.http.JsonResponse;
+public import hunt.framework.http.NotFoundResponse;
 public import hunt.framework.http.RedirectResponse;
 public import hunt.framework.http.session;
 public import hunt.framework.http.Form;

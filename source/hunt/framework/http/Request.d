@@ -11,94 +11,117 @@
 
 module hunt.framework.http.Request;
 
-// import hunt.http.codec.http.model;
-// import hunt.http.HttpConnection;
-// import hunt.http.codec.http.stream.HttpOutputStream;
-// import hunt.net.util.UrlEncoded;
+import hunt.framework.file.UploadedFile;
+import hunt.framework.http.session.SessionStorage;
 
-// import hunt.collection;
-// import hunt.io;
-// import hunt.logging;
-// import hunt.Exceptions;
-// import hunt.util.Common;
-// import hunt.util.MimeTypeUtils;
+import hunt.http.HttpMethod;
+import hunt.http.HttpHeader;
+import hunt.http.MultipartForm;
+import hunt.http.server.HttpServerRequest;
+import hunt.http.server.HttpSession;
 
-// import hunt.framework.application.ApplicationConfig;
-// import hunt.framework.Simplify;
-// import hunt.framework.Exceptions;
-// import hunt.framework.http.session;
-// import hunt.framework.Init;
-// import hunt.framework.routing.Route;
-// import hunt.framework.routing.Define;
-// import hunt.framework.security.acl.User;
-// import hunt.framework.file.UploadedFile;
-// import hunt.Functions;
+import std.algorithm;
+import std.range;
 
-// import core.time : MonoTime, Duration;
-// import std.algorithm;
-// import std.array;
-// import std.container.array;
-// import std.conv;
-// import std.digest;
-// import std.digest.sha;
-// import std.exception;
-// import std.file;
-// import std.json;
-// import std.path;
-// import std.regex;
-// import std.string;
-// import std.socket : Address;
+/**
+ * 
+ */
+class Request {
+
+    private HttpSession _session;
+    private SessionStorage _sessionStorage;
+    private bool _isMultipart = false;
+    private bool _isXFormUrlencoded = false;
+    private UploadedFile[] _convertedAllFiles;
+    private UploadedFile[][string] _convertedMultiFiles;
+
+    HttpServerRequest _request;
+
+    alias _request this;
+
+    this(HttpServerRequest request) {
+        this._request = request;
+    }
+
+    /**
+     * Determine if the uploaded data contains a file.
+     *
+     * @param  string  key
+     * @return bool
+     */
+    bool hasFile(string key) {
+        if (!isMultipartForm()) {
+            return false;
+        } else {
+            checkUploadedFiles();
+
+            if (_convertedMultiFiles !is null && _convertedMultiFiles.get(key, null) is null) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    private void checkUploadedFiles() {
+        if (_convertedAllFiles.empty()) {
+            convertUploadedFiles();
+        }
+    }
+
+    private void convertUploadedFiles() {
+        foreach (Part part; _request.getParts()) {
+            MultipartForm multipart = cast(MultipartForm) part;
+
+            version (HUNT_DEBUG) {
+                tracef("File: key=%s, fileName=%s, actualFile=%s, ContentType=%s, content=%s",
+                        multipart.getName(), multipart.getSubmittedFileName(),
+                        multipart.getFile(), multipart.getContentType(),
+                        cast(string) multipart.getBytes());
+            }
+
+            string contentType = multipart.getContentType();
+            string submittedFileName = multipart.getSubmittedFileName();
+            string key = multipart.getName();
+            if (!submittedFileName.empty) {
+                // TODO: for upload failed? What's the errorCode? use multipart.isWriteToFile?
+                int errorCode = 0;
+                multipart.flush();
+                auto file = new UploadedFile(multipart.getFile(),
+                        submittedFileName, contentType, errorCode);
+
+                this._convertedMultiFiles[key] ~= file;
+                this._convertedAllFiles ~= file;
+            }
+        }
+    }
 
 
-// version(WITH_HUNT_TRACE) {
-//     import hunt.trace.Tracer;
-// }
+    /**
+     * Retrieve a file from the request.
+     *
+     * @param  string  key
+     * @param  mixed default
+     * @return UploadedFile
+     */
+    UploadedFile file(string key)
+    {
+        if (this.hasFile(key))
+        {
+            return this._convertedMultiFiles[key][0];
+        }
 
-// alias RequestEventHandler = void delegate(Request sender);
-// alias Closure = RequestEventHandler;
+        return null;
+    }
 
-// final class Request {
-//     private HttpRequest _request;
-//     private HttpResponse _response;
-//     private SessionStorage _sessionStorage;
+    UploadedFile[] files(string key)
+    {
+        if (this.hasFile(key))
+        {
+            return this._convertedMultiFiles[key];
+        }
 
-//     private UrlEncoded urlEncodedMap;
-//     private Cookie[] _cookies;
-//     private HttpSession _session;
-//     private MonoTime _monoCreated;
-//     private Object[string] _attributes;
-
-//     HttpConnection _connection;
-//     // Action1!ByteBuffer content;
-//     // Action1!Request contentComplete;
-//     // Action1!Request messageComplete;
-//     package(hunt.framework.http) HttpOutputStream outputStream;
-//     package(hunt.framework) List!(ByteBuffer) requestBody;
-
-//     RequestEventHandler routeResolver;
-//     RequestEventHandler userResolver;
-
-//     this(HttpRequest request, HttpResponse response, HttpOutputStream output,
-//             HttpConnection connection, SessionStorage sessionStorage) {
-//         _monoCreated = MonoTime.currTime;
-//         requestBody = new ArrayList!(ByteBuffer)();
-//         this._request = request;
-//         this.outputStream = output;
-//         this._response = response;
-//         this._connection = connection;
-//         this._sessionStorage = sessionStorage;
-//         this.urlEncodedMap = new UrlEncoded();
-//         // response.setStatus(HttpStatus.OK_200);
-//         // response.setHttpVersion(HttpVersion.HTTP_1_1);
-//         // this._response = new Response(response, output, request.getURI(), bufferSize);
-//         handleQueryParameters();
-
-//         .request(this);
-//     }
-
-// version(WITH_HUNT_TRACE) {
-//     Tracer tracer;
-// }
+        return null;
+    }
 
 //     // alias _request this;
 //     @property int elapsed()    {
@@ -186,7 +209,7 @@ module hunt.framework.http.Request;
 //             version (HUNT_DEBUG) info("temp dir for upload: ",tempDir);
 //             // ByteBuffer buffer = requestBody.get(0);
 //             // ByteArrayInputStream inputStream = new ByteArrayInputStream(BufferUtils.toArray(buffer));
-            
+
 //             this.convertUploadedFiles(new MultipartFormInputStream(inputStream, 
 //                 _httpFields.get(HttpHeader.CONTENT_TYPE), config.multipartConfig, tempDir));
 //         } else {
@@ -202,7 +225,7 @@ module hunt.framework.http.Request;
 //     {
 //         foreach (Part part; multipartForm.getParts())
 //         {
-//             MultipartFormInputStream.MultiPart multipart = cast(MultipartFormInputStream.MultiPart) part;
+//             MultipartForm multipart = cast(MultipartForm) part;
 
 //             version(HUNT_DEBUG) {
 //                 tracef("File: key=%s, fileName=%s, actualFile=%s, ContentType=%s, content=%s",
@@ -219,7 +242,7 @@ module hunt.framework.http.Request;
 //                 multipart.flush();
 //                 auto file = new UploadedFile(multipart.getFile(), submittedFileName, 
 //                     contentType, errorCode);
-    
+
 //                 this._convertedMultiFiles[key] ~= file;
 //                 this._convertedAllFiles ~= file;
 //             } else {
@@ -275,13 +298,13 @@ module hunt.framework.http.Request;
 //         return getFields().get(key);
 //     }
 
-//     bool headerExists(HttpHeader code) {
-//         return getFields().contains(code);
-//     }
+    bool headerExists(HttpHeader code) {
+        return getFields().contains(code);
+    }
 
-//     bool headerExists(string key) {
-//         return getFields().containsKey(key);
-//     }
+    bool headerExists(string key) {
+        return getFields().containsKey(key);
+    }
 
 //     // int headersForeach(scope int delegate(string key, string value) each)
 //     // {
@@ -312,39 +335,39 @@ module hunt.framework.http.Request;
 //         return "";
 //     }
 
-//     @property Address clientAddress() {
-//         return _connection.getTcpConnection().getRemoteAddress();
-//     }
+    // @property Address clientAddress() {
+    //     return _connection.getTcpConnection().getRemoteAddress();
+    // }
 
-//     @property string ip() {
-//         string s = this.header(HttpHeader.X_FORWARDED_FOR);
-//         if(s.empty) {
-//             s = this.header("Proxy-Client-IP");
-//         } else {
-//             auto arr = s.split(",");
-//             if(arr.length >= 0)
-//                 s = arr[0];
-//         }
+    @property string ip() {
+        string s = this.header(HttpHeader.X_FORWARDED_FOR);
+        if(s.empty) {
+            s = this.header("Proxy-Client-IP");
+        } else {
+            auto arr = s.split(",");
+            if(arr.length >= 0)
+                s = arr[0];
+        }
 
-//         if(s.empty) {
-//             s = this.header("WL-Proxy-Client-IP");
-//         }
+        if(s.empty) {
+            s = this.header("WL-Proxy-Client-IP");
+        }
 
-//         if(s.empty) {
-//             s = this.header("HTTP_CLIENT_IP");
-//         }
+        if(s.empty) {
+            s = this.header("HTTP_CLIENT_IP");
+        }
 
-//         if(s.empty) {
-//             s = this.header("HTTP_X_FORWARDED_FOR");
-//         } 
+        if(s.empty) {
+            s = this.header("HTTP_X_FORWARDED_FOR");
+        } 
 
-//         if(s.empty) {
-//             Address ad = clientAddress();
-//             s = ad.toAddrString();
-//         }
+        // if(s.empty) {
+        //     Address ad = clientAddress();
+        //     s = ad.toAddrString();
+        // }
 
-//         return s;
-//     }    
+        return s;
+    }    
 
 //     @property JSONValue json() {
 //         if (_json == JSONValue.init)
@@ -424,7 +447,6 @@ module hunt.framework.http.Request;
 
 //     private string[][string] _xFormData;
 
-
 //     T bindForm(T)() {
 
 //         if(methodAsString() != "POST")
@@ -449,7 +471,7 @@ module hunt.framework.http.Request;
 
 //         // return (obj is null) ? (new T()) : obj;
 //     }
-    
+
 //     /**
 //    * Sets the query parameter with the specified name to the specified value.
 //    *
@@ -552,13 +574,13 @@ module hunt.framework.http.Request;
 //         return canFind(acceptable[0], "/json") || canFind(acceptable[0], "+json");
 //     }
 
-//     private static bool isContained(string source, string[] keys) {
-//         foreach (string k; keys) {
-//             if (canFind(source, k))
-//                 return true;
-//         }
-//         return false;
-//     }
+    private static bool isContained(string source, string[] keys) {
+        foreach (string k; keys) {
+            if (canFind(source, k))
+                return true;
+        }
+        return false;
+    }
 
 //     @property bool accepts(string[] contentTypes) {
 //         string[] acceptTypes = getAcceptableContentTypes();
@@ -786,71 +808,71 @@ module hunt.framework.http.Request;
 
 //     }
 
-//     string getMCA()
-//     {
-//         string mca;
-//         if (request.route.getModule() is null)
-//         {
-//             mca = request.route.getController() ~ "." ~ request.route.getAction();
-//         }
-//         else
-//         {
-//             mca = request.route.getModule() ~ "." ~ request.route.getController()
-//                 ~ "." ~ request.route.getAction();
-//         }
-//         return mca;
-//     }
+    // string getMCA()
+    // {
+    //     string mca;
+    //     if (request.route.getModule() is null)
+    //     {
+    //         mca = request.route.getController() ~ "." ~ request.route.getAction();
+    //     }
+    //     else
+    //     {
+    //         mca = request.route.getModule() ~ "." ~ request.route.getController()
+    //             ~ "." ~ request.route.getAction();
+    //     }
+    //     return mca;
+    // }
 
-//     /**
-//      * Flush all of the old input from the session.
-//      *
-//      * @return void
-//      */
-//     void flush() {
-//         if (_session !is null)
-//             _sessionStorage.put(_session);
-//     }
+    /**
+     * Flush all of the old input from the session.
+     *
+     * @return void
+     */
+    void flush() {
+        if (_session !is null)
+            _sessionStorage.put(_session);
+    }
 
-//     /**
-//      * Gets the HttpSession.
-//      *
-//      * @return HttpSession|null The session
-//      */
-//     @property HttpSession session(bool canCreate = true) {
-//         if (_session !is null || isSessionRetrieved)
-//             return _session;
+    /**
+     * Gets the HttpSession.
+     *
+     * @return HttpSession|null The session
+     */
+    @property HttpSession session(bool canCreate = true) {
+        if (_session !is null || isSessionRetrieved)
+            return _session;
 
-//         string sessionId = this.cookie(DefaultSessionIdName);
-//         isSessionRetrieved = true;
-//         if (!sessionId.empty) {
-//             _session = _sessionStorage.get(sessionId);
-//             _session.setMaxInactiveInterval(_sessionStorage.expire);
-//             version(HUNT_HTTP_DEBUG) tracef("existed session: %s, expire: %d", sessionId, _session.getMaxInactiveInterval());
-//         }
+        string sessionId = this.cookie(DefaultSessionIdName);
+        isSessionRetrieved = true;
+        if (!sessionId.empty) {
+            _session = _sessionStorage.get(sessionId);
+            _session.setMaxInactiveInterval(_sessionStorage.expire);
+            version(HUNT_HTTP_DEBUG) tracef("existed session: %s, expire: %d", sessionId, _session.getMaxInactiveInterval());
+        }
 
-//         if (_session is null && canCreate) {
-//             sessionId = HttpSession.generateSessionId();
-//             version(HUNT_DEBUG) infof("new session: %s, expire: %d", sessionId, _sessionStorage.expire);
-//             _session = HttpSession.create(sessionId, _sessionStorage.expire);
-//         }
+        if (_session is null && canCreate) {
+            sessionId = HttpSession.generateSessionId();
+            version(HUNT_DEBUG) infof("new session: %s, expire: %d", sessionId, _sessionStorage.expire);
+            _session = HttpSession.create(sessionId, _sessionStorage.expire);
+        }
 
-//         return _session;
-//     }
+        return _session;
+    }
 
-//     private bool isSessionRetrieved = false;
+    private bool isSessionRetrieved = false;
 
-//     /**
-//      * Whether the request contains a HttpSession object.
-//      *
-//      * This method does not give any information about the state of the session object,
-//      * like whether the session is started or not. It is just a way to check if this Request
-//      * is associated with a HttpSession instance.
-//      *
-//      * @return bool true when the Request contains a HttpSession object, false otherwise
-//      */
-//     bool hasSession() {
-//         return session() !is null;
-//     }
+    /**
+     * Whether the request contains a HttpSession object.
+     *
+     * This method does not give any information about the state of the session object,
+     * like whether the session is started or not. It is just a way to check if this Request
+     * is associated with a HttpSession instance.
+     *
+     * @return bool true when the Request contains a HttpSession object, false otherwise
+     */
+    bool hasSession() {
+        return session() !is null;
+    }
 
 //     // string[] server(string key = null, string[] defaults = null) {
 //     //     throw new NotImplementedException("server");
@@ -890,74 +912,74 @@ module hunt.framework.http.Request;
 //             return r;
 //     }
 
-//     /**
-//      * Get the bearer token from the request headers.
-//      *
-//      * @return string|null
-//      */
-//     string bearerToken() {
-//         string v = header("Authorization", "");
-//         if (startsWith(v, "Bearer ") >= 0)
-//             return v[7 .. $];
-//         return null;
-//     }
+    /**
+     * Get the bearer token from the request headers.
+     *
+     * @return string|null
+     */
+    string bearerToken() {
+        string v = _request.header("Authorization");
+        if (startsWith(v, "Bearer ") >= 0)
+            return v[7 .. $];
+        return null;
+    }
 
-//     /**
-//      * Determine if the request contains a given input item key.
-//      *
-//      * @param  string|array key
-//      * @return bool
-//      */
-//     bool exists(string key) {
-//         return has([key]);
-//     }
+    /**
+     * Determine if the request contains a given input item key.
+     *
+     * @param  string|array key
+     * @return bool
+     */
+    bool exists(string key) {
+        return has([key]);
+    }
 
-//     /**
-//      * Determine if the request contains a given input item key.
-//      *
-//      * @param  string|array  key
-//      * @return bool
-//      */
-//     bool has(string[] keys) {
-//         string[string] dict = this.all();
-//         foreach (string k; keys) {
-//             string* p = (k in dict);
-//             if (p is null)
-//                 return false;
-//         }
-//         return true;
-//     }
+    /**
+     * Determine if the request contains a given input item key.
+     *
+     * @param  string|array  key
+     * @return bool
+     */
+    bool has(string[] keys) {
+        string[string] dict = this.all();
+        foreach (string k; keys) {
+            string* p = (k in dict);
+            if (p is null)
+                return false;
+        }
+        return true;
+    }
 
-//     /**
-//      * Determine if the request contains any of the given inputs.
-//      *
-//      * @param  dynamic  key
-//      * @return bool
-//      */
-//     bool hasAny(string[] keys...) {
-//         string[string] dict = this.all();
-//         foreach (string k; keys) {
-//             string* p = (k in dict);
-//             if (p is null)
-//                 return true;
-//         }
-//         return false;
-//     }
+    /**
+     * Determine if the request contains any of the given inputs.
+     *
+     * @param  dynamic  key
+     * @return bool
+     */
+    bool hasAny(string[] keys...) {
+        string[string] dict = this.all();
+        foreach (string k; keys) {
+            string* p = (k in dict);
+            if (p is null)
+                return true;
+        }
+        return false;
+    }
 
-//     /**
-//      * Determine if the request contains a non-empty value for an input item.
-//      *
-//      * @param  string|array  key
-//      * @return bool
-//      */
-//     bool filled(string[] keys) {
-//         foreach (string k; keys) {
-//             if (k.empty)
-//                 return false;
-//         }
+    /**
+     * Determine if the request contains a non-empty value for an input item.
+     *
+     * @param  string|array  key
+     * @return bool
+     */
+    bool filled(string[] keys) {
+        foreach (string k; keys) {
+            if (k.empty)
+                return false;
+        }
 
-//         return true;
-//     }
+        return true;
+    }
 
 //     /**
 //      * Get the keys for all of the input and files.
@@ -970,47 +992,47 @@ module hunt.framework.http.Request;
 //         return this.input().keys;
 //     }
 
-//     /**
-//      * Get all of the input and files for the request.
-//      *
-//      * @param  array|mixed  keys
-//      * @return array
-//      */
-//     string[string] all(string[] keys = null) {
-//         string[string] inputs = this.input();
-//         if (keys is null) {
-//             // HttpForm.FormFile[string]  files = this.allFiles;
-//             // foreach(string k; files.byKey)
-//             // {
-//             //     inputs[k] = files[k].fileName;
-//             // }
-//             return inputs;
-//         }
+    /**
+     * Get all of the input and files for the request.
+     *
+     * @param  array|mixed  keys
+     * @return array
+     */
+    string[string] all(string[] keys = null) {
+        string[string] inputs = this.input();
+        if (keys is null) {
+            // HttpForm.FormFile[string]  files = this.allFiles;
+            // foreach(string k; files.byKey)
+            // {
+            //     inputs[k] = files[k].fileName;
+            // }
+            return inputs;
+        }
 
-//         string[string] results;
-//         foreach (string k; keys) {
-//             string* v = (k in inputs);
-//             if (v !is null)
-//                 results[k] = *v;
-//         }
-//         return results;
-//     }
+        string[string] results;
+        foreach (string k; keys) {
+            string* v = (k in inputs);
+            if (v !is null)
+                results[k] = *v;
+        }
+        return results;
+    }
 
-//     /**
-//      * Retrieve an input item from the request.
-//      *
-//      * @param  string  key
-//      * @param  string|array|null  default
-//      * @return string|array
-//      */
-//     string input(string key, string defaults = null) {
-//         return getInputSource().get(key, defaults);
-//     }
+    /**
+     * Retrieve an input item from the request.
+     *
+     * @param  string  key
+     * @param  string|array|null  default
+     * @return string|array
+     */
+    string input(string key, string defaults = null) {
+        return getInputSource().get(key, defaults);
+    }
 
-//     /// ditto
-//     string[string] input() {
-//         return getInputSource();
-//     }
+    /// ditto
+    string[string] input() {
+        return getInputSource();
+    }
 
 //     /**
 //      * Get a subset containing the provided keys with values from the input data.
@@ -1088,7 +1110,7 @@ module hunt.framework.http.Request;
 //         string[][string] form = xFormData();
 //         if (form is null)
 //             return v;
-            
+
 //         if(key in form) {
 //             string[] _v = form[key];
 //             if (_v.length > 0) {
@@ -1182,7 +1204,6 @@ module hunt.framework.http.Request;
 //     //     return null;
 //     // }
 
-
 //     /**
 //      * Get an array of all of the files on the request.
 //      *
@@ -1237,17 +1258,17 @@ module hunt.framework.http.Request;
 //         return null;
 //     }
 
-//     @property string methodAsString() {
-//         return _request.getMethod();
-//     }
+    @property string methodAsString() {
+        return _request.getMethod();
+    }
 
-//     @property HttpMethod method() {
-//         return HttpMethod.fromString(_request.getMethod());
-//     }
+    @property HttpMethod method() {
+        return HttpMethod.fromString(_request.getMethod());
+    }
 
-//     @property string url() {
-//         return _request.getURIString();
-//     }
+    @property string url() {
+        return _request.getURIString();
+    }
 
 //     // @property string fullUrl()
 //     // {
@@ -1259,9 +1280,9 @@ module hunt.framework.http.Request;
 //     //     return _httpMessage.url();
 //     // }
 
-//     @property string path() {
-//         return _request.getURI().getPath();
-//     }
+    @property string path() {
+        return _request.getURI().getPath();
+    }
 
 //     @property string decodedPath() {
 //         return _request.getURI().getDecodedPath();
@@ -1455,17 +1476,17 @@ module hunt.framework.http.Request;
 //         return this;
 //     }
 
-//     protected string[string] getInputSource() {
-//         if (isContained(this.methodAsString, ["GET", "HEAD"]))
-//             return queries();
-//         else {
-//             string[string] r;
-//             foreach(string k, string[] v; xFormData()) {
-//                 r[k] = v[0];
-//             }
-//             return r;
-//         }
-//     }
+    protected string[string] getInputSource() {
+        if (isContained(this.methodAsString, ["GET", "HEAD"]))
+            return queries();
+        else {
+            string[string] r;
+            foreach(string k, string[] v; xFormData()) {
+                r[k] = v[0];
+            }
+            return r;
+        }
+    }
 
 //     /**
 //      * Get the user making the request.
@@ -1693,6 +1714,96 @@ module hunt.framework.http.Request;
 //     void setAttribute(string name, Object o) {
 //         this._attributes[name] = o;
 //     }
+
+}
+
+// import hunt.http.codec.http.model;
+// import hunt.http.HttpConnection;
+// import hunt.http.codec.http.stream.HttpOutputStream;
+// import hunt.net.util.UrlEncoded;
+
+// import hunt.collection;
+// import hunt.io;
+// import hunt.logging;
+// import hunt.Exceptions;
+// import hunt.util.Common;
+// import hunt.util.MimeTypeUtils;
+
+// import hunt.framework.application.ApplicationConfig;
+// import hunt.framework.Simplify;
+// import hunt.framework.Exceptions;
+// import hunt.framework.http.session;
+// import hunt.framework.Init;
+// import hunt.framework.routing.Route;
+// import hunt.framework.routing.Define;
+// import hunt.framework.security.acl.User;
+// import hunt.framework.file.UploadedFile;
+// import hunt.Functions;
+
+// import core.time : MonoTime, Duration;
+// import std.algorithm;
+// import std.array;
+// import std.container.array;
+// import std.conv;
+// import std.digest;
+// import std.digest.sha;
+// import std.exception;
+// import std.file;
+// import std.json;
+// import std.path;
+// import std.regex;
+// import std.string;
+// import std.socket : Address;
+
+// version(WITH_HUNT_TRACE) {
+//     import hunt.trace.Tracer;
+// }
+
+// alias RequestEventHandler = void delegate(Request sender);
+// alias Closure = RequestEventHandler;
+
+// final class Request {
+//     private HttpRequest _request;
+//     private HttpResponse _response;
+//     private SessionStorage _sessionStorage;
+
+//     private UrlEncoded urlEncodedMap;
+//     private Cookie[] _cookies;
+//     private HttpSession _session;
+//     private MonoTime _monoCreated;
+//     private Object[string] _attributes;
+
+//     HttpConnection _connection;
+//     // Action1!ByteBuffer content;
+//     // Action1!Request contentComplete;
+//     // Action1!Request messageComplete;
+//     package(hunt.framework.http) HttpOutputStream outputStream;
+//     package(hunt.framework) List!(ByteBuffer) requestBody;
+
+//     RequestEventHandler routeResolver;
+//     RequestEventHandler userResolver;
+
+//     this(HttpRequest request, HttpResponse response, HttpOutputStream output,
+//             HttpConnection connection, SessionStorage sessionStorage) {
+//         _monoCreated = MonoTime.currTime;
+//         requestBody = new ArrayList!(ByteBuffer)();
+//         this._request = request;
+//         this.outputStream = output;
+//         this._response = response;
+//         this._connection = connection;
+//         this._sessionStorage = sessionStorage;
+//         this.urlEncodedMap = new UrlEncoded();
+//         // response.setStatus(HttpStatus.OK_200);
+//         // response.setHttpVersion(HttpVersion.HTTP_1_1);
+//         // this._response = new Response(response, output, request.getURI(), bufferSize);
+//         handleQueryParameters();
+
+//         .request(this);
+//     }
+
+// version(WITH_HUNT_TRACE) {
+//     Tracer tracer;
+// }
 
 //     // enum string Subject = "subject";
 

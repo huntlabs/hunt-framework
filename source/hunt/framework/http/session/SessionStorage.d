@@ -3,6 +3,7 @@ module hunt.framework.http.session.SessionStorage;
 import hunt.cache;
 import hunt.framework.Exceptions;
 import hunt.framework.util.Random;
+import hunt.Exceptions;
 
 import std.array;
 import std.algorithm;
@@ -13,14 +14,15 @@ import std.digest.sha;
 import std.format;
 import std.datetime;
 import std.random;
-import std.conv;
+import std.string;
 import std.traits;
+import std.variant;
 
 import core.cpuid;
-import std.string;
-import hunt.Exceptions;
 
-import hunt.framework.http.session.HttpSession;
+// import hunt.framework.http.session.HttpSession;
+
+import hunt.http.server.HttpSession;
 
 /**
  * 
@@ -86,9 +88,9 @@ class SessionStorage {
 		return str;
 	}
 
-	// void setPrefix(string prefix) {
-	// 	_prefix = prefix;
-	// }
+	void setPrefix(string prefix) {
+		_prefix = prefix;
+	}
 
 	void expire(int expire) @property {
 		_expire = expire;
@@ -110,7 +112,8 @@ class SessionStorage {
 		string _prefix;
 		string _sessionId;
 
-		int _expire = 3600;
+		int _expire;
 		Cache _cache;
 	}
 }
+

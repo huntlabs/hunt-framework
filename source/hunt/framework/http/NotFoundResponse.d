@@ -1,15 +1,22 @@
 module hunt.framework.http.NotFoundResponse;
 
 // import hunt.framework.http.Request;
-// import hunt.framework.http.Response;
+import hunt.framework.http.Response;
+import hunt.http.server;
 
-// class NotFoundResponse : Response
-// {
-//     this(string content)
-//     {
-//         super(request());
+import std.range;
 
-//         setStatus(404);
-//         setContent(content.length == 0 ? errorPageHtml(404) : content);
-//     }
-// }
+/**
+ * 
+ */
+class NotFoundResponse : HttpServerResponse {
+    this(string content = null) {
+        setStatus(404);
+
+        if (content.empty)
+            content = errorPageHtml(404);
+
+        HttpBody hb = HttpBody.create(MimeType.TEXT_HTML_VALUE, content);
+        setBody(hb);
+    }
+}

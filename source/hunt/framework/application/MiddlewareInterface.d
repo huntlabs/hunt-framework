@@ -11,12 +11,12 @@
 
 module hunt.framework.application.MiddlewareInterface;
 
-// import hunt.framework.http.Request;
+import hunt.framework.http.Request;
 // import hunt.framework.http.Response;
 
 import hunt.http.server;
 
-alias Request = HttpServerRequest;
+// alias Request = HttpServerRequest;
 alias Response = HttpServerResponse;
 
 interface MiddlewareInterface

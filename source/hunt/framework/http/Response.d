@@ -11,6 +11,8 @@
 
 module hunt.framework.http.Response;
 
+import hunt.http.HttpStatus;
+
 // import std.conv;
 // import std.datetime;
 // import std.json;
@@ -334,72 +336,72 @@ module hunt.framework.http.Response;
 //     bool _isDone = false;
 // }
 
-// // dfmt off
-// string errorPageHtml(int code , string _body = "")
-// {
-//     import std.conv : to;
+// dfmt off
+string errorPageHtml(int code , string _body = "")
+{
+    import std.conv : to;
 
-//     string text = code.to!string;
-//     text ~= " ";
-//     text ~= HttpStatus.getMessage(code);
+    string text = code.to!string;
+    text ~= " ";
+    text ~= HttpStatus.getMessage(code);
 
-//     string html = `<!doctype html>
-// <html lang="en">
-//     <meta charset="utf-8">
-//     <title>`;
+    string html = `<!doctype html>
+<html lang="en">
+    <meta charset="utf-8">
+    <title>`;
 
-//     html ~= text;
-//     html ~= `</title>
-//     <meta name="viewport" content="width=device-width, initial-scale=1">
-//     <style>
+    html ~= text;
+    html ~= `</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
 
-//         * {
-//             line-height: 3;
-//             margin: 0;
-//         }
+        * {
+            line-height: 3;
+            margin: 0;
+        }
 
-//         html {
-//             color: #888;
-//             display: table;
-//             font-family: sans-serif;
-//             height: 100%;
-//             text-align: center;
-//             width: 100%;
-//         }
+        html {
+            color: #888;
+            display: table;
+            font-family: sans-serif;
+            height: 100%;
+            text-align: center;
+            width: 100%;
+        }
 
-//         body {
-//             display: table-cell;
-//             vertical-align: middle;
-//             margin: 2em auto;
-//         }
+        body {
+            display: table-cell;
+            vertical-align: middle;
+            margin: 2em auto;
+        }
 
-//         h1 {
-//             color: #555;
-//             font-size: 2em;
-//             font-weight: 400;
-//         }
+        h1 {
+            color: #555;
+            font-size: 2em;
+            font-weight: 400;
+        }
 
-//         p {
-//             margin: 0 auto;
-//             width: 90%;
-//         }
+        p {
+            margin: 0 auto;
+            width: 90%;
+        }
 
-//     </style>
-// </head>
-// <body>
-//     <h1>`;
-//     html ~= text;
-//     html ~= `</h1>
-//     <p>Sorry!! Unable to complete your request :(</p>
-//     `;
-//     if(_body.length > 0)
-//         html ~= "<p>" ~ _body ~ "</p>";
-// html ~= `
-// </body>
-// </html>
-// `;
+    </style>
+</head>
+<body>
+    <h1>`;
+    html ~= text;
+    html ~= `</h1>
+    <p>Sorry!! Unable to complete your request :(</p>
+    `;
+    if(_body.length > 0)
+        html ~= "<p>" ~ _body ~ "</p>";
+html ~= `
+</body>
+</html>
+`;
 
-//     return html;
-// }
+    return html;
+}
 
-// // dfmt on
+// dfmt on

@@ -12,7 +12,7 @@
 module hunt.framework.Simplify;
 
 public import hunt.framework.application.Application : app;
-public import hunt.framework.application.ApplicationConfig : ApplicationConfig;
+public import hunt.framework.application.ApplicationConfig : ApplicationConfig, ConfigManager;
 public import hunt.util.DateTime : time, date;
 public import hunt.framework.Init;
 import hunt.framework.provider;
@@ -24,6 +24,10 @@ import poodinis;
 import std.array;
 import std.string;
 import std.json;
+
+ConfigManager configManager() {
+    return serviceContainer().resolve!(ConfigManager);
+}
 
 ApplicationConfig config()
 {

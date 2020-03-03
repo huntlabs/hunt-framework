@@ -12,20 +12,24 @@
 module hunt.framework.application.Controller;
 
 import hunt.framework.application.Application;
+import hunt.framework.application.BreadcrumbsManager;
 import hunt.framework.application.MiddlewareInterface;
 
+import hunt.framework.http.Request;
 public import hunt.framework.http.Response;
-public import hunt.framework.http.Request;
-public import hunt.framework.provider;
-
-import hunt.http.server;
-import hunt.http.routing;
-import hunt.cache;
+import hunt.framework.http.Form;
+import hunt.framework.i18n.I18n;
+import hunt.framework.provider;
 import hunt.framework.Simplify;
 import hunt.framework.view;
+
+public import hunt.http.server;
+import hunt.http.routing;
+import hunt.cache;
 import hunt.logging.ConsoleLogger;
 import hunt.validation;
-import hunt.framework.http.Form;
+
+// public import hunt.http.HttpBody;
 
 import poodinis;
 
@@ -35,7 +39,7 @@ import std.traits;
 
 enum Action;
 
-alias Request = HttpServerRequest;
+// alias Request = HttpServerRequest;
 alias Response = HttpServerResponse;
 
 /**
@@ -43,10 +47,13 @@ alias Response = HttpServerResponse;
  */
 abstract class Controller
 {
+    private Request _request;
+    private Response _response;
+    private BreadcrumbsManager _breadcrumbs;
+
     protected
     {
         RoutingContext _routingContext;
-        Response _response;
         View _view;
         ///called before all actions
         MiddlewareInterface[string] middlewares;
@@ -55,6 +62,16 @@ abstract class Controller
     // shared(DependencyContainer) serviceContainer() {
     //     return Application.instance().serviceContainer();
     // }
+    Request request() {
+        if(_request is null) {
+            _request = new Request(_routingContext.getRequest());
+        }
+        return _request;
+    }
+
+    final @property Response response() {
+        return _routingContext.getResponse();
+    }
 
     @property View view()
     {
@@ -72,14 +89,20 @@ abstract class Controller
         return _view;
     }
 
-    Request request() {
-        return _routingContext.getRequest();
+    BreadcrumbsManager breadcrumbsManager() {
+        if(_breadcrumbs is null) {
+            _breadcrumbs = serviceContainer.resolve!BreadcrumbsManager();
+        }
+        return _breadcrumbs;
     }
 
-    final @property Response response() {
-        return _routingContext.getResponse();
+    I18n translationManager() {
+        return serviceContainer.resolve!(I18n);
     }
 
+    Cache cache() {
+        return serviceContainer.resolve!(Cache);
+    }
 
     /// called before action  return true is continue false is finish
     bool before()
