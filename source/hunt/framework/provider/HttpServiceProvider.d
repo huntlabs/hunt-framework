@@ -125,7 +125,7 @@ class HttpServiceProvider : ServiceProvider {
             if (handler is null) {
                 warningf("No handler found for group route {%s}, key: %s", item.toString(), handlerKey);
             } else {
-                version (HUNT_DEBUG)
+                version (HUNT_FM_DEBUG)
                     tracef("handler found for group route {%s}, key: %s", item.toString(), handlerKey);
                 if (group is null) {
                     infof("adding %s", item.path);

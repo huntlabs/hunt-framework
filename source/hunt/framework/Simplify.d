@@ -62,7 +62,9 @@ string url(string mca, string[string] params) {
 }
 
 public import hunt.entity.EntityManager;
-public import hunt.entity.DefaultEntityManagerFactory;
+
+import hunt.entity.DefaultEntityManagerFactory;
+import hunt.entity.EntityManagerFactory;
 
 //global entity manager
 private EntityManager _em;
@@ -70,7 +72,7 @@ EntityManager defaultEntityManager()
 {
     if (_em is null)
     {
-        _em = defaultEntityManagerFactory().currentEntityManager();
+        _em = serviceContainer.resolve!(EntityManagerFactory).currentEntityManager();
     }
     return _em;
 }

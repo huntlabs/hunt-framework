@@ -25,8 +25,9 @@ import hunt.framework.view;
 
 public import hunt.http.server;
 
-import hunt.http.routing;
 import hunt.cache;
+import hunt.entity.EntityManagerFactory;
+import hunt.http.routing;
 import hunt.logging.ConsoleLogger;
 import hunt.redis.RedisPool;
 import hunt.validation;
@@ -51,6 +52,7 @@ abstract class Controller
 {
     private Request _request;
     private Response _response;
+    private EntityManager _entityManager;
     private BreadcrumbsManager _breadcrumbs;
 
     protected
@@ -105,6 +107,13 @@ abstract class Controller
 
     Cache cache() {
         return serviceContainer.resolve!(Cache);
+    }
+
+    EntityManager entityManager() {
+        if(_entityManager is null) {
+            _entityManager = serviceContainer.resolve!(EntityManagerFactory).currentEntityManager();
+        }
+        return _entityManager;
     }
 
     RedisPool redisPool() {
@@ -460,7 +469,7 @@ RoutingHandler getRouteHandler(string str)
 
 void registerRouteHandler(string str, RoutingHandler method)
 {
-    version (HUNT_DEBUG) logDebug("Add route handler: ", str);
+    version (HUNT_FM_DEBUG) logDebug("Add route handler: ", str);
     _actions[str.toLower] = method;
 }
 
