@@ -123,10 +123,10 @@ class HttpServiceProvider : ServiceProvider {
             RoutingHandler handler = getRouteHandler(handlerKey);
             // warning(item.toString());
             if (handler is null) {
-                warningf("No handler found for group route {%s}", item.toString());
+                warningf("No handler found for group route {%s}, key: %s", item.toString(), handlerKey);
             } else {
                 version (HUNT_DEBUG)
-                    tracef("handler found for group route {%s}", item.toString());
+                    tracef("handler found for group route {%s}, key: %s", item.toString(), handlerKey);
                 if (group is null) {
                     infof("adding %s", item.path);
                     hsb.addRoute([item.path], item.methods, handler);

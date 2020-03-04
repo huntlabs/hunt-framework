@@ -289,12 +289,12 @@ final class Application {
         _providerListener = new class ServiceProviderListener {
             void registered(TypeInfo_Class info)
             {
-                version(HUNT_DEBUG) tracef("Service Provider Loaded: %s", info.toString());
+                tracef("Service Provider Loaded: %s", info.toString());
             }
 
             void booted(TypeInfo_Class info)
             {
-                version(HUNT_DEBUG) tracef("Service Provider Booted: %s", info.toString());
+                tracef("Service Provider Booted: %s", info.toString());
             }
         };
     }

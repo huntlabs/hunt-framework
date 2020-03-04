@@ -185,7 +185,7 @@ struct RouteConfig {
                 routeItem.action = mcaArray[1];
             }
             else {
-                routeItem.action = mcaArray[0];
+                routeItem.moduleName = mcaArray[0];
                 routeItem.controller = mcaArray[1];
                 routeItem.action = mcaArray[2];
             }
@@ -239,14 +239,19 @@ struct RouteConfig {
 
 
 /**
+ * Examples:
+ *  # without component
+ *  app.controller.attachment.attachmentcontroller.upload
  * 
+ *  # with component
+ *  app.component.attachment.controller.attachment.attachmentcontroller.upload
  */
 string makeRouteHandlerKey(ActionRouteItem route, RouteGroup group = null) {
     string moduleName = route.moduleName;
     string controller = route.controller;
 
     string key = format("app.%scontroller.%s%s.%scontroller.%s", 
-        moduleName.empty() ? "" : moduleName ~ ".",
+        moduleName.empty() ? "" : "component." ~ moduleName ~ ".",
         group is null ? "" : group.name ~ ".",
         controller, 
         controller, route.action);

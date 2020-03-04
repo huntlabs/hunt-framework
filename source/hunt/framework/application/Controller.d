@@ -24,9 +24,11 @@ import hunt.framework.Simplify;
 import hunt.framework.view;
 
 public import hunt.http.server;
+
 import hunt.http.routing;
 import hunt.cache;
 import hunt.logging.ConsoleLogger;
+import hunt.redis.RedisPool;
 import hunt.validation;
 
 // public import hunt.http.HttpBody;
@@ -60,8 +62,9 @@ abstract class Controller
     }
 
     // shared(DependencyContainer) serviceContainer() {
-    //     return Application.instance().serviceContainer();
+    //     return .serviceContainer();
     // }
+
     Request request() {
         if(_request is null) {
             _request = new Request(_routingContext.getRequest());
@@ -102,6 +105,10 @@ abstract class Controller
 
     Cache cache() {
         return serviceContainer.resolve!(Cache);
+    }
+
+    RedisPool redisPool() {
+        return serviceContainer.resolve!RedisPool();
     }
 
     /// called before action  return true is continue false is finish
@@ -453,10 +460,8 @@ RoutingHandler getRouteHandler(string str)
 
 void registerRouteHandler(string str, RoutingHandler method)
 {
-    version (HUNT_HTTP_DEBUG) logDebug("add route handler: ", str);
+    version (HUNT_DEBUG) logDebug("Add route handler: ", str);
     _actions[str.toLower] = method;
 }
 
-private:
-// __gshared bool _init = false;
-__gshared RoutingHandler[string] _actions;
+private __gshared RoutingHandler[string] _actions;
