@@ -125,10 +125,10 @@ class HttpServiceProvider : ServiceProvider {
             if (handler is null) {
                 warningf("No handler found for group route {%s}, key: %s", item.toString(), handlerKey);
             } else {
-                version (HUNT_FM_DEBUG)
+                version(HUNT_FM_DEBUG)
                     tracef("handler found for group route {%s}, key: %s", item.toString(), handlerKey);
                 if (group is null) {
-                    infof("adding %s", item.path);
+                    version(HUNT_DEBUG) infof("adding %s", item.path);
                     hsb.addRoute([item.path], item.methods, handler);
                 } else if (group.type == RouteGroup.HOST) {
                     hsb.addRoute([item.path], item.methods, handler,

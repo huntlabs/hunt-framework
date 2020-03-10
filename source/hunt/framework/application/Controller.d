@@ -457,7 +457,12 @@ void callHandler(T, string method)(RoutingContext context)
     // req.action = method;
     // auto req = context.getRequest();
     // warningf("group name: %s", context.groupName());
-    controller.callActionMethod(method, context);
+    try {
+        controller.callActionMethod(method, context);
+    } catch (Throwable t) {
+        warning(t.msg);
+        version(HUNT_DEBUG) warning(t);
+    }
 
     context.end();
 }

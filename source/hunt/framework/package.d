@@ -20,12 +20,14 @@ public import hunt.http.codec.websocket;
 
 public import hunt.framework.application;
 public import hunt.framework.http;
-public import hunt.framework.task;
-public import hunt.framework.view;
 
 public import hunt.framework.Init;
-public import hunt.framework.Version;
+public import hunt.framework.provider;
 public import hunt.framework.Simplify;
+public import hunt.framework.task;
+public import hunt.framework.Version;
+public import hunt.framework.view;
+
 
 debug {}
 else {

@@ -12,7 +12,7 @@
 module hunt.framework.Simplify;
 
 public import hunt.framework.application.Application : app;
-public import hunt.framework.application.ApplicationConfig : ApplicationConfig, ConfigManager;
+public import hunt.framework.application.ApplicationConfig;
 public import hunt.util.DateTime : time, date;
 public import hunt.framework.Init;
 import hunt.framework.provider;
