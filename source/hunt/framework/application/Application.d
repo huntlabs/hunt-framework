@@ -106,14 +106,44 @@ final class Application {
         serviceContainer().register!(ServiceProvider, T)().existingInstance(provider);
         serviceContainer().autowire(provider);
         _providerListener.registered(typeid(T));
+
+        checkCustomizedProvider!(T, ConfigServiceProvider);
+        checkCustomizedProvider!(T, RedisServiceProvider);
+        checkCustomizedProvider!(T, TranslationServiceProvider);
+        checkCustomizedProvider!(T, BreadcrumbServiceProvider);
+        checkCustomizedProvider!(T, CacheServiceProvider);
+        checkCustomizedProvider!(T, SessionServiceProvider);
+        checkCustomizedProvider!(T, DatabaseServiceProvider);
+        checkCustomizedProvider!(T, HttpServiceProvider);
+        checkCustomizedProvider!(T, ViewServiceProvider);
     }
+
+    private void tryRegister(T)() if(is(T : ServiceProvider)) {
+        if(!isRegistered!(T)) {
+            register!T();
+        }
+    }
+
+    private void checkCustomizedProvider(T, S)() {
+        static if(is(T : S)) {
+            _customizedServiceProviders[typeid(S)] = true;
+        }
+    }
+
+    private bool isRegistered(T)() if(is(T : ServiceProvider)) {
+        auto itemPtr = typeid(T) in _customizedServiceProviders;
+
+        return itemPtr !is null;
+    }
+
     private bool _isBooted = false;
+    private bool[TypeInfo] _customizedServiceProviders;
 
     /**
       Start the HttpServer , and block current thread.
      */
     void run(string[] args) {
-        register!ConfigServiceProvider();
+        tryRegister!ConfigServiceProvider();
 
         if (args.length > 1) {
             ServeCommand serveCommand = new ServeCommand();
@@ -123,8 +153,13 @@ final class Application {
                 ConfigManager manager = serviceContainer().resolve!ConfigManager;
                 manager.configPath = signature.configPath;
                 manager.configFile = signature.configFile;
-                manager.load();
-                manager.httpBind(signature.host, signature.port);
+
+                ApplicationConfig appConfig = serviceContainer().resolve!(ApplicationConfig);
+                appConfig.http.address = signature.host;
+                appConfig.http.port = signature.port;
+                // manager.load();
+                // manager.load(signature.configPath, signature.configFile);
+                // manager.httpBind(signature.host, signature.port);
 
                 bootstrap();
             });
@@ -302,14 +337,14 @@ final class Application {
     private void initializeProviders() {
 
         // Register all the default service providers
-        register!RedisServiceProvider();
-        register!TranslationServiceProvider();
-        register!BreadcrumbServiceProvider();
-        register!CacheServiceProvider();
-        register!SessionServiceProvider();
-        register!DatabaseServiceProvider();
-        register!HttpServiceProvider();
-        register!ViewServiceProvider();
+        tryRegister!RedisServiceProvider();
+        tryRegister!TranslationServiceProvider();
+        tryRegister!BreadcrumbServiceProvider();
+        tryRegister!CacheServiceProvider();
+        tryRegister!SessionServiceProvider();
+        tryRegister!DatabaseServiceProvider();
+        tryRegister!HttpServiceProvider();
+        tryRegister!ViewServiceProvider();
 
         // Register all the service provided by the providers
         ServiceProvider[] providers = serviceContainer().resolveAll!(ServiceProvider);

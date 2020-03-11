@@ -37,7 +37,7 @@ enum ENV_CONFIG_BASE_PATH = "CONFIG_BASE_PATH";
 
 
 @Configuration("hunt")
-final class ApplicationConfig {
+class ApplicationConfig {
     struct ApplicationConf {
         string name = "Hunt Application";
         string baseUrl = "http://localhost:8080";
@@ -274,86 +274,113 @@ class ConfigNotFoundException : Exception {
     mixin basicExceptionCtors;
 }
 
+
 /** 
  * 
  */
 class ConfigManager {
-    ApplicationConfig config() {
-        if (!_appConfig) {
 
-            if (_fileName == DEFAULT_CONFIG_FILE) {
-                string huntEnv = environment.get("HUNT_ENV", "");
-                if (huntEnv.empty) {
-                    huntEnv = environment.get(ENV_APP_ENV, "");
-                }
-                
-                version(HUNT_DEBUG) tracef("%s=%s", ENV_APP_ENV, huntEnv);
+    protected ConfigBuilder _defaultBuilder;
+    // protected ConfigBuilder[string] _conf;
 
-                if(!huntEnv.empty) {
-                    _fileName = "application." ~ huntEnv ~ ".conf";
-                }
-            }
+    protected string _basePath = DEFAULT_CONFIG_LACATION;
+    protected string _fileName = DEFAULT_CONFIG_FILE;
+    protected string _section = "";
 
-            if (_fileName.empty)
-                _fileName = DEFAULT_CONFIG_FILE;
-
-            load();
-        }
-
-        return _appConfig;
-    }
+    // private ApplicationConfig _appConfig;
 
     string configPath() {
-        return this._path;
+        return this._basePath;
     }
 
-    void configPath(string path) {
+    ConfigManager configPath(string path) {
         if (path.empty)
-            return;
+            return this;
 
         if (path[$ - 1] == '/')
-            this._path = path;
+            this._basePath = path;
         else
-            this._path = path ~ "/";
-    }
+            this._basePath = path ~ "/";
 
-    void configFile(string name) {
-        _fileName = name;
+        return this;
     }
 
     string configFile() {
         return _fileName;
     }
 
-    void configSection(string name) {
-        _section = name;
+    ConfigManager configFile(string name) {
+        _fileName = name;
+        return this;
     }
 
     string configSection() {
         return _section;
     }
 
-    void httpBind(string host, ushort port) {
-        _appConfig.http.address = host;
-        _appConfig.http.port = port;
+    void configSection(string name) {
+        _section = name;
     }
 
-    void load() {
-        string configBase = environment.get(ENV_CONFIG_BASE_PATH, "");
-        if(!configBase.empty) {
-            _path = configBase;
+    // ApplicationConfig config() {
+    //     if (!_appConfig) {
+
+    //         string huntEnv = environment.get("HUNT_ENV", "");
+    //         if (huntEnv.empty) {
+    //             huntEnv = environment.get(ENV_APP_ENV, "");
+    //         }
+            
+    //         version(HUNT_DEBUG) tracef("%s=%s", ENV_APP_ENV, huntEnv);
+
+    //         if(!huntEnv.empty) {
+    //             _fileName = "application." ~ huntEnv ~ ".conf";
+    //         }
+
+    //         string configBase = environment.get(ENV_CONFIG_BASE_PATH, "");
+    //         if(!configBase.empty) {
+    //             _basePath = configBase;
+    //         }
+
+    //         load();
+    //     }
+
+    //     return _appConfig;
+    // }
+
+    // void httpBind(string host, ushort port) {
+    //     _appConfig.http.address = host;
+    //     _appConfig.http.port = port;
+    // }
+
+    T load(T)() if(is(T : ApplicationConfig)) {
+
+        string huntEnv = environment.get("HUNT_ENV", "");
+        if (huntEnv.empty) {
+            huntEnv = environment.get(ENV_APP_ENV, "");
+        }
+        
+        version(HUNT_DEBUG) tracef("%s=%s", ENV_APP_ENV, huntEnv);
+
+        if(!huntEnv.empty) {
+            _fileName = "application." ~ huntEnv ~ ".conf";
         }
 
-        string fullName = buildPath(APP_PATH, _path, _fileName);
+        string configBase = environment.get(ENV_CONFIG_BASE_PATH, "");
+        if(!configBase.empty) {
+            _basePath = configBase;
+        }  
+
+        T _appConfig;
+        string fullName = buildPath(APP_PATH, _basePath, _fileName);
         if (exists(fullName)) {
             infof("using the config file: %s", fullName);
             _defaultBuilder = new ConfigBuilder(fullName, _section);
-            _appConfig = _defaultBuilder.build!(ApplicationConfig, "hunt")();
-            addConfig("hunt", _defaultBuilder);
+            _appConfig = _defaultBuilder.build!(T, "hunt")();
+            // addConfig("hunt", _defaultBuilder);
         } else {
             warningf("The configure file does not exist: %s", fullName);
             _defaultBuilder = new ConfigBuilder();
-            _appConfig = new ApplicationConfig();
+            _appConfig = new T();
         }
 
         // update the config item with the environment variable if it exists
@@ -376,45 +403,38 @@ class ConfigManager {
         if(!value.empty) {
             _appConfig.application.secret = value;
         }
+
+        return _appConfig;
     }
 
-    ConfigBuilder defaultBuilder() {
-        return _defaultBuilder;
-    }
+    // ConfigBuilder defaultBuilder() {
+    //     return _defaultBuilder;
+    // }
 
-    ConfigBuilder config(string key) {
-        import std.format;
+    // ConfigBuilder config(string key) {
+    //     import std.format;
 
-        ConfigBuilder v = null;
-        v = _conf.get(key, null);
+    //     ConfigBuilder v = null;
+    //     v = _conf.get(key, null);
 
-        enforce!ConfigNotFoundException(v, format(" %s is not created! ", key));
+    //     enforce!ConfigNotFoundException(v, format(" %s is not created! ", key));
 
-        return v;
-    }
+    //     return v;
+    // }
 
-    void addConfig(string key, ConfigBuilder conf) {
-        _conf[key] = conf;
-    }
+    // void addConfig(string key, ConfigBuilder conf) {
+    //     _conf[key] = conf;
+    // }
 
-    auto opDispatch(string s)() {
-        return config(s);
-    }
+    // auto opDispatch(string s)() {
+    //     return config(s);
+    // }
 
     this() {
-        _path = DEFAULT_CONFIG_PATH;
+        _basePath = DEFAULT_CONFIG_PATH;
         _fileName = DEFAULT_CONFIG_FILE;
     }
 
-private:
-
-    ConfigBuilder _defaultBuilder;
-    ApplicationConfig _appConfig;
-    ConfigBuilder[string] _conf;
-
-    string _path = DEFAULT_CONFIG_LACATION;
-    string _fileName = DEFAULT_CONFIG_FILE;
-    string _section = "";
 }
 
 // ConfigManager configManager() {
