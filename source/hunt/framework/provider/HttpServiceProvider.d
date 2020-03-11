@@ -2,6 +2,7 @@ module hunt.framework.provider.HttpServiceProvider;
 
 import hunt.framework.application.Controller;
 import hunt.framework.application.ApplicationConfig;
+import hunt.framework.application.ConfigManager;
 import hunt.framework.application.RouteConfig;
 import hunt.framework.Init;
 import hunt.framework.provider.ServiceProvider;

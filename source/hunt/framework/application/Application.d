@@ -25,6 +25,7 @@ import hunt.framework.trace.Tracer;
 import hunt.framework.http;
 import hunt.framework.application.RouteConfig;
 import hunt.framework.application.ApplicationConfig;
+import hunt.framework.application.ConfigManager;
 import hunt.framework.application.MiddlewareInterface;
 import hunt.framework.application.ServeCommand;
 import hunt.framework.provider;

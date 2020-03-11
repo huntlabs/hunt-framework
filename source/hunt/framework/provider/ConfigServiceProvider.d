@@ -1,6 +1,7 @@
 module hunt.framework.provider.ConfigServiceProvider;
 
 import hunt.framework.application.ApplicationConfig;
+import hunt.framework.application.ConfigManager;
 import hunt.framework.provider.ServiceProvider;
 import hunt.framework.Init;
 
