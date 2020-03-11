@@ -47,11 +47,18 @@ import poodinis;
 
 import std.array;
 import std.conv;
+import std.meta;
 import std.parallelism : totalCPUs;
 import std.path;
 import std.socket : Address, parseAddress;
 import std.stdio;
 import std.string;
+
+
+alias DefaultServiceProviders = AliasSeq!(
+    ConfigServiceProvider, RedisServiceProvider, TranslationServiceProvider,
+    BreadcrumbServiceProvider, CacheServiceProvider, SessionServiceProvider,
+    DatabaseServiceProvider, HttpServiceProvider, ViewServiceProvider);
 
 
 /**
@@ -107,15 +114,9 @@ final class Application {
         serviceContainer().autowire(provider);
         _providerListener.registered(typeid(T));
 
-        checkCustomizedProvider!(T, ConfigServiceProvider);
-        checkCustomizedProvider!(T, RedisServiceProvider);
-        checkCustomizedProvider!(T, TranslationServiceProvider);
-        checkCustomizedProvider!(T, BreadcrumbServiceProvider);
-        checkCustomizedProvider!(T, CacheServiceProvider);
-        checkCustomizedProvider!(T, SessionServiceProvider);
-        checkCustomizedProvider!(T, DatabaseServiceProvider);
-        checkCustomizedProvider!(T, HttpServiceProvider);
-        checkCustomizedProvider!(T, ViewServiceProvider);
+        static foreach(S; DefaultServiceProviders) {
+            checkCustomizedProvider!(T, S);
+        }
     }
 
     private void tryRegister(T)() if(is(T : ServiceProvider)) {
@@ -337,14 +338,19 @@ final class Application {
     private void initializeProviders() {
 
         // Register all the default service providers
-        tryRegister!RedisServiceProvider();
-        tryRegister!TranslationServiceProvider();
-        tryRegister!BreadcrumbServiceProvider();
-        tryRegister!CacheServiceProvider();
-        tryRegister!SessionServiceProvider();
-        tryRegister!DatabaseServiceProvider();
-        tryRegister!HttpServiceProvider();
-        tryRegister!ViewServiceProvider();
+        static foreach(T; DefaultServiceProviders) {
+            static if(!is(T == ConfigServiceProvider)) {
+                tryRegister!T();
+            }
+        }
+        // tryRegister!RedisServiceProvider();
+        // tryRegister!TranslationServiceProvider();
+        // tryRegister!BreadcrumbServiceProvider();
+        // tryRegister!CacheServiceProvider();
+        // tryRegister!SessionServiceProvider();
+        // tryRegister!DatabaseServiceProvider();
+        // tryRegister!HttpServiceProvider();
+        // tryRegister!ViewServiceProvider();
 
         // Register all the service provided by the providers
         ServiceProvider[] providers = serviceContainer().resolveAll!(ServiceProvider);
