@@ -154,15 +154,12 @@ final class Application {
                     tracef(signature.to!string);
                 ConfigManager manager = serviceContainer().resolve!ConfigManager;
                 manager.configPath = signature.configPath;
-                manager.configFile = signature.configFile;
+                // manager.configFile = signature.configFile;
 
                 ApplicationConfig appConfig = serviceContainer().resolve!(ApplicationConfig);
                 appConfig.http.address = signature.host;
                 appConfig.http.port = signature.port;
-                // manager.load();
-                // manager.load(signature.configPath, signature.configFile);
-                // manager.httpBind(signature.host, signature.port);
-
+                
                 bootstrap();
             });
 

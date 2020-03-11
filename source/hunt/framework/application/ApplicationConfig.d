@@ -37,6 +37,7 @@ enum ENV_CONFIG_BASE_PATH = "CONFIG_BASE_PATH";
 
 
 // @Configuration("hunt")
+@ConfigurationFile("application")
 class ApplicationConfig {
     struct ApplicationConf {
         string name = "Hunt Application";
