@@ -1,11 +1,15 @@
 module hunt.framework.application.RouteConfig;
 
+import hunt.framework.application.ApplicationConfig;
+import hunt.framework.Init;
 import hunt.logging.ConsoleLogger;
+import hunt.http.routing.RouterManager;
 
 import std.algorithm;
 import std.array;
 import std.conv;
 import std.file;
+import std.path;
 import std.range;
 import std.regex;
 import std.string;
@@ -89,13 +93,70 @@ alias RouteParsingHandler = void delegate(RouteItem route);
 /** 
  * 
  */
-struct RouteConfig {
+class RouteConfig {
 
-    __gshared RouteItem[][string] allRouteItems;
-    __gshared RouteGroup[] allRouteGroups;
+    private RouteItem[][string] _allRouteItems;
+    private RouteGroup[] _allRouteGroups;
+    private string _basePath;
+    // RouteItem[] routes;
 
-    static ActionRouteItem getRoute(string group, string mca) {
-        auto itemPtr = group in allRouteItems;
+    private ApplicationConfig _appConfig;
+
+    this(ApplicationConfig appConfig) {
+        _appConfig = appConfig;
+        _basePath = DEFAULT_CONFIG_PATH;
+        loadGroupRoutes();
+        loadDefaultRoutes();
+    }
+
+    string basePath() {
+        return _basePath;
+    }
+
+    RouteConfig basePath(string value) {
+        _basePath = value;
+        return this;
+    }
+
+    private void addGroupRoute(RouteGroup group, RouteItem[] routes) {
+        // bool isRootStaticPathAdded = false;
+        _allRouteItems[group.name] = routes;
+        _allRouteGroups ~= group;
+
+        RouteGroupType groupType = RouteGroupType.Host;
+        if (group.type == "path") {
+            groupType = RouteGroupType.Path;
+        }
+
+        // foreach (RouteItem item; routes) {
+        //     addRoute(hsb, item, group);
+        // }
+
+        // if(!isRootStaticPathAdded) {
+        // default static files
+        // hsb.resource("/", DEFAULT_STATIC_FILES_LACATION, false, group.value, groupType);
+        // }
+    }
+
+    RouteItem[][RouteGroup] allRoutes() {
+        RouteItem[][RouteGroup] r;
+        foreach(string key, RouteItem[] value; _allRouteItems) {
+            foreach(RouteGroup g; _allRouteGroups) {
+                if(g.name == key) {
+                    r[g] ~= value;
+                    break;
+                }
+            }
+        }
+        return r;
+    }
+
+    // RouteGroup[] allRouteGroups() {
+    //     return _allRouteGroups
+    // }
+
+    ActionRouteItem getRoute(string group, string mca) {
+        auto itemPtr = group in _allRouteItems;
         if(itemPtr is null)
             return null;
         
@@ -108,18 +169,87 @@ struct RouteConfig {
         return null;
     }
 
-    static RouteGroup getRouteGroupe(string name) {
-        auto item = allRouteGroups.find!(g => g.name == name).takeOne;
+    RouteGroup getRouteGroupe(string name) {
+        warning(_allRouteGroups);
+        auto item = _allRouteGroups.find!(g => g.name == name).takeOne;
         if(item.empty)
             return null;
         return item.front;
+    }
+
+    private void loadGroupRoutes() {
+        if (_appConfig.route.groups.empty)
+            return;
+
+        version (HUNT_DEBUG)
+            info(_appConfig.route.groups);
+
+        string[] groupConfig;
+        foreach (v; split(_appConfig.route.groups, ',')) {
+            groupConfig = split(v, ":");
+
+            if (groupConfig.length != 3 && groupConfig.length != 4) {
+                logWarningf("Group config format error ( %s ).", v);
+            } else {
+                string value = groupConfig[2];
+                if (groupConfig.length == 4) {
+                    if (std.conv.to!int(groupConfig[3]) > 0) {
+                        value ~= ":" ~ groupConfig[3];
+                    }
+                }
+
+                RouteGroup groupInfo = new RouteGroup();
+                groupInfo.name = strip(groupConfig[0]);
+                groupInfo.type = strip(groupConfig[1]);
+                groupInfo.value = strip(value);
+
+                version (HUNT_FM_DEBUG)
+                    infof("route group: %s", groupInfo);
+
+                string routeConfigFile = groupInfo.name ~ DEFAULT_ROUTE_CONFIG_EXT;
+                routeConfigFile = buildPath(_basePath, routeConfigFile);
+
+                if (!exists(routeConfigFile)) {
+                    warningf("Config file does not exist: %s", routeConfigFile);
+                } else {
+                    RouteItem[] routes = load(routeConfigFile);
+
+                    if (routes.length > 0) {
+                        addGroupRoute(groupInfo, routes);
+                    } else {
+                        version (HUNT_DEBUG)
+                            warningf("No routes defined for group %s", groupInfo.name);
+                    }
+                }
+            }
+        }
+    }    
+
+    private void loadDefaultRoutes() {
+        // load default routes
+        string routeConfigFile = buildPath(_basePath, DEFAULT_ROUTE_CONFIG);
+        if (!exists(routeConfigFile)) {
+            warningf("The config file for route does not exist: %s", routeConfigFile);
+        } else {
+            RouteItem[] routes = load(routeConfigFile);
+            _allRouteItems[DEFAULT_ROUTE_GROUP] = routes;
+
+            RouteGroup defaultGroup = new RouteGroup();
+            defaultGroup.name = DEFAULT_ROUTE_GROUP;
+            defaultGroup.type = RouteGroup.DEFAULT;
+
+            _allRouteGroups ~= defaultGroup;
+
+            // foreach (RouteItem item; routes) {
+            //     addRoute(hsb, item, null);
+            // }
+        }        
     }
 
     static RouteItem[] load(string filename) {
         import std.stdio;
 
         RouteItem[] items;
-
         auto f = File(filename);
 
         scope (exit) {
@@ -250,9 +380,13 @@ string makeRouteHandlerKey(ActionRouteItem route, RouteGroup group = null) {
     string moduleName = route.moduleName;
     string controller = route.controller;
 
+    string groupName = "";
+    if(group !is null && group.name != RouteGroup.DEFAULT)
+        groupName = group.name ~ ".";
+
     string key = format("app.%scontroller.%s%s.%scontroller.%s", 
         moduleName.empty() ? "" : "component." ~ moduleName ~ ".",
-        group is null ? "" : group.name ~ ".",
+        groupName,
         controller, 
         controller, route.action);
     return key.toLower();

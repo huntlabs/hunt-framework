@@ -30,9 +30,7 @@ ConfigManager configManager() {
     return serviceContainer().resolve!(ConfigManager);
 }
 
-ApplicationConfig config()
-{
-    // return configManager().config();
+ApplicationConfig config() {
     return serviceContainer().resolve!(ApplicationConfig);
 }
 
@@ -69,22 +67,17 @@ import hunt.entity.EntityManagerFactory;
 
 //global entity manager
 private EntityManager _em;
-EntityManager defaultEntityManager()
-{
-    if (_em is null)
-    {
+EntityManager defaultEntityManager() {
+    if (_em is null) {
         _em = serviceContainer.resolve!(EntityManagerFactory).currentEntityManager();
     }
     return _em;
 }
 
-
 //close global entity manager
-void closeDefaultEntityManager()
-{
-    version(WITH_HUNT_ENTITY)  {
-        if(_em !is null)
-        {
+void closeDefaultEntityManager() {
+    version (WITH_HUNT_ENTITY) {
+        if (_em !is null) {
             _em.close();
             _em = null;
         }
@@ -93,6 +86,7 @@ void closeDefaultEntityManager()
 
 // i18n
 import hunt.framework.i18n.I18n;
+
 private __gshared string _local /* = I18N_DEFAULT_LOCALE */ ;
 
 @property string getLocale() {
@@ -105,12 +99,13 @@ private __gshared string _local /* = I18N_DEFAULT_LOCALE */ ;
     _local = toLower(_l);
 }
 
-
 string trans(A...)(string key, lazy A args) {
     import std.format;
+
     Appender!string buffer;
     string text = _trans(key);
-    version(HUNT_DEBUG) tracef("format string: %s, key: %s, args.length: ", text, key, args.length);
+    version (HUNT_DEBUG)
+        tracef("format string: %s, key: %s, args.length: ", text, key, args.length);
     formattedWrite(buffer, text, args);
 
     return buffer.data;
@@ -118,6 +113,7 @@ string trans(A...)(string key, lazy A args) {
 
 string transWithLocale(A...)(string locale, string key, lazy A args) {
     import std.format;
+
     Appender!string buffer;
     string text = _transWithLocale(locale, key);
     formattedWrite(buffer, text, args);
@@ -127,6 +123,7 @@ string transWithLocale(A...)(string locale, string key, lazy A args) {
 
 string transWithLocale(string locale, string key, JSONValue args) {
     import hunt.framework.util.Formatter;
+
     string text = _transWithLocale(locale, key);
     return StrFormat(text, args);
 }

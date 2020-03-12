@@ -58,8 +58,8 @@ import std.string;
 
 alias DefaultServiceProviders = AliasSeq!(
     ConfigServiceProvider, RedisServiceProvider, TranslationServiceProvider,
-    BreadcrumbServiceProvider, CacheServiceProvider, SessionServiceProvider,
-    DatabaseServiceProvider, HttpServiceProvider, ViewServiceProvider);
+    CacheServiceProvider, SessionServiceProvider, DatabaseServiceProvider,
+    HttpServiceProvider, BreadcrumbServiceProvider, ViewServiceProvider);
 
 
 /**
@@ -184,9 +184,10 @@ final class Application {
      * https://laravel.com/docs/6.x/lifecycle
      */
     private void bootstrap() {
-        // 
-        initializeProviders();
         _appConfig = serviceContainer().resolve!ApplicationConfig();
+
+        // 
+        registerProviders();
         
         //
         initializeLogger();
@@ -195,9 +196,12 @@ final class Application {
             initializeTracer();
         }
 
-        // Resolve the HTTP server
+        // Resolve the HTTP server firstly
         _server = serviceContainer.resolve!(HttpServer);
         _serverOptions = _server.getHttpOptions();
+
+        // booting Providers
+        bootProviders();
 
         //
         showLogo();
@@ -218,16 +222,17 @@ final class Application {
     }
 
     string createUrl(string mca, string[string] params = null, string group = null) {
-
+        
         if (group.empty)
             group = DEFAULT_ROUTE_GROUP;
 
         // find Route
-        RouteGroup routeGroup = RouteConfig.getRouteGroupe(group);
+        RouteConfig routeConfig = serviceContainer().resolve!(RouteConfig);
+        RouteGroup routeGroup = routeConfig.getRouteGroupe(group);
         if (routeGroup is null)
             return null;
 
-        RouteItem route = RouteConfig.getRoute(group, mca);
+        RouteItem route = routeConfig.getRoute(group, mca);
         if (route is null) {
             return null;
         }
@@ -333,26 +338,20 @@ final class Application {
         };
     }
 
-    private void initializeProviders() {
-
+    /**
+     * Register all the default service providers
+     */
+    private void registerProviders() {
         // Register all the default service providers
         static foreach(T; DefaultServiceProviders) {
             static if(!is(T == ConfigServiceProvider)) {
                 tryRegister!T();
             }
         }
-        // tryRegister!RedisServiceProvider();
-        // tryRegister!TranslationServiceProvider();
-        // tryRegister!BreadcrumbServiceProvider();
-        // tryRegister!CacheServiceProvider();
-        // tryRegister!SessionServiceProvider();
-        // tryRegister!DatabaseServiceProvider();
-        // tryRegister!HttpServiceProvider();
-        // tryRegister!ViewServiceProvider();
 
         // Register all the service provided by the providers
         ServiceProvider[] providers = serviceContainer().resolveAll!(ServiceProvider);
-        infof("Registering service providers (%d)...", providers.length);
+        infof("Registering all the service providers (%d)...", providers.length);
 
         // foreach(ServiceProvider p; providers) {
         //     p.register();
@@ -360,8 +359,14 @@ final class Application {
         //     serviceContainer().autowire(p);
         // }
 
-        // Booting all the providers
-        infof("Booting service providers (%d)...", providers.length);
+    }
+
+    /**
+     * Booting all the providers
+     */
+    private void bootProviders() {
+        ServiceProvider[] providers = serviceContainer().resolveAll!(ServiceProvider);
+        infof("Booting all the service providers (%d)...", providers.length);
 
         foreach(ServiceProvider p; providers) {
             p.boot();

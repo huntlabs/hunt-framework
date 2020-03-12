@@ -474,8 +474,9 @@ RoutingHandler getRouteHandler(string str)
 
 void registerRouteHandler(string str, RoutingHandler method)
 {
+    // key: app.controller.Index.IndexController.showString
     version (HUNT_FM_DEBUG) logDebug("Add route handler: ", str);
     _actions[str.toLower] = method;
 }
 
-private __gshared RoutingHandler[string] _actions;
+__gshared RoutingHandler[string] _actions;

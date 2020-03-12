@@ -19,6 +19,7 @@ public import hunt.framework.application.BreadcrumbsManager;
 public import hunt.framework.application.ConfigManager;
 public import hunt.framework.application.Controller;
 public import hunt.framework.application.MiddlewareInterface;
+public import hunt.framework.application.RouteConfig;
 public import hunt.framework.application.ServeCommand;
 
 public import hunt.framework.Simplify;

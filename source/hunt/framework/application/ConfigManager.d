@@ -19,6 +19,8 @@ import std.traits;
  */
 class ConfigManager {
 
+    // TODO: Tasks pending completion -@zhangxueping at 2020-03-11T16:53:58+08:00
+    // thread-safe
     private Object[string] _cachedConfigs;
     private string _basePath = DEFAULT_CONFIG_LACATION;
 
