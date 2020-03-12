@@ -13,6 +13,7 @@ module hunt.framework.http.Request;
 
 import hunt.framework.file.UploadedFile;
 import hunt.framework.http.session.SessionStorage;
+import hunt.framework.provider.ServiceProvider;
 
 import hunt.http.HttpMethod;
 import hunt.http.HttpHeader;
@@ -42,6 +43,7 @@ class Request {
 
     this(HttpServerRequest request) {
         this._request = request;
+        _sessionStorage = serviceContainer().resolve!SessionStorage();
     }
 
     /**
@@ -848,7 +850,9 @@ class Request {
         if (!sessionId.empty) {
             _session = _sessionStorage.get(sessionId);
             _session.setMaxInactiveInterval(_sessionStorage.expire);
-            version(HUNT_HTTP_DEBUG) tracef("existed session: %s, expire: %d", sessionId, _session.getMaxInactiveInterval());
+            version(HUNT_HTTP_DEBUG) {
+                tracef("session exists: %s, expire: %d", sessionId, _session.getMaxInactiveInterval());
+            }
         }
 
         if (_session is null && canCreate) {
