@@ -13,6 +13,7 @@ module hunt.framework.Simplify;
 
 public import hunt.framework.application.Application : app;
 public import hunt.framework.application.ApplicationConfig;
+public import hunt.framework.application.RouteConfig;
 public import hunt.framework.application.ConfigManager;
 public import hunt.util.DateTime : time, date;
 public import hunt.framework.Init;
@@ -34,12 +35,16 @@ ApplicationConfig config() {
     return serviceContainer().resolve!(ApplicationConfig);
 }
 
+RouteConfig routeConfig() {
+    return serviceContainer().resolve!(RouteConfig);
+}
+
 string url(string mca) {
     return url(mca, null);
 }
 
 string url(string mca, string[string] params, string group) {
-    return app().createUrl(mca, params, group);
+    return routeConfig().createUrl(mca, params, group);
 }
 
 string url(string mca, string[string] params) {
@@ -57,7 +62,8 @@ string url(string mca, string[string] params) {
         throw new Exception("Bad format for mca");
     }
 
-    return app().createUrl(pathItem, params, group);
+    // return app().createUrl(pathItem, params, group);
+    return routeConfig().createUrl(pathItem, params, group);
 }
 
 public import hunt.entity.EntityManager;

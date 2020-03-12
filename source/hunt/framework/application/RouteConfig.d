@@ -14,7 +14,6 @@ import std.range;
 import std.regex;
 import std.string;
 
-
 /**
  * 
  */
@@ -64,7 +63,8 @@ final class ResourceRouteItem : RouteItem {
     string resourcePath;
 
     override string toString() {
-        return "path: " ~ path ~ ", methods: " ~ methods.to!string() ~ ", resource path: " ~ resourcePath;
+        return "path: " ~ path ~ ", methods: " ~ methods.to!string()
+            ~ ", resource path: " ~ resourcePath;
     }
 }
 
@@ -72,7 +72,7 @@ final class ResourceRouteItem : RouteItem {
  * 
  */
 final class RouteGroup {
-    
+
     // type
     enum string DEFAULT = "default";
     enum string HOST = "host";
@@ -87,20 +87,15 @@ final class RouteGroup {
     }
 }
 
-alias RouteGroupHandler = void delegate(RouteGroup group, RouteItem[] routes);
-alias RouteParsingHandler = void delegate(RouteItem route);
-
 /** 
  * 
  */
 class RouteConfig {
 
+    private ApplicationConfig _appConfig;
     private RouteItem[][string] _allRouteItems;
     private RouteGroup[] _allRouteGroups;
     private string _basePath;
-    // RouteItem[] routes;
-
-    private ApplicationConfig _appConfig;
 
     this(ApplicationConfig appConfig) {
         _appConfig = appConfig;
@@ -119,7 +114,6 @@ class RouteConfig {
     }
 
     private void addGroupRoute(RouteGroup group, RouteItem[] routes) {
-        // bool isRootStaticPathAdded = false;
         _allRouteItems[group.name] = routes;
         _allRouteGroups ~= group;
 
@@ -127,22 +121,13 @@ class RouteConfig {
         if (group.type == "path") {
             groupType = RouteGroupType.Path;
         }
-
-        // foreach (RouteItem item; routes) {
-        //     addRoute(hsb, item, group);
-        // }
-
-        // if(!isRootStaticPathAdded) {
-        // default static files
-        // hsb.resource("/", DEFAULT_STATIC_FILES_LACATION, false, group.value, groupType);
-        // }
     }
 
     RouteItem[][RouteGroup] allRoutes() {
         RouteItem[][RouteGroup] r;
-        foreach(string key, RouteItem[] value; _allRouteItems) {
-            foreach(RouteGroup g; _allRouteGroups) {
-                if(g.name == key) {
+        foreach (string key, RouteItem[] value; _allRouteItems) {
+            foreach (RouteGroup g; _allRouteGroups) {
+                if (g.name == key) {
                     r[g] ~= value;
                     break;
                 }
@@ -151,19 +136,17 @@ class RouteConfig {
         return r;
     }
 
-    // RouteGroup[] allRouteGroups() {
-    //     return _allRouteGroups
-    // }
-
     ActionRouteItem getRoute(string group, string mca) {
         auto itemPtr = group in _allRouteItems;
-        if(itemPtr is null)
+        if (itemPtr is null)
             return null;
-        
-        foreach(RouteItem item; *itemPtr) {
-            ActionRouteItem actionItem = cast(ActionRouteItem)item;
-            if(actionItem is null) continue;
-            if(actionItem.mca ==  mca) return actionItem;
+
+        foreach (RouteItem item; *itemPtr) {
+            ActionRouteItem actionItem = cast(ActionRouteItem) item;
+            if (actionItem is null)
+                continue;
+            if (actionItem.mca == mca)
+                return actionItem;
         }
 
         return null;
@@ -172,7 +155,7 @@ class RouteConfig {
     RouteGroup getRouteGroupe(string name) {
         warning(_allRouteGroups);
         auto item = _allRouteGroups.find!(g => g.name == name).takeOne;
-        if(item.empty)
+        if (item.empty)
             return null;
         return item.front;
     }
@@ -223,7 +206,7 @@ class RouteConfig {
                 }
             }
         }
-    }    
+    }
 
     private void loadDefaultRoutes() {
         // load default routes
@@ -239,11 +222,73 @@ class RouteConfig {
             defaultGroup.type = RouteGroup.DEFAULT;
 
             _allRouteGroups ~= defaultGroup;
+        }
+    }
 
-            // foreach (RouteItem item; routes) {
-            //     addRoute(hsb, item, null);
-            // }
-        }        
+    string createUrl(string mca, string[string] params = null, string group = null) {
+
+        if (group.empty)
+            group = DEFAULT_ROUTE_GROUP;
+
+        // find Route
+        // RouteConfig routeConfig = serviceContainer().resolve!(RouteConfig);
+        RouteGroup routeGroup = getRouteGroupe(group);
+        if (routeGroup is null)
+            return null;
+
+        RouteItem route = getRoute(group, mca);
+        if (route is null) {
+            return null;
+        }
+
+        string url;
+        if (route.isRegex) {
+            if (params is null) {
+                warningf("Need route params for (%s).", mca);
+                return null;
+            }
+
+            if (!route.paramKeys.empty) {
+                url = route.urlTemplate;
+                foreach (i, key; route.paramKeys) {
+                    string value = params.get(key, null);
+
+                    if (value is null) {
+                        logWarningf("this route template need param (%s).", key);
+                        return null;
+                    }
+
+                    params.remove(key);
+                    url = url.replaceFirst("{" ~ key ~ "}", value);
+                }
+            }
+        } else {
+            url = route.pattern;
+        }
+
+        string groupValue = routeGroup.value;
+        if (routeGroup.type == RouteGroup.HOST) {
+            url = (_appConfig.https.enabled ? "https://" : "http://") ~ groupValue ~ url;
+        } else {
+            url = (!groupValue.empty
+                    ? (_appConfig.application.baseUrl ~ groupValue) : strip(
+                        _appConfig.application.baseUrl, "", "/")) ~ url;
+        }
+
+        return url ~ (params.length > 0 ? ("?" ~ buildUriQueryString(params)) : "");
+    }
+
+    static string buildUriQueryString(string[string] params) {
+        if (params.length == 0) {
+            return "";
+        }
+
+        string r;
+        foreach (k, v; params) {
+            r ~= (r ? "&" : "") ~ k ~ "=" ~ v;
+        }
+
+        return r;
     }
 
     static RouteItem[] load(string filename) {
@@ -257,8 +302,8 @@ class RouteConfig {
         }
 
         foreach (line; f.byLineCopy) {
-            RouteItem item = parseOne(cast(string)line);
-            if(item is null)
+            RouteItem item = parseOne(cast(string) line);
+            if (item is null)
                 continue;
 
             if (item.path.length > 0) {
@@ -277,14 +322,13 @@ class RouteConfig {
             return null;
         }
 
-
         // match example: 
         // GET, POST    /users    module.controller.action | staticDir:wwwroot
         auto matched = line.match(
                 regex(`([^/]+)\s+(/[\S]*?)\s+((staticDir[\:][\w|\/|\\]+)|([\w\.]+))`));
 
         if (!matched) {
-            if(!line.empty()) {
+            if (!line.empty()) {
                 warningf("Unmatched line: %s", line);
             }
             return null;
@@ -293,7 +337,7 @@ class RouteConfig {
         //
         RouteItem item;
         string part3 = matched.captures[3].to!string.strip;
-        
+
         // 
         if (part3.startsWith("staticDir:")) {
             ResourceRouteItem routeItem = new ResourceRouteItem();
@@ -313,25 +357,24 @@ class RouteConfig {
             if (mcaArray.length == 2) {
                 routeItem.controller = mcaArray[0];
                 routeItem.action = mcaArray[1];
-            }
-            else {
+            } else {
                 routeItem.moduleName = mcaArray[0];
                 routeItem.controller = mcaArray[1];
                 routeItem.action = mcaArray[2];
             }
             item = routeItem;
         }
-        
+
         // methods
         string methods = matched.captures[1].to!string.strip;
         methods = methods.toUpper();
-        
-        if(methods.length > 2) {
-            if(methods[0] == '[' && methods[$-1] == ']')
-                methods = methods[1..$-2];
+
+        if (methods.length > 2) {
+            if (methods[0] == '[' && methods[$ - 1] == ']')
+                methods = methods[1 .. $ - 2];
         }
-        
-        if(methods == "*" || methods == "ALL" ) {
+
+        if (methods == "*" || methods == "ALL") {
             item.methods = null;
         } else {
             item.methods = split(methods, ",");
@@ -340,6 +383,9 @@ class RouteConfig {
         // path
         string path = matched.captures[2].to!string.strip;
         item.path = path;
+        item.pattern = mendPath(path);
+
+        // warningf("old: %s, new: %s", path, item.pattern);
 
         // regex path
         auto matches = path.matchAll(regex(`\{(\w+)(<([^>]+)>)?\}`));
@@ -365,8 +411,21 @@ class RouteConfig {
 
         return item;
     }
-}
 
+    static string mendPath(string path) {
+        if (path.empty || path == "/")
+            return "/";
+
+        if (path[0] != '/') {
+            path = "/" ~ path;
+        }
+
+        if (path[$ - 1] != '/')
+            path ~= "/";
+
+        return path;
+    }
+}
 
 /**
  * Examples:
@@ -381,13 +440,11 @@ string makeRouteHandlerKey(ActionRouteItem route, RouteGroup group = null) {
     string controller = route.controller;
 
     string groupName = "";
-    if(group !is null && group.name != RouteGroup.DEFAULT)
+    if (group !is null && group.name != RouteGroup.DEFAULT)
         groupName = group.name ~ ".";
 
-    string key = format("app.%scontroller.%s%s.%scontroller.%s", 
-        moduleName.empty() ? "" : "component." ~ moduleName ~ ".",
-        groupName,
-        controller, 
-        controller, route.action);
+    string key = format("app.%scontroller.%s%s.%scontroller.%s", moduleName.empty()
+            ? "" : "component." ~ moduleName ~ ".", groupName, controller,
+            controller, route.action);
     return key.toLower();
 }
