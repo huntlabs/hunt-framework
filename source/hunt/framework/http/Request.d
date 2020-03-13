@@ -14,6 +14,7 @@ module hunt.framework.http.Request;
 import hunt.framework.file.UploadedFile;
 import hunt.framework.http.session.SessionStorage;
 import hunt.framework.provider.ServiceProvider;
+import hunt.framework.routing;
 
 import hunt.http.HttpMethod;
 import hunt.http.HttpHeader;
@@ -23,6 +24,7 @@ import hunt.http.server.HttpSession;
 import hunt.logging.ConsoleLogger;
 
 import std.algorithm;
+import std.array : split;
 import std.range;
 
 /**
@@ -36,14 +38,19 @@ class Request {
     private bool _isXFormUrlencoded = false;
     private UploadedFile[] _convertedAllFiles;
     private UploadedFile[][string] _convertedMultiFiles;
+    private RouteConfigManager _routeManager;
 
     HttpServerRequest _request;
-
     alias _request this;
 
     this(HttpServerRequest request) {
         this._request = request;
         _sessionStorage = serviceContainer().resolve!SessionStorage();
+        _routeManager = serviceContainer().resolve!RouteConfigManager();
+        
+        // string host = split(request.header(HttpHeader.HOST), ":")[0];
+        // ActionRouteItem routeItem = _routeManager.getRoute(host, request.getMethod(), request.path());
+        // warning(routeItem);
     }
 
     /**
@@ -811,20 +818,15 @@ class Request {
 
 //     }
 
-    // string getMCA()
-    // {
-    //     string mca;
-    //     if (request.route.getModule() is null)
-    //     {
-    //         mca = request.route.getController() ~ "." ~ request.route.getAction();
-    //     }
-    //     else
-    //     {
-    //         mca = request.route.getModule() ~ "." ~ request.route.getController()
-    //             ~ "." ~ request.route.getAction();
-    //     }
-    //     return mca;
-    // }
+    string getMCA() {
+        string host = split(_request.header(HttpHeader.HOST), ":")[0];
+        ActionRouteItem routeItem = _routeManager.getRoute(host, _request.getMethod(), _request.path());
+        version(HUNT_FM_DEBUG) trace(routeItem);
+        if(routeItem is null) 
+            return "";
+        else
+            return routeItem.mca;
+    }
 
     /**
      * Flush all of the old input from the session.

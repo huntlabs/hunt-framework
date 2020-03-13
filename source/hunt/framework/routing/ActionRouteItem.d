@@ -8,13 +8,13 @@ import std.conv;
  */
 final class ActionRouteItem : RouteItem {
 
-    // hunt module
+    // module
     string moduleName;
 
-    // hunt controller
+    // controller
     string controller;
 
-    // hunt action
+    // action
     string action;
 
     string mca() {

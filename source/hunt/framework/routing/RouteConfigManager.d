@@ -86,8 +86,45 @@ class RouteConfigManager {
         return null;
     }
 
+    ActionRouteItem getRoute(string host, string method, string path) {
+        version(HUNT_FM_DEBUG) tracef("matching: host=%s, method=%s, path=%s", host, method, path);
+        // path = mendPath(path);
+
+        RouteGroup group = getRouteGroupe(host);
+        if(group is null) {
+            group = getRouteGroupe(DEFAULT_ROUTE_GROUP);
+            version(HUNT_FM_DEBUG) warningf("Round a RouteGroup for %s", DEFAULT_ROUTE_GROUP);
+        } else {
+            version(HUNT_FM_DEBUG) tracef("Round a RouteGroup for %s", host);
+        }
+
+        //
+        auto itemPtr = group.name in _allRouteItems;
+        if (itemPtr is null)
+            return null;
+
+        foreach (RouteItem item; *itemPtr) {
+            ActionRouteItem actionItem = cast(ActionRouteItem) item;
+            if (actionItem is null)
+                continue;
+            
+            // TODO: Tasks pending completion -@zhangxueping at 2020-03-13T16:23:18+08:00
+            // handle /user/{id<[0-9]+>} 
+            if(actionItem.path != path) continue;
+
+            // tracef("actionItem: %s", actionItem);
+            string[] methods = actionItem.methods;
+            if (!methods.empty && !methods.canFind(method))
+                continue;
+
+            return actionItem;
+        }
+
+        return null;
+    }
+
     RouteGroup getRouteGroupe(string name) {
-        warning(_allRouteGroups);
+        // warning(_allRouteGroups);
         auto item = _allRouteGroups.find!(g => g.name == name).takeOne;
         if (item.empty)
             return null;
