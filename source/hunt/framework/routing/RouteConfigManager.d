@@ -86,20 +86,19 @@ class RouteConfigManager {
         return null;
     }
 
-    ActionRouteItem getRoute(string host, string method, string path) {
-        version(HUNT_FM_DEBUG) tracef("matching: host=%s, method=%s, path=%s", host, method, path);
-        // path = mendPath(path);
-
-        RouteGroup group = getRouteGroupe(host);
-        if(group is null) {
-            group = getRouteGroupe(DEFAULT_ROUTE_GROUP);
-            version(HUNT_FM_DEBUG) warningf("Round a RouteGroup for %s", DEFAULT_ROUTE_GROUP);
-        } else {
-            version(HUNT_FM_DEBUG) tracef("Round a RouteGroup for %s", host);
+    ActionRouteItem getRoute(string groupName, string method, string path) {
+        version(HUNT_FM_DEBUG) tracef("matching: groupName=%s, method=%s, path=%s", groupName, method, path);
+        if(path.empty) {
+            warning("path is empty");
+            return null;
         }
 
+        path = path.stripRight("/");
+
+
         //
-        auto itemPtr = group.name in _allRouteItems;
+        // auto itemPtr = group.name in _allRouteItems;
+        auto itemPtr = groupName in _allRouteItems;
         if (itemPtr is null)
             return null;
 

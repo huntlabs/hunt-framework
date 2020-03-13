@@ -69,7 +69,7 @@ abstract class Controller
 
     Request request() {
         if(_request is null) {
-            _request = new Request(_routingContext.getRequest());
+            _request = new Request(_routingContext.getRequest(), _routingContext.groupName());
         }
         return _request;
     }

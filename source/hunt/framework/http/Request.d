@@ -13,6 +13,7 @@ module hunt.framework.http.Request;
 
 import hunt.framework.file.UploadedFile;
 import hunt.framework.http.session.SessionStorage;
+import hunt.framework.Init;
 import hunt.framework.provider.ServiceProvider;
 import hunt.framework.routing;
 
@@ -25,6 +26,7 @@ import hunt.logging.ConsoleLogger;
 
 import std.algorithm;
 import std.array : split;
+import std.json;
 import std.range;
 
 /**
@@ -39,18 +41,20 @@ class Request {
     private UploadedFile[] _convertedAllFiles;
     private UploadedFile[][string] _convertedMultiFiles;
     private RouteConfigManager _routeManager;
+    private string _routeGroup = DEFAULT_ROUTE_GROUP;
 
     HttpServerRequest _request;
     alias _request this;
 
-    this(HttpServerRequest request) {
+    this(HttpServerRequest request, string routeGroup = DEFAULT_ROUTE_GROUP) {
         this._request = request;
         _sessionStorage = serviceContainer().resolve!SessionStorage();
         _routeManager = serviceContainer().resolve!RouteConfigManager();
+        _routeGroup = routeGroup;
         
         // string host = split(request.header(HttpHeader.HOST), ":")[0];
-        // ActionRouteItem routeItem = _routeManager.getRoute(host, request.getMethod(), request.path());
-        // warning(routeItem);
+        ActionRouteItem routeItem = _routeManager.getRoute(routeGroup, request.getMethod(), request.path());
+        warning(routeItem);
     }
 
     /**
@@ -457,30 +461,30 @@ class Request {
 
 //     private string[][string] _xFormData;
 
-//     T bindForm(T)() {
+    T bindForm(T)() {
 
-//         if(methodAsString() != "POST")
-//             return T.init;
-//         import hunt.serialization.JsonSerializer;
-//         // import hunt.util.Serialize;
+        if(methodAsString() != "POST")
+            return T.init;
+        import hunt.serialization.JsonSerializer;
+        // import hunt.util.Serialize;
 
-//         JSONValue jv;
-//         if(xFormData() is null)
-//             return new T();        
-//         foreach(string k, string[] values; xFormData()) {
-//             if(values.length > 1) {
-//                 jv[k] = JSONValue(values);
-//             } else if(values.length == 1) {
-//                 jv[k] = JSONValue(values[0]);
-//             } else {
-//                 warningf("null value for %s in form data: ", k);
-//             }
-//         }
-//         return JsonSerializer.toObject!T(jv);
-//         // T obj = toObject!T(jv);
+        JSONValue jv;
+        if(xFormData() is null)
+            return new T();        
+        foreach(string k, string[] values; xFormData()) {
+            if(values.length > 1) {
+                jv[k] = JSONValue(values);
+            } else if(values.length == 1) {
+                jv[k] = JSONValue(values[0]);
+            } else {
+                warningf("null value for %s in form data: ", k);
+            }
+        }
+        return JsonSerializer.toObject!T(jv);
+        // T obj = toObject!T(jv);
 
-//         // return (obj is null) ? (new T()) : obj;
-//     }
+        // return (obj is null) ? (new T()) : obj;
+    }
 
 //     /**
 //    * Sets the query parameter with the specified name to the specified value.
@@ -821,7 +825,7 @@ class Request {
     string getMCA() {
         string host = split(_request.header(HttpHeader.HOST), ":")[0];
         ActionRouteItem routeItem = _routeManager.getRoute(host, _request.getMethod(), _request.path());
-        version(HUNT_FM_DEBUG) trace(routeItem);
+        version(HUNT_DEBUG) trace(routeItem);
         if(routeItem is null) 
             return "";
         else
