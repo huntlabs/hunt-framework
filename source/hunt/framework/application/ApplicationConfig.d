@@ -156,7 +156,8 @@ class ApplicationConfig {
         int minConnection = 5;
     }
 
-    struct DBConfig {
+    struct DatabaseConf {
+        
         string url() {
             string s = format("%s://%s:%s@%s:%d/%s?prefix=%s&charset=%s",
                     driver, username, password, host, port, database, prefix, charset);
@@ -172,11 +173,6 @@ class ApplicationConfig {
         string charset = "utf8";
         string prefix = "";
         bool enabled = false;
-    }
-
-    struct DatabaseConf {
-        @Value("default")
-        DBConfig defaultOptions;
 
         DbPoolConf pool;
     }

@@ -23,21 +23,21 @@ class DatabaseServiceProvider : ServiceProvider {
         ApplicationConfig appConfig = container.resolve!ApplicationConfig();
         ApplicationConfig.DatabaseConf config = appConfig.database;
 
-        if (config.defaultOptions.enabled) {
+        if (config.enabled) {
 
             import hunt.entity.EntityOption;
 
             auto option = new EntityOption;
 
             // database options
-            option.database.driver = config.defaultOptions.driver;
-            option.database.host = config.defaultOptions.host;
-            option.database.username = config.defaultOptions.username;
-            option.database.password = config.defaultOptions.password;
-            option.database.port = config.defaultOptions.port;
-            option.database.database = config.defaultOptions.database;
-            option.database.charset = config.defaultOptions.charset;
-            option.database.prefix = config.defaultOptions.prefix;
+            option.database.driver = config.driver;
+            option.database.host = config.host;
+            option.database.username = config.username;
+            option.database.password = config.password;
+            option.database.port = config.port;
+            option.database.database = config.database;
+            option.database.charset = config.charset;
+            option.database.prefix = config.prefix;
 
             // database pool options
             option.pool.minIdle = config.pool.minIdle;
@@ -49,7 +49,7 @@ class DatabaseServiceProvider : ServiceProvider {
             option.pool.maxConnection = config.pool.maxConnection;
             option.pool.minConnection = config.pool.minConnection;
 
-            infof("using database: %s", config.defaultOptions.driver);
+            infof("using database: %s", config.driver);
             return Persistence.createEntityManagerFactory("default", option);
         } else {
             warning("The database is disabled.");
