@@ -3,9 +3,9 @@ module hunt.framework.provider.HttpServiceProvider;
 import hunt.framework.application.Controller;
 import hunt.framework.application.ApplicationConfig;
 import hunt.framework.application.ConfigManager;
-import hunt.framework.application.RouteConfig;
 import hunt.framework.Init;
 import hunt.framework.provider.ServiceProvider;
+import hunt.framework.routing;
 
 import hunt.http.routing.RoutingContext;
 import hunt.http.routing.RouterManager;
@@ -53,7 +53,7 @@ class HttpServiceProvider : ServiceProvider {
         HttpServer.Builder hsb = HttpServer.builder()
             .setListener(appConfig.http.port, appConfig.http.address);
 
-        RouteConfig routeConfig = container.resolve!RouteConfig();
+        RouteConfigManager routeConfig = container.resolve!RouteConfigManager();
         RouteItem[][RouteGroup] allRoutes = routeConfig.allRoutes;
 
         // trace(_actions.keys);

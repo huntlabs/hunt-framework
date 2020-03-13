@@ -13,12 +13,12 @@ module hunt.framework.Simplify;
 
 public import hunt.framework.application.Application : app;
 public import hunt.framework.application.ApplicationConfig;
-public import hunt.framework.application.RouteConfig;
 public import hunt.framework.application.ConfigManager;
-public import hunt.util.DateTime : time, date;
 public import hunt.framework.Init;
-import hunt.framework.provider;
+public import hunt.framework.routing;
+public import hunt.util.DateTime : time, date;
 
+import hunt.framework.provider;
 import hunt.logging.ConsoleLogger;
 
 import poodinis;
@@ -35,8 +35,8 @@ ApplicationConfig config() {
     return serviceContainer().resolve!(ApplicationConfig);
 }
 
-RouteConfig routeConfig() {
-    return serviceContainer().resolve!(RouteConfig);
+RouteConfigManager routeConfig() {
+    return serviceContainer().resolve!(RouteConfigManager);
 }
 
 string url(string mca) {

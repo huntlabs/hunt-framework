@@ -2,9 +2,9 @@ module hunt.framework.provider.ConfigServiceProvider;
 
 import hunt.framework.application.ApplicationConfig;
 import hunt.framework.application.ConfigManager;
-import hunt.framework.application.RouteConfig;
 import hunt.framework.provider.ServiceProvider;
 import hunt.framework.Init;
+import hunt.framework.routing;
 
 import hunt.logging.ConsoleLogger;
 import poodinis;
@@ -32,10 +32,10 @@ class ConfigServiceProvider : ServiceProvider {
             return configManager.load!(ApplicationConfig);
         }).singleInstance();
 
-        container.register!(RouteConfig)(() {
+        container.register!(RouteConfigManager)(() {
             ConfigManager configManager = container.resolve!(ConfigManager)();
             ApplicationConfig appConfig = container.resolve!(ApplicationConfig)();
-            RouteConfig routeConfig = new RouteConfig(appConfig);
+            RouteConfigManager routeConfig = new RouteConfigManager(appConfig);
             routeConfig.basePath = configManager.configPath();
 
             return routeConfig;

@@ -1,4 +1,9 @@
-module hunt.framework.application.RouteConfig;
+module hunt.framework.routing.RouteConfigManager;
+
+import hunt.framework.routing.ActionRouteItem;
+import hunt.framework.routing.RouteItem;
+import hunt.framework.routing.ResourceRouteItem;
+import hunt.framework.routing.RouteGroup;
 
 import hunt.framework.application.ApplicationConfig;
 import hunt.framework.Init;
@@ -14,83 +19,12 @@ import std.range;
 import std.regex;
 import std.string;
 
-/**
- * 
- */
-class RouteItem {
-    string[] methods;
 
-    string path;
-    string urlTemplate;
-    string pattern;
-    string[int] paramKeys;
-
-    bool isRegex = false;
-
-}
-
-/**
- * 
- */
-final class ActionRouteItem : RouteItem {
-
-    // hunt module
-    string moduleName;
-
-    // hunt controller
-    string controller;
-
-    // hunt action
-    string action;
-
-    string mca() {
-        return (moduleName ? moduleName ~ "." : "") ~ controller ~ "." ~ action;
-    }
-
-    override string toString() {
-        return "path: " ~ path ~ ", methods: " ~ methods.to!string() ~ ", mca: " ~ mca;
-    }
-}
-
-/**
- * 
- */
-final class ResourceRouteItem : RouteItem {
-
-    /// Is a folder for static content?
-    bool canListing = false;
-
-    string resourcePath;
-
-    override string toString() {
-        return "path: " ~ path ~ ", methods: " ~ methods.to!string()
-            ~ ", resource path: " ~ resourcePath;
-    }
-}
-
-/**
- * 
- */
-final class RouteGroup {
-
-    // type
-    enum string DEFAULT = "default";
-    enum string HOST = "host";
-    enum string PATH = "path";
-
-    string name;
-    string type;
-    string value;
-
-    override string toString() {
-        return "{" ~ name ~ ", " ~ type ~ ", " ~ value ~ "}";
-    }
-}
 
 /** 
  * 
  */
-class RouteConfig {
+class RouteConfigManager {
 
     private ApplicationConfig _appConfig;
     private RouteItem[][string] _allRouteItems;
@@ -108,7 +42,7 @@ class RouteConfig {
         return _basePath;
     }
 
-    RouteConfig basePath(string value) {
+    RouteConfigManager basePath(string value) {
         _basePath = value;
         return this;
     }
@@ -231,7 +165,7 @@ class RouteConfig {
             group = DEFAULT_ROUTE_GROUP;
 
         // find Route
-        // RouteConfig routeConfig = serviceContainer().resolve!(RouteConfig);
+        // RouteConfigManager routeConfig = serviceContainer().resolve!(RouteConfigManager);
         RouteGroup routeGroup = getRouteGroupe(group);
         if (routeGroup is null)
             return null;
