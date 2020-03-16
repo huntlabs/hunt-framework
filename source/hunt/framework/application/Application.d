@@ -28,6 +28,7 @@ import hunt.framework.application.ConfigManager;
 import hunt.framework.application.MiddlewareInterface;
 import hunt.framework.application.ServeCommand;
 import hunt.framework.provider;
+import hunt.framework.provider.listener;
 import hunt.framework.routing;
 
 import hunt.redis;
@@ -259,17 +260,7 @@ final class Application {
 
     private void initializeProviderListener()
     {
-        _providerListener = new class ServiceProviderListener {
-            void registered(TypeInfo_Class info)
-            {
-                tracef("Service Provider Loaded: %s", info.toString());
-            }
-
-            void booted(TypeInfo_Class info)
-            {
-                tracef("Service Provider Booted: %s", info.toString());
-            }
-        };
+        _providerListener = new DefaultServiceProviderListener;
     }
 
     /**
