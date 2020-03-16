@@ -8,7 +8,7 @@ public import hunt.framework.provider.HttpServiceProvider;
 public import hunt.framework.provider.RedisServiceProvider;
 public import hunt.framework.provider.TranslationServiceProvider;
 public import hunt.framework.provider.ServiceProvider;
-public import hunt.framework.provider.ServiceProviderListener;
 public import hunt.framework.provider.SessionServiceProvider;
 public import hunt.framework.provider.ViewServiceProvider;
 
+public import hunt.framework.provider.listener;

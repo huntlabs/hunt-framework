@@ -1,6 +1,9 @@
-module hunt.framework.provider.lisener.DefaultServiceProviderListener;
+module hunt.framework.provider.listener.DefaultServiceProviderListener;
 
-import hunt.framework.provider.lisener.ServiceProviderListener;
+import hunt.framework.provider.listener.ServiceProviderListener;
+
+import hunt.logging.ConsoleLogger;
+
 
 class DefaultServiceProviderListener : ServiceProviderListener
 {
@@ -8,19 +11,19 @@ class DefaultServiceProviderListener : ServiceProviderListener
 
     void registered(TypeInfo_Class providerType)
     {
-        tracef("Service Provider Loaded: %s", info.toString());
+        tracef("Service Provider Loaded: %s", providerType.toString());
     }
 
     void booted(TypeInfo_Class providerType)
     {
-        tracef("Service Provider Booted: %s", info.toString());
+        tracef("Service Provider Booted: %s", providerType.toString());
 
         this.handle(providerType);
     }
 
-    void listen(TypeInfo_Class providerType, ListenHandler)
+    void listen(TypeInfo_Class providerType, ListenHandler handler)
     {
-        _listenHandlers[providerType] = ListenHandler;
+        _listenHandlers[providerType] = handler;
 
         tracef("Listen Service Provider: %s", providerType.toString());
     }

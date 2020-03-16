@@ -1,4 +1,4 @@
-module hunt.framework.provider.lisener.ServiceProviderListener;
+module hunt.framework.provider.listener.ServiceProviderListener;
 
 alias ListenHandler = void delegate();
 
