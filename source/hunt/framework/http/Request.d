@@ -855,9 +855,11 @@ class Request {
         isSessionRetrieved = true;
         if (!sessionId.empty) {
             _session = _sessionStorage.get(sessionId);
-            _session.setMaxInactiveInterval(_sessionStorage.expire);
-            version(HUNT_HTTP_DEBUG) {
-                tracef("session exists: %s, expire: %d", sessionId, _session.getMaxInactiveInterval());
+            if(_session !is null) {
+                _session.setMaxInactiveInterval(_sessionStorage.expire);
+                version(HUNT_HTTP_DEBUG) {
+                    tracef("session exists: %s, expire: %d", sessionId, _session.getMaxInactiveInterval());
+                }
             }
         }
 

@@ -210,6 +210,25 @@ abstract class Controller
         return res;
     }
 
+    protected void done() {
+        request().flush(); // assure the sessiondata flushed;
+        Response resp = response();
+        HttpSession session = request().session(false);
+        if (session !is null ) // && session.isNewSession()
+        {
+            resp.withCookie(new Cookie(DefaultSessionIdName, session.getId(), session.getMaxInactiveInterval(), 
+                    "/", null, false, false));
+        }
+
+        resp.header("Date", date("Y-m-d H:i:s"));
+        resp.header(HttpHeader.X_POWERED_BY, HUNT_X_POWERED_BY);
+
+        if(!resp.getFields().contains(HttpHeader.CONTENT_TYPE)) {
+            resp.header(HttpHeader.CONTENT_TYPE, MimeType.TEXT_HTML_VALUE);
+        }
+
+    }
+
     void dispose() {
         version(HUNT_HTTP_DEBUG) trace("Do nothing");
     }
@@ -387,6 +406,7 @@ string __createCallActionMethod(T, string moduleName)()
     str ~= "\tdefault:\n\tbreak;\n\t}\n\n";
     // str ~= "\t _routingContext.response = actionResponse;\n";
     // str ~= "\treturn actionResponse;\n";
+    str ~= "this.done();";
     str ~= "}";
 
     return str;
@@ -459,6 +479,7 @@ void callHandler(T, string method)(RoutingContext context)
     // warningf("group name: %s", context.groupName());
     try {
         controller.callActionMethod(method, context);
+        // controller.done();
     } catch (Throwable t) {
         warning(t.msg);
         version(HUNT_DEBUG) warning(t);
