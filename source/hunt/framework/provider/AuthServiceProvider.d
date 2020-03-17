@@ -13,12 +13,10 @@ import poodinis;
 class AuthServiceProvider : ServiceProvider {
 
     override void register() {
-
         serviceContainer().register!(AuthorizingRealm, IniRealm).newInstance;
     }
 
     override void boot() {
-        warning("Auth using shiro....");
         HuntCache cache = serviceContainer().resolve!HuntCache();
         AuthorizingRealm realm = serviceContainer().resolve!(AuthorizingRealm)();
 

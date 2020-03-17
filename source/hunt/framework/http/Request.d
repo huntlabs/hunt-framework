@@ -822,7 +822,11 @@ class Request {
 
 //     }
 
-    string getMCA() {
+    // 
+    deprecated("Using actionId instead.")
+    alias getMCA = actionId;
+
+    string actionId() {
         string host = split(_request.header(HttpHeader.HOST), ":")[0];
         ActionRouteItem routeItem = _routeManager.getRoute(host, _request.getMethod(), _request.path());
         version(HUNT_DEBUG) trace(routeItem);

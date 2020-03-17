@@ -15,8 +15,7 @@ alias HuntCache = hunt.cache.Cache.Cache;
 
 
 /**
- * https://blog.csdn.net/u010514380/article/details/82185451
- * https://blog.csdn.net/qq_41981107/article/details/86647329
+ * 
  */
 class HuntShiroCache : ShiroCache!(Object, AuthorizationInfo) {
     /**
