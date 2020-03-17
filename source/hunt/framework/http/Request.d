@@ -53,8 +53,8 @@ class Request {
         _routeGroup = routeGroup;
         
         // string host = split(request.header(HttpHeader.HOST), ":")[0];
-        ActionRouteItem routeItem = _routeManager.getRoute(routeGroup, request.getMethod(), request.path());
-        warning(routeItem);
+        // ActionRouteItem routeItem = _routeManager.getRoute(routeGroup, request.getMethod(), request.path());
+        // warning(routeItem);
     }
 
     /**
