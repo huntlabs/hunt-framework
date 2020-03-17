@@ -418,12 +418,20 @@ string __createRouteMap(T, string moduleName)()
     enum len = "Controller".length;
     enum controllerName = moduleName[0..$-len];
 
-    // The format: app.controller.{group}.{name}controller
-    // app.controller.admin.IndexController
+    // The format: 
+    // 1) app.controller.{group}.{name}controller
+    //      app.controller.admin.IndexController
+    // 2) app.component.{component-name}.controller.{group}.{name}controller
+    //      app.component.system.controller.admin.DashboardController
     enum string[] parts = moduleName.split(".");
     // string groupName = "default";
+
     static if(parts.length == 4) {
+        // app.controller.admin.DashboardController
         enum GroupName = parts[2];
+    } else static if(parts.length == 6) {
+        // app.component.system.controller.admin.DashboardController
+        enum GroupName = parts[4];
     } else {
         enum GroupName = "default";
     }

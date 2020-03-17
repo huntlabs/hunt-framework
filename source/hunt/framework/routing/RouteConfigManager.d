@@ -95,7 +95,6 @@ class RouteConfigManager {
 
         path = path.stripRight("/");
 
-
         //
         // auto itemPtr = group.name in _allRouteItems;
         auto itemPtr = groupName in _allRouteItems;

@@ -144,7 +144,7 @@ struct Parser(Lexer)
     {
         string dirPath = dirName(path) ~ dirSeparator;
         // path = path.absolute(_path);
-        version(HUNT_DEBUG) logDebug("parse file absolute path : ",path);
+        version(HUNT_FM_DEBUG) logDebug("parse file absolute path : ",path);
         if (auto cached = path in _parsedFiles)
         {
             if (*cached is null)
@@ -1279,7 +1279,7 @@ string absolute(string file,string path)
 bool fileExist(string file,string path)
 {
     import std.path : absolutePath;
-    version(HUNT_DEBUG) logDebug("path.absolutePath : ",(path ~ file).absolutePath);
+    version(HUNT_FM_DEBUG) logDebug("path.absolutePath : ",(path ~ file).absolutePath);
     return (file.exists) || ((path ~ file).absolutePath.exists);
 }
 
