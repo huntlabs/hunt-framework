@@ -13,7 +13,7 @@ module hunt.framework.application.Controller;
 
 import hunt.framework.application.Application;
 import hunt.framework.application.BreadcrumbsManager;
-import hunt.framework.application.MiddlewareInterface;
+import hunt.framework.middleware.MiddlewareInterface;
 
 import hunt.framework.http.Request;
 public import hunt.framework.http.Response;

@@ -21,6 +21,8 @@ public import hunt.http.codec.websocket;
 public import hunt.framework.application;
 public import hunt.framework.http;
 
+public import hunt.framework.middleware;
+
 public import hunt.framework.Init;
 public import hunt.framework.provider;
 public import hunt.framework.Simplify;
