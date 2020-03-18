@@ -8,10 +8,13 @@ import hunt.Exceptions;
 import hunt.logging.ConsoleLogger;
 import hunt.serialization.JsonSerializer;
 
+import std.array;
+import std.conv;
 import std.json;
 
 alias ShiroCache = hunt.shiro.cache.Cache.Cache;
 alias HuntCache = hunt.cache.Cache.Cache;
+
 
 
 /**
@@ -30,33 +33,32 @@ class HuntShiroCache : ShiroCache!(Object, AuthorizationInfo) {
     }
 
     AuthorizationInfo get(Object key) {
-        warning("xxx=>", key.toString);
-        string k = key.toString();
+        version(HUNT_DEBUG) tracef("%s, hash: %d", key.toString, key.toHash());
+        string k = key.toHash().to!string(); // key.toString();
         if(!_cache.hasKey(k)) {
             return null;
         }
+        SimpleAuthorizationInfo obj = new SimpleAuthorizationInfo();
 
         string v = _cache.get(k);
-        trace("key: %s, value: %s", k, v);
-        // AuthorizationInfo obj = JsonSerializer.toObject!(SimpleAuthorizationInfo)(v);
+        if(v.empty) {
+            warningf("value is empty for key: ", k);
+            return obj;
+        }
+
+        // version(HUNT_DEBUG) tracef("key: %s, value: %s", k, v);
         JSONValue jv = parseJSON(v);
         
         string[] roles = JsonSerializer.toObject!(string[])(jv["roles"]);
         string[] permissions = JsonSerializer.toObject!(string[])(jv["permissions"]);
-        
-        trace(roles);
-        trace(permissions);
 
-        SimpleAuthorizationInfo obj = new SimpleAuthorizationInfo();
         obj.addRoles(roles);
-        implementationMissing(false);
-        // obj.addStringPermission(permissions);
+        obj.addStringPermissions(permissions);
 
         return obj;
     }
     
     AuthorizationInfo get(Object key, AuthorizationInfo defaultValue) {
-        // return map.get(key, defaultValue);
         AuthorizationInfo authInfo = get(key);
         if(authInfo is null)
             return defaultValue;
@@ -64,14 +66,8 @@ class HuntShiroCache : ShiroCache!(Object, AuthorizationInfo) {
     }
 
     AuthorizationInfo put(Object key, AuthorizationInfo value) {
-        warning("xxx=>", key.toString);
-        SimpleAuthorizationInfo authInfo = cast(SimpleAuthorizationInfo)value;
-        if(authInfo !is null) {
-            string v = JsonSerializer.toJson(authInfo).toString();
-            trace(v);
-        } else {
-            warning("It's not a SimpleAuthorizationInfo.");
-        }
+        version(HUNT_DEBUG) tracef("%s, hash: %d", key.toString, key.toHash());
+        string k = key.toHash().to!string(); // key.toString();
 
         string[] roles = value.getRoles().toArray();
         string[] permissions = value.getStringPermissions().toArray();
@@ -79,22 +75,23 @@ class HuntShiroCache : ShiroCache!(Object, AuthorizationInfo) {
         JSONValue jv;
         jv["roles"] = roles;
         jv["permissions"] = permissions;
-        info(jv.toString());
 
-        _cache.set(key.toString, jv);
+        string v = jv.toString();
+        version(HUNT_HTTP_DEBUG) info(v);
+
+        _cache.set(k, v);
         return value;
     }
 
     AuthorizationInfo remove(Object key) {
-        warning("xxx=>", key.toString);
-        string k = key.toString();
+        warningf("%s, %d", key.toString, key.toHash());
+        string k = key.toHash().to!string(); // key.toString();
         if(!_cache.hasKey(k)) {
             return null;
         }
 
         // AuthorizationInfo value = _cache.get(k);
         _cache.remove(k);
-        // return value;
         implementationMissing(false);
         return null;
     }
