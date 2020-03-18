@@ -45,7 +45,7 @@ class ConfigServiceProvider : ServiceProvider {
     override void boot() {
         ApplicationConfig appConfig = container.resolve!ApplicationConfig();
         checkWorkerThreads(appConfig);
-        
+
         // update the config item with the environment variable if it exists
         string value = environment.get(ENV_APP_NAME, "");
         if(!value.empty) {

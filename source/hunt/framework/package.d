@@ -19,6 +19,7 @@ public import hunt.http.codec.http;
 public import hunt.http.codec.websocket;
 
 public import hunt.framework.application;
+public import hunt.framework.auth;
 public import hunt.framework.http;
 
 public import hunt.framework.middleware;

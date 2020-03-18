@@ -53,8 +53,8 @@ class Request {
         _routeGroup = routeGroup;
         
         // string host = split(request.header(HttpHeader.HOST), ":")[0];
-        ActionRouteItem routeItem = _routeManager.getRoute(routeGroup, request.getMethod(), request.path());
-        warning(routeItem);
+        // ActionRouteItem routeItem = _routeManager.getRoute(routeGroup, request.getMethod(), request.path());
+        // warning(routeItem);
     }
 
     /**
@@ -822,9 +822,10 @@ class Request {
 
 //     }
 
-    string getMCA() {
-        string host = split(_request.header(HttpHeader.HOST), ":")[0];
-        ActionRouteItem routeItem = _routeManager.getRoute(host, _request.getMethod(), _request.path());
+    string actionId() {
+        // string host = split(_request.header(HttpHeader.HOST), ":")[0];
+
+        ActionRouteItem routeItem = _routeManager.getRoute(_routeGroup, _request.getMethod(), _request.path());
         version(HUNT_DEBUG) trace(routeItem);
         if(routeItem is null) 
             return "";

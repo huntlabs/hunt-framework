@@ -1,5 +1,6 @@
 module hunt.framework.provider;
 
+public import hunt.framework.provider.AuthServiceProvider;
 public import hunt.framework.provider.BreadcrumbServiceProvider;
 public import hunt.framework.provider.CacheServiceProvider;
 public import hunt.framework.provider.ConfigServiceProvider;
