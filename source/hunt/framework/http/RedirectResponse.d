@@ -23,7 +23,7 @@ import hunt.framework.http.Request;
  * RedirectResponse represents an HTTP response doing a redirect.
  *
  */
-class RedirectResponse : HttpServerResponse {
+class RedirectResponse : Response {
 
     private Request _request;
 
@@ -35,6 +35,7 @@ class RedirectResponse : HttpServerResponse {
 
     this(Request request, string targetUrl, bool use301 = false) {
         // super(request());
+        super();
         _request = request;
 
         setStatus((use301 ? 301 : 302));

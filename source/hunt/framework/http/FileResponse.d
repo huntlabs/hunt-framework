@@ -8,34 +8,22 @@ import std.path;
 import std.file;
 import std.stdio;
 
+import hunt.framework.http.Response;
 import hunt.framework.Init;
-// import hunt.framework.application.ApplicationConfig;
 import hunt.framework.util.String;
-// import hunt.framework.Version;
-// import hunt.framework.http.Response;
-// import hunt.framework.http.Request;
 
 import hunt.logging.ConsoleLogger;
-
-// import hunt.http.codec.http.model.HttpHeader;
-
-// // import hunt.http.codec.http.model.AcceptMIMEType;
-// // import hunt.http.codec.http.model.MimeTypes;
-
-import hunt.framework.http.Response;
 import hunt.http.server;
 
 /**
  * FileResponse represents an HTTP response delivering a file.
  */
-class FileResponse : HttpServerResponse {
+class FileResponse : Response {
     private string _file;
     private string _name = "undefined.file";
     private string _contentType;
 
     this(string filename) {
-        // super(request());
-
         this.setFile(filename);
     }
 
@@ -86,9 +74,7 @@ class FileResponse : HttpServerResponse {
     FileResponse setData(in ubyte[] data) {
         header(HttpHeader.CONTENT_DISPOSITION,
                 "attachment; filename=" ~ _name ~ "; size=" ~ (to!string(data.length)));
-        // setContent(data);
-        HttpBody hb = HttpBody.create(_contentType, data);
-        setBody(hb);
+        setContent(data, _contentType);
         return this;
     }
 }

@@ -12,227 +12,129 @@
 module hunt.framework.http.Response;
 
 import hunt.http.HttpStatus;
+import hunt.http.server;
 
-// import std.conv;
-// import std.datetime;
-// import std.json;
-// import std.typecons;
+import std.conv;
 
-// import hunt.http.codec.http.model;
-// import hunt.http.codec.http.stream.HttpOutputStream;
+/**
+ * 
+ */
+class Response {
+    protected HttpServerResponse _response;
+    private bool _bodySet = false;
+    
 
-// import hunt.Exceptions;
-// import hunt.io.Common;
-// import hunt.io.BufferedOutputStream;
-// import hunt.logging;
+    this() {
+        _response = new HttpServerResponse();
+    }
 
-// import hunt.util.Common;
-// import hunt.util.DateTime;
+    this(HttpBody bodyContent) {
+        this(new HttpServerResponse(bodyContent));
+    }
 
-// import hunt.framework.Init;
-// import hunt.framework.http.Request;
-// import hunt.framework.http.session;
-// import hunt.framework.util.String;
+    this(HttpServerResponse response) {
+        this._response = response;
+    }
 
-// enum PlainContentType = "text/plain;charset=utf-8";
-// enum HtmlContentType = "text/html;charset=utf-8";
-// enum JsonContentType = "application/json;charset=utf-8";
-// enum OctetStreamContentType = "binary/octet-stream";
+    HttpServerResponse httpResponse() {
+        return _response;
+    }
 
-// /**
-// */
-// class Response : Closeable {
-//     protected HttpResponse _response;
-//     protected Request _request;
-//     protected HttpOutputStream _output;
-//     protected HttpURI _uri;
-//     protected BufferedOutputStream _bufferedOutput;
-//     protected int _bufferSize = 8 * 1024;
-//     protected size_t totalBytes;
 
-//     this(Request request, int bufferSize = 8 * 1024) {
-//         initialize(request, bufferSize);
+    HttpFields getFields() {
+        return _response.getFields();
+    }
 
-//         this._response.setStatus(HttpStatus.OK_200);
-//         this._response.setHttpVersion(HttpVersion.HTTP_1_1);
-//         totalBytes = 0;
-//     }
 
-//     // this(HttpResponse response, HttpOutputStream output, HttpURI uri, int bufferSize = 8 * 1024) {
-//     //     this._output = output;
-//     //     this._response = response;
-//     //     this._uri = uri;
-//     //     this.bufferSize = bufferSize;
-//     // }
+    Response header(T)(string header, T value) {
+        getFields().put(header, value);
+        return this;
+    }
 
-//     this(Request request, string content, int status = HttpStatus.OK_200, int bufferSize = 8 * 1024) {
-//         this(request, cast(const(ubyte)[]) content, status, bufferSize);
-//     }
+    Response header(T)(HttpHeader header, T value) {
+        getFields().put(header, value);
+        return this;
+    }
 
-//     this(Request request, const(ubyte)[] content, int status = HttpStatus.OK_200,
-//             int bufferSize = 8 * 1024) {
-//         initialize(request, bufferSize);
-//         this._response.setStatus(status);
-//         this._response.setHttpVersion(HttpVersion.HTTP_1_1);
-//         this.setContent(content);
-//     }
+    Response headers(T = string)(T[string] headers) {
+        foreach (string k, T v; headers)
+            getFields().add(k, v);
+        return this;
+    }
 
-//     HttpResponse httpResponse() {
-//         return _response;
-//     }
+    alias setHeader = header;
+    alias withHeaders = headers;
 
-//     void setRequest(Request request, bool isFore = false) {
-//         assert(request !is null);
-//         if (isFore)
-//             initialize(request);
-//         else if (_request is null)
-//             initialize(request);
-//     }
+    // Response setContent(T)(T content) {
+    //     if(getFields().contains(HttpHeader.CONTENT_TYPE)) {
+    //         auto ct = getFields().getField(HttpHeader.CONTENT_TYPE);
+    //         setContent(content, ct);
+    //     } else {
+    //         setContent(content, MimeType.TEXT_PLAIN_VALUE);
+    //     }
+    // }
 
-//     private void initialize(Request request, int bufferSize = 8 * 1024) {
-//         this._request = request;
-//         this._response = request.getResponse();
-//         this._output = request.outputStream;
-//         this._uri = request.getURI();
-//         this._bufferSize = bufferSize;
-//         _isInitilized = true;
-//     }
+    /**
+     * Sets the response content.
+     *
+     * @return this
+     */
+    Response setContent(T)(T content, string contentType = MimeType.TEXT_PLAIN_VALUE) {
+        if(_bodySet)
+            throw new Exception("Body can't be set again.");
+            
+        HttpBody hb = HttpBody.create(contentType, content);
+        _response.setBody(hb);
+        _bodySet = true;
+        return this;
+    }
 
-//     private bool _isInitilized = false;
+    Response setHtmlContent(string content) {
+        setContent(content, MimeType.TEXT_HTML_UTF_8.toString());
+        return this;
+    }
 
-//     private void validateHandler() {
-//         if (_request is null)
-//             throw new Exception("The request handler is null!");
-//     }
+    alias withContent = setContent;
 
-//     HttpFields getFields() {
-//         return _response.getFields();
-//     }
 
-//     Response setHeader(T = string)(string header, T value) {
-//         getFields().put(header, value);
-//         return this;
-//     }
 
-//     Response setHeader(T)(HttpHeader header, T value) {
-//         getFields().put(header, value);
-//         return this;
-//     }
+    ///set http status code eg. 404 200
+    Response setStatus(int status) {
+        _response.setStatus(status);
+        return this;
+    }
 
-//     Response header(T)(string header, T value) {
-//         getFields().put(header, value);
-//         return this;
-//     }
+    int status() @property
+    {
+        return _response.getStatus();
+    }
 
-//     Response header(T)(HttpHeader header, T value) {
-//         getFields().put(header, value);
-//         return this;
-//     }
 
-//     Response addHeader(T = string)(string header, T value) {
-//         getFields().add(header, value);
-//         return this;
-//     }
+    Response setReason(string reason) {
+        _response.setReason(reason);
+        return this;
+    }
 
-//     Response addHeader(T = string)(HttpHeader header, T value) {
-//         getFields().add(header, value);
-//         return this;
-//     }
+    ///download file 
+    Response download(string filename, ubyte[] file, string content_type = "binary/octet-stream") {
+        header(HttpHeader.CONTENT_TYPE, content_type);
+        header(HttpHeader.CONTENT_DISPOSITION,
+                "attachment; filename=" ~ filename ~ "; size=" ~ (file.length.to!string));
+        setContent(file);
 
-//     Response withHeaders(T = string)(T[string] headers) {
-//         foreach (string k, T v; headers)
-//             getFields().add(k, v);
-//         return this;
-//     }
+        return this;
+    }
 
-//     /**
-//      * Sets the response content.
-//      *
-//      * @return this
-//      */
-//     Response setContent(string content) {
-//         return setContent(cast(const(ubyte)[]) content);
-//     }
-
-//     // ditto
-//     Response setContent(const(ubyte)[] content) {
-//         totalBytes += content.length;
-//         getOutputStream().write(cast(byte[]) content, 0, cast(int) content.length);
-
-//         return this;
-//     }
-
-//     alias writeContent = setContent;
-//     // void writeContent(string content) {
-//     //     writeContent(cast(const(ubyte)[]) content);
-//     // }
-
-//     // void writeContent(const(ubyte)[] content) {
-//     //     getOutputStream().write(cast(byte[]) content, 0, cast(int) content.length);
-//     // }
-
-//     /**
-//      * Get the content of the response.
-//      *
-//      * @return string
-//      */
-//     // T getContent(T = string)()
-//     // {
-//     //     return cast(T) _body.allData.data();
-//     // }
-
-//     /**
-//      * Get the original response content.
-//      *
-//      * @return mixed
-//      */
-//     // const(ubyte)[] getOriginalContent()
-//     // {
-//     //     return _body.allData.data();
-//     // }
-
-//     ///set http status code eg. 404 200
-//     Response setStatus(int status) {
-//         _response.setStatus(status);
-//         return this;
-//     }
-
-//     int status() @property
-//     {
-//         return _response.getStatus();
-//     }
-
-//     long size() @property
-//     {
-//         return 0;
-//         // no api.
-//         //getOutputStream().
-//     }
-
-//     Response setReason(string reason) {
-//         _response.setReason(reason);
-//         return this;
-//     }
-
-//     ///download file 
-//     Response download(string filename, ubyte[] file, string content_type = "binary/octet-stream") {
-//         setHeader(HttpHeader.CONTENT_TYPE, content_type).setHeader(HttpHeader.CONTENT_DISPOSITION,
-//                 "attachment; filename=" ~ filename ~ "; size=" ~ (file.length.to!string)).setContent(
-//                 file);
-
-//         return this;
-//     }
-
-//     /**
-//      * Add a cookie to the response.
-//      *
-//      * @param  Cookie cookie
-//      * @return this
-//      */
-//     Response withCookie(Cookie cookie) {
-//         getFields().add(HttpHeader.SET_COOKIE, CookieGenerator.generateSetCookie(cookie));
-//         return this;
-//     }
+    /**
+     * Add a cookie to the response.
+     *
+     * @param  Cookie cookie
+     * @return this
+     */
+    Response withCookie(Cookie cookie) {
+        _response.withCookie(cookie);
+        return this;
+    }
 
 //     /// the session store implementation.
 //     @property HttpSession session() {
@@ -244,36 +146,6 @@ import hunt.http.HttpStatus;
 //     //     _session = se;
 //     // }
 
-//     final void done() {
-//         if (_isDone)
-//             return;
-//         ///set session
-
-//         _request.flush(); // assure the sessiondata flushed;
-//         HttpSession session = _request.session(false);
-//         if (session !is null ) // && session.isNewSession()
-//         {
-//             withCookie(new Cookie(DefaultSessionIdName, session.getId(), session.getMaxInactiveInterval(), 
-//                     "/", null, false, false));
-//         }
-//         setHeader("Date", date("Y-m-d H:i:s"));
-//         setHeader(HttpHeader.X_POWERED_BY, HUNT_X_POWERED_BY);
-
-//         if(!this.getFields().contains(HttpHeader.CONTENT_TYPE)) {
-//             this.header(HttpHeader.CONTENT_TYPE, HtmlContentType);
-//         }
-
-//         if(!this.getFields().contains(HttpHeader.CONTENT_LENGTH)) {
-//             this.header(HttpHeader.CONTENT_LENGTH, totalBytes.to!string());
-//         }
-
-//         try {
-//             this.close();
-//         }
-//         catch (IOException ex) {
-//             error(ex.toString());
-//         }
-//     }
 
 //     // void redirect(string url, bool is301 = false)
 //     // {
@@ -287,54 +159,27 @@ import hunt.http.HttpStatus;
 //     //     done();
 //     // }
 
-//     void do404(string body_ = "", string contentype = "text/html;charset=UTF-8") {
-//         doError(404, body_, contentype);
-//     }
+    void do404(string body_ = "", string contentype = "text/html;charset=UTF-8") {
+        doError(404, body_, contentype);
+    }
 
-//     void do403(string body_ = "", string contentype = "text/html;charset=UTF-8") {
-//         doError(403, body_, contentype);
-//     }
+    void do403(string body_ = "", string contentype = "text/html;charset=UTF-8") {
+        doError(403, body_, contentype);
+    }
 
-//     void doError(ushort code, string body_ = "", string contentype = "text/html;charset=UTF-8") {
-//         if (_isDone)
-//             return;
+    void doError(ushort code, string body_ = "", string contentype = "text/html;charset=UTF-8") {
 
-//         setStatus(code);
-//         getFields().put(HttpHeader.CONTENT_TYPE, contentype);
-//         setContent(errorPageHtml(code, body_));
-//         //       connectionClose();
-//         done();
-//     }
+        setStatus(code);
+        getFields().put(HttpHeader.CONTENT_TYPE, contentype);
+        setContent(errorPageHtml(code, body_));
+    }
 
-//     void setHttpError(ushort code) {
-//         this.setStatus(code);
-//         this.setContent(errorPageHtml(code));
-//     }
+    void setHttpError(ushort code) {
+        this.setStatus(code);
+        this.setContent(errorPageHtml(code));
+    }
 
-//     OutputStream getOutputStream() {
-//         if (_bufferedOutput is null) {
-//             _bufferedOutput = new BufferedOutputStream(_output, _bufferSize);
-//         }
-//         return _bufferedOutput;
-//     }
-
-//     bool isClosed() {
-//         return _isDone;
-//     }
-
-//     void close() {
-//         _isDone = true;
-//         if (_bufferedOutput !is null) {
-//             _bufferedOutput.close();
-//         }
-//         else {
-//             getOutputStream().close();
-//         }
-//     }
-
-// private:
-//     bool _isDone = false;
-// }
+}
 
 // dfmt off
 string errorPageHtml(int code , string _body = "")

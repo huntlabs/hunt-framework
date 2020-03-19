@@ -32,8 +32,6 @@ import hunt.logging.ConsoleLogger;
 import hunt.redis.RedisPool;
 import hunt.validation;
 
-// public import hunt.http.HttpBody;
-
 import poodinis;
 
 import std.exception;
@@ -42,8 +40,6 @@ import std.traits;
 
 enum Action;
 
-// alias Request = HttpServerRequest;
-alias Response = HttpServerResponse;
 
 /**
  * 
@@ -75,19 +71,24 @@ abstract class Controller
     }
 
     final @property Response response() {
-        return _routingContext.getResponse();
+        if(_response is null) {
+            _response = new Response(_routingContext.getResponse());
+        }
+        return _response;
+    }
+
+    // reset to a new response
+    @property void response(Response r) {
+        _response = r;
+        _routingContext.response = r.httpResponse;
     }
 
     @property View view()
     {
         if (_view is null)
         {
-            // _view = GetViewObject();
             _view = serviceContainer.resolve!View();
-            // TODO: Tasks pending completion -@zhangxueping at 2020-01-02T18:16:11+08:00
-            // 
             _view.setRouteGroup(_routingContext.groupName());
-            // _view.setRouteGroup("default");
             _view.setLocale(this.request.locale());
         }
 
@@ -226,7 +227,6 @@ abstract class Controller
         if(!resp.getFields().contains(HttpHeader.CONTENT_TYPE)) {
             resp.header(HttpHeader.CONTENT_TYPE, MimeType.TEXT_HTML_VALUE);
         }
-
     }
 
     void dispose() {
@@ -317,17 +317,18 @@ string __createCallActionMethod(T, string moduleName)()
                         //before
                         str ~= q{
                             if(this.getMiddlewares().length) {
-                                auto response = this.doMiddleware();
+                                auto middleResponse = this.doMiddleware();
 
-                                if (response !is null) {
-                                    // return response;
-                                    _routingContext.response = response;
+                                if (middleResponse !is null) {
+                                    // _routingContext.response = response.httpResponse;
+                                    response = middleResponse;
                                     return;
                                 }
                             }
 
                             if (!this.before()) {
-                                _routingContext.response = response;
+                                // _routingContext.response = response.httpResponse;
+                                // response = middleResponse;
                                 return;
                             }
                         };
@@ -380,14 +381,11 @@ string __createCallActionMethod(T, string moduleName)()
 
                         static if (is(ReturnType!t : Response))
                         {
-                            str ~= "\t\t_routingContext.response = result;\n";
+                            str ~= "\t\t response = result;\n";
                         }
                         else
                         {
-                            // str ~= "\t\tactionResponse = this.response;\n";
-
-                            str ~="\t\trb = HttpBody.create(result);
-                            this.response.setBody(rb);\n";
+                            str ~="\t\tthis.response.setContent(result);";
                         }
                     }
 
@@ -404,8 +402,6 @@ string __createCallActionMethod(T, string moduleName)()
     }
 
     str ~= "\tdefault:\n\tbreak;\n\t}\n\n";
-    // str ~= "\t _routingContext.response = actionResponse;\n";
-    // str ~= "\treturn actionResponse;\n";
     str ~= "this.done();";
     str ~= "}";
 
@@ -471,10 +467,6 @@ void callHandler(T, string method)(RoutingContext context)
     T controller = new T();
     import core.memory;
     scope(exit) {
-        // TODO: Tasks pending completion -@zhangxueping at 2020-01-08T11:43:51+08:00
-        // 
-        // str ~= "\timport hunt.framework.Simplify;\n";
-        // str ~= "\tcloseDefaultEntityManager();\n";
         controller.dispose();
         if(!controller.isAsync) { 
             controller.destroy(); 
@@ -487,7 +479,6 @@ void callHandler(T, string method)(RoutingContext context)
     // warningf("group name: %s", context.groupName());
     try {
         controller.callActionMethod(method, context);
-        // controller.done();
     } catch (Throwable t) {
         warning(t.msg);
         version(HUNT_DEBUG) warning(t);

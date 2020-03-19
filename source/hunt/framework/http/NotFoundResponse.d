@@ -9,14 +9,15 @@ import std.range;
 /**
  * 
  */
-class NotFoundResponse : HttpServerResponse {
+class NotFoundResponse : Response {
     this(string content = null) {
         setStatus(404);
 
         if (content.empty)
             content = errorPageHtml(404);
 
-        HttpBody hb = HttpBody.create(MimeType.TEXT_HTML_VALUE, content);
-        setBody(hb);
+        // HttpBody hb = HttpBody.create(MimeType.TEXT_HTML_VALUE, content);
+        // setBody(hb);
+        setContent(content, MimeType.TEXT_HTML_VALUE);
     }
 }
