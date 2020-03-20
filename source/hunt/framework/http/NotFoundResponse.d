@@ -1,6 +1,5 @@
 module hunt.framework.http.NotFoundResponse;
 
-// import hunt.framework.http.Request;
 import hunt.framework.http.Response;
 import hunt.http.server;
 
@@ -16,8 +15,6 @@ class NotFoundResponse : Response {
         if (content.empty)
             content = errorPageHtml(404);
 
-        // HttpBody hb = HttpBody.create(MimeType.TEXT_HTML_VALUE, content);
-        // setBody(hb);
         setContent(content, MimeType.TEXT_HTML_VALUE);
     }
 }

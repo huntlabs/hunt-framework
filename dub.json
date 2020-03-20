@@ -2,12 +2,16 @@
     "name": "hunt-framework",
     "targetType": "library",
     "description": "A high performance full-stack Web framework.",
-    "copyright": "Copyright (C) 2015-2019, HuntLabs",
+    "copyright": "Copyright (C) 2015-2020, HuntLabs",
     "homepage": "https://www.huntlabs.net",
     "license": "Apache-2.0",
     "dependencies": {
-        "hunt-http": "~>0.5.0-rc.1",
-        "hunt-entity": "~>2.5.4",
-        "hunt-cache": "~>0.6.2"
+        "hunt-console": "~>0.1.1",
+        "hunt-http": "~>0.5.0-rc.2",
+        "hunt-entity": "~>2.5.6",
+        "hunt-cache": "~>0.6.3",
+        "hunt-shiro": "~>1.0.1",
+        "hunt-jwt": "~>0.1.0-beta.1",
+        "poodinis": "~>8.1.0-beta"
     }
 }
