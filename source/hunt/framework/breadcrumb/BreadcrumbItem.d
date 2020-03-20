@@ -1,4 +1,4 @@
-module hunt.framework.application.BreadcrumbItem;
+module hunt.framework.breadcrumb.BreadcrumbItem;
 
 /**
  * 

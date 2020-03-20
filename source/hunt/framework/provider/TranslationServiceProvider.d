@@ -1,7 +1,7 @@
 module hunt.framework.provider.TranslationServiceProvider;
 
 import hunt.framework.provider.ServiceProvider;
-import hunt.framework.application.ApplicationConfig;
+import hunt.framework.config.ApplicationConfig;
 
 import hunt.framework.i18n.I18n;
 import hunt.framework.Init;

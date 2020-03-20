@@ -5,7 +5,7 @@ import hunt.framework.routing.RouteItem;
 import hunt.framework.routing.ResourceRouteItem;
 import hunt.framework.routing.RouteGroup;
 
-import hunt.framework.application.ApplicationConfig;
+import hunt.framework.config.ApplicationConfig;
 import hunt.framework.Init;
 import hunt.logging.ConsoleLogger;
 import hunt.http.routing.RouterManager;

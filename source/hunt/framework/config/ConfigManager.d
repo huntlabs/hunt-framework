@@ -1,6 +1,6 @@
-module hunt.framework.application.ConfigManager;
+module hunt.framework.config.ConfigManager;
 
-import hunt.framework.application.ApplicationConfig;
+import hunt.framework.config.ApplicationConfig;
 import hunt.framework.Init;
 
 import hunt.logging.ConsoleLogger;

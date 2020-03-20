@@ -1,7 +1,7 @@
 module hunt.framework.provider.RedisServiceProvider;
 
 import hunt.framework.provider.ServiceProvider;
-import hunt.framework.application.ApplicationConfig;
+import hunt.framework.config.ApplicationConfig;
 
 import hunt.logging.ConsoleLogger;
 import hunt.redis;

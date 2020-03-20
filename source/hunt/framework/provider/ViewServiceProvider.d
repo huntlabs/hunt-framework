@@ -1,6 +1,6 @@
 module hunt.framework.provider.ViewServiceProvider;
 
-import hunt.framework.application.ApplicationConfig;
+import hunt.framework.config.ApplicationConfig;
 import hunt.framework.provider.ServiceProvider;
 import hunt.framework.Init;
 import hunt.framework.view.View;

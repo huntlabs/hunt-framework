@@ -1,7 +1,7 @@
 module hunt.framework.provider.DatabaseServiceProvider;
 
 import hunt.framework.provider.ServiceProvider;
-import hunt.framework.application.ApplicationConfig;
+import hunt.framework.config.ApplicationConfig;
 
 import hunt.logging.ConsoleLogger;
 import hunt.entity;
@@ -13,8 +13,6 @@ import poodinis;
 class DatabaseServiceProvider : ServiceProvider {
 
     override void register() {
-        // container.register!(RedisPoolConfig)().singleInstance();
-
         container.register!(EntityManagerFactory)(&buildEntityManagerFactory)
             .singleInstance();
     }

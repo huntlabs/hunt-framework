@@ -1,8 +1,8 @@
 module hunt.framework.provider.BreadcrumbServiceProvider;
 
 import hunt.framework.provider.ServiceProvider;
-import hunt.framework.application.BreadcrumbsManager;
-import hunt.framework.application.Breadcrumbs;
+import hunt.framework.breadcrumb.BreadcrumbsManager;
+import hunt.framework.breadcrumb.Breadcrumbs;
 
 import poodinis;
 

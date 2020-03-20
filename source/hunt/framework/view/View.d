@@ -103,7 +103,7 @@ class View {
 
 // View GetViewObject()
 // {
-//     import hunt.framework.application.ApplicationConfig;
+//     import hunt.framework.config.ApplicationConfig;
 //     auto view = new View(new Environment);
 
 //     string path = buildNormalizedPath(APP_PATH, config().view.path);

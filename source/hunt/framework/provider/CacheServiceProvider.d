@@ -1,7 +1,7 @@
 module hunt.framework.provider.CacheServiceProvider;
 
 import hunt.framework.provider.ServiceProvider;
-import hunt.framework.application.ApplicationConfig;
+import hunt.framework.config.ApplicationConfig;
 
 import hunt.cache.CacheFactory;
 import hunt.cache.Cache;

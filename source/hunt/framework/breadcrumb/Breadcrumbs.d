@@ -1,7 +1,7 @@
-module hunt.framework.application.Breadcrumbs;
+module hunt.framework.breadcrumb.Breadcrumbs;
 
 // import hunt.framework.Simplify;
-import hunt.framework.application.BreadcrumbItem;
+import hunt.framework.breadcrumb.BreadcrumbItem;
 import std.container.array;
 import std.array;
 

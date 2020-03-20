@@ -12,8 +12,8 @@
 module hunt.framework.Simplify;
 
 public import hunt.framework.application.Application : app;
-public import hunt.framework.application.ApplicationConfig;
-public import hunt.framework.application.ConfigManager;
+public import hunt.framework.config.ApplicationConfig;
+public import hunt.framework.config.ConfigManager;
 public import hunt.framework.Init;
 public import hunt.framework.routing;
 public import hunt.util.DateTime : time, date;

@@ -1743,7 +1743,7 @@ class Request {
 // import hunt.util.Common;
 // import hunt.util.MimeTypeUtils;
 
-// import hunt.framework.application.ApplicationConfig;
+// import hunt.framework.config.ApplicationConfig;
 // import hunt.framework.Simplify;
 // import hunt.framework.Exceptions;
 // import hunt.framework.http.session;

@@ -1,4 +1,4 @@
-module hunt.framework.application.ServeCommand;
+module hunt.framework.command.ServeCommand;
 
 import hunt.framework.Init;
 

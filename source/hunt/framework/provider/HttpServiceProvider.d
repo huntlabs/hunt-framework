@@ -1,8 +1,8 @@
 module hunt.framework.provider.HttpServiceProvider;
 
-import hunt.framework.application.Controller;
-import hunt.framework.application.ApplicationConfig;
-import hunt.framework.application.ConfigManager;
+import hunt.framework.controller.Controller;
+import hunt.framework.config.ApplicationConfig;
+import hunt.framework.config.ConfigManager;
 import hunt.framework.Init;
 import hunt.framework.provider.ServiceProvider;
 import hunt.framework.routing;

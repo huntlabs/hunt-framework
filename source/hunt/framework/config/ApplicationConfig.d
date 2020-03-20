@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.framework.application.ApplicationConfig;
+module hunt.framework.config.ApplicationConfig;
 
 import hunt.framework.Init;
 

@@ -1,7 +1,7 @@
-module hunt.framework.application.BreadcrumbsManager;
+module hunt.framework.breadcrumb.BreadcrumbsManager;
 
-import hunt.framework.application.BreadcrumbItem;
-import hunt.framework.application.Breadcrumbs;
+import hunt.framework.breadcrumb.BreadcrumbItem;
+import hunt.framework.breadcrumb.Breadcrumbs;
 
 import std.array;
 
