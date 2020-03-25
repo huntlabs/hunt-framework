@@ -107,6 +107,15 @@ class ApplicationConfig {
         bool enabled = false;
         string servers;
     }
+    
+    struct AmqpConf {
+        bool enabled = false;
+        string host = "127.0.0.1";
+        string username = "guest";
+        string password = "guest";
+        ushort port = 5672;
+        uint timeout = 15000;
+    }
 
     struct RedisConf {
         bool enabled = false;
@@ -114,7 +123,7 @@ class ApplicationConfig {
         string password = "";
         ushort database = 0;
         ushort port = 6379;
-        uint timeout = 0;
+        uint timeout = 5000;
         RedisPoolConf pool;
         ClusterOption cluster;
     }
@@ -225,6 +234,7 @@ class ApplicationConfig {
     HttpsConf https;
     RouteConf route;
     MemcacheConf memcache;
+    AmqpConf amqp;
     RedisConf redis;
     LoggingConfig logging;
     UploadConf upload;

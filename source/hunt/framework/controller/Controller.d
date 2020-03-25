@@ -26,6 +26,7 @@ public import hunt.framework.http.Response;
 public import hunt.http.server;
 public import hunt.http.routing;
 
+import hunt.amqp.client;
 import hunt.cache;
 import hunt.entity.EntityManagerFactory;
 import hunt.logging.ConsoleLogger;
@@ -49,6 +50,7 @@ abstract class Controller
     private Response _response;
     private EntityManager _entityManager;
     private BreadcrumbsManager _breadcrumbs;
+    private AmqpConnection _amqpConnection;
 
     protected
     {
@@ -118,6 +120,15 @@ abstract class Controller
 
     RedisPool redisPool() {
         return serviceContainer.resolve!RedisPool();
+    }
+
+    AmqpConnection amqpConnection() {
+        if(_amqpConnection is null) {
+           AmqpClient amqpClient = serviceContainer.resolve!AmqpClient();
+           _amqpConnection = amqpClient.connect();
+        }
+
+        return _amqpConnection;
     }
 
     /// called before action  return true is continue false is finish
@@ -211,6 +222,9 @@ abstract class Controller
     }
 
     protected void done() {
+        if(_amqpConnection !is null) {
+            _amqpConnection.close(null);
+        }
         request().flush(); // assure the sessiondata flushed;
         Response resp = response();
         HttpSession session = request().session(false);

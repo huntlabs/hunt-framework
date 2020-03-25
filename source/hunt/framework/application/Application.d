@@ -58,7 +58,7 @@ import std.string;
 
 
 alias DefaultServiceProviders = AliasSeq!(
-    AuthServiceProvider,
+    AmqpServiceProvider, AuthServiceProvider,
     ConfigServiceProvider, RedisServiceProvider, TranslationServiceProvider,
     CacheServiceProvider, SessionServiceProvider, DatabaseServiceProvider,
     HttpServiceProvider, BreadcrumbServiceProvider, ViewServiceProvider);
