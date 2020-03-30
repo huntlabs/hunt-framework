@@ -70,7 +70,7 @@ class Response {
     //         auto ct = getFields().getField(HttpHeader.CONTENT_TYPE);
     //         setContent(content, ct);
     //     } else {
-    //         setContent(content, MimeType.TEXT_PLAIN_VALUE);
+    //         setContent(content, MimeType.TEXT_HTML_VALUE);
     //     }
     // }
 
@@ -79,7 +79,7 @@ class Response {
      *
      * @return this
      */
-    Response setContent(T)(T content, string contentType = MimeType.TEXT_PLAIN_VALUE) {
+    Response setContent(T)(T content, string contentType = MimeType.TEXT_HTML_VALUE) {
         if(_bodySet)
             throw new Exception("Body can't be set again.");
             
