@@ -118,10 +118,16 @@ final class ApplicationConfig
     }
 
     struct RedisPoolConf {
-        bool enabled = false;
-        uint maxWait = 5000; // millisecond
-        uint maxIdle = 50;  // millisecond
-        uint minIdle = 5;   // millisecond
+        bool enabled = false;        
+        bool blockOnExhausted = true;
+        uint idleTimeout = 30000; // millisecond
+        uint maxPoolSize = 20;
+        uint minPoolSize = 5;
+        uint maxLifetime = 2000000;
+        uint connectionTimeout = 15000;
+        int waitTimeout = 15000; // -1: forever
+        uint maxConnection = 20;
+        uint minConnection = 5; 
     }
 
     struct UploadConf
