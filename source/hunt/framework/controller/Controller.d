@@ -495,6 +495,7 @@ void callHandler(T, string method)(RoutingContext context)
     } catch (Throwable t) {
         warning(t.msg);
         version(HUNT_DEBUG) warning(t);
+        controller.response.doError(HttpStatus.INTERNAL_SERVER_ERROR_500, t.msg);
     }
 
     context.end();
