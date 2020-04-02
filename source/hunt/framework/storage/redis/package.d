@@ -6,8 +6,13 @@ import hunt.logging;
 
 private RedisCluster _redisCluster;
 
+import hunt.framework.Simplify;
+import hunt.framework.application.closer;
+
 Redis getRedis() {
-    return defaultRedisPool.getResource();
+    auto r = defaultRedisPool.getResource();
+    resouceManager.push(new RedisCloser(r));
+    return r;
 }
 
 /**

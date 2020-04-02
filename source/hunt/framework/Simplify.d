@@ -185,3 +185,21 @@ private string _transWithLocale(string locale, string key) {
 
     return defaultValue;
 }
+
+private bool _isRequestThread = true;
+
+bool isRequestThread()
+{
+    return _isRequestThread;
+}
+
+import hunt.framework.application.ResourceManager;
+
+private ResouceManager _resouceManager;
+
+ResouceManager resouceManager() {
+    if(_resouceManager is null) {
+        _resouceManager = new ResouceManager();
+    }
+    return _resouceManager;
+}
