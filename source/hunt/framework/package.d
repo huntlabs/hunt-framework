@@ -29,7 +29,7 @@ public import hunt.framework.middleware;
 public import hunt.framework.Init;
 public import hunt.framework.provider;
 public import hunt.framework.Simplify;
-public import hunt.framework.task;
+public import hunt.framework.queue;
 public import hunt.framework.Version;
 public import hunt.framework.view;
 
