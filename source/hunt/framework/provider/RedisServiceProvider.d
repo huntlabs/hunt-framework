@@ -18,15 +18,22 @@ class RedisServiceProvider : ServiceProvider {
         container.register!(RedisPool)(() {
             ApplicationConfig config = container.resolve!ApplicationConfig();
 
-            auto redisSettings = config.redis;
-            if (redisSettings.pool.enabled) {
+            auto redisOptions = config.redis;
+            auto redisPoolOptions = redisOptions.pool;
+            if (redisOptions.pool.enabled) {
                 RedisPoolConfig poolConfig = new RedisPoolConfig();
                 // RedisPoolConfig poolConfig = container.resolve!RedisPoolConfig(); 
-                poolConfig.host = redisSettings.host;
-                poolConfig.port = cast(int) redisSettings.port;
-                poolConfig.password = redisSettings.password;
-                poolConfig.database = cast(int) redisSettings.database;
-                poolConfig.soTimeout = cast(int) redisSettings.pool.maxIdle;
+                poolConfig.host = redisOptions.host;
+                poolConfig.port = cast(int) redisOptions.port;
+                poolConfig.password = redisOptions.password;
+                poolConfig.database = cast(int) redisOptions.database;
+                poolConfig.soTimeout = cast(int) redisPoolOptions.idleTimeout;
+                poolConfig.connectionTimeout =  redisOptions.timeout;
+                poolConfig.setMaxTotal(redisPoolOptions.maxPoolSize);
+                poolConfig.setBlockWhenExhausted(redisPoolOptions.blockOnExhausted);
+                poolConfig.setMaxWaitMillis(redisPoolOptions.waitTimeout);
+
+                infof("Initializing RedisPool: %s", poolConfig.toString());
 
                 return new RedisPool(poolConfig); 
             } else {
@@ -40,15 +47,15 @@ class RedisServiceProvider : ServiceProvider {
         // trace("Booting redis...");
         // ApplicationConfig config = container.resolve!ApplicationConfig();
 
-        // auto redisSettings = config.redis;
-        // if (redisSettings.pool.enabled) {
+        // auto redisOptions = config.redis;
+        // if (redisOptions.pool.enabled) {
         //     //  new RedisPoolConfig();
         //     RedisPoolConfig poolConfig = container.resolve!RedisPoolConfig(); 
-        //     poolConfig.host = redisSettings.host;
-        //     poolConfig.port = cast(int) redisSettings.port;
-        //     poolConfig.password = redisSettings.password;
-        //     poolConfig.database = cast(int) redisSettings.database;
-        //     poolConfig.soTimeout = cast(int) redisSettings.pool.maxIdle;
+        //     poolConfig.host = redisOptions.host;
+        //     poolConfig.port = cast(int) redisOptions.port;
+        //     poolConfig.password = redisOptions.password;
+        //     poolConfig.database = cast(int) redisOptions.database;
+        //     poolConfig.soTimeout = cast(int) redisOptions.pool.maxIdle;
 
         //     RedisPool pool = container.resolve!RedisPool();
         //     pool.initPool(poolConfig);
