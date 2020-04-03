@@ -31,6 +31,8 @@ enum JobStatus : ubyte {
  */
 abstract class Job {
 
+    private ubyte[] _payload;
+
     this() {
         _id = toHash();
     }
@@ -59,6 +61,10 @@ abstract class Job {
             return false;
         atomicStore(_status, JobStatus.CANCELED);
         return true;
+    }
+
+    ubyte[] payload() {
+        return _payload;
     }
 
     private size_t _id;

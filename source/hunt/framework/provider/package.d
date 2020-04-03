@@ -7,6 +7,7 @@ public import hunt.framework.provider.CacheServiceProvider;
 public import hunt.framework.provider.ConfigServiceProvider;
 public import hunt.framework.provider.DatabaseServiceProvider;
 public import hunt.framework.provider.HttpServiceProvider;
+public import hunt.framework.provider.QueueServiceProvider;
 public import hunt.framework.provider.RedisServiceProvider;
 public import hunt.framework.provider.TranslationServiceProvider;
 public import hunt.framework.provider.ServiceProvider;

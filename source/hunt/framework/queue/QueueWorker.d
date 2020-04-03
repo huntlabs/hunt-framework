@@ -1,7 +1,6 @@
 module hunt.framework.queue.QueueWorker;
 
-import hunt.framework.queue.Job;
-import hunt.framework.queue.Queue;
+// import hunt.framework.queue.Job;
 
 import core.time;
 import core.atomic;
@@ -22,8 +21,11 @@ import hunt.logging;
 import hunt.framework.queue.Job;
 import hunt.logging.ConsoleLogger;
 
+import core.atomic;
 import core.thread;
 import std.parallelism;
+
+alias QueueMessageListener = void delegate(ubyte[] message);
 
 /**
  * 
@@ -33,61 +35,61 @@ abstract class QueueWorker {
     enum string Redis = "redis";
     enum string AMQP = "amqp";
 
-    private shared bool _isExecuting = true;
-    private Thread _workerThread;
+    private shared bool _isListening = false;
+    private QueueMessageListener[string] _listeners;
 
     this() {
-        launchWorkerThread();
     }
 
-    private void launchWorkerThread() {
-        _isExecuting = true;
-        _workerThread = new Thread(&executeJob);
-        _workerThread.start();
+    void push(string channel, ubyte[] message);
+
+    void startListening() {
+        if(cas(&_isListening, false, true)) {
+            onListen();
+        } else {
+            warning("Already listening");
+        }
     }
 
-    private void executeJob() {
-        while(_isExecuting) {
-            Job job = retrieveNextJob(); 
-            version(HUNT_DEBUG) tracef("executing a job: %d, status: %s", job.id, job.status);
-
-            if(job.status == JobStatus.READY) {
-                auto jobTask = task(&job.exec);
-                taskPool.put(jobTask);
+    bool addListener(string channel, QueueMessageListener listener) {
+        assert(listener !is null);
+        
+        synchronized(this) {
+            auto itemPtr = channel in _listeners;
+            if(itemPtr is null) {
+                _listeners[channel] = listener;
+                return true;
             } else {
-                warning("dropping a job, status: %s", job.status);
+                warning("The listener exists for channel %s", channel);
+                return false;
             }
         }
     }
 
-    protected Job retrieveNextJob();
-
-    void push(string channel, Job job);
+    void remove(string channel) {
+        synchronized(this) {
+            auto itemPtr = channel in _listeners;
+            if(itemPtr !is null) {
+                _listeners.remove(channel);
+            }
+        }
+    }
 
     void stop() {
-        _isExecuting = false;
+        _isListening = false;
+        onStop();
+    }
+
+    protected QueueMessageListener[string] listeners() {
+        return _listeners;
+    }
+
+    protected void onListen() {
+
+    }
+
+    protected void onStop() {
+
     }
 }
 
-import std.concurrency : initOnce;
-import hunt.framework.queue.MemoryQueueWorker;
-
-private __gshared QueueWorker _queueWorker;
-
-
-deprecated("Using queueWorker instead.") alias taskManager = queueWorker;
-
-QueueWorker queueWorker() {
-    return initOnce!(_queueWorker)(new MemoryQueueWorker());
-}
-
-
-void resetQueueWorker(string typeName) {
-    if(typeName == QueueWorker.Memory) {
-        _queueWorker = new MemoryQueueWorker();
-    } else {
-        // TODO: Tasks pending completion -@zhangxueping at 2020-04-02T16:43:39+08:00
-        // 
-        warningf("TODO: %s", typeName);
-    }
-}

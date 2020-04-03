@@ -194,7 +194,6 @@ bool isRequestThread()
 }
 
 import hunt.framework.application.ResourceManager;
-
 private ResouceManager _resouceManager;
 
 ResouceManager resouceManager() {
@@ -202,4 +201,12 @@ ResouceManager resouceManager() {
         _resouceManager = new ResouceManager();
     }
     return _resouceManager;
+}
+
+
+import hunt.framework.queue;
+deprecated("Using queueWorker instead.") alias taskManager = queueWorker;
+
+QueueWorker queueWorker() {
+    return serviceContainer.resolve!(QueueWorker);
 }
