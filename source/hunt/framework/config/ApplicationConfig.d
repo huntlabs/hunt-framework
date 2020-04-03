@@ -146,6 +146,11 @@ class ApplicationConfig {
         uint minConnection = 5;        
     }
 
+    struct QueueConf {
+        // Drivers: "amqp", "redis", "null"
+        string driver = null;
+    }
+
     struct UploadConf {
         string path = "/tmp";
         long maxSize = 4 * 1024 * 1024;
@@ -246,6 +251,7 @@ class ApplicationConfig {
     RouteConf route;
     MemcacheConf memcache;
     AmqpConf amqp;
+    QueueConf queue;
     RedisConf redis;
     LoggingConfig logging;
     UploadConf upload;

@@ -22,24 +22,26 @@ class QueueServiceProvider : ServiceProvider {
         QueueWorker _queueWorker;
         ApplicationConfig config = container.resolve!ApplicationConfig();
 
-        string typeName = QueueWorker.AMQP;
+        string typeName = config.queue.driver;
 
         if (typeName == QueueWorker.Memory) {
             // _queueWorker = new MemoryQueueWorker();
             warningf("TODO: %s", typeName);
         } else if (typeName == QueueWorker.AMQP) {
+            auto amqpConf = config.amqp;
+
             AmqpClientOptions options = new AmqpClientOptions()
-            .setHost("10.1.223.62")
-            .setPort(5672)
-            .setUsername("test")
-            .setPassword("123");
+            .setHost(amqpConf.host)
+            .setPort(amqpConf.port)
+            .setUsername(amqpConf.username)
+            .setPassword(amqpConf.password);
 
             AmqpPool pool = new AmqpPool(options);
             _queueWorker = new AmqpQueueWorker(pool);
         } else {
             // TODO: Tasks pending completion -@zhangxueping at 2020-04-02T16:43:39+08:00
             // 
-            warningf("TODO: %s", typeName);
+            warningf("No queue driver defined %s", typeName);
         }
 
         return _queueWorker;
