@@ -17,8 +17,8 @@ class AmqpQueueWorker : QueueWorker {
     private AmqpConnection _listenerConn;
 
     this(AmqpPool pool) {
-        super();
         _pool = pool;
+        super();
     }
     
     override void onListen() {
@@ -38,10 +38,12 @@ class AmqpQueueWorker : QueueWorker {
 
                     recv.handler(new class Handler!AmqpMessage {
                         void handle(AmqpMessage msg) {
-                            tracef("channel: %s Message: %s", channel, msg.bodyAsString());
                             // ubyte[] content = cast(ubyte[])msg.bodyAsBinary();
                             ubyte[] content = cast(ubyte[])msg.bodyAsString();
-                            tracef("%(%02X %)", content);
+                            version(HUNT_FM_DEBUG) {
+                                tracef("channel: %s Message: %s", channel, msg.bodyAsString());
+                                tracef("%(%02X %)", content);
+                            }
                             if(listener !is null) {
                                 listener(content);
                             }

@@ -12,19 +12,52 @@ import std.parallelism;
 /**
  * 
  */
-// class MemoryQueueWorker : QueueWorker {
-//     private SimpleQueue!Job _jobs;
+class MemoryQueueWorker : QueueWorker {
+    private SimpleQueue!(ubyte[])[string] _queueMap;
 
-//     this() {
-//         _jobs = new SimpleQueue!Job();
-//         super();
-//     }
+    this() {
+        super();
+    }
 
-//     override protected Job retrieveNextJob() {
-//         return _jobs.dequeue();
-//     }
+    override void onListen() {
+        if(listeners is null) {
+            return;
+        }
+        
+        foreach(string channel, QueueMessageListener listener; listeners) {
+            auto itemPtr = channel in _queueMap;
+            if(itemPtr is null) {
+                // version(HUNT_DEBUG) warningf("Can't find channel: %s", channel);
+                _queueMap[channel] = new SimpleQueue!(ubyte[])();
+                itemPtr = channel in _queueMap;
+            }
 
-//     override void push(string channel, ubyte[] message) {
-//         _jobs.enqueue(job);
-//     }
-// }
+            ubyte[] content = itemPtr.dequeue();
+            version(HUNT_FM_DEBUG) {
+                tracef("channel: %s Message: %s", channel, msg.bodyAsString());
+                tracef("%(%02X %)", content);
+            }
+            
+            if(listener !is null) {
+                listener(content);
+            }
+        }
+    }
+
+    override void push(string channel, ubyte[] message) {
+        synchronized(this) {
+            auto itemPtr = channel in _queueMap;
+            if(itemPtr is null) {
+                _queueMap[channel] = new SimpleQueue!(ubyte[])();
+                itemPtr = channel in _queueMap;
+            }
+
+            itemPtr.enqueue(message);
+        }
+    }
+
+    override protected void onStop() {
+        _queueMap.clear();
+    }
+}
+

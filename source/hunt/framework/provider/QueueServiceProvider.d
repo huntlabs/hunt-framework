@@ -25,8 +25,7 @@ class QueueServiceProvider : ServiceProvider {
         string typeName = config.queue.driver;
 
         if (typeName == QueueWorker.Memory) {
-            // _queueWorker = new MemoryQueueWorker();
-            warningf("TODO: %s", typeName);
+            _queueWorker = new MemoryQueueWorker();
         } else if (typeName == QueueWorker.AMQP) {
             auto amqpConf = config.amqp;
 
