@@ -18,6 +18,18 @@ class MemoryQueue : AbstractQueue {
     this() {
     }
 
+    override void push(string channel, ubyte[] message) {
+        synchronized(this) {
+            auto itemPtr = channel in _queueMap;
+            if(itemPtr is null) {
+                _queueMap[channel] = new SimpleQueue!(ubyte[])();
+                itemPtr = channel in _queueMap;
+            }
+
+            itemPtr.enqueue(message);
+        }
+    }
+
     override void onListen(string channel, QueueMessageListener listener) {
         if(listeners is null) {
             return;
@@ -40,18 +52,6 @@ class MemoryQueue : AbstractQueue {
         //         listener(content);
         //     }
         // }
-    }
-
-    override void push(string channel, ubyte[] message) {
-        synchronized(this) {
-            auto itemPtr = channel in _queueMap;
-            if(itemPtr is null) {
-                _queueMap[channel] = new SimpleQueue!(ubyte[])();
-                itemPtr = channel in _queueMap;
-            }
-
-            itemPtr.enqueue(message);
-        }
     }
 
     override protected void onStop() {

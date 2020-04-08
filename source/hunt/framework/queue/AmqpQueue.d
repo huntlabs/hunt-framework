@@ -20,6 +20,28 @@ class AmqpQueue : AbstractQueue {
     this(AmqpClient client) {
         _client = client;
     }
+
+    override void push(string channel, ubyte[] message) {
+        // AmqpConnection conn = _pool.borrowObject();
+        AmqpConnection conn = _client.connect();
+        
+        // dfmt off
+        conn.createSender(channel, new class Handler!AmqpSender{
+            void handle(AmqpSender sender) {
+                if(sender is null) {
+                    warning("Unable to create a sender");
+                    return;
+                }
+
+                sender.send(AmqpMessage.create().withBody(cast(string)message).build());
+
+                version(HUNT_DEBUG) trace("A message sent.");
+                // _pool.returnObject(conn);
+                conn.close(null);
+            }
+        });
+        // dfmt on
+    }
     
     override protected void onListen(string channel, QueueMessageListener listener) {
         if(listeners is null) {
@@ -49,15 +71,9 @@ class AmqpQueue : AbstractQueue {
                             // tracef("%(%02X %)", content);
                         }
 
-                        // scope(exit) {
-                        //     _pool.returnObject(conn);
-                        // }
-
                         if(listener !is null) {
                             listener(content);
                         }
-                        
-                        // conn.close(null);
                     }
                 });          
             }
@@ -75,30 +91,6 @@ class AmqpQueue : AbstractQueue {
     }
 
     override protected void onStop() {
-        // if(conn !is null) {
-        //     _pool.returnObject(conn);
-        // }
-    }
-
-    override void push(string channel, ubyte[] message) {
-        // AmqpConnection conn = _pool.borrowObject();
-        AmqpConnection conn = _client.connect();
-        
-        // dfmt off
-        conn.createSender(channel, new class Handler!AmqpSender{
-            void handle(AmqpSender sender) {
-                if(sender is null) {
-                    warning("Unable to create a sender");
-                    return;
-                }
-
-                sender.send(AmqpMessage.create().withBody(cast(string)message).build());
-
-                version(HUNT_DEBUG) trace("A message sent.");
-                // _pool.returnObject(conn);
-                conn.close(null);
-            }
-        });
-        // dfmt on
+        _client.close(null);
     }
 }

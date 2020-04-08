@@ -5,6 +5,7 @@ import hunt.framework.config.ApplicationConfig;
 import hunt.framework.queue;
 
 import hunt.amqp.client;
+import hunt.redis;
 import hunt.logging.ConsoleLogger;
 
 import poodinis;
@@ -23,7 +24,6 @@ class QueueServiceProvider : ServiceProvider {
         ApplicationConfig config = container.resolve!ApplicationConfig();
 
         string typeName = config.queue.driver;
-
         if (typeName == AbstractQueue.MEMORY) {
             _queue = new MemoryQueue();
         } else if (typeName == AbstractQueue.AMQP) {
@@ -39,9 +39,11 @@ class QueueServiceProvider : ServiceProvider {
             // _queue = new AmqpQueue(pool);
             AmqpClient client = AmqpClient.create(options);
             _queue = new AmqpQueue(client);
+        } else if (typeName == AbstractQueue.REDIS) {
+            
+            RedisPool pool = container.resolve!RedisPool();
+            _queue = new RedisQueue(pool);
         } else {
-            // TODO: Tasks pending completion -@zhangxueping at 2020-04-02T16:43:39+08:00
-            // 
             warningf("No queue driver defined %s", typeName);
         }
 
