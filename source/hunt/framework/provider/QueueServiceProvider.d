@@ -24,7 +24,7 @@ class QueueServiceProvider : ServiceProvider {
 
         string typeName = config.queue.driver;
 
-        if (typeName == AbstractQueue.Memory) {
+        if (typeName == AbstractQueue.MEMORY) {
             _queue = new MemoryQueue();
         } else if (typeName == AbstractQueue.AMQP) {
             auto amqpConf = config.amqp;

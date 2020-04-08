@@ -21,14 +21,16 @@ class AmqpQueue : AbstractQueue {
         _client = client;
     }
     
-    override void onListen(string channel, QueueMessageListener listener) {
+    override protected void onListen(string channel, QueueMessageListener listener) {
         if(listeners is null) {
             return;
         }
         
         // AmqpConnection conn = _pool.borrowObject();
         AmqpConnection conn = _client.connect();
-        _connections[listener] = conn; 
+        synchronized(this) {
+            _connections[listener] = conn; 
+        }
 
         // dfmt off
         conn.createReceiver(channel, new class Handler!AmqpReceiver {

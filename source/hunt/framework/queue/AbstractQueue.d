@@ -32,8 +32,8 @@ alias QueueMessageListener = void delegate(ubyte[] message);
  * 
  */
 abstract class AbstractQueue {
-    enum string Memory = "memory";
-    enum string Redis = "redis";
+    enum string MEMORY = "memory";
+    enum string REDIS = "redis";
     enum string AMQP = "amqp";
 
     private shared bool _isListening = false;
