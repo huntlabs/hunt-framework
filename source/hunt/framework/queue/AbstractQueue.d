@@ -28,6 +28,11 @@ import std.parallelism;
 
 alias QueueMessageListener = void delegate(ubyte[] message);
 
+enum ThreadMode {
+    Single,
+    Multi
+}
+
 /**
  * 
  */
@@ -38,7 +43,11 @@ abstract class AbstractQueue {
 
     private shared bool _isListening = false;
     private List!(QueueMessageListener)[string] _listeners;
+    private ThreadMode _threadMode;
 
+    this(ThreadMode mode = ThreadMode.Multi) {
+        _threadMode = mode;
+    }
 
     void push(string channel, ubyte[] message);
 
@@ -58,9 +67,13 @@ abstract class AbstractQueue {
             list.add(listener);
         }
 
-        // dispatch the listener to a working thread
-        auto listenTask = task(&onListen, channel, listener);
-        taskPool.put(listenTask);
+        if(_threadMode == ThreadMode.Single) {
+            onListen(channel, listener);
+        } else {
+            // dispatch the listener to a working thread
+            auto listenTask = task(&onListen, channel, listener);
+            taskPool.put(listenTask);
+        }
     }
 
     protected void onListen(string channel, QueueMessageListener listener);

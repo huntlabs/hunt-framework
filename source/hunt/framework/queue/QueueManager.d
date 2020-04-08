@@ -27,12 +27,14 @@ class QueueManager {
         } else if (typeName == AbstractQueue.AMQP) {
             auto amqpConf = _config.amqp;
 
+            // dfmt off
             AmqpClientOptions options = new AmqpClientOptions()
-            .setHost(amqpConf.host)
-            .setPort(amqpConf.port)
-            .setUsername(amqpConf.username)
-            .setPassword(amqpConf.password);
-
+                .setHost(amqpConf.host)
+                .setPort(amqpConf.port)
+                .setUsername(amqpConf.username)
+                .setPassword(amqpConf.password);
+            // dfmt on
+            
             AmqpClient client = AmqpClient.create(options);
             _queue = new AmqpQueue(client);
         } else if (typeName == AbstractQueue.REDIS) {

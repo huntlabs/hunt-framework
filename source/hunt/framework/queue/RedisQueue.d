@@ -24,6 +24,7 @@ class RedisQueue : AbstractQueue {
 
     this(RedisPool pool) {
         _pool = pool;
+        super(ThreadMode.Multi);
     }
 
     override void push(string channel, ubyte[] message) {

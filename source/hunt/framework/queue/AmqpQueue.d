@@ -19,6 +19,7 @@ class AmqpQueue : AbstractQueue {
 
     this(AmqpClient client) {
         _client = client;
+        super(ThreadMode.Single);
     }
 
     override void push(string channel, ubyte[] message) {
@@ -44,9 +45,7 @@ class AmqpQueue : AbstractQueue {
     }
     
     override protected void onListen(string channel, QueueMessageListener listener) {
-        if(listeners is null) {
-            return;
-        }
+        assert(listener !is null);
         
         // AmqpConnection conn = _pool.borrowObject();
         AmqpConnection conn = _client.connect();
@@ -71,9 +70,7 @@ class AmqpQueue : AbstractQueue {
                             // tracef("%(%02X %)", content);
                         }
 
-                        if(listener !is null) {
-                            listener(content);
-                        }
+                        listener(content);
                     }
                 });          
             }
@@ -82,11 +79,14 @@ class AmqpQueue : AbstractQueue {
     }
 
     override protected void onRemove(string channel, QueueMessageListener listener) {
-        auto itemPtr = listener  in _connections;
-        if(itemPtr !is null) {
-            tracef("Removing a listener from channel %s", channel);
-            // _pool.returnObject(*itemPtr);
-            itemPtr.close(null);
+        synchronized(this) {
+            auto itemPtr = listener in _connections;
+            if(itemPtr !is null) {
+                tracef("Removing a listener from channel %s", channel);
+                _connections.remove(listener);
+                // _pool.returnObject(*itemPtr);
+                itemPtr.close(null);
+            }
         }
     }
 

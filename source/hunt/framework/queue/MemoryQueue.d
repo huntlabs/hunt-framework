@@ -15,6 +15,10 @@ import std.parallelism;
 class MemoryQueue : AbstractQueue {
     private SimpleQueue!(ubyte[])[string] _queueMap;
 
+    this() {
+        super(ThreadMode.Multi);
+    }
+
     override void push(string channel, ubyte[] message) {
         synchronized(this) {
             auto itemPtr = channel in _queueMap;
