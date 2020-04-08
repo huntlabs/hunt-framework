@@ -13,11 +13,12 @@ import std.parallelism;
  * 
  */
 class AmqpQueue : AbstractQueue {
-    private AmqpPool _pool;
+    // private AmqpPool _pool;
+    private AmqpClient _client;
     private AmqpConnection[QueueMessageListener] _connections;
 
-    this(AmqpPool pool) {
-        _pool = pool;
+    this(AmqpClient client) {
+        _client = client;
     }
     
     override void onListen(string channel, QueueMessageListener listener) {
@@ -25,7 +26,8 @@ class AmqpQueue : AbstractQueue {
             return;
         }
         
-        AmqpConnection conn = _pool.borrowObject();
+        // AmqpConnection conn = _pool.borrowObject();
+        AmqpConnection conn = _client.connect();
         _connections[listener] = conn; 
 
         // dfmt off
@@ -61,8 +63,24 @@ class AmqpQueue : AbstractQueue {
         // dfmt on
     }
 
+    override protected void onRemove(string channel, QueueMessageListener listener) {
+        auto itemPtr = listener  in _connections;
+        if(itemPtr !is null) {
+            tracef("Removing a listener from channel %s", channel);
+            // _pool.returnObject(*itemPtr);
+            itemPtr.close(null);
+        }
+    }
+
+    override protected void onStop() {
+        // if(conn !is null) {
+        //     _pool.returnObject(conn);
+        // }
+    }
+
     override void push(string channel, ubyte[] message) {
-        AmqpConnection conn = _pool.borrowObject();
+        // AmqpConnection conn = _pool.borrowObject();
+        AmqpConnection conn = _client.connect();
         
         // dfmt off
         conn.createSender(channel, new class Handler!AmqpSender{
@@ -75,23 +93,10 @@ class AmqpQueue : AbstractQueue {
                 sender.send(AmqpMessage.create().withBody(cast(string)message).build());
 
                 version(HUNT_DEBUG) trace("A message sent.");
-                _pool.returnObject(conn);
+                // _pool.returnObject(conn);
+                conn.close(null);
             }
         });
         // dfmt on
-    }
-
-    override protected void onRemove(string channel, QueueMessageListener listener) {
-        auto itemPtr = listener  in _connections;
-        if(itemPtr !is null) {
-            tracef("Removing a listener from channel %s", channel);
-            _pool.returnObject(*itemPtr);
-        }
-    }
-
-    override protected void onStop() {
-        // if(conn !is null) {
-        //     _pool.returnObject(conn);
-        // }
     }
 }

@@ -35,8 +35,10 @@ class QueueServiceProvider : ServiceProvider {
             .setUsername(amqpConf.username)
             .setPassword(amqpConf.password);
 
-            AmqpPool pool = new AmqpPool(options);
-            _queue = new AmqpQueue(pool);
+            // AmqpPool pool = new AmqpPool(options);
+            // _queue = new AmqpQueue(pool);
+            AmqpClient client = AmqpClient.create(options);
+            _queue = new AmqpQueue(client);
         } else {
             // TODO: Tasks pending completion -@zhangxueping at 2020-04-02T16:43:39+08:00
             // 
