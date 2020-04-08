@@ -207,6 +207,6 @@ ResouceManager resouceManager() {
 import hunt.framework.queue;
 deprecated("Using queueWorker instead.") alias taskManager = queueWorker;
 
-QueueWorker queueWorker() {
-    return serviceContainer.resolve!(QueueWorker);
+AbstractQueue queueWorker() {
+    return serviceContainer.resolve!(AbstractQueue);
 }

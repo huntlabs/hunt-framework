@@ -1,5 +1,5 @@
 module hunt.framework.queue;
 
-public import hunt.framework.queue.AmqpQueueWorker;
-public import hunt.framework.queue.QueueWorker;
-public import hunt.framework.queue.MemoryQueueWorker;
+public import hunt.framework.queue.AmqpQueue;
+public import hunt.framework.queue.AbstractQueue;
+public import hunt.framework.queue.MemoryQueue;

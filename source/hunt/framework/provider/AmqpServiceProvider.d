@@ -3,8 +3,8 @@ module hunt.framework.provider.AmqpServiceProvider;
 import hunt.framework.provider.ServiceProvider;
 import hunt.framework.config.ApplicationConfig;
 
-import hunt.logging.ConsoleLogger;
 import hunt.amqp.client;
+import hunt.logging.ConsoleLogger;
 import poodinis;
 
 import core.time;

@@ -1,4 +1,4 @@
-module hunt.framework.queue.QueueWorker;
+module hunt.framework.queue.AbstractQueue;
 
 // import hunt.framework.queue.Job;
 
@@ -18,8 +18,9 @@ import hunt.util.Common;
 import hunt.util.Timer;
 import hunt.logging;
 
-import hunt.framework.queue.Job;
 import hunt.logging.ConsoleLogger;
+import hunt.collection.ArrayList;
+import hunt.collection.List;
 
 import core.atomic;
 import core.thread;
@@ -30,41 +31,36 @@ alias QueueMessageListener = void delegate(ubyte[] message);
 /**
  * 
  */
-abstract class QueueWorker {
+abstract class AbstractQueue {
     enum string Memory = "memory";
     enum string Redis = "redis";
     enum string AMQP = "amqp";
 
     private shared bool _isListening = false;
-    private QueueMessageListener[string] _listeners;
+    private List!(QueueMessageListener)[string] _listeners;
 
-    this() {
-    }
 
     void push(string channel, ubyte[] message);
 
-    void startListening() {
-        if(cas(&_isListening, false, true)) {
-            onListen();
-        } else {
-            warning("Already listening");
-        }
-    }
-
-    bool addListener(string channel, QueueMessageListener listener) {
+    void addListener(string channel, QueueMessageListener listener) {
         assert(listener !is null);
         
         synchronized(this) {
+            List!QueueMessageListener list;
             auto itemPtr = channel in _listeners;
             if(itemPtr is null) {
-                _listeners[channel] = listener;
-                return true;
+                list = new ArrayList!QueueMessageListener();
+                _listeners[channel] = list;
             } else {
-                warning("The listener exists for channel %s", channel);
-                return false;
+                list = *itemPtr;
             }
+            
+            list.add(listener);    
+            onListen(channel, listener);
         }
     }
+
+    protected void onListen(string channel, QueueMessageListener listener);
 
     void remove(string channel) {
         synchronized(this) {
@@ -72,7 +68,26 @@ abstract class QueueWorker {
             if(itemPtr !is null) {
                 _listeners.remove(channel);
             }
+
+            foreach(QueueMessageListener listener; *itemPtr) {
+                onRemove(channel, listener);
+            }
         }
+    }
+    
+    void remove(string channel, QueueMessageListener listener) {
+        synchronized(this) {
+            auto itemPtr = channel in _listeners;
+            if(itemPtr !is null) {
+                itemPtr.remove(listener);
+            }
+
+            onRemove(channel, listener);
+        }
+    }
+
+    protected void onRemove(string channel, QueueMessageListener listener) {
+
     }
 
     void stop() {
@@ -80,7 +95,7 @@ abstract class QueueWorker {
         onStop();
     }
 
-    protected QueueMessageListener[string] listeners() {
+    protected List!(QueueMessageListener)[string] listeners() {
         return _listeners;
     }
 

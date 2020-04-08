@@ -15,18 +15,18 @@ import poodinis;
 class QueueServiceProvider : ServiceProvider {
 
     override void register() {
-        container.register!(QueueWorker)(&buildWorkder).singleInstance();
+        container.register!(AbstractQueue)(&buildWorkder).singleInstance();
     }
 
-    protected QueueWorker buildWorkder() {
-        QueueWorker _queueWorker;
+    protected AbstractQueue buildWorkder() {
+        AbstractQueue _queue;
         ApplicationConfig config = container.resolve!ApplicationConfig();
 
         string typeName = config.queue.driver;
 
-        if (typeName == QueueWorker.Memory) {
-            _queueWorker = new MemoryQueueWorker();
-        } else if (typeName == QueueWorker.AMQP) {
+        if (typeName == AbstractQueue.Memory) {
+            _queue = new MemoryQueue();
+        } else if (typeName == AbstractQueue.AMQP) {
             auto amqpConf = config.amqp;
 
             AmqpClientOptions options = new AmqpClientOptions()
@@ -36,13 +36,13 @@ class QueueServiceProvider : ServiceProvider {
             .setPassword(amqpConf.password);
 
             AmqpPool pool = new AmqpPool(options);
-            _queueWorker = new AmqpQueueWorker(pool);
+            _queue = new AmqpQueue(pool);
         } else {
             // TODO: Tasks pending completion -@zhangxueping at 2020-04-02T16:43:39+08:00
             // 
             warningf("No queue driver defined %s", typeName);
         }
 
-        return _queueWorker;
+        return _queue;
     }
 }
