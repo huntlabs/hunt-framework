@@ -55,9 +55,12 @@ abstract class AbstractQueue {
                 list = *itemPtr;
             }
             
-            list.add(listener);    
-            onListen(channel, listener);
+            list.add(listener);
         }
+
+        // dispatch the listener to a working thread
+        auto listenTask = task(&onListen, channel, listener);
+        taskPool.put(listenTask);
     }
 
     protected void onListen(string channel, QueueMessageListener listener);

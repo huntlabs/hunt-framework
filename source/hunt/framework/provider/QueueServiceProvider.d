@@ -20,33 +20,8 @@ class QueueServiceProvider : ServiceProvider {
     }
 
     protected AbstractQueue buildWorkder() {
-        AbstractQueue _queue;
         ApplicationConfig config = container.resolve!ApplicationConfig();
-
-        string typeName = config.queue.driver;
-        if (typeName == AbstractQueue.MEMORY) {
-            _queue = new MemoryQueue();
-        } else if (typeName == AbstractQueue.AMQP) {
-            auto amqpConf = config.amqp;
-
-            AmqpClientOptions options = new AmqpClientOptions()
-            .setHost(amqpConf.host)
-            .setPort(amqpConf.port)
-            .setUsername(amqpConf.username)
-            .setPassword(amqpConf.password);
-
-            // AmqpPool pool = new AmqpPool(options);
-            // _queue = new AmqpQueue(pool);
-            AmqpClient client = AmqpClient.create(options);
-            _queue = new AmqpQueue(client);
-        } else if (typeName == AbstractQueue.REDIS) {
-            
-            RedisPool pool = container.resolve!RedisPool();
-            _queue = new RedisQueue(pool);
-        } else {
-            warningf("No queue driver defined %s", typeName);
-        }
-
-        return _queue;
+        QueueManager manager = new QueueManager(config);
+        return manager.build();
     }
 }

@@ -38,7 +38,7 @@ class RedisQueue : AbstractQueue {
             if(r is null) {
                 warning("result is null");
             } else {
-                infof("count: %d", v.value());
+                infof("count: %d", r.value());
             }
         }
     }
@@ -78,7 +78,6 @@ class RedisQueue : AbstractQueue {
 
     }
 
-
     override protected void onRemove(string channel, QueueMessageListener listener) {
         auto itemPtr = listener  in _connections;
         if(itemPtr !is null) {
@@ -94,6 +93,5 @@ class RedisQueue : AbstractQueue {
             }
         }
     }
-
 }
 
