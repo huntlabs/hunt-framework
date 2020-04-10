@@ -56,15 +56,12 @@ import std.socket : Address, parseAddress;
 import std.stdio;
 import std.string;
 
-
-alias DefaultServiceProviders = AliasSeq!(
-    AuthServiceProvider,
-    ConfigServiceProvider, RedisServiceProvider, TranslationServiceProvider,
-    CacheServiceProvider, SessionServiceProvider, DatabaseServiceProvider,
-    QueueServiceProvider, AmqpServiceProvider, 
-    HttpServiceProvider, BreadcrumbServiceProvider, ViewServiceProvider
-);
-
+alias DefaultServiceProviders = AliasSeq!(AuthServiceProvider,
+        ConfigServiceProvider, RedisServiceProvider,
+        TranslationServiceProvider, CacheServiceProvider, SessionServiceProvider,
+        DatabaseServiceProvider,
+        QueueServiceProvider, AmqpServiceProvider, HttpServiceProvider,
+        BreadcrumbServiceProvider, ViewServiceProvider);
 
 /**
  * 
@@ -106,8 +103,8 @@ final class Application {
         initializeProviderListener();
     }
 
-    void register(T)() if(is(T : ServiceProvider)) {
-        if(_isBooted) {
+    void register(T)() if (is(T : ServiceProvider)) {
+        if (_isBooted) {
             warning("A provider can't be registered: %s after the app has been booted.", typeid(T));
             return;
         }
@@ -119,24 +116,24 @@ final class Application {
         serviceContainer().autowire(provider);
         _providerListener.registered(typeid(T));
 
-        static foreach(S; DefaultServiceProviders) {
+        static foreach (S; DefaultServiceProviders) {
             checkCustomizedProvider!(T, S);
         }
     }
 
-    private void tryRegister(T)() if(is(T : ServiceProvider)) {
-        if(!isRegistered!(T)) {
+    private void tryRegister(T)() if (is(T : ServiceProvider)) {
+        if (!isRegistered!(T)) {
             register!T();
         }
     }
 
     private void checkCustomizedProvider(T, S)() {
-        static if(is(T : S)) {
+        static if (is(T : S)) {
             _customizedServiceProviders[typeid(S)] = true;
         }
     }
 
-    private bool isRegistered(T)() if(is(T : ServiceProvider)) {
+    private bool isRegistered(T)() if (is(T : ServiceProvider)) {
         auto itemPtr = typeid(T) in _customizedServiceProviders;
 
         return itemPtr !is null;
@@ -163,7 +160,7 @@ final class Application {
                 ApplicationConfig appConfig = serviceContainer().resolve!(ApplicationConfig);
                 appConfig.http.address = signature.host;
                 appConfig.http.port = signature.port;
-                
+
                 bootstrap();
             });
 
@@ -192,11 +189,11 @@ final class Application {
 
         // 
         registerProviders();
-        
+
         //
         initializeLogger();
 
-        version(WITH_HUNT_TRACE) { 
+        version (WITH_HUNT_TRACE) {
             initializeTracer();
         }
 
@@ -226,8 +223,9 @@ final class Application {
     }
 
     private void showLogo() {
-        Address bindingAddress = parseAddress(_serverOptions.getHost(), cast(ushort)_serverOptions.getPort());
-        
+        Address bindingAddress = parseAddress(_serverOptions.getHost(),
+                cast(ushort) _serverOptions.getPort());
+
         // dfmt off
         string cliText = `
 
@@ -242,27 +240,25 @@ final class Application {
 `;
         writeln(cliText);
         // dfmt on
-        
+
         if (_serverOptions.isSecureConnectionEnabled())
             writeln("Try to browse https://", bindingAddress.toString());
         else
             writeln("Try to browse http://", bindingAddress.toString());
     }
 
-    Application providerLisener(ServiceProviderListener listener)
-    {
+    Application providerLisener(ServiceProviderListener listener) {
         _providerListener = listener;
         return this;
     }
 
-    ServiceProviderListener providerLisener()
-    {
+    ServiceProviderListener providerLisener() {
         return _providerListener;
     }
+
     private ServiceProviderListener _providerListener;
 
-    private void initializeProviderListener()
-    {
+    private void initializeProviderListener() {
         _providerListener = new DefaultServiceProviderListener;
     }
 
@@ -271,8 +267,8 @@ final class Application {
      */
     private void registerProviders() {
         // Register all the default service providers
-        static foreach(T; DefaultServiceProviders) {
-            static if(!is(T == ConfigServiceProvider)) {
+        static foreach (T; DefaultServiceProviders) {
+            static if (!is(T == ConfigServiceProvider)) {
                 tryRegister!T();
             }
         }
@@ -296,7 +292,7 @@ final class Application {
         ServiceProvider[] providers = serviceContainer().resolveAll!(ServiceProvider);
         infof("Booting all the service providers (%d)...", providers.length);
 
-        foreach(ServiceProvider p; providers) {
+        foreach (ServiceProvider p; providers) {
             p.boot();
             _providerListener.booted(typeid(p));
         }
@@ -364,10 +360,10 @@ final class Application {
             logconf.maxNum = conf.maxNum;
 
             logLoadConf(logconf);
-        }        
+        }
     }
 
-    version(WITH_HUNT_TRACE) {
+    version (WITH_HUNT_TRACE) {
 
         private void initializeTracer() {
             _localServiceName = _appConfig.application.name;
@@ -377,22 +373,25 @@ final class Application {
             // initialize HttpSender
             httpSender().endpoint(_appConfig.trace.zipkin);
         }
-        
+
         private void initializeTracer(Request request, HttpConnection connection) {
 
-            if(!isTraceEnabled) return;
+            if (!isTraceEnabled)
+                return;
 
             import std.socket;
+
             string reqPath = request.getURI().getPath();
             Tracer tracer;
 
             string b3 = request.header("b3");
-            if(b3.empty()) {
-                if(_isB3HeaderRequired) return;
+            if (b3.empty()) {
+                if (_isB3HeaderRequired)
+                    return;
 
                 tracer = new Tracer(reqPath);
             } else {
-                version(HUNT_HTTP_DEBUG) {
+                version (HUNT_HTTP_DEBUG) {
                     warningf("initializing tracer for %s, with %s", reqPath, b3);
                 }
 
@@ -412,11 +411,11 @@ final class Application {
 
             span.start();
             request.tracer = tracer;
-        } 
+        }
 
         private string _localServiceName;
         private bool _isB3HeaderRequired = true;
-    } 
+    }
 
     private void setDefaultLogging() {
         version (HUNT_DEBUG) {
@@ -428,6 +427,42 @@ final class Application {
         }
     }
 
+    // dfmtoff Some helpers
+    import hunt.cache.Cache;
+    import hunt.entity.EntityManager;
+    import hunt.entity.EntityManagerFactory;
+    import hunt.framework.breadcrumb.BreadcrumbsManager;
+    import hunt.framework.queue;
+
+    Redis redis() {
+        RedisPool pool = serviceContainer.resolve!RedisPool();
+        return pool.getResource();
+    }
+
+    Cache cache() {
+        return serviceContainer.resolve!(Cache);
+    }
+
+    AbstractQueue queue() {
+        return serviceContainer.resolve!(AbstractQueue);
+    }
+
+    EntityManager entityManager() {
+        if(_entityManager is null) {
+            _entityManager = serviceContainer.resolve!(EntityManagerFactory).currentEntityManager();
+        }
+        return _entityManager;
+    }
+    private EntityManager _entityManager;
+
+    BreadcrumbsManager breadcrumbs() {
+        if(_breadcrumbs is null) {
+            _breadcrumbs = serviceContainer.resolve!BreadcrumbsManager();
+        }
+        return _breadcrumbs;
+    }
+    private BreadcrumbsManager _breadcrumbs;
+    // dfmton
 }
 
 /**

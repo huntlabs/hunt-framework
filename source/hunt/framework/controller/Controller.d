@@ -30,6 +30,7 @@ import hunt.amqp.client;
 import hunt.cache;
 import hunt.entity.EntityManagerFactory;
 import hunt.logging.ConsoleLogger;
+import hunt.redis.Redis;
 import hunt.redis.RedisPool;
 import hunt.validation;
 
@@ -109,6 +110,11 @@ abstract class Controller
 
     Cache cache() {
         return serviceContainer.resolve!(Cache);
+    }    
+    
+    Redis redis() {
+        RedisPool pool = serviceContainer.resolve!RedisPool();
+        return pool.getResource();
     }
 
     EntityManager entityManager() {
@@ -116,10 +122,6 @@ abstract class Controller
             _entityManager = serviceContainer.resolve!(EntityManagerFactory).currentEntityManager();
         }
         return _entityManager;
-    }
-
-    RedisPool redisPool() {
-        return serviceContainer.resolve!RedisPool();
     }
 
     AmqpConnection amqpConnection() {
@@ -162,11 +164,6 @@ abstract class Controller
         return this.middlewares;
     }
 
-    // Cache cache()
-    // {
-    //     return app().cache();
-    // }
-    
     protected final Response doMiddleware()
     {
         version (HUNT_DEBUG) logDebug("doMiddlware ..");
@@ -191,10 +188,10 @@ abstract class Controller
         return null;
     }
 
-    @property bool isAsync()
-    {
-        return true;
-    }
+    // @property bool isAsync()
+    // {
+    //     return true;
+    // }
 
     string processGetNumericString(string value)
     {
@@ -481,10 +478,10 @@ void callHandler(T, string method)(RoutingContext context)
     import core.memory;
     scope(exit) {
         controller.dispose();
-        if(!controller.isAsync) { 
-            controller.destroy(); 
-            GC.free(cast(void *)controller);
-        }
+        // if(!controller.isAsync) { 
+        //     controller.destroy(); 
+        //     GC.free(cast(void *)controller);
+        // }
     }
 
     // req.action = method;

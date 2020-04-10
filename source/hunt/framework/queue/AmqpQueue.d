@@ -70,7 +70,13 @@ class AmqpQueue : AbstractQueue {
                             // tracef("%(%02X %)", content);
                         }
 
-                        listener(content);
+                        try {
+                            listener(content);
+                        } catch (Exception ex) {
+                            warning(ex.msg);
+                            // FIXME: Needing refactor or cleanup -@zhangxueping at 2020-04-10T17:45:34+08:00
+                            // do something
+                        }
                     }
                 });          
             }
