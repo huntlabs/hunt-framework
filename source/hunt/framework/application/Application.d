@@ -59,8 +59,8 @@ import std.string;
 alias DefaultServiceProviders = AliasSeq!(AuthServiceProvider,
         ConfigServiceProvider, RedisServiceProvider,
         TranslationServiceProvider, CacheServiceProvider, SessionServiceProvider,
-        DatabaseServiceProvider,
-        QueueServiceProvider, AmqpServiceProvider, HttpServiceProvider,
+        DatabaseServiceProvider, QueueServiceProvider,
+        TaskServiceProvider, AmqpServiceProvider, HttpServiceProvider,
         BreadcrumbServiceProvider, ViewServiceProvider);
 
 /**
@@ -433,6 +433,7 @@ final class Application {
     import hunt.entity.EntityManagerFactory;
     import hunt.framework.breadcrumb.BreadcrumbsManager;
     import hunt.framework.queue;
+    import hunt.framework.task;
 
     Redis redis() {
         RedisPool pool = serviceContainer.resolve!RedisPool();
@@ -445,6 +446,10 @@ final class Application {
 
     AbstractQueue queue() {
         return serviceContainer.resolve!(AbstractQueue);
+    }
+
+    TaskWorker task() {
+        return serviceContainer.resolve!(TaskWorker);
     }
 
     EntityManager entityManager() {
