@@ -72,17 +72,19 @@ class ConfigServiceProvider : ServiceProvider {
         
         // Worker pool
         int minThreadCount = totalCPUs / 4 + 1;
-        if (appConfig.http.workerThreads == 0)
-            appConfig.http.workerThreads = minThreadCount;
+        // if (appConfig.http.workerThreads == 0)
+        //     appConfig.http.workerThreads = minThreadCount;
 
         if (appConfig.http.workerThreads < minThreadCount) {
-            warningf("It's better to set the number of worker threads >= %d. The current is: %d",
+            warningf("It's better to set it to a value which is >= %d. The current value is: %d",
                     minThreadCount, appConfig.http.workerThreads);
             // appConfig.http.workerThreads = minThreadCount;
         }
 
-        if (appConfig.http.workerThreads <= 1) {
+        if (appConfig.http.workerThreads == 1) {
             appConfig.http.workerThreads = 2;
         }
+
+        // 0 means to use the IO thread
     }
 }

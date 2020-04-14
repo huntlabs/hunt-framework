@@ -8,7 +8,7 @@ class ResouceManager {
     private Closeable[] _closeableObjects;
 
     void push(Closeable obj) {
-        if (!isRequestThread())
+        if (!inWorkerThread())
             return;
 
         assert(obj !is null);

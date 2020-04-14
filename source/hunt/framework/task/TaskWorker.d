@@ -6,11 +6,6 @@ import hunt.framework.queue;
 import hunt.logging.ConsoleLogger;
 import hunt.serialization.JsonSerializer;
 
-class TaskWorkerOptions {
-    int size = 8;
-}
-
-
 
 /**
  * 
@@ -18,19 +13,13 @@ class TaskWorkerOptions {
 class TaskWorker {
     enum string DEFAULT_CHANNEL = "default";
 
-    private TaskWorkerOptions _options;
     private AbstractQueue _queue;
 
     this(AbstractQueue queue) {
-        this(queue, new TaskWorkerOptions());
-    }
-
-    this(AbstractQueue queue, TaskWorkerOptions options) {
         assert(queue !is null);
         _queue = queue;
-        _options = options;
     }
-    
+
     void listen(T)() if(is(T : TaskExecutor)) {
         listen!T(DEFAULT_CHANNEL);
     }

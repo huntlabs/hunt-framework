@@ -186,11 +186,18 @@ private string _transWithLocale(string locale, string key) {
     return defaultValue;
 }
 
-private bool _isRequestThread = true;
+private bool _inWorkerThread = false;
 
-bool isRequestThread()
-{
-    return _isRequestThread;
+bool inWorkerThread() {
+    return _inWorkerThread;
+}
+
+void startWorkerTread() {
+    _inWorkerThread = true;
+}
+
+void resetWorkerThread() {
+    _inWorkerThread = false;
 }
 
 import hunt.framework.application.ResourceManager;

@@ -130,10 +130,6 @@ class ApplicationConfig {
 
     struct RedisPoolConf {
         bool enabled = false;
-        // uint maxWait = 5000; // millisecond
-        // uint maxIdle = 50; // millisecond
-        // uint minIdle = 5; // millisecond
-        // uint maxTotal = 10; // 
 
         bool blockOnExhausted = true;
         uint idleTimeout = 30000; // millisecond

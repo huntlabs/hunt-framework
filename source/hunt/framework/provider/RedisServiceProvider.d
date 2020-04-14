@@ -20,9 +20,9 @@ class RedisServiceProvider : ServiceProvider {
 
             auto redisOptions = config.redis;
             auto redisPoolOptions = redisOptions.pool;
+
             if (redisOptions.pool.enabled) {
                 RedisPoolConfig poolConfig = new RedisPoolConfig();
-                // RedisPoolConfig poolConfig = container.resolve!RedisPoolConfig(); 
                 poolConfig.host = redisOptions.host;
                 poolConfig.port = cast(int) redisOptions.port;
                 poolConfig.password = redisOptions.password;
