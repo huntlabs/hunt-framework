@@ -13,7 +13,6 @@ import std.parallelism;
  * 
  */
 class AmqpQueue : AbstractQueue {
-    // private AmqpPool _pool;
     private AmqpClient _client;
     private AmqpConnection[QueueMessageListener] _connections;
 
@@ -23,7 +22,6 @@ class AmqpQueue : AbstractQueue {
     }
 
     override void push(string channel, ubyte[] message) {
-        // AmqpConnection conn = _pool.borrowObject();
         AmqpConnection conn = _client.connect();
         
         // dfmt off
@@ -37,7 +35,6 @@ class AmqpQueue : AbstractQueue {
                 sender.send(AmqpMessage.create().withBody(cast(string)message).build());
 
                 version(HUNT_DEBUG) trace("A message sent.");
-                // _pool.returnObject(conn);
                 conn.close(null);
             }
         });
@@ -47,7 +44,6 @@ class AmqpQueue : AbstractQueue {
     override protected void onListen(string channel, QueueMessageListener listener) {
         assert(listener !is null);
         
-        // AmqpConnection conn = _pool.borrowObject();
         AmqpConnection conn = _client.connect();
         synchronized(this) {
             _connections[listener] = conn; 
@@ -88,9 +84,8 @@ class AmqpQueue : AbstractQueue {
         synchronized(this) {
             auto itemPtr = listener in _connections;
             if(itemPtr !is null) {
-                tracef("Removing a listener from channel %s", channel);
+                version(HUNT_DEBUG) tracef("Removing a listener from channel %s", channel);
                 _connections.remove(listener);
-                // _pool.returnObject(*itemPtr);
                 itemPtr.close(null);
             }
         }

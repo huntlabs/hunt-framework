@@ -275,7 +275,7 @@ final class Application {
 
         // Register all the service provided by the providers
         ServiceProvider[] providers = serviceContainer().resolveAll!(ServiceProvider);
-        infof("Registering all the service providers (%d)...", providers.length);
+        version(HUNT_DEBUG) infof("Registering all the service providers (%d)...", providers.length);
 
         // foreach(ServiceProvider p; providers) {
         //     p.register();
