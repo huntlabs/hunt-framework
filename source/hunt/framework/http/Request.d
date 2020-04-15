@@ -27,7 +27,9 @@ import hunt.logging.ConsoleLogger;
 import std.algorithm;
 import std.array : split;
 import std.json;
+import std.format;
 import std.range;
+import std.socket;
 
 /**
  * 
@@ -46,15 +48,12 @@ class Request {
     HttpServerRequest _request;
     alias _request this;
 
-    this(HttpServerRequest request, string routeGroup = DEFAULT_ROUTE_GROUP) {
+    this(HttpServerRequest request, Address remoteAddress, string routeGroup = DEFAULT_ROUTE_GROUP) {
         this._request = request;
         _sessionStorage = serviceContainer().resolve!SessionStorage();
         _routeManager = serviceContainer().resolve!RouteConfigManager();
         _routeGroup = routeGroup;
-        
-        // string host = split(request.header(HttpHeader.HOST), ":")[0];
-        // ActionRouteItem routeItem = _routeManager.getRoute(routeGroup, request.getMethod(), request.path());
-        // warning(routeItem);
+        _remoteAddr = remoteAddress;
     }
 
     /**
@@ -137,7 +136,6 @@ class Request {
         return null;
     }
 
-//     // alias _request this;
 //     @property int elapsed()    {
 //         Duration timeElapsed = MonoTime.currTime - _monoCreated;
 //         return cast(int)timeElapsed.total!"msecs";
@@ -349,9 +347,10 @@ class Request {
 //         return "";
 //     }
 
-    // @property Address clientAddress() {
-    //     return _connection.getTcpConnection().getRemoteAddress();
-    // }
+    @property Address remoteAddr() {
+        return _remoteAddr;
+    }
+    private Address _remoteAddr;
 
     @property string ip() {
         string s = this.header(HttpHeader.X_FORWARDED_FOR);
@@ -375,10 +374,10 @@ class Request {
             s = this.header("HTTP_X_FORWARDED_FOR");
         } 
 
-        // if(s.empty) {
-        //     Address ad = clientAddress();
-        //     s = ad.toAddrString();
-        // }
+        if(s.empty) {
+            Address ad = remoteAddr();
+            s = ad.toAddrString();
+        }
 
         return s;
     }    
@@ -1284,10 +1283,11 @@ class Request {
         return _request.getURIString();
     }
 
-//     // @property string fullUrl()
-//     // {
-//     //     return _httpMessage.url();
-//     // }
+    @property string fullUrl()
+    {
+        string str = format("%s://%s%s", getScheme(), _request.host(), _request.getURI().toString());
+        return str;
+    }
 
 //     // @property string fullUrlWithQuery()
 //     // {
@@ -1302,14 +1302,14 @@ class Request {
 //         return _request.getURI().getDecodedPath();
 //     }
 
-//     /**
-//      * Gets the request's scheme.
-//      *
-//      * @return string
-//      */
-//     string getScheme() {
-//         return isSecure() ? "https" : "http";
-//     }
+    /**
+     * Gets the request's scheme.
+     *
+     * @return string
+     */
+    string getScheme() {
+        return _request.isHttps() ? "https" : "http";
+    }
 
 //     /**
 //      * Get a segment from the URI (1 based index).

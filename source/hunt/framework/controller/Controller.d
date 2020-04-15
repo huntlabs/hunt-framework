@@ -25,6 +25,7 @@ import hunt.framework.view;
 public import hunt.framework.http.Response;
 public import hunt.http.server;
 public import hunt.http.routing;
+import hunt.http.HttpConnection;
 
 import hunt.amqp.client;
 import hunt.cache;
@@ -60,7 +61,9 @@ abstract class Controller
 
     Request request() {
         if(_request is null) {
-            _request = new Request(_routingContext.getRequest(), _routingContext.groupName());
+            HttpConnection httpConnection = _routingContext.httpConnection();
+            _request = new Request(_routingContext.getRequest(), httpConnection.getRemoteAddress(),
+                _routingContext.groupName());
         }
         return _request;
     }
@@ -435,12 +438,10 @@ void callHandler(T, string method)(RoutingContext context)
     scope(exit) {
         controller.dispose();        
         version(HUNT_THREAD_DEBUG) warningf("Threads: %d", Thread.getAll().length);
-        resouceManager.clean();
         resetWorkerThread();
     }
 
     try {
-        startWorkerTread();
         controller.callActionMethod(method, context);
     } catch (Throwable t) {
         warning(t.msg);
