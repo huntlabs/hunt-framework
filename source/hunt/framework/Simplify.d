@@ -20,6 +20,7 @@ public import hunt.util.DateTime : time, date;
 
 import hunt.framework.provider;
 import hunt.logging.ConsoleLogger;
+import hunt.concurrency.TaskPool;
 
 import poodinis;
 
@@ -189,7 +190,12 @@ private string _transWithLocale(string locale, string key) {
 private bool _inWorkerThread = false;
 
 bool inWorkerThread() {
-    return _inWorkerThread;
+    if(_inWorkerThread)
+        return true;
+
+    import core.thread;
+    ParallelismThread th = cast(ParallelismThread)Thread.getThis();
+    return th !is null;
 }
 
 void startWorkerTread() {
@@ -197,7 +203,7 @@ void startWorkerTread() {
 }
 
 void resetWorkerThread() {
-    _inWorkerThread = false;
+    resouceManager.clean();
 }
 
 import hunt.framework.application.ResourceManager;

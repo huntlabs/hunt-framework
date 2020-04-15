@@ -1,7 +1,8 @@
 module hunt.framework.application.ResourceManager;
 
-import hunt.util.Common;
+import hunt.concurrency.TaskPool;
 import hunt.framework.Simplify;
+import hunt.util.Common;
 
 class ResouceManager {
 
