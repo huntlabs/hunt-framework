@@ -49,9 +49,6 @@ abstract class Controller
 {
     private Request _request;
     private Response _response;
-    private EntityManager _entityManager;
-    private BreadcrumbsManager _breadcrumbs;
-    private AmqpConnection _amqpConnection;
 
     protected
     {
@@ -60,10 +57,6 @@ abstract class Controller
         ///called before all actions
         MiddlewareInterface[string] middlewares;
     }
-
-    // shared(DependencyContainer) serviceContainer() {
-    //     return .serviceContainer();
-    // }
 
     Request request() {
         if(_request is null) {
@@ -95,42 +88,6 @@ abstract class Controller
         }
 
         return _view;
-    }
-
-    BreadcrumbsManager breadcrumbsManager() {
-        if(_breadcrumbs is null) {
-            _breadcrumbs = serviceContainer.resolve!BreadcrumbsManager();
-        }
-        return _breadcrumbs;
-    }
-
-    I18n translationManager() {
-        return serviceContainer.resolve!(I18n);
-    }
-
-    Cache cache() {
-        return serviceContainer.resolve!(Cache);
-    }    
-    
-    Redis redis() {
-        RedisPool pool = serviceContainer.resolve!RedisPool();
-        return pool.getResource();
-    }
-
-    EntityManager entityManager() {
-        if(_entityManager is null) {
-            _entityManager = serviceContainer.resolve!(EntityManagerFactory).currentEntityManager();
-        }
-        return _entityManager;
-    }
-
-    AmqpConnection amqpConnection() {
-        if(_amqpConnection is null) {
-           AmqpClient amqpClient = serviceContainer.resolve!AmqpClient();
-           _amqpConnection = amqpClient.connect();
-        }
-
-        return _amqpConnection;
     }
 
     /// called before action  return true is continue false is finish
@@ -188,11 +145,6 @@ abstract class Controller
         return null;
     }
 
-    // @property bool isAsync()
-    // {
-    //     return true;
-    // }
-
     string processGetNumericString(string value)
     {
         import std.string;
@@ -219,9 +171,6 @@ abstract class Controller
     }
 
     protected void done() {
-        if(_amqpConnection !is null) {
-            _amqpConnection.close(null);
-        }
         request().flush(); // assure the sessiondata flushed;
         Response resp = response();
         HttpSession session = request().session(false);
@@ -471,23 +420,27 @@ string __createRouteMap(T, string moduleName)()
     return str;
 }
 
+import core.memory;
+import core.thread;
+
 void callHandler(T, string method)(RoutingContext context)
         if (is(T == class) || (is(T == struct) && hasMember!(T, "__CALLACTION__")))
 {
-    T controller = new T();
-    import core.memory;
-    scope(exit) {
-        controller.dispose();
-        // if(!controller.isAsync) { 
-        //     controller.destroy(); 
-        //     GC.free(cast(void *)controller);
-        // }
-    }
-
     // req.action = method;
     // auto req = context.getRequest();
-    // warningf("group name: %s", context.groupName());
+    // warningf("group name: %s, Threads: %d", context.groupName(), Thread.getAll().length);
+
+    T controller = new T();
+
+    scope(exit) {
+        controller.dispose();        
+        version(HUNT_THREAD_DEBUG) warningf("Threads: %d", Thread.getAll().length);
+        resouceManager.clean();
+        resetWorkerThread();
+    }
+
     try {
+        startWorkerTread();
         controller.callActionMethod(method, context);
     } catch (Throwable t) {
         warning(t.msg);

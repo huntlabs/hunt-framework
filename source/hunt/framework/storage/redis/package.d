@@ -4,9 +4,7 @@ import hunt.redis;
 import hunt.framework.Simplify;
 import hunt.logging;
 
-import hunt.framework.Simplify;
 import hunt.framework.application.closer;
-
 import hunt.framework.provider.ServiceProvider;
 
 Redis getRedis() {

@@ -20,16 +20,18 @@ import hunt.http.WebSocketCommon;
 
 import hunt.console;
 
+import hunt.framework.application.closer;
+import hunt.framework.command.ServeCommand;
 import hunt.framework.Init;
-import hunt.framework.trace.Tracer;
 import hunt.framework.http;
+import hunt.framework.i18n.I18n;
 import hunt.framework.config.ApplicationConfig;
 import hunt.framework.config.ConfigManager;
 import hunt.framework.middleware.MiddlewareInterface;
-import hunt.framework.command.ServeCommand;
 import hunt.framework.provider;
 import hunt.framework.provider.listener;
 import hunt.framework.routing;
+import hunt.framework.trace.Tracer;
 
 import hunt.redis;
 
@@ -441,11 +443,14 @@ final class Application {
     import hunt.entity.EntityManagerFactory;
     import hunt.framework.breadcrumb.BreadcrumbsManager;
     import hunt.framework.queue;
+    import hunt.framework.Simplify;
     import hunt.framework.task;
 
     Redis redis() {
         RedisPool pool = serviceContainer.resolve!RedisPool();
-        return pool.getResource();
+        Redis r = pool.getResource();
+        resouceManager.push(new RedisCloser(r));
+        return r;
     }
 
     Cache cache() {
@@ -463,6 +468,7 @@ final class Application {
     EntityManager entityManager() {
         if(_entityManager is null) {
             _entityManager = serviceContainer.resolve!(EntityManagerFactory).currentEntityManager();
+            resouceManager.push(new EntityCloser(_entityManager));
         }
         return _entityManager;
     }
@@ -475,6 +481,10 @@ final class Application {
         return _breadcrumbs;
     }
     private BreadcrumbsManager _breadcrumbs;
+
+    I18n translation() {
+        return serviceContainer.resolve!(I18n);
+    }
     // dfmton
 }
 
