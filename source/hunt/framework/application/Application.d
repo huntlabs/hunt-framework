@@ -446,6 +446,10 @@ final class Application {
     import hunt.framework.Simplify;
     import hunt.framework.task;
 
+    ApplicationConfig config() {
+        return _appConfig;
+    }
+
     Redis redis() {
         RedisPool pool = serviceContainer.resolve!RedisPool();
         Redis r = pool.getResource();

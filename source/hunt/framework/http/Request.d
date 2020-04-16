@@ -1289,11 +1289,6 @@ class Request {
         return str;
     }
 
-//     // @property string fullUrlWithQuery()
-//     // {
-//     //     return _httpMessage.url();
-//     // }
-
     @property string path() {
         return _request.getURI().getPath();
     }
