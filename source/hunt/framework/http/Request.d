@@ -17,6 +17,7 @@ import hunt.framework.Init;
 import hunt.framework.provider.ServiceProvider;
 import hunt.framework.routing;
 
+import hunt.http.Cookie;
 import hunt.http.HttpMethod;
 import hunt.http.HttpHeader;
 import hunt.http.MultipartForm;
@@ -263,14 +264,6 @@ class Request {
 //         }
 //     }
 
-//     private bool _isMultipart = false;
-//     private bool _isXFormUrlencoded = false;
-//     private UploadedFile[] _convertedAllFiles;
-//     private UploadedFile[][string] _convertedMultiFiles;
-
-//     package(hunt.framework) void onMessageCompleted() {
-//         version(HUNT_DEBUG_MORE) trace("do nothing");
-//     }
 
 //     bool isChunked() {
 //         return _isChunked;
@@ -1162,48 +1155,22 @@ class Request {
 //     //     return _cookies.length > 0;
 //     // }
 
-//     /**
-//      * Retrieve a cookie from the request.
-//      *
-//      * @param  string  key
-//      * @param  string|array|null  default
-//      * @return string|array
-//      */
-//     string cookie(string key, string defaultValue = null) {
-//         // return cookieManager.get(key, defaultValue);
-//         foreach (Cookie c; getCookies()) {
-//             if (c.getName == key)
-//                 return c.getValue();
-//         }
-//         return defaultValue;
-//     }
+    /**
+     * Retrieve a cookie from the request.
+     *
+     * @param  string  key
+     * @param  string|array|null  default
+     * @return string|array
+     */
+    string cookie(string key, string defaultValue = null) {
+        foreach (Cookie c; getCookies()) {
+            if (c.getName == key)
+                return c.getValue();
+        }
+        return defaultValue;
+    }
 
-//     Cookie[] getCookies() {
-//         if (_cookies is null) {
-//             Array!(Cookie) list;
-//             foreach (string v; getFields().getValuesList(HttpHeader.COOKIE)) {
-//                 if (v.empty)
-//                     continue;
-//                 foreach (Cookie c; CookieParser.parseCookie(v))
-//                     list.insertBack(c);
-//             }
-//             _cookies = list.array();
-//         }
-//         return _cookies;
-//     }
 
-//     /**
-//      * Retrieve  users' own preferred language.
-//      */
-//     string locale()
-//     {
-//         string l;
-//         l = cookie("Content-Language");
-//         if(l is null)
-//             l = config().application.defaultLanguage;
-
-//         return toLower(l);
-//     }
 //     /**
 //      * Get an array of all cookies.
 //      *
@@ -1217,59 +1184,15 @@ class Request {
 //     //     return null;
 //     // }
 
-//     /**
-//      * Get an array of all of the files on the request.
-//      *
-//      * @return array
-//      */
-//     UploadedFile[] allFiles() {
-//         return _convertedAllFiles;
-//     }
+    /**
+     * Get an array of all of the files on the request.
+     *
+     * @return array
+     */
+    UploadedFile[] allFiles() {
+        return _convertedAllFiles;
+    }
 
-//     /**
-//      * Determine if the uploaded data contains a file.
-//      *
-//      * @param  string  key
-//      * @return bool
-//      */
-//     bool hasFile(string key) {
-//         if(_convertedMultiFiles is null) {
-//             return false;
-//         } else {
-//             if (_convertedMultiFiles.get(key, null) is null)
-//             {
-//                 return false;
-//             }
-//             return true;
-//         }
-//     }
-
-//     /**
-//      * Retrieve a file from the request.
-//      *
-//      * @param  string  key
-//      * @param  mixed default
-//      * @return UploadedFile
-//      */
-//     UploadedFile file(string key)
-//     {
-//         if (this.hasFile(key))
-//         {
-//             return this._convertedMultiFiles[key][0];
-//         }
-
-//         return null;
-//     }
-
-//     UploadedFile[] files(string key)
-//     {
-//         if (this.hasFile(key))
-//         {
-//             return this._convertedMultiFiles[key];
-//         }
-
-//         return null;
-//     }
 
     @property string methodAsString() {
         return _request.getMethod();
@@ -1407,28 +1330,6 @@ class Request {
 //         return getFields().containsKey("X-PJAX");
 //     }
 
-//     /**
-//      * Determine if the request is over HTTPS.
-//      *
-//      * @return bool
-//      */
-//     @property bool secure() {
-//         return isSecure();
-//     }
-
-//     /**
-//      * Checks whether the request is secure or not.
-//      *
-//      * This method can read the client protocol from the "X-Forwarded-Proto" header
-//      * when trusted proxies were set via "setTrustedProxies()".
-//      *
-//      * The "X-Forwarded-Proto" header must contain the protocol: "https" or "http".
-//      *
-//      * @return bool
-//      */
-//     @property bool isSecure() {
-//         throw new NotImplementedException("isSecure");
-//     }
 
 //     /**
 //      * Get the client IP address.

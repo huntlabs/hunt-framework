@@ -4,7 +4,8 @@ import hunt.framework.task.TaskExecutor;
 import hunt.framework.queue;
 
 import hunt.logging.ConsoleLogger;
-import hunt.serialization.JsonSerializer;
+// import hunt.serialization.JsonSerializer;
+import hunt.serialization.BinarySerialization;
 
 
 /**
@@ -45,7 +46,7 @@ class TaskWorker {
     }
 
     void dispatch(T)(string channel, T task) if(is(T : TaskExecutor)) {
-        string message = toJson(task).toString();
-        _queue.push(channel, cast(ubyte[])message);
+        ubyte[] message = toBinary(task);
+        _queue.push(channel, message);
     }
 }
