@@ -20,10 +20,8 @@ import std.process;
 import std.socket : Address, parseAddress;
 import std.string;
 
-import hunt.cache.CacheOption;
 import hunt.http.MultipartOptions;
 import hunt.logging.ConsoleLogger;
-import hunt.redis.RedisPoolConfig;
 import hunt.util.Configuration;
 
 // 
@@ -49,6 +47,22 @@ class ApplicationConfig {
         string encoding = "utf-8";
         int staticFileCacheMinutes = 30;
         string langLocation = "./translations";
+    }
+
+    
+    struct CacheConf {
+        string adapter = "memory";
+        string prefix = "";
+
+        bool useSecondLevelCache = false;
+        uint maxEntriesLocalHeap = 10000;
+        bool eternal = false;
+        uint timeToIdleSeconds = 3600;
+        uint timeToLiveSeconds = 10;
+        bool overflowToDisk = true;
+        bool diskPersistent = true;
+        uint diskExpiryThreadIntervalSeconds = 120;
+        uint maxEntriesLocalDisk = 10000;
     }
 
     struct CookieConf {
@@ -125,7 +139,7 @@ class ApplicationConfig {
         ushort port = 6379;
         uint timeout = 5000;
         RedisPoolConf pool;
-        ClusterOption cluster;
+        RedisClusterConf cluster;
     }
 
     struct RedisPoolConf {
@@ -142,8 +156,13 @@ class ApplicationConfig {
         uint minConnection = 5;        
     }
 
+    struct RedisClusterConf {
+        bool enabled = false;
+        string[] nodes;
+    }
+
     struct QueueConf {
-        // Drivers: "amqp", "redis", "null"
+        // Drivers: "memeory", "amqp", "redis", "null"
         string driver = null;
     }
 
@@ -241,7 +260,7 @@ class ApplicationConfig {
     ApplicationConf application;
     CookieConf cookie;
     SessionConf session;
-    CacheOption cache;
+    CacheConf cache;
     HttpConf http;
     HttpsConf https;
     RouteConf route;

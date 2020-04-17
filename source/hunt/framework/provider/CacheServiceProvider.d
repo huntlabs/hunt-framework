@@ -5,8 +5,10 @@ import hunt.framework.config.ApplicationConfig;
 
 import hunt.cache.CacheFactory;
 import hunt.cache.Cache;
-import hunt.cache.CacheOption;
+import hunt.cache.CacheOptions;
 import hunt.cache.Defined;
+import hunt.logging.ConsoleLogger;
+import hunt.redis.RedisPoolConfig;
 
 import hunt.framework.Init;
 
@@ -20,29 +22,44 @@ class CacheServiceProvider : ServiceProvider {
     override void register() {
         container.register!(Cache)(() {
             ApplicationConfig config = container.resolve!ApplicationConfig();
-            if(config.cache.adapter == AdapterType.REDIS) {
-                config.cache.redis.host = config.redis.host;
-                config.cache.redis.port = config.redis.port;
-                config.cache.redis.password = config.redis.password;
-                config.cache.redis.database = config.redis.database;
-                config.cache.redis.timeout = config.redis.timeout;
+            ApplicationConfig.CacheConf cacheConf = config.cache;
+            ApplicationConfig.RedisConf redisConf = config.redis;
+            auto redisPoolOptions = redisConf.pool;
 
-                config.cache.redis.pool.enabled = config.redis.pool.enabled;
-                config.cache.redis.pool.blockOnExhausted = config.redis.pool.blockOnExhausted;
-                config.cache.redis.pool.idleTimeout = config.redis.pool.idleTimeout;
-                config.cache.redis.pool.maxPoolSize = config.redis.pool.maxPoolSize;
-                config.cache.redis.pool.minPoolSize = config.redis.pool.minPoolSize;
-                config.cache.redis.pool.maxLifetime = config.redis.pool.maxLifetime;
-                config.cache.redis.pool.connectionTimeout = config.redis.pool.connectionTimeout;
-                config.cache.redis.pool.waitTimeout = config.redis.pool.waitTimeout;
-                config.cache.redis.pool.maxConnection = config.redis.pool.maxConnection;
-                config.cache.redis.pool.minConnection = config.redis.pool.minConnection;
+            CacheOptions options = new CacheOptions();
+            options.adapter = cacheConf.adapter;
+            options.prefix = cacheConf.prefix;
+            options.useSecondLevelCache = cacheConf.useSecondLevelCache;
+            options.maxEntriesLocalHeap = cacheConf.maxEntriesLocalHeap;
+            options.eternal = cacheConf.eternal;
+            options.timeToIdleSeconds = cacheConf.timeToIdleSeconds;
+            options.timeToLiveSeconds = cacheConf.timeToLiveSeconds;
+            options.overflowToDisk = cacheConf.overflowToDisk;
+            options.diskPersistent = cacheConf.diskPersistent;
+            options.diskExpiryThreadIntervalSeconds = cacheConf.diskExpiryThreadIntervalSeconds;
+            options.maxEntriesLocalDisk = cacheConf.maxEntriesLocalDisk;
 
-                config.cache.redis.cluster.enabled = config.redis.cluster.enabled;
-                config.cache.redis.cluster.nodes = config.redis.cluster.nodes;
+            if(cacheConf.adapter == AdapterType.REDIS) {
+                RedisPoolConfig poolConfig = new RedisPoolConfig();
+                poolConfig.host = redisConf.host;
+                poolConfig.port = cast(int) redisConf.port;
+                poolConfig.password = redisConf.password;
+                poolConfig.database = cast(int) redisConf.database;
+                poolConfig.soTimeout = cast(int) redisPoolOptions.idleTimeout;
+                poolConfig.connectionTimeout =  redisConf.timeout;
+                poolConfig.setMaxTotal(redisPoolOptions.maxPoolSize);
+                poolConfig.setBlockWhenExhausted(redisPoolOptions.blockOnExhausted);
+                poolConfig.setMaxWaitMillis(redisPoolOptions.waitTimeout);
+
+                infof("Initializing RedisPool: %s", poolConfig.toString());
+
+                options.redisPool = poolConfig;
+
+                options.redisCluster.enabled = redisConf.cluster.enabled;
+                options.redisCluster.nodes = redisConf.cluster.nodes;
             }
-            
-            return CacheFactory.create(config.cache);
+
+            return CacheFactory.create(options);
         }).singleInstance();
     }
 }
