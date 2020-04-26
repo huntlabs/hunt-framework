@@ -80,10 +80,21 @@ class Response {
      * @return this
      */
     Response setContent(T)(T content, string contentType = MimeType.TEXT_HTML_VALUE) {
+        import std.traits;
+        import hunt.collection.ByteBuffer;
+
         if(_bodySet)
             throw new Exception("Body can't be set again.");
-            
-        HttpBody hb = HttpBody.create(contentType, content);
+        static if(is(T : ByteBuffer)) {
+            HttpBody hb = HttpBody.create(contentType, content);
+        } else static if(isSomeString!T) {
+            HttpBody hb = HttpBody.create(contentType, content);
+        } else static if(is(T == const(ubyte)[])) {
+            HttpBody hb = HttpBody.create(contentType, content);
+        } else {
+            string c = content.to!string();
+            HttpBody hb = HttpBody.create(contentType, c);
+        }
         _response.setBody(hb);
         _bodySet = true;
         return this;
