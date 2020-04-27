@@ -89,7 +89,7 @@ class Response {
             HttpBody hb = HttpBody.create(contentType, content);
         } else static if(isSomeString!T) {
             HttpBody hb = HttpBody.create(contentType, content);
-        } else static if(is(T == const(ubyte)[])) {
+        } else static if(is(T : K[], K) && is(Unqual!K == ubyte)) {
             HttpBody hb = HttpBody.create(contentType, content);
         } else {
             string c = content.to!string();
