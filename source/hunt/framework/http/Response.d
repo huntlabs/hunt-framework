@@ -13,8 +13,11 @@ module hunt.framework.http.Response;
 
 import hunt.http.HttpStatus;
 import hunt.http.server;
+import hunt.collection.ByteBuffer;
 
 import std.conv;
+import std.range;
+import std.traits;
 
 /**
  * 
@@ -65,14 +68,6 @@ class Response {
     alias setHeader = header;
     alias withHeaders = headers;
 
-    // Response setContent(T)(T content) {
-    //     if(getFields().contains(HttpHeader.CONTENT_TYPE)) {
-    //         auto ct = getFields().getField(HttpHeader.CONTENT_TYPE);
-    //         setContent(content, ct);
-    //     } else {
-    //         setContent(content, MimeType.TEXT_HTML_VALUE);
-    //     }
-    // }
 
     /**
      * Sets the response content.
@@ -80,8 +75,6 @@ class Response {
      * @return this
      */
     Response setContent(T)(T content, string contentType = MimeType.TEXT_HTML_VALUE) {
-        import std.traits;
-        import hunt.collection.ByteBuffer;
 
         if(_bodySet)
             throw new Exception("Body can't be set again.");
@@ -185,6 +178,18 @@ class Response {
         setContent(errorPageHtml(code, body_));
     }
 
+    void doError(ushort code, Throwable exception, string contentype = "text/html;charset=UTF-8") {
+
+        setStatus(code);
+        getFields().put(HttpHeader.CONTENT_TYPE, contentype);
+
+        version(HUNT_DEBUG) {
+            setContent(errorPageWithStack(code, exception.toString()));
+        } else {
+            setContent(errorPageWithStack(code, exception.msg));
+        }
+    }    
+
     void setHttpError(ushort code) {
         this.setStatus(code);
         this.setContent(errorPageHtml(code));
@@ -260,4 +265,41 @@ html ~= `
     return html;
 }
 
+string errorPageWithStack(int code , string _body = "")
+{
+    import std.conv : to;
+
+    string text = code.to!string;
+    text ~= " ";
+    text ~= HttpStatus.getMessage(code);
+
+    string html = `<!doctype html>
+<html lang="en">
+    <meta charset="utf-8">
+    <title>`;
+
+    html ~= text;
+    html ~= `</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+</head>
+<body>
+    <h1>`;
+    html ~= text;
+    html ~= `</h1>
+    <p>Sorry!! Unable to complete your request :(</p>
+    `;
+    
+
+    if(!_body.empty) {
+        html ~= _body;
+    }
+
+    html ~= `
+</body>
+</html>
+`;
+
+    return html;
+}
 // dfmt on
