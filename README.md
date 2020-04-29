@@ -63,7 +63,6 @@ View [hunt-skeleton](https://github.com/huntlabs/hunt-skeleton) or [hunt-example
 7. [Template Engine](https://github.com/huntlabs/hunt-framework/wiki/View)
 8. Task Worker
 9. Security
-10. WebSocket (with STOMP)
 
 ## Community
 QQ Group: 184183224 
