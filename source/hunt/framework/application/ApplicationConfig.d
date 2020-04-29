@@ -117,6 +117,11 @@ final class ApplicationConfig
         ClusterOption cluster;
     }
 
+    struct ClusterOption {
+        string[] nodes;
+        bool enabled;
+    }
+
     struct RedisPoolConf {
         bool enabled = false;        
         bool blockOnExhausted = true;
