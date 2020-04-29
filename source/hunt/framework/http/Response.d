@@ -186,7 +186,7 @@ class Response {
         version(HUNT_DEBUG) {
             setContent(errorPageWithStack(code, exception.toString()));
         } else {
-            setContent(errorPageWithStack(code, exception.msg));
+            setContent(errorPageWithStack(code, "<pre>" ~ exception.msg ~ "/<pre>" ));
         }
     }    
 

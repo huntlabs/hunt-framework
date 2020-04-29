@@ -55,7 +55,7 @@ class CacheServiceProvider : ServiceProvider {
 
                 options.redisPool = poolConfig;
 
-                options.redisCluster.enabled = redisConf.cluster.enabled;
+                options.isRedisClusterEnabled = redisConf.cluster.enabled;
                 options.redisCluster.nodes = redisConf.cluster.nodes;
             }
 
