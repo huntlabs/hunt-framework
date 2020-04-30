@@ -215,9 +215,9 @@ TaskManager taskManager()
     if (_taskMInstance is null) {
         import hunt.event;
         import hunt.net.NetUtil;
-        EventLoopGroup eg = NetUtil.defaultEventLoopGroup();
+        EventLoop el = new EventLoop();
         _taskMInstance = new DefaultTaskManager();
-        _taskMInstance.setEventLoop(eg[0]);
+        _taskMInstance.setEventLoop(el);
     }
     return _taskMInstance;
 }

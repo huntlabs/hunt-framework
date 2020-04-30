@@ -136,9 +136,9 @@ final class Application : ApplicationContext {
         return _server;
     }
 
-    @property EventLoopGroup loopGroup() {
-        return NetUtil.defaultEventLoopGroup();
-    }
+    // @property EventLoopGroup loopGroup() {
+    //     return NetUtil.defaultEventLoopGroup();
+    // }
 
     private void initDatabase(ApplicationConfig.DatabaseConf config)
     {
