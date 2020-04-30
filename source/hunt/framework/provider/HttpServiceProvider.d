@@ -104,7 +104,7 @@ class HttpServiceProvider : ServiceProvider {
             RoutingHandler handler = getRouteHandler(handlerKey);
             // warning(item.toString());
             if (handler is null) {
-                warningf("No handler found for group route {%s}, key: %s", item.toString(), handlerKey);
+                version(HUNT_DEBUG) warningf("No handler found for group route {%s}, key: %s", item.toString(), handlerKey);
             } else {
                 version(HUNT_FM_DEBUG)
                     tracef("handler found for group route {%s}, key: %s", item.toString(), handlerKey);

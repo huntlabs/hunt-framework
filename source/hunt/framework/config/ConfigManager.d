@@ -86,7 +86,7 @@ class ConfigManager {
         ConfigBuilder defaultBuilder;
         string fullName = buildPath(APP_PATH, _basePath, fileName);
         if (exists(fullName)) {
-            infof("Loading config from: %s", fullName);
+            version(HUNT_DEBUG) infof("Loading config from: %s", fullName);
             defaultBuilder = new ConfigBuilder(fullName, section);
             currentConfig = defaultBuilder.build!(T)();
         } else {

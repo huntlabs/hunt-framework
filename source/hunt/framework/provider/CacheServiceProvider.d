@@ -51,7 +51,7 @@ class CacheServiceProvider : ServiceProvider {
                 poolConfig.setBlockWhenExhausted(redisPoolOptions.blockOnExhausted);
                 poolConfig.setMaxWaitMillis(redisPoolOptions.waitTimeout);
 
-                infof("Initializing RedisPool: %s", poolConfig.toString());
+                version(HUNT_DEBUG) infof("Initializing RedisPool: %s", poolConfig.toString());
 
                 options.redisPool = poolConfig;
 

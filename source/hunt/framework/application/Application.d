@@ -292,7 +292,7 @@ final class Application {
      */
     private void bootProviders() {
         ServiceProvider[] providers = serviceContainer().resolveAll!(ServiceProvider);
-        infof("Booting all the service providers (%d)...", providers.length);
+        version(HUNT_DEBUG) infof("Booting all the service providers (%d)...", providers.length);
 
         foreach (ServiceProvider p; providers) {
             p.boot();
