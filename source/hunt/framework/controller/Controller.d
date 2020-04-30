@@ -37,6 +37,9 @@ import hunt.validation;
 
 import poodinis;
 
+import core.memory;
+import core.thread;
+
 import std.exception;
 import std.string;
 import std.traits;
@@ -422,9 +425,6 @@ string __createRouteMap(T, string moduleName)()
 
     return str;
 }
-
-import core.memory;
-import core.thread;
 
 void callHandler(T, string method)(RoutingContext context)
         if (is(T == class) || (is(T == struct) && hasMember!(T, "__CALLACTION__")))

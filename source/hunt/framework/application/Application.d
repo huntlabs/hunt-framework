@@ -195,8 +195,6 @@ final class Application {
         //
         initializeLogger();
 
-        initializeWorkerThreads();
-
         version (WITH_HUNT_TRACE) {
             initializeTracer();
         }
@@ -365,12 +363,6 @@ final class Application {
 
             logLoadConf(logconf);
         }
-    }
-
-    private void initializeWorkerThreads() {
-        import hunt.io.channel.Common;
-        defaultPoolThreads = _appConfig.http.workerThreads;
-        workerPool();
     }
 
     version (WITH_HUNT_TRACE) {

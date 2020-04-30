@@ -184,9 +184,9 @@ class Response {
         getFields().put(HttpHeader.CONTENT_TYPE, contentype);
 
         version(HUNT_DEBUG) {
-            setContent(errorPageWithStack(code, exception.toString()));
+            setContent(errorPageWithStack(code, "<pre>" ~ exception.toString() ~ "/<pre>"));
         } else {
-            setContent(errorPageWithStack(code, "<pre>" ~ exception.msg ~ "/<pre>" ));
+            setContent(errorPageWithStack(code, exception.msg ));
         }
     }    
 

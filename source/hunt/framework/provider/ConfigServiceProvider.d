@@ -27,10 +27,7 @@ class ConfigServiceProvider : ServiceProvider {
     override void register() {
         container.register!(ConfigManager).singleInstance();
 
-        container.register!(ApplicationConfig)(() {
-            ConfigManager configManager = container.resolve!(ConfigManager)();
-            return configManager.load!(ApplicationConfig);
-        }).singleInstance();
+        container.register!(ApplicationConfig)(&buildAppConfig).singleInstance();
 
         container.register!(RouteConfigManager)(() {
             ConfigManager configManager = container.resolve!(ConfigManager)();
@@ -42,8 +39,10 @@ class ConfigServiceProvider : ServiceProvider {
         });
     }
 
-    override void boot() {
-        ApplicationConfig appConfig = container.resolve!ApplicationConfig();
+    private ApplicationConfig buildAppConfig() {
+        ConfigManager configManager = container.resolve!(ConfigManager)();
+        ApplicationConfig appConfig = configManager.load!(ApplicationConfig);
+
         checkWorkerThreads(appConfig);
 
         // update the config item with the environment variable if it exists
@@ -66,6 +65,8 @@ class ConfigServiceProvider : ServiceProvider {
         if(!value.empty) {
             appConfig.application.secret = value;
         }
+
+        return appConfig;
     }
 
     private void checkWorkerThreads(ApplicationConfig appConfig) {
@@ -83,6 +84,10 @@ class ConfigServiceProvider : ServiceProvider {
 
         if (appConfig.http.workerThreads == 1) {
             appConfig.http.workerThreads = 2;
+        }
+
+        if(appConfig.http.ioThreads <= 0) {
+            appConfig.http.ioThreads = totalCPUs;
         }
 
         // 0 means to use the IO thread

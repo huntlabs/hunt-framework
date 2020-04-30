@@ -293,6 +293,7 @@ class ApplicationConfig {
 
     this() {
         http.workerThreads = totalCPUs * 4;
+        http.ioThreads = totalCPUs;
         upload.path = DEFAULT_TEMP_PATH;
         view.path = DEFAULT_TEMPLATE_PATH;
         application.langLocation = DEFAULT_LANGUAGE_PATH;

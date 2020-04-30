@@ -51,7 +51,9 @@ class HttpServiceProvider : ServiceProvider {
         // Building http server
         // HttpServerOptions options = new HttpServerOptions();
         HttpServer.Builder hsb = HttpServer.builder()
-            .setListener(appConfig.http.port, appConfig.http.address);
+            .setListener(appConfig.http.port, appConfig.http.address)
+            .workerThreadSize(appConfig.http.workerThreads)
+            .ioThreadSize(appConfig.http.ioThreads);
 
         RouteConfigManager routeConfig = container.resolve!RouteConfigManager();
         RouteItem[][RouteGroup] allRoutes = routeConfig.allRoutes;
