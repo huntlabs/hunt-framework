@@ -27,12 +27,12 @@ public import hunt.framework.http;
 public import hunt.framework.middleware;
 
 public import hunt.framework.Init;
+public import hunt.framework.i18n.I18n;
 public import hunt.framework.provider;
 public import hunt.framework.Simplify;
 public import hunt.framework.queue;
 public import hunt.framework.Version;
 public import hunt.framework.view;
-
 
 
 debug {}

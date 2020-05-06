@@ -76,8 +76,8 @@ class ConfigServiceProvider : ServiceProvider {
         // if (appConfig.http.workerThreads == 0)
         //     appConfig.http.workerThreads = minThreadCount;
 
-        if (appConfig.http.workerThreads < minThreadCount) {
-            warningf("It's better to set it to a value which is >= %d. The current value is: %d",
+        if (appConfig.http.workerThreads != 0 && appConfig.http.workerThreads < minThreadCount) {
+            warningf("It's better to make the worker threads >= %d. The current value is: %d",
                     minThreadCount, appConfig.http.workerThreads);
             // appConfig.http.workerThreads = minThreadCount;
         }
