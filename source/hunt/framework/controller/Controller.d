@@ -176,6 +176,31 @@ abstract class Controller
         return res;
     }
 
+    ConstraintValidatorContext validate() {
+        if(_context is null) {
+            // assert(!_currentActionName.empty(), "No currentActionName found!");
+            _context = new DefaultConstraintValidatorContext();
+
+            auto itemPtr = _currentActionName in _actionValidators;
+            // assert(itemPtr !is null, format("No handler found for action: %s!", _currentActionName));
+            if(itemPtr is null) {
+                warning(format("No validator found for action: %s.", _currentActionName));
+            } else {
+                try {
+                    (*itemPtr)(_context);  
+                } catch(Exception ex) {
+                    warning(ex.msg);
+                    version(HUNT_DEBUG) warning(ex);
+                }
+            }          
+        }
+
+        return _context;
+    }
+    private ConstraintValidatorContext _context;
+    protected string _currentActionName;
+    private QueryParameterValidator[string] _actionValidators;
+
     protected void done() {
         request().flush(); // assure the sessiondata flushed;
         Response resp = response();
@@ -209,7 +234,7 @@ mixin template HuntDynamicCallFun(T, string moduleName) if(is(T : Controller))
 public:
     enum allActions = __createCallActionMethod!(T, moduleName);
     // version (HUNT_DEBUG) 
-    // pragma(msg, allActions);
+    pragma(msg, allActions);
 
     mixin(allActions);
     
@@ -268,16 +293,17 @@ string __createCallActionMethod(T, string moduleName)()
             // pragma(msg, "got: ", memberName);
 
             enum _isActionMember = isActionMember(memberName);
-            foreach (t; __traits(getOverloads, T, memberName))
+            static foreach (currentMethod; __traits(getOverloads, T, memberName))
             {
                 // alias RT = ReturnType!(t);
 
                 //alias pars = ParameterTypeTuple!(t);
-                static if (hasUDA!(t, Action) || _isActionMember)
+                static if (hasUDA!(currentMethod, Action) || _isActionMember)
                 {
                     str ~= "\t\tcase \"" ~ memberName ~ "\": {\n";
+                    str ~=  "_currentActionName = \"" ~ currentMethod.mangleof ~ "\";";
 
-                    static if (hasUDA!(t, Action) || _isActionMember)
+                    static if (hasUDA!(currentMethod, Action) || _isActionMember)
                     {
                         //before
                         str ~= q{
@@ -300,7 +326,7 @@ string __createCallActionMethod(T, string moduleName)()
                     }
 
                     // Action parameters
-                    auto params = ParameterIdentifierTuple!t;
+                    auto params = ParameterIdentifierTuple!currentMethod;
                     string paramString = "";
 
                     static if (params.length > 0)
@@ -308,7 +334,7 @@ string __createCallActionMethod(T, string moduleName)()
                         import std.conv : to;
 
                         string varName = "";
-                        alias paramsType = Parameters!t;
+                        alias paramsType = Parameters!currentMethod;
 
                         static foreach (int i; 0..params.length)
                         {
@@ -332,34 +358,38 @@ string __createCallActionMethod(T, string moduleName)()
                             }
 
                             paramString ~= i == 0 ? varName : ", " ~ varName;
-
                             varName = "";
                         }
                     }
 
-                    // call Action
-                    static if (is(ReturnType!t == void)) {
+                    // Parameters validation
+                    if(!paramString.empty) {
+                        str ~= "warning(\"" ~ paramString ~"\");";
+                    }
+
+                    // alias Params = Parameters!currentMember;
+
+
+                    // Call the Action
+                    static if (is(ReturnType!currentMethod == void)) {
                         str ~= "\t\tthis." ~ memberName ~ "(" ~ paramString ~ ");\n";
                     } else {
-                        str ~= "\t\t" ~ ReturnType!t.stringof ~ " result = this." ~ 
+                        str ~= "\t\t" ~ ReturnType!currentMethod.stringof ~ " result = this." ~ 
                                 memberName ~ "(" ~ paramString ~ ");\n";
 
-                        static if (is(ReturnType!t : Response))
-                        {
+                        static if (is(ReturnType!currentMethod : Response)) {
                             str ~= "\t\t response = result;\n";
-                        }
-                        else
-                        {
+                        } else {
                             str ~="\t\tthis.response.setContent(result);";
                         }
                     }
 
                     // str ~= "\t\tactionResponse = this.processResponse(actionResponse);\n";
 
-                    static if(hasUDA!(t, Action) || _isActionMember)
-                    {
+                    static if(hasUDA!(currentMethod, Action) || _isActionMember) {
                         str ~= "\t\tthis.after();\n";
                     }
+
                     str ~= "\n\t\tbreak;\n\t}\n";
                 }
             }
@@ -372,6 +402,23 @@ string __createCallActionMethod(T, string moduleName)()
 
     return str;
 }
+
+
+string makeDoValid() {
+    string str = `
+        
+        private ConstraintValidatorContext doValid(string actionName) {
+            ConstraintValidatorContext context = new DefaultConstraintValidatorContext();
+        `;
+
+
+    str ~= " return context;";
+    str ~= "}";
+
+    return str;
+}
+
+alias QueryParameterValidator = void delegate(ConstraintValidatorContext);
 
 string __createRouteMap(T, string moduleName)()
 {
