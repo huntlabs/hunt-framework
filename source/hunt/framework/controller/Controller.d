@@ -44,7 +44,18 @@ import std.exception;
 import std.string;
 import std.traits;
 
-enum Action;
+struct Action {
+
+}
+
+private enum string TempVarName = "__var";
+private enum string IndentString = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";  // 16 tabs
+
+string indent(size_t number) {
+    assert(number>0 && IndentString.length, "Out of range");
+    return IndentString[0..number];
+}
+
 
 /**
  * 
@@ -199,7 +210,7 @@ abstract class Controller
     }
     private ConstraintValidatorContext _context;
     protected string _currentActionName;
-    private QueryParameterValidator[string] _actionValidators;
+    protected QueryParameterValidator[string] _actionValidators;
 
     protected void done() {
         request().flush(); // assure the sessiondata flushed;
@@ -232,9 +243,10 @@ mixin template MakeController(string moduleName = __MODULE__)
 mixin template HuntDynamicCallFun(T, string moduleName) if(is(T : Controller))
 {
 public:
+
     enum allActions = __createCallActionMethod!(T, moduleName);
     // version (HUNT_DEBUG) 
-    pragma(msg, allActions);
+    // pragma(msg, allActions);
 
     mixin(allActions);
     
@@ -248,6 +260,7 @@ public:
 
 private
 {
+    // Predefined characteristic name for a default Action method.
     enum actionName = "Action";
     enum actionNameLength = actionName.length;
 
@@ -256,6 +269,7 @@ private
         return name.length > actionNameLength && name[$ - actionNameLength .. $] == actionName;
     }
 }
+
 
 string __createCallActionMethod(T, string moduleName)()
 {
@@ -272,6 +286,8 @@ string __createCallActionMethod(T, string moduleName)()
         import hunt.http.server.HttpServerResponse;
         import hunt.http.routing.RoutingContext;
         import hunt.http.HttpBody;
+        import hunt.validation.ConstraintValidatorContext;
+        import std.demangle;
 
         void callActionMethod(string methodName, RoutingContext context) {
             _routingContext = context;
@@ -298,39 +314,34 @@ string __createCallActionMethod(T, string moduleName)()
                 // alias RT = ReturnType!(t);
 
                 //alias pars = ParameterTypeTuple!(t);
-                static if (hasUDA!(currentMethod, Action) || _isActionMember)
-                {
-                    str ~= "\t\tcase \"" ~ memberName ~ "\": {\n";
-                    str ~=  "_currentActionName = \"" ~ currentMethod.mangleof ~ "\";";
+                static if (hasUDA!(currentMethod, Action) || _isActionMember) {
+                    str ~= indent(2) ~ "case \"" ~ memberName ~ "\": {\n";
+                    str ~= indent(4) ~ "_currentActionName = \"" ~ currentMethod.mangleof ~ "\";";
 
-                    static if (hasUDA!(currentMethod, Action) || _isActionMember)
-                    {
-                        //before
-                        str ~= q{
-                            if(this.getMiddlewares().length) {
-                                auto middleResponse = this.doMiddleware();
+                    //before
+                    str ~= q{
+                        if(this.getMiddlewares().length) {
+                            auto middleResponse = this.doMiddleware();
 
-                                if (middleResponse !is null) {
-                                    // _routingContext.response = response.httpResponse;
-                                    response = middleResponse;
-                                    return;
-                                }
-                            }
-
-                            if (!this.before()) {
+                            if (middleResponse !is null) {
                                 // _routingContext.response = response.httpResponse;
-                                // response = middleResponse;
+                                response = middleResponse;
                                 return;
                             }
-                        };
-                    }
+                        }
+
+                        if (!this.before()) {
+                            // _routingContext.response = response.httpResponse;
+                            // response = middleResponse;
+                            return;
+                        }
+                    };
 
                     // Action parameters
                     auto params = ParameterIdentifierTuple!currentMethod;
                     string paramString = "";
 
-                    static if (params.length > 0)
-                    {
+                    static if (params.length > 0) {
                         import std.conv : to;
 
                         string varName = "";
@@ -338,37 +349,46 @@ string __createCallActionMethod(T, string moduleName)()
 
                         static foreach (int i; 0..params.length)
                         {
-                            varName = "var" ~ i.to!string;
+                            varName = TempVarName ~ i.to!string;
 
-                            static if (paramsType[i].stringof == "string")
-                            {
-                                str ~= "\t\tstring " ~ varName ~ " = request.get(\"" ~ params[i] ~ "\");\n";
-                            }
-                            else
-                            {
-                                static if (isNumeric!(paramsType[i])) {
-                                    str ~= "\t\tauto " ~ varName ~ " = this.processGetNumericString(request.get(\"" ~ 
-                                        params[i] ~ "\")).to!" ~ paramsType[i].stringof ~ ";\n";
-                                } else static if(is(paramsType[i] : Form)) {
-                                    str ~= "\t\tauto " ~ varName ~ " = request.bindForm!" ~ paramsType[i].stringof ~ "();\n";
-                                } else {
-                                    str ~= "\t\tauto " ~ varName ~ " = request.get(\"" ~ params[i] ~ "\").to!" ~ 
-                                            paramsType[i].stringof ~ ";\n";
-                                }
+                            static if (paramsType[i].stringof == "string") {
+                                str ~= indent(2) ~ "string " ~ varName ~ " = request.get(\"" ~ params[i] ~ "\");\n";
+                            } else static if (isNumeric!(paramsType[i])) {
+                                str ~= "\t\tauto " ~ varName ~ " = this.processGetNumericString(request.get(\"" ~ 
+                                    params[i] ~ "\")).to!" ~ paramsType[i].stringof ~ ";\n";
+                            } else static if(is(paramsType[i] : Form)) {
+                                str ~= "\t\tauto " ~ varName ~ " = request.bindForm!" ~ paramsType[i].stringof ~ "();\n";
+                            } else {
+                                str ~= "\t\tauto " ~ varName ~ " = request.get(\"" ~ params[i] ~ "\").to!" ~ 
+                                        paramsType[i].stringof ~ ";\n";
                             }
 
                             paramString ~= i == 0 ? varName : ", " ~ varName;
-                            varName = "";
+                            // varName = "";
                         }
                     }
 
                     // Parameters validation
-                    if(!paramString.empty) {
-                        str ~= "warning(\"" ~ paramString ~"\");";
+                    // https://forum.dlang.org/post/bbgwqvvausncrkukzpui@forum.dlang.org
+                    str ~= `_actionValidators["` ~ currentMethod.mangleof ~ 
+                        `"] = (ConstraintValidatorContext context) {` ~ "\n";
+
+                    static if(is(typeof(currentMethod) allParams == __parameters)) {
+                        str ~= indent(4) ~ `version(HUNT_DEBUG) info("Validating in ` ~  memberName ~ 
+                            ", the prototype is " ~ typeof(currentMethod).stringof ~` "); ` ~ "\n";
+                        // str ~= indent(4) ~ `version(HUNT_DEBUG) infof("Validating in %s", demangle(_currentActionName)); ` ~ "\n";                        
+
+                        static foreach(i, _; allParams) {{
+                            alias thisParameter = allParams[i .. i + 1]; 
+                            alias udas =  __traits(getAttributes, thisParameter);
+                            enum ident = __traits(identifier, thisParameter);
+
+                            str ~= "\n" ~ makeParameterValidation!(TempVarName ~ i.to!string, ident, 
+                                thisParameter, udas) ~ "\n"; 
+                         }}
                     }
 
-                    // alias Params = Parameters!currentMember;
-
+                    str ~= indent(3) ~ "};\n";
 
                     // Call the Action
                     static if (is(ReturnType!currentMethod == void)) {
@@ -387,7 +407,7 @@ string __createCallActionMethod(T, string moduleName)()
                     // str ~= "\t\tactionResponse = this.processResponse(actionResponse);\n";
 
                     static if(hasUDA!(currentMethod, Action) || _isActionMember) {
-                        str ~= "\t\tthis.after();\n";
+                        str ~= "\n\t\tthis.after();\n";
                     }
 
                     str ~= "\n\t\tbreak;\n\t}\n";
@@ -404,16 +424,110 @@ string __createCallActionMethod(T, string moduleName)()
 }
 
 
-string makeDoValid() {
-    string str = `
-        
-        private ConstraintValidatorContext doValid(string actionName) {
-            ConstraintValidatorContext context = new DefaultConstraintValidatorContext();
-        `;
+string makeParameterValidation(string varName, string paraName, paraType, UDAs ...)() {
+    string str;
+    // = "\ninfof(\"" ~ symbol.stringof ~ "\");";
 
+    static foreach(uda; UDAs) {
+        static if(is(typeof(uda) == Max)) {
+            str ~= `
+                MaxValidator validator = new MaxValidator();
+                validator.initialize(` ~ uda.stringof ~ `);
+                validator.setPropertyName("` ~ paraName ~ `");
+                validator.isValid(`~ varName ~`, context);
+            `;
+        }
 
-    str ~= " return context;";
-    str ~= "}";
+        static if(is(typeof(uda) == Min)) {
+            str ~= `
+                MinValidator validator = new MinValidator();
+                validator.initialize(` ~ uda.stringof ~ `);
+                validator.setPropertyName("` ~ paraName ~ `");
+                validator.isValid(`~ varName ~`, context);
+            `;
+        }
+
+        static if(is(typeof(uda) == AssertFalse)) {
+            str ~= `
+                AssertFalseValidator validator = new AssertFalseValidator();
+                validator.initialize(` ~ uda.stringof ~ `);
+                validator.setPropertyName("` ~ paraName ~ `");
+                validator.isValid(`~ varName ~`, context);
+            `;
+        }
+
+        static if(is(typeof(uda) == AssertTrue)) {
+            str ~= `
+                AssertTrueValidator validator = new AssertTrueValidator();
+                validator.initialize(` ~ uda.stringof ~ `);
+                validator.setPropertyName("` ~ paraName ~ `");
+                validator.isValid(`~ varName ~`, context);
+            `;
+        }
+
+        static if(is(typeof(uda) == Email)) {
+            str ~= `
+                EmailValidator validator = new EmailValidator();
+                validator.initialize(` ~ uda.stringof ~ `);
+                validator.setPropertyName("` ~ paraName ~ `");
+                validator.isValid(`~ varName ~`, context);
+            `;
+        }
+
+        static if(is(typeof(uda) == Length)) {
+            str ~= `
+                LengthValidator validator = new LengthValidator();
+                validator.initialize(` ~ uda.stringof ~ `);
+                validator.setPropertyName("` ~ paraName ~ `");
+                validator.isValid(`~ varName ~`, context);
+            `;
+        }
+
+        static if(is(typeof(uda) == NotBlank)) {
+            str ~= `
+                NotBlankValidator validator = new NotBlankValidator();
+                validator.initialize(` ~ uda.stringof ~ `);
+                validator.setPropertyName("` ~ paraName ~ `");
+                validator.isValid(`~ varName ~`, context);
+            `;
+        }
+
+        static if(is(typeof(uda) == NotEmpty)) {
+            str ~= `
+                auto validator = new NotEmptyValidator!` ~ paraType.stringof ~`();
+                validator.initialize(` ~ uda.stringof ~ `);
+                validator.setPropertyName("` ~ paraName ~ `");
+                validator.isValid(`~ varName ~`, context);
+            `;
+        }
+
+        static if(is(typeof(uda) == Pattern)) {
+            str ~= `
+                PatternValidator validator = new PatternValidator();
+                validator.initialize(` ~ uda.stringof ~ `);
+                validator.setPropertyName("` ~ paraName ~ `");
+                validator.isValid(`~ varName ~`, context);
+            `;
+        }
+
+        static if(is(typeof(uda) == Size)) {
+            str ~= `
+                SizeValidator validator = new SizeValidator();
+                validator.initialize(` ~ uda.stringof ~ `);
+                validator.setPropertyName("` ~ paraName ~ `");
+                validator.isValid(`~ varName ~`, context);
+            `;
+        }
+
+        static if(is(typeof(uda) == Range)) {
+            str ~= `
+                RangeValidator validator = new RangeValidator();
+                validator.initialize(` ~ uda.stringof ~ `);
+                validator.setPropertyName("` ~ paraName ~ `");
+                validator.isValid(`~ varName ~`, context);
+            `;
+        }
+    }
 
     return str;
 }
