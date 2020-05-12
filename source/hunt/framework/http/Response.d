@@ -11,9 +11,10 @@
 
 module hunt.framework.http.Response;
 
+import hunt.collection.ByteBuffer;
 import hunt.http.HttpStatus;
 import hunt.http.server;
-import hunt.collection.ByteBuffer;
+import hunt.logging.ConsoleLogger;
 
 import std.conv;
 import std.range;
@@ -25,7 +26,6 @@ import std.traits;
 class Response {
     protected HttpServerResponse _response;
     private bool _bodySet = false;
-    
 
     this() {
         _response = new HttpServerResponse();
@@ -43,11 +43,9 @@ class Response {
         return _response;
     }
 
-
     HttpFields getFields() {
         return _response.getFields();
     }
-
 
     Response header(T)(string header, T value) {
         getFields().put(header, value);
@@ -65,10 +63,6 @@ class Response {
         return this;
     }
 
-    alias setHeader = header;
-    alias withHeaders = headers;
-
-
     /**
      * Sets the response content.
      *
@@ -76,8 +70,10 @@ class Response {
      */
     Response setContent(T)(T content, string contentType = MimeType.TEXT_HTML_VALUE) {
 
-        if(_bodySet)
-            throw new Exception("Body can't be set again.");
+        if(_bodySet) {
+            version(HUNT_DEBUG) warning("The body is set again.");
+        }
+
         static if(is(T : ByteBuffer)) {
             HttpBody hb = HttpBody.create(contentType, content);
         } else static if(isSomeString!T) {
@@ -98,9 +94,6 @@ class Response {
         return this;
     }
 
-    alias withContent = setContent;
-
-
 
     ///set http status code eg. 404 200
     Response setStatus(int status) {
@@ -108,8 +101,7 @@ class Response {
         return this;
     }
 
-    int status() @property
-    {
+    int status() @property {
         return _response.getStatus();
     }
 
@@ -186,7 +178,7 @@ class Response {
         version(HUNT_DEBUG) {
             setContent(errorPageWithStack(code, "<pre>" ~ exception.toString() ~ "/<pre>"));
         } else {
-            setContent(errorPageWithStack(code, exception.msg ));
+            setContent(errorPageWithStack(code, exception.msg));
         }
     }    
 
@@ -195,6 +187,10 @@ class Response {
         this.setContent(errorPageHtml(code));
     }
 
+    
+    alias setHeader = header;
+    alias withHeaders = headers;
+    alias withContent = setContent;
 }
 
 // dfmt off
