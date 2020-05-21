@@ -20,7 +20,7 @@ public import hunt.util.DateTime : time, date;
 
 import hunt.framework.provider;
 import hunt.logging.ConsoleLogger;
-import hunt.concurrency.TaskPool;
+import hunt.util.TaskPool;
 
 import poodinis;
 

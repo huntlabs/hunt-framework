@@ -3,7 +3,7 @@ module hunt.framework.queue.MemoryQueue;
 import hunt.framework.queue.AbstractQueue;
 
 import hunt.collection.List;
-import hunt.concurrency.SimpleQueue;
+import hunt.io.SimpleQueue;
 import hunt.logging.ConsoleLogger;
 
 import core.thread;

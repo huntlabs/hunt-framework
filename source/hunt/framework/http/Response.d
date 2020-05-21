@@ -11,7 +11,7 @@
 
 module hunt.framework.http.Response;
 
-import hunt.collection.ByteBuffer;
+import hunt.io.ByteBuffer;
 import hunt.http.HttpStatus;
 import hunt.http.server;
 import hunt.logging.ConsoleLogger;

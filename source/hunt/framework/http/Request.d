@@ -375,11 +375,12 @@ class Request {
         return s;
     }    
 
-//     @property JSONValue json() {
-//         if (_json == JSONValue.init)
-//             _json = parseJSON(getBodyAsString());
-//         return _json;
-//     }
+    @property JSONValue json() {
+        if (_json == JSONValue.init)
+            _json = parseJSON(getBodyAsString());
+        return _json;
+    }
+    private JSONValue _json;
 
 //     T json(T = string)(string key, T defaults = T.init) {
 //         import std.traits;
@@ -508,26 +509,13 @@ class Request {
 //         return _mate;
 //     }
 
-//     HttpResponse getResponse() {
-//         return _response;
-//     }
-
-//     alias getStringBody = getBodyAsString;
-
-//     string getBodyAsString() {
-//         if (stringBody is null) {
-//             Appender!string buffer;
-//             foreach (ByteBuffer b; requestBody) {
-//                 buffer.put(BufferUtils.toString(b));
-//             }
-//             stringBody = buffer.data;
-//             version (HUNT_DEBUG)
-//                 trace("body content: ", stringBody);
-//         }
-//         return stringBody;
-//     }
-
-//     private string stringBody;
+    string getBodyAsString() {
+        if (stringBody is null) {
+            stringBody = _request.getStringBody();
+        }
+        return stringBody;
+    }
+    private string stringBody;
 
 //     // Response createResponse()
 //     // {
@@ -1627,159 +1615,7 @@ class Request {
 
 }
 
-// import hunt.http.codec.http.model;
-// import hunt.http.HttpConnection;
-// import hunt.http.codec.http.stream.HttpOutputStream;
-// import hunt.net.util.UrlEncoded;
-
-// import hunt.collection;
-// import hunt.io;
-// import hunt.logging;
-// import hunt.Exceptions;
-// import hunt.util.Common;
-// import hunt.util.MimeTypeUtils;
-
-// import hunt.framework.config.ApplicationConfig;
-// import hunt.framework.Simplify;
-// import hunt.framework.Exceptions;
-// import hunt.framework.http.session;
-// import hunt.framework.Init;
-// import hunt.framework.routing.Route;
-// import hunt.framework.routing.Define;
-// import hunt.framework.security.acl.User;
-// import hunt.framework.file.UploadedFile;
-// import hunt.Functions;
-
-// import core.time : MonoTime, Duration;
-// import std.algorithm;
-// import std.array;
-// import std.container.array;
-// import std.conv;
-// import std.digest;
-// import std.digest.sha;
-// import std.exception;
-// import std.file;
-// import std.json;
-// import std.path;
-// import std.regex;
-// import std.string;
-// import std.socket : Address;
 
 // version(WITH_HUNT_TRACE) {
 //     import hunt.trace.Tracer;
-// }
-
-// alias RequestEventHandler = void delegate(Request sender);
-// alias Closure = RequestEventHandler;
-
-// final class Request {
-//     private HttpRequest _request;
-//     private HttpResponse _response;
-//     private SessionStorage _sessionStorage;
-
-//     private UrlEncoded urlEncodedMap;
-//     private Cookie[] _cookies;
-//     private HttpSession _session;
-//     private MonoTime _monoCreated;
-//     private Object[string] _attributes;
-
-//     HttpConnection _connection;
-//     // Action1!ByteBuffer content;
-//     // Action1!Request contentComplete;
-//     // Action1!Request messageComplete;
-//     package(hunt.framework.http) HttpOutputStream outputStream;
-//     package(hunt.framework) List!(ByteBuffer) requestBody;
-
-//     RequestEventHandler routeResolver;
-//     RequestEventHandler userResolver;
-
-//     this(HttpRequest request, HttpResponse response, HttpOutputStream output,
-//             HttpConnection connection, SessionStorage sessionStorage) {
-//         _monoCreated = MonoTime.currTime;
-//         requestBody = new ArrayList!(ByteBuffer)();
-//         this._request = request;
-//         this.outputStream = output;
-//         this._response = response;
-//         this._connection = connection;
-//         this._sessionStorage = sessionStorage;
-//         this.urlEncodedMap = new UrlEncoded();
-//         // response.setStatus(HttpStatus.OK_200);
-//         // response.setHttpVersion(HttpVersion.HTTP_1_1);
-//         // this._response = new Response(response, output, request.getURI(), bufferSize);
-//         handleQueryParameters();
-
-//         .request(this);
-//     }
-
-// version(WITH_HUNT_TRACE) {
-//     Tracer tracer;
-// }
-
-//     // enum string Subject = "subject";
-
-// private:
-//     User _user;
-//     Route _route;
-//     string _stringBody;
-//     string[string] _mate;
-//     // CookieManager _cookieManager;
-//     JSONValue _json;
-//     string _action;
-// }
-
-// void setTrustedProxies(string[] proxies, int headerSet) {
-//     trustedProxies = proxies;
-//     trustedHeaderSet = headerSet;
-// }
-
-// package {
-//     string[][string] formats;
-//     string[] trustedProxies;
-//     int trustedHeaderSet;
-
-//     const HEADER_FORWARDED = 0b00001; // When using RFC 7239
-//     const HEADER_X_FORWARDED_FOR = 0b00010;
-//     const HEADER_X_FORWARDED_HOST = 0b00100;
-//     const HEADER_X_FORWARDED_PROTO = 0b01000;
-//     const HEADER_X_FORWARDED_PORT = 0b10000;
-//     const HEADER_X_FORWARDED_ALL = 0b11110; // All "X-Forwarded-*" headers
-//     const HEADER_X_FORWARDED_AWS_ELB = 0b11010; // AWS ELB doesn"t send X-Forwarded-Host
-// }
-
-// static this() {
-//     formats["html"] = ["text/html", "application/xhtml+xml"];
-//     formats["txt"] = ["text/plain"];
-//     formats["js"] = ["application/javascript", "application/x-javascript", "text/javascript"];
-//     formats["css"] = ["text/css"];
-//     formats["json"] = ["application/json", "application/x-json"];
-//     formats["jsonld"] = ["application/ld+json"];
-//     formats["xml"] = ["text/xml", "application/xml", "application/x-xml"];
-//     formats["rdf"] = ["application/rdf+xml"];
-//     formats["atom"] = ["application/atom+xml"];
-//     formats["rss"] = ["application/rss+xml"];
-//     formats["form"] = ["application/x-www-form-urlencoded"];
-// }
-
-// private Request _request;
-
-// Request request() {
-//     return _request;
-// }
-
-// void request(Request request) {
-//     _request = request;
-// }
-
-// HttpSession session() {
-//     return request().session();
-// }
-
-// string session(string key) {
-//     return session().get(key);
-// }
-
-// void session(string[string] values) {
-//     foreach (key, value; values) {
-//         session().put(key, value);
-//     }
 // }
