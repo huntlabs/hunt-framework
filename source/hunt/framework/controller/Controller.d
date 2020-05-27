@@ -277,8 +277,6 @@ string __createCallActionMethod(T, string moduleName)()
     import std.format;
     import std.string;
     import std.conv;
-    
-    import hunt.logging.ConsoleLogger;
 
     string str = `
 
@@ -286,6 +284,7 @@ string __createCallActionMethod(T, string moduleName)()
         import hunt.http.server.HttpServerResponse;
         import hunt.http.routing.RoutingContext;
         import hunt.http.HttpBody;
+        import hunt.logging.ConsoleLogger;
         import hunt.validation.ConstraintValidatorContext;
         import std.demangle;
 
