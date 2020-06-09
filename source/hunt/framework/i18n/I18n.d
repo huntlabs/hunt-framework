@@ -147,6 +147,10 @@ class I18n {
         return true;
     }
 
+    // TODO: Tasks pending completion -@zhangxueping at 2020-06-05T18:15:42+08:00
+    // 
+    // Add trans()
+
 }
 
 // private string _local /* = I18N_DEFAULT_LOCALE */ ;

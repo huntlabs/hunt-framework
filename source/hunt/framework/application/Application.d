@@ -43,6 +43,7 @@ version (WITH_HUNT_TRACE) {
     import hunt.trace.Tracer;
     import hunt.trace.HttpSender;
     import hunt.framework.trace.Tracer;
+    import hunt.http.HttpConnection;
 
     import std.format;
 }

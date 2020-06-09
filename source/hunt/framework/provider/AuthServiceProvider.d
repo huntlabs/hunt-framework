@@ -22,6 +22,7 @@ class AuthServiceProvider : ServiceProvider {
 
         DefaultSecurityManager securityManager = new DefaultSecurityManager();
         securityManager.setRealm(realm);
+        
         CacheManager cacheManager = new ShiroCacheManager(cache);
         securityManager.setCacheManager(cacheManager);
 
