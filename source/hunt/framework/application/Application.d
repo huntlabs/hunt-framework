@@ -31,19 +31,17 @@ import hunt.framework.middleware.MiddlewareInterface;
 import hunt.framework.provider;
 import hunt.framework.provider.listener;
 import hunt.framework.routing;
-import hunt.framework.trace.Tracer;
 
 import hunt.redis;
 
 version (WITH_HUNT_TRACE) {
+    import hunt.http.HttpConnection;
     import hunt.net.util.HttpURI;
     import hunt.trace.Constrants;
     import hunt.trace.Endpoint;
     import hunt.trace.Span;
     import hunt.trace.Tracer;
     import hunt.trace.HttpSender;
-    import hunt.framework.trace.Tracer;
-    import hunt.http.HttpConnection;
 
     import std.format;
 }
@@ -367,57 +365,13 @@ final class Application {
     }
 
     version (WITH_HUNT_TRACE) {
-
         private void initializeTracer() {
-            _localServiceName = _appConfig.application.name;
+
             isTraceEnabled = _appConfig.trace.enable;
-            // _isB3HeaderRequired = config.trace.b3Required;
 
             // initialize HttpSender
             httpSender().endpoint(_appConfig.trace.zipkin);
         }
-
-        private void initializeTracer(Request request, HttpConnection connection) {
-
-            if (!isTraceEnabled)
-                return;
-
-            import std.socket;
-
-            string reqPath = request.getURI().getPath();
-            Tracer tracer;
-
-            string b3 = request.header("b3");
-            if (b3.empty()) {
-                if (_isB3HeaderRequired)
-                    return;
-
-                tracer = new Tracer(reqPath);
-            } else {
-                version (HUNT_HTTP_DEBUG) {
-                    warningf("initializing tracer for %s, with %s", reqPath, b3);
-                }
-
-                tracer = new Tracer(reqPath, b3);
-            }
-
-            Span span = tracer.root;
-            span.initializeLocalEndpoint(_localServiceName);
-
-            // 
-            Address remote = connection.getRemoteAddress;
-            EndPoint remoteEndpoint = new EndPoint();
-            remoteEndpoint.ipv4 = remote.toAddrString();
-            remoteEndpoint.port = remote.toPortString().to!int;
-            span.remoteEndpoint = remoteEndpoint;
-            //
-
-            span.start();
-            request.tracer = tracer;
-        }
-
-        private string _localServiceName;
-        private bool _isB3HeaderRequired = true;
     }
 
     private void setDefaultLogging() {

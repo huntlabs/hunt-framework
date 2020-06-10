@@ -55,6 +55,11 @@ class HttpServiceProvider : ServiceProvider {
             .workerThreadSize(appConfig.http.workerThreads)
             .ioThreadSize(appConfig.http.ioThreads);
 
+        version(WITH_HUNT_TRACE) {
+            hsb.localServiceName(appConfig.application.name)
+                .isB3HeaderRequired(appConfig.trace.b3Required);
+        }            
+
         RouteConfigManager routeConfig = container.resolve!RouteConfigManager();
         RouteItem[][RouteGroup] allRoutes = routeConfig.allRoutes;
 
