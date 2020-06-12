@@ -14,14 +14,16 @@ class AuthServiceProvider : ServiceProvider {
 
     override void register() {
         serviceContainer().register!(AuthorizingRealm, IniRealm).newInstance;
+        serviceContainer().register!(AuthorizingRealm, UserAuthRealm).newInstance;
+        serviceContainer().register!(AuthorizingRealm, JwtAuthRealm).newInstance;
     }
 
     override void boot() {
         HuntCache cache = serviceContainer().resolve!HuntCache();
-        AuthorizingRealm realm = serviceContainer().resolve!(AuthorizingRealm)();
+        AuthorizingRealm[] realms = serviceContainer().resolveAll!(AuthorizingRealm)();
 
         DefaultSecurityManager securityManager = new DefaultSecurityManager();
-        securityManager.setRealm(realm);
+        securityManager.setRealms(realms);
         
         CacheManager cacheManager = new ShiroCacheManager(cache);
         securityManager.setCacheManager(cacheManager);
