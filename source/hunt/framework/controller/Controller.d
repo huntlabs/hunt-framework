@@ -370,12 +370,12 @@ string __createCallActionMethod(T, string moduleName)()
 
                     // Parameters validation
                     // https://forum.dlang.org/post/bbgwqvvausncrkukzpui@forum.dlang.org
-                    str ~= `_actionValidators["` ~ currentMethod.mangleof ~ 
+                    str ~= indent(3) ~ `_actionValidators["` ~ currentMethod.mangleof ~ 
                         `"] = (ConstraintValidatorContext context) {` ~ "\n";
 
                     static if(is(typeof(currentMethod) allParams == __parameters)) {
-                        str ~= indent(4) ~ `version(HUNT_DEBUG) info("Validating in ` ~  memberName ~ 
-                            ", the prototype is " ~ typeof(currentMethod).stringof ~` "); ` ~ "\n";
+                        str ~= indent(4) ~ "version(HUNT_DEBUG) info(`Validating in " ~  memberName ~ 
+                            ", the prototype is " ~ typeof(currentMethod).stringof ~ ". `); " ~ "\n";
                         // str ~= indent(4) ~ `version(HUNT_DEBUG) infof("Validating in %s", demangle(_currentActionName)); ` ~ "\n";                        
 
                         static foreach(i, _; allParams) {{
