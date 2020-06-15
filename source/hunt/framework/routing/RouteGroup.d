@@ -9,6 +9,7 @@ final class RouteGroup {
     // type
     enum string DEFAULT = "default";
     enum string HOST = "host";
+    enum string DOMAIN = "domain";
     enum string PATH = "path";
 
     string name;
