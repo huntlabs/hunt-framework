@@ -114,12 +114,14 @@ class HttpServiceProvider : ServiceProvider {
                 version(HUNT_FM_DEBUG)
                     tracef("handler found for group route {%s}, key: %s", item.toString(), handlerKey);
                 if (group is null || group.type == RouteGroup.DEFAULT) {
-                    version(HUNT_DEBUG) infof("adding %s", item.path);
+                    version(HUNT_DEBUG) infof("adding %s into DEFAULT", item.path);
                     hsb.addRoute([item.path], item.methods, handler);
                 } else if (group.type == RouteGroup.HOST) {
+                    version(HUNT_DEBUG) infof("adding %s into HOST", item.path);
                     hsb.addRoute([item.path], item.methods, handler,
                             group.value, RouteGroupType.Host);
                 } else if (group.type == RouteGroup.PATH) {
+                    version(HUNT_DEBUG) infof("adding %s into PATH", item.path);
                     hsb.addRoute([item.path], item.methods, handler,
                             group.value, RouteGroupType.Path);
                 } else {
