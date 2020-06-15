@@ -18,7 +18,7 @@ class AuthServiceProvider : ServiceProvider {
         // serviceContainer().register!(AuthorizingRealm, IniRealm).newInstance;
         serviceContainer().register!(AuthorizingRealm, UserAuthRealm).newInstance;
         serviceContainer().register!(AuthorizingRealm, JwtAuthRealm).newInstance;
-        serviceContainer().register!(UserService, DefaultUserService).singleInstance;
+        // serviceContainer().register!(UserService, DefaultUserService).singleInstance;
     }
 
     override void boot() {

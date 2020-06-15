@@ -57,7 +57,7 @@ import std.socket : Address, parseAddress;
 import std.stdio;
 import std.string;
 
-alias DefaultServiceProviders = AliasSeq!(AuthServiceProvider,
+alias DefaultServiceProviders = AliasSeq!(UserServiceProvider, AuthServiceProvider,
         ConfigServiceProvider, RedisServiceProvider,
         TranslationServiceProvider, CacheServiceProvider, SessionServiceProvider,
         DatabaseServiceProvider, QueueServiceProvider,

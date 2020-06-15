@@ -95,7 +95,7 @@ class HttpServiceProvider : ServiceProvider {
             if (group is null || group.type == RouteGroup.DEFAULT) {
                 hsb.resource(resourceItem.path, resourceItem.resourcePath,
                         resourceItem.canListing);
-            } else if (group.type == RouteGroup.HOST) {
+            } else if (group.type == RouteGroup.HOST || group.type == RouteGroup.DOMAIN) {
                 hsb.resource(resourceItem.path, resourceItem.resourcePath,
                         resourceItem.canListing, group.value, RouteGroupType.Host);
             } else if (group.type == RouteGroup.PATH) {
@@ -113,17 +113,23 @@ class HttpServiceProvider : ServiceProvider {
             } else {
                 version(HUNT_FM_DEBUG)
                     tracef("handler found for group route {%s}, key: %s", item.toString(), handlerKey);
+                string[] methods = item.methods;
+                version(HUNT_DEBUG) {
+                    string methodsString = "[*]";
+                    if(!methods.empty)
+                        methodsString = methods.to!string();
+                }
+
                 if (group is null || group.type == RouteGroup.DEFAULT) {
-                    version(HUNT_DEBUG) infof("adding %s into DEFAULT", item.path);
-                    hsb.addRoute([item.path], item.methods, handler);
-                } else if (group.type == RouteGroup.HOST) {
-                    version(HUNT_DEBUG) infof("adding %s into HOST", item.path);
-                    hsb.addRoute([item.path], item.methods, handler,
+                    version(HUNT_DEBUG) infof("adding %s %s into DEFAULT", methodsString, item.path);
+                    hsb.addRoute([item.path], methods, handler);
+                } else if (group.type == RouteGroup.HOST || group.type == RouteGroup.DOMAIN) {
+                    version(HUNT_DEBUG) infof("adding %s %s into DOMAIN", methodsString, item.path);
+                    hsb.addRoute([item.path], methods, handler,
                             group.value, RouteGroupType.Host);
                 } else if (group.type == RouteGroup.PATH) {
-                    version(HUNT_DEBUG) infof("adding %s into PATH", item.path);
-                    hsb.addRoute([item.path], item.methods, handler,
-                            group.value, RouteGroupType.Path);
+                    version(HUNT_DEBUG) infof("adding %s %s into PATH", methodsString, item.path);
+                    hsb.addRoute([item.path], methods, handler, group.value, RouteGroupType.Path);
                 } else {
                     errorf("Unknown route group type: %s", group.type);
                 }
