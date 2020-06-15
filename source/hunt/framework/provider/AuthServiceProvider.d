@@ -5,6 +5,8 @@ import hunt.framework.auth;
 import hunt.logging.ConsoleLogger;
 import hunt.shiro;
 
+import std.algorithm;
+import std.array;
 import poodinis;
 
 /**
@@ -13,14 +15,16 @@ import poodinis;
 class AuthServiceProvider : ServiceProvider {
 
     override void register() {
-        serviceContainer().register!(AuthorizingRealm, IniRealm).newInstance;
+        // serviceContainer().register!(AuthorizingRealm, IniRealm).newInstance;
         serviceContainer().register!(AuthorizingRealm, UserAuthRealm).newInstance;
         serviceContainer().register!(AuthorizingRealm, JwtAuthRealm).newInstance;
+        serviceContainer().register!(UserService, DefaultUserService).singleInstance;
     }
 
     override void boot() {
         HuntCache cache = serviceContainer().resolve!HuntCache();
-        AuthorizingRealm[] realms = serviceContainer().resolveAll!(AuthorizingRealm)();
+        AuthorizingRealm[] authorizingRealms = serviceContainer().resolveAll!(AuthorizingRealm)();
+        Realm[] realms = authorizingRealms.map!(a => cast(Realm)a).array;
 
         DefaultSecurityManager securityManager = new DefaultSecurityManager();
         securityManager.setRealms(realms);

@@ -29,19 +29,18 @@ class UserAuthRealm : AuthorizingRealm {
     }
 
     override protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) {
-        string tokenString = token.getPrincipal();
-        string username = JwtUtil.getUsername(tokenString);
+        string username = token.getPrincipal();
+        string password = cast(string)token.getCredentials();
 
         version(HUNT_DEBUG) {
-            infof("tokenString: %s,  principal: %s", tokenString, username);
+            infof("principal: %s", username);
         }        
 
-        // To retrieve the user info from username
-        AuthUser user = _userService.getByName(username);
+        // To authenticate the user with username and password
+        AuthUser user = _userService.authenticate(username, password);
 
-        // Valid the user using JWT
-        if(JwtUtil.verify(tokenString, username, user.password)) {
-                String credentials = new String(tokenString);
+        if(user !is null) {
+                String credentials = new String(password);
                 SimpleAuthenticationInfo info = new SimpleAuthenticationInfo(user, credentials, getName());
                 return info;
         } else {
