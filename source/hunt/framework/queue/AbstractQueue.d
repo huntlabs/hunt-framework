@@ -49,6 +49,10 @@ abstract class AbstractQueue {
         _threadMode = mode;
     }
 
+    void push(string channel, string message) {
+        push(channel, cast(ubyte[])message);
+    }
+
     void push(string channel, ubyte[] message);
 
     void addListener(string channel, QueueMessageListener listener) {
