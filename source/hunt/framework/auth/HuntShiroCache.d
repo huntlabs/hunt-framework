@@ -1,7 +1,8 @@
 module hunt.framework.auth.HuntShiroCache;
 
-import hunt.redis;
 import hunt.cache.Cache;
+import hunt.collection.Collection;
+import hunt.redis;
 import hunt.shiro;
 
 import hunt.Exceptions;
@@ -69,8 +70,22 @@ class HuntShiroCache : ShiroCache!(Object, AuthorizationInfo) {
         version(HUNT_DEBUG) tracef("%s, hash: %d", key.toString, key.toHash());
         string k = key.toHash().to!string(); // key.toString();
 
-        string[] roles = value.getRoles().toArray();
-        string[] permissions = value.getStringPermissions().toArray();
+        string[] roles;
+        Collection!(string) collection = value.getRoles();
+        if(collection !is null) {
+            roles = collection.toArray();
+        } else {
+            warning("Roles is empty");
+        }
+
+        string[] permissions;
+        collection = value.getStringPermissions();
+        
+        if(collection !is null) {
+            permissions = collection.toArray();
+        } else {
+            warning("Permissions is empty");
+        }
 
         JSONValue jv;
         jv["roles"] = roles;

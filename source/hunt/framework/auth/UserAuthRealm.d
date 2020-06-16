@@ -38,11 +38,11 @@ class UserAuthRealm : AuthorizingRealm {
 
         // To authenticate the user with username and password
         AuthUser user = _userService.authenticate(username, password);
-
+        
         if(user !is null) {
-                String credentials = new String(password);
-                SimpleAuthenticationInfo info = new SimpleAuthenticationInfo(user, credentials, getName());
-                return info;
+            String credentials = new String(password);
+            SimpleAuthenticationInfo info = new SimpleAuthenticationInfo(user, credentials, getName());
+            return info;
         } else {
             throw new IncorrectCredentialsException(username);
         }
