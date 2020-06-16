@@ -224,6 +224,7 @@ abstract class Controller
 
         resp.header("Date", date("Y-m-d H:i:s"));
         resp.header(HttpHeader.X_POWERED_BY, HUNT_X_POWERED_BY);
+        resp.header(HttpHeader.SERVER, HUNT_FRAMEWORK_SERVER);
 
         if(!resp.getFields().contains(HttpHeader.CONTENT_TYPE)) {
             resp.header(HttpHeader.CONTENT_TYPE, MimeType.TEXT_HTML_VALUE);
@@ -417,7 +418,7 @@ string __createCallActionMethod(T, string moduleName)()
     }
 
     str ~= "\tdefault:\n\tbreak;\n\t}\n\n";
-    str ~= "this.done();";
+    // str ~= "this.done();";
     str ~= "}";
 
     return str;
@@ -605,13 +606,13 @@ void callHandler(T, string method)(RoutingContext context)
     try {
         controller.callActionMethod(method, context);
     } catch (Throwable t) {
-        warning(t.msg);
-        version(HUNT_DEBUG) warning(t);
+        error(t);
         Response errorRes = new Response();
         errorRes.doError(HttpStatus.INTERNAL_SERVER_ERROR_500, t);
         controller.response = errorRes; 
     }
-
+    
+    controller.done();
     context.end();
 }
 
