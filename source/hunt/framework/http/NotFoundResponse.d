@@ -1,5 +1,6 @@
 module hunt.framework.http.NotFoundResponse;
 
+import hunt.framework.http.HttpErrorResponseHandler;
 import hunt.framework.http.Response;
 import hunt.http.server;
 

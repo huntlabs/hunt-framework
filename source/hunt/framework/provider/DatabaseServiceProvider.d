@@ -48,10 +48,14 @@ class DatabaseServiceProvider : ServiceProvider {
             option.pool.minConnection = config.pool.minConnection;
 
             infof("using database: %s", config.driver);
-            return Persistence.createEntityManagerFactory("default", option);
+            return Persistence.createEntityManagerFactory(option);
         } else {
             warning("The database is disabled.");
             return null;
         }
+    }
+
+    override void boot() {
+        EntityManagerFactory factory = container.resolve!EntityManagerFactory();
     }
 }

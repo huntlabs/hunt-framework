@@ -3,6 +3,7 @@ module hunt.framework.provider.HttpServiceProvider;
 import hunt.framework.controller.Controller;
 import hunt.framework.config.ApplicationConfig;
 import hunt.framework.config.ConfigManager;
+import hunt.framework.http.HttpErrorResponseHandler;
 import hunt.framework.Init;
 import hunt.framework.provider.ServiceProvider;
 import hunt.framework.routing;
@@ -40,6 +41,7 @@ class HttpServiceProvider : ServiceProvider {
     }
 
     private HttpServer buildServer() {
+        DefaultErrorResponseHandler.Default = new HttpErrorResponseHandler();
         ConfigManager manager = container.resolve!ConfigManager;
         ApplicationConfig appConfig = container.resolve!ApplicationConfig();
         // SimpleWebSocketHandler webSocketHandler = new SimpleWebSocketHandler();
@@ -58,7 +60,9 @@ class HttpServiceProvider : ServiceProvider {
         version(WITH_HUNT_TRACE) {
             hsb.localServiceName(appConfig.application.name)
                 .isB3HeaderRequired(appConfig.trace.b3Required);
-        }            
+        }
+
+        auto staticFilesConfig = appConfig.staticfiles;
 
         RouteConfigManager routeConfig = container.resolve!RouteConfigManager();
         RouteItem[][RouteGroup] allRoutes = routeConfig.allRoutes;
@@ -76,12 +80,32 @@ class HttpServiceProvider : ServiceProvider {
             }
             // if(!isRootStaticPathAdded) {
             // default static files
-            hsb.resource("/", DEFAULT_STATIC_FILES_LACATION, false, group.value, groupType);
+            hsb.resource("/", staticFilesConfig.location, staticFilesConfig.canList, group.value, groupType);
             // }
         }
 
         // default static files
-        hsb.resource("/", DEFAULT_STATIC_FILES_LACATION, false);
+        hsb.resource("/", staticFilesConfig.location, staticFilesConfig.canList);
+        // hsb.setDefaultRequest((RoutingContext ctx) {
+        //     string content = "The resource " ~ ctx.getURI().getPath() ~ " is not found";
+        //     string title = "404 - Not Foundxxxx";
+
+        //     ctx.responseHeader(HttpHeader.CONTENT_TYPE, "text/html");
+
+        //     ctx.write("<!DOCTYPE html>")
+        //         .write("<html>")
+        //         .write("<head>")
+        //         .write("<title>")
+        //         .write(title)
+        //         .write("</title>")
+        //         .write("</head>")
+        //         .write("<body>")
+        //         .write("<h1> " ~ title ~ " </h1>")
+        //         .write("<p>" ~ content ~ "</p>")
+        //         .write("</body>")
+        //         .end("</html>");
+        // });
+
         return hsb.build();
     }
 

@@ -49,6 +49,15 @@ class ApplicationConfig {
         string langLocation = "./translations";
     }
 
+    /** Config for static files */
+    struct StaticFilesConf {
+        bool enabled = true;
+        // default root path
+        string location = DEFAULT_STATIC_FILES_LACATION;
+        bool canList = true;
+        int cacheTime = 30;
+    }
+
     
     struct CacheConf {
         string adapter = "memory";
@@ -258,6 +267,7 @@ class ApplicationConfig {
 
     DatabaseConf database;
     ApplicationConf application;
+    StaticFilesConf staticfiles;
     CookieConf cookie;
     SessionConf session;
     CacheConf cache;
