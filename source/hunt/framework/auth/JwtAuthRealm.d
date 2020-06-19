@@ -1,9 +1,10 @@
 module hunt.framework.auth.JwtAuthRealm;
 
-import hunt.framework.auth.AuthRole;
-import hunt.framework.auth.AuthUser;
+// import hunt.framework.auth.AuthRole;
+// import hunt.framework.auth.AuthUser;
 import hunt.framework.auth.JwtToken;
 import hunt.framework.auth.JwtUtil;
+import hunt.framework.auth.UserDetails;
 import hunt.framework.auth.UserService;
 import hunt.framework.provider.ServiceProvider;
 
@@ -43,7 +44,7 @@ class JwtAuthRealm : AuthorizingRealm {
         }        
 
         // To retrieve the user info from username
-        AuthUser user = _userService.getByName(username);
+        UserDetails user = _userService.getByName(username);
         if(user is null) {
             throw new AuthenticationException("User didn't existed!");
         }
@@ -68,25 +69,18 @@ class JwtAuthRealm : AuthorizingRealm {
 
         string username = principal.value();
         
-        // To retrieve all the roles for the user from database
-        AuthUser user = _userService.getByName(username);
+        // To retrieve all the roles and permissions for the user from database
+        UserDetails user = _userService.getByName(username);
         if(user is null) {
             throw new AuthenticationException("User didn't existed!");
         }
 
         SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
+        //
+        info.addRoles(user.roles);
 
-        // To retrieve all the roles for the user from database
-        AuthRole[] userRoles = user.roles;
-
-        // Recording the permissions based on each role
-        foreach(AuthRole r; userRoles) {
-            // roles
-            info.addRole(r.name);
-
-            // permissions
-            info.addStringPermissions(r.permissions);
-        }
+        // 
+        info.addStringPermissions(user.permissions);
 
         return info;
     }

@@ -1,6 +1,6 @@
 module hunt.framework.auth.UserService;
 
-import hunt.framework.auth.AuthUser;
+import hunt.framework.auth.UserDetails;
 
 /**
  * 
@@ -11,7 +11,7 @@ interface UserService {
 
     string getSalt(string name, string password);
 
-    AuthUser getByName(string name);
+    UserDetails getByName(string name);
 
-    AuthUser getById(ulong id);
+    UserDetails getById(ulong id);
 }

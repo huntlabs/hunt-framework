@@ -9,5 +9,6 @@ public import hunt.framework.auth.JwtUtil;
 public import hunt.framework.auth.HuntShiroCache;
 public import hunt.framework.auth.ShiroCacheManager;
 public import hunt.framework.auth.UserService;
+public import hunt.framework.auth.UserDetails;
 public import hunt.framework.auth.DefaultUserService;
 

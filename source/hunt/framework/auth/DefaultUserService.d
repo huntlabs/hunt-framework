@@ -1,6 +1,6 @@
 module hunt.framework.auth.DefaultUserService;
 
-import hunt.framework.auth.AuthUser;
+import hunt.framework.auth.UserDetails;
 import hunt.framework.auth.UserService;
 
 import std.digest.sha;
@@ -22,11 +22,11 @@ class DefaultUserService : UserService {
         return toHexString(hash256);        
     }
 
-    AuthUser getByName(string name) {
+    UserDetails getByName(string name) {
         return null;
     }
 
-    AuthUser getById(ulong id) {
+    UserDetails getById(ulong id) {
         return null;
     }
 }

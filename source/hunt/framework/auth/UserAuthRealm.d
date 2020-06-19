@@ -1,7 +1,6 @@
 module hunt.framework.auth.UserAuthRealm;
 
-import hunt.framework.auth.AuthRole;
-import hunt.framework.auth.AuthUser;
+import hunt.framework.auth.UserDetails;
 import hunt.framework.auth.JwtToken;
 import hunt.framework.auth.JwtUtil;
 import hunt.framework.auth.UserService;
@@ -60,21 +59,17 @@ class UserAuthRealm : AuthorizingRealm {
         SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
 
         // To retrieve all the roles for the user from database
-        AuthUser user = _userService.getByName(username);
+        UserDetails user = _userService.getByName(username);
         if(user is null) {
             throw new AuthenticationException("User didn't existed!");
         }
 
-        AuthRole[] userRoles = user.roles;
+        //
+        info.addRoles(user.roles);
 
-        // Recording the permissions based on each role
-        foreach(AuthRole r; userRoles) {
-            // roles
-            info.addRole(r.name);
+        // 
+        info.addStringPermissions(user.permissions);
 
-            // permissions
-            info.addStringPermissions(r.permissions);
-        }
 
         return info;
     }

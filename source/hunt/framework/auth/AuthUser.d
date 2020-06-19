@@ -15,21 +15,28 @@ class AuthUser {
         _subject = SecurityUtils.getSubject();
     }
 
-    ulong id;
+    // ulong id;
 
-    string name;
+    string name() {
+        Object principal = _subject.getPrincipal();
+        if(principal is null) {
+            return "";
+        } else {
+            return _subject.getPrincipal().toString();
+        }
+    }
 
-    string password;
+    // string password;
 
-    string fullName;
+    // string fullName;
 
-    AuthRole[] roles;
+    // AuthRole[] roles;
 
     // string[] permissions;
 
     void authenticate(string username, string password) {
-        this.name = username;
-        this.password = password;
+        // this.name = username;
+        // this.password = password;
 
         warningf("Checking at first: %s", _subject.isAuthenticated());
 
@@ -64,6 +71,15 @@ class AuthUser {
 
     bool hasRole(string role) {
         return _subject.hasRole(role);
+    }
+
+    bool isPermitted(string[] permissions...) {
+        bool[] resultSet = _subject.isPermitted(permissions);
+        foreach(bool r; resultSet ) {
+            if(!r) return false;
+        }
+
+        return true;
     }
 
     override string toString() {
