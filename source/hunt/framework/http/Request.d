@@ -25,6 +25,8 @@ import hunt.http.server.HttpServerRequest;
 import hunt.http.server.HttpSession;
 import hunt.logging.ConsoleLogger;
 
+import hunt.framework.auth;
+
 import std.algorithm;
 import std.array : split;
 import std.json;
@@ -45,6 +47,8 @@ class Request {
     private UploadedFile[][string] _convertedMultiFiles;
     private RouteConfigManager _routeManager;
     private string _routeGroup = DEFAULT_ROUTE_GROUP;
+    private AuthUser _user;
+    private Cookie _authCookie;
 
     HttpServerRequest _request;
     alias _request this;
@@ -55,6 +59,27 @@ class Request {
         _routeManager = serviceContainer().resolve!RouteConfigManager();
         _routeGroup = routeGroup;
         _remoteAddr = remoteAddress;
+        _user = new AuthUser();
+    }
+
+    AuthUser user() {
+        return _user;
+    }
+
+    AuthUser authenticate(string name, string password) {
+        _user.authenticate(name, password);
+        if(_user.isAuthenticated()) {
+            UserService userService = serviceContainer().resolve!UserService();
+            string salt = userService.getSalt(username, password);
+            string jwtToken = JwtUtil.sign(username, salt);
+            _authCookie = new Cookie(JwtUtil.COOKIE_NAME, jwtToken);
+        }
+
+        return _user;
+    }
+
+    Cookie authCookie() {
+        return _authCookie;
     }
 
     /**

@@ -12,6 +12,7 @@
 module hunt.framework.controller.Controller;
 
 import hunt.framework.application.Application;
+import hunt.framework.auth;
 import hunt.framework.breadcrumb.BreadcrumbsManager;
 import hunt.framework.middleware.MiddlewareInterface;
 
@@ -94,6 +95,21 @@ abstract class Controller
         _response = r;
         _routingContext.response = r.httpResponse;
     }
+
+    // AuthUser authenticate(string username, string password) {
+    //     Request req = request();
+    //     AuthUser user = req.user;
+    //     user.authenticate(username, password);
+
+    //     if(user.isAuthenticated()) {
+    //         UserService userService = serviceContainer().resolve!UserService();
+    //         string salt = userService.getSalt(username, password);
+    //         string jwtToken = JwtUtil.sign(username, salt);
+    //         Cookie tokenCookie = new Cookie("__auth_token__", jwtToken);
+    //     }
+
+    //     return user;
+    // }
 
     @property View view()
     {

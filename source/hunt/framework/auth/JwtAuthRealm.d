@@ -11,9 +11,12 @@ import hunt.logging.ConsoleLogger;
 import hunt.shiro;
 import hunt.String;
 
+import std.range;
+
 
 /**
- * 
+ * See_also:
+ *  [Springboot Integrate with Apache Shiro](http://www.andrew-programming.com/2019/01/23/springboot-integrate-with-jwt-and-apache-shiro/)
  */
 class JwtAuthRealm : AuthorizingRealm {
     private UserService _userService;
@@ -31,6 +34,9 @@ class JwtAuthRealm : AuthorizingRealm {
     override protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) {
         string tokenString = token.getPrincipal();
         string username = JwtUtil.getUsername(tokenString);
+        if (username.empty) {
+            throw new AuthenticationException("token invalid");
+        }
 
         version(HUNT_DEBUG) {
             infof("tokenString: %s,  principal: %s", tokenString, username);
@@ -38,22 +44,34 @@ class JwtAuthRealm : AuthorizingRealm {
 
         // To retrieve the user info from username
         AuthUser user = _userService.getByName(username);
+        if(user is null) {
+            throw new AuthenticationException("User didn't existed!");
+        }
 
         // Valid the user using JWT
-        if(JwtUtil.verify(tokenString, username, user.password)) {
-                String credentials = new String(tokenString);
-                SimpleAuthenticationInfo info = new SimpleAuthenticationInfo(user, credentials, getName());
-                return info;
-        } else {
-            throw new IncorrectCredentialsException(username);
+        if(!JwtUtil.verify(tokenString, username, user.password)) {
+            throw new IncorrectCredentialsException("Username or password error: " ~ username);
         }
+
+        String principal = new String(username);
+        String credentials = new String(tokenString);
+        SimpleAuthenticationInfo info = new SimpleAuthenticationInfo(principal, credentials, getName());
+        return info;
     }
 
-    override protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {        
-        AuthUser user = cast(AuthUser) principals.getPrimaryPrincipal();
-        if(user is null) {
-            warning("no principals");
+    override protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
+        String principal = cast(String) principals.getPrimaryPrincipal();
+        if(principal is null) {
+            warning("No principal avaliable");
             return null;
+        }
+
+        string username = principal.value();
+        
+        // To retrieve all the roles for the user from database
+        AuthUser user = _userService.getByName(username);
+        if(user is null) {
+            throw new AuthenticationException("User didn't existed!");
         }
 
         SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();

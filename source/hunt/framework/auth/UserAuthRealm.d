@@ -37,27 +37,34 @@ class UserAuthRealm : AuthorizingRealm {
         }        
 
         // To authenticate the user with username and password
-        AuthUser user = _userService.authenticate(username, password);
+        bool isAuthenticated = _userService.authenticate(username, password);
         
-        if(user !is null) {
+        if(isAuthenticated) {
+            String principal = new String(username);
             String credentials = new String(password);
-            SimpleAuthenticationInfo info = new SimpleAuthenticationInfo(user, credentials, getName());
+            SimpleAuthenticationInfo info = new SimpleAuthenticationInfo(principal, credentials, getName());
             return info;
         } else {
             throw new IncorrectCredentialsException(username);
         }
     }
 
-    override protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {        
-        AuthUser user = cast(AuthUser) principals.getPrimaryPrincipal();
-        if(user is null) {
-            warning("no principals");
+    override protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
+        String principal = cast(String) principals.getPrimaryPrincipal();
+        if(principal is null) {
+            warning("No principal avaliable");
             return null;
         }
 
+        string username = principal.value();
         SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
 
         // To retrieve all the roles for the user from database
+        AuthUser user = _userService.getByName(username);
+        if(user is null) {
+            throw new AuthenticationException("User didn't existed!");
+        }
+
         AuthRole[] userRoles = user.roles;
 
         // Recording the permissions based on each role

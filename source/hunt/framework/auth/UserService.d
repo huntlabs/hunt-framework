@@ -7,7 +7,9 @@ import hunt.framework.auth.AuthUser;
  */
 interface UserService {
 
-    AuthUser authenticate(string name, string password);
+    bool authenticate(string name, string password);
+
+    string getSalt(string name, string password);
 
     AuthUser getByName(string name);
 
