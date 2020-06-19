@@ -12,8 +12,9 @@
 module hunt.framework;
 
 public import hunt.cache;
-public import hunt.util.MimeType;
+public import hunt.entity;
 public import hunt.validation;
+public import hunt.util.MimeType;
 
 public import hunt.http.codec.http;
 public import hunt.http.codec.websocket;
@@ -38,5 +39,5 @@ debug {}
 else {
     import hunt.util.Common;
     static assert(CompilerHelper.isGreaterThan(2082), 
-        "The version of D compiler must be greater than 2.083 in release model.");
+        "The required version for D compiler must be greater than 2.083 if building in release model.");
 }
