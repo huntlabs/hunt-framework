@@ -11,15 +11,6 @@
 
 module hunt.framework.application.Application;
 
-import hunt.logging;
-
-import hunt.http.server.HttpServer;
-import hunt.http.server.HttpServerOptions;
-import hunt.http.WebSocketPolicy;
-import hunt.http.WebSocketCommon;
-
-import hunt.console;
-
 import hunt.framework.application.closer;
 import hunt.framework.command.ServeCommand;
 import hunt.framework.Init;
@@ -32,6 +23,14 @@ import hunt.framework.provider;
 import hunt.framework.provider.listener;
 import hunt.framework.routing;
 
+import hunt.http.server.HttpServer;
+import hunt.http.server.HttpServerOptions;
+import hunt.http.WebSocketPolicy;
+import hunt.http.WebSocketCommon;
+
+import hunt.console;
+import hunt.Functions;
+import hunt.logging;
 import hunt.redis;
 
 version (WITH_HUNT_TRACE) {
@@ -142,11 +141,13 @@ final class Application {
 
     private bool _isBooted = false;
     private bool[TypeInfo] _customizedServiceProviders;
+    private SimpleEventHandler _launchedHandler;
 
     /**
       Start the HttpServer , and block current thread.
      */
-    void run(string[] args) {
+    void run(string[] args, SimpleEventHandler handler = null) {
+        _launchedHandler = handler;
         tryRegister!ConfigServiceProvider();
 
         if (args.length > 1) {
@@ -208,7 +209,13 @@ final class Application {
         //
         showLogo();
 
+        // Launch the HTTP server.
         _server.start();
+
+        // Notify that the application is ready.
+        if(_launchedHandler !is null) {
+            _launchedHandler();
+        }
     }
 
     Application addGroupMiddleware(MiddlewareInterface mw, string group = "default") {

@@ -32,6 +32,11 @@ class Response {
         _response = new HttpServerResponse();
     }
 
+    this(string content) {
+        HttpBody hb = HttpBody.create(content);
+        this(hb);
+    }
+
     this(HttpBody bodyContent) {
         this(new HttpServerResponse(bodyContent));
     }
