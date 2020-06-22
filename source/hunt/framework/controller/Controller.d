@@ -92,6 +92,7 @@ abstract class Controller
 
     // reset to a new response
     @property void response(Response r) {
+        assert(r !is null, "The response can't be null");
         _response = r;
         _routingContext.response = r.httpResponse;
     }
@@ -229,9 +230,10 @@ abstract class Controller
     protected QueryParameterValidator[string] _actionValidators;
 
     protected void done() {
-        request().flush(); // assure the sessiondata flushed;
+        Request req = request();
+        req.flush(); // assure the sessiondata flushed;
         Response resp = response();
-        HttpSession session = request().session(false);
+        HttpSession session = req.session(false);
         if (session !is null ) // && session.isNewSession()
         {
             resp.withCookie(new Cookie(DefaultSessionIdName, session.getId(), session.getMaxInactiveInterval(), 
@@ -244,6 +246,11 @@ abstract class Controller
 
         if(!resp.getFields().contains(HttpHeader.CONTENT_TYPE)) {
             resp.header(HttpHeader.CONTENT_TYPE, MimeType.TEXT_HTML_VALUE);
+        }
+        
+        Cookie tokenCookie = req.authCookie();
+        if(tokenCookie !is null) {
+            resp.withCookie(tokenCookie);
         }
     }
 

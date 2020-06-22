@@ -39,8 +39,8 @@ class Identity {
 
     void authenticate(string username, string password) {
 
-        version(HUNT_HTTP_DEBUG) { 
-            warningf("Checking at first: %s", _subject.isAuthenticated());
+        version(HUNT_SHIRO_DEBUG) { 
+            warningf("Checking the status at first: %s", _subject.isAuthenticated());
         }
 
         if (_subject.isAuthenticated()) {
