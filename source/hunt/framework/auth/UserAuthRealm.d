@@ -1,11 +1,14 @@
 module hunt.framework.auth.UserAuthRealm;
 
-import hunt.framework.auth.UserDetails;
 import hunt.framework.auth.JwtToken;
 import hunt.framework.auth.JwtUtil;
+import hunt.framework.auth.principal;
+import hunt.framework.auth.UserDetails;
 import hunt.framework.auth.UserService;
 import hunt.framework.provider.ServiceProvider;
 
+import hunt.collection.ArrayList;
+import hunt.collection.Collection;
 import hunt.logging.ConsoleLogger;
 import hunt.shiro;
 import hunt.String;
@@ -32,16 +35,26 @@ class UserAuthRealm : AuthorizingRealm {
         string password = cast(string)token.getCredentials();
 
         version(HUNT_DEBUG) {
-            infof("principal: %s", username);
+            infof("username: %s", username);
         }        
 
         // To authenticate the user with username and password
-        bool isAuthenticated = _userService.authenticate(username, password);
+        UserDetails user = _userService.authenticate(username, password);
         
-        if(isAuthenticated) {
-            String principal = new String(username);
+        if(user !is null) {
+            Collection!(Object) principals = new ArrayList!(Object)(3);
+
+            UserIdPrincipal idPrincipal = new UserIdPrincipal(user.id);
+            principals.add(idPrincipal);
+
+            UsernamePrincipal namePrincipal = new UsernamePrincipal(username);
+            principals.add(namePrincipal);
+
             String credentials = new String(password);
-            SimpleAuthenticationInfo info = new SimpleAuthenticationInfo(principal, credentials, getName());
+
+            PrincipalCollection pCollection = new SimplePrincipalCollection(principals, getName());
+            SimpleAuthenticationInfo info = new SimpleAuthenticationInfo(pCollection, credentials);
+
             return info;
         } else {
             throw new IncorrectCredentialsException(username);
@@ -49,13 +62,15 @@ class UserAuthRealm : AuthorizingRealm {
     }
 
     override protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
-        String principal = cast(String) principals.getPrimaryPrincipal();
+        SimplePrincipalCollection spc = cast(SimplePrincipalCollection)principals;
+        
+        UsernamePrincipal principal = spc.oneByType!(UsernamePrincipal)();
         if(principal is null) {
-            warning("No principal avaliable");
+            warning("No username avaliable");
             return null;
         }
 
-        string username = principal.value();
+        string username = principal.getUsername();
         SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
 
         // To retrieve all the roles for the user from database

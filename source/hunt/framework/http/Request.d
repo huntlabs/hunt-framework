@@ -47,7 +47,7 @@ class Request {
     private UploadedFile[][string] _convertedMultiFiles;
     private RouteConfigManager _routeManager;
     private string _routeGroup = DEFAULT_ROUTE_GROUP;
-    private AuthUser _user;
+    private Identity _user;
     private Cookie _authCookie;
 
     HttpServerRequest _request;
@@ -59,14 +59,14 @@ class Request {
         _routeManager = serviceContainer().resolve!RouteConfigManager();
         _routeGroup = routeGroup;
         _remoteAddr = remoteAddress;
-        _user = new AuthUser();
+        _user = new Identity();
     }
 
-    AuthUser user() {
+    Identity user() {
         return _user;
     }
 
-    AuthUser authenticate(string name, string password) {
+    Identity signIn(string name, string password) {
         _user.authenticate(name, password);
         if(_user.isAuthenticated()) {
             UserService userService = serviceContainer().resolve!UserService();

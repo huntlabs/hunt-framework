@@ -11,8 +11,8 @@ import std.digest.sha;
  */
 class DefaultUserService : UserService {
 
-    bool authenticate(string name, string password) {
-        return false;
+    UserDetails authenticate(string name, string password) {
+        return null;
     }
 
     string getSalt(string name, string password) {

@@ -1,7 +1,6 @@
 module hunt.framework.auth.JwtAuthRealm;
 
-// import hunt.framework.auth.AuthRole;
-// import hunt.framework.auth.AuthUser;
+import hunt.framework.auth.Identity;
 import hunt.framework.auth.JwtToken;
 import hunt.framework.auth.JwtUtil;
 import hunt.framework.auth.UserDetails;

@@ -1,44 +1,47 @@
-module hunt.framework.auth.AuthUser;
+module hunt.framework.auth.Identity;
 
-import hunt.framework.auth.AuthRole;
+import hunt.framework.auth.principal;
 
-import hunt.shiro;
 import hunt.logging.ConsoleLogger;
+import hunt.shiro;
 
 /**
- * 
+ * User Identity
  */
-class AuthUser {
+class Identity {
     private Subject _subject;
 
     this() {
         _subject = SecurityUtils.getSubject();
     }
 
-    // ulong id;
+    ulong id() {
+        PrincipalCollection pCollection = _subject.getPrincipals();
+        UserIdPrincipal principal = PrincipalCollectionHelper.oneByType!(UserIdPrincipal)(pCollection);
+
+        if(principal is null) {
+            return 0;
+        } else {
+            return principal.getUserId();
+        }        
+    }
 
     string name() {
-        Object principal = _subject.getPrincipal();
+        PrincipalCollection pCollection = _subject.getPrincipals();
+        UsernamePrincipal principal = PrincipalCollectionHelper.oneByType!(UsernamePrincipal)(pCollection);
+
         if(principal is null) {
             return "";
         } else {
-            return _subject.getPrincipal().toString();
+            return principal.getUsername();
         }
     }
 
-    // string password;
-
-    // string fullName;
-
-    // AuthRole[] roles;
-
-    // string[] permissions;
-
     void authenticate(string username, string password) {
-        // this.name = username;
-        // this.password = password;
 
-        warningf("Checking at first: %s", _subject.isAuthenticated());
+        version(HUNT_HTTP_DEBUG) { 
+            warningf("Checking at first: %s", _subject.isAuthenticated());
+        }
 
         if (_subject.isAuthenticated()) {
             _subject.logout();
@@ -83,6 +86,6 @@ class AuthUser {
     }
 
     override string toString() {
-        return "name: " ~ name ~ ", FullName: " ~ fullName;
+        return name(); 
     }
 }
