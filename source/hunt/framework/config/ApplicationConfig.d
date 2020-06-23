@@ -49,6 +49,12 @@ class ApplicationConfig {
         string langLocation = "./translations";
     }
 
+    struct AuthConf {
+        string loginUrl;
+        string successUrl;
+        string unauthorizedUrl;
+    }
+
     /** Config for static files */
     struct StaticFilesConf {
         bool enabled = true;
@@ -267,6 +273,7 @@ class ApplicationConfig {
 
     DatabaseConf database;
     ApplicationConf application;
+    AuthConf auth;
     StaticFilesConf staticfiles;
     CookieConf cookie;
     SessionConf session;

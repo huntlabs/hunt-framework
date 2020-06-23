@@ -70,8 +70,8 @@ class Request {
         _user.authenticate(name, password);
         if(_user.isAuthenticated()) {
             UserService userService = serviceContainer().resolve!UserService();
-            string salt = userService.getSalt(username, password);
-            string jwtToken = JwtUtil.sign(username, salt);
+            string salt = userService.getSalt(name, password);
+            string jwtToken = JwtUtil.sign(name, salt);
             _authCookie = new Cookie(JwtUtil.COOKIE_NAME, jwtToken);
         }
 
