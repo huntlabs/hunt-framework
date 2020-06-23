@@ -99,7 +99,7 @@ class HuntShiroCache : ShiroCache!(Object, AuthorizationInfo) {
     }
 
     AuthorizationInfo remove(Object key) {
-        warningf("%s, %d", key.toString, key.toHash());
+        version(HUNT_DEBUG) infof("key: %s, hash: %d", key.toString, key.toHash());
         string k = key.toHash().to!string(); // key.toString();
         if(!_cache.hasKey(k)) {
             return null;

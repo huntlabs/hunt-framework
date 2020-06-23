@@ -48,7 +48,10 @@ class Request {
     private RouteConfigManager _routeManager;
     private string _routeGroup = DEFAULT_ROUTE_GROUP;
     private Identity _user;
-    private Cookie _authCookie;
+    // private Cookie _authCookie;
+    private string _authToken;
+    private bool _remember = false;
+    private bool _isLogout = false;
 
     HttpServerRequest _request;
     alias _request this;
@@ -66,20 +69,40 @@ class Request {
         return _user;
     }
 
-    Identity signIn(string name, string password) {
-        _user.authenticate(name, password);
+    Identity signIn(string name, string password, bool remember = false) {
+        _user.authenticate(name, password, remember);
+        _remember = remember;
+
         if(_user.isAuthenticated()) {
             UserService userService = serviceContainer().resolve!UserService();
             string salt = userService.getSalt(name, password);
-            string jwtToken = JwtUtil.sign(name, salt);
-            _authCookie = new Cookie(JwtUtil.COOKIE_NAME, jwtToken);
+            _authToken = JwtUtil.sign(name, salt);
+            // _authCookie = new Cookie(JwtUtil.COOKIE_NAME, jwtToken);
         }
 
         return _user;
     }
 
-    Cookie authCookie() {
-        return _authCookie;
+    void signOut() {
+        _authToken = null;
+        _remember = false;
+        _isLogout = true;
+        if(_user.isAuthenticated()) {
+            _user.logout();
+        }
+    }
+
+    // the token value for the "remember me" session.
+    string authToken() {
+        return _authToken;
+    }
+
+    bool canRememberMe() {
+        return _remember;
+    }
+
+    bool isLogout() {
+        return _isLogout;
     }
 
     /**

@@ -97,6 +97,13 @@ abstract class Controller
         _routingContext.response = r.httpResponse;
     }
 
+    /**
+     * Get the currently authenticated user.
+     */
+    Identity user() {
+        return this.request().user();
+    }
+
     // AuthUser authenticate(string username, string password) {
     //     Request req = request();
     //     AuthUser user = req.user;
@@ -111,6 +118,7 @@ abstract class Controller
 
     //     return user;
     // }
+
 
     @property View view()
     {
@@ -164,7 +172,7 @@ abstract class Controller
 
         foreach (m; middlewares)
         {
-            version (HUNT_DEBUG) logDebugf("do %s onProcess ..", m.name());
+            version (HUNT_DEBUG) logDebugf("The %s is processing ...", m.name());
 
             auto response = m.onProcess(this.request, this.response);
             if (response is null)
@@ -247,9 +255,12 @@ abstract class Controller
         if(!resp.getFields().contains(HttpHeader.CONTENT_TYPE)) {
             resp.header(HttpHeader.CONTENT_TYPE, MimeType.TEXT_HTML_VALUE);
         }
-        
-        Cookie tokenCookie = req.authCookie();
-        if(tokenCookie !is null) {
+
+        if(req.canRememberMe() && !req.authToken().empty) {
+            Cookie tokenCookie = new Cookie(JwtUtil.COOKIE_NAME, req.authToken());
+            resp.withCookie(tokenCookie);
+        } else if(req.isLogout()) {
+            Cookie tokenCookie = new Cookie(JwtUtil.COOKIE_NAME, "", 0);
             resp.withCookie(tokenCookie);
         }
     }

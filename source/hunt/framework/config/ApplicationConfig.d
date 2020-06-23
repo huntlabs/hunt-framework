@@ -50,9 +50,9 @@ class ApplicationConfig {
     }
 
     struct AuthConf {
-        string loginUrl;
-        string successUrl;
-        string unauthorizedUrl;
+        string loginUrl = "/";
+        string successUrl = "/";
+        string unauthorizedUrl = "/";
     }
 
     /** Config for static files */

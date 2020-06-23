@@ -14,16 +14,24 @@ import hunt.framework.Simplify;
 import hunt.http.HttpHeader;
 import hunt.logging.ConsoleLogger;
 import hunt.shiro;
+import hunt.Functions;
 
 import std.range;
 import std.string;
 
+alias RouteCheckingHandler = Func1!(string, bool);
 
 /**
  * 
  */
 class JwtAuthMiddleware : MiddlewareInterface {
     enum TokenHeader = "Bearer ";
+
+    private RouteCheckingHandler _checkingHandler;
+
+    this(RouteCheckingHandler handler) {
+        _checkingHandler = handler;
+    }
 
     string name() {
         return typeof(this).stringof;
@@ -37,8 +45,18 @@ class JwtAuthMiddleware : MiddlewareInterface {
         //     return null;
         // }
 
+        bool needCheck = true;
+        if(_checkingHandler !is null) {
+            needCheck = _checkingHandler(request.path());
+        }
+
+        if(!needCheck) {
+            return null;
+        }
+
         Subject subject = SecurityUtils.getSubject();
         if(subject.isAuthenticated()) {
+            warningf("User %s has logged in.", request.user.name());
             return null;
         }
         
@@ -46,9 +64,6 @@ class JwtAuthMiddleware : MiddlewareInterface {
 
         ApplicationConfig.AuthConf appConfig = app().config().auth;
         string unauthorizedUrl = appConfig.unauthorizedUrl;
-
-        unauthorizedUrl = "/403.html";
-
         
         if(!tokenString.empty) {
             if(!tokenString.startsWith(TokenHeader)) {
@@ -60,8 +75,6 @@ class JwtAuthMiddleware : MiddlewareInterface {
 
         if(tokenString.empty)
             tokenString = request.cookie("__auth_token__");
-            
-        // info(tokenString);
 
         if(!tokenString.empty) {
             try {
@@ -76,6 +89,7 @@ class JwtAuthMiddleware : MiddlewareInterface {
             }
 
             if(subject.isAuthenticated()) {
+                warningf("User %s logged in.", request.user.name());
                 return null;	
             }
         }

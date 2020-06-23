@@ -37,7 +37,7 @@ class Identity {
         }
     }
 
-    void authenticate(string username, string password) {
+    void authenticate(string username, string password, bool remember = true) {
 
         version(HUNT_SHIRO_DEBUG) { 
             warningf("Checking the status at first: %s", _subject.isAuthenticated());
@@ -48,7 +48,7 @@ class Identity {
         }
 
         UsernamePasswordToken token = new UsernamePasswordToken(username, password);
-        token.setRememberMe(true);
+        token.setRememberMe(remember);
 
         try {
             _subject.login(token);
@@ -83,6 +83,10 @@ class Identity {
         }
 
         return true;
+    }
+
+    void logout() {
+        _subject.logout();
     }
 
     override string toString() {
