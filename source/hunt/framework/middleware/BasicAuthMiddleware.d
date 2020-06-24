@@ -7,8 +7,10 @@ import hunt.framework.config.ApplicationConfig;
 import hunt.framework.http.RedirectResponse;
 import hunt.framework.http.Request;
 import hunt.framework.http.Response;
+import hunt.framework.http.UnauthorizedResponse;
 import hunt.framework.Simplify;
 import hunt.http.HttpHeader;
+import hunt.http.AuthenticationScheme;
 import hunt.logging.ConsoleLogger;
 import hunt.shiro;
 
@@ -58,13 +60,15 @@ class BasicAuthMiddleware : MiddlewareInterface {
         string tokenString = request.basicToken();
         if(tokenString.empty()) {
             return new RedirectResponse(request, unauthorizedUrl);
+            // return new UnauthorizedResponse("", AuthenticationScheme.Basic);
         }
 
         ubyte[] decoded = Base64.decode(tokenString);
         string[] values = split(cast(string)decoded, ":");
         if(values.length != 2) {
-            warningf("Wrong format: %s", values);
+            warningf("Wrong token: %s", values);
             return new RedirectResponse(request, unauthorizedUrl);
+            // return new UnauthorizedResponse("", AuthenticationScheme.Basic);
         }
 
         string username = values[0];
@@ -75,6 +79,7 @@ class BasicAuthMiddleware : MiddlewareInterface {
             return null;
         } else {
             return new RedirectResponse(request, unauthorizedUrl);
+            // return new UnauthorizedResponse("", AuthenticationScheme.Basic);
         }
     }
 }

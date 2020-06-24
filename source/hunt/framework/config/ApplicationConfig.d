@@ -53,6 +53,8 @@ class ApplicationConfig {
         string loginUrl = "/";
         string successUrl = "/";
         string unauthorizedUrl = "/";
+
+        string basicRealm = "Secure Area";
     }
 
     /** Config for static files */
