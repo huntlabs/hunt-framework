@@ -17,6 +17,7 @@ import hunt.framework.Init;
 import hunt.framework.provider.ServiceProvider;
 import hunt.framework.routing;
 
+import hunt.http.AuthenticationScheme;
 import hunt.http.Cookie;
 import hunt.http.HttpMethod;
 import hunt.http.HttpHeader;
@@ -29,10 +30,18 @@ import hunt.framework.auth;
 
 import std.algorithm;
 import std.array : split;
+import std.base64;
 import std.json;
 import std.format;
 import std.range;
 import std.socket;
+
+
+enum BasicTokenHeader = AuthenticationScheme.Basic ~ " ";
+enum BearerTokenHeader = AuthenticationScheme.Bearer ~ " ";
+
+enum string BASIC_COOKIE_NAME = "__basic_token__";
+enum string BEARER_COOKIE_NAME = "__jwt_token__";
 
 /**
  * 
@@ -50,6 +59,7 @@ class Request {
     private Identity _user;
     // private Cookie _authCookie;
     private string _authToken;
+    private AuthenticationScheme _authType = AuthenticationScheme.None;
     private bool _remember = false;
     private bool _isLogout = false;
 
@@ -69,24 +79,44 @@ class Request {
         return _user;
     }
 
-    Identity signIn(string name, string password, bool remember = false) {
+    Identity signIn(string name, string password, bool remember = false, 
+            AuthenticationScheme authType = AuthenticationScheme.Bearer) {
         _user.authenticate(name, password, remember);
         _remember = remember;
+        _authType = authType;
 
         if(_user.isAuthenticated()) {
-            UserService userService = serviceContainer().resolve!UserService();
-            string salt = userService.getSalt(name, password);
-            _authToken = JwtUtil.sign(name, salt);
-            // _authCookie = new Cookie(JwtUtil.COOKIE_NAME, jwtToken);
+            if(authType == AuthenticationScheme.Bearer) {
+                UserService userService = serviceContainer().resolve!UserService();
+                string salt = userService.getSalt(name, password);
+                _authToken = JwtUtil.sign(name, salt);
+            } else {
+                string str = name ~ ":" ~ password;
+                ubyte[] data = cast(ubyte[])str.dup;
+                _authToken = cast(string)Base64.encode(data);
+            }
         }
 
         return _user;
     }
 
-    void signOut() {
+    void signOut(AuthenticationScheme authType = AuthenticationScheme.None) {
         _authToken = null;
         _remember = false;
         _isLogout = true;
+
+        if(authType == AuthenticationScheme.None) {
+            // Detect the auth type automatically
+            string token = this.bearerToken();
+            if(token.empty()) {
+                token = this.basicToken();
+            }
+        }
+
+        if(_authType != AuthenticationScheme.Basic || _authType != AuthenticationScheme.Bearer) {
+            warningf("Unsupported auth type: %s", _authType);
+        }
+
         if(_user.isAuthenticated()) {
             _user.logout();
         }
@@ -95,6 +125,10 @@ class Request {
     // the token value for the "remember me" session.
     string authToken() {
         return _authToken;
+    }
+
+    AuthenticationScheme authType() {
+        return _authType;
     }
 
     bool canRememberMe() {
@@ -957,12 +991,28 @@ class Request {
     /**
      * Get the bearer token from the request headers.
      *
-     * @return string|null
+     * @return string
      */
     string bearerToken() {
         string v = _request.header("Authorization");
-        if (startsWith(v, "Bearer ") >= 0)
-            return v[7 .. $];
+        if (startsWith(v, BearerTokenHeader)) {
+            _authType = AuthenticationScheme.Bearer;
+            return v[BearerTokenHeader.length .. $];
+        }
+        return null;
+    }
+
+    /**
+     * Get the basic token from the request headers.
+     *
+     * @return string
+     */
+    string basicToken() {
+        string v = _request.header("Authorization");
+        if (startsWith(v, BasicTokenHeader)) {
+            _authType = AuthenticationScheme.Basic;
+            return v[BasicTokenHeader.length .. $];
+        }
         return null;
     }
 

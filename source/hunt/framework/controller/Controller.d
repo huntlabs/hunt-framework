@@ -104,22 +104,6 @@ abstract class Controller
         return this.request().user();
     }
 
-    // AuthUser authenticate(string username, string password) {
-    //     Request req = request();
-    //     AuthUser user = req.user;
-    //     user.authenticate(username, password);
-
-    //     if(user.isAuthenticated()) {
-    //         UserService userService = serviceContainer().resolve!UserService();
-    //         string salt = userService.getSalt(username, password);
-    //         string jwtToken = JwtUtil.sign(username, salt);
-    //         Cookie tokenCookie = new Cookie("__auth_token__", jwtToken);
-    //     }
-
-    //     return user;
-    // }
-
-
     @property View view()
     {
         if (_view is null)
@@ -256,12 +240,31 @@ abstract class Controller
             resp.header(HttpHeader.CONTENT_TYPE, MimeType.TEXT_HTML_VALUE);
         }
 
-        if(req.canRememberMe() && !req.authToken().empty) {
-            Cookie tokenCookie = new Cookie(JwtUtil.COOKIE_NAME, req.authToken());
-            resp.withCookie(tokenCookie);
+        if(req.canRememberMe()) {
+            string authToken = req.authToken();
+            AuthenticationScheme authType = req.authType();
+            Cookie tokenCookie;
+            if(authType == AuthenticationScheme.Bearer) {
+                tokenCookie = new Cookie(BEARER_COOKIE_NAME, authToken);
+            } else if(authType == AuthenticationScheme.Basic) {
+                tokenCookie = new Cookie(BASIC_COOKIE_NAME, authToken);
+            }
+
+            if(tokenCookie !is null)
+                resp.withCookie(tokenCookie);
+
         } else if(req.isLogout()) {
-            Cookie tokenCookie = new Cookie(JwtUtil.COOKIE_NAME, "", 0);
-            resp.withCookie(tokenCookie);
+            AuthenticationScheme authType = req.authType();
+            Cookie tokenCookie;
+            
+            if(authType == AuthenticationScheme.Bearer) {
+                tokenCookie = new Cookie(BEARER_COOKIE_NAME, "", 0);
+            } else if(authType == AuthenticationScheme.Basic) {
+                tokenCookie = new Cookie(BASIC_COOKIE_NAME, "", 0);
+            }
+
+            if(tokenCookie !is null)
+                resp.withCookie(tokenCookie);
         }
     }
 

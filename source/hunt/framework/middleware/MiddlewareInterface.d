@@ -14,6 +14,9 @@ module hunt.framework.middleware.MiddlewareInterface;
 import hunt.framework.http.Request;
 import hunt.framework.http.Response;
 
+import hunt.Functions;
+
+alias RouteChecker = Func2!(string, string, bool);
 
 interface MiddlewareInterface
 {

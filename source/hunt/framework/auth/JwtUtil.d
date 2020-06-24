@@ -15,8 +15,7 @@ class JwtUtil {
 
     __gshared Duration EXPIRE_TIME = 5.days;
     
-    enum string TYPE_NAME = "Bearer";
-    enum string COOKIE_NAME = "__auth_token__";
+    // enum string COOKIE_NAME = "__jwt_token__";
 
     static bool verify(string token, string username, string secret) {
         try {

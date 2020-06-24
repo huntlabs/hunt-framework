@@ -61,10 +61,10 @@ class Identity {
                     ~ " is locked.  " ~ "Please contact your administrator to unlock it.");
         } catch (AuthenticationException ex) {
             errorf("Authentication failed: ", ex.msg);
-            error(ex);
+            version(HUNT_DEBUG) error(ex);
         } catch (Exception ex) {
             errorf("Authentication failed: ", ex.msg);
-            error(ex);
+            version(HUNT_DEBUG) error(ex);
         }
     }
 

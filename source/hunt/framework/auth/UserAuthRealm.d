@@ -34,7 +34,7 @@ class UserAuthRealm : AuthorizingRealm {
         string username = token.getPrincipal();
         string password = cast(string)token.getCredentials();
 
-        version(HUNT_DEBUG) {
+        version(HUNT_SHIRO_DEBUG) {
             infof("username: %s", username);
         }        
 
