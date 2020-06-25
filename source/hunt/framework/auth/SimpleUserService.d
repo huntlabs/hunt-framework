@@ -1,0 +1,81 @@
+module hunt.framework.auth.SimpleUserService;
+
+import hunt.framework.auth.UserDetails;
+import hunt.framework.auth.UserService;
+
+import hunt.framework.config.AuthUserConfig;
+import hunt.framework.provider.ServiceProvider;
+
+import std.digest.sha;
+
+
+/**
+ * Retrieve user details from a local config file.
+ */
+class SimpleUserService : UserService {
+
+    private AuthUserConfig _userConfig;
+
+    this() {
+        _userConfig = serviceContainer.resolve!(AuthUserConfig)();
+    }
+
+    private AuthUserConfig.Role getRole(string name) {
+        foreach(AuthUserConfig.Role r; _userConfig.roles) {
+            if(r.name == name) return r;
+        }
+
+        return null;
+    }
+
+    UserDetails authenticate(string name, string password) {
+        
+        foreach(AuthUserConfig.User user; _userConfig.users) {
+            if(user.name == name && user.password == password) {
+                UserDetails userDetails = new UserDetails();
+                userDetails.name = name;
+                userDetails.password = password;
+
+                // roles
+                AuthUserConfig.Role role = getRole(user.role);
+                if(role !is null) {
+                    userDetails.roles ~= role.name;
+                    userDetails.permissions ~= role.permissions;
+                } 
+                return userDetails;
+            }
+        }
+        return null;
+    }
+
+    UserDetails getByName(string name) {
+        foreach(AuthUserConfig.User user; _userConfig.users) {
+            if(user.name == name) {
+                UserDetails userDetails = new UserDetails();
+                userDetails.name = name;
+                userDetails.password = user.password;
+
+                // roles
+                AuthUserConfig.Role role = getRole(user.role);
+                if(role !is null) {
+                    userDetails.roles ~= role.name;
+                    userDetails.permissions ~= role.permissions;
+                } 
+                return userDetails;
+            }
+        }
+        return null;
+    }
+
+    UserDetails getById(ulong id) {
+        return null;
+    }
+
+    string getSalt(string name, string password) {
+        string userSalt = name;
+        auto sha256 = new SHA256Digest();
+        ubyte[] hash256 = sha256.digest(password~userSalt);
+        return toHexString(hash256);        
+    }
+
+}

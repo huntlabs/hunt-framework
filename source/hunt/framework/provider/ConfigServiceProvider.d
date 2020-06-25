@@ -1,6 +1,7 @@
 module hunt.framework.provider.ConfigServiceProvider;
 
 import hunt.framework.config.ApplicationConfig;
+import hunt.framework.config.AuthUserConfig;
 import hunt.framework.config.ConfigManager;
 import hunt.framework.provider.ServiceProvider;
 import hunt.framework.Init;
@@ -27,16 +28,15 @@ class ConfigServiceProvider : ServiceProvider {
     override void register() {
         container.register!(ConfigManager).singleInstance();
 
+        registerApplicationConfig();
+
+        registerRouteConfigManager();
+
+        registerAuthUserConfig();
+    }
+
+    protected void registerApplicationConfig() {
         container.register!(ApplicationConfig)(&buildAppConfig).singleInstance();
-
-        container.register!(RouteConfigManager)(() {
-            ConfigManager configManager = container.resolve!(ConfigManager)();
-            ApplicationConfig appConfig = container.resolve!(ApplicationConfig)();
-            RouteConfigManager routeConfig = new RouteConfigManager(appConfig);
-            routeConfig.basePath = configManager.configPath();
-
-            return routeConfig;
-        });
     }
 
     private ApplicationConfig buildAppConfig() {
@@ -91,5 +91,34 @@ class ConfigServiceProvider : ServiceProvider {
         }
 
         // 0 means to use the IO thread
+    }
+
+    protected void registerRouteConfigManager() {
+        container.register!(RouteConfigManager)(() {
+            ConfigManager configManager = container.resolve!(ConfigManager)();
+            ApplicationConfig appConfig = container.resolve!(ApplicationConfig)();
+            RouteConfigManager routeConfig = new RouteConfigManager(appConfig);
+            routeConfig.basePath = configManager.configPath();
+
+            return routeConfig;
+        });
+    }
+
+    protected void registerAuthUserConfig() {
+        container.register!(AuthUserConfig)(() {
+            string userConfigFile = buildPath(APP_PATH, DEFAULT_CONFIG_PATH, DEFAULT_USERS_CONFIG);
+            string roleConfigFile = buildPath(APP_PATH, DEFAULT_CONFIG_PATH, DEFAULT_ROLES_CONFIG);
+            AuthUserConfig config = AuthUserConfig.load(userConfigFile, roleConfigFile);
+
+            trace(config.users);
+            trace(config.roles);
+
+            return config;
+        }).singleInstance();
+    }
+
+    override void boot() {
+        
+        AuthUserConfig userConfig = container.resolve!(AuthUserConfig);
     }
 }

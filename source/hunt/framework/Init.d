@@ -41,6 +41,10 @@ enum string DEFAULT_CONFIG_FILE = "application.conf";
 enum string DEFAULT_CONFIG_EXT = ".conf";
 enum string DEFAULT_ROUTE_CONFIG = "./routes";
 
+enum string DEFAULT_USERS_CONFIG = "./users";
+enum string DEFAULT_ROLES_CONFIG = "./roles";
+
+
 // default route group name
 enum string DEFAULT_ROUTE_GROUP = "default";
 enum string DEFAULT_ROUTE_CONFIG_EXT = ".routes";
