@@ -101,7 +101,7 @@ abstract class Controller
      * Get the currently authenticated user.
      */
     Identity user() {
-        return this.request().user();
+        return this.request().auth().user();
     }
 
     @property View view()
@@ -241,12 +241,12 @@ abstract class Controller
         }
 
         if(req.canRememberMe()) {
-            string authToken = req.authToken();
-            AuthenticationScheme authType = req.authType();
+            string authToken = req.auth.token();
+            AuthenticationScheme authScheme = req.auth().scheme();
             Cookie tokenCookie;
-            if(authType == AuthenticationScheme.Bearer) {
+            if(authScheme == AuthenticationScheme.Bearer) {
                 tokenCookie = new Cookie(BEARER_COOKIE_NAME, authToken);
-            } else if(authType == AuthenticationScheme.Basic) {
+            } else if(authScheme == AuthenticationScheme.Basic) {
                 tokenCookie = new Cookie(BASIC_COOKIE_NAME, authToken);
             }
 
@@ -254,12 +254,12 @@ abstract class Controller
                 resp.withCookie(tokenCookie);
 
         } else if(req.isLogout()) {
-            AuthenticationScheme authType = req.authType();
+            AuthenticationScheme authScheme = req.auth().scheme();
             Cookie tokenCookie;
             
-            if(authType == AuthenticationScheme.Bearer) {
+            if(authScheme == AuthenticationScheme.Bearer) {
                 tokenCookie = new Cookie(BEARER_COOKIE_NAME, "", 0);
-            } else if(authType == AuthenticationScheme.Basic) {
+            } else if(authScheme == AuthenticationScheme.Basic) {
                 tokenCookie = new Cookie(BASIC_COOKIE_NAME, "", 0);
             }
 

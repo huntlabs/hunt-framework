@@ -50,7 +50,7 @@ class BasicAuthMiddleware : MiddlewareInterface {
         Subject subject = SecurityUtils.getSubject();
         if (subject.isAuthenticated()) {
             version (HUNT_DEBUG)
-                tracef("User %s has logged in.", request.user.name());
+                tracef("User %s has logged in.", request.auth().user().name());
             return null;
         }
 
@@ -74,7 +74,7 @@ class BasicAuthMiddleware : MiddlewareInterface {
         string username = values[0];
         string password = values[1];
 
-        Identity user = request.signIn(username, password);
+        Identity user = request.auth().signIn(username, password);
         if(user.isAuthenticated()) {
             return null;
         } else {

@@ -49,7 +49,7 @@ class JwtAuthMiddleware : MiddlewareInterface {
 
         Subject subject = SecurityUtils.getSubject();
         if(subject.isAuthenticated()) {
-            version(HUNT_DEBUG) tracef("User %s has logged in.", request.user.name());
+            version(HUNT_DEBUG) tracef("User %s has logged in.",  request.auth().user().name());
             return null;
         }
         
@@ -77,7 +77,7 @@ class JwtAuthMiddleware : MiddlewareInterface {
             }
 
             if(subject.isAuthenticated()) {
-                version(HUNT_DEBUG) infof("User %s logged in.", request.user.name());
+                version(HUNT_DEBUG) infof("User %s logged in.",  request.auth().user().name());
                 return null;	
             }
         }

@@ -56,87 +56,22 @@ class Request {
     private UploadedFile[][string] _convertedMultiFiles;
     private RouteConfigManager _routeManager;
     private string _routeGroup = DEFAULT_ROUTE_GROUP;
-    private Identity _user;
-    // private Cookie _authCookie;
-    private string _authToken;
-    private AuthenticationScheme _authType = AuthenticationScheme.None;
-    private bool _remember = false;
-    private bool _isLogout = false;
+    private Auth _auth;
 
     HttpServerRequest _request;
     alias _request this;
 
     this(HttpServerRequest request, Address remoteAddress, string routeGroup = DEFAULT_ROUTE_GROUP) {
         this._request = request;
+        _auth = new Auth(this);
         _sessionStorage = serviceContainer().resolve!SessionStorage();
         _routeManager = serviceContainer().resolve!RouteConfigManager();
         _routeGroup = routeGroup;
         _remoteAddr = remoteAddress;
-        _user = new Identity();
     }
 
-    Identity user() {
-        return _user;
-    }
-
-    Identity signIn(string name, string password, bool remember = false, 
-            AuthenticationScheme authType = AuthenticationScheme.Bearer) {
-        _user.authenticate(name, password, remember);
-        _remember = remember;
-        _authType = authType;
-
-        if(_user.isAuthenticated()) {
-            if(authType == AuthenticationScheme.Bearer) {
-                UserService userService = serviceContainer().resolve!UserService();
-                string salt = userService.getSalt(name, password);
-                _authToken = JwtUtil.sign(name, salt);
-            } else {
-                string str = name ~ ":" ~ password;
-                ubyte[] data = cast(ubyte[])str.dup;
-                _authToken = cast(string)Base64.encode(data);
-            }
-        }
-
-        return _user;
-    }
-
-    void signOut(AuthenticationScheme authType = AuthenticationScheme.None) {
-        _authToken = null;
-        _remember = false;
-        _isLogout = true;
-
-        if(authType == AuthenticationScheme.None) {
-            // Detect the auth type automatically
-            string token = this.bearerToken();
-            if(token.empty()) {
-                token = this.basicToken();
-            }
-        }
-
-        if(_authType != AuthenticationScheme.Basic || _authType != AuthenticationScheme.Bearer) {
-            warningf("Unsupported auth type: %s", _authType);
-        }
-
-        if(_user.isAuthenticated()) {
-            _user.logout();
-        }
-    }
-
-    // the token value for the "remember me" session.
-    string authToken() {
-        return _authToken;
-    }
-
-    AuthenticationScheme authType() {
-        return _authType;
-    }
-
-    bool canRememberMe() {
-        return _remember;
-    }
-
-    bool isLogout() {
-        return _isLogout;
+    Auth auth() {
+        return _auth;
     }
 
     /**
@@ -996,7 +931,6 @@ class Request {
     string bearerToken() {
         string v = _request.header("Authorization");
         if (startsWith(v, BearerTokenHeader)) {
-            _authType = AuthenticationScheme.Bearer;
             return v[BearerTokenHeader.length .. $];
         }
         return null;
@@ -1010,7 +944,6 @@ class Request {
     string basicToken() {
         string v = _request.header("Authorization");
         if (startsWith(v, BasicTokenHeader)) {
-            _authType = AuthenticationScheme.Basic;
             return v[BasicTokenHeader.length .. $];
         }
         return null;
