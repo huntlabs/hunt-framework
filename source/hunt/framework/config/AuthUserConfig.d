@@ -20,10 +20,10 @@ class AuthUserConfig {
     static class User {
         string name;
         string password;
-        string role;
+        string[] roles;
 
         override string toString() {
-            return "name: " ~ name ~ ", role: " ~ role;
+            return "name: " ~ name ~ ", role: " ~ roles.to!string();
         }
     }
 
@@ -66,7 +66,7 @@ class AuthUserConfig {
 
                 string fieldValue;
                 string password;
-                string role;
+                string roles;
 
                 int fieldIndex = 1;
                 foreach(string v; parts[1..$]) {
@@ -74,7 +74,7 @@ class AuthUserConfig {
                     if(fieldValue.empty) continue;
 
                     if(fieldIndex == 1) password = fieldValue;
-                    if(fieldIndex == 2) role = fieldValue;
+                    if(fieldIndex == 2) roles = fieldValue;
 
                     fieldIndex++;
                     if(fieldIndex > 2) break;
@@ -83,7 +83,7 @@ class AuthUserConfig {
                 User user = new User();
                 user.name = parts[0].strip();
                 user.password = password;
-                user.role = role;
+                user.roles = roles.split("|");
 
                 config.users ~= user;
             }

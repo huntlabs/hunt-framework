@@ -5,6 +5,7 @@ import hunt.framework.auth.UserService;
 
 import hunt.framework.config.AuthUserConfig;
 import hunt.framework.provider.ServiceProvider;
+import hunt.logging.ConsoleLogger;
 
 import std.digest.sha;
 
@@ -37,11 +38,16 @@ class SimpleUserService : UserService {
                 userDetails.password = password;
 
                 // roles
-                AuthUserConfig.Role role = getRole(user.role);
-                if(role !is null) {
-                    userDetails.roles ~= role.name;
-                    userDetails.permissions ~= role.permissions;
-                } 
+                foreach(string roleName; user.roles) {
+                    AuthUserConfig.Role role = getRole(roleName);
+                    if(role !is null) {
+                        userDetails.roles ~= role.name;
+                        userDetails.permissions ~= role.permissions;
+                    } else {
+                        warning("The role is not defined: %s", roleName);
+                    }
+                }
+                
                 return userDetails;
             }
         }
@@ -56,11 +62,15 @@ class SimpleUserService : UserService {
                 userDetails.password = user.password;
 
                 // roles
-                AuthUserConfig.Role role = getRole(user.role);
-                if(role !is null) {
-                    userDetails.roles ~= role.name;
-                    userDetails.permissions ~= role.permissions;
-                } 
+                foreach(string roleName; user.roles) {
+                    AuthUserConfig.Role role = getRole(roleName);
+                    if(role !is null) {
+                        userDetails.roles ~= role.name;
+                        userDetails.permissions ~= role.permissions;
+                    } else {
+                        warning("The role is not defined: %s", roleName);
+                    }
+                }
                 return userDetails;
             }
         }
