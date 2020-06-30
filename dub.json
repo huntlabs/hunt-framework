@@ -10,7 +10,7 @@
         "hunt-http": "~>0.6.2",
         "hunt-entity": "~>2.6.0",
         "hunt-cache": "~>0.8.1",
-        "hunt-shiro": "~>1.1.2",
+        "hunt-shiro": "~>1.1.3",
         "hunt-jwt": "~>0.1.0-beta.1",
         "hunt-amqp-client": "~>1.1.0-beta.2",
         "poodinis": "~>8.1.0-beta.2"

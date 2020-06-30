@@ -75,6 +75,10 @@ class Identity {
     bool hasRole(string role) {
         return _subject.hasRole(role);
     }
+    
+    bool hasAllRoles(string[] roles...) {
+        return _subject.hasAllRoles(roles);
+    }
 
     bool isPermitted(string[] permissions...) {
         bool[] resultSet = _subject.isPermitted(permissions);
