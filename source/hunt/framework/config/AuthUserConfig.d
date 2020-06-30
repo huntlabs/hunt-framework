@@ -13,6 +13,15 @@ import std.string;
 
 import hunt.logging.ConsoleLogger;
 
+
+/**
+ * Convert the permission format from Hunt to Shiro, which means that 
+ * all the '.' will be replaced with the ':'.
+ */
+static string toShiroPermissions(string value) {
+    return value.replace('.', ':');
+}
+
 /**
  * 
  */
@@ -29,6 +38,14 @@ class AuthUserConfig {
 
     static class Role {
         string name;
+
+        /**
+         * Examples:
+         *  printer:query,print:lp7200
+         * 
+         * See_also:
+         *  https://shiro.apache.org/permissions.html
+         */
         string[] permissions;
 
         override string toString() {
@@ -115,7 +132,7 @@ class AuthUserConfig {
                     if(!permissions.empty) break;
                 }
 
-                role.permissions = permissions.split("|").map!(p => strip(p)).array;
+                role.permissions = permissions.split("|").map!(p => p.strip().toShiroPermissions()).array;
                 config.roles ~= role;
             }            
         }
