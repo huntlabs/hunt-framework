@@ -23,24 +23,33 @@ import std.string;
 /**
  * 
  */
-class JwtAuthMiddleware : MiddlewareInterface {
+class JwtAuthMiddleware : AbstractMiddleware {
 
-    private RouteChecker _couteChecker;
-
-    this(RouteChecker handler = null) {
-        _couteChecker = handler;
+    this() {
+        super();
     }
 
-    string name() {
-        return typeof(this).stringof;
+    this(RouteChecker routeChecker, MiddlewareEventHandler rejectionHandler) {
+        super(routeChecker, rejectionHandler);
     }
+
+    private Response onRejected(Request request) {
+
+        if(_rejectionHandler !is null) {
+            return _rejectionHandler(this, request);
+        } else {
+            ApplicationConfig.AuthConf appConfig = app().config().auth;
+            string unauthorizedUrl = appConfig.unauthorizedUrl;
+            return new RedirectResponse(request, unauthorizedUrl);
+        }
+    }    
 
     Response onProcess(Request request, Response response = null) {
         version(HUNT_SHIRO_DEBUG) infof("path: %s, method: %s", request.path(), request.method );
 
         bool needCheck = true;
-        if(_couteChecker !is null) {
-            needCheck = _couteChecker(request.path(), request.getMethod());
+        if(_routeChecker !is null) {
+            needCheck = _routeChecker(request.path(), request.getMethod());
         }
 
         if(!needCheck) {
@@ -53,17 +62,11 @@ class JwtAuthMiddleware : MiddlewareInterface {
             return null;
         }
         
-        ApplicationConfig.AuthConf appConfig = app().config().auth;
-        string unauthorizedUrl = appConfig.unauthorizedUrl;
-        
         string tokenString = request.bearerToken();
-        if(tokenString.empty) {
-            return new RedirectResponse(request, unauthorizedUrl);
-        }
 
         if(tokenString.empty)
             tokenString = request.cookie(BEARER_COOKIE_NAME);
-
+            
         if(!tokenString.empty) {
             try {
                 JwtToken token = new JwtToken(tokenString);
@@ -81,7 +84,7 @@ class JwtAuthMiddleware : MiddlewareInterface {
                 return null;	
             }
         }
-
-        return new RedirectResponse(request, unauthorizedUrl);        
+        
+        return onRejected(request);
     }
 }

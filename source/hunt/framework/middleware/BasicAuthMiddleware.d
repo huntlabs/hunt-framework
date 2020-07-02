@@ -9,6 +9,7 @@ import hunt.framework.http.Request;
 import hunt.framework.http.Response;
 import hunt.framework.http.UnauthorizedResponse;
 import hunt.framework.Simplify;
+
 import hunt.http.HttpHeader;
 import hunt.http.AuthenticationScheme;
 import hunt.logging.ConsoleLogger;
@@ -21,26 +22,34 @@ import std.string;
 /**
  * 
  */
-class BasicAuthMiddleware : MiddlewareInterface {
-    
-    enum TokenHeader = "Basic ";
-    private RouteChecker _couteChecker;
+class BasicAuthMiddleware : AbstractMiddleware {
 
-    this(RouteChecker handler = null) {
-        _couteChecker = handler;
+    this() {
+        super();
     }
 
-    string name() {
-        return typeof(this).stringof;
+    this(RouteChecker routeChecker, MiddlewareEventHandler rejectionHandler) {
+        super(routeChecker, rejectionHandler);
     }
+
+    private Response onRejected(Request request) {
+
+        if(_rejectionHandler !is null) {
+            return _rejectionHandler(this, request);
+        } else {
+            ApplicationConfig.AuthConf appConfig = app().config().auth;
+            string unauthorizedUrl = appConfig.unauthorizedUrl;
+            return new RedirectResponse(request, unauthorizedUrl);
+        }
+    }    
 
     ///return null is continue, response is close the session
     Response onProcess(Request request, Response response = null) {
         infof("path: %s, method: %s", request.path(), request.method);
 
         bool needCheck = true;
-        if (_couteChecker !is null) {
-            needCheck = _couteChecker(request.path(), request.getMethod());
+        if (_routeChecker !is null) {
+            needCheck = _routeChecker(request.path(), request.getMethod());
         }
 
         if (!needCheck) {
@@ -58,17 +67,15 @@ class BasicAuthMiddleware : MiddlewareInterface {
         string unauthorizedUrl = appConfig.unauthorizedUrl;
 
         string tokenString = request.basicToken();
-        if(tokenString.empty()) {
-            return new RedirectResponse(request, unauthorizedUrl);
-            // return new UnauthorizedResponse("", AuthenticationScheme.Basic);
+        if(tokenString.empty) {
+            return onRejected(request);
         }
 
         ubyte[] decoded = Base64.decode(tokenString);
         string[] values = split(cast(string)decoded, ":");
         if(values.length != 2) {
             warningf("Wrong token: %s", values);
-            return new RedirectResponse(request, unauthorizedUrl);
-            // return new UnauthorizedResponse("", AuthenticationScheme.Basic);
+            return onRejected(request);
         }
 
         string username = values[0];
@@ -78,8 +85,7 @@ class BasicAuthMiddleware : MiddlewareInterface {
         if(user.isAuthenticated()) {
             return null;
         } else {
-            return new RedirectResponse(request, unauthorizedUrl);
-            // return new UnauthorizedResponse("", AuthenticationScheme.Basic);
+            return onRejected(request);
         }
     }
 }
