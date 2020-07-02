@@ -2,7 +2,7 @@ module hunt.framework.middleware.Middleware;
 
 
 /**
- * 
+ * Accepted middleware
  */
 struct Middleware {
     string[] names;
@@ -17,7 +17,7 @@ struct Middleware {
 
 
 /**
- * 
+ * Skipped middleware
  */
 struct SkippedMiddleware {
     string[] names;

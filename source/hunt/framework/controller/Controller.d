@@ -14,6 +14,8 @@ module hunt.framework.controller.Controller;
 import hunt.framework.application.Application;
 import hunt.framework.auth;
 import hunt.framework.breadcrumb.BreadcrumbsManager;
+import hunt.framework.middleware.Middleware;
+import hunt.framework.middleware.MiddlewareInfo;
 import hunt.framework.middleware.MiddlewareInterface;
 
 import hunt.framework.http.Request;
@@ -41,6 +43,7 @@ import poodinis;
 import core.memory;
 import core.thread;
 
+import std.algorithm;
 import std.exception;
 import std.string;
 import std.traits;
@@ -50,7 +53,8 @@ struct Action {
 }
 
 private enum string TempVarName = "__var";
-private enum string IndentString = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";  // 16 tabs
+// private enum string IndentString = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";  // 16 tabs
+private enum string IndentString = "                                ";  // 32 spaces
 
 string indent(size_t number) {
     assert(number>0 && IndentString.length, "Out of range");
@@ -65,6 +69,9 @@ abstract class Controller
 {
     private Request _request;
     private Response _response;
+
+    private MiddlewareInfo[] _acceptedMiddlewares;
+    private MiddlewareInfo[] _skippedMiddlewares;
 
     protected
     {
@@ -128,6 +135,7 @@ abstract class Controller
         return true;
     }
 
+
     ///add middleware
     ///return true is ok, the named middleware is already exist return false
     bool addMiddleware(MiddlewareInterface m)
@@ -141,30 +149,84 @@ abstract class Controller
         return true;
     }
 
+    /**
+     * 
+     */
+    void addAcceptedMiddleware(string fullName, string actionName, string controllerName, string moduleName) {
+        MiddlewareInfo info = new MiddlewareInfo(fullName, actionName, controllerName, moduleName);
+        _acceptedMiddlewares ~= info;
+    }
+    
+    /**
+     * 
+     */
+    void addSkippedMiddleware(string fullName, string actionName, string controllerName, string moduleName) {
+        MiddlewareInfo info = new MiddlewareInfo(fullName, actionName, controllerName, moduleName);
+        _skippedMiddlewares ~= info;
+    }
+
+    protected MiddlewareInterface[] getAcceptedMiddlewareByAction(string name) {
+        auto middlewares = _acceptedMiddlewares.filter!( m => m.action == name);
+        // auto middlewares = _acceptedMiddlewares.filter!( (m) { 
+        //     trace(m.action, " == ", name);
+        //     return m.action == name;
+        // });
+
+        
+        MiddlewareInterface[] result;
+        foreach(MiddlewareInfo info; middlewares) {
+            // warningf("name: %s, action: %s", info.fullName, info.action);
+
+            MiddlewareInterface middleware = cast(MiddlewareInterface)Object.factory(info.fullName);
+            if(middleware is null) {
+                warningf("%s is not a MiddlewareInterface", info.fullName);
+            } else {
+                result ~= middleware;
+            }
+        }
+
+        return result;
+    }
+
+    protected bool isMiddlewareSkipped(string name) {
+        bool r = _skippedMiddlewares.canFind!(m => m.fullName == name);
+        return r;
+    }
+
     // get all middleware
     MiddlewareInterface[string] getMiddlewares()
     {
         return this.middlewares;
     }
 
-    protected final Response doMiddleware()
-    {
-        version (HUNT_DEBUG) logDebug("doMiddlware ..");
+    protected final Response doMiddleware(string actionName) {
+        version (HUNT_DEBUG) tracef("Handling middlware for %s...%s", this.request.actionId, actionName);
 
-        // TODO: Tasks pending completion -@zhangxueping at 2020-01-02T18:24:39+08:00
-        // 
-
-        foreach (m; middlewares)
-        {
+        MiddlewareInterface[] acceptedMiddlewares = getAcceptedMiddlewareByAction(actionName);
+        foreach(MiddlewareInterface m; acceptedMiddlewares) {
             version (HUNT_DEBUG) logDebugf("The %s is processing ...", m.name());
-
             auto response = m.onProcess(this.request, this.response);
-            if (response is null)
-            {
+            if (response is null) {
                 continue;
             }
 
             version (HUNT_DEBUG) logDebugf("Middleware %s is to retrun.", m.name);
+            return response;
+        }
+
+        foreach (m; middlewares) {
+            string name = m.name();
+            version (HUNT_DEBUG) logDebugf("The %s is processing ...", name);
+            if(isMiddlewareSkipped(name)) {
+                version (HUNT_DEBUG) infof("Middleware %s is skipped ...", name);
+                return null;
+            }
+
+            auto response = m.onProcess(this.request, this.response);
+            if (response is null)
+                continue;
+
+            version (HUNT_DEBUG) logDebugf("The request is blocked by %s.", name);
             return response;
         }
 
@@ -282,11 +344,17 @@ mixin template HuntDynamicCallFun(T, string moduleName) if(is(T : Controller))
 {
 public:
 
-    enum allActions = __createCallActionMethod!(T, moduleName);
-    // version (HUNT_DEBUG) 
-    // pragma(msg, allActions);
+    // Middleware
+    // pragma(msg, handleMiddlewareAnnotation!(T, moduleName));
 
-    mixin(allActions);
+    mixin(handleMiddlewareAnnotation!(T, moduleName));
+
+    // Actions
+    // enum allActions = __createCallActionMethod!(T, moduleName);
+    // version (HUNT_DEBUG) 
+    // pragma(msg, __createCallActionMethod!(T, moduleName));
+
+    mixin(__createCallActionMethod!(T, moduleName));
     
     shared static this()
     {
@@ -309,6 +377,59 @@ private
 }
 
 
+/// 
+string handleMiddlewareAnnotation(T, string moduleName)() {
+    import std.traits;
+    import std.format;
+    import std.string;
+    import std.conv;
+    import hunt.framework.middleware.MiddlewareInterface;
+
+    string str = `
+    void initializeMiddlewares() {
+    `;
+    
+    foreach (memberName; __traits(allMembers, T)) {
+        alias currentMember = __traits(getMember, T, memberName);
+        enum _isActionMember = isActionMember(memberName);
+
+        static if(isFunction!(currentMember)) {
+
+            static if (hasUDA!(currentMember, Action) || _isActionMember) {
+                static if(hasUDA!(currentMember, Middleware)) {
+                    enum middlewareUDAs = getUDAs!(currentMember, Middleware);
+
+                    foreach(uda; middlewareUDAs) {
+                        foreach(middlewareName; uda.names) {
+                            str ~= indent(4) ~ format(`this.addAcceptedMiddleware("%s", "%s", "%s", "%s");`, 
+                                middlewareName, memberName, T.stringof, moduleName) ~ "\n";
+                        }
+                    }
+                } 
+                
+                static if(hasUDA!(currentMember, SkippedMiddleware)) {
+                    enum skippedMiddlewareUDAs = getUDAs!(currentMember, SkippedMiddleware);
+                    foreach(uda; skippedMiddlewareUDAs) {
+                        foreach(middlewareName; uda.names) {
+                            str ~= indent(4) ~ format(`this.addSkippedMiddleware("%s", "%s", "%s", "%s");`, 
+                                middlewareName, memberName, T.stringof, moduleName) ~ "\n";
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    str ~= `
+    }    
+    `;
+
+    return str;
+}
+
+
+
+
 string __createCallActionMethod(T, string moduleName)()
 {
     import std.traits;
@@ -325,6 +446,7 @@ string __createCallActionMethod(T, string moduleName)()
         import hunt.http.HttpBody;
         import hunt.logging.ConsoleLogger;
         import hunt.validation.ConstraintValidatorContext;
+        import hunt.framework.middleware.MiddlewareInterface;
         import std.demangle;
 
         void callActionMethod(string methodName, RoutingContext context) {
@@ -356,16 +478,15 @@ string __createCallActionMethod(T, string moduleName)()
                     str ~= indent(2) ~ "case \"" ~ memberName ~ "\": {\n";
                     str ~= indent(4) ~ "_currentActionName = \"" ~ currentMethod.mangleof ~ "\";";
 
+                    // middleware
+                    str ~= `auto middleResponse = this.doMiddleware("`~ memberName ~ `");`;
+
                     //before
                     str ~= q{
-                        if(this.getMiddlewares().length) {
-                            auto middleResponse = this.doMiddleware();
-
-                            if (middleResponse !is null) {
-                                // _routingContext.response = response.httpResponse;
-                                response = middleResponse;
-                                return;
-                            }
+                        if (middleResponse !is null) {
+                            // _routingContext.response = response.httpResponse;
+                            response = middleResponse;
+                            return;
                         }
 
                         if (!this.before()) {
@@ -442,8 +563,6 @@ string __createCallActionMethod(T, string moduleName)()
                         }
                     }
 
-                    // str ~= "\t\tactionResponse = this.processResponse(actionResponse);\n";
-
                     static if(hasUDA!(currentMethod, Action) || _isActionMember) {
                         str ~= "\n\t\tthis.after();\n";
                     }
@@ -455,7 +574,6 @@ string __createCallActionMethod(T, string moduleName)()
     }
 
     str ~= "\tdefault:\n\tbreak;\n\t}\n\n";
-    // str ~= "this.done();";
     str ~= "}";
 
     return str;
@@ -579,8 +697,10 @@ string __createRouteMap(T, string moduleName)()
     enum controllerName = moduleName[0..$-len];
 
     // The format: 
-    // 1) app.controller.{group}.{name}controller
+    // 1) app.controller.[{group}.]{name}controller
     //      app.controller.admin.IndexController
+    //      app.controller.IndexController
+    // 
     // 2) app.component.{component-name}.controller.{group}.{name}controller
     //      app.component.system.controller.admin.DashboardController
     enum string[] parts = moduleName.split(".");
@@ -641,6 +761,7 @@ void callHandler(T, string method)(RoutingContext context)
     }
 
     try {
+        controller.initializeMiddlewares();
         controller.callActionMethod(method, context);
     } catch (Throwable t) {
         error(t);
