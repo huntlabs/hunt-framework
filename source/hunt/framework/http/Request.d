@@ -427,33 +427,11 @@ class Request {
 //         }
 //     }
 
-//     // get queries
-//     @property ref string[string] queries() {
-//         if (!_isQueryParamsSet) {
-//             MultiMap!string map = new MultiMap!string();
-//             getURI().decodeQueryTo(map);
-//             foreach (string key, List!(string) values; map) {
-//                 version(HUNT_DEBUG) {
-//                     infof("query parameter: key=%s, values=%s", key, values[0]);
-//                 }
-//                 if(values is null || values.size()<1) {
-//                     _queryParams[key] = ""; 
-//                 } else {
-//                     _queryParams[key] = values[0];
-//                 }
-//             }
-//             _isQueryParamsSet = true;
-//         }
-//         return _queryParams;
-//     }
-//     private bool _isQueryParamsSet = false;
 
-//     void putQueryParameter(string key, string value) {
-//         version(HUNT_DEBUG) infof("query parameter: key=%s, values=%s", key, value);
-//         _queryParams[key] = value;
-//     }
-
-//     private string[string] _queryParams;
+    // void putQueryParameter(string key, string value) {
+    //     version(HUNT_DEBUG) infof("query parameter: key=%s, values=%s", key, value);
+    //     _queryParams[key] = value;
+    // }
 
 //     @property string[][string] xFormData() {
 //         if (_xFormData is null && _isXFormUrlencoded) {
@@ -1387,23 +1365,7 @@ class Request {
 //         return this;
 //     }
 
-//     /**
-//      * Replace the input for the current request.
-//      *
-//      * @param  array input
-//      * @return Request
-//      */
-//     Request replace(string[string] input) {
-//         if (isContained(this.methodAsString, ["GET", "HEAD"]))
-//             _queryParams = input;
-//         else {
-//             foreach(string k, string v; input) {
-//                 _xFormData[k] ~= v;
-//             }
-//         }
 
-//         return this;
-//     }
 
     protected string[string] getInputSource() {
         if (isContained(this.methodAsString, ["GET", "HEAD"]))
@@ -1417,20 +1379,6 @@ class Request {
         }
     }
 
-//     /**
-//      * Get the user making the request.
-//      *
-//      * @param  string|null guard
-//      * @return User
-//      */
-//     @property User user() {
-//         return this._user;
-//     }
-
-//     // ditto
-//     @property void user(User user) {
-//         this._user = user;
-//     }
 
 //     /**
 //      * Get the route handling the request.
