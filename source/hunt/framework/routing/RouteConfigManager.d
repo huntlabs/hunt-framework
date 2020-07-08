@@ -20,7 +20,6 @@ import std.regex;
 import std.string;
 
 
-
 /** 
  * 
  */
@@ -292,9 +291,9 @@ class RouteConfigManager {
         }
 
         // match example: 
-        // GET, POST    /users    module.controller.action | staticDir:wwwroot
+        // GET, POST    /users    module.controller.action | staticDir:wwwroot:true
         auto matched = line.match(
-                regex(`([^/]+)\s+(/[\S]*?)\s+((staticDir[\:][\w|\/|\\]+)|([\w\.]+))`));
+                regex(`([^/]+)\s+(/[\S]*?)\s+((staticDir[\:][\w|\/|\\|\:|\.]+)|([\w\.]+))`));
 
         if (!matched) {
             if (!line.empty()) {
@@ -308,9 +307,27 @@ class RouteConfigManager {
         string part3 = matched.captures[3].to!string.strip;
 
         // 
-        if (part3.startsWith("staticDir:")) {
+        if (part3.startsWith(DEFAULT_RESOURCES_ROUTE_LEADER)) {
             ResourceRouteItem routeItem = new ResourceRouteItem();
-            routeItem.resourcePath = part3.chompPrefix("staticDir:");
+            string remaining = part3.chompPrefix(DEFAULT_RESOURCES_ROUTE_LEADER);
+            string[] subParts = remaining.split(":");
+
+            version(HUNT_HTTP_DEBUG) {
+                tracef("Resource route: %s", subParts);
+            }
+
+            if(subParts.length > 1) {
+                routeItem.resourcePath = subParts[0].strip();
+                string s = subParts[1].strip();
+                try {
+                    routeItem.canListing = to!bool(s);
+                } catch(Throwable t) {
+                    version(HUNT_DEBUG) warning(t);
+                }
+            } else {
+                routeItem.resourcePath = remaining.strip();
+            }
+
             item = routeItem;
         } else {
             ActionRouteItem routeItem = new ActionRouteItem();
