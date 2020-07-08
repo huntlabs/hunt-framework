@@ -91,9 +91,9 @@ class ApplicationConfig {
     }
 
     struct SessionConf {
-        string storage = "memory";
+        // string storage = "memory";
+        // string args = "/tmp";
         string prefix = "huntsession_";
-        string args = "/tmp";
         uint expire = 3600; // in seconds
     }
 

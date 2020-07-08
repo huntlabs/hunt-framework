@@ -18,7 +18,7 @@ class SessionServiceProvider : ServiceProvider {
         container.register!(SessionStorage)(() {
             ApplicationConfig config = container.resolve!ApplicationConfig();
             Cache cache = container.resolve!Cache;
-            return new SessionStorage(cache, config.session.expire);
+            return new SessionStorage(cache, config.session.prefix, config.session.expire);
         }).singleInstance();
     }
 }

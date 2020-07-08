@@ -28,9 +28,10 @@ import hunt.http.server.HttpSession;
  * 
  */
 class SessionStorage {
-	this(Cache cache, int expire = 3600) {
+	this(Cache cache, string prefix="", int expire = 3600) {
 		_cache = cache;
 		_expire = expire;
+		_prefix = prefix;
 	}
 
 	alias set = put;
