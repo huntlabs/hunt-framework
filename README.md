@@ -5,9 +5,12 @@
 ![Framework](framework.png)
 
 ## Documents
-[Start read hunt framework wiki for documents](https://github.com/huntlabs/hunt-framework/wiki).
+- [Wiki](https://github.com/huntlabs/hunt-framework/wiki)
+- [Tutorial](https://github.com/huntlabs/hunt-framework-docs)
+- [Articles](https://github.com/huntlabs/hunt-framework-articles)
 
-## Create project
+
+## Create a project
 ```bash
 git clone https://github.com/huntlabs/hunt-skeleton.git myproject
 cd myproject
@@ -51,13 +54,13 @@ class IndexController : Controller
 }
 ```
 
-View [hunt-skeleton](https://github.com/huntlabs/hunt-skeleton) or [hunt-examples](https://github.com/huntlabs/hunt-examples).
+For more, see [hunt-skeleton](https://github.com/huntlabs/hunt-skeleton) or [hunt-examples](https://github.com/huntlabs/hunt-examples).
 
 ## Components
 1. [Routing](https://github.com/huntlabs/hunt-framework/wiki/Routing)
 2. [Caching](https://github.com/huntlabs/hunt-framework/wiki/Cache)
 3. [Middleware](https://github.com/huntlabs/hunt-framework/wiki/Middleware)
-4. [Configuration](https://github.com/huntlabs/hunt-framework/wiki/Configuration)
+4. [Configuration](https://github.com/huntlabs/hunt-framework/wiki/Configuration)****
 5. [Validation](https://github.com/huntlabs/hunt-framework/wiki/Validation)
 6. [Entity & Repository](https://github.com/huntlabs/hunt-framework/wiki/Database)
 7. [Form](https://github.com/huntlabs/hunt-framework/wiki/Form)
