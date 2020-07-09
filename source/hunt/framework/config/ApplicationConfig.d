@@ -24,15 +24,6 @@ import hunt.http.MultipartOptions;
 import hunt.logging.ConsoleLogger;
 import hunt.util.Configuration;
 
-// 
-enum ENV_APP_NAME = "APP_NAME";
-enum ENV_APP_VERSION = "APP_VERSION";
-enum ENV_APP_ENV = "APP_ENV";
-enum ENV_APP_LANG = "APP_LANG";
-enum ENV_APP_KEY = "APP_KEY";
-enum ENV_APP_BASE_PATH = "APP_BASE_PATH";
-enum ENV_CONFIG_BASE_PATH = "CONFIG_BASE_PATH";
-
 
 // @Configuration("hunt")
 @ConfigurationFile("application")

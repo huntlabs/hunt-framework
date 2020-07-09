@@ -11,6 +11,7 @@
 
 module hunt.framework.application.Application;
 
+import hunt.framework.application.HostEnvironment;
 import hunt.framework.application.closer;
 import hunt.framework.command.ServeCommand;
 import hunt.framework.Init;
@@ -89,6 +90,7 @@ final class Application {
     }
 
     this() {
+        _environment = new HostEnvironment();
         setDefaultLogging();
         initializeProviderListener();
     }
@@ -97,7 +99,7 @@ final class Application {
         _name = name;
         _ver = ver;
         _description = description;
-        // serviceContainer() = new DependencyContainer();
+        _environment = new HostEnvironment();
 
         setDefaultLogging();
         initializeProviderListener();
@@ -143,6 +145,19 @@ final class Application {
     private bool[TypeInfo] _customizedServiceProviders;
     private SimpleEventHandler _launchedHandler;
 
+    // private __gshared string _environment = DEFAULT_RUNTIME_ENVIRONMENT;
+    // private __gshared string _configPath = DEFAULT_CONFIG_LACATION;
+
+    // static string configPath() {
+    //     return _configPath;
+    // }
+
+    private HostEnvironment _environment;
+
+    HostEnvironment environment() {
+        return _environment;
+    }
+
     /**
       Start the HttpServer , and block current thread.
      */
@@ -150,18 +165,27 @@ final class Application {
         _launchedHandler = handler;
         tryRegister!ConfigServiceProvider();
 
+        ConfigManager manager = serviceContainer().resolve!ConfigManager;
+        manager.hostEnvironment = _environment;
+
+
         if (args.length > 1) {
             ServeCommand serveCommand = new ServeCommand();
             serveCommand.onInput((ServeSignature signature) {
-                version (HUNT_DEBUG)
-                    tracef(signature.to!string);
-                ConfigManager manager = serviceContainer().resolve!ConfigManager;
-                manager.configPath = signature.configPath;
+                version (HUNT_DEBUG) tracef(signature.to!string);
+                _environment.name = signature.environment;
+                _environment.configPath = signature.configPath;
+
+                 // signature.environment;
                 // manager.configFile = signature.configFile;
 
-                ApplicationConfig appConfig = serviceContainer().resolve!(ApplicationConfig);
-                appConfig.http.address = signature.host;
-                appConfig.http.port = signature.port;
+                _appConfig = serviceContainer().resolve!ApplicationConfig();
+                // ApplicationConfig appConfig = serviceContainer().resolve!(ApplicationConfig);
+                _appConfig.http.address = signature.host;
+                _appConfig.http.port = signature.port;
+
+                // 
+                // appConfig.application.environment = signature.environment;
 
                 bootstrap();
             });
@@ -169,9 +193,17 @@ final class Application {
             Console console = new Console(_description, _ver);
             console.setAutoExit(false);
             console.add(serveCommand);
-            console.run(args);
+
+            try {
+                console.run(args);
+            } catch(Exception ex) {
+                warning(ex);
+            } catch(Error er) {
+                error(er);
+            }
 
         } else {
+            _appConfig = serviceContainer().resolve!ApplicationConfig();
             bootstrap();
         }
     }
@@ -187,7 +219,7 @@ final class Application {
      * https://laravel.com/docs/6.x/lifecycle
      */
     private void bootstrap() {
-        _appConfig = serviceContainer().resolve!ApplicationConfig();
+        // _appConfig = serviceContainer().resolve!ApplicationConfig();
 
         // 
         registerProviders();

@@ -1,5 +1,6 @@
 module hunt.framework.provider.ConfigServiceProvider;
 
+import hunt.framework.application.HostEnvironment;
 import hunt.framework.config.ApplicationConfig;
 import hunt.framework.config.AuthUserConfig;
 import hunt.framework.config.ConfigManager;
@@ -98,7 +99,7 @@ class ConfigServiceProvider : ServiceProvider {
             ConfigManager configManager = container.resolve!(ConfigManager)();
             ApplicationConfig appConfig = container.resolve!(ApplicationConfig)();
             RouteConfigManager routeConfig = new RouteConfigManager(appConfig);
-            routeConfig.basePath = configManager.configPath();
+            routeConfig.basePath = configManager.hostEnvironment.configPath();
 
             return routeConfig;
         });
@@ -118,7 +119,6 @@ class ConfigServiceProvider : ServiceProvider {
     }
 
     override void boot() {
-        
         AuthUserConfig userConfig = container.resolve!(AuthUserConfig);
     }
 }

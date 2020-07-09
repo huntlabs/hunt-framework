@@ -1,5 +1,6 @@
 module hunt.framework.config.ConfigManager;
 
+import hunt.framework.application.HostEnvironment;
 import hunt.framework.config.ApplicationConfig;
 import hunt.framework.Init;
 
@@ -22,25 +23,18 @@ class ConfigManager {
     // TODO: Tasks pending completion -@zhangxueping at 2020-03-11T16:53:58+08:00
     // thread-safe
     private Object[string] _cachedConfigs;
-    private string _basePath = DEFAULT_CONFIG_LACATION;
+    private HostEnvironment _environment;
 
     this() {
-        _basePath = DEFAULT_CONFIG_PATH;
+        _environment = new HostEnvironment();
     }
 
-    string configPath() {
-        return this._basePath;
+    HostEnvironment hostEnvironment() {
+        return _environment;
     }
 
-    ConfigManager configPath(string path) {
-        if (path.empty)
-            return this;
-
-        if (path[$ - 1] == '/')
-            this._basePath = path;
-        else
-            this._basePath = path ~ "/";
-
+    ConfigManager hostEnvironment(HostEnvironment value) {
+        _environment = value;
         return this;
     }
 
@@ -54,7 +48,7 @@ class ConfigManager {
         return load!T(fileBaseName);
     }
 
-    T load(T)(string baseName, string section="") {
+    T load(T)(string baseName, string section="", bool isEnvironmentEnabled = true) {
 
         // get from the cache
         auto itemPtr = baseName in _cachedConfigs;
@@ -62,42 +56,43 @@ class ConfigManager {
             return cast(T)*itemPtr;
         }
 
+        string defaultConfigFile = baseName ~ DEFAULT_CONFIG_EXT;
+        string fileName = defaultConfigFile;
+
+        if(isEnvironmentEnabled && !_environment.isProduction()) {
+            string env = _environment.name();
+            if (!env.empty) {
+                fileName = baseName ~ "." ~ env ~ DEFAULT_CONFIG_EXT;
+            }            
+        }
+
+        string _basePath = hostEnvironment.configPath();
+
         // Use the environment virable to set the base path
         string configBase = environment.get(ENV_CONFIG_BASE_PATH, "");
         if (!configBase.empty) {
             _basePath = configBase;
         }
 
-        // Try to load the config based on environment settings firstly.
-        string fileName = baseName ~ DEFAULT_CONFIG_EXT;
-        string huntEnv = environment.get("HUNT_ENV", "");
-        if (huntEnv.empty) {
-            huntEnv = environment.get(ENV_APP_ENV, "");
-        }
-
-        version (HUNT_FM_DEBUG)
-            tracef("%s=%s", ENV_APP_ENV, huntEnv);
-
-        if (!huntEnv.empty) {
-            fileName = baseName ~ "." ~ huntEnv ~ DEFAULT_CONFIG_EXT;
-        }
-
         T currentConfig;
         ConfigBuilder defaultBuilder;
         string fullName = buildPath(APP_PATH, _basePath, fileName);
+
         if (exists(fullName)) {
             version(HUNT_DEBUG) infof("Loading config from: %s", fullName);
             defaultBuilder = new ConfigBuilder(fullName, section);
             currentConfig = defaultBuilder.build!(T)();
         } else {
-            fileName = baseName ~ DEFAULT_CONFIG_EXT;
+            warningf("The configure file does NOT exist (Use the default instead): %s",
+                    fullName);
+            fileName = defaultConfigFile;
             fullName = buildPath(APP_PATH, _basePath, fileName);
             if (exists(fullName)) {
                 infof("Loading config from: %s", fullName);
                 defaultBuilder = new ConfigBuilder(fullName, section);
                 currentConfig = defaultBuilder.build!(T)();
             } else {
-                warningf("The configure file does not exist (Use the default instead): %s",
+                warningf("The configure file does NOT exist (Use the default instead): %s",
                         fullName);
                 defaultBuilder = new ConfigBuilder();
                 currentConfig = new T();

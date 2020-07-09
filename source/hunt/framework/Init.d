@@ -37,6 +37,8 @@ enum string DEFAULT_APP_Locale = "en-US";
 enum string DEFAULT_CONFIG_LACATION = "config/";
 enum string DEFAULT_STATIC_FILES_LACATION = "wwwroot/";
 
+enum string DEFAULT_RUNTIME_ENVIRONMENT = "production";
+
 enum string DEFAULT_CONFIG_FILE = "application.conf";
 enum string DEFAULT_CONFIG_EXT = ".conf";
 enum string DEFAULT_ROUTE_CONFIG = "./routes";

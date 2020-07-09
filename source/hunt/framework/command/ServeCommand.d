@@ -20,8 +20,8 @@ class ServeCommand : Command {
     enum string PortOption = "port";
     enum string BindOption = "bind";
     enum string ConfigPathOption = "config-path";
-    enum string ConfigFileOption = "config-file";
-    enum string EnvironmentOption = "env"; // Development, Prodction, Staging
+    // enum string ConfigFileOption = "config-file";
+    enum string EnvironmentOption = "env"; // development, production, staging
 
     private CommandInputHandler _inputHandler;
 
@@ -51,20 +51,16 @@ class ServeCommand : Command {
             "Convenience for setting hostname and port together.",
             "0.0.0.0:8080");
 
+        addOption(EnvironmentOption, "e", InputOption.VALUE_OPTIONAL,
+            "Set the runtime environment.", DEFAULT_RUNTIME_ENVIRONMENT);
+
         addOption(ConfigPathOption, "cp", InputOption.VALUE_OPTIONAL,
             "Set the location for config files",
             DEFAULT_CONFIG_LACATION);
 
-        addOption(ConfigFileOption, "cf", InputOption.VALUE_OPTIONAL,
-            "Set the name of the main config file",
-            DEFAULT_CONFIG_FILE);
-
-        // addOption(EnvironmentOption, "e", InputOption.VALUE_OPTIONAL,
-        //     "Set the location for config files",
-        //     DEFAULT_CONFIG_LACATION);
-
-        // addArgument(ConfigPathOption, InputArgument.OPTIONAL, 
-        //     "Set the config file (Default: config/application.conf)");
+        // addOption(ConfigFileOption, "cf", InputOption.VALUE_OPTIONAL,
+        //     "Set the name of the main config file",
+        //     DEFAULT_CONFIG_FILE);
 
     }
 
@@ -73,7 +69,8 @@ class ServeCommand : Command {
         string port = input.getOption(PortOption);
         string bind = input.getOption(BindOption);
         string configPath = input.getOption(ConfigPathOption);
-        string configFile = input.getOption(ConfigFileOption);
+        // string configFile = input.getOption(ConfigFileOption);
+        string envionment = input.getOption(EnvironmentOption);
 
         if (!bind.empty && bind != "0.0.0.0:8080") {
             // 0.0.0.0:8080, 0.0.0.0, parse hostname and port
@@ -89,7 +86,7 @@ class ServeCommand : Command {
 
         if(_inputHandler !is null) {
             ServeSignature signature = ServeSignature(hostname, port.to!ushort, 
-                configPath, configFile);
+                configPath, envionment); // configFile, 
                 
             _inputHandler(signature);
         }
@@ -113,7 +110,8 @@ struct ServeSignature {
     string host = "0.0.0.0";
     ushort port = 8080;
     string configPath = DEFAULT_CONFIG_LACATION;
-    string configFile = DEFAULT_CONFIG_FILE;
+    // string configFile = DEFAULT_CONFIG_FILE;
+    string environment = DEFAULT_RUNTIME_ENVIRONMENT;
 }
 
 alias CommandInputHandler = void delegate(ServeSignature signature);

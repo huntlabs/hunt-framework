@@ -23,6 +23,7 @@ public import hunt.framework.application;
 public import hunt.framework.auth;
 public import hunt.framework.breadcrumb;
 public import hunt.framework.command.ServeCommand;
+public import hunt.framework.controller.Controller;
 public import hunt.framework.config;
 public import hunt.framework.http;
 public import hunt.framework.i18n.I18n;
