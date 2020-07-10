@@ -54,14 +54,9 @@ class ServeCommand : Command {
         addOption(EnvironmentOption, "e", InputOption.VALUE_OPTIONAL,
             "Set the runtime environment.", DEFAULT_RUNTIME_ENVIRONMENT);
 
-        addOption(ConfigPathOption, "cp", InputOption.VALUE_OPTIONAL,
+        addOption(ConfigPathOption, "c", InputOption.VALUE_OPTIONAL,
             "Set the location for config files",
             DEFAULT_CONFIG_LACATION);
-
-        // addOption(ConfigFileOption, "cf", InputOption.VALUE_OPTIONAL,
-        //     "Set the name of the main config file",
-        //     DEFAULT_CONFIG_FILE);
-
     }
 
     override protected int execute(Input input, Output output) {
