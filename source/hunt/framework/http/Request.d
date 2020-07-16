@@ -68,6 +68,8 @@ class Request {
         _routeManager = serviceContainer().resolve!RouteConfigManager();
         _routeGroup = routeGroup;
         _remoteAddr = remoteAddress;
+
+        .request(this); // Binding this request to current thread.
     }
 
     Auth auth() {
@@ -1596,3 +1598,18 @@ class Request {
 // version(WITH_HUNT_TRACE) {
 //     import hunt.trace.Tracer;
 // }
+
+
+private Request _request;
+
+Request request() {
+    return _request;
+}
+
+void request(Request request) {
+    _request = request;
+}
+
+HttpSession session() {
+    return request().session();
+}
