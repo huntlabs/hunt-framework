@@ -36,6 +36,8 @@ import std.format;
 import std.range;
 import std.socket;
 
+import core.time;
+
 
 enum BasicTokenHeader = AuthenticationScheme.Basic ~ " ";
 enum BearerTokenHeader = AuthenticationScheme.Bearer ~ " ";
@@ -57,12 +59,14 @@ class Request {
     private RouteConfigManager _routeManager;
     private string _routeGroup = DEFAULT_ROUTE_GROUP;
     private Auth _auth;
+    private MonoTime _monoCreated;
 
     HttpServerRequest _request;
     alias _request this;
 
     this(HttpServerRequest request, Address remoteAddress, string routeGroup = DEFAULT_ROUTE_GROUP) {
-        this._request = request;
+        _request = request;
+        _monoCreated = MonoTime.currTime;
         _auth = new Auth(this);
         _sessionStorage = serviceContainer().resolve!SessionStorage();
         _routeManager = serviceContainer().resolve!RouteConfigManager();
@@ -156,10 +160,10 @@ class Request {
         return null;
     }
 
-//     @property int elapsed()    {
-//         Duration timeElapsed = MonoTime.currTime - _monoCreated;
-//         return cast(int)timeElapsed.total!"msecs";
-//     }
+    @property int elapsed()    {
+        Duration timeElapsed = MonoTime.currTime - _monoCreated;
+        return cast(int)timeElapsed.total!"msecs";
+    }
 
 //     HttpURI getURI() {
 //         return _request.getURI();
@@ -800,12 +804,22 @@ class Request {
 //     }
 
     string actionId() {
-        ActionRouteItem routeItem = _routeManager.getRoute(_routeGroup, _request.getMethod(), _request.path());
-        version(HUNT_DEBUG) trace(routeItem);
-        if(routeItem is null) 
+        if(routeItem is null) {
+            routeItem = _routeManager.getRoute(_routeGroup, _request.getMethod(), _request.path());
+            version(HUNT_DEBUG) trace(routeItem);
+        }
+        
+        if(routeItem is null) {
             return "";
-        else
+        } else {
             return routeItem.mca;
+        }
+    }
+
+    private ActionRouteItem routeItem;
+
+    string routeGroup() {
+        return _routeGroup;
     }
 
     /**

@@ -75,7 +75,7 @@ abstract class Controller
     private Request _request;
     private Response _response;
 
-    private MiddlewareInfo[] _acceptedMiddlewares;
+    private MiddlewareInfo[] _allowedMiddlewares;
     private MiddlewareInfo[] _skippedMiddlewares;
 
     protected
@@ -128,6 +128,10 @@ abstract class Controller
         return _view;
     }
 
+    private RouteConfigManager routeManager() {
+        return serviceContainer.resolve!(RouteConfigManager);
+    }
+
     /// called before action  return true is continue false is finish
     bool before()
     {
@@ -159,7 +163,7 @@ abstract class Controller
      */
     void addAcceptedMiddleware(string fullName, string actionName, string controllerName, string moduleName) {
         MiddlewareInfo info = new MiddlewareInfo(fullName, actionName, controllerName, moduleName);
-        _acceptedMiddlewares ~= info;
+        _allowedMiddlewares ~= info;
     }
     
     /**
@@ -170,17 +174,61 @@ abstract class Controller
         _skippedMiddlewares ~= info;
     }
 
-    protected MiddlewareInterface[] getAcceptedMiddlewareByAction(string name) {
-        auto middlewares = _acceptedMiddlewares.filter!( m => m.action == name);
-        // auto middlewares = _acceptedMiddlewares.filter!( (m) { 
+    // All the middlewares defined in the route group
+    protected MiddlewareInterface[] getAcceptedMiddlewaresInRouteGroup(string routeGroup) {
+        MiddlewareInterface[] result;
+
+        TypeInfo_Class[] routeMiddlewares;
+        routeMiddlewares = routeManager().group(routeGroup).allowedMiddlewares();
+        foreach(TypeInfo_Class info; routeMiddlewares) {
+            warningf("routeGroup: %s, fullName: %s", routeGroup, info.name);
+
+            MiddlewareInterface middleware = cast(MiddlewareInterface)info.create();
+            if(middleware is null) {
+                warningf("%s is not a MiddlewareInterface", info.name);
+            } else {
+                result ~= middleware;
+            }
+        }
+
+        return result;
+    }
+
+    // All the middlewares defined in the route item
+    protected MiddlewareInterface[] getAcceptedMiddlewaresInRouteItem(string routeGroup, string actionId) {
+        MiddlewareInterface[] result;
+        TypeInfo_Class[] routeMiddlewares;
+
+        RouteItem routeItem = routeManager().get(routeGroup, actionId);
+            if(routeItem !is null) {
+            routeMiddlewares = routeItem.allowedMiddlewares();
+            foreach(TypeInfo_Class info; routeMiddlewares) {
+                warningf("actionId: %s, fullName: %s", actionId, info.name);
+
+                MiddlewareInterface middleware = cast(MiddlewareInterface)info.create();
+                if(middleware is null) {
+                    warningf("%s is not a MiddlewareInterface", info.name);
+                } else {
+                    result ~= middleware;
+                }
+            } 
+        }
+
+        return result;
+    }
+
+    // All the middlewares defined this Controller's action
+    protected MiddlewareInterface[] getAcceptedMiddlewaresInController(string actionName) {
+        MiddlewareInterface[] result;
+
+        auto middlewares = _allowedMiddlewares.filter!( m => m.action == actionName);
+        // auto middlewares = _allowedMiddlewares.filter!( (m) { 
         //     trace(m.action, " == ", name);
         //     return m.action == name;
         // });
 
-        
-        MiddlewareInterface[] result;
         foreach(MiddlewareInfo info; middlewares) {
-            // warningf("name: %s, action: %s", info.fullName, info.action);
+            // warningf("fullName: %s, action: %s", info.fullName, info.action);
 
             MiddlewareInterface middleware = cast(MiddlewareInterface)Object.factory(info.fullName);
             if(middleware is null) {
@@ -193,8 +241,87 @@ abstract class Controller
         return result;
     }
 
-    protected bool isMiddlewareSkipped(string name) {
-        bool r = _skippedMiddlewares.canFind!(m => m.fullName == name);
+    // protected MiddlewareInterface[] getAcceptedMiddlewareByAction(string routeGroup, string actionId, string actionName) {
+    //     MiddlewareInterface[] result;
+
+    //     // All the middlewares defined this Controller's action
+    //     auto middlewares = _allowedMiddlewares.filter!( m => m.action == actionName);
+    //     // auto middlewares = _allowedMiddlewares.filter!( (m) { 
+    //     //     trace(m.action, " == ", name);
+    //     //     return m.action == name;
+    //     // });
+
+    //     foreach(MiddlewareInfo info; middlewares) {
+    //         // warningf("fullName: %s, action: %s", info.fullName, info.action);
+
+    //         MiddlewareInterface middleware = cast(MiddlewareInterface)Object.factory(info.fullName);
+    //         if(middleware is null) {
+    //             warningf("%s is not a MiddlewareInterface", info.fullName);
+    //         } else {
+    //             result ~= middleware;
+    //         }
+    //     }
+
+    //     TypeInfo_Class[] routeMiddlewares;
+
+    //     // All the middlewares defined in the route item
+    //     RouteItem routeItem = routeManager().get(routeGroup, actionId);
+    //         if(routeItem !is null) {
+    //         routeMiddlewares = routeItem.allowedMiddlewares();
+    //         foreach(TypeInfo_Class info; routeMiddlewares) {
+    //             warningf("actionId: %s, fullName: %s", actionId, info.name);
+
+    //             MiddlewareInterface middleware = cast(MiddlewareInterface)info.create();
+    //             if(middleware is null) {
+    //                 warningf("%s is not a MiddlewareInterface", info.name);
+    //             } else {
+    //                 result ~= middleware;
+    //             }
+    //         } 
+    //     }   
+
+    //     // All the middlewares defined in the route group
+    //     routeMiddlewares = routeManager().group(routeGroup).allowedMiddlewares();
+    //     foreach(TypeInfo_Class info; routeMiddlewares) {
+    //         warningf("routeGroup: %s, fullName: %s", routeGroup, info.name);
+
+    //         MiddlewareInterface middleware = cast(MiddlewareInterface)info.create();
+    //         if(middleware is null) {
+    //             warningf("%s is not a MiddlewareInterface", info.name);
+    //         } else {
+    //             result ~= middleware;
+    //         }
+    //     }
+
+    //     return result;
+    // }
+
+    // All the middlewares defined in the route group
+    protected bool isSkippedMiddlewareInRouteGroup(string fullName, string routeGroup) {
+        TypeInfo_Class[] routeMiddlewares = routeManager().group(routeGroup).skippedMiddlewares();
+        foreach(TypeInfo_Class typeInfo; routeMiddlewares) {
+            if(typeInfo.name == fullName) return true;
+        }
+
+        return false;
+    }
+    
+    // All the middlewares defined in the route item
+    protected bool isSkippedMiddlewareInRouteItem(string fullName, string routeGroup, string actionId) {
+        RouteItem routeItem = routeManager().getRoute(routeGroup, actionId);
+        if(routeItem !is null) {
+            TypeInfo_Class[] routeMiddlewares = routeItem.skippedMiddlewares();
+            foreach(TypeInfo_Class typeInfo; routeMiddlewares) {
+                if(typeInfo.name == fullName) return true;
+            }
+        }
+
+        return false;
+    }
+
+    // All the middlewares defined this Controller's action
+    protected bool isSkippedMiddlewareInControllerAction(string fullName) {
+        bool r = _skippedMiddlewares.canFind!(m => m.fullName == fullName);
         return r;
     }
 
@@ -205,33 +332,84 @@ abstract class Controller
     }
 
     protected final Response doMiddleware(string actionName) {
-        version (HUNT_DEBUG) tracef("Handling middlware for %s...%s", this.request.actionId, actionName);
+        Request req = this.request();
+        string actionId = req.actionId();
+        string routeGroup = req.routeGroup();
+        
+        version (HUNT_DEBUG) {
+            tracef("Handling middlware: actionId=%s, actionName=%s", actionId, actionName);
+        }
 
-        MiddlewareInterface[] acceptedMiddlewares = getAcceptedMiddlewareByAction(actionName);
-        foreach(MiddlewareInterface m; acceptedMiddlewares) {
-            version (HUNT_DEBUG) logDebugf("The %s is processing ...", m.name());
-            auto response = m.onProcess(this.request, this.response);
+        /////////////
+        // Checking all the allowed middlewares.
+        /////////////
+
+        // Allowed middlewares in Controller's Action
+        MiddlewareInterface[] allowedMiddlewares = getAcceptedMiddlewaresInController(actionName);
+        
+        // Allowed middlewares in RouteItem
+        allowedMiddlewares ~= getAcceptedMiddlewaresInRouteItem(routeGroup, actionId);
+
+        foreach(MiddlewareInterface m; allowedMiddlewares) {
+            string name = m.name();
+            version (HUNT_DEBUG) logDebugf("The %s is processing ...", name);
+
+            auto response = m.onProcess(req, this.response);
             if (response is null) {
                 continue;
             }
 
-            version (HUNT_DEBUG) logDebugf("Middleware %s is to retrun.", m.name);
+            version (HUNT_DEBUG) infof("The access is blocked by %s.", name);
             return response;
         }
+        
+        // Allowed middlewares in RouteGroup
+        allowedMiddlewares = getAcceptedMiddlewaresInRouteGroup(routeGroup);
+        foreach(MiddlewareInterface m; allowedMiddlewares) {
+            string name = m.name();
+            version (HUNT_DEBUG) logDebugf("The %s is processing ...", name);
+
+            if(isSkippedMiddlewareInControllerAction(name)) {
+                version (HUNT_DEBUG) infof("A middleware [%s] is skipped ...", name);
+                return null;
+            }
+
+            if(isSkippedMiddlewareInRouteItem(name, routeGroup, actionId)) {
+                version (HUNT_DEBUG) infof("A middleware [%s] is skipped ...", name);
+                return null;
+            }
+
+            auto response = m.onProcess(req, this.response);
+            if (response is null) {
+                continue;
+            }
+
+            version (HUNT_DEBUG) infof("The access is blocked by %s.", m.name);
+            return response;
+        }
+
+        /////////////
+        // Checking all the directly registed middlewares in Controller.
+        /////////////
 
         foreach (m; middlewares) {
             string name = m.name();
             version (HUNT_DEBUG) logDebugf("The %s is processing ...", name);
-            if(isMiddlewareSkipped(name)) {
-                version (HUNT_DEBUG) infof("Middleware %s is skipped ...", name);
+            if(isSkippedMiddlewareInControllerAction(name)) {
+                version (HUNT_DEBUG) infof("A middleware [%s] is skipped ...", name);
                 return null;
             }
 
-            auto response = m.onProcess(this.request, this.response);
+            if(isSkippedMiddlewareInRouteItem(name, routeGroup, actionId)) {
+                version (HUNT_DEBUG) infof("A middleware [%s] is skipped ...", name);
+                return null;
+            }
+
+            auto response = m.onProcess(req, this.response);
             if (response is null)
                 continue;
 
-            version (HUNT_DEBUG) logDebugf("The request is blocked by %s.", name);
+            version (HUNT_DEBUG) logDebugf("The access is blocked by %s.", name);
             return response;
         }
 

@@ -79,7 +79,6 @@ final class Application {
 
     // private WebSocketPolicy _webSocketPolicy;
     // private WebSocketHandler[string] webSocketHandlerMap;
-    private MiddlewareInterface[string][string] _groupMiddlewares;
 
     private __gshared Application _app;
 
@@ -158,11 +157,20 @@ final class Application {
         return _environment;
     }
 
+    Application onBooted(SimpleEventHandler handler) {
+        _launchedHandler = handler;
+        return this;
+    }
+
+    void run(string[] args, SimpleEventHandler handler) {
+        _launchedHandler = handler;
+        run(args);
+    }
+
     /**
       Start the HttpServer , and block current thread.
      */
-    void run(string[] args, SimpleEventHandler handler = null) {
-        _launchedHandler = handler;
+    void run(string[] args) {
         tryRegister!ConfigServiceProvider();
 
         ConfigManager manager = serviceContainer().resolve!ConfigManager;
@@ -248,18 +256,6 @@ final class Application {
         if(_launchedHandler !is null) {
             _launchedHandler();
         }
-    }
-
-    Application addGroupMiddleware(MiddlewareInterface mw, string group = "default") {
-        _groupMiddlewares[group][mw.name()] = mw;
-        return this;
-    }
-
-    MiddlewareInterface[string] getGroupMiddlewares(string group) {
-        if (group in _groupMiddlewares)
-            return _groupMiddlewares[group];
-        else
-            return null;
     }
 
     private void showLogo() {
@@ -434,6 +430,10 @@ final class Application {
 
     ApplicationConfig config() {
         return _appConfig;
+    }
+
+    RouteConfigManager route() {
+        return serviceContainer.resolve!(RouteConfigManager);
     }
 
     Redis redis() {

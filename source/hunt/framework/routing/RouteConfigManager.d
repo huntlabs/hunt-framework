@@ -48,12 +48,21 @@ class RouteConfigManager {
 
     private void addGroupRoute(RouteGroup group, RouteItem[] routes) {
         _allRouteItems[group.name] = routes;
+        group.appendRoutes(routes);
         _allRouteGroups ~= group;
 
         RouteGroupType groupType = RouteGroupType.Host;
         if (group.type == "path") {
             groupType = RouteGroupType.Path;
         }
+    }
+
+    RouteItem get(string actionId) {
+        return getRoute(RouteGroup.DEFAULT, actionId);
+    }
+
+    RouteItem get(string group, string actionId) {
+        return getRoute(group, actionId);
     }
 
     RouteItem[][RouteGroup] allRoutes() {
@@ -86,7 +95,10 @@ class RouteConfigManager {
     }
 
     ActionRouteItem getRoute(string groupName, string method, string path) {
-        version(HUNT_FM_DEBUG) tracef("matching: groupName=%s, method=%s, path=%s", groupName, method, path);
+        version(HUNT_FM_DEBUG) {
+            tracef("matching: groupName=%s, method=%s, path=%s", groupName, method, path);
+        }
+
         if(path.empty) {
             warning("path is empty");
             return null;
@@ -120,7 +132,7 @@ class RouteConfigManager {
         return null;
     }
 
-    RouteGroup getRouteGroupe(string name) {
+    RouteGroup group(string name = RouteGroup.DEFAULT) {
         // warning(_allRouteGroups);
         auto item = _allRouteGroups.find!(g => g.name == name).takeOne;
         if (item.empty)
@@ -183,28 +195,28 @@ class RouteConfigManager {
             warningf("The config file for route does not exist: %s", routeConfigFile);
         } else {
             RouteItem[] routes = load(routeConfigFile);
-            _allRouteItems[DEFAULT_ROUTE_GROUP] = routes;
+            _allRouteItems[RouteGroup.DEFAULT] = routes;
 
             RouteGroup defaultGroup = new RouteGroup();
-            defaultGroup.name = DEFAULT_ROUTE_GROUP;
+            defaultGroup.name = RouteGroup.DEFAULT;
             defaultGroup.type = RouteGroup.DEFAULT;
 
             _allRouteGroups ~= defaultGroup;
         }
     }
 
-    string createUrl(string mca, string[string] params = null, string group = null) {
+    string createUrl(string mca, string[string] params = null, string groupName = RouteGroup.DEFAULT) {
 
-        if (group.empty)
-            group = DEFAULT_ROUTE_GROUP;
+        if (groupName.empty)
+            groupName = RouteGroup.DEFAULT;
 
         // find Route
         // RouteConfigManager routeConfig = serviceContainer().resolve!(RouteConfigManager);
-        RouteGroup routeGroup = getRouteGroupe(group);
+        RouteGroup routeGroup = group(groupName);
         if (routeGroup is null)
             return null;
 
-        RouteItem route = getRoute(group, mca);
+        RouteItem route = getRoute(groupName, mca);
         if (route is null) {
             return null;
         }
