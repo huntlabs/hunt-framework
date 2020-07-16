@@ -61,6 +61,11 @@ string indent(size_t number) {
     return IndentString[0..number];
 }
 
+class ControllerBase(T) : Controller {
+    // mixin MakeController;
+    mixin HuntDynamicCallFun!(T, moduleName!T);
+    // mixin(handleMiddlewareAnnotation!(T, moduleName!T));
+}
 
 /**
  * 
@@ -340,7 +345,7 @@ mixin template MakeController(string moduleName = __MODULE__)
     mixin HuntDynamicCallFun!(typeof(this), moduleName);
 }
 
-mixin template HuntDynamicCallFun(T, string moduleName) if(is(T : Controller))
+mixin template HuntDynamicCallFun(T, string moduleName) // if(is(T : Controller))
 {
 public:
 
@@ -407,8 +412,8 @@ string handleMiddlewareAnnotation(T, string moduleName)() {
                     }
                 } 
                 
-                static if(hasUDA!(currentMember, SkippedMiddleware)) {
-                    enum skippedMiddlewareUDAs = getUDAs!(currentMember, SkippedMiddleware);
+                static if(hasUDA!(currentMember, WithoutMiddleware)) {
+                    enum skippedMiddlewareUDAs = getUDAs!(currentMember, WithoutMiddleware);
                     foreach(uda; skippedMiddlewareUDAs) {
                         foreach(middlewareName; uda.names) {
                             str ~= indent(4) ~ format(`this.addSkippedMiddleware("%s", "%s", "%s", "%s");`, 

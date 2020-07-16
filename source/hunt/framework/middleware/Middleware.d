@@ -19,7 +19,7 @@ struct Middleware {
 /**
  * Skipped middleware
  */
-struct SkippedMiddleware {
+struct WithoutMiddleware {
     string[] names;
 
     /**
