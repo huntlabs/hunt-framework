@@ -4,12 +4,6 @@
 [Hunt](http://www.huntframework.com/) is a high-level [D Programming Language](http://dlang.org/) Web framework that encourages rapid development and clean, pragmatic design. It lets you build high-performance Web applications quickly and easily.
 ![Framework](framework.png)
 
-## Documents
-- [Wiki](https://github.com/huntlabs/hunt-framework/wiki)
-- [Tutorial](https://github.com/huntlabs/hunt-framework-docs)
-- [Articles](https://github.com/huntlabs/hunt-framework-articles)
-
-
 ## Create a project
 ```bash
 git clone https://github.com/huntlabs/hunt-skeleton.git myproject
@@ -69,11 +63,14 @@ For more, see [hunt-skeleton](https://github.com/huntlabs/hunt-skeleton) or [hun
 9. Security
 10. Queue
 
+
+## Resources
+- [Documentation](https://github.com/huntlabs/hunt-framework-docs)
+- [Articles](https://github.com/huntlabs/hunt-framework-articles)
+
 ## Community
 QQ Group: 184183224 
 
-[Github](https://github.com/huntlabs/hunt-framework/issues)
-
-## For Chinese users
+[Issues](https://github.com/huntlabs/hunt-framework/issues)
 [D语言中文社区](https://forums.dlangchina.com/)
 
