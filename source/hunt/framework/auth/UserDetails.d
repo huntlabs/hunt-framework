@@ -1,7 +1,5 @@
 module hunt.framework.auth.UserDetails;
 
-// import hunt.framework.auth.AuthRole;
-
 /**
  * 
  */
@@ -10,6 +8,7 @@ class UserDetails {
 
     string name;
 
+    deprecated("This field will be removed in next release.")
     string password;
 
     string fullName;

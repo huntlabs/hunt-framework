@@ -32,10 +32,10 @@ class SimpleUserService : UserService {
     UserDetails authenticate(string name, string password) {
         
         foreach(AuthUserConfig.User user; _userConfig.users) {
-            if(user.name == name && user.password == password) {
+            if(user.name == name) { //  && user.password == password
                 UserDetails userDetails = new UserDetails();
                 userDetails.name = name;
-                userDetails.password = password;
+                // userDetails.password = password;
 
                 // roles
                 foreach(string roleName; user.roles) {
@@ -59,7 +59,7 @@ class SimpleUserService : UserService {
             if(user.name == name) {
                 UserDetails userDetails = new UserDetails();
                 userDetails.name = name;
-                userDetails.password = user.password;
+                // userDetails.password = user.password;
 
                 // roles
                 foreach(string roleName; user.roles) {

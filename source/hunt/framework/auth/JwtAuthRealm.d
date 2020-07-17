@@ -10,6 +10,7 @@ import hunt.framework.provider.ServiceProvider;
 
 import hunt.collection.ArrayList;
 import hunt.collection.Collection;
+import hunt.http.AuthenticationScheme;
 import hunt.logging.ConsoleLogger;
 import hunt.shiro;
 import hunt.String;
@@ -48,7 +49,7 @@ class JwtAuthRealm : AuthorizingRealm {
             throw new AuthenticationException("The user doesn't exist!");
         }
 
-        string salt = _userService.getSalt(username, user.password);
+        string salt = _userService.getSalt(username, "user.password");
         version(HUNT_SHIRO_DEBUG) {
             infof("tokenString: %s,  username: %s, salt: %s", tokenString, username, salt);
         }          
@@ -67,6 +68,9 @@ class JwtAuthRealm : AuthorizingRealm {
 
         UsernamePrincipal namePrincipal = new UsernamePrincipal(username);
         principals.add(namePrincipal);
+        
+        AuthSchemePrincipal schemePrincipal = new AuthSchemePrincipal(AuthenticationScheme.Bearer);
+        principals.add(schemePrincipal);
 
         String credentials = new String(tokenString);
         

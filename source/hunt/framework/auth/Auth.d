@@ -9,6 +9,7 @@ import hunt.framework.provider.ServiceProvider;
 
 import hunt.http.AuthenticationScheme;
 import hunt.logging.ConsoleLogger;
+import hunt.shiro.Exceptions;
 
 import std.algorithm;
 import std.array : split;
@@ -27,6 +28,7 @@ class Auth {
     private string _token;
     private AuthenticationScheme _scheme = AuthenticationScheme.None;
     private bool _remember = false;
+    private bool _isTokenRefreshed = false;
     private bool _isLogout = false;
 
     private Request _request;
@@ -34,13 +36,25 @@ class Auth {
     this(Request request) {
         _request = request;
         _user = new Identity();
+
+        // Detect the auth type automatically
+        _token = _request.bearerToken();
+        if(_token.empty()) {
+            _token = _request.basicToken();
+            if(_token.empty()) {
+                if(_user.isAuthenticated()) _scheme = _user.authScheme();
+            } else {
+                _scheme = AuthenticationScheme.Basic;
+            }
+        } else {
+            _scheme = AuthenticationScheme.Bearer;
+        }
     }
 
     Identity user() {
         return _user;
     }
 
-    
     Identity signIn(string name, string password, bool remember = false, 
             AuthenticationScheme scheme = AuthenticationScheme.Bearer) {
         _user.authenticate(name, password, remember);
@@ -62,24 +76,11 @@ class Auth {
         return _user;
     }
 
-    void signOut(AuthenticationScheme scheme = AuthenticationScheme.None) {
+    void signOut() {
         _token = null;
         _remember = false;
         _isLogout = true;
-
-        if(scheme == AuthenticationScheme.None) {
-            // Detect the auth type automatically
-            string token = _request.bearerToken();
-            if(token.empty()) {
-                token = _request.basicToken();
-                if(!token.empty()) {
-                    _scheme = AuthenticationScheme.Basic;
-                }
-            } else {
-                _scheme = AuthenticationScheme.Bearer;
-            }
-        }
-
+        
         if(_scheme != AuthenticationScheme.Basic || _scheme != AuthenticationScheme.Bearer) {
             warningf("Unsupported auth type: %s", _scheme);
         }
@@ -87,6 +88,24 @@ class Auth {
         if(_user.isAuthenticated()) {
             _user.logout();
         }
+    }
+
+    string refreshToken() {
+        string username = _user.name();
+        if(!_user.isAuthenticated()) {
+            throw new AuthenticationException( format("Use is not authenticated: %s", _user.name()));
+        }
+
+        if(_scheme == AuthenticationScheme.Bearer) {
+            UserService userService = serviceContainer().resolve!UserService();
+            // FIXME: Needing refactor or cleanup -@zhangxueping at 2020-07-17T11:10:18+08:00
+            // 
+            string salt = userService.getSalt(username, "no password");
+            _token = JwtUtil.sign(username, salt);
+        } 
+        
+        _isTokenRefreshed = true;
+        return _token;
     }
 
     // the token value for the "remember me" session.
@@ -100,6 +119,10 @@ class Auth {
 
     bool canRememberMe() {
         return _remember;
+    }
+
+    bool isTokenRefreshed() {
+        return _isTokenRefreshed;
     }
 
     bool isLogout() {

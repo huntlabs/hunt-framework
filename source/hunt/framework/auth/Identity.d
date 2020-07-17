@@ -2,6 +2,7 @@ module hunt.framework.auth.Identity;
 
 import hunt.framework.auth.principal;
 
+import hunt.http.AuthenticationScheme;
 import hunt.logging.ConsoleLogger;
 import hunt.shiro;
 
@@ -36,11 +37,23 @@ class Identity {
             return principal.getUsername();
         }
     }
+    
+
+    AuthenticationScheme authScheme() {
+        PrincipalCollection pCollection = _subject.getPrincipals();
+        AuthSchemePrincipal principal = PrincipalCollectionHelper.oneByType!(AuthSchemePrincipal)(pCollection);
+
+        if(principal is null) {
+            return AuthenticationScheme.None;
+        } else {
+            return principal.getAuthScheme();
+        }
+    }
 
     void authenticate(string username, string password, bool remember = true) {
 
         version(HUNT_SHIRO_DEBUG) { 
-            warningf("Checking the status at first: %s", _subject.isAuthenticated());
+            tracef("Checking the status at first: %s", _subject.isAuthenticated());
         }
 
         if (_subject.isAuthenticated()) {
@@ -52,11 +65,11 @@ class Identity {
 
         try {
             _subject.login(token);
-        } catch (UnknownAccountException uae) {
+        } catch (UnknownAccountException ex) {
             info("There is no user with username of " ~ token.getPrincipal());
-        } catch (IncorrectCredentialsException ice) {
+        } catch (IncorrectCredentialsException ex) {
             info("Password for account " ~ token.getPrincipal() ~ " was incorrect!");
-        } catch (LockedAccountException lae) {
+        } catch (LockedAccountException ex) {
             info("The account for username " ~ token.getPrincipal()
                     ~ " is locked.  " ~ "Please contact your administrator to unlock it.");
         } catch (AuthenticationException ex) {

@@ -46,6 +46,9 @@ class ApplicationConfig {
         string unauthorizedUrl = "/";
 
         string basicRealm = "Secure Area";
+
+        // the max inactive interval. The time unit is second.
+        int tokenExpiration = DEFAULT_TOKEN_EXPIRATION*24*60*60; 
     }
 
     /** Config for static files */

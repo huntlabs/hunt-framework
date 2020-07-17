@@ -1,5 +1,7 @@
 module hunt.framework.auth.JwtUtil;
 
+import hunt.framework.Init;
+
 import jwt;
 import hunt.logging.ConsoleLogger;
 import hunt.util.DateTime;
@@ -13,7 +15,7 @@ import std.json;
  */
 class JwtUtil {
 
-    __gshared Duration EXPIRE_TIME = 5.days;
+    __gshared Duration EXPIRE_TIME = days(DEFAULT_TOKEN_EXPIRATION);
     
     // enum string COOKIE_NAME = "__jwt_token__";
 

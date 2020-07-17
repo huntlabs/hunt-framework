@@ -1,4 +1,4 @@
-module hunt.framework.auth.UserAuthRealm;
+module hunt.framework.auth.BasicAuthRealm;
 
 import hunt.framework.auth.JwtToken;
 import hunt.framework.auth.JwtUtil;
@@ -9,6 +9,7 @@ import hunt.framework.provider.ServiceProvider;
 
 import hunt.collection.ArrayList;
 import hunt.collection.Collection;
+import hunt.http.AuthenticationScheme;
 import hunt.logging.ConsoleLogger;
 import hunt.shiro;
 import hunt.String;
@@ -17,7 +18,7 @@ import hunt.String;
 /**
  * 
  */
-class UserAuthRealm : AuthorizingRealm {
+class BasicAuthRealm : AuthorizingRealm {
     private UserService _userService;
 
     this() {
@@ -49,6 +50,9 @@ class UserAuthRealm : AuthorizingRealm {
 
             UsernamePrincipal namePrincipal = new UsernamePrincipal(username);
             principals.add(namePrincipal);
+
+            AuthSchemePrincipal schemePrincipal = new AuthSchemePrincipal(AuthenticationScheme.Basic);
+            principals.add(schemePrincipal);
 
             String credentials = new String(password);
 

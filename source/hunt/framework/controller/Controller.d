@@ -485,32 +485,40 @@ abstract class Controller
             resp.header(HttpHeader.CONTENT_TYPE, MimeType.TEXT_HTML_VALUE);
         }
 
-        if(req.canRememberMe()) {
+        Auth auth = req.auth();
+        AuthenticationScheme authScheme = auth.scheme();
+        Cookie tokenCookie;
+
+        if(req.canRememberMe() || auth.isTokenRefreshed()) {
+            ApplicationConfig appConfig = app().config();
+            int tokenExpiration = appConfig.auth.tokenExpiration;
             string authToken = req.auth.token();
-            AuthenticationScheme authScheme = req.auth().scheme();
-            Cookie tokenCookie;
+
             if(authScheme == AuthenticationScheme.Bearer) {
-                tokenCookie = new Cookie(BEARER_COOKIE_NAME, authToken);
+                tokenCookie = new Cookie(BEARER_COOKIE_NAME, authToken, tokenExpiration);
             } else if(authScheme == AuthenticationScheme.Basic) {
-                tokenCookie = new Cookie(BASIC_COOKIE_NAME, authToken);
+                tokenCookie = new Cookie(BASIC_COOKIE_NAME, authToken, tokenExpiration);
             }
 
-            if(tokenCookie !is null)
-                resp.withCookie(tokenCookie);
-
         } else if(req.isLogout()) {
-            AuthenticationScheme authScheme = req.auth().scheme();
-            Cookie tokenCookie;
-            
             if(authScheme == AuthenticationScheme.Bearer) {
                 tokenCookie = new Cookie(BEARER_COOKIE_NAME, "", 0);
             } else if(authScheme == AuthenticationScheme.Basic) {
                 tokenCookie = new Cookie(BASIC_COOKIE_NAME, "", 0);
             }
-
-            if(tokenCookie !is null)
-                resp.withCookie(tokenCookie);
+        } else if(authScheme != AuthenticationScheme.None) {
+            ApplicationConfig appConfig = app().config();
+            int tokenExpiration = appConfig.auth.tokenExpiration;
+            string authToken = req.auth.token();
+            if(authScheme == AuthenticationScheme.Bearer) {
+                tokenCookie = new Cookie(BEARER_COOKIE_NAME, authToken, tokenExpiration);
+            } else if(authScheme == AuthenticationScheme.Basic) {
+                tokenCookie = new Cookie(BASIC_COOKIE_NAME, authToken, tokenExpiration);
+            }
         }
+
+        if(tokenCookie !is null)
+            resp.withCookie(tokenCookie);
     }
 
     void dispose() {
