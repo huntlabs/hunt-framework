@@ -12,12 +12,14 @@
 module hunt.framework.http.Response;
 
 import hunt.framework.http.HttpErrorResponseHandler;
-import hunt.io.ByteBuffer;
 import hunt.http.HttpStatus;
 import hunt.http.server;
+import hunt.io.ByteBuffer;
+import hunt.serialization.JsonSerializer;
 import hunt.logging.ConsoleLogger;
 
 import std.conv;
+import std.json;
 import std.range;
 import std.traits;
 
@@ -69,13 +71,33 @@ class Response {
         return this;
     }
 
+    Response setRestContent(T)(T content) {
+        if(_bodySet) {
+            version(HUNT_DEBUG) warning("The body is set again.");
+        }
+
+        string contentType = MimeType.APPLICATION_JSON_VALUE;
+
+        static if(is(T : ByteBuffer)) {
+            HttpBody hb = HttpBody.create(contentType, content);
+        } else static if(isSomeString!T) {
+            HttpBody hb = HttpBody.create(contentType, content);
+        } else {
+            JSONValue js = JsonSerializer.toJson(content);
+            string c = js.toString();
+            HttpBody hb = HttpBody.create(contentType, c);
+        }
+        _response.setBody(hb);
+        _bodySet = true;
+        return this;        
+    }
+
     /**
      * Sets the response content.
      *
      * @return this
      */
     Response setContent(T)(T content, string contentType = MimeType.TEXT_HTML_VALUE) {
-
         if(_bodySet) {
             version(HUNT_DEBUG) warning("The body is set again.");
         }

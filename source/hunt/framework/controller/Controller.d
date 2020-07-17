@@ -14,6 +14,7 @@ module hunt.framework.controller.Controller;
 import hunt.framework.application.Application;
 import hunt.framework.auth;
 import hunt.framework.breadcrumb.BreadcrumbsManager;
+import hunt.framework.controller.RestController;
 import hunt.framework.middleware.Middleware;
 import hunt.framework.middleware.MiddlewareInfo;
 import hunt.framework.middleware.MiddlewareInterface;
@@ -607,7 +608,6 @@ string __createCallActionMethod(T, string moduleName)()
     
 
     string str = `
-
         import hunt.http.server.HttpServerRequest;
         import hunt.http.server.HttpServerResponse;
         import hunt.http.routing.RoutingContext;
@@ -619,7 +619,7 @@ string __createCallActionMethod(T, string moduleName)()
 
         void callActionMethod(string methodName, RoutingContext context) {
             _routingContext = context;
-            Response actionResponse=null;
+            // Response actionResponse=null;
             HttpBody rb;
             version (HUNT_FM_DEBUG) logDebug("methodName=", methodName);
             import std.conv;
@@ -725,9 +725,13 @@ string __createCallActionMethod(T, string moduleName)()
                                 memberName ~ "(" ~ paramString ~ ");\n";
 
                         static if (is(ReturnType!currentMethod : Response)) {
-                            str ~= "\t\t response = result;\n";
+                            str ~= "\t\t this.response = result;\n";
                         } else {
-                            str ~="\t\tthis.response.setContent(result);";
+                            static if(is(T : RestController)) {
+                                str ~="\t\tthis.response.setRestContent(result);";
+                            } else {
+                                str ~="\t\tthis.response.setContent(result);";
+                            }
                         }
                     }
 
