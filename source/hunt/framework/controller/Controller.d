@@ -64,7 +64,6 @@ string indent(size_t number) {
 class ControllerBase(T) : Controller {
     // mixin MakeController;
     mixin HuntDynamicCallFun!(T, moduleName!T);
-    // mixin(handleMiddlewareAnnotation!(T, moduleName!T));
 }
 
 /**
@@ -536,7 +535,7 @@ mixin template HuntDynamicCallFun(T, string moduleName) // if(is(T : Controller)
 public:
 
     // Middleware
-    // pragma(msg, handleMiddlewareAnnotation!(T, moduleName));
+    pragma(msg, handleMiddlewareAnnotation!(T, moduleName));
 
     mixin(handleMiddlewareAnnotation!(T, moduleName));
 
@@ -592,8 +591,9 @@ string handleMiddlewareAnnotation(T, string moduleName)() {
 
                     foreach(uda; middlewareUDAs) {
                         foreach(middlewareName; uda.names) {
-                            str ~= indent(4) ~ format(`this.addAcceptedMiddleware("%s", "%s", "%s", "%s");`, 
-                                middlewareName, memberName, T.stringof, moduleName) ~ "\n";
+                            str ~= indent(4) ~ generateAcceptedMiddleware(middlewareName, memberName, T.stringof, moduleName);
+                            // str ~= indent(4) ~ format(`this.addAcceptedMiddleware("%s", "%s", "%s", "%s");`, 
+                            //     middlewareName, memberName, T.stringof, moduleName) ~ "\n";
                         }
                     }
                 } 
@@ -602,8 +602,9 @@ string handleMiddlewareAnnotation(T, string moduleName)() {
                     enum skippedMiddlewareUDAs = getUDAs!(currentMember, WithoutMiddleware);
                     foreach(uda; skippedMiddlewareUDAs) {
                         foreach(middlewareName; uda.names) {
-                            str ~= indent(4) ~ format(`this.addSkippedMiddleware("%s", "%s", "%s", "%s");`, 
-                                middlewareName, memberName, T.stringof, moduleName) ~ "\n";
+                            str ~= indent(4) ~ generateAddSkippedMiddleware(middlewareName, memberName, T.stringof, moduleName);
+                            // str ~= indent(4) ~ format(`this.addSkippedMiddleware("%s", "%s", "%s", "%s");`, 
+                            //     middlewareName, memberName, T.stringof, moduleName) ~ "\n";
                         }
                     }
                 }
@@ -618,8 +619,39 @@ string handleMiddlewareAnnotation(T, string moduleName)() {
     return str;
 }
 
+private string generateAcceptedMiddleware(string name, string actionName, string controllerName, string moduleName) {
+    string str;
 
+    str = `
+        try {
+            TypeInfo_Class typeInfo = MiddlewareInterface.get("%s");
+            string fullName = typeInfo.name;
+            this.addAcceptedMiddleware(fullName, "%s", "%s", "%s");
+        } catch(Exception ex) {
+            warning(ex.msg);
+        }
+    `;
 
+    str = format(str, name, actionName, controllerName, moduleName);
+    return str;
+}
+
+private string generateAddSkippedMiddleware(string name, string actionName, string controllerName, string moduleName) {
+    string str;
+
+    str = `
+        try {
+            TypeInfo_Class typeInfo = MiddlewareInterface.get("%s");
+            string fullName = typeInfo.name;
+            this.addSkippedMiddleware(fullName, "%s", "%s", "%s");
+        } catch(Exception ex) {
+            warning(ex.msg);
+        }
+    `;
+
+    str = format(str, name, actionName, controllerName, moduleName);
+    return str;
+}
 
 string __createCallActionMethod(T, string moduleName)()
 {

@@ -23,7 +23,7 @@ import std.string;
 /**
  * 
  */
-class JwtAuthMiddleware : AbstractMiddleware {
+class JwtAuthMiddleware : AbstractMiddleware!(JwtAuthMiddleware) {
 
     this() {
         super();

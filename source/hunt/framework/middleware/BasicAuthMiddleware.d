@@ -22,7 +22,7 @@ import std.string;
 /**
  * 
  */
-class BasicAuthMiddleware : AbstractMiddleware {
+class BasicAuthMiddleware : AbstractMiddleware!(BasicAuthMiddleware) {
 
     this() {
         super();
