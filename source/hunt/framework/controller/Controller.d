@@ -240,61 +240,6 @@ abstract class Controller
         return result;
     }
 
-    // protected MiddlewareInterface[] getAcceptedMiddlewareByAction(string routeGroup, string actionId, string actionName) {
-    //     MiddlewareInterface[] result;
-
-    //     // All the middlewares defined this Controller's action
-    //     auto middlewares = _allowedMiddlewares.filter!( m => m.action == actionName);
-    //     // auto middlewares = _allowedMiddlewares.filter!( (m) { 
-    //     //     trace(m.action, " == ", name);
-    //     //     return m.action == name;
-    //     // });
-
-    //     foreach(MiddlewareInfo info; middlewares) {
-    //         // warningf("fullName: %s, action: %s", info.fullName, info.action);
-
-    //         MiddlewareInterface middleware = cast(MiddlewareInterface)Object.factory(info.fullName);
-    //         if(middleware is null) {
-    //             warningf("%s is not a MiddlewareInterface", info.fullName);
-    //         } else {
-    //             result ~= middleware;
-    //         }
-    //     }
-
-    //     TypeInfo_Class[] routeMiddlewares;
-
-    //     // All the middlewares defined in the route item
-    //     RouteItem routeItem = routeManager().get(routeGroup, actionId);
-    //         if(routeItem !is null) {
-    //         routeMiddlewares = routeItem.allowedMiddlewares();
-    //         foreach(TypeInfo_Class info; routeMiddlewares) {
-    //             warningf("actionId: %s, fullName: %s", actionId, info.name);
-
-    //             MiddlewareInterface middleware = cast(MiddlewareInterface)info.create();
-    //             if(middleware is null) {
-    //                 warningf("%s is not a MiddlewareInterface", info.name);
-    //             } else {
-    //                 result ~= middleware;
-    //             }
-    //         } 
-    //     }   
-
-    //     // All the middlewares defined in the route group
-    //     routeMiddlewares = routeManager().group(routeGroup).allowedMiddlewares();
-    //     foreach(TypeInfo_Class info; routeMiddlewares) {
-    //         warningf("routeGroup: %s, fullName: %s", routeGroup, info.name);
-
-    //         MiddlewareInterface middleware = cast(MiddlewareInterface)info.create();
-    //         if(middleware is null) {
-    //             warningf("%s is not a MiddlewareInterface", info.name);
-    //         } else {
-    //             result ~= middleware;
-    //         }
-    //     }
-
-    //     return result;
-    // }
-
     // All the middlewares defined in the route group
     protected bool isSkippedMiddlewareInRouteGroup(string fullName, string routeGroup) {
         TypeInfo_Class[] routeMiddlewares = routeManager().group(routeGroup).skippedMiddlewares();
@@ -535,7 +480,7 @@ mixin template HuntDynamicCallFun(T, string moduleName) // if(is(T : Controller)
 public:
 
     // Middleware
-    pragma(msg, handleMiddlewareAnnotation!(T, moduleName));
+    // pragma(msg, handleMiddlewareAnnotation!(T, moduleName));
 
     mixin(handleMiddlewareAnnotation!(T, moduleName));
 
