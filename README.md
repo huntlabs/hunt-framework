@@ -54,7 +54,7 @@ For more, see [hunt-skeleton](https://github.com/huntlabs/hunt-skeleton) or [hun
 1. [Routing](https://github.com/huntlabs/hunt-framework/wiki/Routing)
 2. [Caching](https://github.com/huntlabs/hunt-framework/wiki/Cache)
 3. [Middleware](https://github.com/huntlabs/hunt-framework/wiki/Middleware)
-4. [Configuration](https://github.com/huntlabs/hunt-framework/wiki/Configuration)****
+4. [Configuration](https://github.com/huntlabs/hunt-framework/wiki/Configuration)
 5. [Validation](https://github.com/huntlabs/hunt-framework/wiki/Validation)
 6. [Entity & Repository](https://github.com/huntlabs/hunt-framework/wiki/Database)
 7. [Form](https://github.com/huntlabs/hunt-framework/wiki/Form)
@@ -69,8 +69,7 @@ For more, see [hunt-skeleton](https://github.com/huntlabs/hunt-skeleton) or [hun
 - [Articles](https://github.com/huntlabs/hunt-framework-articles)
 
 ## Community
-QQ Group: 184183224 
-
-[Issues](https://github.com/huntlabs/hunt-framework/issues)
-[D语言中文社区](https://forums.dlangchina.com/)
+- [Issues](https://github.com/huntlabs/hunt-framework/issues)
+- QQ Group: 184183224 
+- [D语言中文社区](https://forums.dlangchina.com/)
 
