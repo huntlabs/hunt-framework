@@ -19,6 +19,7 @@ import hunt.Functions;
 
 import std.exception;
 import std.format;
+import std.traits;
 
 alias RouteChecker = Func2!(string, string, bool);
 alias MiddlewareEventHandler = Func2!(MiddlewareInterface, Request, Response);
@@ -33,6 +34,10 @@ interface MiddlewareInterface
     
     ///return null is continue, response is close the session
     Response onProcess(Request request, Response response = null);
+
+    MiddlewareInterface rejectionHandler(MiddlewareEventHandler handler);
+    
+    MiddlewareEventHandler rejectionHandler();
 
     private __gshared TypeInfo_Class[string] _all;
 
@@ -62,6 +67,36 @@ interface MiddlewareInterface
     static TypeInfo_Class[string] all() {
         return _all;
     }
+
+    private __gshared MiddlewareEventHandler[string] _allRejectHanders;
+
+    static void registerRejectHandler(T)(MiddlewareEventHandler handler) {
+        string fullName = fullyQualifiedName!T;
+        auto itemPtr = fullName in _allRejectHanders;
+        if(itemPtr !is null) {
+            warning("The middleware [%s]'s reject handler will be overwritten", fullName);
+        }
+
+        _allRejectHanders[fullName] = handler;
+    }
+
+    static void registerRejectHandler(string fullName, MiddlewareEventHandler handler) {
+        auto itemPtr = fullName in _allRejectHanders;
+        if(itemPtr !is null) {
+            warning("The middleware [%s]'s reject handler will be overwritten", fullName);
+        }
+
+        _allRejectHanders[fullName] = handler;
+    }
+
+    static MiddlewareEventHandler getRejectHander(string fullName) {
+        auto itemPtr = fullName in _allRejectHanders;
+        if(itemPtr is null) {
+            return null;
+        }
+
+        return *itemPtr;
+    }
 }
 
 /**
@@ -84,7 +119,7 @@ abstract class AbstractMiddleware(T) : MiddlewareInterface {
         _rejectionHandler = rejectionHandler;
     }
 
-    AbstractMiddleware routeChecker(RouteChecker handler) {
+    MiddlewareInterface routeChecker(RouteChecker handler) {
         _routeChecker = handler;
         return this;
     }
@@ -93,7 +128,7 @@ abstract class AbstractMiddleware(T) : MiddlewareInterface {
         return _routeChecker;
     }
 
-    AbstractMiddleware rejectionHandler(MiddlewareEventHandler handler) {
+    MiddlewareInterface rejectionHandler(MiddlewareEventHandler handler) {
         _rejectionHandler = handler;
         return this;
     }

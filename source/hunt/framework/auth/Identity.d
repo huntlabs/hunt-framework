@@ -38,7 +38,6 @@ class Identity {
         }
     }
     
-
     AuthenticationScheme authScheme() {
         PrincipalCollection pCollection = _subject.getPrincipals();
         AuthSchemePrincipal principal = PrincipalCollectionHelper.oneByType!(AuthSchemePrincipal)(pCollection);
