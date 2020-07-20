@@ -133,7 +133,6 @@ class RouteConfigManager {
     }
 
     RouteGroup group(string name = RouteGroup.DEFAULT) {
-        // warning(_allRouteGroups);
         auto item = _allRouteGroups.find!(g => g.name == name).takeOne;
         if (item.empty)
             return null;
@@ -204,6 +203,30 @@ class RouteConfigManager {
             _allRouteGroups ~= defaultGroup;
         }
     }
+
+    void withMiddleware(T)() if(is(T : MiddlewareInterface)) {
+        group().withMiddleware!T();
+    }
+    
+    void withMiddleware(string name) {
+        try {
+            group().withMiddleware(name);
+        } catch(Exception ex) {
+            warning(ex.msg);
+        }
+    }    
+    
+    void withoutMiddleware(T)() if(is(T : MiddlewareInterface)) {
+        group().withoutMiddleware!T();
+    }
+    
+    void withoutMiddleware(string name) {
+        try {
+            group().withoutMiddleware(name);
+        } catch(Exception ex) {
+            warning(ex.msg);
+        }
+    } 
 
     string createUrl(string mca, string[string] params = null, string groupName = RouteGroup.DEFAULT) {
 
