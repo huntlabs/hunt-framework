@@ -1,7 +1,7 @@
 module hunt.framework.auth.Auth;
 
-
 import hunt.framework.auth.Identity;
+import hunt.framework.auth.JwtToken;
 import hunt.framework.auth.JwtUtil;
 import hunt.framework.auth.UserService;
 import hunt.framework.http.Request;
@@ -37,19 +37,37 @@ class Auth {
         _request = request;
         _user = new Identity();
 
+
         // Detect the auth type automatically
         _token = _request.bearerToken();
         if(_token.empty()) {
             _token = _request.basicToken();
-            if(_token.empty()) {
-                if(_user.isAuthenticated()) _scheme = _user.authScheme();
-            } else {
-                _scheme = AuthenticationScheme.Basic;
+            if(!_token.empty()) {
+                // _scheme = AuthenticationScheme.Basic;
+                _user.authenticate(_token, AuthenticationScheme.Basic);
             }
         } else {
-            _scheme = AuthenticationScheme.Bearer;
+            _user.authenticate(_token, AuthenticationScheme.Bearer);
+        }
+
+        // Detect the token from cookie
+        if(_token.empty()) {
+            _token = request.cookie(BEARER_COOKIE_NAME);
+            if(_token.empty()) {
+                _token = request.cookie(BASIC_COOKIE_NAME);
+                if(!_token.empty()) {
+                _user.authenticate(_token, AuthenticationScheme.Basic);
+                }
+            } else {
+                _user.authenticate(_token, AuthenticationScheme.Bearer);
+            }
+        }
+        
+        if(_user.isAuthenticated()) {
+            _scheme = _user.authScheme();
         }
     }
+
 
     Identity user() {
         return _user;

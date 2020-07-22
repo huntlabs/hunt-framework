@@ -68,7 +68,6 @@ class Request {
     this(HttpServerRequest request, Address remoteAddress, string routeGroup = DEFAULT_ROUTE_GROUP) {
         _request = request;
         _monoCreated = MonoTime.currTime;
-        _auth = new Auth(this);
         _sessionStorage = serviceContainer().resolve!SessionStorage();
         _routeManager = serviceContainer().resolve!RouteConfigManager();
         _routeGroup = routeGroup;
@@ -78,6 +77,8 @@ class Request {
     }
 
     Auth auth() {
+        if(_auth is null)
+            _auth = new Auth(this);
         return _auth;
     }
 

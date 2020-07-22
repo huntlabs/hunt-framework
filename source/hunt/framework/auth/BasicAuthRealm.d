@@ -1,5 +1,6 @@
 module hunt.framework.auth.BasicAuthRealm;
 
+import hunt.framework.auth.Claim;
 import hunt.framework.auth.JwtToken;
 import hunt.framework.auth.JwtUtil;
 import hunt.framework.auth.principal;
@@ -54,9 +55,12 @@ class BasicAuthRealm : AuthorizingRealm {
             AuthSchemePrincipal schemePrincipal = new AuthSchemePrincipal(AuthenticationScheme.Basic);
             principals.add(schemePrincipal);
 
-            String credentials = new String(password);
+            foreach(Claim claim; user.claims) {
+                principals.add(claim);
+            }
 
             PrincipalCollection pCollection = new SimplePrincipalCollection(principals, getName());
+            String credentials = new String(password);
             SimpleAuthenticationInfo info = new SimpleAuthenticationInfo(pCollection, credentials);
 
             return info;

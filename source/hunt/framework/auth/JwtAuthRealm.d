@@ -1,5 +1,6 @@
 module hunt.framework.auth.JwtAuthRealm;
 
+import hunt.framework.auth.Claim;
 import hunt.framework.auth.Identity;
 import hunt.framework.auth.JwtToken;
 import hunt.framework.auth.JwtUtil;
@@ -59,7 +60,6 @@ class JwtAuthRealm : AuthorizingRealm {
             throw new IncorrectCredentialsException("Wrong username or password for " ~ username);
         }
 
-        // String principal = new String(username);
         
         Collection!(Object) principals = new ArrayList!(Object)(3);
 
@@ -72,9 +72,13 @@ class JwtAuthRealm : AuthorizingRealm {
         AuthSchemePrincipal schemePrincipal = new AuthSchemePrincipal(AuthenticationScheme.Bearer);
         principals.add(schemePrincipal);
 
-        String credentials = new String(tokenString);
-        
+        foreach(Claim claim; user.claims) {
+            principals.add(claim);
+        }
+
         PrincipalCollection pCollection = new SimplePrincipalCollection(principals, getName());
+        String credentials = new String(tokenString);
+
         SimpleAuthenticationInfo info = new SimpleAuthenticationInfo(pCollection, credentials);
         return info;
     }

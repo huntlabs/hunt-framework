@@ -1,5 +1,9 @@
 module hunt.framework.auth.UserDetails;
 
+import hunt.framework.auth.Claim;
+
+import std.variant;
+
 /**
  * 
  */
@@ -16,4 +20,11 @@ class UserDetails {
     string[] roles;
 
     string[] permissions;
+
+    Claim[] claims;
+
+    void addClaim(T)(string type, T value) {
+        claims ~= new Claim(type, value);
+    }
+
 }

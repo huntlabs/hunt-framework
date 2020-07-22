@@ -1,10 +1,16 @@
 module hunt.framework.auth.Identity;
 
+import hunt.framework.auth.Claim;
+import hunt.framework.auth.JwtToken;
 import hunt.framework.auth.principal;
 
 import hunt.http.AuthenticationScheme;
 import hunt.logging.ConsoleLogger;
 import hunt.shiro;
+
+import std.base64;
+import std.string;
+import std.variant;
 
 /**
  * User Identity
@@ -49,6 +55,27 @@ class Identity {
         }
     }
 
+    Variant claim(string type) {
+        PrincipalCollection pCollection = _subject.getPrincipals();
+        foreach(Object p; pCollection) {
+            Claim claim = cast(Claim)p;
+            if(claim is null) continue;
+            if(claim.type == type) return claim.value();
+        }
+
+        return Variant(null);
+    }
+    
+    T claimAs(T)(string type) {
+        Variant v = claim(type);
+        if(v == null) {
+            version(HUNT_DEBUG) warning("The claim is null");
+            return T.init;
+        }
+
+        return v.get!T();
+    }
+
     void authenticate(string username, string password, bool remember = true) {
 
         version(HUNT_SHIRO_DEBUG) { 
@@ -77,6 +104,44 @@ class Identity {
         } catch (Exception ex) {
             errorf("Authentication failed: ", ex.msg);
             version(HUNT_DEBUG) error(ex);
+        }
+    }
+
+    void authenticate(string token, AuthenticationScheme scheme) {
+        if(scheme == AuthenticationScheme.Bearer) {
+            autoBearerLogin(token);
+        } else if(scheme == AuthenticationScheme.Basic) {
+            autoBasicLogin(token);
+        } else {
+            warningf("Unknown AuthenticationScheme: %s", scheme);
+        }
+    }
+
+
+    private void autoBasicLogin(string tokenString) {
+
+        ubyte[] decoded = Base64.decode(tokenString);
+        string[] values = split(cast(string)decoded, ":");
+        if(values.length != 2) {
+            warningf("Wrong token: %s", values);
+            return;
+        }
+
+        string username = values[0];
+        string password = values[1];
+        authenticate(username, password, true);
+    }
+
+    private void autoBearerLogin(string tokenString) {
+        try {
+            JwtToken token = new JwtToken(tokenString);
+            _subject.login(token);
+        } catch (AuthenticationException e) {
+            version(HUNT_DEBUG) warning(e.msg);
+            version(HUNT_AUTH_DEBUG) warning(e);
+        } catch(Exception ex) {
+            version(HUNT_DEBUG) warning(ex.msg);
+            version(HUNT_AUTH_DEBUG) warning(ex);
         }
     }
 
