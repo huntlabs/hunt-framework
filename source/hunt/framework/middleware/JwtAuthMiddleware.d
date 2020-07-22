@@ -9,6 +9,7 @@ import hunt.framework.config.ApplicationConfig;
 import hunt.framework.http.RedirectResponse;
 import hunt.framework.http.Request;
 import hunt.framework.http.Response;
+import hunt.framework.http.UnauthorizedResponse;
 import hunt.framework.Simplify;
 import hunt.http.AuthenticationScheme;
 import hunt.http.HttpHeader;
@@ -33,15 +34,21 @@ class JwtAuthMiddleware : AbstractMiddleware!(JwtAuthMiddleware) {
         super(routeChecker, rejectionHandler);
     }
 
-    private Response onRejected(Request request) {
-
-        if(_rejectionHandler !is null) {
-            return _rejectionHandler(this, request);
+    protected Response onRejected(Request request) {
+        if(request.isRestful()) {
+            return new UnauthorizedResponse();
         } else {
             ApplicationConfig.AuthConf appConfig = app().config().auth;
             string unauthorizedUrl = appConfig.unauthorizedUrl;
             return new RedirectResponse(request, unauthorizedUrl);
         }
+        // if(_rejectionHandler !is null) {
+        //     return _rejectionHandler(this, request);
+        // } else {
+        //     ApplicationConfig.AuthConf appConfig = app().config().auth;
+        //     string unauthorizedUrl = appConfig.unauthorizedUrl;
+        //     return new RedirectResponse(request, unauthorizedUrl);
+        // }
     }    
 
     Response onProcess(Request request, Response response = null) {

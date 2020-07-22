@@ -60,6 +60,7 @@ class Request {
     private string _routeGroup = DEFAULT_ROUTE_GROUP;
     private Auth _auth;
     private MonoTime _monoCreated;
+    private bool _isRestful = false;
 
     HttpServerRequest _request;
     alias _request this;
@@ -78,6 +79,14 @@ class Request {
 
     Auth auth() {
         return _auth;
+    }
+
+    bool isRestful() {
+        return _isRestful;
+    }
+
+    void isRestful(bool value) {
+        _isRestful = value;
     }
 
     /**

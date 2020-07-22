@@ -87,10 +87,15 @@ abstract class Controller
     }
 
     Request request() {
+        return createRequest(false);
+    }
+
+    protected Request createRequest(bool isRestful = false) {
         if(_request is null) {
             HttpConnection httpConnection = _routingContext.httpConnection();
             _request = new Request(_routingContext.getRequest(), httpConnection.getRemoteAddress(),
                 _routingContext.groupName());
+            _request.isRestful = isRestful;
         }
         return _request;
     }

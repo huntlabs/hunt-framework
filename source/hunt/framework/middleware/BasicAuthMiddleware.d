@@ -32,15 +32,21 @@ class BasicAuthMiddleware : AbstractMiddleware!(BasicAuthMiddleware) {
         super(routeChecker, rejectionHandler);
     }
 
-    private Response onRejected(Request request) {
-
-        if(_rejectionHandler !is null) {
-            return _rejectionHandler(this, request);
+    protected Response onRejected(Request request) {
+        if(request.isRestful()) {
+            return new UnauthorizedResponse();
         } else {
             ApplicationConfig.AuthConf appConfig = app().config().auth;
             string unauthorizedUrl = appConfig.unauthorizedUrl;
             return new RedirectResponse(request, unauthorizedUrl);
         }
+        // if(_rejectionHandler !is null) {
+        //     return _rejectionHandler(this, request);
+        // } else {
+        //     ApplicationConfig.AuthConf appConfig = app().config().auth;
+        //     string unauthorizedUrl = appConfig.unauthorizedUrl;
+        //     return new RedirectResponse(request, unauthorizedUrl);
+        // }
     }    
 
     ///return null is continue, response is close the session
