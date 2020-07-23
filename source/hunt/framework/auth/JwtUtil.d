@@ -33,7 +33,7 @@ class JwtUtil {
     static string getUsername(string token) {
         try {
             Token tk = decode(token);
-            return tk.claims().get("username");         
+            return tk.claims().sub();
         } catch (Exception e) {
             warning(e);
             return null;
@@ -55,8 +55,9 @@ class JwtUtil {
 
     static string sign(string username, string secret, Duration expireTime, JSONValue claims) {
         Token token = new Token(JWTAlgorithm.HS512);
+        token.claims.sub = username;
         token.claims.exp = cast(int) DateTime.currentUnixTime() + expireTime.total!(TimeUnit.Second)();
-        token.claims.set("username", username);
+        // token.claims.set("username", username);
 
         foreach(string key, JSONValue value; claims) {
             token.claims.set(key, value);

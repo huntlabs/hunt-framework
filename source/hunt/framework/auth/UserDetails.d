@@ -12,6 +12,8 @@ class UserDetails {
 
     string name;
 
+    bool isEnabled = true;
+
     deprecated("This field will be removed in next release.")
     string password;
 

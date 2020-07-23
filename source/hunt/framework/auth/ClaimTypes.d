@@ -12,5 +12,6 @@ enum ClaimTypes : string {
     Anonymous = "Anonymous",
     Country = "Country",
     DateOfBirth = "DateOfBirth",
-    Email = "Email"
+    Email = "Email",
+    AuthScheme = "AuthScheme"
 }

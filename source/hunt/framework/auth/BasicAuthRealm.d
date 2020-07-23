@@ -1,6 +1,7 @@
 module hunt.framework.auth.BasicAuthRealm;
 
 import hunt.framework.auth.Claim;
+import hunt.framework.auth.ClaimTypes;
 import hunt.framework.auth.JwtToken;
 import hunt.framework.auth.JwtUtil;
 import hunt.framework.auth.principal;
@@ -46,17 +47,21 @@ class BasicAuthRealm : AuthorizingRealm {
         if(user !is null) {
             Collection!(Object) principals = new ArrayList!(Object)(3);
 
+            // Add claims
+            Claim claim;
             UserIdPrincipal idPrincipal = new UserIdPrincipal(user.id);
             principals.add(idPrincipal);
 
             UsernamePrincipal namePrincipal = new UsernamePrincipal(username);
             principals.add(namePrincipal);
 
-            AuthSchemePrincipal schemePrincipal = new AuthSchemePrincipal(AuthenticationScheme.Basic);
-            principals.add(schemePrincipal);
+            claim = new Claim(ClaimTypes.AuthScheme, cast(string)AuthenticationScheme.Bearer);
+            principals.add(claim);
+            // AuthSchemePrincipal schemePrincipal = new AuthSchemePrincipal(AuthenticationScheme.Basic);
+            // principals.add(schemePrincipal);
 
-            foreach(Claim claim; user.claims) {
-                principals.add(claim);
+            foreach(Claim c; user.claims) {
+                principals.add(c);
             }
 
             PrincipalCollection pCollection = new SimplePrincipalCollection(principals, getName());

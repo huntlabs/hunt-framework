@@ -1,6 +1,7 @@
 module hunt.framework.auth.JwtAuthRealm;
 
 import hunt.framework.auth.Claim;
+import hunt.framework.auth.ClaimTypes;
 import hunt.framework.auth.Identity;
 import hunt.framework.auth.JwtToken;
 import hunt.framework.auth.JwtUtil;
@@ -9,6 +10,8 @@ import hunt.framework.auth.UserDetails;
 import hunt.framework.auth.UserService;
 import hunt.framework.provider.ServiceProvider;
 
+import hunt.framework.config.AuthUserConfig;
+
 import hunt.collection.ArrayList;
 import hunt.collection.Collection;
 import hunt.http.AuthenticationScheme;
@@ -16,7 +19,9 @@ import hunt.logging.ConsoleLogger;
 import hunt.shiro;
 import hunt.String;
 
+import std.algorithm;
 import std.range;
+import std.string;
 
 
 /**
@@ -47,8 +52,11 @@ class JwtAuthRealm : AuthorizingRealm {
         // To retrieve the user info from username
         UserDetails user = _userService.getByName(username);
         if(user is null) {
-            throw new AuthenticationException("The user doesn't exist!");
+            throw new AuthenticationException("The user does NOT exist!");
         }
+
+        if(!user.isEnabled)
+            throw new AuthenticationException("The user is disabled!");
 
         string salt = _userService.getSalt(username, "user.password");
         version(HUNT_SHIRO_DEBUG) {
@@ -60,8 +68,10 @@ class JwtAuthRealm : AuthorizingRealm {
             throw new IncorrectCredentialsException("Wrong username or password for " ~ username);
         }
 
+        // Add claims
+        Claim claim;
         
-        Collection!(Object) principals = new ArrayList!(Object)(3);
+        Collection!(Object) principals = new ArrayList!(Object)(10);
 
         UserIdPrincipal idPrincipal = new UserIdPrincipal(user.id);
         principals.add(idPrincipal);
@@ -69,11 +79,14 @@ class JwtAuthRealm : AuthorizingRealm {
         UsernamePrincipal namePrincipal = new UsernamePrincipal(username);
         principals.add(namePrincipal);
         
-        AuthSchemePrincipal schemePrincipal = new AuthSchemePrincipal(AuthenticationScheme.Bearer);
-        principals.add(schemePrincipal);
+        // AuthSchemePrincipal schemePrincipal = new AuthSchemePrincipal(AuthenticationScheme.Bearer);
+        // principals.add(schemePrincipal);
 
-        foreach(Claim claim; user.claims) {
-            principals.add(claim);
+        claim = new Claim(ClaimTypes.AuthScheme, cast(string)AuthenticationScheme.Bearer);
+        principals.add(claim);
+
+        foreach(Claim c; user.claims) {
+            principals.add(c);
         }
 
         PrincipalCollection pCollection = new SimplePrincipalCollection(principals, getName());
@@ -105,7 +118,8 @@ class JwtAuthRealm : AuthorizingRealm {
         info.addRoles(user.roles);
 
         // 
-        info.addStringPermissions(user.permissions);
+        string[] permissions = user.permissions.map!(p => p.strip().toShiroPermissions()).array;
+        info.addStringPermissions(permissions);
 
         return info;
     }

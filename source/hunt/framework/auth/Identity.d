@@ -1,6 +1,7 @@
 module hunt.framework.auth.Identity;
 
 import hunt.framework.auth.Claim;
+import hunt.framework.auth.ClaimTypes;
 import hunt.framework.auth.JwtToken;
 import hunt.framework.auth.principal;
 
@@ -45,14 +46,17 @@ class Identity {
     }
     
     AuthenticationScheme authScheme() {
-        PrincipalCollection pCollection = _subject.getPrincipals();
-        AuthSchemePrincipal principal = PrincipalCollectionHelper.oneByType!(AuthSchemePrincipal)(pCollection);
+        Variant var = claim(ClaimTypes.AuthScheme);
+        if(var == null) return AuthenticationScheme.None;
+        return cast(AuthenticationScheme)var.get!string();
+        // PrincipalCollection pCollection = _subject.getPrincipals();
+        // AuthSchemePrincipal principal = PrincipalCollectionHelper.oneByType!(AuthSchemePrincipal)(pCollection);
 
-        if(principal is null) {
-            return AuthenticationScheme.None;
-        } else {
-            return principal.getAuthScheme();
-        }
+        // if(principal is null) {
+        //     return AuthenticationScheme.None;
+        // } else {
+        //     return principal.getAuthScheme();
+        // }
     }
 
     Variant claim(string type) {
@@ -74,6 +78,19 @@ class Identity {
         }
 
         return v.get!T();
+    }
+
+    Claim[] claims() {
+        Claim[] r;
+
+        PrincipalCollection pCollection = _subject.getPrincipals();
+        foreach(Object p; pCollection) {
+            Claim claim = cast(Claim)p;
+            if(claim is null) continue;
+            r ~= claim;
+        }
+
+        return r;
     }
 
     void authenticate(string username, string password, bool remember = true) {
@@ -108,18 +125,21 @@ class Identity {
     }
 
     void authenticate(string token, AuthenticationScheme scheme) {
+        version(HUNT_DEBUG) {
+            infof("scheme: %s", scheme);
+        }
+
         if(scheme == AuthenticationScheme.Bearer) {
-            autoBearerLogin(token);
+            bearerLogin(token);
         } else if(scheme == AuthenticationScheme.Basic) {
-            autoBasicLogin(token);
+            basicLogin(token);
         } else {
             warningf("Unknown AuthenticationScheme: %s", scheme);
         }
     }
 
 
-    private void autoBasicLogin(string tokenString) {
-
+    private void basicLogin(string tokenString) {
         ubyte[] decoded = Base64.decode(tokenString);
         string[] values = split(cast(string)decoded, ":");
         if(values.length != 2) {
@@ -132,7 +152,7 @@ class Identity {
         authenticate(username, password, true);
     }
 
-    private void autoBearerLogin(string tokenString) {
+    private void bearerLogin(string tokenString) {
         try {
             JwtToken token = new JwtToken(tokenString);
             _subject.login(token);
