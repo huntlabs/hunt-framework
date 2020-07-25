@@ -54,6 +54,7 @@ class JwtUtil {
     }
 
     static string sign(string username, string secret, Duration expireTime, JSONValue claims) {
+        version(HUNT_AUTH_DEBUG) infof("username: %s, salt: %s", username, secret);
         Token token = new Token(JWTAlgorithm.HS512);
         token.claims.sub = username;
         token.claims.exp = cast(int) DateTime.currentUnixTime() + expireTime.total!(TimeUnit.Second)();

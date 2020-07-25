@@ -53,7 +53,6 @@ enum string DEFAULT_ROUTE_CONFIG_EXT = ".routes";
 
 enum int DEFAULT_TOKEN_EXPIRATION = 30; // days
 
-
 shared static this()
 {
     APP_PATH = dirName(thisExePath());

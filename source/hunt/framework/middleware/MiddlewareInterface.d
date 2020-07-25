@@ -102,14 +102,10 @@ interface MiddlewareInterface
 /**
  * 
  */
-abstract class AbstractMiddleware(T) : MiddlewareInterface {
+abstract class AbstractMiddleware : MiddlewareInterface {
 
     protected RouteChecker _routeChecker;
     protected MiddlewareEventHandler _rejectionHandler;
-
-    shared static this() {
-        MiddlewareInterface.register!(T);
-    }
 
     this() {
     }

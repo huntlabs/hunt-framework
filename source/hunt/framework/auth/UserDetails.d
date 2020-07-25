@@ -17,6 +17,8 @@ class UserDetails {
     deprecated("This field will be removed in next release.")
     string password;
 
+    string salt;
+
     string fullName;
 
     string[] roles;

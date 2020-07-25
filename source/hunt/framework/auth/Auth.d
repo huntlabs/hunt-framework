@@ -8,11 +8,12 @@ import hunt.framework.auth.JwtUtil;
 import hunt.framework.auth.UserService;
 import hunt.framework.http.Request;
 import hunt.framework.Simplify;
-import hunt.framework.provider.ServiceProvider;
+// import hunt.framework.provider.ServiceProvider;
 
 import hunt.http.AuthenticationScheme;
 import hunt.logging.ConsoleLogger;
 import hunt.shiro.Exceptions;
+import hunt.shiro.authc.AuthenticationToken;
 import hunt.util.TypeUtils;
 
 import jwt.JwtRegisteredClaimNames;
@@ -26,6 +27,13 @@ import std.range;
 import std.variant;
 import core.time;
 
+private enum AuthState {
+    Auto,
+    Token,
+    SignIn,
+    SignOut
+}
+
 
 /**
  * 
@@ -34,65 +42,77 @@ class Auth {
     
     private Identity _user;
     private string _token;
-    private AuthenticationScheme _scheme = AuthenticationScheme.None;
     private bool _remember = false;
     private bool _isTokenRefreshed = false;
     private bool _isLogout = false;
+    private AuthState _state = AuthState.Auto;
+    private string _tokenCookieName = BEARER_COOKIE_NAME;  
+    private AuthenticationScheme _scheme = AuthenticationScheme.None;
 
     private Request _request;
 
-    this(Request request) {
-        _request = request;
+    this(Request request, string tokenCookieName = BEARER_COOKIE_NAME,
+            AuthenticationScheme scheme = AuthenticationScheme.None) {
         _user = new Identity();
-
-        // Detect the auth type automatically
-        _token = _request.bearerToken();
-        if(_token.empty()) {
-            _token = _request.basicToken();
-            if(!_token.empty()) {
-                // _scheme = AuthenticationScheme.Basic;
-                _user.authenticate(_token, AuthenticationScheme.Basic);
-            }
-        } else {
-            // _scheme = AuthenticationScheme.Bearer;
-            _user.authenticate(_token, AuthenticationScheme.Bearer);
-        }
-
-        // Detect the token from cookie
-        if(_token.empty()) {
-            _token = request.cookie(BEARER_COOKIE_NAME);
-            if(_token.empty()) {
-                _token = request.cookie(BASIC_COOKIE_NAME);
-                if(!_token.empty()) {
-                    // _scheme = AuthenticationScheme.Basic;
-                    _user.authenticate(_token, AuthenticationScheme.Basic);
-                }
-            } else {
-                // _scheme = AuthenticationScheme.Bearer;
-                _user.authenticate(_token, AuthenticationScheme.Bearer);
-            }
-        }
-        
-        if(_user.isAuthenticated()) {
-            _scheme = _user.authScheme();
+        _request = request;
+        _tokenCookieName = tokenCookieName;
+        _scheme = scheme;
+        version(HUNT_AUTH_DEBUG) {
+            warningf("path: %s, isAuthenticated: %s", request.path(), _user.isAuthenticated());
         }
     }
 
+    // void tokenCookieName(string name) {
+    //     _tokenCookieName = name;
+    // }
+
+    string tokenCookieName() {
+        return _tokenCookieName;
+    }
+
+    private void autoDetect() {
+        if(_state != AuthState.Auto) 
+            return;
+        
+        if(_scheme == AuthenticationScheme.None)
+            _scheme = AuthenticationScheme.Bearer;
+
+        // Detect the auth type automatically
+        if(_scheme == AuthenticationScheme.Bearer) {
+            _token = _request.bearerToken();
+        } else if(_scheme == AuthenticationScheme.Basic) {
+            _token = _request.basicToken();
+        }
+
+        if(_token.empty()) { // Detect the token from cookie
+            _token = request.cookie(_tokenCookieName);
+        } 
+
+        if(!_token.empty()) {
+            _user.authenticate(_token, _tokenCookieName, _scheme);
+        }
+
+        _state = AuthState.Token;
+    }
 
     Identity user() {
+        autoDetect();
         return _user;
     }
 
-    Identity signIn(string name, string password, bool remember = false, 
+    Identity signIn(string name, string password, string salt, bool remember = false, 
+            string tokenName = DEFAULT_AUTH_TOKEN_NAME,
             AuthenticationScheme scheme = AuthenticationScheme.Bearer) {
-        _user.authenticate(name, password, remember);
+        _user.authenticate(name, password, remember, tokenName);
         _remember = remember;
         _scheme = scheme;
+        _state = AuthState.SignIn;
 
         if(_user.isAuthenticated()) {
             if(scheme == AuthenticationScheme.Bearer) {
-                UserService userService = serviceContainer().resolve!UserService();
-                string salt = userService.getSalt(name, password);
+                // UserService userService = serviceContainer().resolve!UserService();
+
+                // string salt = userService.getSalt(name, password);
                 int exp = config().auth.tokenExpiration;
 
                 JSONValue claims;
@@ -114,10 +134,12 @@ class Auth {
                 }
 
                 _token = JwtUtil.sign(name, salt, exp.seconds, claims);
-            } else {
+            } else if(scheme == AuthenticationScheme.Basic) {
                 string str = name ~ ":" ~ password;
                 ubyte[] data = cast(ubyte[])str;
                 _token = cast(string)Base64.encode(data);
+            } else {
+                error("Unsupported AuthenticationScheme: %s", scheme);
             }
         }
 
@@ -154,6 +176,7 @@ class Auth {
     }
 
     void signOut() {
+        _state = AuthState.SignOut;
         _token = null;
         _remember = false;
         _isLogout = true;
@@ -167,17 +190,17 @@ class Auth {
         }
     }
 
-    string refreshToken() {
+    string refreshToken(string salt) {
         string username = _user.name();
         if(!_user.isAuthenticated()) {
             throw new AuthenticationException( format("Use is not authenticated: %s", _user.name()));
         }
 
         if(_scheme == AuthenticationScheme.Bearer) {
-            UserService userService = serviceContainer().resolve!UserService();
+            // UserService userService = serviceContainer().resolve!UserService();
             // FIXME: Needing refactor or cleanup -@zhangxueping at 2020-07-17T11:10:18+08:00
             // 
-            string salt = userService.getSalt(username, "no password");
+            // string salt = userService.getSalt(username, "no password");
             _token = JwtUtil.sign(username, salt);
         } 
         
@@ -187,12 +210,18 @@ class Auth {
 
     // the token value for the "remember me" session.
     string token() {
+        autoDetect();
         return _token;
     }
-
+  
     AuthenticationScheme scheme() {
+        autoDetect();
         return _scheme;
     }
+
+    // void scheme(AuthenticationScheme value) {
+    //     _scheme = value;
+    // }
 
     bool canRememberMe() {
         return _remember;

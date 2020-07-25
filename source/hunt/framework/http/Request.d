@@ -61,6 +61,7 @@ class Request {
     private Auth _auth;
     private MonoTime _monoCreated;
     private bool _isRestful = false;
+    // private string _tokenCookieName = BEARER_COOKIE_NAME;
 
     HttpServerRequest _request;
     alias _request this;
@@ -73,14 +74,39 @@ class Request {
         _routeGroup = routeGroup;
         _remoteAddr = remoteAddress;
 
-        .request(this); // Binding this request to current thread.
+        .request(this); // Binding this request to the current thread.
     }
 
     Auth auth() {
         if(_auth is null)
-            _auth = new Auth(this);
+            _auth = new Auth(this, _tokenCookieName, _authenticationScheme);
         return _auth;
     }
+
+    package void tokenCookieName(string name) {
+        _tokenCookieName = name;
+    }
+
+    string tokenCookieName() {
+        return _tokenCookieName;
+    }
+    private string _tokenCookieName = BEARER_COOKIE_NAME;  
+
+    package void authenticationScheme(AuthenticationScheme name) {
+        _authenticationScheme = name;
+    }
+
+    AuthenticationScheme authenticationScheme() {
+        return _authenticationScheme;
+    }
+    private AuthenticationScheme _authenticationScheme = AuthenticationScheme.None;
+
+    // Auth auth(string tokenCookieName, AuthenticationScheme scheme) {
+    //     if(_auth is null) {
+    //         _auth = new Auth(this, tokenCookieName, scheme);
+    //     }
+    //     return _auth;
+    // }
 
     bool isRestful() {
         return _isRestful;
@@ -89,6 +115,14 @@ class Request {
     void isRestful(bool value) {
         _isRestful = value;
     }
+
+    // void tokenCookieName(string name) {
+    //     _tokenCookieName = name;
+    // }
+
+    // string tokenCookieName() {
+    //     return _tokenCookieName;
+    // }
 
     /**
      * Determine if the uploaded data contains a file.

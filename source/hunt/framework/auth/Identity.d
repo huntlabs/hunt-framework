@@ -93,7 +93,8 @@ class Identity {
         return r;
     }
 
-    void authenticate(string username, string password, bool remember = true) {
+    void authenticate(string username, string password, bool remember = true, 
+            string tokenName = DEFAULT_AUTH_TOKEN_NAME) {
 
         version(HUNT_SHIRO_DEBUG) { 
             tracef("Checking the status at first: %s", _subject.isAuthenticated());
@@ -105,6 +106,7 @@ class Identity {
 
         UsernamePasswordToken token = new UsernamePasswordToken(username, password);
         token.setRememberMe(remember);
+        token.name = tokenName;
 
         try {
             _subject.login(token);
@@ -124,22 +126,22 @@ class Identity {
         }
     }
 
-    void authenticate(string token, AuthenticationScheme scheme) {
-        version(HUNT_DEBUG) {
-            infof("scheme: %s", scheme);
+    void authenticate(string token, string tokenName, AuthenticationScheme scheme) {
+        version(HUNT_AUTH_DEBUG) {
+            infof("tokenName: %s, scheme: %s", tokenName, scheme);
         }
 
         if(scheme == AuthenticationScheme.Bearer) {
-            bearerLogin(token);
+            bearerLogin(token, tokenName);
         } else if(scheme == AuthenticationScheme.Basic) {
-            basicLogin(token);
+            basicLogin(token, tokenName);
         } else {
             warningf("Unknown AuthenticationScheme: %s", scheme);
         }
     }
 
 
-    private void basicLogin(string tokenString) {
+    private void basicLogin(string tokenString, string tokenName = DEFAULT_AUTH_TOKEN_NAME) {
         ubyte[] decoded = Base64.decode(tokenString);
         string[] values = split(cast(string)decoded, ":");
         if(values.length != 2) {
@@ -149,19 +151,19 @@ class Identity {
 
         string username = values[0];
         string password = values[1];
-        authenticate(username, password, true);
+        authenticate(username, password, true, tokenName);
     }
 
-    private void bearerLogin(string tokenString) {
+    private void bearerLogin(string tokenString, string tokenName = DEFAULT_AUTH_TOKEN_NAME) {
         try {
-            JwtToken token = new JwtToken(tokenString);
+            JwtToken token = new JwtToken(tokenString, tokenName);
             _subject.login(token);
         } catch (AuthenticationException e) {
-            version(HUNT_DEBUG) warning(e.msg);
+            warning(e.msg);
             version(HUNT_AUTH_DEBUG) warning(e);
         } catch(Exception ex) {
-            version(HUNT_DEBUG) warning(ex.msg);
-            version(HUNT_AUTH_DEBUG) warning(ex);
+            warning(ex.msg);
+            version(HUNT_DEBUG) warning(ex);
         }
     }
 

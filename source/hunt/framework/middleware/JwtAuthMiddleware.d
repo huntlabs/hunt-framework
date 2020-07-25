@@ -20,11 +20,14 @@ import std.range;
 import std.string;
 
 
-
 /**
  * 
  */
-class JwtAuthMiddleware : AbstractMiddleware!(JwtAuthMiddleware) {
+class JwtAuthMiddleware : AbstractMiddleware {
+
+    shared static this() {
+        MiddlewareInterface.register!(typeof(this));
+    }
 
     this() {
         super();
@@ -35,21 +38,32 @@ class JwtAuthMiddleware : AbstractMiddleware!(JwtAuthMiddleware) {
     }
 
     protected Response onRejected(Request request) {
-        if(request.isRestful()) {
-            return new UnauthorizedResponse();
+        if(_rejectionHandler !is null) {
+            return _rejectionHandler(this, request);
         } else {
-            ApplicationConfig.AuthConf appConfig = app().config().auth;
-            string unauthorizedUrl = appConfig.unauthorizedUrl;
-            return new RedirectResponse(request, unauthorizedUrl);
+            // ApplicationConfig.AuthConf appConfig = app().config().auth;
+            // string unauthorizedUrl = appConfig.unauthorizedUrl;
+            // return new RedirectResponse(request, unauthorizedUrl);
+            if(request.isRestful()) {
+                return new UnauthorizedResponse();
+            } else {
+                ApplicationConfig.AuthConf appConfig = app().config().auth;
+                string unauthorizedUrl = appConfig.unauthorizedUrl;
+                return new RedirectResponse(request, unauthorizedUrl);
+            }            
         }
-        // if(_rejectionHandler !is null) {
-        //     return _rejectionHandler(this, request);
-        // } else {
-        //     ApplicationConfig.AuthConf appConfig = app().config().auth;
-        //     string unauthorizedUrl = appConfig.unauthorizedUrl;
-        //     return new RedirectResponse(request, unauthorizedUrl);
-        // }
-    }    
+    }
+
+    protected JwtToken getToken(Request request) {
+        string tokenString = request.bearerToken();
+
+        if(tokenString.empty)
+            tokenString = request.cookie(BEARER_COOKIE_NAME);
+
+        if(tokenString.empty)
+            return null;
+        return new JwtToken(tokenString);
+    }
 
     Response onProcess(Request request, Response response = null) {
         version(HUNT_SHIRO_DEBUG) infof("path: %s, method: %s", request.path(), request.method );
@@ -69,14 +83,10 @@ class JwtAuthMiddleware : AbstractMiddleware!(JwtAuthMiddleware) {
             return null;
         }
         
-        string tokenString = request.bearerToken();
-
-        if(tokenString.empty)
-            tokenString = request.cookie(BEARER_COOKIE_NAME);
+        JwtToken token = getToken(request);
             
-        if(!tokenString.empty) {
+        if(token !is null) {
             try {
-                JwtToken token = new JwtToken(tokenString);
                 subject.login(token);
             } catch (AuthenticationException e) {
                 version(HUNT_DEBUG) warning(e.msg);

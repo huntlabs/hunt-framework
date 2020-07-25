@@ -21,28 +21,36 @@ import hunt.String;
  * 
  */
 class BasicAuthRealm : AuthorizingRealm {
-    private UserService _userService;
 
     this() {
-        _userService = serviceContainer().resolve!UserService();
     }
 
-    override
-    bool supports(AuthenticationToken token) {
-        UsernamePasswordToken ut = cast(UsernamePasswordToken)token;
-        return ut !is null;
+    override bool supports(AuthenticationToken token) {
+        // return typeid(cast(Object)token) == typeid(UsernamePasswordToken);
+
+        UsernamePasswordToken t = cast(UsernamePasswordToken)token;
+        if(t is null)
+            return false;
+        return t.name() ==  DEFAULT_AUTH_TOKEN_NAME;
+    }
+
+    protected UserService getUserService() {
+        return serviceContainer().resolve!UserService();
     }
 
     override protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) {
         string username = token.getPrincipal();
         string password = cast(string)token.getCredentials();
 
-        version(HUNT_SHIRO_DEBUG) {
-            infof("username: %s", username);
+        UserService userService = getUserService();
+        version(HUNT_AUTH_DEBUG) {
+            infof("username: %s, %s", username, typeid(cast(Object)userService));
         }        
 
+            infof("username: %s, %s", username, typeid(cast(Object)userService));
+
         // To authenticate the user with username and password
-        UserDetails user = _userService.authenticate(username, password);
+        UserDetails user = userService.authenticate(username, password);
         
         if(user !is null) {
             Collection!(Object) principals = new ArrayList!(Object)(3);
@@ -86,8 +94,9 @@ class BasicAuthRealm : AuthorizingRealm {
         string username = principal.getUsername();
         SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
 
+        UserService userService = getUserService();
         // To retrieve all the roles for the user from database
-        UserDetails user = _userService.getByName(username);
+        UserDetails user = userService.getByName(username);
         if(user is null) {
             throw new AuthenticationException("User didn't existed!");
         }

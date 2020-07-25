@@ -2,23 +2,29 @@ module hunt.framework.auth.JwtToken;
 
 import hunt.shiro.authc.AuthenticationToken;
 
+
 /**
  * 
  */
 class JwtToken : AuthenticationToken {
 
-    private string token;
+    private string _token;
+    private string _name;
 
-    this(string token) {
-        this.token = token;
+    this(string token, string name = DEFAULT_AUTH_TOKEN_NAME) {
+        _token = token;
+        _name = name;
     }
 
     string getPrincipal() {
-        return token;
+        return _token;
     }
 
     char[] getCredentials() {
-        return cast(char[])token.dup;
+        return cast(char[])_token.dup;
     }
-    
+
+    string name() {
+        return _name;
+    }
 }

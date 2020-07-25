@@ -29,16 +29,23 @@ import std.string;
  *  [Springboot Integrate with Apache Shiro](http://www.andrew-programming.com/2019/01/23/springboot-integrate-with-jwt-and-apache-shiro/)
  */
 class JwtAuthRealm : AuthorizingRealm {
-    private UserService _userService;
+    // private UserService userService;
 
     this() {
-        _userService = serviceContainer().resolve!UserService();
+        // userService = serviceContainer().resolve!UserService();
     }
 
-    override
-    bool supports(AuthenticationToken token) {
-        JwtToken jt = cast(JwtToken)token;
-        return jt !is null;
+    override bool supports(AuthenticationToken token) {
+        // return typeid(cast(Object)token) == typeid(JwtToken);
+        
+        JwtToken t = cast(JwtToken)token;
+        if(t is null)
+            return false;
+        return t.name() ==  DEFAULT_AUTH_TOKEN_NAME;
+    }
+
+    protected UserService getUserService() {
+        return serviceContainer().resolve!UserService();
     }
 
     override protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) {
@@ -49,8 +56,13 @@ class JwtAuthRealm : AuthorizingRealm {
             throw new AuthenticationException("token invalid");
         }
 
+        UserService userService = getUserService();
+        version(HUNT_AUTH_DEBUG) {
+            infof("username: %s, %s", username, typeid(cast(Object)userService));
+        }        
+
         // To retrieve the user info from username
-        UserDetails user = _userService.getByName(username);
+        UserDetails user = userService.getByName(username);
         if(user is null) {
             throw new AuthenticationException("The user does NOT exist!");
         }
@@ -58,10 +70,11 @@ class JwtAuthRealm : AuthorizingRealm {
         if(!user.isEnabled)
             throw new AuthenticationException("The user is disabled!");
 
-        string salt = _userService.getSalt(username, "user.password");
-        version(HUNT_SHIRO_DEBUG) {
+        string salt = user.salt; // userService.getSalt(username, "user.password");
+        version(HUNT_AUTH_DEBUG) {
             infof("tokenString: %s,  username: %s, salt: %s", tokenString, username, salt);
-        }          
+        }      
+            infof("tokenString: %s,  username: %s, salt: %s", tokenString, username, salt);    
 
         // Valid the user using JWT
         if(!JwtUtil.verify(tokenString, username, salt)) {
@@ -105,10 +118,11 @@ class JwtAuthRealm : AuthorizingRealm {
             return null;
         }
 
+        UserService userService = getUserService();
         string username = principal.getUsername();
         
         // To retrieve all the roles and permissions for the user from database
-        UserDetails user = _userService.getByName(username);
+        UserDetails user = userService.getByName(username);
         if(user is null) {
             throw new AuthenticationException("User didn't existed!");
         }

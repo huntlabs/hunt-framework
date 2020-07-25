@@ -74,6 +74,7 @@ abstract class Controller
 {
     private Request _request;
     private Response _response;
+    private string _tokenCookieName = BEARER_COOKIE_NAME;  
 
     private MiddlewareInfo[] _allowedMiddlewares;
     private MiddlewareInfo[] _skippedMiddlewares;
@@ -86,23 +87,34 @@ abstract class Controller
         MiddlewareInterface[string] middlewares;
     }
 
+    RoutingContext routingContext() {
+        if(_routingContext is null) {
+            throw new Exception("Can't call this method in the constructor.");
+        }
+        return _routingContext;
+    }
+
     Request request() {
         return createRequest(false);
     }
 
+
     protected Request createRequest(bool isRestful = false) {
         if(_request is null) {
-            HttpConnection httpConnection = _routingContext.httpConnection();
-            _request = new Request(_routingContext.getRequest(), httpConnection.getRemoteAddress(),
-                _routingContext.groupName());
+            RoutingContext context = routingContext();
+            HttpConnection httpConnection = context.httpConnection();
+            _request = new Request(context.getRequest(), httpConnection.getRemoteAddress(),
+                context.groupName());
             _request.isRestful = isRestful;
+            _request.tokenCookieName = tokenCookieName();
+            _request.authenticationScheme = authenticationScheme();
         }
         return _request;
     }
 
     final @property Response response() {
         if(_response is null) {
-            _response = new Response(_routingContext.getResponse());
+            _response = new Response(routingContext().getResponse());
         }
         return _response;
     }
@@ -111,8 +123,26 @@ abstract class Controller
     @property void response(Response r) {
         assert(r !is null, "The response can't be null");
         _response = r;
-        _routingContext.response = r.httpResponse;
+        routingContext().response = r.httpResponse;
     }
+
+    void tokenCookieName(string name) {
+        _tokenCookieName = name;
+    }
+
+    string tokenCookieName() {
+        return _tokenCookieName;
+    }
+
+    void authenticationScheme(AuthenticationScheme name) {
+        _authenticationScheme = name;
+    }
+
+    AuthenticationScheme authenticationScheme() {
+        return _authenticationScheme;
+    }
+
+    private AuthenticationScheme _authenticationScheme = AuthenticationScheme.None;
 
     /**
      * Get the currently authenticated user.
@@ -126,7 +156,7 @@ abstract class Controller
         if (_view is null)
         {
             _view = serviceContainer.resolve!View();
-            _view.setRouteGroup(_routingContext.groupName());
+            _view.setRouteGroup(routingContext().groupName());
             _view.setLocale(this.request.locale());
         }
 
@@ -136,6 +166,7 @@ abstract class Controller
     private RouteConfigManager routeManager() {
         return serviceContainer.resolve!(RouteConfigManager);
     }
+
 
     /// called before action  return true is continue false is finish
     bool before()
@@ -449,33 +480,32 @@ abstract class Controller
 
         Auth auth = req.auth();
         AuthenticationScheme authScheme = auth.scheme();
+        string tokenCookieName = auth.tokenCookieName();
+        version(HUNT_AUTH_DEBUG) {
+            warningf("tokenCookieName: %s, authScheme: %s, isAuthenticated: %s", 
+                tokenCookieName, authScheme, auth.user().isAuthenticated);
+        }
         Cookie tokenCookie;
 
         if(req.canRememberMe() || auth.isTokenRefreshed()) {
             ApplicationConfig appConfig = app().config();
             int tokenExpiration = appConfig.auth.tokenExpiration;
-            string authToken = req.auth.token();
+            string authToken = auth.token();
 
-            if(authScheme == AuthenticationScheme.Bearer) {
-                tokenCookie = new Cookie(BEARER_COOKIE_NAME, authToken, tokenExpiration);
-            } else if(authScheme == AuthenticationScheme.Basic) {
-                tokenCookie = new Cookie(BASIC_COOKIE_NAME, authToken, tokenExpiration);
-            }
+            if(authScheme != AuthenticationScheme.None) {
+                tokenCookie = new Cookie(tokenCookieName, authToken, tokenExpiration);
+            } 
 
         } else if(req.isLogout()) {
-            if(authScheme == AuthenticationScheme.Bearer) {
-                tokenCookie = new Cookie(BEARER_COOKIE_NAME, "", 0);
-            } else if(authScheme == AuthenticationScheme.Basic) {
-                tokenCookie = new Cookie(BASIC_COOKIE_NAME, "", 0);
+            if(authScheme != AuthenticationScheme.None) {
+                tokenCookie = new Cookie(tokenCookieName, "", 0);
             }
         } else if(authScheme != AuthenticationScheme.None) {
             ApplicationConfig appConfig = app().config();
             int tokenExpiration = appConfig.auth.tokenExpiration;
-            string authToken = req.auth.token();
-            if(authScheme == AuthenticationScheme.Bearer) {
-                tokenCookie = new Cookie(BEARER_COOKIE_NAME, authToken, tokenExpiration);
-            } else if(authScheme == AuthenticationScheme.Basic) {
-                tokenCookie = new Cookie(BASIC_COOKIE_NAME, authToken, tokenExpiration);
+            string authToken = auth.token();
+            if(authScheme != AuthenticationScheme.None) {
+                tokenCookie = new Cookie(tokenCookieName, authToken, tokenExpiration);
             }
         }
 
@@ -636,7 +666,6 @@ string __createCallActionMethod(T, string moduleName)()
 
         void callActionMethod(string methodName, RoutingContext context) {
             _routingContext = context;
-            // Response actionResponse=null;
             HttpBody rb;
             version (HUNT_FM_DEBUG) logDebug("methodName=", methodName);
             import std.conv;
