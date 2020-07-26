@@ -74,7 +74,6 @@ class JwtAuthRealm : AuthorizingRealm {
         version(HUNT_AUTH_DEBUG) {
             infof("tokenString: %s,  username: %s, salt: %s", tokenString, username, salt);
         }      
-            infof("tokenString: %s,  username: %s, salt: %s", tokenString, username, salt);    
 
         // Valid the user using JWT
         if(!JwtUtil.verify(tokenString, username, salt)) {
@@ -120,11 +119,13 @@ class JwtAuthRealm : AuthorizingRealm {
 
         UserService userService = getUserService();
         string username = principal.getUsername();
+
+        warning(typeid(cast(Object)userService));
         
         // To retrieve all the roles and permissions for the user from database
         UserDetails user = userService.getByName(username);
         if(user is null) {
-            throw new AuthenticationException("User didn't existed!");
+            throw new AuthenticationException(format("The user [%s] does NOT exist!", username));
         }
 
         SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();

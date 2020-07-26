@@ -73,7 +73,7 @@ class Identity {
     T claimAs(T)(string type) {
         Variant v = claim(type);
         if(v == null) {
-            version(HUNT_DEBUG) warning("The claim is null");
+            version(HUNT_DEBUG) warningf("The claim for %s is null", type);
             return T.init;
         }
 

@@ -21,4 +21,8 @@ class UserIdPrincipal : Principal {
     string getName() {
         return _userId.to!string();
     }
+
+    override string toString() {
+        return _userId.to!string();
+    }
 }

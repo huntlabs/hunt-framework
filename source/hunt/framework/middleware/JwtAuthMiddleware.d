@@ -41,9 +41,6 @@ class JwtAuthMiddleware : AbstractMiddleware {
         if(_rejectionHandler !is null) {
             return _rejectionHandler(this, request);
         } else {
-            // ApplicationConfig.AuthConf appConfig = app().config().auth;
-            // string unauthorizedUrl = appConfig.unauthorizedUrl;
-            // return new RedirectResponse(request, unauthorizedUrl);
             if(request.isRestful()) {
                 return new UnauthorizedResponse();
             } else {
@@ -66,7 +63,7 @@ class JwtAuthMiddleware : AbstractMiddleware {
     }
 
     Response onProcess(Request request, Response response = null) {
-        version(HUNT_SHIRO_DEBUG) infof("path: %s, method: %s", request.path(), request.method );
+        version(HUNT_AUTH_DEBUG) infof("path: %s, method: %s", request.path(), request.method );
 
         bool needCheck = true;
         if(_routeChecker !is null) {

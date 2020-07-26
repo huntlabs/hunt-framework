@@ -16,6 +16,8 @@ import hunt.logging.ConsoleLogger;
 import hunt.shiro;
 import hunt.String;
 
+import std.format;
+
 
 /**
  * 
@@ -95,10 +97,13 @@ class BasicAuthRealm : AuthorizingRealm {
         SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
 
         UserService userService = getUserService();
+        
+        warning(typeid(cast(Object)userService));
+
         // To retrieve all the roles for the user from database
         UserDetails user = userService.getByName(username);
         if(user is null) {
-            throw new AuthenticationException("User didn't existed!");
+            throw new AuthenticationException(format("The user [%s] does NOT exist!", username));
         }
 
         //

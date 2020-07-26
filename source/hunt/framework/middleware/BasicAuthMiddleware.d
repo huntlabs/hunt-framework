@@ -60,13 +60,12 @@ class BasicAuthMiddleware : AbstractMiddleware {
     protected string getSalt(string username) {
         UserService userService = serviceContainer().resolve!UserService();
         string salt = userService.getSalt(username, "");
-        warning("xxxxxxxxxxx=>", salt);
         return salt;
     }
 
     ///return null is continue, response is close the session
     Response onProcess(Request request, Response response = null) {
-        infof("path: %s, method: %s", request.path(), request.method);
+        version(HUNT_AUTH_DEBUG) infof("path: %s, method: %s", request.path(), request.method );
 
         bool needCheck = true;
         if (_routeChecker !is null) {

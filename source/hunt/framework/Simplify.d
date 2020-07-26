@@ -174,15 +174,19 @@ private string _transWithLocale(string locale, string key) {
     if (p !is null) {
         return p.get(key, defaultValue);
     }
-    logWarning("unsupported locale: ", locale, ", use default now: ", i18n.defaultLocale);
+    version(HUNT_DEBUG) { 
+        logWarning("No language resource found for ", locale, 
+            ". Use the default now: ", i18n.defaultLocale);
+    }
 
-    p = i18n.defaultLocale in i18n.resources;
+    locale = i18n.defaultLocale;
+    p = locale in i18n.resources;
 
     if (p !is null) {
         return p.get(key, defaultValue);
     }
 
-    logDebug("unsupported locale: ", i18n.defaultLocale);
+    warning("No language resource found for: ", locale);
 
     return defaultValue;
 }

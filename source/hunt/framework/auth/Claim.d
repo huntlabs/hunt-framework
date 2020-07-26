@@ -26,4 +26,8 @@ class Claim {
     Variant value() {
         return _value;
     }
+
+    override string toString() {
+        return _value.toString();
+    }
 }
