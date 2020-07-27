@@ -11,6 +11,7 @@
 
 module hunt.framework.http.Request;
 
+import hunt.framework.auth;
 import hunt.framework.file.UploadedFile;
 import hunt.framework.http.session.SessionStorage;
 import hunt.framework.Init;
@@ -25,8 +26,7 @@ import hunt.http.MultipartForm;
 import hunt.http.server.HttpServerRequest;
 import hunt.http.server.HttpSession;
 import hunt.logging.ConsoleLogger;
-
-import hunt.framework.auth;
+import hunt.serialization.JsonSerializer;
 
 import std.algorithm;
 import std.array : split;
@@ -501,9 +501,14 @@ class Request {
 
     T bindForm(T)() {
 
-        if(methodAsString() != "POST")
+        if(_request.getMethod() != HttpMethod.POST.asString() && 
+            _request.getMethod() != HttpMethod.PUT.asString()) {
+            version(HUNT_DEBUG) {
+                warningf("The required method is POST or PUT. Here is yours: %s", _request.getMethod());
+            }
             return T.init;
-        import hunt.serialization.JsonSerializer;
+        }
+        
         // import hunt.util.Serialize;
 
         JSONValue jv;
