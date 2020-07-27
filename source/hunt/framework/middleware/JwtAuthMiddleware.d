@@ -1,13 +1,10 @@
 module hunt.framework.middleware.JwtAuthMiddleware;
 
 import hunt.framework.middleware.MiddlewareInterface;
+import hunt.framework.middleware.AuthMiddleware;
 
 import hunt.framework.application.Application;
-import hunt.framework.auth.Claim;
-import hunt.framework.auth.ClaimTypes;
-import hunt.framework.auth.Identity;
-import hunt.framework.auth.JwtToken;
-import hunt.framework.auth.JwtUtil;
+import hunt.framework.auth;
 import hunt.framework.config.ApplicationConfig;
 import hunt.framework.http.RedirectResponse;
 import hunt.framework.http.Request;
@@ -26,7 +23,7 @@ import std.string;
 /**
  * 
  */
-class JwtAuthMiddleware : AbstractMiddleware {
+class JwtAuthMiddleware : AuthMiddleware {
 
     shared static this() {
         MiddlewareInterface.register!(typeof(this));
@@ -40,21 +37,7 @@ class JwtAuthMiddleware : AbstractMiddleware {
         super(routeChecker, rejectionHandler);
     }
 
-    protected Response onRejected(Request request) {
-        if(_rejectionHandler !is null) {
-            return _rejectionHandler(this, request);
-        } else {
-            if(request.isRestful()) {
-                return new UnauthorizedResponse();
-            } else {
-                ApplicationConfig.AuthConf appConfig = app().config().auth;
-                string unauthorizedUrl = appConfig.unauthorizedUrl;
-                return new RedirectResponse(request, unauthorizedUrl);
-            }            
-        }
-    }
-
-    protected JwtToken getToken(Request request) {
+    override protected JwtToken getToken(Request request) {
         string tokenString = request.bearerToken();
 
         if(tokenString.empty)
@@ -65,55 +48,55 @@ class JwtAuthMiddleware : AbstractMiddleware {
         return new JwtToken(tokenString);
     }
 
-    Response onProcess(Request request, Response response = null) {
-        version(HUNT_AUTH_DEBUG) infof("path: %s, method: %s", request.path(), request.method );
+    // Response onProcess(Request request, Response response = null) {
+    //     version(HUNT_AUTH_DEBUG) infof("path: %s, method: %s", request.path(), request.method );
 
-        bool needCheck = true;
-        if(_routeChecker !is null) {
-            needCheck = _routeChecker(request.path(), request.getMethod());
-        }
+    //     bool needCheck = true;
+    //     if(_routeChecker !is null) {
+    //         needCheck = _routeChecker(request.path(), request.getMethod());
+    //     }
 
-        if(!needCheck) {
-            return null;
-        }
+    //     if(!needCheck) {
+    //         return null;
+    //     }
 
-        Subject subject = SecurityUtils.getSubject();
-        if(subject.isAuthenticated()) {
-            version(HUNT_DEBUG) {
-                Identity user = request.auth().user();
-                string fullName = user.claimAs!(string)(ClaimTypes.FullName);
-                infof("User [%s / %s] logged in.",  user.name(), fullName);
-            }
-            return null;
-        }
+    //     Subject subject = SecurityUtils.getSubject(guardName());
+    //     if(subject.isAuthenticated()) {
+    //         version(HUNT_DEBUG) {
+    //             Identity user = request.auth().user();
+    //             string fullName = user.claimAs!(string)(ClaimTypes.FullName);
+    //             infof("User [%s / %s] logged in.",  user.name(), fullName);
+    //         }
+    //         return null;
+    //     }
         
-        JwtToken token = getToken(request);
+    //     JwtToken token = getToken(request);
             
-        if(token !is null) {
-            try {
-                subject.login(token);
-            } catch (AuthenticationException e) {
-                version(HUNT_DEBUG) warning(e.msg);
-                version(HUNT_AUTH_DEBUG) warning(e);
-            } catch(Exception ex) {
-                version(HUNT_DEBUG) warning(ex.msg);
-                version(HUNT_AUTH_DEBUG) warning(ex);
-            }
+    //     if(token !is null) {
+    //         try {
+    //             subject.login(token);
+    //         } catch (AuthenticationException e) {
+    //             version(HUNT_DEBUG) warning(e.msg);
+    //             version(HUNT_AUTH_DEBUG) warning(e);
+    //         } catch(Exception ex) {
+    //             version(HUNT_DEBUG) warning(ex.msg);
+    //             version(HUNT_AUTH_DEBUG) warning(ex);
+    //         }
 
-            if(subject.isAuthenticated()) {
-                version(HUNT_DEBUG) {
-                    Identity user = request.auth().user();
-                    // Claim[] claims =  user.claims;
-                    // foreach(Claim c; claims) {
-                    //     tracef("%s, %s", c.type, c.value);
-                    // }
-                    string fullName = user.claimAs!(string)(ClaimTypes.FullName);
-                    infof("User [%s / %s] logged in.",  user.name(), fullName);
-                }
-                return null;	
-            }
-        }
+    //         if(subject.isAuthenticated()) {
+    //             version(HUNT_DEBUG) {
+    //                 Identity user = request.auth().user();
+    //                 // Claim[] claims =  user.claims;
+    //                 // foreach(Claim c; claims) {
+    //                 //     tracef("%s, %s", c.type, c.value);
+    //                 // }
+    //                 string fullName = user.claimAs!(string)(ClaimTypes.FullName);
+    //                 infof("User [%s / %s] logged in.",  user.name(), fullName);
+    //             }
+    //             return null;	
+    //         }
+    //     }
         
-        return onRejected(request);
-    }
+    //     return onRejected(request);
+    // }
 }

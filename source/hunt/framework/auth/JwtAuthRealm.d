@@ -1,5 +1,6 @@
 module hunt.framework.auth.JwtAuthRealm;
 
+import hunt.framework.auth.AuthRealm;
 import hunt.framework.auth.Claim;
 import hunt.framework.auth.ClaimTypes;
 import hunt.framework.auth.Identity;
@@ -8,9 +9,10 @@ import hunt.framework.auth.JwtUtil;
 import hunt.framework.auth.principal;
 import hunt.framework.auth.UserDetails;
 import hunt.framework.auth.UserService;
+import hunt.framework.config.AuthUserConfig;
+import hunt.framework.Init;
 import hunt.framework.provider.ServiceProvider;
 
-import hunt.framework.config.AuthUserConfig;
 
 import hunt.collection.ArrayList;
 import hunt.collection.Collection;
@@ -27,14 +29,9 @@ import std.string;
 /**
  * See_also:
  *  [Springboot Integrate with Apache Shiro](http://www.andrew-programming.com/2019/01/23/springboot-integrate-with-jwt-and-apache-shiro/)
+ *  https://stackoverflow.com/questions/13686246/shiro-security-multiple-realms-which-authorization-info-is-taken
  */
-class JwtAuthRealm : AuthorizingRealm {
-    // private UserService userService;
-
-    this() {
-        // userService = serviceContainer().resolve!UserService();
-    }
-
+class JwtAuthRealm : AuthRealm {
     override bool supports(AuthenticationToken token) {
         // return typeid(cast(Object)token) == typeid(JwtToken);
         
@@ -44,7 +41,7 @@ class JwtAuthRealm : AuthorizingRealm {
         return t.name() ==  DEFAULT_AUTH_TOKEN_NAME;
     }
 
-    protected UserService getUserService() {
+    override protected UserService getUserService() {
         return serviceContainer().resolve!UserService();
     }
 
@@ -64,7 +61,7 @@ class JwtAuthRealm : AuthorizingRealm {
         // To retrieve the user info from username
         UserDetails user = userService.getByName(username);
         if(user is null) {
-            throw new AuthenticationException("The user does NOT exist!");
+            throw new AuthenticationException(format("The user [%s] does NOT exist!", username));
         }
 
         if(!user.isEnabled)
@@ -81,8 +78,6 @@ class JwtAuthRealm : AuthorizingRealm {
         }
 
         // Add claims
-        Claim claim;
-        
         Collection!(Object) principals = new ArrayList!(Object)(10);
 
         UserIdPrincipal idPrincipal = new UserIdPrincipal(user.id);
@@ -93,6 +88,7 @@ class JwtAuthRealm : AuthorizingRealm {
         
         // AuthSchemePrincipal schemePrincipal = new AuthSchemePrincipal(AuthenticationScheme.Bearer);
         // principals.add(schemePrincipal);
+        Claim claim;
         claim = new Claim(ClaimTypes.FullName, user.fullName);
         principals.add(claim);
 
@@ -102,6 +98,8 @@ class JwtAuthRealm : AuthorizingRealm {
         foreach(Claim c; user.claims) {
             principals.add(c);
         }
+
+        version(HUNT_AUTH_DEBUG) infof("Realm: %s", getName());
 
         PrincipalCollection pCollection = new SimplePrincipalCollection(principals, getName());
         String credentials = new String(tokenString);
@@ -123,6 +121,9 @@ class JwtAuthRealm : AuthorizingRealm {
         string username = principal.getUsername();
 
         version(HUNT_AUTH_DEBUG) trace(typeid(cast(Object)userService));
+        trace(typeid(this));
+        trace(typeid(cast(Object)userService));
+        warning("vvvvv=>", getName());
         
         // To retrieve all the roles and permissions for the user from database
         UserDetails user = userService.getByName(username);

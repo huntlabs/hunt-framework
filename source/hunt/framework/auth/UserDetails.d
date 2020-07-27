@@ -8,6 +8,7 @@ import std.variant;
  * 
  */
 class UserDetails {
+    private Claim[] _claims;
     ulong id;
 
     string name;
@@ -25,10 +26,12 @@ class UserDetails {
 
     string[] permissions;
 
-    Claim[] claims;
+    Claim[] claims() {
+        return _claims;
+    }
 
     void addClaim(T)(string type, T value) {
-        claims ~= new Claim(type, value);
+        _claims ~= new Claim(type, value);
     }
 
 }

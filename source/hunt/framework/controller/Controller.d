@@ -74,7 +74,7 @@ abstract class Controller
 {
     private Request _request;
     private Response _response;
-    private string _tokenCookieName = BEARER_COOKIE_NAME;  
+    // private string _tokenCookieName = BEARER_COOKIE_NAME;  
 
     private MiddlewareInfo[] _allowedMiddlewares;
     private MiddlewareInfo[] _skippedMiddlewares;
@@ -85,6 +85,10 @@ abstract class Controller
         View _view;
         ///called before all actions
         MiddlewareInterface[string] middlewares;
+    }
+
+    this() {
+        _authOptions = new AuthOptions();
     }
 
     RoutingContext routingContext() {
@@ -98,7 +102,6 @@ abstract class Controller
         return createRequest(false);
     }
 
-
     protected Request createRequest(bool isRestful = false) {
         if(_request is null) {
             RoutingContext context = routingContext();
@@ -106,8 +109,10 @@ abstract class Controller
             _request = new Request(context.getRequest(), httpConnection.getRemoteAddress(),
                 context.groupName());
             _request.isRestful = isRestful;
-            _request.tokenCookieName = tokenCookieName();
-            _request.authenticationScheme = authenticationScheme();
+            // _request.authOptions.tokenCookieName = tokenCookieName();
+            // _request.authOptions.scheme = authenticationScheme();
+            // _request.authOptions.guardName = authenticationScheme();
+            _request.authOptions = authOptions();
         }
         return _request;
     }
@@ -126,23 +131,33 @@ abstract class Controller
         routingContext().response = r.httpResponse;
     }
 
-    void tokenCookieName(string name) {
-        _tokenCookieName = name;
+    AuthOptions authOptions() {
+        return _authOptions;
     }
 
-    string tokenCookieName() {
-        return _tokenCookieName;
+    void authOptions(AuthOptions value) {
+        _authOptions = value; 
     }
 
-    void authenticationScheme(AuthenticationScheme name) {
-        _authenticationScheme = name;
-    }
+    private AuthOptions _authOptions;  
 
-    AuthenticationScheme authenticationScheme() {
-        return _authenticationScheme;
-    }
+    // void tokenCookieName(string name) {
+    //     _tokenCookieName = name;
+    // }
 
-    private AuthenticationScheme _authenticationScheme = AuthenticationScheme.None;
+    // string tokenCookieName() {
+    //     return _tokenCookieName;
+    // }
+
+    // void authenticationScheme(AuthenticationScheme name) {
+    //     _authenticationScheme = name;
+    // }
+
+    // AuthenticationScheme authenticationScheme() {
+    //     return _authenticationScheme;
+    // }
+
+    // private AuthenticationScheme _authenticationScheme = AuthenticationScheme.None;
 
     /**
      * Get the currently authenticated user.

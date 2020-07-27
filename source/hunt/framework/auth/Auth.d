@@ -1,5 +1,6 @@
 module hunt.framework.auth.Auth;
 
+import hunt.framework.auth.AuthOptions;
 import hunt.framework.auth.Claim;
 import hunt.framework.auth.ClaimTypes;
 import hunt.framework.auth.Identity;
@@ -48,15 +49,24 @@ class Auth {
     private AuthState _state = AuthState.Auto;
     private string _tokenCookieName = BEARER_COOKIE_NAME;  
     private AuthenticationScheme _scheme = AuthenticationScheme.None;
+    private string _guardName = DEFAULT_GURAD_NAME;
+
+    // private AuthOptions _options;
 
     private Request _request;
+    
+    this(Request request) {
+        this(request, new AuthOptions());
+    }
 
-    this(Request request, string tokenCookieName = BEARER_COOKIE_NAME,
-            AuthenticationScheme scheme = AuthenticationScheme.None) {
-        _user = new Identity();
+    this(Request request, AuthOptions options) {
         _request = request;
-        _tokenCookieName = tokenCookieName;
-        _scheme = scheme;
+        _guardName = options.guardName;
+        _tokenCookieName = options.tokenCookieName;
+        _scheme = options.scheme;
+
+        _user = new Identity(_guardName);
+
         version(HUNT_AUTH_DEBUG) {
             warningf("path: %s, isAuthenticated: %s", request.path(), _user.isAuthenticated());
         }

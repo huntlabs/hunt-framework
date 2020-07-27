@@ -19,8 +19,8 @@ import std.variant;
 class Identity {
     private Subject _subject;
 
-    this() {
-        _subject = SecurityUtils.getSubject();
+    this(string guardName) {
+        _subject = SecurityUtils.getSubject(guardName);
     }
 
     ulong id() {

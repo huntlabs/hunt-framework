@@ -42,9 +42,6 @@ import core.time;
 enum BasicTokenHeader = AuthenticationScheme.Basic ~ " ";
 enum BearerTokenHeader = AuthenticationScheme.Bearer ~ " ";
 
-enum string BASIC_COOKIE_NAME = "__basic_token__";
-enum string BEARER_COOKIE_NAME = "__jwt_token__";
-
 /**
  * 
  */
@@ -61,7 +58,6 @@ class Request {
     private Auth _auth;
     private MonoTime _monoCreated;
     private bool _isRestful = false;
-    // private string _tokenCookieName = BEARER_COOKIE_NAME;
 
     HttpServerRequest _request;
     alias _request this;
@@ -73,33 +69,45 @@ class Request {
         _routeManager = serviceContainer().resolve!RouteConfigManager();
         _routeGroup = routeGroup;
         _remoteAddr = remoteAddress;
+        _authOptions = new AuthOptions();
 
         .request(this); // Binding this request to the current thread.
     }
 
     Auth auth() {
-        if(_auth is null)
-            _auth = new Auth(this, _tokenCookieName, _authenticationScheme);
+        if(_auth is null) {
+            _auth = new Auth(this, _authOptions);
+        }
         return _auth;
     }
 
-    package void tokenCookieName(string name) {
-        _tokenCookieName = name;
+    AuthOptions authOptions() {
+        return _authOptions;
     }
 
-    string tokenCookieName() {
-        return _tokenCookieName;
-    }
-    private string _tokenCookieName = BEARER_COOKIE_NAME;  
-
-    package void authenticationScheme(AuthenticationScheme name) {
-        _authenticationScheme = name;
+    void authOptions(AuthOptions value) {
+        _authOptions = value; 
     }
 
-    AuthenticationScheme authenticationScheme() {
-        return _authenticationScheme;
-    }
-    private AuthenticationScheme _authenticationScheme = AuthenticationScheme.None;
+    private AuthOptions _authOptions;
+
+    // package void tokenCookieName(string name) {
+    //     _tokenCookieName = name;
+    // }
+
+    // string tokenCookieName() {
+    //     return _tokenCookieName;
+    // }
+    // private string _tokenCookieName = BEARER_COOKIE_NAME;  
+
+    // package void authenticationScheme(AuthenticationScheme name) {
+    //     _authenticationScheme = name;
+    // }
+
+    // AuthenticationScheme authenticationScheme() {
+    //     return _authenticationScheme;
+    // }
+    // private AuthenticationScheme _authenticationScheme = AuthenticationScheme.None;
 
     // Auth auth(string tokenCookieName, AuthenticationScheme scheme) {
     //     if(_auth is null) {

@@ -1,5 +1,6 @@
 module hunt.framework.auth.BasicAuthRealm;
 
+import hunt.framework.auth.AuthRealm;
 import hunt.framework.auth.Claim;
 import hunt.framework.auth.ClaimTypes;
 import hunt.framework.auth.JwtToken;
@@ -22,10 +23,7 @@ import std.format;
 /**
  * 
  */
-class BasicAuthRealm : AuthorizingRealm {
-
-    this() {
-    }
+class BasicAuthRealm : AuthRealm {
 
     override bool supports(AuthenticationToken token) {
         // return typeid(cast(Object)token) == typeid(UsernamePasswordToken);
@@ -36,7 +34,7 @@ class BasicAuthRealm : AuthorizingRealm {
         return t.name() ==  DEFAULT_AUTH_TOKEN_NAME;
     }
 
-    protected UserService getUserService() {
+    override protected UserService getUserService() {
         return serviceContainer().resolve!UserService();
     }
 
@@ -95,6 +93,7 @@ class BasicAuthRealm : AuthorizingRealm {
             warning("No username avaliable");
             return null;
         }
+        warningf("Realm: %s", getName());
 
         string username = principal.getUsername();
         SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();

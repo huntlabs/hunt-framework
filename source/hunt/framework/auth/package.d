@@ -1,6 +1,8 @@
 module hunt.framework.auth;
 
 public import hunt.framework.auth.Auth;
+public import hunt.framework.auth.AuthOptions;
+public import hunt.framework.auth.AuthRealm;
 public import hunt.framework.auth.BasicAuthRealm;
 public import hunt.framework.auth.Claim;
 public import hunt.framework.auth.ClaimTypes;
