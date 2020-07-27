@@ -49,30 +49,26 @@ class Identity {
         Variant var = claim(ClaimTypes.AuthScheme);
         if(var == null) return AuthenticationScheme.None;
         return cast(AuthenticationScheme)var.get!string();
-        // PrincipalCollection pCollection = _subject.getPrincipals();
-        // AuthSchemePrincipal principal = PrincipalCollectionHelper.oneByType!(AuthSchemePrincipal)(pCollection);
-
-        // if(principal is null) {
-        //     return AuthenticationScheme.None;
-        // } else {
-        //     return principal.getAuthScheme();
-        // }
     }
 
     Variant claim(string type) {
         PrincipalCollection pCollection = _subject.getPrincipals();
+        Variant v = Variant(null);
+
         foreach(Object p; pCollection) {
             Claim claim = cast(Claim)p;
             if(claim is null) continue;
-            if(claim.type == type) return claim.value();
+            if(claim.type == type) {
+                v = claim.value();
+                break;
+            }
         }
-
-        return Variant(null);
+        return v;
     }
     
     T claimAs(T)(string type) {
         Variant v = claim(type);
-        if(v == null) {
+        if(v == null || !v.hasValue()) {
             version(HUNT_DEBUG) warningf("The claim for %s is null", type);
             return T.init;
         }

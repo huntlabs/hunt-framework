@@ -93,6 +93,8 @@ class JwtAuthRealm : AuthorizingRealm {
         
         // AuthSchemePrincipal schemePrincipal = new AuthSchemePrincipal(AuthenticationScheme.Bearer);
         // principals.add(schemePrincipal);
+        claim = new Claim(ClaimTypes.FullName, user.fullName);
+        principals.add(claim);
 
         claim = new Claim(ClaimTypes.AuthScheme, cast(string)AuthenticationScheme.Bearer);
         principals.add(claim);
@@ -120,7 +122,7 @@ class JwtAuthRealm : AuthorizingRealm {
         UserService userService = getUserService();
         string username = principal.getUsername();
 
-        warning(typeid(cast(Object)userService));
+        version(HUNT_AUTH_DEBUG) trace(typeid(cast(Object)userService));
         
         // To retrieve all the roles and permissions for the user from database
         UserDetails user = userService.getByName(username);

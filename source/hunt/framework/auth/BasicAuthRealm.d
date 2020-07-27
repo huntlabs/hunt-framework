@@ -65,7 +65,10 @@ class BasicAuthRealm : AuthorizingRealm {
             UsernamePrincipal namePrincipal = new UsernamePrincipal(username);
             principals.add(namePrincipal);
 
-            claim = new Claim(ClaimTypes.AuthScheme, cast(string)AuthenticationScheme.Bearer);
+            claim = new Claim(ClaimTypes.FullName, user.fullName);
+            principals.add(claim);
+
+            claim = new Claim(ClaimTypes.AuthScheme, cast(string)AuthenticationScheme.Basic);
             principals.add(claim);
             // AuthSchemePrincipal schemePrincipal = new AuthSchemePrincipal(AuthenticationScheme.Basic);
             // principals.add(schemePrincipal);
@@ -97,8 +100,7 @@ class BasicAuthRealm : AuthorizingRealm {
         SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
 
         UserService userService = getUserService();
-        
-        warning(typeid(cast(Object)userService));
+        version(HUNT_AUTH_DEBUG) trace(typeid(cast(Object)userService));
 
         // To retrieve all the roles for the user from database
         UserDetails user = userService.getByName(username);

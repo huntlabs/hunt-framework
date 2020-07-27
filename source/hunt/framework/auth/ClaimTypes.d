@@ -6,6 +6,7 @@ enum ClaimTypes : string {
     Role = "Role",
     HomePhone = "HomePhone",
     MobilePhone = "MobilePhone",
+    FullName = "FullName",
     Surname = "Surname",
     GivenName = "GivenName",
     Nickname = "Nickname",

@@ -2,6 +2,8 @@ module hunt.framework.middleware.BasicAuthMiddleware;
 
 import hunt.framework.middleware.MiddlewareInterface;
 
+import hunt.framework.auth.Claim;
+import hunt.framework.auth.ClaimTypes;
 import hunt.framework.auth.Identity;
 import hunt.framework.auth.UserService;
 import hunt.framework.config.ApplicationConfig;
@@ -78,8 +80,11 @@ class BasicAuthMiddleware : AbstractMiddleware {
 
         Subject subject = SecurityUtils.getSubject();
         if (subject.isAuthenticated()) {
-            version (HUNT_DEBUG)
-                tracef("User %s has logged in.", request.auth().user().name());
+            version (HUNT_DEBUG) {
+                Identity user = request.auth().user();
+                string fullName = user.claimAs!(string)(ClaimTypes.FullName);
+                infof("User [%s / %s] logged in.",  user.name(), fullName);
+            }
             return null;
         }
 
@@ -103,6 +108,14 @@ class BasicAuthMiddleware : AbstractMiddleware {
 
         Identity user = request.auth().signIn(username, password, getSalt(username));
         if(user.isAuthenticated()) {
+            version(HUNT_DEBUG) {
+                // Claim[] claims =  user.claims;
+                // foreach(Claim c; claims) {
+                //     tracef("%s, %s", c.type, c.value);
+                // }
+                string fullName = user.claimAs!(string)(ClaimTypes.FullName);
+                infof("User [%s / %s] logged in.",  user.name(), fullName);
+            }
             return null;
         } else {
             return onRejected(request);
