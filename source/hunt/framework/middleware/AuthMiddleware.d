@@ -74,13 +74,13 @@ abstract class AuthMiddleware : AbstractMiddleware {
         }
         
         Identity user = request.auth().user();
-        // if(user.isAuthenticated()) {
-        //     version(HUNT_DEBUG) {
-        //         string fullName = user.claimAs!(string)(ClaimTypes.FullName);
-        //         infof("User [%s / %s] has already logged in.",  user.name(), fullName);
-        //     }
-        //     return null;
-        // }
+        if(user.isAuthenticated()) {
+            version(HUNT_DEBUG) {
+                string fullName = user.claimAs!(string)(ClaimTypes.FullName);
+                infof("User [%s / %s] has already logged in.",  user.name(), fullName);
+            }
+            return null;
+        }
 
         AuthenticationToken token = getToken(request);
         if(user.login(token)) {

@@ -96,7 +96,10 @@ class BasicAuthRealm : AuthRealm {
         SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
 
         UserService userService = getUserService();
-        version(HUNT_AUTH_DEBUG) trace(typeid(cast(Object)userService));
+        version(HUNT_AUTH_DEBUG) {
+            trace(typeid(this));
+            trace(typeid(cast(Object)userService));
+        }
 
         // To retrieve all the roles for the user from database
         UserDetails user = userService.getByName(username);

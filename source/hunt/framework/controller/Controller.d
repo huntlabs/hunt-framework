@@ -475,8 +475,8 @@ abstract class Controller
         }
 
         Auth auth = req.auth();
-        AuthenticationScheme authScheme = auth.scheme();
-        string tokenCookieName = auth.tokenCookieName();
+        AuthenticationScheme authScheme = authOptions.scheme;
+        string tokenCookieName = authOptions.tokenCookieName;
         version(HUNT_AUTH_DEBUG) {
             warningf("tokenCookieName: %s, authScheme: %s, isAuthenticated: %s", 
                 tokenCookieName, authScheme, auth.user().isAuthenticated);
@@ -977,6 +977,7 @@ void callHandler(T, string method)(RoutingContext context)
     try {
         controller.initializeMiddlewares();
         controller.callActionMethod(method, context);
+        controller.done();
     } catch (Throwable t) {
         error(t);
         Response errorRes = new Response();
@@ -984,7 +985,6 @@ void callHandler(T, string method)(RoutingContext context)
         controller.response = errorRes; 
     }
     
-    controller.done();
     context.end();
 }
 

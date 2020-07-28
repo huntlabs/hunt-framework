@@ -18,13 +18,21 @@ import std.variant;
  */
 class Identity {
     private Subject _subject;
+    private string _guardName;
 
     this(string guardName) {
-        _subject = SecurityUtils.getSubject(guardName);
+        // _subject = SecurityUtils.getSubject(guardName);
+        _guardName = guardName;
+    }
+
+    Subject subject() {
+        if(_subject is null)
+            _subject = SecurityUtils.getSubject(_guardName);
+        return _subject;
     }
 
     ulong id() {
-        PrincipalCollection pCollection = _subject.getPrincipals();
+        PrincipalCollection pCollection = subject().getPrincipals();
         UserIdPrincipal principal = PrincipalCollectionHelper.oneByType!(UserIdPrincipal)(pCollection);
 
         if(principal is null) {
@@ -35,7 +43,7 @@ class Identity {
     }
 
     string name() {
-        PrincipalCollection pCollection = _subject.getPrincipals();
+        PrincipalCollection pCollection = subject().getPrincipals();
         UsernamePrincipal principal = PrincipalCollectionHelper.oneByType!(UsernamePrincipal)(pCollection);
 
         if(principal is null) {
@@ -52,7 +60,7 @@ class Identity {
     }
 
     Variant claim(string type) {
-        PrincipalCollection pCollection = _subject.getPrincipals();
+        PrincipalCollection pCollection = subject().getPrincipals();
         Variant v = Variant(null);
 
         foreach(Object p; pCollection) {
@@ -79,7 +87,7 @@ class Identity {
     Claim[] claims() {
         Claim[] r;
 
-        PrincipalCollection pCollection = _subject.getPrincipals();
+        PrincipalCollection pCollection = subject().getPrincipals();
         foreach(Object p; pCollection) {
             Claim claim = cast(Claim)p;
             if(claim is null) continue;
@@ -93,11 +101,11 @@ class Identity {
             string tokenName = DEFAULT_AUTH_TOKEN_NAME) {
 
         version(HUNT_SHIRO_DEBUG) { 
-            tracef("Checking the status at first: %s", _subject.isAuthenticated());
+            tracef("Checking the status at first: %s", subject().isAuthenticated());
         }
 
-        if (_subject.isAuthenticated()) {
-            _subject.logout();
+        if (subject().isAuthenticated()) {
+            subject().logout();
         }
 
         UsernamePasswordToken token = new UsernamePasswordToken(username, password);
@@ -105,7 +113,7 @@ class Identity {
         token.name = tokenName;
 
         try {
-            _subject.login(token);
+            subject().login(token);
         } catch (UnknownAccountException ex) {
             info("There is no user with username of " ~ token.getPrincipal());
         } catch (IncorrectCredentialsException ex) {
@@ -153,7 +161,7 @@ class Identity {
     private void bearerLogin(string tokenString) {
         try {
             JwtToken token = new JwtToken(tokenString);
-            _subject.login(token);
+            subject().login(token);
         } catch (AuthenticationException e) {
             warning(e.msg);
             version(HUNT_AUTH_DEBUG) warning(e);
@@ -170,7 +178,7 @@ class Identity {
         }
 
         try {
-            _subject.login(token);
+            subject().login(token);
         } catch (AuthenticationException e) {
             version(HUNT_DEBUG) warning(e.msg);
             version(HUNT_AUTH_DEBUG) warning(e);
@@ -179,23 +187,23 @@ class Identity {
             version(HUNT_AUTH_DEBUG) warning(ex);
         }
 
-        return _subject.isAuthenticated();
+        return subject().isAuthenticated();
     }
 
     bool isAuthenticated() {
-        return _subject.isAuthenticated();
+        return subject().isAuthenticated();
     }
 
     bool hasRole(string role) {
-        return _subject.hasRole(role);
+        return subject().hasRole(role);
     }
     
     bool hasAllRoles(string[] roles...) {
-        return _subject.hasAllRoles(roles);
+        return subject().hasAllRoles(roles);
     }
 
     bool isPermitted(string[] permissions...) {
-        bool[] resultSet = _subject.isPermitted(permissions);
+        bool[] resultSet = subject().isPermitted(permissions);
         foreach(bool r; resultSet ) {
             if(!r) return false;
         }
@@ -204,7 +212,7 @@ class Identity {
     }
 
     void logout() {
-        _subject.logout();
+        subject().logout();
     }
 
     override string toString() {

@@ -32,6 +32,7 @@ import std.string;
  *  https://stackoverflow.com/questions/13686246/shiro-security-multiple-realms-which-authorization-info-is-taken
  */
 class JwtAuthRealm : AuthRealm {
+
     override bool supports(AuthenticationToken token) {
         version(HUNT_AUTH_DEBUG) tracef("AuthenticationToken: %s", typeid(cast(Object)token));
         
@@ -118,10 +119,10 @@ class JwtAuthRealm : AuthRealm {
         UserService userService = getUserService();
         string username = principal.getUsername();
 
-        version(HUNT_AUTH_DEBUG) trace(typeid(cast(Object)userService));
-        trace(typeid(this));
-        trace(typeid(cast(Object)userService));
-        warning("vvvvv=>", getName());
+        version(HUNT_AUTH_DEBUG) {
+            trace(typeid(this));
+            trace(typeid(cast(Object)userService));
+        }
         
         // To retrieve all the roles and permissions for the user from database
         UserDetails user = userService.getByName(username);

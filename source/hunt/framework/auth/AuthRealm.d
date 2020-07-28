@@ -1,28 +1,8 @@
 module hunt.framework.auth.AuthRealm;
 
-// import hunt.framework.auth.Claim;
-// import hunt.framework.auth.ClaimTypes;
-// import hunt.framework.auth.Identity;
-// import hunt.framework.auth.JwtToken;
-// import hunt.framework.auth.JwtUtil;
-// import hunt.framework.auth.principal;
-// import hunt.framework.auth.UserDetails;
 import hunt.framework.auth.UserService;
-// import hunt.framework.config.AuthUserConfig;
 import hunt.framework.auth.AuthOptions;
-// import hunt.framework.provider.ServiceProvider;
-
-
-// import hunt.collection.ArrayList;
-// import hunt.collection.Collection;
-// import hunt.http.AuthenticationScheme;
-// import hunt.logging.ConsoleLogger;
 import hunt.shiro;
-// import hunt.String;
-
-// import std.algorithm;
-// import std.range;
-// import std.string;
 
 
 /**
