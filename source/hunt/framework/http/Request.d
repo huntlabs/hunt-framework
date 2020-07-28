@@ -56,6 +56,7 @@ class Request {
     private RouteConfigManager _routeManager;
     private string _routeGroup = DEFAULT_ROUTE_GROUP;
     private Auth _auth;
+    private AuthOptions _authOptions;
     private MonoTime _monoCreated;
     private bool _isRestful = false;
 
@@ -89,33 +90,6 @@ class Request {
         _authOptions = value; 
     }
 
-    private AuthOptions _authOptions;
-
-    // package void tokenCookieName(string name) {
-    //     _tokenCookieName = name;
-    // }
-
-    // string tokenCookieName() {
-    //     return _tokenCookieName;
-    // }
-    // private string _tokenCookieName = BEARER_COOKIE_NAME;  
-
-    // package void authenticationScheme(AuthenticationScheme name) {
-    //     _authenticationScheme = name;
-    // }
-
-    // AuthenticationScheme authenticationScheme() {
-    //     return _authenticationScheme;
-    // }
-    // private AuthenticationScheme _authenticationScheme = AuthenticationScheme.None;
-
-    // Auth auth(string tokenCookieName, AuthenticationScheme scheme) {
-    //     if(_auth is null) {
-    //         _auth = new Auth(this, tokenCookieName, scheme);
-    //     }
-    //     return _auth;
-    // }
-
     bool isRestful() {
         return _isRestful;
     }
@@ -123,14 +97,6 @@ class Request {
     void isRestful(bool value) {
         _isRestful = value;
     }
-
-    // void tokenCookieName(string name) {
-    //     _tokenCookieName = name;
-    // }
-
-    // string tokenCookieName() {
-    //     return _tokenCookieName;
-    // }
 
     /**
      * Determine if the uploaded data contains a file.

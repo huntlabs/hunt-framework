@@ -9,6 +9,8 @@ enum string BEARER_COOKIE_NAME = "__jwt_token__";
 
 class AuthOptions {
     string guardName = DEFAULT_GURAD_NAME;
+
     string tokenCookieName = BEARER_COOKIE_NAME;
+    
     AuthenticationScheme scheme = AuthenticationScheme.None;
 }
