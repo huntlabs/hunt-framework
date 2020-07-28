@@ -77,67 +77,32 @@ class JwtAuthRealm : AuthRealm {
         }
 
         // Add claims
-        Collection!(Object) principals = new ArrayList!(Object)(10);
+        // Collection!(Object) principals = new ArrayList!(Object)(10);
 
-        UserIdPrincipal idPrincipal = new UserIdPrincipal(user.id);
-        principals.add(idPrincipal);
+        // UserIdPrincipal idPrincipal = new UserIdPrincipal(user.id);
+        // principals.add(idPrincipal);
 
-        UsernamePrincipal namePrincipal = new UsernamePrincipal(username);
-        principals.add(namePrincipal);
+        // UsernamePrincipal namePrincipal = new UsernamePrincipal(username);
+        // principals.add(namePrincipal);
         
-        // AuthSchemePrincipal schemePrincipal = new AuthSchemePrincipal(AuthenticationScheme.Bearer);
-        // principals.add(schemePrincipal);
-        Claim claim;
-        claim = new Claim(ClaimTypes.FullName, user.fullName);
-        principals.add(claim);
+        // // AuthSchemePrincipal schemePrincipal = new AuthSchemePrincipal(AuthenticationScheme.Bearer);
+        // // principals.add(schemePrincipal);
+        // Claim claim;
+        // claim = new Claim(ClaimTypes.FullName, user.fullName);
+        // principals.add(claim);
 
-        claim = new Claim(ClaimTypes.AuthScheme, cast(string)AuthenticationScheme.Bearer);
-        principals.add(claim);
+        // claim = new Claim(ClaimTypes.AuthScheme, cast(string)AuthenticationScheme.Bearer);
+        // principals.add(claim);
 
-        foreach(Claim c; user.claims) {
-            principals.add(c);
-        }
-
+        // foreach(Claim c; user.claims) {
+        //     principals.add(c);
+        // }
         version(HUNT_AUTH_DEBUG) infof("Realm: %s", getName());
-
-        PrincipalCollection pCollection = new SimplePrincipalCollection(principals, getName());
+        PrincipalCollection pCollection = new SimplePrincipalCollection(user, getName());
         String credentials = new String(tokenString);
 
         SimpleAuthenticationInfo info = new SimpleAuthenticationInfo(pCollection, credentials);
         return info;
     }
 
-    override protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
-        SimplePrincipalCollection spc = cast(SimplePrincipalCollection)principals;
-        
-        UsernamePrincipal principal = spc.oneByType!(UsernamePrincipal)();
-        if(principal is null) {
-            warning("No username avaliable");
-            return null;
-        }
-
-        UserService userService = getUserService();
-        string username = principal.getUsername();
-
-        version(HUNT_AUTH_DEBUG) {
-            trace(typeid(this));
-            trace(typeid(cast(Object)userService));
-        }
-        
-        // To retrieve all the roles and permissions for the user from database
-        UserDetails user = userService.getByName(username);
-        if(user is null) {
-            throw new AuthenticationException(format("The user [%s] does NOT exist!", username));
-        }
-
-        SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
-        //
-        info.addRoles(user.roles);
-
-        // 
-        string[] permissions = user.permissions.map!(p => p.strip().toShiroPermissions()).array;
-        info.addStringPermissions(permissions);
-
-        return info;
-    }
 }

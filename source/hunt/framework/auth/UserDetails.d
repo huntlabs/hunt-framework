@@ -34,4 +34,8 @@ class UserDetails {
         _claims ~= new Claim(type, value);
     }
 
+    override string toString() {
+        return name;
+    }
+
 }
