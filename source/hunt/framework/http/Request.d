@@ -863,7 +863,6 @@ class Request {
     string actionId() {
         if(routeItem is null) {
             routeItem = _routeManager.getRoute(_routeGroup, _request.getMethod(), _request.path());
-            version(HUNT_DEBUG) trace(routeItem);
         }
         
         if(routeItem is null) {

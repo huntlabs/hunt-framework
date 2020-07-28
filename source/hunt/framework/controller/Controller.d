@@ -50,7 +50,6 @@ import std.string;
 import std.traits;
 
 struct Action {
-
 }
 
 private enum string TempVarName = "__var";
@@ -820,102 +819,102 @@ string makeParameterValidation(string varName, string paraName, paraType, UDAs .
 
     static foreach(uda; UDAs) {
         static if(is(typeof(uda) == Max)) {
-            str ~= `
+            str ~= `{
                 MaxValidator validator = new MaxValidator();
                 validator.initialize(` ~ uda.stringof ~ `);
                 validator.setPropertyName("` ~ paraName ~ `");
                 validator.isValid(`~ varName ~`, context);
-            `;
+            }`;
         }
 
         static if(is(typeof(uda) == Min)) {
-            str ~= `
+            str ~= `{
                 MinValidator validator = new MinValidator();
                 validator.initialize(` ~ uda.stringof ~ `);
                 validator.setPropertyName("` ~ paraName ~ `");
                 validator.isValid(`~ varName ~`, context);
-            `;
+            }`;
         }
 
         static if(is(typeof(uda) == AssertFalse)) {
-            str ~= `
+            str ~= `{
                 AssertFalseValidator validator = new AssertFalseValidator();
                 validator.initialize(` ~ uda.stringof ~ `);
                 validator.setPropertyName("` ~ paraName ~ `");
                 validator.isValid(`~ varName ~`, context);
-            `;
+            }`;
         }
 
         static if(is(typeof(uda) == AssertTrue)) {
-            str ~= `
+            str ~= `{
                 AssertTrueValidator validator = new AssertTrueValidator();
                 validator.initialize(` ~ uda.stringof ~ `);
                 validator.setPropertyName("` ~ paraName ~ `");
                 validator.isValid(`~ varName ~`, context);
-            `;
+            }`;
         }
 
         static if(is(typeof(uda) == Email)) {
-            str ~= `
+            str ~= `{
                 EmailValidator validator = new EmailValidator();
                 validator.initialize(` ~ uda.stringof ~ `);
                 validator.setPropertyName("` ~ paraName ~ `");
                 validator.isValid(`~ varName ~`, context);
-            `;
+            }`;
         }
 
         static if(is(typeof(uda) == Length)) {
-            str ~= `
+            str ~= `{
                 LengthValidator validator = new LengthValidator();
                 validator.initialize(` ~ uda.stringof ~ `);
                 validator.setPropertyName("` ~ paraName ~ `");
                 validator.isValid(`~ varName ~`, context);
-            `;
+            }`;
         }
 
         static if(is(typeof(uda) == NotBlank)) {
-            str ~= `
+            str ~= `{
                 NotBlankValidator validator = new NotBlankValidator();
                 validator.initialize(` ~ uda.stringof ~ `);
                 validator.setPropertyName("` ~ paraName ~ `");
                 validator.isValid(`~ varName ~`, context);
-            `;
+            }`;
         }
 
         static if(is(typeof(uda) == NotEmpty)) {
-            str ~= `
+            str ~= `{
                 auto validator = new NotEmptyValidator!` ~ paraType.stringof ~`();
                 validator.initialize(` ~ uda.stringof ~ `);
                 validator.setPropertyName("` ~ paraName ~ `");
                 validator.isValid(`~ varName ~`, context);
-            `;
+            }`;
         }
 
         static if(is(typeof(uda) == Pattern)) {
-            str ~= `
+            str ~= `{
                 PatternValidator validator = new PatternValidator();
                 validator.initialize(` ~ uda.stringof ~ `);
                 validator.setPropertyName("` ~ paraName ~ `");
                 validator.isValid(`~ varName ~`, context);
-            `;
+            }`;
         }
 
         static if(is(typeof(uda) == Size)) {
-            str ~= `
+            str ~= `{
                 SizeValidator validator = new SizeValidator();
                 validator.initialize(` ~ uda.stringof ~ `);
                 validator.setPropertyName("` ~ paraName ~ `");
                 validator.isValid(`~ varName ~`, context);
-            `;
+            }`;
         }
 
         static if(is(typeof(uda) == Range)) {
-            str ~= `
+            str ~= `{
                 RangeValidator validator = new RangeValidator();
                 validator.initialize(` ~ uda.stringof ~ `);
                 validator.setPropertyName("` ~ paraName ~ `");
                 validator.isValid(`~ varName ~`, context);
-            `;
+            }`;
         }
     }
 
