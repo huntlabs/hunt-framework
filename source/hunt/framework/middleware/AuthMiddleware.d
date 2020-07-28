@@ -26,6 +26,9 @@ import std.base64;
 import std.range;
 import std.string;
 
+/**
+ * 
+ */
 abstract class AuthMiddleware : AbstractMiddleware {
 
     this() {
@@ -36,16 +39,11 @@ abstract class AuthMiddleware : AbstractMiddleware {
         super(routeChecker, rejectionHandler);
     }
 
-    string guardName() {
-        return _guardName;
-    }
-
-    void guardName(string value) {
-        _guardName = value;
-    }
-    private string _guardName = DEFAULT_GURAD_NAME;
-
     protected AuthenticationToken getToken(Request request);
+
+    protected bool onAccessable(Request request) {
+        return true;
+    }
 
     protected Response onRejected(Request request) {
         if(_rejectionHandler !is null) {
@@ -62,7 +60,9 @@ abstract class AuthMiddleware : AbstractMiddleware {
     } 
 
     Response onProcess(Request request, Response response = null) {
-        version(HUNT_AUTH_DEBUG) infof("path: %s, method: %s", request.path(), request.method );
+        version(HUNT_AUTH_DEBUG) {
+            infof("path: %s, method: %s", request.path(), request.method );
+        }
 
         bool needCheck = true;
         if(_routeChecker !is null) {
@@ -72,44 +72,28 @@ abstract class AuthMiddleware : AbstractMiddleware {
         if(!needCheck) {
             return null;
         }
+        
+        Identity user = request.auth().user();
+        // if(user.isAuthenticated()) {
+        //     version(HUNT_DEBUG) {
+        //         string fullName = user.claimAs!(string)(ClaimTypes.FullName);
+        //         infof("User [%s / %s] has already logged in.",  user.name(), fullName);
+        //     }
+        //     return null;
+        // }
 
-        version(HUNT_AUTH_DEBUG) infof("guard name: %s", guardName());
-
-        Subject subject = SecurityUtils.getSubject(guardName());
-        if(subject.isAuthenticated()) {
+        AuthenticationToken token = getToken(request);
+        if(user.login(token)) {
             version(HUNT_DEBUG) {
-                Identity user = request.auth().user();
+                // Claim[] claims =  user.claims;
+                // foreach(Claim c; claims) {
+                //     tracef("%s, %s", c.type, c.value);
+                // }
                 string fullName = user.claimAs!(string)(ClaimTypes.FullName);
                 infof("User [%s / %s] logged in.",  user.name(), fullName);
             }
-            return null;
-        }
-        
-        AuthenticationToken token = getToken(request);
-            
-        if(token !is null) {
-            try {
-                subject.login(token);
-            } catch (AuthenticationException e) {
-                version(HUNT_DEBUG) warning(e.msg);
-                version(HUNT_AUTH_DEBUG) warning(e);
-            } catch(Exception ex) {
-                version(HUNT_DEBUG) warning(ex.msg);
-                version(HUNT_AUTH_DEBUG) warning(ex);
-            }
 
-            if(subject.isAuthenticated()) {
-                version(HUNT_DEBUG) {
-                    Identity user = request.auth().user();
-                    // Claim[] claims =  user.claims;
-                    // foreach(Claim c; claims) {
-                    //     tracef("%s, %s", c.type, c.value);
-                    // }
-                    string fullName = user.claimAs!(string)(ClaimTypes.FullName);
-                    infof("User [%s / %s] logged in.",  user.name(), fullName);
-                }
-                return null;	
-            }
+            if(onAccessable(request)) return null;	
         }
         
         return onRejected(request);

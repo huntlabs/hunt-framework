@@ -33,12 +33,10 @@ import std.string;
  */
 class JwtAuthRealm : AuthRealm {
     override bool supports(AuthenticationToken token) {
-        // return typeid(cast(Object)token) == typeid(JwtToken);
+        version(HUNT_AUTH_DEBUG) tracef("AuthenticationToken: %s", typeid(cast(Object)token));
         
         JwtToken t = cast(JwtToken)token;
-        if(t is null)
-            return false;
-        return t.name() ==  DEFAULT_AUTH_TOKEN_NAME;
+        return t !is null;
     }
 
     override protected UserService getUserService() {

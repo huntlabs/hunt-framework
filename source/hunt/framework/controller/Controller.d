@@ -77,6 +77,7 @@ abstract class Controller
 
     private MiddlewareInfo[] _allowedMiddlewares;
     private MiddlewareInfo[] _skippedMiddlewares;
+    private AuthOptions _authOptions; 
 
     protected
     {
@@ -136,27 +137,7 @@ abstract class Controller
 
     void authOptions(AuthOptions value) {
         _authOptions = value; 
-    }
-
-    private AuthOptions _authOptions;  
-
-    // void tokenCookieName(string name) {
-    //     _tokenCookieName = name;
-    // }
-
-    // string tokenCookieName() {
-    //     return _tokenCookieName;
-    // }
-
-    // void authenticationScheme(AuthenticationScheme name) {
-    //     _authenticationScheme = name;
-    // }
-
-    // AuthenticationScheme authenticationScheme() {
-    //     return _authenticationScheme;
-    // }
-
-    // private AuthenticationScheme _authenticationScheme = AuthenticationScheme.None;
+    } 
 
     /**
      * Get the currently authenticated user.

@@ -47,11 +47,10 @@ class Auth {
     private bool _isTokenRefreshed = false;
     private bool _isLogout = false;
     private AuthState _state = AuthState.Auto;
-    private string _tokenCookieName = BEARER_COOKIE_NAME;  
-    private AuthenticationScheme _scheme = AuthenticationScheme.None;
-    private string _guardName = DEFAULT_GURAD_NAME;
-
-    // private AuthOptions _options;
+    // private string _tokenCookieName = BEARER_COOKIE_NAME;  
+    // private AuthenticationScheme _scheme = AuthenticationScheme.None;
+    // private string _guardName = DEFAULT_GURAD_NAME;
+    private AuthOptions _options;
 
     private Request _request;
     
@@ -61,11 +60,12 @@ class Auth {
 
     this(Request request, AuthOptions options) {
         _request = request;
-        _guardName = options.guardName;
-        _tokenCookieName = options.tokenCookieName;
-        _scheme = options.scheme;
+        _options = options;
+        // _guardName = options.guardName;
+        // _tokenCookieName = options.tokenCookieName;
+        // _scheme = options.scheme;
 
-        _user = new Identity(_guardName);
+        _user = new Identity(options.guardName);
 
         version(HUNT_AUTH_DEBUG) {
             warningf("path: %s, isAuthenticated: %s", request.path(), _user.isAuthenticated());
@@ -77,13 +77,15 @@ class Auth {
     // }
 
     string tokenCookieName() {
-        return _tokenCookieName;
+        return _options.tokenCookieName;
     }
 
     private void autoDetect() {
         if(_state != AuthState.Auto) 
             return;
-        
+
+        version(HUNT_DEBUG) tracef("Detecting the authentication state from %s", tokenCookieName());
+        AuthenticationScheme _scheme = _options.scheme;
         if(_scheme == AuthenticationScheme.None)
             _scheme = AuthenticationScheme.Bearer;
 
@@ -95,27 +97,26 @@ class Auth {
         }
 
         if(_token.empty()) { // Detect the token from cookie
-            _token = request.cookie(_tokenCookieName);
+            _token = request.cookie(tokenCookieName());
         } 
 
         if(!_token.empty()) {
-            _user.authenticate(_token, _tokenCookieName, _scheme);
+            _user.authenticate(_token, _scheme);
         }
 
         _state = AuthState.Token;
     }
 
     Identity user() {
-        autoDetect();
+        // autoDetect();
         return _user;
     }
 
-    Identity signIn(string name, string password, string salt, bool remember = false, 
-            string tokenName = DEFAULT_AUTH_TOKEN_NAME,
-            AuthenticationScheme scheme = AuthenticationScheme.Bearer) {
-        _user.authenticate(name, password, remember, tokenName);
+    Identity signIn(string name, string password, string salt, bool remember = false) {
+        _user.authenticate(name, password, remember);
+
         _remember = remember;
-        _scheme = scheme;
+        string scheme = _options.scheme;
         _state = AuthState.SignIn;
 
         if(_user.isAuthenticated()) {
@@ -191,8 +192,8 @@ class Auth {
         _remember = false;
         _isLogout = true;
         
-        if(_scheme != AuthenticationScheme.Basic || _scheme != AuthenticationScheme.Bearer) {
-            warningf("Unsupported auth type: %s", _scheme);
+        if(_options.scheme != AuthenticationScheme.Basic && _options.scheme != AuthenticationScheme.Bearer) {
+            warningf("Unsupported auth type: %s", _options.scheme);
         }
 
         if(_user.isAuthenticated()) {
@@ -203,10 +204,10 @@ class Auth {
     string refreshToken(string salt) {
         string username = _user.name();
         if(!_user.isAuthenticated()) {
-            throw new AuthenticationException( format("Use is not authenticated: %s", _user.name()));
+            throw new AuthenticationException( format("The use is not authenticated: %s", _user.name()));
         }
 
-        if(_scheme == AuthenticationScheme.Bearer) {
+        if(_options.scheme == AuthenticationScheme.Bearer) {
             // UserService userService = serviceContainer().resolve!UserService();
             // FIXME: Needing refactor or cleanup -@zhangxueping at 2020-07-17T11:10:18+08:00
             // 
@@ -214,6 +215,7 @@ class Auth {
             _token = JwtUtil.sign(username, salt);
         } 
         
+        _state = AuthState.Token;
         _isTokenRefreshed = true;
         return _token;
     }
@@ -226,7 +228,7 @@ class Auth {
   
     AuthenticationScheme scheme() {
         autoDetect();
-        return _scheme;
+        return _options.scheme;
     }
 
     // void scheme(AuthenticationScheme value) {

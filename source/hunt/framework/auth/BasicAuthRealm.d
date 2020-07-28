@@ -26,12 +26,9 @@ import std.format;
 class BasicAuthRealm : AuthRealm {
 
     override bool supports(AuthenticationToken token) {
-        // return typeid(cast(Object)token) == typeid(UsernamePasswordToken);
-
+        version(HUNT_AUTH_DEBUG) tracef("AuthenticationToken: %s", typeid(cast(Object)token));
         UsernamePasswordToken t = cast(UsernamePasswordToken)token;
-        if(t is null)
-            return false;
-        return t.name() ==  DEFAULT_AUTH_TOKEN_NAME;
+        return t !is null;
     }
 
     override protected UserService getUserService() {
@@ -93,7 +90,7 @@ class BasicAuthRealm : AuthRealm {
             warning("No username avaliable");
             return null;
         }
-        warningf("Realm: %s", getName());
+        version(HUNT_AUTH_DEBUG) tracef("Realm: %s", getName());
 
         string username = principal.getUsername();
         SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();

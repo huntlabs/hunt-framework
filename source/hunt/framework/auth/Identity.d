@@ -122,22 +122,22 @@ class Identity {
         }
     }
 
-    void authenticate(string token, string tokenName, AuthenticationScheme scheme) {
+    void authenticate(string token, AuthenticationScheme scheme) {
         version(HUNT_AUTH_DEBUG) {
-            infof("tokenName: %s, scheme: %s", tokenName, scheme);
+            infof("scheme: %s", scheme);
         }
 
         if(scheme == AuthenticationScheme.Bearer) {
-            bearerLogin(token, tokenName);
+            bearerLogin(token);
         } else if(scheme == AuthenticationScheme.Basic) {
-            basicLogin(token, tokenName);
+            basicLogin(token);
         } else {
             warningf("Unknown AuthenticationScheme: %s", scheme);
         }
     }
 
 
-    private void basicLogin(string tokenString, string tokenName = DEFAULT_AUTH_TOKEN_NAME) {
+    private void basicLogin(string tokenString) {
         ubyte[] decoded = Base64.decode(tokenString);
         string[] values = split(cast(string)decoded, ":");
         if(values.length != 2) {
@@ -147,12 +147,12 @@ class Identity {
 
         string username = values[0];
         string password = values[1];
-        authenticate(username, password, true, tokenName);
+        authenticate(username, password, true);
     }
 
-    private void bearerLogin(string tokenString, string tokenName = DEFAULT_AUTH_TOKEN_NAME) {
+    private void bearerLogin(string tokenString) {
         try {
-            JwtToken token = new JwtToken(tokenString, tokenName);
+            JwtToken token = new JwtToken(tokenString);
             _subject.login(token);
         } catch (AuthenticationException e) {
             warning(e.msg);
@@ -161,6 +161,25 @@ class Identity {
             warning(ex.msg);
             version(HUNT_DEBUG) warning(ex);
         }
+    }
+
+    bool login(AuthenticationToken token) {
+        if(token is null) {
+            warning("Token is null");
+            return false;
+        }
+
+        try {
+            _subject.login(token);
+        } catch (AuthenticationException e) {
+            version(HUNT_DEBUG) warning(e.msg);
+            version(HUNT_AUTH_DEBUG) warning(e);
+        } catch(Exception ex) {
+            version(HUNT_DEBUG) warning(ex.msg);
+            version(HUNT_AUTH_DEBUG) warning(ex);
+        }
+
+        return _subject.isAuthenticated();
     }
 
     bool isAuthenticated() {
