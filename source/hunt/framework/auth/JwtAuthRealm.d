@@ -76,27 +76,6 @@ class JwtAuthRealm : AuthRealm {
             throw new IncorrectCredentialsException("Wrong username or password for " ~ username);
         }
 
-        // Add claims
-        // Collection!(Object) principals = new ArrayList!(Object)(10);
-
-        // UserIdPrincipal idPrincipal = new UserIdPrincipal(user.id);
-        // principals.add(idPrincipal);
-
-        // UsernamePrincipal namePrincipal = new UsernamePrincipal(username);
-        // principals.add(namePrincipal);
-        
-        // // AuthSchemePrincipal schemePrincipal = new AuthSchemePrincipal(AuthenticationScheme.Bearer);
-        // // principals.add(schemePrincipal);
-        // Claim claim;
-        // claim = new Claim(ClaimTypes.FullName, user.fullName);
-        // principals.add(claim);
-
-        // claim = new Claim(ClaimTypes.AuthScheme, cast(string)AuthenticationScheme.Bearer);
-        // principals.add(claim);
-
-        // foreach(Claim c; user.claims) {
-        //     principals.add(c);
-        // }
         version(HUNT_AUTH_DEBUG) infof("Realm: %s", getName());
         PrincipalCollection pCollection = new SimplePrincipalCollection(user, getName());
         String credentials = new String(tokenString);

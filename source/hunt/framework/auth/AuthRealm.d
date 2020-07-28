@@ -36,22 +36,6 @@ abstract class AuthRealm : AuthorizingRealm {
 
 
     override protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
-
-        // SimplePrincipalCollection spc = cast(SimplePrincipalCollection)principals;
-        // UsernamePrincipal principal = spc.oneByType!(UsernamePrincipal)();
-        // if(principal is null) {
-        //     warning("No username avaliable");
-        //     return null;
-        // }
-
-        // UserService userService = getUserService();
-        // string username = principal.getUsername();
-
-        // version(HUNT_AUTH_DEBUG) {
-        //     trace(typeid(this));
-        //     trace(typeid(cast(Object)userService));
-        // }
-        // UserDetails user = userService.getByName(username);
         
         // To retrieve all the roles and permissions for the user from database
         UserDetails user = cast(UserDetails)principals.getPrimaryPrincipal();

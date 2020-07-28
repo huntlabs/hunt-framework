@@ -44,33 +44,10 @@ class BasicAuthRealm : AuthRealm {
             infof("username: %s, %s", username, typeid(cast(Object)userService));
         }        
 
-            infof("username: %s, %s", username, typeid(cast(Object)userService));
-
         // To authenticate the user with username and password
         UserDetails user = userService.authenticate(username, password);
         
         if(user !is null) {
-            // Collection!(Object) principals = new ArrayList!(Object)(3);
-
-            // // Add claims
-            // Claim claim;
-            // UserIdPrincipal idPrincipal = new UserIdPrincipal(user.id);
-            // principals.add(idPrincipal);
-
-            // UsernamePrincipal namePrincipal = new UsernamePrincipal(username);
-            // principals.add(namePrincipal);
-
-            // claim = new Claim(ClaimTypes.FullName, user.fullName);
-            // principals.add(claim);
-
-            // claim = new Claim(ClaimTypes.AuthScheme, cast(string)AuthenticationScheme.Basic);
-            // principals.add(claim);
-            // // AuthSchemePrincipal schemePrincipal = new AuthSchemePrincipal(AuthenticationScheme.Basic);
-            // // principals.add(schemePrincipal);
-
-            // foreach(Claim c; user.claims) {
-            //     principals.add(c);
-            // }
 
             version(HUNT_AUTH_DEBUG) infof("Realm: %s", getName());
             PrincipalCollection pCollection = new SimplePrincipalCollection(user, getName());
@@ -82,43 +59,4 @@ class BasicAuthRealm : AuthRealm {
             throw new IncorrectCredentialsException(username);
         }
     }
-
-    // override protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
-
-    //     // SimplePrincipalCollection spc = cast(SimplePrincipalCollection)principals;
-        
-    //     // UsernamePrincipal principal = spc.oneByType!(UsernamePrincipal)();
-    //     // if(principal is null) {
-    //     //     warning("No username avaliable");
-    //     //     return null;
-    //     // }
-    //     // version(HUNT_AUTH_DEBUG) tracef("Realm: %s", getName());
-
-    //     // string username = principal.getUsername();
-
-    //     // UserService userService = getUserService();
-    //     // version(HUNT_AUTH_DEBUG) {
-    //     //     trace(typeid(this));
-    //     //     trace(typeid(cast(Object)userService));
-    //     // }
-
-    //     // UserDetails user = userService.getByName(username);
-
-    //     // To retrieve all the roles for the user from database
-    //     UserDetails user = cast(UserDetails)principals.getPrimaryPrincipal();
-
-    //     if(user is null) {
-    //         throw new AuthenticationException(format("The user does NOT exist!"));
-    //     }
-
-    //     SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
-    //     //
-    //     info.addRoles(user.roles);
-
-    //     // 
-    //     info.addStringPermissions(user.permissions);
-
-
-    //     return info;
-    // }
 }
