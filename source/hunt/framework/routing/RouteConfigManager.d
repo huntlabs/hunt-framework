@@ -270,7 +270,7 @@ class RouteConfigManager {
         }
 
         string groupValue = routeGroup.value;
-        if (routeGroup.type == RouteGroup.HOST) {
+        if (routeGroup.type == RouteGroup.HOST || routeGroup.type == RouteGroup.DOMAIN) {
             url = (_appConfig.https.enabled ? "https://" : "http://") ~ groupValue ~ url;
         } else {
             string baseUrl = strip(_appConfig.application.baseUrl, "", "/");

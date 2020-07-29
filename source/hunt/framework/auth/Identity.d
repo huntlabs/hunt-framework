@@ -5,11 +5,14 @@ import hunt.framework.auth.Claim;
 import hunt.framework.auth.ClaimTypes;
 import hunt.framework.auth.JwtToken;
 import hunt.framework.auth.principal;
+import hunt.framework.config.AuthUserConfig;
 
 import hunt.http.AuthenticationScheme;
 import hunt.logging.ConsoleLogger;
 import hunt.shiro;
 
+import std.algorithm;
+import std.array;
 import std.base64;
 import std.string;
 import std.variant;
@@ -22,18 +25,17 @@ class Identity {
     private string _guardName;
 
     this(string guardName) {
-        // _subject = SecurityUtils.getSubject(guardName);
         _guardName = guardName;
     }
 
     Subject subject() {
-        if(_subject is null)
+        if(_subject is null) {
             _subject = SecurityUtils.getSubject(_guardName);
+        }
         return _subject;
     }
 
     ulong id() {
-        
         UserDetails userDetails = cast(UserDetails)subject().getPrincipal();
         if(userDetails !is null) {
             return userDetails.id;
@@ -87,13 +89,13 @@ class Identity {
 
     void authenticate(string username, string password, bool remember = true, 
             string tokenName = DEFAULT_AUTH_TOKEN_NAME) {
-
+        Subject _subject = subject();
         version(HUNT_SHIRO_DEBUG) { 
-            tracef("Checking the status at first: %s", subject().isAuthenticated());
+            tracef("Checking the status at first: %s", _subject.isAuthenticated());
         }
 
-        if (subject().isAuthenticated()) {
-            subject().logout();
+        if (_subject.isAuthenticated()) {
+            _subject.logout();
         }
 
         UsernamePasswordToken token = new UsernamePasswordToken(username, password);
@@ -101,7 +103,7 @@ class Identity {
         token.name = tokenName;
 
         try {
-            subject().login(token);
+            _subject.login(token);
         } catch (UnknownAccountException ex) {
             info("There is no user with username of " ~ token.getPrincipal());
         } catch (IncorrectCredentialsException ex) {
@@ -191,7 +193,10 @@ class Identity {
     }
 
     bool isPermitted(string[] permissions...) {
-        bool[] resultSet = subject().isPermitted(permissions);
+        
+        // Try to convert all the custom permissions to shiro's ones
+        string[] shiroPermissions = permissions.map!(p => p.strip().toShiroPermissions()).array;
+        bool[] resultSet = subject().isPermitted(shiroPermissions);
         foreach(bool r; resultSet ) {
             if(!r) return false;
         }

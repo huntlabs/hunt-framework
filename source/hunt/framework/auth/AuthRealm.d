@@ -44,14 +44,14 @@ abstract class AuthRealm : AuthorizingRealm {
             throw new AuthenticationException(format("The user does NOT exist!"));
         }
 
-        SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
+        SimpleAuthorizationInfo authInfo = new SimpleAuthorizationInfo();
         //
-        info.addRoles(user.roles);
+        authInfo.addRoles(user.roles);
 
-        // 
+        // Try to convert all the custom permissions to shiro's ones
         string[] permissions = user.permissions.map!(p => p.strip().toShiroPermissions()).array;
-        info.addStringPermissions(permissions);
+        authInfo.addStringPermissions(permissions);
 
-        return info;
+        return authInfo;
     }    
 }

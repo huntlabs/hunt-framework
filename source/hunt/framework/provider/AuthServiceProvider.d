@@ -25,43 +25,26 @@ class AuthServiceProvider : ServiceProvider {
     override void boot() {
         HuntCache cache = serviceContainer().resolve!HuntCache();
         CacheManager cacheManager = new ShiroCacheManager(cache);
-        try {
-            AuthorizingRealm[] authorizingRealms = serviceContainer().resolveAll!(AuthorizingRealm)(ResolveOption.noResolveException);
-            foreach(AuthorizingRealm realm; authorizingRealms) {
-                AuthRealm authRealm = cast(AuthRealm)realm;
 
-                if(authRealm is null) continue;
-                string guardName = authRealm.guardName();
-                _groupedRealms[guardName] ~= cast(Realm)authRealm;
-            }
+        AuthorizingRealm[] authorizingRealms = serviceContainer().resolveAll!(AuthorizingRealm)(ResolveOption.noResolveException);
+        foreach(AuthorizingRealm realm; authorizingRealms) {
+            AuthRealm authRealm = cast(AuthRealm)realm;
 
-            foreach(string guardName, Realm[] realms; _groupedRealms) {
-                DefaultSecurityManager securityManager = cast(DefaultSecurityManager) SecurityUtils.getSecurityManager(guardName);
-                if(securityManager is null) {
-                    securityManager = new DefaultSecurityManager();
-                    SecurityUtils.setSecurityManager(guardName, securityManager);
-                    securityManager.setRealms(realms);
-                    securityManager.setCacheManager(cacheManager);
-                }            
-            }
-        } catch(Exception ex) {
-            warning(ex.msg);
-            version(HUNT_DEBUG) warning(ex);
+            if(authRealm is null) continue;
+            string guardName = authRealm.guardName();
+            _groupedRealms[guardName] ~= cast(Realm)authRealm;
+        }
+        // Realm[] realms = authorizingRealms.map!(a => cast(Realm)a).array;
+
+        foreach(string guardName, Realm[] realms; _groupedRealms) {
+            DefaultSecurityManager securityManager = cast(DefaultSecurityManager) SecurityUtils.getSecurityManager(guardName);
+            if(securityManager is null) {
+                securityManager = new DefaultSecurityManager();
+                SecurityUtils.setSecurityManager(guardName, securityManager);
+                securityManager.setRealms(realms);
+                securityManager.setCacheManager(cacheManager);
+            }            
         }
 
     }
-
-    // override void boot() {
-    //     HuntCache cache = serviceContainer().resolve!HuntCache();
-    //     AuthorizingRealm[] authorizingRealms = serviceContainer().resolveAll!(AuthorizingRealm)();
-    //     Realm[] realms = authorizingRealms.map!(a => cast(Realm)a).array;
-
-    //     DefaultSecurityManager securityManager = new DefaultSecurityManager();
-    //     securityManager.setRealms(realms);
-        
-    //     CacheManager cacheManager = new ShiroCacheManager(cache);
-    //     securityManager.setCacheManager(cacheManager);
-
-    //     SecurityUtils.setSecurityManager(securityManager);
-    // }
 }
