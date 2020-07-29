@@ -1,5 +1,6 @@
 module hunt.framework.auth.Identity;
 
+import hunt.framework.auth.UserDetails;
 import hunt.framework.auth.Claim;
 import hunt.framework.auth.ClaimTypes;
 import hunt.framework.auth.JwtToken;
@@ -32,25 +33,36 @@ class Identity {
     }
 
     ulong id() {
-        PrincipalCollection pCollection = subject().getPrincipals();
-        UserIdPrincipal principal = PrincipalCollectionHelper.oneByType!(UserIdPrincipal)(pCollection);
+        
+        UserDetails userDetails = cast(UserDetails)subject().getPrincipal();
+        if(userDetails !is null) {
+            return userDetails.id;
+        }
+        return 0;
+        // PrincipalCollection pCollection = subject().getPrincipals();
+        // UserIdPrincipal principal = PrincipalCollectionHelper.oneByType!(UserIdPrincipal)(pCollection);
 
-        if(principal is null) {
-            return 0;
-        } else {
-            return principal.getUserId();
-        }        
+        // if(principal is null) {
+        //     return 0;
+        // } else {
+        //     return principal.getUserId();
+        // }        
     }
 
     string name() {
-        PrincipalCollection pCollection = subject().getPrincipals();
-        UsernamePrincipal principal = PrincipalCollectionHelper.oneByType!(UsernamePrincipal)(pCollection);
-
-        if(principal is null) {
-            return "";
-        } else {
-            return principal.getUsername();
+        UserDetails userDetails = cast(UserDetails)subject().getPrincipal();
+        if(userDetails !is null) {
+            return userDetails.name;
         }
+        return "";
+        // PrincipalCollection pCollection = subject().getPrincipals();
+        // UsernamePrincipal principal = PrincipalCollectionHelper.oneByType!(UsernamePrincipal)(pCollection);
+
+        // if(principal is null) {
+        //     return "";
+        // } else {
+        //     return principal.getUsername();
+        // }
     }
     
     AuthenticationScheme authScheme() {
@@ -60,24 +72,29 @@ class Identity {
     }
 
     Variant claim(string type) {
-        PrincipalCollection pCollection = subject().getPrincipals();
         Variant v = Variant(null);
-
-        foreach(Object p; pCollection) {
-            Claim claim = cast(Claim)p;
-            if(claim is null) continue;
-            if(claim.type == type) {
-                v = claim.value();
-                break;
-            }
+        UserDetails userDetails = cast(UserDetails)subject().getPrincipal();
+        if(userDetails !is null) {
+            v = userDetails.claim(type);
         }
+
+        // PrincipalCollection pCollection = subject().getPrincipals();
+        // Variant v = Variant(null);
+
+        // foreach(Object p; pCollection) {
+        //     Claim claim = cast(Claim)p;
+        //     if(claim is null) continue;
+        //     if(claim.type == type) {
+        //         v = claim.value();
+        //         break;
+        //     }
+        // }
         return v;
     }
     
     T claimAs(T)(string type) {
         Variant v = claim(type);
         if(v == null || !v.hasValue()) {
-            version(HUNT_DEBUG) warningf("The claim for %s is null", type);
             return T.init;
         }
 
@@ -86,13 +103,18 @@ class Identity {
 
     Claim[] claims() {
         Claim[] r;
-
-        PrincipalCollection pCollection = subject().getPrincipals();
-        foreach(Object p; pCollection) {
-            Claim claim = cast(Claim)p;
-            if(claim is null) continue;
-            r ~= claim;
+        
+        UserDetails userDetails = cast(UserDetails)subject().getPrincipal();
+        if(userDetails !is null) {
+            r = userDetails.claims();
         }
+
+        // PrincipalCollection pCollection = subject().getPrincipals();
+        // foreach(Object p; pCollection) {
+        //     Claim claim = cast(Claim)p;
+        //     if(claim is null) continue;
+        //     r ~= claim;
+        // }
 
         return r;
     }

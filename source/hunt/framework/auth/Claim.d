@@ -28,6 +28,6 @@ class Claim {
     }
 
     override string toString() {
-        return _value.toString();
+        return _type ~ " => " ~ _value.toString();
     }
 }
