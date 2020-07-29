@@ -38,15 +38,7 @@ class Identity {
         if(userDetails !is null) {
             return userDetails.id;
         }
-        return 0;
-        // PrincipalCollection pCollection = subject().getPrincipals();
-        // UserIdPrincipal principal = PrincipalCollectionHelper.oneByType!(UserIdPrincipal)(pCollection);
-
-        // if(principal is null) {
-        //     return 0;
-        // } else {
-        //     return principal.getUserId();
-        // }        
+        return 0;       
     }
 
     string name() {
@@ -55,14 +47,6 @@ class Identity {
             return userDetails.name;
         }
         return "";
-        // PrincipalCollection pCollection = subject().getPrincipals();
-        // UsernamePrincipal principal = PrincipalCollectionHelper.oneByType!(UsernamePrincipal)(pCollection);
-
-        // if(principal is null) {
-        //     return "";
-        // } else {
-        //     return principal.getUsername();
-        // }
     }
     
     AuthenticationScheme authScheme() {
@@ -78,17 +62,6 @@ class Identity {
             v = userDetails.claim(type);
         }
 
-        // PrincipalCollection pCollection = subject().getPrincipals();
-        // Variant v = Variant(null);
-
-        // foreach(Object p; pCollection) {
-        //     Claim claim = cast(Claim)p;
-        //     if(claim is null) continue;
-        //     if(claim.type == type) {
-        //         v = claim.value();
-        //         break;
-        //     }
-        // }
         return v;
     }
     
@@ -108,13 +81,6 @@ class Identity {
         if(userDetails !is null) {
             r = userDetails.claims();
         }
-
-        // PrincipalCollection pCollection = subject().getPrincipals();
-        // foreach(Object p; pCollection) {
-        //     Claim claim = cast(Claim)p;
-        //     if(claim is null) continue;
-        //     r ~= claim;
-        // }
 
         return r;
     }
