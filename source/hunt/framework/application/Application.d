@@ -11,6 +11,7 @@
 
 module hunt.framework.application.Application;
 
+import hunt.framework.auth.AuthService;
 import hunt.framework.application.HostEnvironment;
 import hunt.framework.application.closer;
 import hunt.framework.command.ServeCommand;
@@ -434,6 +435,10 @@ final class Application {
 
     RouteConfigManager route() {
         return serviceContainer.resolve!(RouteConfigManager);
+    }
+
+    AuthService auth() {
+        return serviceContainer.resolve!(AuthService);
     }
 
     Redis redis() {

@@ -25,15 +25,19 @@ import std.format;
  */
 class BasicAuthRealm : AuthRealm {
 
+    this(UserService userService) {
+        super(userService);
+    }
+
     override bool supports(AuthenticationToken token) {
         version(HUNT_AUTH_DEBUG) tracef("AuthenticationToken: %s", typeid(cast(Object)token));
         UsernamePasswordToken t = cast(UsernamePasswordToken)token;
         return t !is null;
     }
 
-    override protected UserService getUserService() {
-        return serviceContainer().resolve!UserService();
-    }
+    // override protected UserService getUserService() {
+    //     return _userService; //serviceContainer().resolve!UserService();
+    // }
 
     override protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) {
         string username = token.getPrincipal();

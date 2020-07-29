@@ -23,6 +23,11 @@ import std.string;
  */
 abstract class AuthRealm : AuthorizingRealm {
     private string _guardName = DEFAULT_GURAD_NAME;
+    private UserService _userService;
+
+    this(UserService userService) {
+        _userService = userService;
+    }
 
     string guardName() {
         return _guardName;
@@ -32,8 +37,9 @@ abstract class AuthRealm : AuthorizingRealm {
         _guardName = value;
     }
 
-    protected UserService getUserService();
-
+    protected UserService getUserService() {
+        return _userService; //serviceContainer().resolve!UserService();
+    }
 
     override protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
         

@@ -33,6 +33,10 @@ import std.string;
  */
 class JwtAuthRealm : AuthRealm {
 
+    this(UserService userService) {
+        super(userService);
+    }
+
     override bool supports(AuthenticationToken token) {
         version(HUNT_AUTH_DEBUG) tracef("AuthenticationToken: %s", typeid(cast(Object)token));
         
@@ -40,9 +44,9 @@ class JwtAuthRealm : AuthRealm {
         return t !is null;
     }
 
-    override protected UserService getUserService() {
-        return serviceContainer().resolve!UserService();
-    }
+    // override protected UserService getUserService() {
+    //     return serviceContainer().resolve!UserService();
+    // }
 
     override protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) {
         string tokenString = token.getPrincipal();
