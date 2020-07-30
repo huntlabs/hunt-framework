@@ -2,6 +2,7 @@ module hunt.framework.routing.RouteGroup;
 
 import hunt.framework.routing.ActionRouteItem;
 import hunt.framework.routing.RouteItem;
+import hunt.framework.auth.AuthOptions;
 import hunt.framework.middleware.MiddlewareInterface;
 
 import hunt.logging.ConsoleLogger;
@@ -12,6 +13,7 @@ import hunt.logging.ConsoleLogger;
 final class RouteGroup {
 
     private RouteItem[] _allItems;
+    private string _guardName = DEFAULT_GURAD_NAME;
 
     private TypeInfo_Class[] _allowedMiddlewares;
     private TypeInfo_Class[] _skippedMiddlewares;
@@ -26,6 +28,7 @@ final class RouteGroup {
     string type;
     string value;
 
+
     void appendRoutes(RouteItem[] items) {
         _allItems ~= items;
     }
@@ -35,7 +38,7 @@ final class RouteGroup {
             ActionRouteItem actionItem = cast(ActionRouteItem) item;
             if (actionItem is null)
                 continue;
-            if (actionItem.mca == actionId)
+            if (actionItem.actionId == actionId)
                 return actionItem;
         }
 
@@ -44,6 +47,15 @@ final class RouteGroup {
 
     override string toString() {
         return "{" ~ name ~ ", " ~ type ~ ", " ~ value ~ "}";
+    }
+
+    string guardName() {
+        return _guardName;
+    }
+
+    RouteGroup guardName(string value) {
+        _guardName = value;
+        return this;
     }
 
     void withMiddleware(T)() if(is(T : MiddlewareInterface)) {

@@ -1,15 +1,17 @@
 module hunt.framework.auth.Auth;
 
 import hunt.framework.auth.AuthOptions;
+import hunt.framework.auth.AuthService;
 import hunt.framework.auth.Claim;
 import hunt.framework.auth.ClaimTypes;
+import hunt.framework.auth.guard;
 import hunt.framework.auth.Identity;
 import hunt.framework.auth.JwtToken;
 import hunt.framework.auth.JwtUtil;
 import hunt.framework.auth.UserService;
 import hunt.framework.http.Request;
-import hunt.framework.Simplify;
-// import hunt.framework.provider.ServiceProvider;
+// import hunt.framework.Simplify;
+import hunt.framework.provider.ServiceProvider;
 
 import hunt.http.AuthenticationScheme;
 import hunt.logging.ConsoleLogger;
@@ -47,25 +49,28 @@ class Auth {
     private bool _isTokenRefreshed = false;
     private bool _isLogout = false;
     private AuthState _state = AuthState.Auto;
-    // private string _tokenCookieName = BEARER_COOKIE_NAME;  
+    // private string _tokenCookieName = JWT_COOKIE_NAME;  
     // private AuthenticationScheme _scheme = AuthenticationScheme.None;
-    // private string _guardName = DEFAULT_GURAD_NAME;
-    private AuthOptions _options;
+    private string _guardName = DEFAULT_GURAD_NAME;
+    // private AuthOptions _options;
+    private Guard _guard;
 
     private Request _request;
     
-    this(Request request) {
-        this(request, new AuthOptions());
-    }
+    // this(Request request) {
+    //     this(request, new AuthOptions());
+    // }
 
-    this(Request request, AuthOptions options) {
+    this(Request request) {
         _request = request;
-        _options = options;
-        // _guardName = options.guardName;
+        // _options = options;
+        _guardName = request.guardName();
         // _tokenCookieName = options.tokenCookieName;
         // _scheme = options.scheme;
-
-        _user = new Identity(options.guardName);
+        AuthService authService = serviceContainer().resolve!AuthService();
+        
+        _guard = authService.guard(_guardName);
+        _user = new Identity(_guardName);
 
         version(HUNT_AUTH_DEBUG) {
             warningf("path: %s, isAuthenticated: %s", request.path(), _user.isAuthenticated());
@@ -77,22 +82,25 @@ class Auth {
     // }
 
     string tokenCookieName() {
-        return _options.tokenCookieName;
+        return _guard.tokenCookieName();
     }
 
-    private void autoDetect() {
+    void autoDetect() {
         if(_state != AuthState.Auto) 
             return;
 
-        version(HUNT_DEBUG) tracef("Detecting the authentication state from %s", tokenCookieName());
-        AuthenticationScheme _scheme = _options.scheme;
-        if(_scheme == AuthenticationScheme.None)
-            _scheme = AuthenticationScheme.Bearer;
+        version(HUNT_DEBUG) {
+            infof("Detecting the authentication state from %s", tokenCookieName());
+        }
+        
+        AuthenticationScheme scheme = _guard.authScheme();
+        if(scheme == AuthenticationScheme.None)
+            scheme = AuthenticationScheme.Bearer;
 
         // Detect the auth type automatically
-        if(_scheme == AuthenticationScheme.Bearer) {
+        if(scheme == AuthenticationScheme.Bearer) {
             _token = _request.bearerToken();
-        } else if(_scheme == AuthenticationScheme.Basic) {
+        } else if(scheme == AuthenticationScheme.Basic) {
             _token = _request.basicToken();
         }
 
@@ -101,32 +109,38 @@ class Auth {
         } 
 
         if(!_token.empty()) {
-            _user.authenticate(_token, _scheme);
+            _user.authenticate(_token, scheme);
         }
 
         _state = AuthState.Token;
     }
 
     Identity user() {
-        // autoDetect();
+        autoDetect();
         return _user;
     }
 
-    Identity signIn(string name, string password, string salt, bool remember = false) {
+    Guard guard() {
+        return _guard;
+    }
+
+    Identity signIn(string name, string password, bool remember = false) {
         _user.authenticate(name, password, remember);
 
         _remember = remember;
-        string scheme = _options.scheme;
+        // AuthenticationScheme scheme = _guard.authScheme();
         _state = AuthState.SignIn;
 
         if(!_user.isAuthenticated()) 
             return _user;
 
         if(scheme == AuthenticationScheme.Bearer) {
-            // UserService userService = serviceContainer().resolve!UserService();
-
-            // string salt = userService.getSalt(name, password);
-            int exp = config().auth.tokenExpiration;
+            // AuthService authService = serviceContainer().resolve!AuthService();
+            // Guard guard = authService.guard(_options.guardName);
+            UserService userService = _guard.userService();
+            string salt = userService.getSalt(name, password);
+            
+            uint exp = _guard.tokenExpiration; // config().auth.tokenExpiration;
 
             JSONValue claims;
             claims["user_id"] = _user.id;
@@ -157,7 +171,6 @@ class Auth {
 
         return _user;
     }
-
 
     static string toJwtClaimName(string name) {
         switch(name) {
@@ -192,9 +205,11 @@ class Auth {
         _token = null;
         _remember = false;
         _isLogout = true;
+
+        // AuthenticationScheme scheme = _guard.authScheme();
         
-        if(_options.scheme != AuthenticationScheme.Basic && _options.scheme != AuthenticationScheme.Bearer) {
-            warningf("Unsupported auth type: %s", _options.scheme);
+        if(scheme != AuthenticationScheme.Basic && scheme != AuthenticationScheme.Bearer) {
+            warningf("Unsupported authentication scheme: %s", scheme);
         }
 
         if(_user.isAuthenticated()) {
@@ -208,7 +223,7 @@ class Auth {
             throw new AuthenticationException( format("The use is not authenticated: %s", _user.name()));
         }
 
-        if(_options.scheme == AuthenticationScheme.Bearer) {
+        if(scheme == AuthenticationScheme.Bearer) {
             // UserService userService = serviceContainer().resolve!UserService();
             // FIXME: Needing refactor or cleanup -@zhangxueping at 2020-07-17T11:10:18+08:00
             // 
@@ -228,8 +243,8 @@ class Auth {
     }
   
     AuthenticationScheme scheme() {
-        autoDetect();
-        return _options.scheme;
+        // autoDetect();
+        return _guard.authScheme();
     }
 
     // void scheme(AuthenticationScheme value) {
@@ -247,6 +262,5 @@ class Auth {
     bool isLogout() {
         return _isLogout;
     }
-
 
 }

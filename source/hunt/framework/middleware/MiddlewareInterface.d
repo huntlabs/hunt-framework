@@ -35,10 +35,6 @@ interface MiddlewareInterface
     ///return null is continue, response is close the session
     Response onProcess(Request request, Response response = null);
 
-    // MiddlewareInterface rejectionHandler(MiddlewareEventHandler handler);
-    
-    // MiddlewareEventHandler rejectionHandler();
-
     private __gshared TypeInfo_Class[string] _all;
 
     static void register(T)() if(is(T : MiddlewareInterface)) {
@@ -68,76 +64,12 @@ interface MiddlewareInterface
         return _all;
     }
 
-    // private __gshared MiddlewareEventHandler[string] _allRejectHanders;
-
-    // static void registerRejectHandler(T)(MiddlewareEventHandler handler) {
-    //     string fullName = fullyQualifiedName!T;
-    //     auto itemPtr = fullName in _allRejectHanders;
-    //     if(itemPtr !is null) {
-    //         warning("The middleware [%s]'s reject handler will be overwritten", fullName);
-    //     }
-
-    //     _allRejectHanders[fullName] = handler;
-    // }
-
-    // static void registerRejectHandler(string fullName, MiddlewareEventHandler handler) {
-    //     auto itemPtr = fullName in _allRejectHanders;
-    //     if(itemPtr !is null) {
-    //         warning("The middleware [%s]'s reject handler will be overwritten", fullName);
-    //     }
-
-    //     _allRejectHanders[fullName] = handler;
-    // }
-
-    // static MiddlewareEventHandler getRejectHander(string fullName) {
-    //     auto itemPtr = fullName in _allRejectHanders;
-    //     if(itemPtr is null) {
-    //         return null;
-    //     }
-
-    //     return *itemPtr;
-    // }
 }
 
 /**
  * 
  */
 abstract class AbstractMiddleware : MiddlewareInterface {
-
-    // protected RouteChecker _routeChecker;
-    // protected MiddlewareEventHandler _rejectionHandler;
-
-    // this() {
-    // }
-
-    // this(RouteChecker routeChecker, MiddlewareEventHandler rejectionHandler) {
-    //     _routeChecker = routeChecker;
-    //     _rejectionHandler = rejectionHandler;
-    // }
-
-    // MiddlewareInterface routeChecker(RouteChecker handler) {
-    //     _routeChecker = handler;
-    //     return this;
-    // }
-
-    // RouteChecker routeChecker() {
-    //     return _routeChecker;
-    // }
-
-    // MiddlewareInterface rejectionHandler(MiddlewareEventHandler handler) {
-    //     _rejectionHandler = handler;
-    //     return this;
-    // }
-    
-    // MiddlewareEventHandler rejectionHandler() {
-    //     return _rejectionHandler;
-    // }
-
-    // protected void onRejected() {
-    //     if(_rejectionHandler !is null) {
-    //         _rejectionHandler(this);
-    //     }
-    // }
     
     /// get the middleware name
     string name() {

@@ -1,6 +1,6 @@
 module hunt.framework.auth.JwtUtil;
 
-import hunt.framework.Init;
+import hunt.framework.auth.AuthOptions;
 
 import jwt;
 import hunt.logging.ConsoleLogger;

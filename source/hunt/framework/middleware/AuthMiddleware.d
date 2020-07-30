@@ -29,34 +29,23 @@ import std.string;
 /**
  * 
  */
-abstract class AuthMiddleware : AbstractMiddleware {
-
-    // this() {
-    //     super();
-    // }
-
-    // this(RouteChecker routeChecker, MiddlewareEventHandler rejectionHandler) {
-    //     super(routeChecker, rejectionHandler);
-    // }
-
-    protected AuthenticationToken getToken(Request request);
+class AuthMiddleware : AbstractMiddleware {
+    shared static this() {
+        MiddlewareInterface.register!(typeof(this));
+    }
 
     protected bool onAccessable(Request request) {
         return true;
     }
 
     protected Response onRejected(Request request) {
-        // if(_rejectionHandler !is null) {
-        //     return _rejectionHandler(this, request);
-        // } else {
-            if(request.isRestful()) {
-                return new UnauthorizedResponse();
-            } else {
-                ApplicationConfig.AuthConf appConfig = app().config().auth;
-                string unauthorizedUrl = appConfig.unauthorizedUrl;
-                return new RedirectResponse(request, unauthorizedUrl);
-            }            
-        // }
+        if(request.isRestful()) {
+            return new UnauthorizedResponse();
+        } else {
+            ApplicationConfig.AuthConf appConfig = app().config().auth;
+            string unauthorizedUrl = appConfig.unauthorizedUrl;
+            return new RedirectResponse(request, unauthorizedUrl);
+        }            
     } 
 
     Response onProcess(Request request, Response response = null) {
@@ -64,15 +53,6 @@ abstract class AuthMiddleware : AbstractMiddleware {
             infof("path: %s, method: %s", request.path(), request.method );
         }
 
-        // bool needCheck = true;
-        // if(_routeChecker !is null) {
-        //     needCheck = _routeChecker(request.path(), request.getMethod());
-        // }
-
-        // if(!needCheck) {
-        //     return null;
-        // }
-        
         Identity user = request.auth().user();
         if(user.isAuthenticated()) {
             version(HUNT_DEBUG) {
@@ -81,8 +61,8 @@ abstract class AuthMiddleware : AbstractMiddleware {
             }
             return null;
         }
-
-        AuthenticationToken token = getToken(request);
+        
+        AuthenticationToken token = request.auth().guard().getToken(request);
         if(user.login(token)) {
             version(HUNT_DEBUG) {
                 string fullName = user.fullName();

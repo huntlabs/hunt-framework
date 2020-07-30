@@ -1,6 +1,6 @@
 module hunt.framework.auth.AuthService;
 
-import hunt.framework.auth.Guard;
+import hunt.framework.auth.guard;
 
 /**
  * 

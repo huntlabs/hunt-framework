@@ -12,6 +12,7 @@
 module hunt.framework.config.ApplicationConfig;
 
 import hunt.framework.Init;
+import hunt.framework.auth.AuthOptions;
 
 import std.exception;
 import std.format;
@@ -46,6 +47,9 @@ class ApplicationConfig {
         string unauthorizedUrl = "/";
 
         string basicRealm = "Secure Area";
+
+        // AuthenticationScheme: basic, bear/jwt
+        string guardScheme = "jwt";
 
         // the max inactive interval. The time unit is second.
         int tokenExpiration = DEFAULT_TOKEN_EXPIRATION*24*60*60; 

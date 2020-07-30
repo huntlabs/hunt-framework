@@ -56,7 +56,8 @@ class Request {
     private RouteConfigManager _routeManager;
     private string _routeGroup = DEFAULT_ROUTE_GROUP;
     private Auth _auth;
-    private AuthOptions _authOptions;
+    private string _guardName;
+    // private AuthOptions _authOptions;
     private MonoTime _monoCreated;
     private bool _isRestful = false;
 
@@ -69,26 +70,27 @@ class Request {
         _sessionStorage = serviceContainer().resolve!SessionStorage();
         _routeManager = serviceContainer().resolve!RouteConfigManager();
         _routeGroup = routeGroup;
+        _guardName = _routeManager.group(routeGroup).guardName();
         _remoteAddr = remoteAddress;
-        _authOptions = new AuthOptions();
+        // _authOptions = new AuthOptions();
 
         .request(this); // Binding this request to the current thread.
     }
 
     Auth auth() {
         if(_auth is null) {
-            _auth = new Auth(this, _authOptions);
+            _auth = new Auth(this);
         }
         return _auth;
     }
 
-    AuthOptions authOptions() {
-        return _authOptions;
-    }
+    // AuthOptions authOptions() {
+    //     return _authOptions;
+    // }
 
-    void authOptions(AuthOptions value) {
-        _authOptions = value; 
-    }
+    // void authOptions(AuthOptions value) {
+    //     _authOptions = value; 
+    // }
 
     bool isRestful() {
         return _isRestful;
@@ -834,7 +836,7 @@ class Request {
         if(routeItem is null) {
             return "";
         } else {
-            return routeItem.mca;
+            return routeItem.actionId;
         }
     }
 
@@ -842,6 +844,10 @@ class Request {
 
     string routeGroup() {
         return _routeGroup;
+    }
+
+    string guardName() {
+        return _guardName;
     }
 
     /**

@@ -78,7 +78,7 @@ class RouteConfigManager {
         return r;
     }
 
-    ActionRouteItem getRoute(string group, string mca) {
+    ActionRouteItem getRoute(string group, string actionId) {
         auto itemPtr = group in _allRouteItems;
         if (itemPtr is null)
             return null;
@@ -87,7 +87,7 @@ class RouteConfigManager {
             ActionRouteItem actionItem = cast(ActionRouteItem) item;
             if (actionItem is null)
                 continue;
-            if (actionItem.mca == mca)
+            if (actionItem.actionId == actionId)
                 return actionItem;
         }
 

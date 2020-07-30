@@ -73,11 +73,11 @@ abstract class Controller
 {
     private Request _request;
     private Response _response;
-    // private string _tokenCookieName = BEARER_COOKIE_NAME;  
+    // private string _tokenCookieName = JWT_COOKIE_NAME;  
 
     private MiddlewareInfo[] _allowedMiddlewares;
     private MiddlewareInfo[] _skippedMiddlewares;
-    private AuthOptions _authOptions;
+    // private AuthOptions _authOptions;
 
     protected
     {
@@ -88,7 +88,8 @@ abstract class Controller
     }
 
     this() {
-        _authOptions = new AuthOptions();
+        // _authOptions = new AuthOptions();
+        // _authOptions.tokenExpiration = config().auth.tokenExpiration;
     }
 
     RoutingContext routingContext() {
@@ -106,13 +107,16 @@ abstract class Controller
         if(_request is null) {
             RoutingContext context = routingContext();
             HttpConnection httpConnection = context.httpConnection();
-            _request = new Request(context.getRequest(), httpConnection.getRemoteAddress(),
-                context.groupName());
+
+            _request = new Request(context.getRequest(), 
+                                    httpConnection.getRemoteAddress(),
+                                    context.groupName());
+
             _request.isRestful = isRestful;
             // _request.authOptions.tokenCookieName = tokenCookieName();
             // _request.authOptions.scheme = authenticationScheme();
             // _request.authOptions.guardName = authenticationScheme();
-            _request.authOptions = authOptions();
+            // _request.authOptions = authOptions();
         }
         return _request;
     }
@@ -131,13 +135,13 @@ abstract class Controller
         routingContext().response = r.httpResponse;
     }
 
-    AuthOptions authOptions() {
-        return _authOptions;
-    }
+    // AuthOptions authOptions() {
+    //     return _authOptions;
+    // }
 
-    void authOptions(AuthOptions value) {
-        _authOptions = value; 
-    } 
+    // void authOptions(AuthOptions value) {
+    //     _authOptions = value; 
+    // } 
 
     /**
      * Get the currently authenticated user.
@@ -174,7 +178,6 @@ abstract class Controller
     {
         return true;
     }
-
 
     ///add middleware
     ///return true is ok, the named middleware is already exist return false
@@ -217,11 +220,7 @@ abstract class Controller
             MiddlewareInterface middleware = cast(MiddlewareInterface)info.create();
             if(middleware is null) {
                 warningf("%s is not a MiddlewareInterface", info.name);
-            } else {
-                // MiddlewareEventHandler rejectHandler = MiddlewareInterface.getRejectHander(middleware.name());
-                // if(rejectHandler !is null) {
-                //     middleware.rejectionHandler = rejectHandler;
-                // }                
+            } else {              
                 result ~= middleware;
             }
         }
@@ -244,10 +243,6 @@ abstract class Controller
                 if(middleware is null) {
                     warningf("%s is not a MiddlewareInterface", info.name);
                 } else {
-                    // MiddlewareEventHandler rejectHandler = MiddlewareInterface.getRejectHander(middleware.name());
-                    // if(rejectHandler !is null) {
-                    //     middleware.rejectionHandler = rejectHandler;
-                    // }
                     result ~= middleware;
                 }
             } 
@@ -272,11 +267,7 @@ abstract class Controller
             MiddlewareInterface middleware = cast(MiddlewareInterface)Object.factory(info.fullName);
             if(middleware is null) {
                 warningf("%s is not a MiddlewareInterface", info.fullName);
-            } else {
-                // MiddlewareEventHandler rejectHandler = MiddlewareInterface.getRejectHander(middleware.name());
-                // if(rejectHandler !is null) {
-                //     middleware.rejectionHandler = rejectHandler;
-                // }                
+            } else {             
                 result ~= middleware;
             }
         }
@@ -475,32 +466,37 @@ abstract class Controller
         }
 
         Auth auth = req.auth();
-        AuthenticationScheme authScheme = authOptions.scheme;
-        string tokenCookieName = authOptions.tokenCookieName;
+        AuthenticationScheme authScheme = auth.scheme();
+        string tokenCookieName = auth.tokenCookieName;
         version(HUNT_AUTH_DEBUG) {
             warningf("tokenCookieName: %s, authScheme: %s, isAuthenticated: %s", 
                 tokenCookieName, authScheme, auth.user().isAuthenticated);
         }
+        
+        warningf("path: %s, tokenCookieName: %s, authScheme: %s, isLogout: %s",  req.path,
+            tokenCookieName, authScheme, auth.isLogout());
+
         Cookie tokenCookie;
 
-        if(req.canRememberMe() || auth.isTokenRefreshed()) {
+        if(auth.canRememberMe() || auth.isTokenRefreshed()) {
             ApplicationConfig appConfig = app().config();
             int tokenExpiration = appConfig.auth.tokenExpiration;
-            string authToken = auth.token();
 
             if(authScheme != AuthenticationScheme.None) {
+                string authToken = auth.token();
                 tokenCookie = new Cookie(tokenCookieName, authToken, tokenExpiration);
             } 
 
-        } else if(req.isLogout()) {
+        } else if(auth.isLogout()) {
             if(authScheme != AuthenticationScheme.None) {
                 tokenCookie = new Cookie(tokenCookieName, "", 0);
             }
         } else if(authScheme != AuthenticationScheme.None) {
             ApplicationConfig appConfig = app().config();
             int tokenExpiration = appConfig.auth.tokenExpiration;
-            string authToken = auth.token();
+
             if(authScheme != AuthenticationScheme.None) {
+                string authToken = auth.token();
                 tokenCookie = new Cookie(tokenCookieName, authToken, tokenExpiration);
             }
         }
