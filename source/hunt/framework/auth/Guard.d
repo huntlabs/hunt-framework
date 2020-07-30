@@ -9,7 +9,7 @@ import hunt.logging.ConsoleLogger;
 /**
  * 
  */
-abstract class Guard {
+class Guard {
     private DefaultSecurityManager _securityManager;
     private Realm[] _realms;
     private UserService _userService;

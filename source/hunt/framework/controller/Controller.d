@@ -77,7 +77,7 @@ abstract class Controller
 
     private MiddlewareInfo[] _allowedMiddlewares;
     private MiddlewareInfo[] _skippedMiddlewares;
-    private AuthOptions _authOptions; 
+    private AuthOptions _authOptions;
 
     protected
     {
@@ -218,10 +218,10 @@ abstract class Controller
             if(middleware is null) {
                 warningf("%s is not a MiddlewareInterface", info.name);
             } else {
-                MiddlewareEventHandler rejectHandler = MiddlewareInterface.getRejectHander(middleware.name());
-                if(rejectHandler !is null) {
-                    middleware.rejectionHandler = rejectHandler;
-                }                
+                // MiddlewareEventHandler rejectHandler = MiddlewareInterface.getRejectHander(middleware.name());
+                // if(rejectHandler !is null) {
+                //     middleware.rejectionHandler = rejectHandler;
+                // }                
                 result ~= middleware;
             }
         }
@@ -244,10 +244,10 @@ abstract class Controller
                 if(middleware is null) {
                     warningf("%s is not a MiddlewareInterface", info.name);
                 } else {
-                    MiddlewareEventHandler rejectHandler = MiddlewareInterface.getRejectHander(middleware.name());
-                    if(rejectHandler !is null) {
-                        middleware.rejectionHandler = rejectHandler;
-                    }
+                    // MiddlewareEventHandler rejectHandler = MiddlewareInterface.getRejectHander(middleware.name());
+                    // if(rejectHandler !is null) {
+                    //     middleware.rejectionHandler = rejectHandler;
+                    // }
                     result ~= middleware;
                 }
             } 
@@ -273,10 +273,10 @@ abstract class Controller
             if(middleware is null) {
                 warningf("%s is not a MiddlewareInterface", info.fullName);
             } else {
-                MiddlewareEventHandler rejectHandler = MiddlewareInterface.getRejectHander(middleware.name());
-                if(rejectHandler !is null) {
-                    middleware.rejectionHandler = rejectHandler;
-                }                
+                // MiddlewareEventHandler rejectHandler = MiddlewareInterface.getRejectHander(middleware.name());
+                // if(rejectHandler !is null) {
+                //     middleware.rejectionHandler = rejectHandler;
+                // }                
                 result ~= middleware;
             }
         }

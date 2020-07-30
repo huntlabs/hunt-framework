@@ -12,5 +12,5 @@ class AuthOptions {
 
     string tokenCookieName = BEARER_COOKIE_NAME;
     
-    AuthenticationScheme scheme = AuthenticationScheme.None;
+    AuthenticationScheme scheme = AuthenticationScheme.Bearer;
 }

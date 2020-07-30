@@ -18,14 +18,11 @@ class AuthServiceProvider : ServiceProvider {
         serviceContainer().register!(AuthService);
     }
 
-    // override void boot() {
-    //     AuthService authService = serviceContainer().resolve!AuthService();
-
-    //     Guard[] guards = authService.guards();
-    //     foreach(Guard g; guards) {
-    //         g.boot();
-    //     }
-    // }
+    override void boot() {
+        AuthService authService = serviceContainer().resolve!AuthService();
+        authService.addGuard(new Guard(new SimpleUserService(), DEFAULT_GURAD_NAME));
+        authService.boot();
+    }
 
     // private Realm[][string] _groupedRealms;
 

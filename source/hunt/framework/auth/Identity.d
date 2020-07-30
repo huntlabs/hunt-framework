@@ -57,6 +57,10 @@ class Identity {
         return cast(AuthenticationScheme)var.get!string();
     }
 
+    string fullName() {
+        return claimAs!(string)(ClaimTypes.FullName);
+    }
+
     Variant claim(string type) {
         Variant v = Variant(null);
         UserDetails userDetails = cast(UserDetails)subject().getPrincipal();

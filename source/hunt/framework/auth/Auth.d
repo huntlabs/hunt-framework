@@ -119,39 +119,40 @@ class Auth {
         string scheme = _options.scheme;
         _state = AuthState.SignIn;
 
-        if(_user.isAuthenticated()) {
-            if(scheme == AuthenticationScheme.Bearer) {
-                // UserService userService = serviceContainer().resolve!UserService();
+        if(!_user.isAuthenticated()) 
+            return _user;
 
-                // string salt = userService.getSalt(name, password);
-                int exp = config().auth.tokenExpiration;
+        if(scheme == AuthenticationScheme.Bearer) {
+            // UserService userService = serviceContainer().resolve!UserService();
 
-                JSONValue claims;
-                claims["user_id"] = _user.id;
+            // string salt = userService.getSalt(name, password);
+            int exp = config().auth.tokenExpiration;
 
-                Claim[] userClaims = _user.claims();
+            JSONValue claims;
+            claims["user_id"] = _user.id;
 
-                foreach(Claim c; userClaims) {
-                    string claimName = toJwtClaimName(c.type());
-                    Variant value = c.value;
-                    if(TypeUtils.isIntegral(value.type))
-                        claims[claimName] = JSONValue(c.value.get!(long));
-                    else if(TypeUtils.isUsignedIntegral(value.type))
-                        claims[claimName] = JSONValue(c.value.get!(ulong));
-                    else if(TypeUtils.isFloatingPoint(value.type))
-                        claims[claimName] = JSONValue(c.value.get!(float));
-                    else 
-                        claims[claimName] = JSONValue(c.value.toString());
-                }
+            Claim[] userClaims = _user.claims();
 
-                _token = JwtUtil.sign(name, salt, exp.seconds, claims);
-            } else if(scheme == AuthenticationScheme.Basic) {
-                string str = name ~ ":" ~ password;
-                ubyte[] data = cast(ubyte[])str;
-                _token = cast(string)Base64.encode(data);
-            } else {
-                error("Unsupported AuthenticationScheme: %s", scheme);
+            foreach(Claim c; userClaims) {
+                string claimName = toJwtClaimName(c.type());
+                Variant value = c.value;
+                if(TypeUtils.isIntegral(value.type))
+                    claims[claimName] = JSONValue(c.value.get!(long));
+                else if(TypeUtils.isUsignedIntegral(value.type))
+                    claims[claimName] = JSONValue(c.value.get!(ulong));
+                else if(TypeUtils.isFloatingPoint(value.type))
+                    claims[claimName] = JSONValue(c.value.get!(float));
+                else 
+                    claims[claimName] = JSONValue(c.value.toString());
             }
+
+            _token = JwtUtil.sign(name, salt, exp.seconds, claims);
+        } else if(scheme == AuthenticationScheme.Basic) {
+            string str = name ~ ":" ~ password;
+            ubyte[] data = cast(ubyte[])str;
+            _token = cast(string)Base64.encode(data);
+        } else {
+            error("Unsupported AuthenticationScheme: %s", scheme);
         }
 
         return _user;
