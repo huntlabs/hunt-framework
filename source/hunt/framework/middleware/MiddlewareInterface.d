@@ -35,9 +35,9 @@ interface MiddlewareInterface
     ///return null is continue, response is close the session
     Response onProcess(Request request, Response response = null);
 
-    MiddlewareInterface rejectionHandler(MiddlewareEventHandler handler);
+    // MiddlewareInterface rejectionHandler(MiddlewareEventHandler handler);
     
-    MiddlewareEventHandler rejectionHandler();
+    // MiddlewareEventHandler rejectionHandler();
 
     private __gshared TypeInfo_Class[string] _all;
 
@@ -68,35 +68,35 @@ interface MiddlewareInterface
         return _all;
     }
 
-    private __gshared MiddlewareEventHandler[string] _allRejectHanders;
+    // private __gshared MiddlewareEventHandler[string] _allRejectHanders;
 
-    static void registerRejectHandler(T)(MiddlewareEventHandler handler) {
-        string fullName = fullyQualifiedName!T;
-        auto itemPtr = fullName in _allRejectHanders;
-        if(itemPtr !is null) {
-            warning("The middleware [%s]'s reject handler will be overwritten", fullName);
-        }
+    // static void registerRejectHandler(T)(MiddlewareEventHandler handler) {
+    //     string fullName = fullyQualifiedName!T;
+    //     auto itemPtr = fullName in _allRejectHanders;
+    //     if(itemPtr !is null) {
+    //         warning("The middleware [%s]'s reject handler will be overwritten", fullName);
+    //     }
 
-        _allRejectHanders[fullName] = handler;
-    }
+    //     _allRejectHanders[fullName] = handler;
+    // }
 
-    static void registerRejectHandler(string fullName, MiddlewareEventHandler handler) {
-        auto itemPtr = fullName in _allRejectHanders;
-        if(itemPtr !is null) {
-            warning("The middleware [%s]'s reject handler will be overwritten", fullName);
-        }
+    // static void registerRejectHandler(string fullName, MiddlewareEventHandler handler) {
+    //     auto itemPtr = fullName in _allRejectHanders;
+    //     if(itemPtr !is null) {
+    //         warning("The middleware [%s]'s reject handler will be overwritten", fullName);
+    //     }
 
-        _allRejectHanders[fullName] = handler;
-    }
+    //     _allRejectHanders[fullName] = handler;
+    // }
 
-    static MiddlewareEventHandler getRejectHander(string fullName) {
-        auto itemPtr = fullName in _allRejectHanders;
-        if(itemPtr is null) {
-            return null;
-        }
+    // static MiddlewareEventHandler getRejectHander(string fullName) {
+    //     auto itemPtr = fullName in _allRejectHanders;
+    //     if(itemPtr is null) {
+    //         return null;
+    //     }
 
-        return *itemPtr;
-    }
+    //     return *itemPtr;
+    // }
 }
 
 /**
@@ -104,34 +104,34 @@ interface MiddlewareInterface
  */
 abstract class AbstractMiddleware : MiddlewareInterface {
 
-    protected RouteChecker _routeChecker;
-    protected MiddlewareEventHandler _rejectionHandler;
+    // protected RouteChecker _routeChecker;
+    // protected MiddlewareEventHandler _rejectionHandler;
 
-    this() {
-    }
+    // this() {
+    // }
 
-    this(RouteChecker routeChecker, MiddlewareEventHandler rejectionHandler) {
-        _routeChecker = routeChecker;
-        _rejectionHandler = rejectionHandler;
-    }
+    // this(RouteChecker routeChecker, MiddlewareEventHandler rejectionHandler) {
+    //     _routeChecker = routeChecker;
+    //     _rejectionHandler = rejectionHandler;
+    // }
 
-    MiddlewareInterface routeChecker(RouteChecker handler) {
-        _routeChecker = handler;
-        return this;
-    }
+    // MiddlewareInterface routeChecker(RouteChecker handler) {
+    //     _routeChecker = handler;
+    //     return this;
+    // }
 
-    RouteChecker routeChecker() {
-        return _routeChecker;
-    }
+    // RouteChecker routeChecker() {
+    //     return _routeChecker;
+    // }
 
-    MiddlewareInterface rejectionHandler(MiddlewareEventHandler handler) {
-        _rejectionHandler = handler;
-        return this;
-    }
+    // MiddlewareInterface rejectionHandler(MiddlewareEventHandler handler) {
+    //     _rejectionHandler = handler;
+    //     return this;
+    // }
     
-    MiddlewareEventHandler rejectionHandler() {
-        return _rejectionHandler;
-    }
+    // MiddlewareEventHandler rejectionHandler() {
+    //     return _rejectionHandler;
+    // }
 
     // protected void onRejected() {
     //     if(_rejectionHandler !is null) {
@@ -143,17 +143,4 @@ abstract class AbstractMiddleware : MiddlewareInterface {
     string name() {
         return typeid(this).name;
     }
-    
-    // Response onProcess(Request request, Response response = null) {
-    //     version(HUNT_SHIRO_DEBUG) infof("path: %s, method: %s", request.path(), request.method );
-
-    //     bool needCheck = true;
-    //     if(_routeChecker !is null) {
-    //         needCheck = _routeChecker(request.path(), request.getMethod());
-    //     }
-
-    //     if(!needCheck) {
-    //         return null;
-    //     }
-    // }
 }

@@ -35,13 +35,13 @@ class BasicAuthMiddleware : AuthMiddleware {
         MiddlewareInterface.register!(typeof(this));
     }
 
-    this() {
-        super();
-    }
+    // this() {
+    //     super();
+    // }
 
-    this(RouteChecker routeChecker, MiddlewareEventHandler rejectionHandler) {
-        super(routeChecker, rejectionHandler);
-    }
+    // this(RouteChecker routeChecker, MiddlewareEventHandler rejectionHandler) {
+    //     super(routeChecker, rejectionHandler);
+    // }
 
     override protected UsernamePasswordToken getToken(Request request) {
         string tokenString = request.basicToken();

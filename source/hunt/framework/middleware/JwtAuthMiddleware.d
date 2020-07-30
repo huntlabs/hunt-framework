@@ -29,13 +29,13 @@ class JwtAuthMiddleware : AuthMiddleware {
         MiddlewareInterface.register!(typeof(this));
     }
 
-    this() {
-        super();
-    }
+    // this() {
+    //     super();
+    // }
 
-    this(RouteChecker routeChecker, MiddlewareEventHandler rejectionHandler) {
-        super(routeChecker, rejectionHandler);
-    }
+    // this(RouteChecker routeChecker, MiddlewareEventHandler rejectionHandler) {
+    //     super(routeChecker, rejectionHandler);
+    // }
 
     override protected JwtToken getToken(Request request) {
         string tokenString = request.bearerToken();

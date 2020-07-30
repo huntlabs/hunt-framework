@@ -31,13 +31,13 @@ import std.string;
  */
 abstract class AuthMiddleware : AbstractMiddleware {
 
-    this() {
-        super();
-    }
+    // this() {
+    //     super();
+    // }
 
-    this(RouteChecker routeChecker, MiddlewareEventHandler rejectionHandler) {
-        super(routeChecker, rejectionHandler);
-    }
+    // this(RouteChecker routeChecker, MiddlewareEventHandler rejectionHandler) {
+    //     super(routeChecker, rejectionHandler);
+    // }
 
     protected AuthenticationToken getToken(Request request);
 
@@ -46,9 +46,9 @@ abstract class AuthMiddleware : AbstractMiddleware {
     }
 
     protected Response onRejected(Request request) {
-        if(_rejectionHandler !is null) {
-            return _rejectionHandler(this, request);
-        } else {
+        // if(_rejectionHandler !is null) {
+        //     return _rejectionHandler(this, request);
+        // } else {
             if(request.isRestful()) {
                 return new UnauthorizedResponse();
             } else {
@@ -56,7 +56,7 @@ abstract class AuthMiddleware : AbstractMiddleware {
                 string unauthorizedUrl = appConfig.unauthorizedUrl;
                 return new RedirectResponse(request, unauthorizedUrl);
             }            
-        }
+        // }
     } 
 
     Response onProcess(Request request, Response response = null) {
@@ -64,19 +64,19 @@ abstract class AuthMiddleware : AbstractMiddleware {
             infof("path: %s, method: %s", request.path(), request.method );
         }
 
-        bool needCheck = true;
-        if(_routeChecker !is null) {
-            needCheck = _routeChecker(request.path(), request.getMethod());
-        }
+        // bool needCheck = true;
+        // if(_routeChecker !is null) {
+        //     needCheck = _routeChecker(request.path(), request.getMethod());
+        // }
 
-        if(!needCheck) {
-            return null;
-        }
+        // if(!needCheck) {
+        //     return null;
+        // }
         
         Identity user = request.auth().user();
         if(user.isAuthenticated()) {
             version(HUNT_DEBUG) {
-                string fullName = user.claimAs!(string)(ClaimTypes.FullName);
+                string fullName = user.fullName();
                 infof("User [%s / %s] has already logged in.",  user.name(), fullName);
             }
             return null;
@@ -85,11 +85,7 @@ abstract class AuthMiddleware : AbstractMiddleware {
         AuthenticationToken token = getToken(request);
         if(user.login(token)) {
             version(HUNT_DEBUG) {
-                // Claim[] claims =  user.claims;
-                // foreach(Claim c; claims) {
-                //     tracef("%s, %s", c.type, c.value);
-                // }
-                string fullName = user.claimAs!(string)(ClaimTypes.FullName);
+                string fullName = user.fullName();
                 infof("User [%s / %s] logged in.",  user.name(), fullName);
             }
 
