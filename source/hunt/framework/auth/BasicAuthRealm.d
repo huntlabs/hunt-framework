@@ -35,10 +35,6 @@ class BasicAuthRealm : AuthRealm {
         return t !is null;
     }
 
-    // override protected UserService getUserService() {
-    //     return _userService; //serviceContainer().resolve!UserService();
-    // }
-
     override protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) {
         string username = token.getPrincipal();
         string password = cast(string)token.getCredentials();

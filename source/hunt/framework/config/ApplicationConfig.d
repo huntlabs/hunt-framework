@@ -44,7 +44,7 @@ class ApplicationConfig {
     struct AuthConf {
         string loginUrl = "/";
         string successUrl = "/";
-        string unauthorizedUrl = "/";
+        string unauthorizedUrl = "";
 
         string basicRealm = "Secure Area";
 

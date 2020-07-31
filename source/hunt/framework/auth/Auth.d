@@ -77,16 +77,16 @@ class Auth {
         }
     }
 
-    // void tokenCookieName(string name) {
-    //     _tokenCookieName = name;
-    // }
+    bool isEnabled() {
+        return _guard !is null;
+    }
 
     string tokenCookieName() {
         return _guard.tokenCookieName();
     }
 
     void autoDetect() {
-        if(_state != AuthState.Auto) 
+        if(_state != AuthState.Auto || !isEnabled()) 
             return;
 
         version(HUNT_DEBUG) {
@@ -205,8 +205,6 @@ class Auth {
         _token = null;
         _remember = false;
         _isLogout = true;
-
-        // AuthenticationScheme scheme = _guard.authScheme();
         
         if(scheme != AuthenticationScheme.Basic && scheme != AuthenticationScheme.Bearer) {
             warningf("Unsupported authentication scheme: %s", scheme);
@@ -243,13 +241,8 @@ class Auth {
     }
   
     AuthenticationScheme scheme() {
-        // autoDetect();
         return _guard.authScheme();
     }
-
-    // void scheme(AuthenticationScheme value) {
-    //     _scheme = value;
-    // }
 
     bool canRememberMe() {
         return _remember;

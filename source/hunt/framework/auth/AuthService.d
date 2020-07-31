@@ -2,6 +2,8 @@ module hunt.framework.auth.AuthService;
 
 import hunt.framework.auth.guard;
 
+import hunt.logging.ConsoleLogger;
+
 /**
  * 
  */
@@ -16,8 +18,10 @@ class AuthService {
 
     Guard guard(string name) {
         auto itemPtr = name in _guards;
-        if(itemPtr is null)
-            throw new Exception("No guard found: " ~ name);
+        if(itemPtr is null) {
+            version(HUNT_AUTH_DEBUG) warning("No guard found: " ~ name);
+            return null;
+        }
         return *itemPtr;
     }
 

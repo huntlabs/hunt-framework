@@ -215,7 +215,7 @@ abstract class Controller
         TypeInfo_Class[] routeMiddlewares;
         routeMiddlewares = routeManager().group(routeGroup).allowedMiddlewares();
         foreach(TypeInfo_Class info; routeMiddlewares) {
-            warningf("routeGroup: %s, fullName: %s", routeGroup, info.name);
+            version(HUNT_AUTH_DEBUG) warningf("routeGroup: %s, fullName: %s", routeGroup, info.name);
 
             MiddlewareInterface middleware = cast(MiddlewareInterface)info.create();
             if(middleware is null) {
@@ -465,16 +465,23 @@ abstract class Controller
             resp.header(HttpHeader.CONTENT_TYPE, MimeType.TEXT_HTML_VALUE);
         }
 
+        handleAuthResponse();
+
+    }
+
+    private void handleAuthResponse() {
+        Request req = request();
+
         Auth auth = req.auth();
+        if(!auth.isEnabled()) 
+            return;
+
         AuthenticationScheme authScheme = auth.scheme();
         string tokenCookieName = auth.tokenCookieName;
         version(HUNT_AUTH_DEBUG) {
             warningf("tokenCookieName: %s, authScheme: %s, isAuthenticated: %s", 
                 tokenCookieName, authScheme, auth.user().isAuthenticated);
         }
-        
-        warningf("path: %s, tokenCookieName: %s, authScheme: %s, isLogout: %s",  req.path,
-            tokenCookieName, authScheme, auth.isLogout());
 
         Cookie tokenCookie;
 
@@ -501,8 +508,9 @@ abstract class Controller
             }
         }
 
-        if(tokenCookie !is null)
-            resp.withCookie(tokenCookie);
+        if(tokenCookie !is null) {
+            response().withCookie(tokenCookie);
+        }
     }
 
     void dispose() {

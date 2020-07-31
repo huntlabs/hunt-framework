@@ -88,7 +88,7 @@ class HttpServiceProvider : ServiceProvider {
         hsb.resource("/", staticFilesConfig.location, staticFilesConfig.canList);
         // hsb.setDefaultRequest((RoutingContext ctx) {
         //     string content = "The resource " ~ ctx.getURI().getPath() ~ " is not found";
-        //     string title = "404 - Not Foundxxxx";
+        //     string title = "404 - Not Found";
 
         //     ctx.responseHeader(HttpHeader.CONTENT_TYPE, "text/html");
 

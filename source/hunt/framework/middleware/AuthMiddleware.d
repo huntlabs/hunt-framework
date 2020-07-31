@@ -2,6 +2,7 @@ module hunt.framework.middleware.AuthMiddleware;
 
 import hunt.framework.middleware.MiddlewareInterface;
 
+import hunt.framework.auth.Auth;
 import hunt.framework.auth.AuthOptions;
 import hunt.framework.auth.Claim;
 import hunt.framework.auth.ClaimTypes;
@@ -40,17 +41,27 @@ class AuthMiddleware : AbstractMiddleware {
 
     protected Response onRejected(Request request) {
         if(request.isRestful()) {
-            return new UnauthorizedResponse();
+            return new UnauthorizedResponse("", true);
         } else {
             ApplicationConfig.AuthConf appConfig = app().config().auth;
             string unauthorizedUrl = appConfig.unauthorizedUrl;
-            return new RedirectResponse(request, unauthorizedUrl);
+            if(unauthorizedUrl.empty ) {
+                return new UnauthorizedResponse("", false, request.auth().scheme());
+            } else {
+                return new RedirectResponse(request, unauthorizedUrl);
+            }
         }            
     } 
 
     Response onProcess(Request request, Response response = null) {
         version(HUNT_AUTH_DEBUG) {
             infof("path: %s, method: %s", request.path(), request.method );
+        }
+
+        Auth auth = request.auth();
+        if(!auth.isEnabled()) {
+            warning("The auth is disabled. Are you sure that the guard is defined?");
+            return onRejected(request);
         }
 
         Identity user = request.auth().user();
