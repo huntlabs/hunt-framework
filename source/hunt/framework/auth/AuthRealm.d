@@ -2,7 +2,6 @@ module hunt.framework.auth.AuthRealm;
 
 import hunt.framework.auth.UserDetails;
 import hunt.framework.auth.UserService;
-import hunt.framework.auth.AuthOptions;
 import hunt.framework.config.AuthUserConfig;
 import hunt.shiro;
 
@@ -22,19 +21,10 @@ import std.string;
  *  https://stackoverflow.com/questions/13686246/shiro-security-multiple-realms-which-authorization-info-is-taken
  */
 abstract class AuthRealm : AuthorizingRealm {
-    private string _guardName = DEFAULT_GURAD_NAME;
     private UserService _userService;
 
     this(UserService userService) {
         _userService = userService;
-    }
-
-    string guardName() {
-        return _guardName;
-    }
-
-    void guardName(string value) {
-        _guardName = value;
     }
 
     protected UserService getUserService() {
