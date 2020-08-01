@@ -21,7 +21,6 @@ import hunt.framework.Simplify;
 import hunt.http.HttpHeader;
 import hunt.http.AuthenticationScheme;
 import hunt.logging.ConsoleLogger;
-import hunt.shiro;
 
 import std.base64;
 import std.range;
@@ -64,17 +63,23 @@ class AuthMiddleware : AbstractMiddleware {
             return onRejected(request);
         }
 
-        Identity user = request.auth().user();
-        if(user.isAuthenticated()) {
-            version(HUNT_DEBUG) {
-                string fullName = user.fullName();
-                infof("User [%s / %s] has already logged in.",  user.name(), fullName);
-            }
-            return null;
-        }
+        // Identity user = auth.user();
+        // try {
+        //     if(user.isAuthenticated()) {
+        //         version(HUNT_DEBUG) {
+        //             string fullName = user.fullName();
+        //             infof("User [%s / %s] has already logged in.",  user.name(), fullName);
+        //         }
+        //         return null;
+        //     }
+        // } catch(Exception ex) {
+        //     warning(ex.msg);
+        //     version(HUNT_DEBUG) warning(ex);
+        // }
         
-        AuthenticationToken token = request.auth().guard().getToken(request);
-        if(user.login(token)) {
+
+        Identity user = auth.signIn();
+        if(user.isAuthenticated()) {
             version(HUNT_DEBUG) {
                 string fullName = user.fullName();
                 infof("User [%s / %s] logged in.",  user.name(), fullName);

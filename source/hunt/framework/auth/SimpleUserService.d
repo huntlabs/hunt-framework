@@ -32,47 +32,51 @@ class SimpleUserService : UserService {
     UserDetails authenticate(string name, string password) {
         
         foreach(AuthUserConfig.User user; _userConfig.users) {
-            if(user.name == name) { //  && user.password == password
-                UserDetails userDetails = new UserDetails();
-                userDetails.name = name;
-                // userDetails.password = password;
+            if(user.name != name || user.password != password)
+                continue;
 
-                // roles
-                foreach(string roleName; user.roles) {
-                    AuthUserConfig.Role role = getRole(roleName);
-                    if(role !is null) {
-                        userDetails.roles ~= role.name;
-                        userDetails.permissions ~= role.permissions;
-                    } else {
-                        warning("The role is not defined: %s", roleName);
-                    }
+            UserDetails userDetails = new UserDetails();
+            userDetails.name = name;
+            // userDetails.password = password;
+            userDetails.salt = getSalt(name, user.password);
+
+            // roles
+            foreach(string roleName; user.roles) {
+                AuthUserConfig.Role role = getRole(roleName);
+                if(role !is null) {
+                    userDetails.roles ~= role.name;
+                    userDetails.permissions ~= role.permissions;
+                } else {
+                    warning("The role is not defined: %s", roleName);
                 }
-                
-                return userDetails;
             }
+            
+            return userDetails;
         }
         return null;
     }
 
     UserDetails getByName(string name) {
         foreach(AuthUserConfig.User user; _userConfig.users) {
-            if(user.name == name) {
-                UserDetails userDetails = new UserDetails();
-                userDetails.name = name;
-                // userDetails.password = user.password;
+            if(user.name != name) 
+                continue;
 
-                // roles
-                foreach(string roleName; user.roles) {
-                    AuthUserConfig.Role role = getRole(roleName);
-                    if(role !is null) {
-                        userDetails.roles ~= role.name;
-                        userDetails.permissions ~= role.permissions;
-                    } else {
-                        warning("The role is not defined: %s", roleName);
-                    }
+            UserDetails userDetails = new UserDetails();
+            userDetails.name = name;
+            // userDetails.password = user.password;
+            userDetails.salt = getSalt(name, user.password);
+
+            // roles
+            foreach(string roleName; user.roles) {
+                AuthUserConfig.Role role = getRole(roleName);
+                if(role !is null) {
+                    userDetails.roles ~= role.name;
+                    userDetails.permissions ~= role.permissions;
+                } else {
+                    warning("The role is not defined: %s", roleName);
                 }
-                return userDetails;
             }
+            return userDetails;
         }
         return null;
     }

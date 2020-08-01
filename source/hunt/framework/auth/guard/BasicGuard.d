@@ -31,6 +31,10 @@ class BasicGuard : Guard {
 
     override AuthenticationToken getToken(Request request) {
         string tokenString = request.basicToken();
+        
+        if (tokenString.empty)
+            tokenString = request.cookie(tokenCookieName);
+
         if(tokenString.empty) {
             return null;
         }

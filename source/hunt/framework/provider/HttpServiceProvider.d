@@ -67,8 +67,6 @@ class HttpServiceProvider : ServiceProvider {
         RouteConfigManager routeConfig = container.resolve!RouteConfigManager();
         RouteItem[][RouteGroup] allRoutes = routeConfig.allRoutes;
 
-        // trace(_actions.keys);
-
         foreach(RouteGroup group, RouteItem[] routes; allRoutes) {
             foreach (RouteItem item; routes) {
                 addRoute(hsb, item, group);

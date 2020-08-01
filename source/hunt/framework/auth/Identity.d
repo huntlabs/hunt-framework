@@ -167,12 +167,17 @@ class Identity {
 
     bool login(AuthenticationToken token) {
         if(token is null) {
-            warning("Token is null");
+            warning("The token is null");
             return false;
         }
 
+        Subject sj = subject();
+
         try {
-            subject().login(token);
+            // FIXME: Needing refactor or cleanup -@zhangxueping at 2020-08-01T16:13:55+08:00
+            // Session with id [b82d265a-ec96-406b-854c-0a846e690aff] has expired
+            sj.logout();
+            sj.login(token);
         } catch (AuthenticationException e) {
             version(HUNT_DEBUG) warning(e.msg);
             version(HUNT_AUTH_DEBUG) warning(e);
@@ -181,7 +186,7 @@ class Identity {
             version(HUNT_AUTH_DEBUG) warning(ex);
         }
 
-        return subject().isAuthenticated();
+        return sj.isAuthenticated();
     }
 
     bool isAuthenticated() {

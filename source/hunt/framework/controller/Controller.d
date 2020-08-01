@@ -316,7 +316,7 @@ abstract class Controller
         string routeGroup = req.routeGroup();
         
         version (HUNT_DEBUG) {
-            infof("Handling middlware: routeGroup=%s, path=%s, method=%s, actionId=%s, actionName=%s", 
+            infof("middlware: routeGroup=%s, path=%s, method=%s, actionId=%s, actionName=%s", 
                routeGroup, req.path(),  req.method, actionId, actionName);
         }
 
@@ -501,9 +501,10 @@ abstract class Controller
         } else if(authScheme != AuthenticationScheme.None) {
             ApplicationConfig appConfig = app().config();
             int tokenExpiration = appConfig.auth.tokenExpiration;
-
-            if(authScheme != AuthenticationScheme.None) {
-                string authToken = auth.token();
+            string authToken = auth.token();
+            if(authToken.empty()) {
+                warning("The token is empty!");
+            } else {
                 tokenCookie = new Cookie(tokenCookieName, authToken, tokenExpiration);
             }
         }

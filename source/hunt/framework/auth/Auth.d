@@ -116,7 +116,7 @@ class Auth {
     }
 
     Identity user() {
-        autoDetect();
+        // autoDetect();
         return _user;
     }
 
@@ -200,6 +200,19 @@ class Auth {
         }
     }
 
+    /// Use token to login
+    Identity signIn() {
+        scope(success) {
+            _state = AuthState.Token;
+        }
+        
+        version(HUNT_AUTH_DEBUG) infof("guard: %s, type: %s", _guard.name, typeid(_guard));
+
+        AuthenticationToken token = _guard.getToken(_request);
+        _user.login(token);
+        return _user;
+    }
+
     void signOut() {
         _state = AuthState.SignOut;
         _token = null;
@@ -236,7 +249,12 @@ class Auth {
 
     // the token value for the "remember me" session.
     string token() {
-        autoDetect();
+        // autoDetect();
+        if(_token.empty) {
+            AuthenticationToken token = guard().getToken(_request);
+            if(token !is null)
+                _token = token.getPrincipal();
+        }
         return _token;
     }
   

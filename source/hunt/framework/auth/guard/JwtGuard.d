@@ -32,7 +32,6 @@ class JwtGuard : Guard {
 
     override AuthenticationToken getToken(Request request) {
         string tokenString = request.bearerToken();
-        // string tokenCookieName = request.auth().tokenCookieName(); // authOptions.tokenCookieName;
 
         if (tokenString.empty)
             tokenString = request.cookie(tokenCookieName);

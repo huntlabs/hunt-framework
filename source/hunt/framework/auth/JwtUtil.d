@@ -24,8 +24,8 @@ class JwtUtil {
             Token tk = jwt.verify(token, secret, [JWTAlgorithm.HS256, JWTAlgorithm.HS512]);
             return true;
         } catch (Exception e) {
-            version(HUNT_DEBUG) warning(e.msg);
-            version(HUNT_SHIRO_DEBUG) warning(e);
+            warning(e.msg);
+            version(HUNT_DEBUG) warning(e);
             return false;
         }
     }
