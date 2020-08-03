@@ -834,6 +834,8 @@ class Request {
         }
         
         if(routeItem is null) {
+            warningf("Can't find the action id for [group=%s, method=%s, path=%s]", 
+                _routeGroup, _request.getMethod(), _request.path());
             return "";
         } else {
             return routeItem.actionId;

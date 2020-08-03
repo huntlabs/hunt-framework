@@ -88,8 +88,6 @@ abstract class Controller
     }
 
     this() {
-        // _authOptions = new AuthOptions();
-        // _authOptions.tokenExpiration = config().auth.tokenExpiration;
     }
 
     RoutingContext routingContext() {
@@ -113,10 +111,6 @@ abstract class Controller
                                     context.groupName());
 
             _request.isRestful = isRestful;
-            // _request.authOptions.tokenCookieName = tokenCookieName();
-            // _request.authOptions.scheme = authenticationScheme();
-            // _request.authOptions.guardName = authenticationScheme();
-            // _request.authOptions = authOptions();
         }
         return _request;
     }

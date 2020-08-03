@@ -104,7 +104,8 @@ class RouteConfigManager {
             return null;
         }
 
-        path = path.stripRight("/");
+        if(path != "/")
+            path = path.stripRight("/");
 
         //
         // auto itemPtr = group.name in _allRouteItems;
@@ -116,11 +117,10 @@ class RouteConfigManager {
             ActionRouteItem actionItem = cast(ActionRouteItem) item;
             if (actionItem is null)
                 continue;
-            
+
             // TODO: Tasks pending completion -@zhangxueping at 2020-03-13T16:23:18+08:00
             // handle /user/{id<[0-9]+>} 
             if(actionItem.path != path) continue;
-
             // tracef("actionItem: %s", actionItem);
             string[] methods = actionItem.methods;
             if (!methods.empty && !methods.canFind(method))
@@ -228,7 +228,7 @@ class RouteConfigManager {
         }
     } 
 
-    string createUrl(string mca, string[string] params = null, string groupName = RouteGroup.DEFAULT) {
+    string createUrl(string actionId, string[string] params = null, string groupName = RouteGroup.DEFAULT) {
 
         if (groupName.empty)
             groupName = RouteGroup.DEFAULT;
@@ -239,7 +239,7 @@ class RouteConfigManager {
         if (routeGroup is null)
             return null;
 
-        RouteItem route = getRoute(groupName, mca);
+        RouteItem route = getRoute(groupName, actionId);
         if (route is null) {
             return null;
         }
@@ -247,7 +247,7 @@ class RouteConfigManager {
         string url;
         if (route.isRegex) {
             if (params is null) {
-                warningf("Need route params for (%s).", mca);
+                warningf("Need route params for (%s).", actionId);
                 return null;
             }
 
@@ -365,12 +365,12 @@ class RouteConfigManager {
             item = routeItem;
         } else {
             ActionRouteItem routeItem = new ActionRouteItem();
-            // mca
-            string mca = part3;
-            string[] mcaArray = split(mca, ".");
+            // actionId
+            string actionId = part3;
+            string[] mcaArray = split(actionId, ".");
 
             if (mcaArray.length > 3 || mcaArray.length < 2) {
-                logWarningf("this route config mca length is: %d (%s)", mcaArray.length, mca);
+                logWarningf("this route config actionId length is: %d (%s)", mcaArray.length, actionId);
                 return null;
             }
 

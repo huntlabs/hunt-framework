@@ -56,7 +56,7 @@ class AuthMiddleware : AbstractMiddleware {
         version(HUNT_AUTH_DEBUG) {
             infof("path: %s, method: %s", request.path(), request.method );
         }
-
+        
         Auth auth = request.auth();
         if(!auth.isEnabled()) {
             warning("The auth is disabled. Are you sure that the guard is defined?");
