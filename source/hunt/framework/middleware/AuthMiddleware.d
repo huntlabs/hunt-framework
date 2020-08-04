@@ -79,7 +79,7 @@ class AuthMiddleware : AbstractMiddleware {
         //     version(HUNT_DEBUG) warning(ex);
         // }
 
-        user = auth.signIn();
+        Identity user = auth.signIn();
         if(user.isAuthenticated()) {
             version(HUNT_DEBUG) {
                 string fullName = user.fullName();
