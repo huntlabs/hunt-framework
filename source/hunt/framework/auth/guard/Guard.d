@@ -10,6 +10,8 @@ import hunt.framework.http.Request;
 import hunt.framework.provider.ServiceProvider;
 import hunt.http.AuthenticationScheme;
 import hunt.shiro;
+import hunt.shiro.session.mgt.SessionManager;
+import hunt.shiro.session.mgt.DefaultSessionManager;
 
 import hunt.logging.ConsoleLogger;
 
@@ -82,6 +84,14 @@ abstract class Guard {
         HuntCache cache = serviceContainer().resolve!HuntCache();
         CacheManager cacheManager = new ShiroCacheManager(cache);        
         _securityManager = new DefaultSecurityManager();
+        DefaultSessionManager sm = cast(DefaultSessionManager)_securityManager.getSessionManager();
+
+        if(sm !is null) {
+            sm.setGlobalSessionTimeout(_tokenExpiration*1000);
+            version(HUNT_AUTH_DEBUG) {
+                sm.setGlobalSessionTimeout(20*1000);
+            }
+        }
 
         SecurityUtils.setSecurityManager(_name, _securityManager);
         _securityManager.setRealms(_realms);

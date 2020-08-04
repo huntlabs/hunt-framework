@@ -264,4 +264,8 @@ class Auth {
         return _isLogout;
     }
 
+    void touchSession() {
+        _user.touchSession();
+    }
+
 }

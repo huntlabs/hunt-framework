@@ -53,6 +53,8 @@ class ApplicationConfig {
 
         // the max inactive interval. The time unit is second.
         int tokenExpiration = DEFAULT_TOKEN_EXPIRATION*24*60*60; 
+        
+        int shiroTokenExpiration = 30*1000;
     }
 
     /** Config for static files */

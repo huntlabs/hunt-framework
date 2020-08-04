@@ -94,7 +94,7 @@ class Identity {
     void authenticate(string username, string password, bool remember = true, 
             string tokenName = DEFAULT_AUTH_TOKEN_NAME) {
         Subject _subject = subject();
-        version(HUNT_SHIRO_DEBUG) { 
+        version(HUNT_AUTH_DEBUG) { 
             tracef("Checking the status at first: %s", _subject.isAuthenticated());
         }
 
@@ -167,6 +167,13 @@ class Identity {
 
     bool login(AuthenticationToken token) {
         Subject sj = subject();
+        version(HUNT_AUTH_DEBUG) { 
+            tracef("Checking the status at first: %s", _subject.isAuthenticated());
+        }
+
+        if (sj.isAuthenticated()) {
+            sj.logout();
+        }        
         sj.logout();
 
         if(token is null) {
@@ -218,6 +225,20 @@ class Identity {
         }
 
         return true;
+    }
+
+    void touchSession() {
+        Session session = subject().getSession(false);
+        if (session !is null) {
+            try {
+                session.touch();
+            } catch (Throwable t) {
+                error("session.touch() method invocation has failed.  Unable to update " ~
+                        "the corresponding session's last access time based on the incoming request.");
+                error(t.msg);
+                version(HUNT_AUTH_DEBUG) warning(t);
+            }
+        }
     }
 
     void logout() {

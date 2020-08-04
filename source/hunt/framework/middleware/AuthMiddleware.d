@@ -63,6 +63,8 @@ class AuthMiddleware : AbstractMiddleware {
             return onRejected(request);
         }
 
+        // FIXME: Needing refactor or cleanup -@zhangxueping at 2020-08-04T18:03:55+08:00
+        // More tests are needed
         // Identity user = auth.user();
         // try {
         //     if(user.isAuthenticated()) {
@@ -77,7 +79,7 @@ class AuthMiddleware : AbstractMiddleware {
         //     version(HUNT_DEBUG) warning(ex);
         // }
 
-        Identity user = auth.signIn();
+        user = auth.signIn();
         if(user.isAuthenticated()) {
             version(HUNT_DEBUG) {
                 string fullName = user.fullName();

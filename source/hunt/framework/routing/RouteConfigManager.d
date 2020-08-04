@@ -134,8 +134,10 @@ class RouteConfigManager {
 
     RouteGroup group(string name = RouteGroup.DEFAULT) {
         auto item = _allRouteGroups.find!(g => g.name == name).takeOne;
-        if (item.empty)
+        if (item.empty) {
+            errorf("Can't find the route group: %s", name);
             return null;
+        }
         return item.front;
     }
 

@@ -486,6 +486,7 @@ abstract class Controller
             if(authScheme != AuthenticationScheme.None) {
                 string authToken = auth.token();
                 tokenCookie = new Cookie(tokenCookieName, authToken, tokenExpiration);
+                auth.touchSession();
             } 
 
         } else if(auth.isLogout()) {
@@ -500,6 +501,7 @@ abstract class Controller
                 warning("The token is empty!");
             } else {
                 tokenCookie = new Cookie(tokenCookieName, authToken, tokenExpiration);
+                auth.touchSession();
             }
         }
 
