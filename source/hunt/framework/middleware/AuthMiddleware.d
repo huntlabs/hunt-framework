@@ -76,7 +76,6 @@ class AuthMiddleware : AbstractMiddleware {
         //     warning(ex.msg);
         //     version(HUNT_DEBUG) warning(ex);
         // }
-        
 
         Identity user = auth.signIn();
         if(user.isAuthenticated()) {

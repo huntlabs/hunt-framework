@@ -49,24 +49,14 @@ class Auth {
     private bool _isTokenRefreshed = false;
     private bool _isLogout = false;
     private AuthState _state = AuthState.Auto;
-    // private string _tokenCookieName = JWT_COOKIE_NAME;  
-    // private AuthenticationScheme _scheme = AuthenticationScheme.None;
     private string _guardName = DEFAULT_GURAD_NAME;
-    // private AuthOptions _options;
     private Guard _guard;
 
     private Request _request;
     
-    // this(Request request) {
-    //     this(request, new AuthOptions());
-    // }
-
     this(Request request) {
         _request = request;
-        // _options = options;
         _guardName = request.guardName();
-        // _tokenCookieName = options.tokenCookieName;
-        // _scheme = options.scheme;
         AuthService authService = serviceContainer().resolve!AuthService();
         
         _guard = authService.guard(_guardName);
@@ -206,7 +196,7 @@ class Auth {
             _state = AuthState.Token;
         }
         
-        version(HUNT_AUTH_DEBUG) infof("guard: %s, type: %s", _guard.name, typeid(_guard));
+        version(HUNT_DEBUG) infof("guard: %s, type: %s", _guard.name, typeid(_guard));
 
         AuthenticationToken token = _guard.getToken(_request);
         _user.login(token);

@@ -34,7 +34,7 @@ class HuntShiroCache : ShiroCache!(Object, AuthorizationInfo) {
     }
 
     AuthorizationInfo get(Object key) {
-        version(HUNT_DEBUG) tracef("%s, hash: %d", key.toString, key.toHash());
+        version(HUNT_AUTH_DEBUG) tracef("%s, hash: %d", key.toString, key.toHash());
         string k = key.toHash().to!string(); // key.toString();
         if(!_cache.hasKey(k)) {
             return null;
@@ -107,7 +107,6 @@ class HuntShiroCache : ShiroCache!(Object, AuthorizationInfo) {
 
         // AuthorizationInfo value = _cache.get(k);
         _cache.remove(k);
-        implementationMissing(false);
         return null;
     }
 

@@ -166,17 +166,18 @@ class Identity {
     }
 
     bool login(AuthenticationToken token) {
+        Subject sj = subject();
+        sj.logout();
+
         if(token is null) {
             warning("The token is null");
             return false;
         }
 
-        Subject sj = subject();
 
         try {
             // FIXME: Needing refactor or cleanup -@zhangxueping at 2020-08-01T16:13:55+08:00
             // Session with id [b82d265a-ec96-406b-854c-0a846e690aff] has expired
-            sj.logout();
             sj.login(token);
         } catch (AuthenticationException e) {
             version(HUNT_DEBUG) warning(e.msg);
@@ -204,10 +205,16 @@ class Identity {
     bool isPermitted(string[] permissions...) {
         
         // Try to convert all the custom permissions to shiro's ones
-        string[] shiroPermissions = permissions.map!(p => p.strip().toShiroPermissions()).array;
-        bool[] resultSet = subject().isPermitted(shiroPermissions);
-        foreach(bool r; resultSet ) {
-            if(!r) return false;
+        try {
+            string[] shiroPermissions = permissions.map!(p => p.strip().toShiroPermissions()).array;
+            bool[] resultSet = subject().isPermitted(shiroPermissions);
+            foreach(bool r; resultSet ) {
+                if(!r) return false;
+            }
+        } catch(Exception ex) {
+            warning(ex.msg);
+            version(HUNT_DEBUG) warning(ex);
+            return false;
         }
 
         return true;
