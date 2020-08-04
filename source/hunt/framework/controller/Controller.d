@@ -293,8 +293,8 @@ abstract class Controller
     }
 
     // All the middlewares defined this Controller's action
-    protected bool isSkippedMiddlewareInControllerAction(string fullName) {
-        bool r = _skippedMiddlewares.canFind!(m => m.fullName == fullName);
+    protected bool isSkippedMiddlewareInControllerAction(string actionName, string middlewareName) {
+        bool r = _skippedMiddlewares.canFind!(m => m.fullName == middlewareName && m.action == actionName);
         return r;
     }
 
@@ -343,7 +343,7 @@ abstract class Controller
             string name = m.name();
             version (HUNT_DEBUG) logDebugf("The %s is processing ...", name);
 
-            if(isSkippedMiddlewareInControllerAction(name)) {
+            if(isSkippedMiddlewareInControllerAction(actionName, name)) {
                 version (HUNT_DEBUG) infof("A middleware [%s] is skipped ...", name);
                 return null;
             }
@@ -369,7 +369,7 @@ abstract class Controller
         foreach (m; middlewares) {
             string name = m.name();
             version (HUNT_DEBUG) logDebugf("The %s is processing ...", name);
-            if(isSkippedMiddlewareInControllerAction(name)) {
+            if(isSkippedMiddlewareInControllerAction(actionName, name)) {
                 version (HUNT_DEBUG) infof("A middleware [%s] is skipped ...", name);
                 return null;
             }
