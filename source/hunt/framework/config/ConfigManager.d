@@ -59,7 +59,7 @@ class ConfigManager {
         string defaultConfigFile = baseName ~ DEFAULT_CONFIG_EXT;
         string fileName = defaultConfigFile;
 
-        if(isEnvironmentEnabled && !_environment.isProduction()) {
+        if(isEnvironmentEnabled) {
             string env = _environment.name();
             if (!env.empty) {
                 fileName = baseName ~ "." ~ env ~ DEFAULT_CONFIG_EXT;
