@@ -498,7 +498,7 @@ abstract class Controller
             int tokenExpiration = appConfig.auth.tokenExpiration;
             string authToken = auth.token();
             if(authToken.empty()) {
-                warning("The token is empty!");
+                version(HUNT_AUTH_DEBUG) warning("The auth token is empty!");
             } else {
                 tokenCookie = new Cookie(tokenCookieName, authToken, tokenExpiration);
                 auth.touchSession();

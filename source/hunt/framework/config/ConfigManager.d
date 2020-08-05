@@ -83,12 +83,13 @@ class ConfigManager {
             defaultBuilder = new ConfigBuilder(fullName, section);
             currentConfig = defaultBuilder.build!(T)();
         } else {
-            warningf("The configure file does NOT exist (Use the default instead): %s",
-                    fullName);
+            version(HUNT_DEBUG) {
+                warningf("The configure file does NOT exist (Use the default instead): %s", fullName);
+            }
             fileName = defaultConfigFile;
             fullName = buildPath(APP_PATH, _basePath, fileName);
             if (exists(fullName)) {
-                infof("Loading config from: %s", fullName);
+                version(HUNT_DEBUG) infof("Loading config from: %s", fullName);
                 defaultBuilder = new ConfigBuilder(fullName, section);
                 currentConfig = defaultBuilder.build!(T)();
             } else {

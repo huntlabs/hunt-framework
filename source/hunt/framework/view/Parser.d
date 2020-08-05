@@ -154,7 +154,6 @@ struct Parser(Lexer)
         }
 
         // Prevent recursive imports
-        _parsedFiles[path] = null;
         auto str = cast(string)read(path);
         _parsedFiles[path] = parseTree(str, path,dirPath);
 

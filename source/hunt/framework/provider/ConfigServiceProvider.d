@@ -111,9 +111,6 @@ class ConfigServiceProvider : ServiceProvider {
             string roleConfigFile = buildPath(APP_PATH, DEFAULT_CONFIG_PATH, DEFAULT_ROLES_CONFIG);
             AuthUserConfig config = AuthUserConfig.load(userConfigFile, roleConfigFile);
 
-            trace(config.users);
-            trace(config.roles);
-
             return config;
         }).singleInstance();
     }
