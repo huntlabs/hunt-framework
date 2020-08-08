@@ -73,11 +73,9 @@ abstract class Controller
 {
     private Request _request;
     private Response _response;
-    // private string _tokenCookieName = JWT_COOKIE_NAME;  
 
     private MiddlewareInfo[] _allowedMiddlewares;
     private MiddlewareInfo[] _skippedMiddlewares;
-    // private AuthOptions _authOptions;
 
     protected
     {
@@ -129,13 +127,6 @@ abstract class Controller
         routingContext().response = r.httpResponse;
     }
 
-    // AuthOptions authOptions() {
-    //     return _authOptions;
-    // }
-
-    // void authOptions(AuthOptions value) {
-    //     _authOptions = value; 
-    // } 
 
     /**
      * Get the currently authenticated user.

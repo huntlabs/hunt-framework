@@ -201,6 +201,8 @@ class RouteConfigManager {
             RouteGroup defaultGroup = new RouteGroup();
             defaultGroup.name = RouteGroup.DEFAULT;
             defaultGroup.type = RouteGroup.DEFAULT;
+            defaultGroup.value = RouteGroup.DEFAULT;
+            defaultGroup.appendRoutes(routes);
 
             _allRouteGroups ~= defaultGroup;
         }
