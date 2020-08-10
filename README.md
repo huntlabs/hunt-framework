@@ -6,8 +6,8 @@
 
 
 ## Getting Started
-- [Installation](installation.md)
-- [Server Configuration](configuration.md)
+- [Installation](https://github.com/huntlabs/hunt-framework-docs/blob/master/installation.md)
+- [Server Configuration](https://github.com/huntlabs/hunt-framework-docs/blob/master/configuration.md)
 
 ### Create a project
 ```bash
@@ -54,37 +54,6 @@ class IndexController : Controller
 ```
 
 For more, see [hunt-skeleton](https://github.com/huntlabs/hunt-skeleton) or [hunt-examples](https://github.com/huntlabs/hunt-examples).
-
-## Components
-
-### Basics
-- [Routing](routing.md)
-- [Middleware](middleware.md)
-- [Controller](controllers.md)
-- [Request](requests.md)
-- [Response](responses.md)
-- [Session](session.md)
-- [Validation](validation.md)
-- [Logging](logging.md)
-
-### Security
-- [Authorization](authorization.md)
-
-### Database
-- [Database ORM](entity.md)
-- [Redis](redis.md)
-- [Pagination](pagination.md)
-
-### Frontend
-- [View Templates](views.md)
-- [Localization](localization.md)
-
-### Digging Deeper
-- [HTTP Client](http-client.md)
-- [Cache](cache.md)
-- [Message Queue](queues.md)
-- [Scheduling](scheduling.md)
-
 
 ## Resources
 - [Documentation](https://github.com/huntlabs/hunt-framework-docs)
