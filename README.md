@@ -6,8 +6,8 @@
 
 
 ## Getting Started
-- [Installation](installation.md)
-- [Server Configuration](configuration.md)
+- [Installation](https://github.com/huntlabs/hunt-framework-docs/blob/master/installation.md)
+- [Server Configuration](https://github.com/huntlabs/hunt-framework-docs/blob/master/configuration.md)
 
 ### Create a project
 ```bash
@@ -58,32 +58,32 @@ For more, see [hunt-skeleton](https://github.com/huntlabs/hunt-skeleton) or [hun
 ## Components
 
 ### Basics
-- [Routing](routing.md)
-- [Middleware](middleware.md)
-- [Controller](controllers.md)
-- [Request](requests.md)
-- [Response](responses.md)
-- [Session](session.md)
-- [Validation](validation.md)
-- [Logging](logging.md)
+- [Routing](https://github.com/huntlabs/hunt-framework-docs/blob/master/routing.md)
+- [Middleware](https://github.com/huntlabs/hunt-framework-docs/blob/master/middleware.md)
+- [Controller](https://github.com/huntlabs/hunt-framework-docs/blob/master/controllers.md)
+- [Request](https://github.com/huntlabs/hunt-framework-docs/blob/master/requests.md)
+- [Response](https://github.com/huntlabs/hunt-framework-docs/blob/master/responses.md)
+- [Session](https://github.com/huntlabs/hunt-framework-docs/blob/master/session.md)
+- [Validation](https://github.com/huntlabs/hunt-framework-docs/blob/master/validation.md)
+- [Logging](https://github.com/huntlabs/hunt-framework-docs/blob/master/logging.md)
 
 ### Security
-- [Authorization](authorization.md)
+- [Authorization](https://github.com/huntlabs/hunt-framework-docs/blob/master/authorization.md)
 
 ### Database
-- [Database ORM](entity.md)
-- [Redis](redis.md)
-- [Pagination](pagination.md)
+- [Database ORM](https://github.com/huntlabs/hunt-framework-docs/blob/master/entity.md)
+- [Redis](https://github.com/huntlabs/hunt-framework-docs/blob/master/redis.md)
+- [Pagination](https://github.com/huntlabs/hunt-framework-docs/blob/master/pagination.md)
 
 ### Frontend
-- [View Templates](views.md)
-- [Localization](localization.md)
+- [View Templates](https://github.com/huntlabs/hunt-framework-docs/blob/master/views.md)
+- [Localization](https://github.com/huntlabs/hunt-framework-docs/blob/master/localization.md)
 
 ### Digging Deeper
-- [HTTP Client](http-client.md)
-- [Cache](cache.md)
-- [Message Queue](queues.md)
-- [Scheduling](scheduling.md)
+- [HTTP Client](https://github.com/huntlabs/hunt-framework-docs/blob/master/http-client.md)
+- [Cache](https://github.com/huntlabs/hunt-framework-docs/blob/master/cache.md)
+- [Message Queue](https://github.com/huntlabs/hunt-framework-docs/blob/master/queues.md)
+- [Scheduling](https://github.com/huntlabs/hunt-framework-docs/blob/master/scheduling.md)
 
 
 ## Resources
