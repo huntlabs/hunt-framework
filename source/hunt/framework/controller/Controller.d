@@ -48,6 +48,7 @@ import std.algorithm;
 import std.exception;
 import std.string;
 import std.traits;
+import std.variant;
 
 struct Action {
 }
@@ -102,11 +103,18 @@ abstract class Controller
     protected Request createRequest(bool isRestful = false) {
         if(_request is null) {
             RoutingContext context = routingContext();
+
+            Variant itemAtt = context.getAttribute(RouterContex.stringof);
+            RouterContex routeContex;
+            if(itemAtt.hasValue()) {
+                routeContex = cast(RouterContex)itemAtt.get!(Object);
+            }
+
             HttpConnection httpConnection = context.httpConnection();
 
             _request = new Request(context.getRequest(), 
                                     httpConnection.getRemoteAddress(),
-                                    context.groupName());
+                                    routeContex);
 
             _request.isRestful = isRestful;
         }

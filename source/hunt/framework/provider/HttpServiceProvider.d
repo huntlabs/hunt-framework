@@ -142,16 +142,22 @@ class HttpServiceProvider : ServiceProvider {
                         methodsString = methods.to!string();
                 }
 
+                RouterContex contex = new RouterContex();
+                contex.routeGroup = group;
+                contex.routeItem = item;
+
                 if (group is null || group.type == RouteGroup.DEFAULT) {
                     version(HUNT_DEBUG) infof("adding %s %s into DEFAULT", methodsString, item.path);
-                    hsb.addRoute([item.path], methods, handler);
+                    hsb.addRoute([item.path], methods, handler, null, 
+                        RouteGroupType.Default, RouterContex.stringof, contex);
                 } else if (group.type == RouteGroup.HOST || group.type == RouteGroup.DOMAIN) {
                     version(HUNT_DEBUG) infof("adding %s %s into DOMAIN", methodsString, item.path);
-                    hsb.addRoute([item.path], methods, handler,
-                            group.value, RouteGroupType.Host);
+                    hsb.addRoute([item.path], methods, handler, group.value, 
+                        RouteGroupType.Host, RouterContex.stringof, contex);
                 } else if (group.type == RouteGroup.PATH) {
                     version(HUNT_DEBUG) infof("adding %s %s into PATH", methodsString, item.path);
-                    hsb.addRoute([item.path], methods, handler, group.value, RouteGroupType.Path);
+                    hsb.addRoute([item.path], methods, handler, group.value, 
+                        RouteGroupType.Path, RouterContex.stringof, contex);
                 } else {
                     errorf("Unknown route group type: %s", group.type);
                 }

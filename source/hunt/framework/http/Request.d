@@ -53,26 +53,35 @@ class Request {
     private bool _isXFormUrlencoded = false;
     private UploadedFile[] _convertedAllFiles;
     private UploadedFile[][string] _convertedMultiFiles;
-    private RouteConfigManager _routeManager;
+    // private RouteConfigManager _routeManager;
     private string _routeGroup = DEFAULT_ROUTE_GROUP;
+    private string _actionId = "";
     private Auth _auth;
     private string _guardName;
     // private AuthOptions _authOptions;
     private MonoTime _monoCreated;
     private bool _isRestful = false;
+    // private ActionRouteItem _routeItem;
 
     HttpServerRequest _request;
     alias _request this;
 
-    this(HttpServerRequest request, Address remoteAddress, string routeGroup = DEFAULT_ROUTE_GROUP) {
+    this(HttpServerRequest request, Address remoteAddress, RouterContex routeContext=null) {
         _request = request;
+        if(routeContext !is null) {
+            // _routeItem = routeContext.routeItem;
+            ActionRouteItem routeItem = cast(ActionRouteItem)routeContext.routeItem;
+            if(routeItem !is null)
+                _actionId = routeItem.actionId;
+            _routeGroup = routeContext.routeGroup.name;
+            _guardName = routeContext.routeGroup.guardName;
+        }
         _monoCreated = MonoTime.currTime;
         _sessionStorage = serviceContainer().resolve!SessionStorage();
-        _routeManager = serviceContainer().resolve!RouteConfigManager();
-        _routeGroup = routeGroup;
-        _guardName = _routeManager.group(routeGroup).guardName();
+        // _routeManager = serviceContainer().resolve!RouteConfigManager();
+        // _routeGroup = routeGroup;
+        // _guardName = _routeManager.group(routeGroup).guardName();
         _remoteAddr = remoteAddress;
-        // _authOptions = new AuthOptions();
 
         .request(this); // Binding this request to the current thread.
     }
@@ -829,20 +838,29 @@ class Request {
 //     }
 
     string actionId() {
-        if(routeItem is null) {
-            routeItem = _routeManager.getRoute(_routeGroup, _request.getMethod(), _request.path());
-        }
+        return _actionId;
+        // if(routeItem is null) {
+        //     routeItem = _routeManager.getRoute(_routeGroup, _request.getMethod(), _request.path());
+        // }
         
-        if(routeItem is null) {
-            warningf("Can't find the action id for [group=%s, method=%s, path=%s]", 
-                _routeGroup, _request.getMethod(), _request.path());
-            return "";
-        } else {
-            return routeItem.actionId;
-        }
+        // if(routeItem is null) {
+        //     warningf("Can't find the action id for [group=%s, method=%s, path=%s]", 
+        //         _routeGroup, _request.getMethod(), _request.path());
+        //     return "";
+        // } else {
+        //     return routeItem.actionId;
+        // }
+        
+        // if(_routeItem is null) {
+        //     warningf("Can't find the action id for [group=%s, method=%s, path=%s]", 
+        //         _routeGroup, _request.getMethod(), _request.path());
+        //     return "";
+        // } else {
+        //     return _routeItem.actionId;
+        // }
     }
 
-    private ActionRouteItem routeItem;
+    // private ActionRouteItem routeItem;
 
     string routeGroup() {
         return _routeGroup;
