@@ -19,18 +19,18 @@ public
                 deserialize = deserializeUniNode;
 }
 
-private
-{
-    import std.array;
-    import std.algorithm : among, map, sort;
-    import std.conv : to;
-    import std.format: fmt = format;
-    import std.typecons : Tuple, tuple;
 
-    import hunt.framework.view.Lexer;
-    import hunt.framework.view.Exception : TemplateRenderException,
-                              assertTemplate = assertTemplateRender;
-}
+import std.array;
+import std.algorithm : among, map, sort;
+import std.conv : to;
+import std.format: fmt = format;
+import std.typecons : Tuple, tuple;
+
+import hunt.logging.ConsoleLogger;
+
+import hunt.framework.view.Lexer;
+import hunt.framework.view.Exception : TemplateRenderException,
+                            assertTemplate = assertTemplateRender;
 
 
 bool isNumericNode(ref UniNode n)

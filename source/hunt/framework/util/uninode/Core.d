@@ -21,12 +21,15 @@ private
     import std.variant : maxSize;
 }
 
+
+import hunt.logging.ConsoleLogger;
+
 /**
  * UniNode implementation
  */
 struct UniNodeImpl(This)
 {
-@safe:
+// @safe:
     private nothrow
     {
         alias Bytes = immutable(ubyte)[];
@@ -569,8 +572,23 @@ struct UniNodeImpl(This)
 
     bool opEquals(ref const This other) const @trusted
     {
-        if (_kind != other.kind)
+        version (HUNT_VIEW_DEBUG) {
+            tracef("this: %s, other: %s", _kind, other.kind);
+        }
+
+        if (_kind != other.kind) {
+            version(HUNT_DEBUG) {
+                warningf("Different type for comparation, this: %s, other: %s", toString(), other.toString());
+            }
+            
+            if(_kind == Kind.integer && other.kind == Kind.uinteger) {
+                return _int == other._int;
+            }
+            if(_kind == Kind.uinteger && other.kind == Kind.integer) {
+                return _uint == other._uint;
+            }
             return false;
+        }
 
         final switch (_kind) with (Kind)
         {
@@ -854,7 +872,7 @@ private:
  */
 struct UniNode
 {
-@safe:
+// @safe:
     UniNodeImpl!UniNode node;
     alias node this;
 
@@ -914,7 +932,9 @@ private:
 template TypeEnum(U)
 {
     import std.array : join;
-    mixin("enum TypeEnum : ubyte { " ~ [FieldNameTuple!U].join(", ") ~ " }");
+    enum msg = "enum TypeEnum : ubyte { " ~ [FieldNameTuple!U].join(", ") ~ " }";
+    // pragma(msg, msg);
+    mixin(msg);
 }
 
 /**

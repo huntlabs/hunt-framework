@@ -29,7 +29,7 @@ private
 
     import hunt.framework.Simplify;
     import hunt.framework.view.Util;
-    import hunt.logging;
+    import hunt.logging.ConsoleLogger;
 }
 
 
@@ -314,7 +314,7 @@ class Render : VisitorInterface
         UniNode calc(Operator op)()
         {
             tryAccept(node.lhs);
-            auto lhs = pop();
+            UniNode lhs = pop();
 
             tryAccept(node.rhs);
             auto rhs = pop();
@@ -911,7 +911,7 @@ class Render : VisitorInterface
 
     private UniNode visitFunc(string name, UniNode args)
     {
-        version(HUNT_VIEW_DEBUG) logDebug("---Func :",name," args: ",args);
+        version(HUNT_VIEW_DEBUG) info("---Func: ", name,", args: ",args);
 
         if(name == "trans")
         {

@@ -99,18 +99,3 @@ class View {
     }
 }
 
-// __gshared private Environment _envInstance;
-
-// View GetViewObject()
-// {
-//     import hunt.framework.config.ApplicationConfig;
-//     auto view = new View(new Environment);
-
-//     string path = buildNormalizedPath(APP_PATH, config().view.path);
-
-//     version (HUNT_DEBUG) {
-//         tracef("setting view path: %s", path);
-//     }
-//     view.setTemplatePath(path).setTemplateExt(config().view.ext);
-//     return view;
-// }
