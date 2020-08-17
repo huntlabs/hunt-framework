@@ -278,7 +278,8 @@ class RouteConfigManager {
             url = (_appConfig.https.enabled ? "https://" : "http://") ~ groupValue ~ url;
         } else {
             string baseUrl = strip(_appConfig.application.baseUrl, "", "/");
-            url = (groupValue.empty ? baseUrl: (baseUrl ~ "/" ~ groupValue)) ~ url;
+            string tempUrl = (groupValue.empty || groupValue == RouteGroup.DEFAULT) ? baseUrl : (baseUrl ~ "/" ~ groupValue);
+            url = tempUrl ~ url;
         }
 
         return url ~ (params.length > 0 ? ("?" ~ buildUriQueryString(params)) : "");
