@@ -11,33 +11,34 @@
 
 module hunt.framework.view.Environment;
 
+import hunt.framework.Simplify;
+import hunt.framework.view.Template;
+import hunt.framework.view.Render;
+import hunt.framework.view.Lexer;
+import hunt.framework.view.Parser;
+import hunt.framework.view.Uninode;
+import hunt.framework.view.ast;
+import hunt.framework.util.uninode.Serialization;
+
+import hunt.framework.http.Request;
+import hunt.framework.Init;
+
+import hunt.logging.ConsoleLogger;
+
+import std.meta;
+import std.traits;
 import std.string;
 import std.json;
 import std.file;
 import std.path;
 import std.stdio;
 
-import hunt.logging;
-
-import hunt.framework.Simplify;
-import hunt.framework.view.Template;
-
-private
-{
-    import std.meta;
-    import std.traits;
-
-    import hunt.framework.view.Render;
-    import hunt.framework.view.Lexer;
-    import hunt.framework.view.Parser;
-    import hunt.framework.view.Uninode;
-    import hunt.framework.view.ast;
-}
 
 class Environment
 {
     private 
     {
+        Request _request;
         string input_path;
         string output_path;
 
@@ -50,7 +51,6 @@ class Environment
         string _locale = "en-us";
     }
 
-public:
     this()
     {
         auto tpl_path = config().view.path;
@@ -69,6 +69,14 @@ public:
     {
         this.input_path = buildNormalizedPath(input_path) ~ dirSeparator;
         this.output_path = buildNormalizedPath(output_path) ~ dirSeparator;
+    }
+
+    Request request() {
+        return _request;
+    }
+
+    void request(Request value) {
+        _request = value;
     }
 
     void setRouteGroup(string rg)
@@ -99,6 +107,7 @@ public:
         auto render = new Render(tree);
         render.setRouteGroup(_routeGroup);
         render.setLocale(_locale);
+        render.request = _request;
         return render.render(jsonToUniNode(data));
     }
 
@@ -109,11 +118,11 @@ public:
 
     string render(string str,JSONValue data)
     {
-        import hunt.framework.util.uninode.Serialization;
         auto tree = _parser.parseTree(str,"",input_path);
         auto render = new Render(tree);
         render.setRouteGroup(_routeGroup);
         render.setLocale(_locale);
+        render.request = _request;
         return render.render(jsonToUniNode(data));
     } 
-};
+}

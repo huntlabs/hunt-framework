@@ -26,6 +26,7 @@ private
                               assertTemplate = assertTemplateRender;
 
     import hunt.framework.view.Uninode;
+    import hunt.framework.http.Request;
 
     import hunt.framework.Simplify;
     import hunt.framework.view.Util;
@@ -188,6 +189,7 @@ class Render : VisitorInterface
         TemplateNode[]  _extends;
 
         Context         _context;
+        Request _request;
 
         string          _renderedResult;
         bool            _isExtended;
@@ -201,20 +203,72 @@ class Render : VisitorInterface
         _root = root;
         _rootContext = new Context();
 
-        foreach(key, value; globalFunctions)
+        foreach(key, value; globalFunctions) {
             _rootContext.functions[key] = cast(Function)value;
-        foreach(key, value; globalFilters)
+        }
+
+        foreach(key, value; globalFilters) {
             _rootContext.functions[key] = cast(Function)value;
-        foreach(key, value; globalTests)
+        }
+
+        foreach(key, value; globalTests) {
             _rootContext.functions[key] = cast(Function)value;
+        }
+
+        _rootContext.functions["input"] = &input;
     }
 
-    public void setRouteGroup(string rg)
+    Request request() {
+        return _request;
+    }
+
+    void request(Request value) {
+        _request = value;
+    }
+
+    UniNode input(UniNode node) {
+        version(HUNT_VIEW_DEBUG) {
+            tracef("node: %s,  kind: %s", node.toString(), node.kind());
+        }
+
+        if(_request is null) {
+            warningf("The reques does NOT set for node: %s", node.toString());
+            return UniNode("");
+        }
+
+        UniNode varargs = node["varargs"];
+        if(varargs.length == 0) {
+            UniNode[string] data;
+
+            foreach(string key, string value; _request.input()) {
+                data[key] = UniNode(value);
+            }
+            return UniNode(data);
+        } else  {
+            UniNode[] argNodes = varargs.get!(UniNode[])();
+            UniNode firstNode = argNodes[0];
+            
+            if(firstNode.kind == UniNode.Kind.text) {
+                string key = firstNode.get!string();
+                string[string] allInputs = _request.input();
+                auto itemPtr = key in allInputs;
+                if(itemPtr is null) {
+                    return UniNode(fmt("No value found for %s", key));
+                } else {
+                    return UniNode(*itemPtr);
+                }
+            } else {
+                return UniNode("Only string can be accepted.");
+            }
+        }
+    }
+
+    void setRouteGroup(string rg)
     {
         _routeGroup = rg;
     }
 
-    public void setLocale(string locale)
+    void setLocale(string locale)
     {
         _locale = locale;
     }

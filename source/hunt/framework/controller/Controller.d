@@ -147,9 +147,13 @@ abstract class Controller
     {
         if (_view is null)
         {
+            Request req = this.request();
             _view = serviceContainer.resolve!View();
             _view.setRouteGroup(routingContext().groupName());
-            _view.setLocale(this.request.locale());
+            _view.setLocale(req.locale());
+            _view.env().request = req;
+            
+            // _view.assign("input", req.input());
         }
 
         return _view;

@@ -25,7 +25,7 @@ class ViewServiceProvider : ServiceProvider {
             string path = buildNormalizedPath(APP_PATH, _appConfig.view.path);
 
             version (HUNT_DEBUG) {
-                tracef("Setting view path: %s", path);
+                tracef("Setting the view path: %s", path);
             }
 
             view.setTemplatePath(path)

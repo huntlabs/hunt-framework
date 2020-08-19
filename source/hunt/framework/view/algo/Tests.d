@@ -11,11 +11,10 @@
 
 module hunt.framework.view.algo.Tests;
 
-private
-{
-    import hunt.framework.view.algo.Wrapper;
-    import hunt.framework.view.Uninode;
-}
+
+import hunt.framework.view.algo.Wrapper;
+import hunt.framework.view.Uninode;
+import hunt.logging.ConsoleLogger;
 
 
 Function[string] globalTests()
@@ -45,16 +44,14 @@ bool undefined(UniNode value)
 
 bool number(UniNode value)
 {
-    import hunt.logging;
-    logDebug(value," kind :",value.kind);
+    version(HUNT_VIEW_DEBUG) logDebug(value," kind :",value.kind);
     return value.isNumericNode;
 }
 
 
 bool list(UniNode value)
 {
-    import hunt.logging;
-    logDebug(value," kind :",value.kind);
+    version(HUNT_VIEW_DEBUG) logDebug(value," kind :",value.kind);
     return value.kind == UniNode.Kind.array;
 }
 
