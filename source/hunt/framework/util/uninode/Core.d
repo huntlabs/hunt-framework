@@ -29,7 +29,7 @@ import hunt.logging.ConsoleLogger;
  */
 struct UniNodeImpl(This)
 {
-// @safe:
+@safe:
     private nothrow
     {
         alias Bytes = immutable(ubyte)[];
@@ -872,7 +872,7 @@ private:
  */
 struct UniNode
 {
-// @safe:
+@safe:
     UniNodeImpl!UniNode node;
     alias node this;
 
