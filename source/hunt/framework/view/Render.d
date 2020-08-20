@@ -246,19 +246,27 @@ class Render : VisitorInterface
             return UniNode(data);
         } else  {
             UniNode[] argNodes = varargs.get!(UniNode[])();
-            UniNode firstNode = argNodes[0];
+            UniNode keyNode = argNodes[0];
+            UniNode defaultValueNode = UniNode("");
+
+            if(varargs.length >= 2) {
+                defaultValueNode = argNodes[1];
+            }
             
-            if(firstNode.kind == UniNode.Kind.text) {
-                string key = firstNode.get!string();
+            if(keyNode.kind == UniNode.Kind.text) {
+                string key = keyNode.get!string();
                 string[string] allInputs = _request.input();
                 auto itemPtr = key in allInputs;
                 if(itemPtr is null) {
-                    return UniNode(fmt("No value found for %s", key));
+                    warning(fmt("No value found for %s", key));
+                    return defaultValueNode;
                 } else {
                     return UniNode(*itemPtr);
                 }
             } else {
-                return UniNode("Only string can be accepted.");
+                // return UniNode("Only string can be accepted.");
+                warning("Only string can be accepted.");
+                return defaultValueNode;
             }
         }
     }
