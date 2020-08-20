@@ -9,6 +9,7 @@ import hunt.framework.auth.Identity;
 import hunt.framework.auth.JwtToken;
 import hunt.framework.auth.JwtUtil;
 import hunt.framework.auth.UserService;
+import hunt.framework.auth.UserDetails;
 import hunt.framework.http.Request;
 // import hunt.framework.Simplify;
 import hunt.framework.provider.ServiceProvider;
@@ -118,17 +119,16 @@ class Auth {
         _user.authenticate(name, password, remember);
 
         _remember = remember;
-        // AuthenticationScheme scheme = _guard.authScheme();
         _state = AuthState.SignIn;
 
         if(!_user.isAuthenticated()) 
             return _user;
 
         if(scheme == AuthenticationScheme.Bearer) {
-            // AuthService authService = serviceContainer().resolve!AuthService();
-            // Guard guard = authService.guard(_options.guardName);
-            UserService userService = _guard.userService();
-            string salt = userService.getSalt(name, password);
+            UserDetails userDetails = _user.userDetails();
+            string salt = userDetails.salt;
+            // UserService userService = _guard.userService();
+            // string salt = userService.getSalt(name, password);
             
             uint exp = _guard.tokenExpiration; // config().auth.tokenExpiration;
 

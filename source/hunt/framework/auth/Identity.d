@@ -35,6 +35,11 @@ class Identity {
         return _subject;
     }
 
+    UserDetails userDetails() {
+        UserDetails userDetails = cast(UserDetails)subject().getPrincipal();
+        return userDetails;
+    }
+
     ulong id() {
         UserDetails userDetails = cast(UserDetails)subject().getPrincipal();
         if(userDetails !is null) {
@@ -137,7 +142,6 @@ class Identity {
             warningf("Unknown AuthenticationScheme: %s", scheme);
         }
     }
-
 
     private void basicLogin(string tokenString) {
         ubyte[] decoded = Base64.decode(tokenString);
