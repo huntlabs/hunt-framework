@@ -106,7 +106,7 @@ class Request {
         } else {
             checkUploadedFiles();
 
-            if (_convertedMultiFiles !is null && _convertedMultiFiles.get(key, null) is null) {
+            if (_convertedMultiFiles is null || _convertedMultiFiles.get(key, null) is null) {
                 return false;
             }
             return true;
