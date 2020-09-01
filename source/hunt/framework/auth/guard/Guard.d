@@ -88,9 +88,6 @@ abstract class Guard {
 
         if(sm !is null) {
             sm.setGlobalSessionTimeout(_tokenExpiration*1000);
-            version(HUNT_AUTH_DEBUG) {
-                sm.setGlobalSessionTimeout(20*1000);
-            }
         }
 
         SecurityUtils.setSecurityManager(_name, _securityManager);

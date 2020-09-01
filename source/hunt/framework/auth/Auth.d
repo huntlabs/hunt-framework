@@ -107,7 +107,6 @@ class Auth {
     }
 
     Identity user() {
-        // autoDetect();
         return _user;
     }
 

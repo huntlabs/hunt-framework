@@ -245,6 +245,9 @@ class Identity {
         }
     }
 
+    /**
+     * It should be called from the Auth
+     */
     void logout() {
         subject().logout();
     }

@@ -135,6 +135,12 @@ abstract class Controller
         routingContext().response = r.httpResponse;
     }
 
+    /**
+     * Handle the auth status
+     */
+    Auth auth() {
+        return this.request().auth();
+    }
 
     /**
      * Get the currently authenticated user.
@@ -476,8 +482,8 @@ abstract class Controller
         AuthenticationScheme authScheme = auth.scheme();
         string tokenCookieName = auth.tokenCookieName;
         version(HUNT_AUTH_DEBUG) {
-            warningf("tokenCookieName: %s, authScheme: %s, isAuthenticated: %s", 
-                tokenCookieName, authScheme, auth.user().isAuthenticated);
+            warningf("tokenCookieName: %s, authScheme: %s, isAuthenticated: %s, isLogout: %s", 
+                tokenCookieName, authScheme, auth.user().isAuthenticated, auth.isLogout());
         }
 
         Cookie tokenCookie;
