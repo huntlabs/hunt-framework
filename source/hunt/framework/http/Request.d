@@ -123,7 +123,7 @@ class Request {
         foreach (Part part; _request.getParts()) {
             MultipartForm multipart = cast(MultipartForm) part;
 
-            version (HUNT_DEBUG) {
+            version (HUNT_HTTP_DEBUG) {
                 tracef("File: key=%s, fileName=%s, actualFile=%s, ContentType=%s, content=%s",
                         multipart.getName(), multipart.getSubmittedFileName(),
                         multipart.getFile(), multipart.getContentType(),
@@ -1213,6 +1213,7 @@ class Request {
      * @return array
      */
     UploadedFile[] allFiles() {
+        checkUploadedFiles();
         return _convertedAllFiles;
     }
 

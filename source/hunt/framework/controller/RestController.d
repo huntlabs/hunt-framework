@@ -13,4 +13,8 @@ class RestController : Controller {
         return createRequest(true);
     }
 
+    override protected void handleAuthResponse() {
+        // do nothing
+    }
+
 }

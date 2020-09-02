@@ -468,11 +468,27 @@ abstract class Controller
             resp.header(HttpHeader.CONTENT_TYPE, MimeType.TEXT_HTML_VALUE);
         }
 
+        handleCors();
+
         handleAuthResponse();
 
     }
 
-    private void handleAuthResponse() {
+    protected void handleCors() {
+        /**
+        CORS support
+        http://www.cnblogs.com/feihong84/p/5678895.html
+        https://stackoverflow.com/questions/10093053/add-header-in-ajax-request-with-jquery
+        */
+        ApplicationConfig.HttpConf httpConf = config().http;
+        if(httpConf.enableCors) {
+            response.setHeader("Access-Control-Allow-Origin", httpConf.allowOrigin);
+            response.setHeader("Access-Control-Allow-Methods", httpConf.allowMethods);
+            response.setHeader("Access-Control-Allow-Headers", httpConf.allowHeaders);
+        }        
+    }
+
+    protected void handleAuthResponse() {
         Request req = request();
 
         Auth auth = req.auth();
