@@ -41,9 +41,14 @@ class Identity {
     }
 
     ulong id() {
-        UserDetails userDetails = cast(UserDetails)subject().getPrincipal();
-        if(userDetails !is null) {
-            return userDetails.id;
+        try {
+            UserDetails userDetails = cast(UserDetails)subject().getPrincipal();
+            if(userDetails !is null) {
+                return userDetails.id;
+            }
+        } catch(Exception ex) {
+            warning(ex.msg);
+            version(HUNT_AUTH_DEBUG) warning(ex);
         }
         return 0;       
     }
@@ -202,7 +207,13 @@ class Identity {
     }
 
     bool isAuthenticated() {
-        return subject().isAuthenticated();
+        try {
+            return subject().isAuthenticated();
+        } catch(Exception ex) {
+            warning(ex.msg);
+            version(HUNT_DEBUG) warning(ex);
+            return false;
+        }
     }
 
     bool hasRole(string role) {
