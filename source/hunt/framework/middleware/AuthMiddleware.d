@@ -2,6 +2,7 @@ module hunt.framework.middleware.AuthMiddleware;
 
 import hunt.framework.middleware.MiddlewareInterface;
 
+import hunt.framework.application.Application;
 import hunt.framework.auth.Auth;
 import hunt.framework.auth.AuthOptions;
 import hunt.framework.auth.Claim;

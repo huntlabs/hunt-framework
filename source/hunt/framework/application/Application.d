@@ -460,14 +460,12 @@ final class Application {
         return serviceContainer.resolve!(TaskWorker);
     }
 
+    deprecated("Using defaultEntityManager instead.")
     EntityManager entityManager() {
-        if(_entityManager is null) {
-            _entityManager = serviceContainer.resolve!(EntityManagerFactory).currentEntityManager();
-            resouceManager.push(new EntityCloser(_entityManager));
-        }
+        EntityManager _entityManager = serviceContainer.resolve!(EntityManagerFactory).currentEntityManager();
+        resouceManager.push(new EntityCloser(_entityManager));
         return _entityManager;
     }
-    private EntityManager _entityManager;
 
     BreadcrumbsManager breadcrumbs() {
         if(_breadcrumbs is null) {

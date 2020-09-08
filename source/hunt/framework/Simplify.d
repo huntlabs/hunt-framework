@@ -11,7 +11,7 @@
 
 module hunt.framework.Simplify;
 
-public import hunt.framework.application.Application : app;
+// public import hunt.framework.application.Application : app;
 public import hunt.framework.config.ApplicationConfig;
 public import hunt.framework.config.ConfigManager;
 public import hunt.framework.Init;
@@ -72,23 +72,29 @@ public import hunt.entity.EntityManager;
 
 import hunt.entity.DefaultEntityManagerFactory;
 import hunt.entity.EntityManagerFactory;
+import hunt.framework.application.closer.EntityCloser;
+import hunt.util.Common;
 
 //global entity manager
 private EntityManager _em;
 EntityManager defaultEntityManager() {
     if (_em is null) {
         _em = serviceContainer.resolve!(EntityManagerFactory).currentEntityManager();
+        // resouceManager.push(new EntityCloser(_em));
+        resouceManager.push(new class Closeable {
+            void close() {
+                closeDefaultEntityManager();
+            }
+        });
     }
     return _em;
 }
 
 //close global entity manager
 void closeDefaultEntityManager() {
-    version (WITH_HUNT_ENTITY) {
-        if (_em !is null) {
-            _em.close();
-            _em = null;
-        }
+    if (_em !is null) {
+        _em.close();
+        _em = null;
     }
 }
 
@@ -199,6 +205,7 @@ bool inWorkerThread() {
         return true;
 
     import core.thread;
+    
     ParallelismThread th = cast(ParallelismThread)Thread.getThis();
     return th !is null;
 }
