@@ -25,7 +25,7 @@ class JwtUtil {
             return true;
         } catch (Exception e) {
             warning(e.msg);
-            version(HUNT_DEBUG) warning(e);
+            version(HUNT_AUTH_DEBUG) warning(e);
             return false;
         }
     }
