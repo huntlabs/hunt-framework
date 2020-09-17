@@ -15,6 +15,7 @@ import hunt.framework.application.Application;
 import hunt.framework.auth;
 import hunt.framework.breadcrumb.BreadcrumbsManager;
 import hunt.framework.controller.RestController;
+import hunt.framework.middleware.AuthMiddleware;
 import hunt.framework.middleware.Middleware;
 import hunt.framework.middleware.MiddlewareInfo;
 import hunt.framework.middleware.MiddlewareInterface;
@@ -218,7 +219,7 @@ abstract class Controller
         TypeInfo_Class[] routeMiddlewares;
         routeMiddlewares = routeManager().group(routeGroup).allowedMiddlewares();
         foreach(TypeInfo_Class info; routeMiddlewares) {
-            version(HUNT_AUTH_DEBUG) warningf("routeGroup: %s, fullName: %s", routeGroup, info.name);
+            version(HUNT_AUTH_DEBUG) tracef("routeGroup: %s, fullName: %s", routeGroup, info.name);
 
             MiddlewareInterface middleware = cast(MiddlewareInterface)info.create();
             if(middleware is null) {
@@ -313,7 +314,7 @@ abstract class Controller
         return this.middlewares;
     }
 
-    protected final Response doMiddleware(string actionName) {
+    protected final Response handleMiddlewares(string actionName) {
         Request req = this.request();
         string actionId = req.actionId();
         string routeGroup = req.routeGroup();
@@ -389,8 +390,9 @@ abstract class Controller
             }
 
             auto response = m.onProcess(req, this.response);
-            if (response is null)
+            if (response is null) {
                 continue;
+            }
 
             version (HUNT_DEBUG) logDebugf("The access is blocked by %s.", name);
             return response;
@@ -469,9 +471,7 @@ abstract class Controller
         }
 
         handleCors();
-
         handleAuthResponse();
-
     }
 
     protected void handleCors() {
@@ -490,9 +490,14 @@ abstract class Controller
 
     protected void handleAuthResponse() {
         Request req = request();
-
         Auth auth = req.auth();
-        if(!auth.isEnabled()) 
+
+        version(HUNT_AUTH_DEBUG) {
+            tracef("Path: %s, isAuthRequired: %s, isAuthEnabled: %s", 
+                req.path, req.isAuthRequired, auth.isEnabled());
+        }
+
+        if(!req.isAuthRequired || !auth.isEnabled()) 
             return;
 
         AuthenticationScheme authScheme = auth.scheme();
@@ -715,7 +720,7 @@ string __createCallActionMethod(T, string moduleName)()
                     str ~= indent(4) ~ "_currentActionName = \"" ~ currentMethod.mangleof ~ "\";";
 
                     // middleware
-                    str ~= `auto middleResponse = this.doMiddleware("`~ memberName ~ `");`;
+                    str ~= `auto middleResponse = this.handleMiddlewares("`~ memberName ~ `");`;
 
                     //before
                     str ~= q{

@@ -61,10 +61,12 @@ class Auth {
         AuthService authService = serviceContainer().resolve!AuthService();
         
         _guard = authService.guard(_guardName);
-        _user = new Identity(_guardName);
+        _user = new Identity(_guardName, isEnabled());
 
         version(HUNT_AUTH_DEBUG) {
-            warningf("path: %s, isAuthenticated: %s", request.path(), _user.isAuthenticated());
+            if(isEnabled()) {
+                warningf("path: %s, isAuthenticated: %s", request.path(), _user.isAuthenticated());
+            }
         }
     }
 
@@ -73,44 +75,50 @@ class Auth {
     }
 
     string tokenCookieName() {
-        return _guard.tokenCookieName();
+        return guard().tokenCookieName();
     }
 
-    void autoDetect() {
-        if(_state != AuthState.Auto || !isEnabled()) 
-            return;
+    // void autoDetect() {
+    //     if(_state != AuthState.Auto || !isEnabled()) 
+    //         return;
 
-        version(HUNT_DEBUG) {
-            infof("Detecting the authentication state from %s", tokenCookieName());
-        }
+    //     version(HUNT_DEBUG) {
+    //         infof("Detecting the authentication state from %s", tokenCookieName());
+    //     }
         
-        AuthenticationScheme scheme = _guard.authScheme();
-        if(scheme == AuthenticationScheme.None)
-            scheme = AuthenticationScheme.Bearer;
+    //     AuthenticationScheme scheme = guard().authScheme();
+    //     if(scheme == AuthenticationScheme.None)
+    //         scheme = AuthenticationScheme.Bearer;
 
-        // Detect the auth type automatically
-        if(scheme == AuthenticationScheme.Bearer) {
-            _token = _request.bearerToken();
-        } else if(scheme == AuthenticationScheme.Basic) {
-            _token = _request.basicToken();
-        }
+    //     // Detect the auth type automatically
+    //     if(scheme == AuthenticationScheme.Bearer) {
+    //         _token = _request.bearerToken();
+    //     } else if(scheme == AuthenticationScheme.Basic) {
+    //         _token = _request.basicToken();
+    //     }
 
-        if(_token.empty()) { // Detect the token from cookie
-            _token = request.cookie(tokenCookieName());
-        } 
+    //     if(_token.empty()) { // Detect the token from cookie
+    //         _token = request.cookie(tokenCookieName());
+    //     } 
 
-        if(!_token.empty()) {
-            _user.authenticate(_token, scheme);
-        }
+    //     if(!_token.empty()) {
+    //         _user.authenticate(_token, scheme);
+    //     }
 
-        _state = AuthState.Token;
-    }
+    //     _state = AuthState.Token;
+    // }
 
     Identity user() {
         return _user;
     }
 
     Guard guard() {
+        version(HUNT_DEBUG) {
+            if(!isEnabled()) {
+                string msg = format("No guard avaliable for %s", _guardName);
+                throw new AuthenticationException(msg);
+            }
+        }
         return _guard;
     }
 
@@ -126,10 +134,10 @@ class Auth {
         if(scheme == AuthenticationScheme.Bearer) {
             UserDetails userDetails = _user.userDetails();
             string salt = userDetails.salt;
-            // UserService userService = _guard.userService();
+            // UserService userService = guard().userService();
             // string salt = userService.getSalt(name, password);
             
-            uint exp = _guard.tokenExpiration; // config().auth.tokenExpiration;
+            uint exp = guard().tokenExpiration; // config().auth.tokenExpiration;
 
             JSONValue claims;
             claims["user_id"] = _user.id;
@@ -194,10 +202,12 @@ class Auth {
         scope(success) {
             _state = AuthState.Token;
         }
-        
-        version(HUNT_DEBUG) infof("guard: %s, type: %s", _guard.name, typeid(_guard));
 
-        AuthenticationToken token = _guard.getToken(_request);
+        Guard g = guard();
+        
+        version(HUNT_DEBUG) infof("guard: %s, type: %s", g.name, typeid(g));
+
+        AuthenticationToken token = g.getToken(_request);
         _user.login(token);
         return _user;
     }
@@ -248,7 +258,7 @@ class Auth {
     }
   
     AuthenticationScheme scheme() {
-        return _guard.authScheme();
+        return guard().authScheme();
     }
 
     bool canRememberMe() {

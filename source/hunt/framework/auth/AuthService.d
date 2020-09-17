@@ -19,7 +19,7 @@ class AuthService {
     Guard guard(string name) {
         auto itemPtr = name in _guards;
         if(itemPtr is null) {
-            version(HUNT_DEBUG) warning("No guard found: " ~ name);
+            warning("No guard found: " ~ name);
             return null;
         }
         return *itemPtr;

@@ -23,38 +23,49 @@ import std.variant;
 class Identity {
     private Subject _subject;
     private string _guardName;
+    private bool _isValid = false;
 
-    this(string guardName) {
+    this(string guardName, bool isValid) {
         _guardName = guardName;
+        _isValid = isValid;
+    }
+
+    bool isValid() nothrow {
+        return _isValid;
     }
 
     Subject subject() {
-        if(_subject is null) {
-            _subject = SecurityUtils.getSubject(_guardName);
-        }
-        return _subject;
-    }
-
-    UserDetails userDetails() {
-        UserDetails userDetails = cast(UserDetails)subject().getPrincipal();
-        return userDetails;
-    }
-
-    ulong id() {
-        try {
-            UserDetails userDetails = cast(UserDetails)subject().getPrincipal();
-            if(userDetails !is null) {
-                return userDetails.id;
+        if(_isValid) {
+            if(_subject is null) {
+                _subject = SecurityUtils.getSubject(_guardName);
             }
+            return _subject;
+        } else {
+            throw new AuthorizationException(getError());
+        }
+    }
+
+    UserDetails userDetails() nothrow {
+        UserDetails userDetails = null;
+        try {
+            userDetails = cast(UserDetails)subject().getPrincipal();
         } catch(Exception ex) {
             warning(ex.msg);
             version(HUNT_AUTH_DEBUG) warning(ex);
         }
+        return userDetails;
+    }
+
+    ulong id() nothrow {
+        UserDetails userDetails = userDetails();
+        if(userDetails !is null) {
+            return userDetails.id;
+        }
         return 0;       
     }
 
-    string name() {
-        UserDetails userDetails = cast(UserDetails)subject().getPrincipal();
+    string name() nothrow {
+        UserDetails userDetails = userDetails();
         if(userDetails !is null) {
             return userDetails.name;
         }
@@ -73,7 +84,7 @@ class Identity {
 
     Variant claim(string type) {
         Variant v = Variant(null);
-        UserDetails userDetails = cast(UserDetails)subject().getPrincipal();
+        UserDetails userDetails = userDetails();
         if(userDetails !is null) {
             v = userDetails.claim(type);
         }
@@ -93,7 +104,7 @@ class Identity {
     Claim[] claims() {
         Claim[] r;
         
-        UserDetails userDetails = cast(UserDetails)subject().getPrincipal();
+        UserDetails userDetails = userDetails();
         if(userDetails !is null) {
             r = userDetails.claims();
         }
@@ -206,7 +217,7 @@ class Identity {
         return sj.isAuthenticated();
     }
 
-    bool isAuthenticated() {
+    bool isAuthenticated() nothrow {
         try {
             return subject().isAuthenticated();
         } catch(Exception ex) {
@@ -216,15 +227,27 @@ class Identity {
         }
     }
 
-    bool hasRole(string role) {
-        return subject().hasRole(role);
+    bool hasRole(string role) nothrow {
+        try {
+            return subject().hasRole(role);
+        } catch(Exception ex) {
+            warning(ex.msg);
+            version(HUNT_DEBUG) warning(ex);
+            return false;
+        }
     }
     
-    bool hasAllRoles(string[] roles...) {
-        return subject().hasAllRoles(roles);
+    bool hasAllRoles(string[] roles...) nothrow {
+        try {
+            return subject().hasAllRoles(roles);
+        } catch(Exception ex) {
+            warning(ex.msg);
+            version(HUNT_DEBUG) warning(ex);
+            return false;
+        }
     }
 
-    bool isPermitted(string[] permissions...) {
+    bool isPermitted(string[] permissions...) nothrow {
         
         // Try to convert all the custom permissions to shiro's ones
         try {
@@ -242,25 +265,39 @@ class Identity {
         return true;
     }
 
-    void touchSession() {
-        Session session = subject().getSession(false);
-        if (session !is null) {
-            try {
-                session.touch();
-            } catch (Throwable t) {
-                error("session.touch() method invocation has failed.  Unable to update " ~
-                        "the corresponding session's last access time based on the incoming request.");
-                error(t.msg);
-                version(HUNT_AUTH_DEBUG) warning(t);
+    void touchSession() nothrow {
+        try {
+            Session session = subject().getSession(false);
+            if (session !is null) {
+                try {
+                    session.touch();
+                } catch (Throwable t) {
+                    error("session.touch() method invocation has failed.  Unable to update " ~
+                            "the corresponding session's last access time based on the incoming request.");
+                    error(t.msg);
+                    version(HUNT_AUTH_DEBUG) warning(t);
+                }
             }
+        } catch(Exception ex) {
+            warning(ex.msg);
+            version(HUNT_DEBUG) warning(ex);
         }
     }
 
     /**
      * It should be called from the Auth
      */
-    void logout() {
-        subject().logout();
+    void logout() nothrow {
+        try {
+            subject().logout();
+        } catch(Exception ex) {
+            warning(ex.msg);
+            version(HUNT_DEBUG) warning(ex);
+        }
+    }
+
+    private string getError() {
+        return format("This identity [%s] is invalid!", _guardName);
     }
 
     override string toString() {

@@ -59,6 +59,7 @@ class Request {
     private string _guardName;
     private MonoTime _monoCreated;
     private bool _isRestful = false;
+    private bool _isAuthRequired = false;
 
     HttpServerRequest _request;
     alias _request this;
@@ -92,6 +93,14 @@ class Request {
 
     void isRestful(bool value) {
         _isRestful = value;
+    }
+    
+    bool isAuthRequired() {
+        return _isAuthRequired;
+    }
+
+    void isAuthRequired(bool value) {
+        _isAuthRequired = value;
     }
 
     /**
