@@ -101,7 +101,12 @@ version(HUNT_TEST) {
             holdUpTime = Clock.currTime;
             releaseTime = holdUpTime;
             number = atomicOp!"+="(counter, 1);
-            path = request().path();
+            Request req = request();
+            if(req is null) {
+                warning("Called from a non-Controller thread.");
+            } else {
+                path = req.path();
+            }
         }
 
         override string toString() {
@@ -131,7 +136,12 @@ version(HUNT_TEST) {
 
         static void remove() {
             ThreadID tid = getTid();
-            string reqPath = request().path;
+            
+            string reqPath;
+            Request req = request();
+            if(req !is null)
+                reqPath = req.path();
+
             _mtx.lock();
             scope(exit) _mtx.unlock();
 
