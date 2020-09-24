@@ -182,19 +182,36 @@ final class Application {
             ServeCommand serveCommand = new ServeCommand();
             serveCommand.onInput((ServeSignature signature) {
                 version (HUNT_DEBUG) tracef(signature.to!string);
-                _environment.name = signature.environment;
-                _environment.configPath = signature.configPath;
 
-                 // signature.environment;
-                // manager.configFile = signature.configFile;
+                //
+                string configPath = signature.configPath;
+                if(!configPath.empty()) {
+                    _environment.configPath = signature.configPath;
+                }
 
+                //
+                string envName = signature.environment;
+
+                if(envName.empty()) {
+                    _environment.name = DEFAULT_RUNTIME_ENVIRONMENT;
+                } else {
+                    _environment.name = envName;
+                }
+
+                // loading config
                 _appConfig = serviceContainer().resolve!ApplicationConfig();
-                // ApplicationConfig appConfig = serviceContainer().resolve!(ApplicationConfig);
-                _appConfig.http.address = signature.host;
-                _appConfig.http.port = signature.port;
 
-                // 
-                // appConfig.application.environment = signature.environment;
+                //
+                string host = signature.host;
+                if(!host.empty()) {
+                    _appConfig.http.address = host;
+                }
+
+                //
+                ushort port = signature.port;
+                if(port > 0) {
+                    _appConfig.http.port = signature.port;
+                }
 
                 bootstrap();
             });

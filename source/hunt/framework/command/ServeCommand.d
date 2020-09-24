@@ -40,19 +40,21 @@ class ServeCommand : Command {
         setDescription("Begins serving the app over HTTP.");
 
         addOption(HostNameOption, "H", InputOption.VALUE_OPTIONAL,
-            "Set the hostname the server will run on.",
-            "0.0.0.0");
+            "Set the hostname the server will run on. (Using the setting in config file by default)"); 
+            // DEFAULT_HOST
+            // (Using the setting in config file by default)
 
         addOption(PortOption, "p", InputOption.VALUE_OPTIONAL,
-            "Set the port the server will run on.",
-            "8080");
+            "Set the port the server will run on. (Using the setting in config file by default)"); 
+            // (Using the setting in config file.)
 
         addOption(BindOption, "b", InputOption.VALUE_OPTIONAL,
-            "Convenience for setting hostname and port together.",
-            "0.0.0.0:8080");
+            "Convenience for setting hostname and port together."); 
+            // (Using the setting in config file.)
 
         addOption(EnvironmentOption, "e", InputOption.VALUE_OPTIONAL,
-            "Set the runtime environment.", DEFAULT_RUNTIME_ENVIRONMENT);
+            "Set the runtime environment."); 
+            // DEFAULT_RUNTIME_ENVIRONMENT
 
         addOption(ConfigPathOption, "c", InputOption.VALUE_OPTIONAL,
             "Set the location for config files",
@@ -79,6 +81,8 @@ class ServeCommand : Command {
             port = parts[1];
         }
 
+        if(port.empty()) port = "0";
+
         if(_inputHandler !is null) {
             ServeSignature signature = ServeSignature(hostname, port.to!ushort, 
                 configPath, envionment); // configFile, 
@@ -102,11 +106,11 @@ class ServeCommand : Command {
  * 
  */
 struct ServeSignature {
-    string host = "0.0.0.0";
-    ushort port = 8080;
+    string host = DEFAULT_HOST;
+    ushort port = DEFAULT_PORT;
     string configPath = DEFAULT_CONFIG_LACATION;
     // string configFile = DEFAULT_CONFIG_FILE;
-    string environment = DEFAULT_RUNTIME_ENVIRONMENT;
+    string environment; // = DEFAULT_RUNTIME_ENVIRONMENT;
 }
 
 alias CommandInputHandler = void delegate(ServeSignature signature);
