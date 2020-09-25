@@ -6,6 +6,7 @@ public import hunt.framework.provider.BreadcrumbServiceProvider;
 public import hunt.framework.provider.CacheServiceProvider;
 public import hunt.framework.provider.ConfigServiceProvider;
 public import hunt.framework.provider.DatabaseServiceProvider;
+public import hunt.framework.provider.GrpcServiceProvider;
 public import hunt.framework.provider.HttpServiceProvider;
 public import hunt.framework.provider.QueueServiceProvider;
 public import hunt.framework.provider.RedisServiceProvider;

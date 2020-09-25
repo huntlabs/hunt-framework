@@ -65,7 +65,6 @@ class ApplicationConfig {
         bool canList = true;
         int cacheTime = 30;
     }
-
     
     struct CacheConf {
         string adapter = "memory";
@@ -183,6 +182,11 @@ class ApplicationConfig {
         string driver = null;
     }
 
+    struct GrpcConf {
+        GrpcServerConf server;
+        GrpcClientConf[] clientChannels;
+    }
+
     struct UploadConf {
         string path = "/tmp";
         long maxSize = 4 * 1024 * 1024;
@@ -287,6 +291,7 @@ class ApplicationConfig {
     AmqpConf amqp;
     QueueConf queue;
     RedisConf redis;
+    GrpcConf grpc;
     LoggingConfig logging;
     UploadConf upload;
     CornConf cron;
@@ -318,6 +323,20 @@ class ApplicationConfig {
         application.langLocation = DEFAULT_LANGUAGE_PATH;
     }
 }
+
+struct GrpcServerConf {
+    bool enabled = false;
+    string host = "127.0.0.1";
+    ushort port = 50051;
+}
+
+struct GrpcClientConf {
+    string name="unnamed";
+    string host = "127.0.0.1";
+    ushort port = 50051;
+    uint timeout = 15000;
+}
+
 
 import core.sync.rwmutex;
 

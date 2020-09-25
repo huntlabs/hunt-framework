@@ -34,6 +34,8 @@ import hunt.console;
 import hunt.Functions;
 import hunt.logging;
 import hunt.redis;
+import grpc.GrpcServer;
+import grpc.GrpcClient;
 
 version (WITH_HUNT_TRACE) {
     import hunt.http.HttpConnection;
@@ -62,7 +64,7 @@ alias DefaultServiceProviders = AliasSeq!(UserServiceProvider, AuthServiceProvid
         ConfigServiceProvider, RedisServiceProvider,
         TranslationServiceProvider, CacheServiceProvider, SessionServiceProvider,
         DatabaseServiceProvider, QueueServiceProvider,
-        TaskServiceProvider, AmqpServiceProvider, HttpServiceProvider,
+        TaskServiceProvider, AmqpServiceProvider, HttpServiceProvider, GrpcServiceProvider,
         BreadcrumbServiceProvider, ViewServiceProvider);
 
 /**
@@ -77,6 +79,11 @@ final class Application {
     private HttpServer _server;
     private HttpServerOptions _serverOptions;
     private ApplicationConfig _appConfig;
+
+    private bool _isBooted = false;
+    private bool[TypeInfo] _customizedServiceProviders;
+    private SimpleEventHandler _launchedHandler;
+    private HostEnvironment _environment;
 
     // private WebSocketPolicy _webSocketPolicy;
     // private WebSocketHandler[string] webSocketHandlerMap;
@@ -141,18 +148,14 @@ final class Application {
         return itemPtr !is null;
     }
 
-    private bool _isBooted = false;
-    private bool[TypeInfo] _customizedServiceProviders;
-    private SimpleEventHandler _launchedHandler;
+    GrpcServer grpcServer() {
+        return serviceContainer().resolve!GrpcServer();
+    }
 
-    // private __gshared string _environment = DEFAULT_RUNTIME_ENVIRONMENT;
-    // private __gshared string _configPath = DEFAULT_CONFIG_LACATION;
-
-    // static string configPath() {
-    //     return _configPath;
-    // }
-
-    private HostEnvironment _environment;
+    Channel grpcChannel(string name) {
+        GrpcChannelService service = serviceContainer().resolve!GrpcChannelService();
+        return service.channel(name);
+    }
 
     HostEnvironment environment() {
         return _environment;
