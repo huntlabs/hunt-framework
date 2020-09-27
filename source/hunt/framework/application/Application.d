@@ -83,6 +83,7 @@ final class Application {
     private bool _isBooted = false;
     private bool[TypeInfo] _customizedServiceProviders;
     private SimpleEventHandler _launchedHandler;
+    private SimpleEventHandler _configuringHandler;
     private HostEnvironment _environment;
 
     // private WebSocketPolicy _webSocketPolicy;
@@ -148,20 +149,24 @@ final class Application {
         return itemPtr !is null;
     }
 
-    GrpcServer grpcServer() {
-        return serviceContainer().resolve!GrpcServer();
-    }
-
-    Channel grpcChannel(string name) {
-        GrpcChannelService service = serviceContainer().resolve!GrpcChannelService();
-        return service.channel(name);
+    GrpcService grpc() {
+        return serviceContainer().resolve!GrpcService();
     }
 
     HostEnvironment environment() {
         return _environment;
     }
 
-    Application onBooted(SimpleEventHandler handler) {
+    alias configuring = booting;
+    Application booting(SimpleEventHandler handler) {
+        _configuringHandler = handler;
+        return this;
+    }
+
+    deprecated("Using booted instead.")
+    alias onBooted = booted;
+
+    Application booted(SimpleEventHandler handler) {
         _launchedHandler = handler;
         return this;
     }
@@ -244,6 +249,10 @@ final class Application {
         _server.stop();
     }
 
+    // void registGrpcSerive(T)(){
+
+    // }
+
     /**
      * https://laravel.com/docs/6.x/lifecycle
      */
@@ -263,6 +272,11 @@ final class Application {
         // Resolve the HTTP server firstly
         _server = serviceContainer.resolve!(HttpServer);
         _serverOptions = _server.getHttpOptions();
+
+        // 
+        if(_configuringHandler !is null) {
+            _configuringHandler();
+        }
 
         // booting Providers
         bootProviders();

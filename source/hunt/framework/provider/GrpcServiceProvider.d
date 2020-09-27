@@ -36,11 +36,11 @@ class GrpcServiceProvider : ServiceProvider {
 
         }).singleInstance();
 
-        container().register!(GrpcChannelService)(() {
+        container().register!(GrpcService)(() {
             ApplicationConfig appConfig = container().resolve!ApplicationConfig();
-            return new GrpcChannelService(appConfig.grpc.clientChannels);
+            return new GrpcService(appConfig.grpc.clientChannels);
 
-        }).singleInstance();
+        }).singleInstance();        
 
     }
 
@@ -54,11 +54,12 @@ class GrpcServiceProvider : ServiceProvider {
     }
 }
 
+
 /**
  * 
  */
-class GrpcChannelService {
-
+class GrpcService {
+    
     private GrpcClientConf[string] _clientOptions;
 
     this(GrpcClientConf[] clientOptions) {
@@ -67,14 +68,16 @@ class GrpcChannelService {
         }
     }
 
-    Channel channel(string name) {
+
+    GrpcServer server() {
+        return serviceContainer().resolve!GrpcServer();
+    }
+
+    Channel getChannel(string name) {
         GrpcClientConf* itemPtr = name in _clientOptions;
         if(itemPtr is null) {
             throw new Exception(format("No options found for %s", name));
         }
-        // GrpcClientConf conf = *itemPtr;
-
-        return new Channel(itemPtr.host, itemPtr.port);
+        return new Channel(itemPtr.host, itemPtr.port);        
     }
-
 }
