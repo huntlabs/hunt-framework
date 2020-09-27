@@ -58,7 +58,6 @@ class AuthMiddleware : AbstractMiddleware {
             infof("path: %s, method: %s", request.path(), request.method );
         }
 
-        request.isAuthRequired = true;
         
         Auth auth = request.auth();
         if(!auth.isEnabled()) {

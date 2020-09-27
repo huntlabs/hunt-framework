@@ -52,6 +52,7 @@ class Auth {
     private AuthState _state = AuthState.Auto;
     private string _guardName = DEFAULT_GURAD_NAME;
     private Guard _guard;
+    private bool _isEnabled = false;
 
     private Request _request;
     
@@ -61,17 +62,22 @@ class Auth {
         AuthService authService = serviceContainer().resolve!AuthService();
         
         _guard = authService.guard(_guardName);
-        _user = new Identity(_guardName, isEnabled());
+        _user = new Identity(_guardName, isGuardAvailable());
+        _isEnabled = isGuardAvailable();
 
         version(HUNT_AUTH_DEBUG) {
-            if(isEnabled()) {
+            if(isGuardAvailable()) {
                 warningf("path: %s, isAuthenticated: %s", request.path(), _user.isAuthenticated());
             }
         }
     }
 
-    bool isEnabled() {
+    bool isGuardAvailable() {
         return _guard !is null;
+    }
+
+    bool isEnabled() {
+        return _isEnabled;
     }
 
     string tokenCookieName() {
@@ -158,12 +164,15 @@ class Auth {
             }
 
             _token = JwtUtil.sign(name, salt, exp.seconds, claims);
+            _isEnabled = true;
         } else if(scheme == AuthenticationScheme.Basic) {
             string str = name ~ ":" ~ password;
             ubyte[] data = cast(ubyte[])str;
             _token = cast(string)Base64.encode(data);
+            _isEnabled = true;
         } else {
             error("Unsupported AuthenticationScheme: %s", scheme);
+            _isEnabled = false;
         }
 
         return _user;
@@ -209,6 +218,7 @@ class Auth {
 
         AuthenticationToken token = g.getToken(_request);
         _user.login(token);
+        _isEnabled = true;
         return _user;
     }
 

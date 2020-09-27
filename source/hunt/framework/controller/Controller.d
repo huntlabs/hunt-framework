@@ -493,11 +493,11 @@ abstract class Controller
         Auth auth = req.auth();
 
         version(HUNT_AUTH_DEBUG) {
-            tracef("Path: %s, isAuthRequired: %s, isAuthEnabled: %s", 
-                req.path, req.isAuthRequired, auth.isEnabled());
+            tracef("Path: %s, isAuthEnabled: %s", 
+                req.path,  auth.isEnabled());
         }
 
-        if(!req.isAuthRequired || !auth.isEnabled()) 
+        if(!auth.isEnabled()) 
             return;
 
         AuthenticationScheme authScheme = auth.scheme();
