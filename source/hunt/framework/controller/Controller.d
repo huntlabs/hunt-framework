@@ -1001,9 +1001,14 @@ void callHandler(T, string method)(RoutingContext context)
     T controller = new T();
 
     scope(exit) {
-        controller.dispose();        
-        version(HUNT_THREAD_DEBUG) warningf("Threads: %d", Thread.getAll().length);
+        controller.dispose();
         resetWorkerThread();
+        // HUNT_THREAD_DEBUG
+        version(HUNT_DEBUG) {
+            warningf("Threads: %d, allocatedInCurrentThread: %d bytes", 
+                Thread.getAll().length, GC.stats().allocatedInCurrentThread);
+        }
+        // GC.collect();
     }
 
     try {
