@@ -451,7 +451,7 @@ abstract class Controller
     protected string _currentActionName;
     protected QueryParameterValidator[string] _actionValidators;
 
-    private void raiseError(Response response) {
+    protected void raiseError(Response response) {
         this.response = onError(response);
     }
 
