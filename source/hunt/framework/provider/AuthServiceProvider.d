@@ -21,6 +21,10 @@ class AuthServiceProvider : ServiceProvider {
         container().register!(AuthService);
     }
 
+    protected void configure(AuthService authService) {
+
+    }
+
     override void boot() {
         AuthService authService = container().resolve!AuthService();
         ApplicationConfig appConfig = container().resolve!ApplicationConfig();
@@ -38,6 +42,8 @@ class AuthServiceProvider : ServiceProvider {
             BasicGuard guard = new BasicGuard();
             authService.addGuard(guard);
         }
+
+        configure(authService);
 
         authService.boot();
     }

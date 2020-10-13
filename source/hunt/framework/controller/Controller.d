@@ -451,6 +451,14 @@ abstract class Controller
     protected string _currentActionName;
     protected QueryParameterValidator[string] _actionValidators;
 
+    private void raiseError(Response response) {
+        this.response = onError(response);
+    }
+
+    protected Response onError(Response response) {
+        return response;
+    }
+
     protected void done() {
         Request req = request();
         req.flush(); // assure the sessiondata flushed;
@@ -1019,7 +1027,7 @@ void callHandler(T, string method)(RoutingContext context)
         error(t);
         Response errorRes = new Response();
         errorRes.doError(HttpStatus.INTERNAL_SERVER_ERROR_500, t);
-        controller.response = errorRes; 
+        controller.raiseError(errorRes); 
     }
     
     context.end();
