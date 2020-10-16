@@ -17,9 +17,16 @@ private
     import hunt.framework.view.Exception : assertTemplate = assertTemplateException, TemplateRenderException;
     import hunt.framework.view.Uninode;
 
+    import hunt.logging.ConsoleLogger;
+
+    import std.array : array;
+    import std.algorithm : map;   
     import std.functional : toDelegate;
     import std.format : fmt = format;
     import std.conv;
+
+    import std.range : iota;
+    import std.string; 
 }
 
 // dfmt off
@@ -34,6 +41,7 @@ Function[string] globalFunctions()
             "date": wrapper!date,
             "url": wrapper!url,
             "int": wrapper!Int,
+            "split": wrapper!split,
             "string": wrapper!String,
             "trans":toDelegate(&trans),
             "format" : toDelegate(&doFormat)
@@ -41,11 +49,31 @@ Function[string] globalFunctions()
 }
 // dfmt on
 
+/**
+ * "a, b, c"  => ["a", "b", "c"]
+ */
+UniNode split(UniNode str, UniNode seperator = UniNode(",") ) { 
+    version(HUNT_VIEW_DEBUG) {
+        tracef("params: %s,  kind: %s", str.toString(), str.kind());
+        tracef("seperator: %s,  kind: %s", seperator.toString(), seperator.kind());
+    }
+
+    if(str.kind() != UniNode.Kind.text && seperator.kind() != UniNode.Kind.text) {
+        assertTemplate(0, "Only string supported");
+        return UniNode("");
+    }
+
+    string separator = seperator.get!string();
+    string value = str.get!string;
+    string[] items = std.string.split(value, separator);
+    UniNode[] arr = items.map!(a => UniNode(a.strip())).array;
+
+    return UniNode(arr);
+}
+
+
 UniNode range(UniNode params)
 {
-    import std.range : iota;
-    import std.array : array;
-    import std.algorithm : map;
 
     assertTemplate(params.kind == UniNode.Kind.object, "Non object params");
     assertTemplate(cast(bool)("varargs" in params), "Missing varargs in params");
