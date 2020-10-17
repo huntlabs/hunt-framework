@@ -1166,8 +1166,9 @@ void registerFunction(alias func)(Render render)
 
 private bool has(FormArg[] arr, string name)
 {
-    foreach(a; arr)
+    foreach(a; arr) {
         if (a.name == name)
             return true;
+    }
     return false;
 }

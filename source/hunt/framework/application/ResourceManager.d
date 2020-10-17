@@ -19,5 +19,6 @@ class ResouceManager {
         foreach (obj; _closeableObjects) {
             obj.close();
         }
+        _closeableObjects = null;
     }
 }

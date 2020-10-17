@@ -451,6 +451,14 @@ abstract class Controller
     protected string _currentActionName;
     protected QueryParameterValidator[string] _actionValidators;
 
+    protected void raiseError(Response response) {
+        this.response = onError(response);
+    }
+
+    protected Response onError(Response response) {
+        return response;
+    }
+
     protected void done() {
         Request req = request();
         req.flush(); // assure the sessiondata flushed;
@@ -503,7 +511,7 @@ abstract class Controller
         AuthenticationScheme authScheme = auth.scheme();
         string tokenCookieName = auth.tokenCookieName;
         version(HUNT_AUTH_DEBUG) {
-            tracef("tokenCookieName: %s, authScheme: %s, isAuthenticated: %s, isLogout: %s", 
+            warningf("tokenCookieName: %s, authScheme: %s, isAuthenticated: %s, isLogout: %s", 
                 tokenCookieName, authScheme, auth.user().isAuthenticated, auth.isLogout());
         }
 
@@ -1001,9 +1009,14 @@ void callHandler(T, string method)(RoutingContext context)
     T controller = new T();
 
     scope(exit) {
-        controller.dispose();        
-        version(HUNT_THREAD_DEBUG) warningf("Threads: %d", Thread.getAll().length);
+        controller.dispose();
         resetWorkerThread();
+        // HUNT_THREAD_DEBUG
+        version(HUNT_DEBUG) {
+            warningf("Threads: %d, allocatedInCurrentThread: %d bytes", 
+                Thread.getAll().length, GC.stats().allocatedInCurrentThread);
+        }
+        // GC.collect();
     }
 
     try {
@@ -1014,7 +1027,7 @@ void callHandler(T, string method)(RoutingContext context)
         error(t);
         Response errorRes = new Response();
         errorRes.doError(HttpStatus.INTERNAL_SERVER_ERROR_500, t);
-        controller.response = errorRes; 
+        controller.raiseError(errorRes); 
     }
     
     context.end();

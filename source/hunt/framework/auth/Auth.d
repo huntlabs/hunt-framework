@@ -62,12 +62,12 @@ class Auth {
         AuthService authService = serviceContainer().resolve!AuthService();
         
         _guard = authService.guard(_guardName);
-        _user = new Identity(_guardName, isGuardAvailable());
         _isEnabled = isGuardAvailable();
+        _user = new Identity(_guardName, _isEnabled);
 
         version(HUNT_AUTH_DEBUG) {
-            if(isGuardAvailable()) {
-                tracef("path: %s, isAuthenticated: %s", request.path(), _user.isAuthenticated());
+            if(_isEnabled) {
+                warningf("path: %s, isAuthenticated: %s", request.path(), _user.isAuthenticated());
             }
         }
     }
