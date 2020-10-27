@@ -85,6 +85,7 @@ final class Application {
     private SimpleEventHandler _launchedHandler;
     private SimpleEventHandler _configuringHandler;
     private HostEnvironment _environment;
+    private hunt.console.Command[] _commands;
 
     // private WebSocketPolicy _webSocketPolicy;
     // private WebSocketHandler[string] webSocketHandlerMap;
@@ -171,6 +172,10 @@ final class Application {
         return this;
     }
 
+    void register(hunt.console.Command cmd) {
+        _commands ~= cmd;
+    }
+
     void run(string[] args, SimpleEventHandler handler) {
         _launchedHandler = handler;
         run(args);
@@ -184,6 +189,28 @@ final class Application {
 
         ConfigManager manager = serviceContainer().resolve!ConfigManager;
         manager.hostEnvironment = _environment;
+
+        if(_commands.length > 0) {
+            _appConfig = serviceContainer().resolve!ApplicationConfig();
+            bootstrap();
+            
+            Console console = new Console(_description, _ver);
+            console.setAutoExit(false);
+
+            foreach(hunt.console.Command cmd; _commands) {
+                console.add(cmd);
+            }
+
+            try {
+                console.run(args);
+            } catch(Exception ex) {
+                warning(ex);
+            } catch(Error er) {
+                error(er);
+            }
+
+            return;
+        }
 
 
         if (args.length > 1) {
