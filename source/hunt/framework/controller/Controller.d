@@ -320,7 +320,7 @@ abstract class Controller
         string routeGroup = req.routeGroup();
         
         version (HUNT_DEBUG) {
-            infof("middlware: routeGroup=%s, path=%s, method=%s, actionId=%s, actionName=%s", 
+            infof("middleware: routeGroup=%s, path=%s, method=%s, actionId=%s, actionName=%s", 
                routeGroup, req.path(),  req.method, actionId, actionName);
         }
 
