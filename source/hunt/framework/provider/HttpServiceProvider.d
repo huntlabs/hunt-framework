@@ -1,9 +1,9 @@
 module hunt.framework.provider.HttpServiceProvider;
 
-import hunt.framework.controller.Controller;
 import hunt.framework.config.ApplicationConfig;
 import hunt.framework.config.ConfigManager;
 import hunt.framework.http.HttpErrorResponseHandler;
+import hunt.http.routing.handler.DefaultErrorResponseHandler;
 import hunt.framework.Init;
 import hunt.framework.provider.ServiceProvider;
 import hunt.framework.routing;

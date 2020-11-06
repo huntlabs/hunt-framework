@@ -6,3 +6,4 @@ public import hunt.framework.routing.ResourceRouteItem;
 public import hunt.framework.routing.RouteGroup;
 public import hunt.framework.routing.RouteConfigManager;
 public import hunt.framework.routing.RouterContex;
+public import hunt.framework.routing.RouterHandler;
