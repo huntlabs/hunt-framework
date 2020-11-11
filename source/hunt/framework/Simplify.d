@@ -337,7 +337,7 @@ bool inWorkerThread() {
     return th !is null;
 }
 
-void startWorkerTread() {
+void startWorkerThread() {
     _inWorkerThread = true;
 }
 

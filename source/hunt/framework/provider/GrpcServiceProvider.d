@@ -49,7 +49,7 @@ class GrpcServiceProvider : ServiceProvider {
             GrpcServer grpcServer = container().resolve!GrpcServer();
             grpcServer.start();
 
-            warning("grpc server started.");
+            infof("grpc server started.");
         }
     }
 }

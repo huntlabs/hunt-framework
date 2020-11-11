@@ -121,7 +121,7 @@ class ApplicationConfig {
     }
 
     struct RouteConf {
-        string groups;
+        RouteGroupConfig[] groups;
     }
 
     struct LoggingConfig {
@@ -324,17 +324,32 @@ class ApplicationConfig {
     }
 }
 
+/**
+ * 
+ */
 struct GrpcServerConf {
     bool enabled = false;
     string host = "127.0.0.1";
     ushort port = 50051;
 }
 
+/**
+ * 
+ */
 struct GrpcClientConf {
     string name="unnamed";
     string host = "127.0.0.1";
     ushort port = 50051;
     uint timeout = 15000;
+}
+
+/**
+ * 
+ */
+struct RouteGroupConfig {
+    string name;
+    string type;
+    string value;
 }
 
 

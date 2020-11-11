@@ -142,48 +142,38 @@ class RouteConfigManager {
     }
 
     private void loadGroupRoutes() {
-        if (_appConfig.route.groups.empty)
+        RouteGroupConfig[] routeGroups = _appConfig.route.groups;
+        if (routeGroups.empty) {
+            warning("No route group defined.");
             return;
+        }
 
-        version (HUNT_DEBUG)
-            info(_appConfig.route.groups);
+        version (HUNT_DEBUG) {
+            info(routeGroups);
+        }
 
-        string[] groupConfig;
-        foreach (v; split(_appConfig.route.groups, ',')) {
-            groupConfig = split(v, ":");
+        foreach (RouteGroupConfig v; routeGroups) {
+            RouteGroup groupInfo = new RouteGroup();
+            groupInfo.name = strip(v.name);
+            groupInfo.type = strip(v.type);
+            groupInfo.value = strip(v.value);
 
-            if (groupConfig.length != 3 && groupConfig.length != 4) {
-                logWarningf("Group config format error ( %s ).", v);
+            version (HUNT_FM_DEBUG)
+                infof("route group: %s", groupInfo);
+
+            string routeConfigFile = groupInfo.name ~ DEFAULT_ROUTE_CONFIG_EXT;
+            routeConfigFile = buildPath(_basePath, routeConfigFile);
+
+            if (!exists(routeConfigFile)) {
+                warningf("Config file does not exist: %s", routeConfigFile);
             } else {
-                string value = groupConfig[2];
-                if (groupConfig.length == 4) {
-                    if (std.conv.to!int(groupConfig[3]) > 0) {
-                        value ~= ":" ~ groupConfig[3];
-                    }
-                }
+                RouteItem[] routes = load(routeConfigFile);
 
-                RouteGroup groupInfo = new RouteGroup();
-                groupInfo.name = strip(groupConfig[0]);
-                groupInfo.type = strip(groupConfig[1]);
-                groupInfo.value = strip(value);
-
-                version (HUNT_FM_DEBUG)
-                    infof("route group: %s", groupInfo);
-
-                string routeConfigFile = groupInfo.name ~ DEFAULT_ROUTE_CONFIG_EXT;
-                routeConfigFile = buildPath(_basePath, routeConfigFile);
-
-                if (!exists(routeConfigFile)) {
-                    warningf("Config file does not exist: %s", routeConfigFile);
+                if (routes.length > 0) {
+                    addGroupRoute(groupInfo, routes);
                 } else {
-                    RouteItem[] routes = load(routeConfigFile);
-
-                    if (routes.length > 0) {
-                        addGroupRoute(groupInfo, routes);
-                    } else {
-                        version (HUNT_DEBUG)
-                            warningf("No routes defined for group %s", groupInfo.name);
-                    }
+                    version (HUNT_DEBUG)
+                        warningf("No routes defined for group %s", groupInfo.name);
                 }
             }
         }

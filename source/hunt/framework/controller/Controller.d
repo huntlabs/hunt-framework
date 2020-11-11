@@ -1004,7 +1004,7 @@ void callHandler(T, string method)(RoutingContext context)
     // req.action = method;
     // auto req = context.getRequest();
     // warningf("group name: %s, Threads: %d", context.groupName(), Thread.getAll().length);
-    startWorkerTread();
+    startWorkerThread();
 
     T controller = new T();
 
