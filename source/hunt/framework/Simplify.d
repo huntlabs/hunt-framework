@@ -161,10 +161,10 @@ version(HUNT_TEST) {
                     isRemoved = true;
                     break;
                 }
+            }
 
-                if(!isRemoved) {
-                    warningf("Nothing removed: ", tid, reqPath);
-                }
+            if(!isRemoved) {
+                warningf("Nothing removed: ", tid, reqPath);
             }
         }
 
@@ -187,15 +187,17 @@ version(HUNT_TEST) {
     EntityManager defaultEntityManager() {
         if (_em is null) {
             _em = serviceContainer.resolve!(EntityManagerFactory).currentEntityManager();
-            // resouceManager.push(new EntityCloser(_em));
-            resouceManager.push(new class Closeable {
-                void close() {
-                    closeDefaultEntityManager();
-                    EntityManagerInfo.remove();
-                }
-            });
+            if(inWorkerThread()) {
+                // resouceManager.push(new EntityCloser(_em));
+                resouceManager.push(new class Closeable {
+                    void close() {
+                        closeDefaultEntityManager();
+                        EntityManagerInfo.remove();
+                    }
+                });
 
-            EntityManagerInfo.append();
+                EntityManagerInfo.append();
+            }
         }
         return _em;
     }
@@ -207,11 +209,13 @@ version(HUNT_TEST) {
         if (_em is null) {
             _em = serviceContainer.resolve!(EntityManagerFactory).currentEntityManager();
             // resouceManager.push(new EntityCloser(_em));
-            resouceManager.push(new class Closeable {
-                void close() {
-                    closeDefaultEntityManager();
-                }
-            });
+            if(inWorkerThread()) {
+                resouceManager.push(new class Closeable {
+                    void close() {
+                        closeDefaultEntityManager();
+                    }
+                });
+            }
         }
         return _em;
     }
@@ -337,7 +341,7 @@ bool inWorkerThread() {
     return th !is null;
 }
 
-void startWorkerTread() {
+void startWorkerThread() {
     _inWorkerThread = true;
 }
 

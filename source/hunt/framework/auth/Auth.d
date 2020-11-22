@@ -14,14 +14,14 @@ import hunt.framework.http.Request;
 // import hunt.framework.Simplify;
 import hunt.framework.provider.ServiceProvider;
 
+import hunt.framework.jwt.JwtRegisteredClaimNames;
+
+
 import hunt.http.AuthenticationScheme;
 import hunt.logging.ConsoleLogger;
 import hunt.shiro.Exceptions;
 import hunt.shiro.authc.AuthenticationToken;
 import hunt.util.TypeUtils;
-
-import jwt.JwtRegisteredClaimNames;
-
 import std.algorithm;
 import std.array : split;
 import std.base64;
