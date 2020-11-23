@@ -1,7 +1,7 @@
 module hunt.framework.auth.JwtUtil;
 
 import hunt.framework.auth.AuthOptions;
-import hunt.framework.jwt;
+import hunt.jwt;
 import hunt.logging.ConsoleLogger;
 import hunt.util.DateTime;
 
@@ -18,7 +18,7 @@ class JwtUtil {
 
     static bool verify(string token, string username, string secret) {
         try {
-            return hunt.framework.jwt.verify(token, secret);
+            return JwtToken.verify(token, secret);
         } catch (Exception e) {
             warning(e.msg);
             version(HUNT_AUTH_DEBUG) warning(e);
@@ -28,7 +28,7 @@ class JwtUtil {
     
     static string getUsername(string token) {
         try {
-            Token tk = decodeAsToken(token);
+            JwtToken tk = JwtToken.decode(token);
             return tk.claims().sub();
         } catch (Exception e) {
             warning(e);
@@ -36,27 +36,27 @@ class JwtUtil {
         }
     }
 
-    static string sign(string username, string secret, JWTAlgorithm algo = JWTAlgorithm.HS512) {
+    static string sign(string username, string secret, JwtAlgorithm algo = JwtAlgorithm.HS512) {
         return sign(username, secret, EXPIRE_TIME, null, algo);
     }
     
-    static string sign(string username, string secret, string[string] claims, JWTAlgorithm algo = JWTAlgorithm.HS512) {
+    static string sign(string username, string secret, string[string] claims, JwtAlgorithm algo = JwtAlgorithm.HS512) {
         return sign(username, secret, EXPIRE_TIME, claims, algo);
     }
 
     static string sign(string username, string secret, Duration expireTime, 
-            string[string] claims = null, JWTAlgorithm algo = JWTAlgorithm.HS512) {
+            string[string] claims = null, JwtAlgorithm algo = JwtAlgorithm.HS512) {
         JSONValue claimsInJson = JSONValue(claims);
         return sign(username, secret, expireTime, claimsInJson, algo);
     }
 
     static string sign(string username, string secret, Duration expireTime, 
-            JSONValue claims, JWTAlgorithm algo = JWTAlgorithm.HS512) {
+            JSONValue claims, JwtAlgorithm algo = JwtAlgorithm.HS512) {
         version(HUNT_AUTH_DEBUG) {
             infof("username: %s, secret: %s", username, secret);
         }
 
-        Token token = new Token(algo);
+        JwtToken token = new JwtToken(algo);
         token.claims.sub = username;
         token.claims.exp = cast(int) DateTime.currentUnixTime() + expireTime.total!(TimeUnit.Second)();
         // token.claims.set("username", username);

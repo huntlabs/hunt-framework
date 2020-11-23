@@ -14,7 +14,7 @@ import hunt.framework.http.Request;
 // import hunt.framework.Simplify;
 import hunt.framework.provider.ServiceProvider;
 
-import hunt.framework.jwt.JwtRegisteredClaimNames;
+import hunt.jwt.JwtRegisteredClaimNames;
 
 
 import hunt.http.AuthenticationScheme;
@@ -33,7 +33,7 @@ import core.time;
 
 private enum AuthState {
     Auto,
-    Token,
+    JwtToken,
     SignIn,
     SignOut
 }
@@ -111,7 +111,7 @@ class Auth {
     //         _user.authenticate(_token, scheme);
     //     }
 
-    //     _state = AuthState.Token;
+    //     _state = AuthState.JwtToken;
     // }
 
     Identity user() {
@@ -209,7 +209,7 @@ class Auth {
     /// Use token to login
     Identity signIn() {
         scope(success) {
-            _state = AuthState.Token;
+            _state = AuthState.JwtToken;
         }
 
         Guard g = guard();
@@ -251,7 +251,7 @@ class Auth {
             _token = JwtUtil.sign(username, salt);
         } 
         
-        _state = AuthState.Token;
+        _state = AuthState.JwtToken;
         _isTokenRefreshed = true;
         return _token;
     }
