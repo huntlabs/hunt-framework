@@ -67,15 +67,6 @@ EC_KEY* getESKeypair(uint curve_type, string key) {
     return eckey;
 }
 
-unittest {
-    import jwtd.test;
-    import std.exception : assertThrown;
-
-    assertThrown(getESKeypair(0, "key"));
-    assertThrown(getESKeypair(NID_secp256k1, "bogus_key"));
-    assertThrown(getESKeypair(NID_secp256k1, null));
-    assertThrown(getESKeypair(NID_secp256k1, private256));
-}
 
 EC_KEY* getESPrivateKey(uint curve_type, string key) {
     EC_GROUP* curve;
@@ -112,12 +103,6 @@ EC_KEY* getESPrivateKey(uint curve_type, string key) {
     return eckey;
 }
 
-unittest {
-    import std.exception : assertThrown;
-    assertThrown(getESPrivateKey(0, "key"));
-    assertThrown(getESPrivateKey(NID_secp256k1, "bogus_key"));
-    assertThrown(getESPrivateKey(NID_secp256k1, null));
-}
 
 EC_KEY* getESPublicKey(uint curve_type, string key) {
     EC_GROUP* curve;
@@ -145,17 +130,6 @@ EC_KEY* getESPublicKey(uint curve_type, string key) {
         throw new Exception("Public key is not valid.");
 
     return eckey;
-}
-
-unittest {
-    import jwtd.test;
-    import std.exception : assertThrown;
-
-    assertThrown(getESPublicKey(0, "key"));
-
-    auto eckey = getESPublicKey(NID_secp256k1, es256_public);
-    EC_KEY_free(eckey);
-    assertThrown(getESPublicKey(NID_secp256k1, null));
 }
 
 string sign(string msg, string key, JWTAlgorithm algo = JWTAlgorithm.HS256) {
