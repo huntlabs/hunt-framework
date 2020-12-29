@@ -30,7 +30,7 @@ class AmqpServiceProvider : ServiceProvider {
 
                 return AmqpClient.create(options); 
             } else {
-                warning("RedisPool has been disabled.");
+                warning("The AMQP Client has been disabled.");
                 return AmqpClient.create(new AmqpClientOptions());
             }
         }).singleInstance();

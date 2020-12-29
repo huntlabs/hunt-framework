@@ -483,9 +483,10 @@ class Request {
         // import hunt.util.Serialize;
 
         JSONValue jv;
-        if(xFormData() is null)
+        string[][string] data = xFormData();
+        if(data is null)
             return new T();        
-        foreach(string k, string[] values; xFormData()) {
+        foreach(string k, string[] values; data) {
             if(values.length > 1) {
                 jv[k] = JSONValue(values);
             } else if(values.length == 1) {
@@ -1399,13 +1400,29 @@ class Request {
         if (isContained(this.methodAsString, ["GET", "HEAD"]))
             return queries();
         else {
-            string[string] r;
-            foreach(string k, string[] v; xFormData()) {
-                r[k] = v[0];
+            if(!_isInputChecked) {
+                if(isMultipartForm()) {
+                    foreach (Part part; _request.getParts()) {
+                        string submittedFileName = part.getSubmittedFileName();
+                        if(submittedFileName.empty()) {
+                            string key = part.getName();
+                            string content = cast(string)part.getBytes();
+                            _inputData[key] = content;
+                        }
+                    }
+                } else {
+                    string[][string] data = xFormData();
+                    foreach(string k, string[] v; data) {
+                        _inputData[k] = v[0];
+                    }
+                }
             }
-            return r;
+            return _inputData;
         }
     }
+
+    private bool _isInputChecked = false;
+    private string[string] _inputData;
 
 
 //     /**
