@@ -2,6 +2,7 @@ module hunt.framework.provider.GrpcServiceProvider;
 
 import hunt.framework.provider.ServiceProvider;
 import hunt.framework.config;
+import hunt.http.HttpVersion;
 import hunt.logging.ConsoleLogger;
 import grpc;
 
@@ -26,7 +27,16 @@ class GrpcServiceProvider : ServiceProvider {
             GrpcServerConf serverConf = appConfig.grpc.server;
             isGrpcServerEnabled = serverConf.enabled;
             if(isGrpcServerEnabled) {
-                GrpcServer server = new GrpcServer();
+                import hunt.http.server.HttpServerOptions;
+
+                auto httpServerOptions = new HttpServerOptions();
+                httpServerOptions.setSecureConnectionEnabled(false);
+                httpServerOptions.setFlowControlStrategy("simple");
+                httpServerOptions.getTcpConfiguration().workerThreadSize = serverConf.workerThreads;
+                //httpServerOptions.getTcpConfiguration().setTimeout(60 * 1000);
+                httpServerOptions.setProtocol(HttpVersion.HTTP_2.asString());
+
+                GrpcServer server = new GrpcServer(httpServerOptions);
                 server.listen(serverConf.host, serverConf.port);
                 return server;
             } else {
@@ -49,7 +59,7 @@ class GrpcServiceProvider : ServiceProvider {
             GrpcServer grpcServer = container().resolve!GrpcServer();
             grpcServer.start();
 
-            infof("grpc server started.");
+            infof("gRPC server started.");
         }
     }
 }

@@ -332,6 +332,7 @@ class ApplicationConfig {
  */
 struct GrpcServerConf {
     bool enabled = false;
+    uint workerThreads = 4;
     string host = "127.0.0.1";
     ushort port = 50051;
 }
