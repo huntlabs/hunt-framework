@@ -32,7 +32,6 @@ public import hunt.http.server;
 public import hunt.http.routing;
 import hunt.http.HttpConnection;
 
-import hunt.amqp.client;
 import hunt.cache;
 import hunt.entity.EntityManagerFactory;
 import hunt.logging.ConsoleLogger;

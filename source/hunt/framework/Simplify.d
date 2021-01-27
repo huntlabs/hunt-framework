@@ -356,8 +356,8 @@ ResouceManager resouceManager() {
 }
 
 
-import hunt.framework.queue;
+import hunt.util.worker;
 
-AbstractQueue messageQueue() {
-    return serviceContainer.resolve!(AbstractQueue);
+TaskQueue taskQueue() {
+    return serviceContainer.resolve!(TaskQueue);
 }

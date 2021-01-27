@@ -3,7 +3,8 @@ module hunt.framework.provider.TaskServiceProvider;
 import hunt.framework.config.ApplicationConfig;
 import hunt.framework.provider.ServiceProvider;
 import hunt.framework.queue;
-import hunt.framework.task;
+// import hunt.framework.task;
+import hunt.util.worker.Worker;
 
 import hunt.logging.ConsoleLogger;
 import poodinis;
@@ -18,14 +19,18 @@ class TaskServiceProvider : ServiceProvider {
     private ApplicationConfig _appConfig;
 
     override void register() {
-
-        container.register!(TaskWorker)(() {
-            AbstractQueue queue = serviceContainer.resolve!(AbstractQueue);
-            return new TaskWorker(queue);
-        }).newInstance();
+        container.register!(Worker)(&build).singleInstance();
     }
 
-    override void boot() {
+    protected Worker build() {
         _appConfig = container.resolve!ApplicationConfig();
+        if(_appConfig.queue.enabled) {
+            QueueManager manager = new QueueManager(_appConfig);
+            TaskQueue queue = manager.build();
+            return new Worker(queue, _appConfig.queue.workerThreads);
+        } else {
+            return null;
+        }
     }
+
 }

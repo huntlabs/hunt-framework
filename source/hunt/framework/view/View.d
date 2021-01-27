@@ -19,7 +19,7 @@ import hunt.framework.Init;
 
 // import hunt.framework.Simplify;
 
-import hunt.util.Serialize;
+import hunt.serialization.JsonSerializer;
 import hunt.logging;
 
 import std.json : JSONValue;
@@ -91,7 +91,7 @@ class View {
     }
 
     void assign(T)(string key, T t) {
-        this.assign(key, toJson(t, _arrayDepth));
+        this.assign(key, toJson(t));
     }
 
     void assign(string key, JSONValue t) {

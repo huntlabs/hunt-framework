@@ -64,7 +64,7 @@ alias DefaultServiceProviders = AliasSeq!(UserServiceProvider, AuthServiceProvid
         ConfigServiceProvider, RedisServiceProvider,
         TranslationServiceProvider, CacheServiceProvider, SessionServiceProvider,
         DatabaseServiceProvider, QueueServiceProvider,
-        TaskServiceProvider, AmqpServiceProvider, HttpServiceProvider, GrpcServiceProvider,
+        TaskServiceProvider, HttpServiceProvider, GrpcServiceProvider,
         BreadcrumbServiceProvider, ViewServiceProvider);
 
 /**
@@ -513,13 +513,13 @@ final class Application {
         return serviceContainer.resolve!(Cache);
     }
 
-    AbstractQueue queue() {
-        return serviceContainer.resolve!(AbstractQueue);
+    TaskQueue queue() {
+        return serviceContainer.resolve!(TaskQueue);
     }
 
-    TaskWorker task() {
-        return serviceContainer.resolve!(TaskWorker);
-    }
+    // TaskWorker task() {
+    //     return serviceContainer.resolve!(TaskWorker);
+    // }
 
     deprecated("Using defaultEntityManager instead.")
     EntityManager entityManager() {

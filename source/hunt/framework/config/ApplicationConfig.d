@@ -178,8 +178,10 @@ class ApplicationConfig {
     }
 
     struct QueueConf {
+        bool enabled = false;
         // Drivers: "memeory", "amqp", "redis", "null"
         string driver = null;
+        uint workerThreads = 4;
     }
 
     struct GrpcConf {
@@ -250,7 +252,7 @@ class ApplicationConfig {
     struct ServiceConf {
         string address = "127.0.0.1";
         ushort port = 8080;
-        int workerThreads = 1;
+        int workerThreads = 2;
         string password;
     }
 
@@ -318,6 +320,7 @@ class ApplicationConfig {
     this() {
         http.workerThreads = totalCPUs * 4;
         http.ioThreads = totalCPUs;
+        queue.workerThreads = totalCPUs;
         upload.path = DEFAULT_TEMP_PATH;
         view.path = DEFAULT_TEMPLATE_PATH;
         application.langLocation = DEFAULT_LANGUAGE_PATH;

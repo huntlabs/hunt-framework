@@ -8,7 +8,7 @@ import std.json;
 
 import hunt.logging.ConsoleLogger;
 import hunt.util.MimeType;
-import hunt.util.Serialize;
+import hunt.serialization.JsonSerializer;
 
 // import hunt.framework.http.cookie;
 // import hunt.framework.util.String;

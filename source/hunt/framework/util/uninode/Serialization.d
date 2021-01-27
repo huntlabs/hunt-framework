@@ -15,10 +15,10 @@ import std.stdio;
 
 private
 {
-    import hunt.util.Serialize;
     import std.traits;
     import std.json;
     import hunt.framework.util.uninode.Core;
+    import hunt.serialization.JsonSerializer;
 }
 
 /**
