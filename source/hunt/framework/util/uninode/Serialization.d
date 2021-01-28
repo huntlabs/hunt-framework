@@ -15,7 +15,7 @@ import std.stdio;
 
 private
 {
-    import hunt.util.Serialize;
+    import hunt.serialization.JsonSerializer;
     import std.traits;
     import std.json;
     import hunt.framework.util.uninode.Core;
