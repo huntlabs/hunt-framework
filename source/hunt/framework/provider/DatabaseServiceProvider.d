@@ -11,6 +11,7 @@ import poodinis;
  * 
  */
 class DatabaseServiceProvider : ServiceProvider {
+    private bool _isEnabled = true;
 
     override void register() {
         container.register!(EntityManagerFactory)(&buildEntityManagerFactory)
@@ -50,12 +51,17 @@ class DatabaseServiceProvider : ServiceProvider {
             version(HUNT_DEBUG) infof("using database: %s", config.driver);
             return Persistence.createEntityManagerFactory(option);
         } else {
-            version(HUNT_DEBUG) warning("The database is disabled.");
-            return null;
+            // version(HUNT_DEBUG) warning("The database is disabled.");
+            // return null;
+            throw new Exception("The database is disabled.");
         }
     }
 
     override void boot() {
-        EntityManagerFactory factory = container.resolve!EntityManagerFactory();
+        ApplicationConfig appConfig = container.resolve!ApplicationConfig();
+        ApplicationConfig.DatabaseConf config = appConfig.database;
+        if(config.enabled) {
+            EntityManagerFactory factory = container.resolve!EntityManagerFactory();
+        }
     }
 }

@@ -160,7 +160,7 @@ class ApplicationConfig {
     }
 
     struct RedisPoolConf {
-        bool enabled = false;
+        // bool enabled = false;
 
         bool blockOnExhausted = true;
         uint idleTimeout = 30000; // millisecond

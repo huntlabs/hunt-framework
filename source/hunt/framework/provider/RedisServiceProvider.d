@@ -21,7 +21,7 @@ class RedisServiceProvider : ServiceProvider {
             auto redisOptions = config.redis;
             auto redisPoolOptions = redisOptions.pool;
 
-            if (redisOptions.pool.enabled) {
+            if (redisOptions.enabled) {
                 RedisPoolConfig poolConfig = new RedisPoolConfig();
                 poolConfig.host = redisOptions.host;
                 poolConfig.port = cast(int) redisOptions.port;
@@ -37,8 +37,9 @@ class RedisServiceProvider : ServiceProvider {
 
                 return new RedisPool(poolConfig); 
             } else {
-                warning("RedisPool has been disabled.");
-                return new RedisPool();
+                // warning("RedisPool has been disabled.");
+                // return new RedisPool();
+                throw new Exception("The Redis is disabled.");
             }
         }).singleInstance();
     }

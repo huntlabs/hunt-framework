@@ -30,8 +30,9 @@ class AmqpServiceProvider : ServiceProvider {
 
                 return AmqpClient.create(options); 
             } else {
-                warning("The AMQP Client has been disabled.");
-                return AmqpClient.create(new AmqpClientOptions());
+                // warning("The AMQP Client has been disabled.");
+                // return AmqpClient.create(new AmqpClientOptions());
+                throw new Exception("The AMQP Client is disabled.");
             }
         }).singleInstance();
     }

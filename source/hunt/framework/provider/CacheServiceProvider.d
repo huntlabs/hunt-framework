@@ -40,6 +40,11 @@ class CacheServiceProvider : ServiceProvider {
             options.maxEntriesLocalDisk = cacheConf.maxEntriesLocalDisk;
 
             if(cacheConf.adapter == AdapterType.REDIS) {
+
+                if(!redisConf.enabled) {
+                    throw new Exception("The Redis is disabled.");
+                }
+
                 RedisPoolConfig poolConfig = new RedisPoolConfig();
                 poolConfig.host = redisConf.host;
                 poolConfig.port = cast(int) redisConf.port;
