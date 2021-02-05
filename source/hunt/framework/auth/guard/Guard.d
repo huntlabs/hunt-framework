@@ -81,18 +81,23 @@ abstract class Guard {
     AuthenticationToken getToken(Request request);
 
     void boot() {
-        HuntCache cache = serviceContainer().resolve!HuntCache();
-        CacheManager cacheManager = new ShiroCacheManager(cache);        
-        _securityManager = new DefaultSecurityManager();
-        DefaultSessionManager sm = cast(DefaultSessionManager)_securityManager.getSessionManager();
+        try {
+            HuntCache cache = serviceContainer().resolve!HuntCache();
+            CacheManager cacheManager = new ShiroCacheManager(cache);        
+            _securityManager = new DefaultSecurityManager();
+            DefaultSessionManager sm = cast(DefaultSessionManager)_securityManager.getSessionManager();
 
-        if(sm !is null) {
-            sm.setGlobalSessionTimeout(_tokenExpiration*1000);
-        }
+            if(sm !is null) {
+                sm.setGlobalSessionTimeout(_tokenExpiration*1000);
+            }
 
-        SecurityUtils.setSecurityManager(_name, _securityManager);
-        _securityManager.setRealms(_realms);
-        _securityManager.setCacheManager(cacheManager);        
+            SecurityUtils.setSecurityManager(_name, _securityManager);
+            _securityManager.setRealms(_realms);
+            _securityManager.setCacheManager(cacheManager);              
+        } catch(Exception ex) {
+            warning(ex.msg);
+            version(HUNT_DEBUG) warning(ex);
+        }      
     }
 
 }
