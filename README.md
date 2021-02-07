@@ -89,6 +89,7 @@ For more, see [hunt-skeleton](https://github.com/huntlabs/hunt-skeleton) or [hun
 ## Resources
 - [Documentation](https://github.com/huntlabs/hunt-framework-docs)
 - [Articles](https://github.com/huntlabs/hunt-framework-articles)
+- [API](http://hunt-framework.dpldocs.info/hunt.framework.html)
 
 ## Community
 - [Issues](https://github.com/huntlabs/hunt-framework/issues)
