@@ -38,6 +38,7 @@ class GrpcServiceProvider : ServiceProvider {
 
                 GrpcServer server = new GrpcServer(httpServerOptions);
                 server.listen(serverConf.host, serverConf.port);
+                infof("gRPC server started at %s:%d.", serverConf.host, serverConf.port);
                 return server;
             } else {
                 version(HUNT_DEBUG) warning("The GrpcService is disabled.");
@@ -58,8 +59,6 @@ class GrpcServiceProvider : ServiceProvider {
         if(isGrpcServerEnabled) {
             GrpcServer grpcServer = container().resolve!GrpcServer();
             grpcServer.start();
-
-            infof("gRPC server started.");
         }
     }
 }
