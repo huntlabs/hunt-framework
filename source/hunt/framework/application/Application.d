@@ -34,6 +34,8 @@ import hunt.console;
 import hunt.Functions;
 import hunt.logging;
 import hunt.redis;
+import hunt.util.ResoureManager;
+
 import grpc.GrpcServer;
 import grpc.GrpcClient;
 
@@ -505,7 +507,7 @@ final class Application {
     Redis redis() {
         RedisPool pool = serviceContainer.resolve!RedisPool();
         Redis r = pool.getResource();
-        resouceManager.push(new RedisCloser(r));
+        registerResoure(new RedisCloser(r));
         return r;
     }
 
@@ -524,7 +526,7 @@ final class Application {
     deprecated("Using defaultEntityManager instead.")
     EntityManager entityManager() {
         EntityManager _entityManager = serviceContainer.resolve!(EntityManagerFactory).currentEntityManager();
-        resouceManager.push(new EntityCloser(_entityManager));
+        registerResoure(new EntityCloser(_entityManager));
         return _entityManager;
     }
 

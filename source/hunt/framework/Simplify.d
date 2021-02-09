@@ -11,7 +11,6 @@
 
 module hunt.framework.Simplify;
 
-// public import hunt.framework.application.Application : app;
 public import hunt.framework.config.ApplicationConfig;
 public import hunt.framework.config.ConfigManager;
 public import hunt.framework.Init;
@@ -21,6 +20,7 @@ public import hunt.util.DateTime : time, date;
 import hunt.framework.provider;
 import hunt.logging.ConsoleLogger;
 import hunt.util.TaskPool;
+import hunt.util.ResoureManager;
 
 import poodinis;
 
@@ -187,8 +187,7 @@ version(HUNT_TEST) {
     EntityManager defaultEntityManager() {
         if (_em is null) {
             _em = serviceContainer.resolve!(EntityManagerFactory).currentEntityManager();
-            // resouceManager.push(new EntityCloser(_em));
-            resouceManager.push(new class Closeable {
+            registerResoure(new class Closeable {
                 void close() {
                     closeDefaultEntityManager();
                     EntityManagerInfo.remove();
@@ -206,8 +205,7 @@ version(HUNT_TEST) {
     EntityManager defaultEntityManager() {
         if (_em is null) {
             _em = serviceContainer.resolve!(EntityManagerFactory).currentEntityManager();
-            // resouceManager.push(new EntityCloser(_em));
-            resouceManager.push(new class Closeable {
+            registerResoure(new class Closeable {
                 void close() {
                     closeDefaultEntityManager();
                 }
@@ -323,36 +321,6 @@ private string _transWithLocale(string locale, string key) {
     warning("No language resource found for: ", locale);
 
     return defaultValue;
-}
-
-private bool _inWorkerThread = false;
-
-bool inWorkerThread() {
-    if(_inWorkerThread)
-        return true;
-
-    import core.thread;
-    
-    ParallelismThread th = cast(ParallelismThread)Thread.getThis();
-    return th !is null;
-}
-
-void startWorkerThread() {
-    _inWorkerThread = true;
-}
-
-void resetWorkerThread() {
-    resouceManager.clean();
-}
-
-import hunt.framework.application.ResourceManager;
-private ResouceManager _resouceManager;
-
-ResouceManager resouceManager() {
-    if(_resouceManager is null) {
-        _resouceManager = new ResouceManager();
-    }
-    return _resouceManager;
 }
 
 

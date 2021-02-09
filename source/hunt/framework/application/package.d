@@ -13,4 +13,3 @@ module hunt.framework.application;
 
 public import hunt.framework.application.Application;
 public import hunt.framework.application.HostEnvironment;
-public import hunt.framework.application.ResourceManager;

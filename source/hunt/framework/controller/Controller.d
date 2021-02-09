@@ -1003,13 +1003,16 @@ void callHandler(T, string method)(RoutingContext context)
     // req.action = method;
     // auto req = context.getRequest();
     // warningf("group name: %s, Threads: %d", context.groupName(), Thread.getAll().length);
-    startWorkerThread();
 
     T controller = new T();
 
     scope(exit) {
+        import hunt.util.ResoureManager;
+        ApplicationConfig appConfig = app().config();
+        if(appConfig.http.workerThreads == 0) {
+            collectResoure();
+        }
         controller.dispose();
-        resetWorkerThread();
         // HUNT_THREAD_DEBUG
         version(HUNT_DEBUG) {
             warningf("Threads: %d, allocatedInCurrentThread: %d bytes", 
