@@ -41,8 +41,8 @@ class GrpcServiceProvider : ServiceProvider {
                 infof("gRPC server started at %s:%d.", serverConf.host, serverConf.port);
                 return server;
             } else {
-                version(HUNT_DEBUG) warning("The GrpcService is disabled.");
-                return null;
+                // version(HUNT_DEBUG) warning("The GrpcService is disabled.");
+                throw new Exception("The GrpcService is disabled.");
             }
 
         }).singleInstance();

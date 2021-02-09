@@ -16,20 +16,21 @@ import std.path;
  */
 class TaskServiceProvider : ServiceProvider {
 
-    private ApplicationConfig _appConfig;
-
     override void register() {
         container.register!(Worker)(&build).singleInstance();
     }
 
     protected Worker build() {
-        _appConfig = container.resolve!ApplicationConfig();
-        if(_appConfig.queue.enabled) {
-            QueueManager manager = new QueueManager(_appConfig);
-            TaskQueue queue = manager.build();
-            return new Worker(queue, _appConfig.queue.workerThreads);
-        } else {
-            return null;
+        ApplicationConfig appConfig = container.resolve!ApplicationConfig();
+        TaskQueue queue = container.resolve!TaskQueue();
+        return new Worker(queue, appConfig.task.workerThreads);
+    }
+
+    override void boot() {
+        ApplicationConfig appConfig = container.resolve!ApplicationConfig();
+        if(appConfig.queue.enabled) {
+            Worker worker = container.resolve!Worker();
+            worker.run();
         }
     }
 

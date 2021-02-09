@@ -15,6 +15,7 @@ public import hunt.cache;
 public import hunt.entity;
 public import hunt.validation;
 public import hunt.util.MimeType;
+public import hunt.util.worker;
 
 public import hunt.http.codec.http;
 public import hunt.http.codec.websocket;

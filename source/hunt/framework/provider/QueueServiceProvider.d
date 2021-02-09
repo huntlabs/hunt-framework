@@ -20,7 +20,12 @@ class QueueServiceProvider : ServiceProvider {
 
     protected TaskQueue build() {
         ApplicationConfig config = container.resolve!ApplicationConfig();
-        QueueManager manager = new QueueManager(config);
-        return manager.build();
+        if(config.queue.enabled) {
+            QueueManager manager = new QueueManager(config);
+            return manager.build();
+        } else {
+            // return null;
+            throw new Exception("Queue is disabled.");
+        }
     }
 }

@@ -133,19 +133,10 @@ class ApplicationConfig {
         uint maxNum = 8;
     }
 
-    struct MemcacheConf {
-        bool enabled = false;
-        string servers;
-    }
-    
-    struct AmqpConf {
-        bool enabled = false;
-        string host = "127.0.0.1";
-        string username = "guest";
-        string password = "guest";
-        ushort port = 5672;
-        uint timeout = 15000;
-    }
+    // struct MemcacheConf {
+    //     bool enabled = false;
+    //     string servers;
+    // }
 
     struct RedisConf {
         bool enabled = false;
@@ -179,8 +170,12 @@ class ApplicationConfig {
 
     struct QueueConf {
         bool enabled = false;
-        // Drivers: "memeory", "amqp", "redis", "null"
+        // Drivers: "memeory", "redis", "null"
         string driver = null;
+    }
+
+    struct TaskConf {
+        bool enabled = false;
         uint workerThreads = 4;
     }
 
@@ -289,9 +284,9 @@ class ApplicationConfig {
     HttpConf http;
     HttpsConf https;
     RouteConf route;
-    MemcacheConf memcache;
-    AmqpConf amqp;
+    // MemcacheConf memcache;
     QueueConf queue;
+    TaskConf task;
     RedisConf redis;
     GrpcConf grpc;
     LoggingConfig logging;
@@ -320,7 +315,7 @@ class ApplicationConfig {
     this() {
         http.workerThreads = totalCPUs * 4;
         http.ioThreads = totalCPUs;
-        queue.workerThreads = totalCPUs;
+        task.workerThreads = totalCPUs;
         upload.path = DEFAULT_TEMP_PATH;
         view.path = DEFAULT_TEMPLATE_PATH;
         application.langLocation = DEFAULT_LANGUAGE_PATH;

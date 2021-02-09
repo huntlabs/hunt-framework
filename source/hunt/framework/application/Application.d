@@ -35,6 +35,7 @@ import hunt.Functions;
 import hunt.logging;
 import hunt.redis;
 import hunt.util.ResoureManager;
+import hunt.util.worker;
 
 import grpc.GrpcServer;
 import grpc.GrpcClient;
@@ -519,9 +520,9 @@ final class Application {
         return serviceContainer.resolve!(TaskQueue);
     }
 
-    // TaskWorker task() {
-    //     return serviceContainer.resolve!(TaskWorker);
-    // }
+    Worker task() {
+        return serviceContainer.resolve!(Worker);
+    }
 
     deprecated("Using defaultEntityManager instead.")
     EntityManager entityManager() {
