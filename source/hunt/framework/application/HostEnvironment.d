@@ -55,11 +55,15 @@ class HostEnvironment {
     }
 
     bool isProduction() {
-        return _name == DEFAULT_RUNTIME_ENVIRONMENT;
+        return _name == "production";
     }
 
     bool isDevelopment() {
-        return _name == "development";
+        return _name == "development" || _name == DEFAULT_RUNTIME_ENVIRONMENT;
+    }
+
+    bool isTest() {
+        return _name == "test";
     }
 
     bool isStaging() {
