@@ -144,7 +144,7 @@ class RouteConfigManager {
     private void loadGroupRoutes() {
         RouteGroupConfig[] routeGroups = _appConfig.route.groups;
         if (routeGroups.empty) {
-            warning("No route group defined.");
+            version(HUNT_DEBUG) warning("No route group defined.");
             return;
         }
 

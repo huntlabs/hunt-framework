@@ -284,7 +284,6 @@ class ApplicationConfig {
     HttpConf http;
     HttpsConf https;
     RouteConf route;
-    // MemcacheConf memcache;
     QueueConf queue;
     TaskConf task;
     RedisConf redis;
