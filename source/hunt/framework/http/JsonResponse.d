@@ -32,12 +32,20 @@ class JsonResponse : Response {
     
     this() {
         super();
+        this.setJson(parseJSON("{}"));
     }
 
     this(T)(T data) {
         super();
 
-        this.setJson(data.toJson());
+        JSONValue jv = data.toJson();
+        if(jv.type == JSONType.OBJECT || jv.type == JSONType.ARRAY) {
+            this.setJson(jv);
+        } else {
+            JSONValue j;
+            j["data"] = jv;
+            this.setJson(j);
+        }
     }
 
     /**
@@ -58,6 +66,7 @@ class JsonResponse : Response {
      * @return this
      */
     JsonResponse setJson(JSONValue data) {
+        assert(data.type == JSONType.OBJECT || data.type == JSONType.ARRAY);
         this.setContent(data.toString(), MimeType.APPLICATION_JSON_UTF_8.toString());
 
         return this;
