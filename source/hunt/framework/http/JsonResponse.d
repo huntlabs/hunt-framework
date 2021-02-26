@@ -7,8 +7,8 @@ import std.datetime;
 import std.json;
 
 import hunt.logging.ConsoleLogger;
-import hunt.util.MimeType;
 import hunt.serialization.JsonSerializer;
+import hunt.util.MimeType;
 
 // import hunt.framework.http.cookie;
 // import hunt.framework.util.String;
@@ -32,21 +32,10 @@ class JsonResponse : Response {
     
     this() {
         super();
-        this.setJson(parseJSON("{}"));
     }
 
     this(T)(T data) {
         super();
-
-        // JSONValue jv = data.toJson();
-        // if(jv.type == JSONType.OBJECT || jv.type == JSONType.ARRAY) {
-        //     this.setJson(jv);
-        // } else {
-        //     JSONValue j;
-        //     j["data"] = jv;
-        //     this.setJson(j);
-        // }
-
         this.setJson(data.toJson());
     }
 
@@ -68,9 +57,7 @@ class JsonResponse : Response {
      * @return this
      */
     JsonResponse setJson(JSONValue data) {
-        // assert(data.type == JSONType.OBJECT || data.type == JSONType.ARRAY);
         this.setContent(data.toString(), MimeType.APPLICATION_JSON_UTF_8.toString());
-
         return this;
     }
 }
