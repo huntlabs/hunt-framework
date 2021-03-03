@@ -20,7 +20,7 @@ import hunt.shiro.Exceptions;
 import hunt.shiro.authc.AuthenticationToken;
 import hunt.util.TypeUtils;
 
-import jwt.JwtRegisteredClaimNames;
+import hunt.jwt.JwtRegisteredClaimNames;
 
 import std.algorithm;
 import std.array : split;
