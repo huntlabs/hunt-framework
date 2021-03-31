@@ -48,7 +48,7 @@ class DatabaseServiceProvider : ServiceProvider {
             option.pool.maxConnection = config.pool.maxConnection;
             option.pool.minConnection = config.pool.minConnection;
 
-            version(HUNT_DEBUG) infof("using database: %s", config.driver);
+            version(HUNT_DEBUG) infof("Using database: %s", config.driver);
             return Persistence.createEntityManagerFactory(option);
         } else {
             // version(HUNT_DEBUG) warning("The database is disabled.");

@@ -12,7 +12,7 @@
         "hunt-entity": "~>2.7.0",
         "hunt-cache": "~>0.9.0",
         "hunt-shiro": "~>1.2.0",
-        "hunt-jwt": "~>0.2.0-beta.1",
+        "hunt-jwt": "~>0.2.0-beta.2",
         "poodinis": "~>8.1.0-beta.2"
     }
 }
