@@ -14,6 +14,8 @@ module hunt.framework.http.Form;
 import hunt.validation.ConstraintValidatorContext;
 import hunt.validation.Valid;
 
+import hunt.serialization.JsonSerializer;
+
 interface Form : Valid
 {
 }
@@ -22,3 +24,5 @@ mixin template MakeForm()
 {
     mixin MakeValid;
 }
+
+alias FormProperty = JsonProperty;
