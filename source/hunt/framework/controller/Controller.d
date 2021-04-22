@@ -467,6 +467,8 @@ abstract class Controller
         {
             resp.withCookie(new Cookie(DefaultSessionIdName, session.getId(), session.getMaxInactiveInterval(), 
                     "/", null, false, false));
+
+            // session.save();
         }
 
         resp.header("Date", date("Y-m-d H:i:s"));
@@ -753,26 +755,44 @@ string __createCallActionMethod(T, string moduleName)()
 
                         string varName = "";
                         alias paramsType = Parameters!currentMethod;
+                        alias paramsDefaults = ParameterDefaults!currentMethod;
 
                         static foreach (int i; 0..params.length)
-                        {
+                        {{
                             varName = TempVarName ~ i.to!string;
+                            enum currentParamType = paramsType[i].stringof;
 
-                            static if (paramsType[i].stringof == "string") {
-                                str ~= indent(2) ~ "string " ~ varName ~ " = request.get(\"" ~ params[i] ~ "\");\n";
+                            static if (is(paramsType[i] == string)) {
+                                static if(is(paramsDefaults[i] == void)) {
+                                    str ~= indent(3) ~ "string " ~ varName ~ " = request.get(\"" ~ params[i] ~ "\");\n";
+                                } else {
+                                    str ~= indent(3) ~ "string " ~ varName ~ " = request.get(\"" ~ params[i] ~ 
+                                        "\", " ~ paramsDefaults[i].stringof ~ ");\n";
+                                }
                             } else static if (isNumeric!(paramsType[i])) {
-                                str ~= "\t\tauto " ~ varName ~ " = this.processGetNumericString(request.get(\"" ~ 
-                                    params[i] ~ "\")).to!" ~ paramsType[i].stringof ~ ";\n";
+                                static if(is(paramsDefaults[i] == void)) {
+                                    str ~= indent(3) ~ "auto " ~ varName ~ " = this.processGetNumericString(request.get(\"" ~ 
+                                        params[i] ~ "\")).to!" ~ currentParamType ~ ";\n";
+                                } else {
+                                    str ~= indent(3) ~ "auto " ~ varName ~ " = this.processGetNumericString(request.get(\"" ~ 
+                                        params[i] ~ "\", \"" ~ paramsDefaults[i].stringof ~ "\")).to!" ~ currentParamType ~ ";\n";
+                                }
                             } else static if(is(paramsType[i] : Form)) {
-                                str ~= "\t\tauto " ~ varName ~ " = request.bindForm!" ~ paramsType[i].stringof ~ "();\n";
+                                str ~= indent(3) ~ "auto " ~ varName ~ " = request.bindForm!" ~ currentParamType ~ "();\n";
                             } else {
-                                str ~= "\t\tauto " ~ varName ~ " = request.get(\"" ~ params[i] ~ "\").to!" ~ 
-                                        paramsType[i].stringof ~ ";\n";
+                                static if(is(paramsDefaults[i] == void)) {
+                                    str ~= indent(3) ~ "auto " ~ varName ~ " = request.get(\"" ~ params[i] ~ "\").to!" ~ 
+                                            currentParamType ~ ";\n";
+                                } else {
+                                    str ~= indent(3) ~ "auto " ~ varName ~ " = request.get(\"" ~ params[i] ~ 
+                                            "\", " ~ paramsDefaults[i].stringof ~ ").to!" ~ 
+                                            currentParamType ~ ";\n";
+                                }
                             }
 
                             paramString ~= i == 0 ? varName : ", " ~ varName;
                             // varName = "";
-                        }
+                        }}
                     }
 
                     // Parameters validation

@@ -1067,7 +1067,7 @@ class Render : VisitorInterface
                 assertTemplate(0, "Missing value for argument `%s` in macro `%s`".fmt(arg.name, name));
 
         if (!caller.isNull)
-            _context.macros["caller"] = caller;
+            _context.macros["caller"] = caller.get();
 
         tryAccept(macro_.block.get);
         result = pop();
