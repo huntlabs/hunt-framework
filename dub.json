@@ -13,7 +13,7 @@
         "hunt-cache": "~>0.8.2",
         "hunt-shiro": "~>1.1.15",
         "hunt-amqp-client": "~>1.1.0-beta.2",
-        "poodinis": "~>8.1.0-beta.2"
+        "poodinis": "==8.1.0-beta.2"
     },
     "subConfigurations": {
         "hunt-http" : "tls"

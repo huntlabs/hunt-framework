@@ -461,14 +461,17 @@ abstract class Controller
 
     protected void done() {
         Request req = request();
-        req.flush(); // assure the sessiondata flushed;
         Response resp = response();
         HttpSession session = req.session(false);
         if (session !is null ) // && session.isNewSession()
         {
             resp.withCookie(new Cookie(DefaultSessionIdName, session.getId(), session.getMaxInactiveInterval(), 
                     "/", null, false, false));
+
+            // session.reflash();
+            session.save();
         }
+        req.flush(); // assure the sessiondata flushed;
 
         resp.header("Date", date("Y-m-d H:i:s"));
         resp.header(HttpHeader.X_POWERED_BY, HUNT_X_POWERED_BY);

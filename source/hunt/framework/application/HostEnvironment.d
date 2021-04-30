@@ -59,7 +59,7 @@ class HostEnvironment {
     }
 
     bool isDevelopment() {
-        return _name == "development";
+        return _name == "development" || _name.empty();
     }
 
     bool isStaging() {
