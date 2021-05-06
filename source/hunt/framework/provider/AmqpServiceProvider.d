@@ -15,7 +15,7 @@ import core.time;
 class AmqpServiceProvider : ServiceProvider {
 
     override void register() {
-        container.register!(AmqpClient, AmqpClientImpl)(() {
+        container.register!(AmqpClient, AmqpClientImpl).initializedBy!(AmqpClient)({
             ApplicationConfig config = container.resolve!ApplicationConfig();
 
             auto amqpConfig = config.amqp;

@@ -15,7 +15,7 @@ class RedisServiceProvider : ServiceProvider {
     override void register() {
         // container.register!(RedisPoolConfig)().singleInstance();
 
-        container.register!(RedisPool)(() {
+        container.register!(RedisPool).initializedBy(() {
             ApplicationConfig config = container.resolve!ApplicationConfig();
 
             auto redisOptions = config.redis;
