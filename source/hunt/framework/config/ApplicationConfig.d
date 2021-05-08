@@ -103,7 +103,7 @@ class ApplicationConfig {
         uint workerThreads = 4;
         uint ioThreads = 2;
         size_t keepAliveTimeOut = 30;
-        size_t maxHeaderSize = 60 * 1024;
+        size_t maxHeaderSize = 64 * 1024;
         int cacheControl;
         bool enableCors = false; // CORS support
         string allowOrigin = "*";

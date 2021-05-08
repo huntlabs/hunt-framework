@@ -55,6 +55,7 @@ class HttpServiceProvider : ServiceProvider {
         HttpServer.Builder hsb = HttpServer.builder()
             .setListener(appConfig.http.port, appConfig.http.address)
             .workerThreadSize(appConfig.http.workerThreads)
+            .maxRequestSize(cast(int)appConfig.http.maxHeaderSize)
             .ioThreadSize(appConfig.http.ioThreads);
 
         version(WITH_HUNT_TRACE) {
