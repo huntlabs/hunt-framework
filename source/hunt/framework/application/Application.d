@@ -512,6 +512,11 @@ final class Application {
         return r;
     }
 
+    RedisCluster redisCluster() {
+        RedisCluster cluster = serviceContainer.resolve!RedisCluster();
+        return cluster;
+    }
+
     Cache cache() {
         return serviceContainer.resolve!(Cache);
     }

@@ -166,6 +166,7 @@ class ApplicationConfig {
     struct RedisClusterConf {
         bool enabled = false;
         string[] nodes;
+        uint redirections = 5;
     }
 
     struct QueueConf {

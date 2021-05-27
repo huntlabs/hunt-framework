@@ -39,7 +39,7 @@ class CacheServiceProvider : ServiceProvider {
             options.diskExpiryThreadIntervalSeconds = cacheConf.diskExpiryThreadIntervalSeconds;
             options.maxEntriesLocalDisk = cacheConf.maxEntriesLocalDisk;
 
-            if(cacheConf.adapter == AdapterType.REDIS) {
+            if(cacheConf.adapter == AdapterType.REDIS || cacheConf.adapter == AdapterType.REDIS_CLUSTER) {
 
                 if(!redisConf.enabled) {
                     throw new Exception("The Redis is disabled.");
@@ -59,11 +59,9 @@ class CacheServiceProvider : ServiceProvider {
                 version(HUNT_DEBUG) infof("Initializing RedisPool: %s", poolConfig.toString());
 
                 options.redisPool = poolConfig;
-
-                options.isRedisClusterEnabled = redisConf.cluster.enabled;
                 options.redisCluster.nodes = redisConf.cluster.nodes;
-            }
-
+            } 
+            
             return CacheFactory.create(options);
         }).singleInstance();
     }
