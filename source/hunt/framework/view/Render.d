@@ -958,8 +958,11 @@ class Render : VisitorInterface
 
     override void visit(ExtendsNode node)
     {
-        _extends ~= node.tmplBlock;
-        tryAccept(node.tmplBlock.get);
+        Nullable!TemplateNode templateNode = node.tmplBlock;
+        if(!templateNode.isNull()) {
+            _extends ~= templateNode.get();
+            tryAccept(templateNode.get());
+        }
         _extends.popBack;
         _isExtended = true;
     }
