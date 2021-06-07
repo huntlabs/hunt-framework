@@ -35,6 +35,7 @@ import hunt.http.HttpConnection;
 import hunt.cache;
 import hunt.entity.EntityManagerFactory;
 import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 import hunt.redis.Redis;
 import hunt.redis.RedisPool;
 import hunt.validation;
@@ -218,11 +219,11 @@ abstract class Controller
         TypeInfo_Class[] routeMiddlewares;
         routeMiddlewares = routeManager().group(routeGroup).allowedMiddlewares();
         foreach(TypeInfo_Class info; routeMiddlewares) {
-            version(HUNT_AUTH_DEBUG) tracef("routeGroup: %s, fullName: %s", routeGroup, info.name);
+            version(HUNT_AUTH_DEBUG) ConsoleLogger.tracef("routeGroup: %s, fullName: %s", routeGroup, info.name);
 
             MiddlewareInterface middleware = cast(MiddlewareInterface)info.create();
             if(middleware is null) {
-                warningf("%s is not a MiddlewareInterface", info.name);
+                ConsoleLogger.warningf("%s is not a MiddlewareInterface", info.name);
             } else {              
                 result ~= middleware;
             }
@@ -240,11 +241,11 @@ abstract class Controller
             if(routeItem !is null) {
             routeMiddlewares = routeItem.allowedMiddlewares();
             foreach(TypeInfo_Class info; routeMiddlewares) {
-                warningf("actionId: %s, fullName: %s", actionId, info.name);
+                ConsoleLogger.warningf("actionId: %s, fullName: %s", actionId, info.name);
 
                 MiddlewareInterface middleware = cast(MiddlewareInterface)info.create();
                 if(middleware is null) {
-                    warningf("%s is not a MiddlewareInterface", info.name);
+                    ConsoleLogger.warningf("%s is not a MiddlewareInterface", info.name);
                 } else {
                     result ~= middleware;
                 }
@@ -265,11 +266,11 @@ abstract class Controller
         // });
 
         foreach(MiddlewareInfo info; middlewares) {
-            // warningf("fullName: %s, action: %s", info.fullName, info.action);
+            // ConsoleLogger.warningf("fullName: %s, action: %s", info.fullName, info.action);
 
             MiddlewareInterface middleware = cast(MiddlewareInterface)Object.factory(info.fullName);
             if(middleware is null) {
-                warningf("%s is not a MiddlewareInterface", info.fullName);
+                ConsoleLogger.warningf("%s is not a MiddlewareInterface", info.fullName);
             } else {             
                 result ~= middleware;
             }
@@ -319,7 +320,7 @@ abstract class Controller
         string routeGroup = req.routeGroup();
         
         version (HUNT_DEBUG) {
-            infof("middlware: routeGroup=%s, path=%s, method=%s, actionId=%s, actionName=%s", 
+            ConsoleLogger.infof("middlware: routeGroup=%s, path=%s, method=%s, actionId=%s, actionName=%s", 
                routeGroup, req.path(),  req.method, actionId, actionName);
         }
 
@@ -335,14 +336,14 @@ abstract class Controller
 
         foreach(MiddlewareInterface m; allowedMiddlewares) {
             string name = m.name();
-            version (HUNT_DEBUG) logDebugf("The %s is processing ...", name);
+            version (HUNT_DEBUG) ConsoleLogger.tracef("The %s is processing ...", name);
 
             auto response = m.onProcess(req, this.response);
             if (response is null) {
                 continue;
             }
 
-            version (HUNT_DEBUG) infof("The access is blocked by %s.", name);
+            version (HUNT_DEBUG) ConsoleLogger.infof("The access is blocked by %s.", name);
             return response;
         }
         
@@ -350,15 +351,15 @@ abstract class Controller
         allowedMiddlewares = getAcceptedMiddlewaresInRouteGroup(routeGroup);
         foreach(MiddlewareInterface m; allowedMiddlewares) {
             string name = m.name();
-            version (HUNT_DEBUG) logDebugf("The %s is processing ...", name);
+            version (HUNT_DEBUG) ConsoleLogger.tracef("The %s is processing ...", name);
 
             if(isSkippedMiddlewareInControllerAction(actionName, name)) {
-                version (HUNT_DEBUG) infof("A middleware [%s] is skipped ...", name);
+                version (HUNT_DEBUG) ConsoleLogger.infof("A middleware [%s] is skipped ...", name);
                 return null;
             }
 
             if(isSkippedMiddlewareInRouteItem(name, routeGroup, actionId)) {
-                version (HUNT_DEBUG) infof("A middleware [%s] is skipped ...", name);
+                version (HUNT_DEBUG) ConsoleLogger.infof("A middleware [%s] is skipped ...", name);
                 return null;
             }
 
@@ -367,7 +368,7 @@ abstract class Controller
                 continue;
             }
 
-            version (HUNT_DEBUG) infof("The access is blocked by %s.", m.name);
+            version (HUNT_DEBUG) ConsoleLogger.infof("The access is blocked by %s.", m.name);
             return response;
         }
 
@@ -377,14 +378,14 @@ abstract class Controller
 
         foreach (m; middlewares) {
             string name = m.name();
-            version (HUNT_DEBUG) logDebugf("The %s is processing ...", name);
+            version (HUNT_DEBUG) ConsoleLogger.tracef("The %s is processing ...", name);
             if(isSkippedMiddlewareInControllerAction(actionName, name)) {
-                version (HUNT_DEBUG) infof("A middleware [%s] is skipped ...", name);
+                version (HUNT_DEBUG) ConsoleLogger.infof("A middleware [%s] is skipped ...", name);
                 return null;
             }
 
             if(isSkippedMiddlewareInRouteItem(name, routeGroup, actionId)) {
-                version (HUNT_DEBUG) infof("A middleware [%s] is skipped ...", name);
+                version (HUNT_DEBUG) ConsoleLogger.infof("A middleware [%s] is skipped ...", name);
                 return null;
             }
 
@@ -393,7 +394,7 @@ abstract class Controller
                 continue;
             }
 
-            version (HUNT_DEBUG) logDebugf("The access is blocked by %s.", name);
+            version (HUNT_DEBUG) ConsoleLogger.tracef("The access is blocked by %s.", name);
             return response;
         }
 
@@ -433,13 +434,13 @@ abstract class Controller
             auto itemPtr = _currentActionName in _actionValidators;
             // assert(itemPtr !is null, format("No handler found for action: %s!", _currentActionName));
             if(itemPtr is null) {
-                warning(format("No validator found for action: %s.", _currentActionName));
+                ConsoleLogger.warning(format("No validator found for action: %s.", _currentActionName));
             } else {
                 try {
                     (*itemPtr)(_context);  
                 } catch(Exception ex) {
-                    warning(ex.msg);
-                    version(HUNT_DEBUG) warning(ex);
+                    ConsoleLogger.warning(ex.msg);
+                    version(HUNT_DEBUG) ConsoleLogger.warning(ex);
                 }
             }          
         }
@@ -503,7 +504,7 @@ abstract class Controller
         Auth auth = req.auth();
 
         version(HUNT_AUTH_DEBUG) {
-            tracef("Path: %s, isAuthEnabled: %s", 
+            ConsoleLogger.tracef("Path: %s, isAuthEnabled: %s", 
                 req.path,  auth.isEnabled());
         }
 
@@ -513,7 +514,7 @@ abstract class Controller
         AuthenticationScheme authScheme = auth.scheme();
         string tokenCookieName = auth.tokenCookieName;
         version(HUNT_AUTH_DEBUG) {
-            warningf("tokenCookieName: %s, authScheme: %s, isAuthenticated: %s, isLogout: %s", 
+            ConsoleLogger.warningf("tokenCookieName: %s, authScheme: %s, isAuthenticated: %s, isLogout: %s", 
                 tokenCookieName, authScheme, auth.user().isAuthenticated, auth.isLogout());
         }
 
@@ -538,7 +539,7 @@ abstract class Controller
             int tokenExpiration = appConfig.auth.tokenExpiration;
             string authToken = auth.token();
             if(authToken.empty()) {
-                version(HUNT_AUTH_DEBUG) warning("The auth token is empty!");
+                version(HUNT_AUTH_DEBUG) ConsoleLogger.warning("The auth token is empty!");
             } else {
                 tokenCookie = new Cookie(tokenCookieName, authToken, tokenExpiration);
                 auth.touchSession();
@@ -658,7 +659,7 @@ private string generateAcceptedMiddleware(string name, string actionName, string
             string fullName = typeInfo.name;
             this.addAcceptedMiddleware(fullName, "%s", "%s", "%s");
         } catch(Exception ex) {
-            warning(ex.msg);
+            ConsoleLogger.warning(ex.msg);
         }
     `;
 
@@ -675,7 +676,7 @@ private string generateAddSkippedMiddleware(string name, string actionName, stri
             string fullName = typeInfo.name;
             this.addSkippedMiddleware(fullName, "%s", "%s", "%s");
         } catch(Exception ex) {
-            warning(ex.msg);
+            ConsoleLogger.warning(ex.msg);
         }
     `;
 
@@ -804,7 +805,7 @@ string __createCallActionMethod(T, string moduleName)()
                     static if(is(typeof(currentMethod) allParams == __parameters)) {
                         str ~= indent(4) ~ "version(HUNT_DEBUG) info(`Validating in " ~  memberName ~ 
                             ", the prototype is " ~ typeof(currentMethod).stringof ~ ". `); " ~ "\n";
-                        // str ~= indent(4) ~ `version(HUNT_DEBUG) infof("Validating in %s", demangle(_currentActionName)); ` ~ "\n";                        
+                        // str ~= indent(4) ~ `version(HUNT_DEBUG) ConsoleLogger.infof("Validating in %s", demangle(_currentActionName)); ` ~ "\n";                        
 
                         static foreach(i, _; allParams) {{
                             alias thisParameter = allParams[i .. i + 1]; 
@@ -1023,7 +1024,7 @@ void callHandler(T, string method)(RoutingContext context)
 {
     // req.action = method;
     // auto req = context.getRequest();
-    // warningf("group name: %s, Threads: %d", context.groupName(), Thread.getAll().length);
+    // ConsoleLogger.warningf("group name: %s, Threads: %d", context.groupName(), Thread.getAll().length);
 
     T controller = new T();
 
@@ -1036,7 +1037,7 @@ void callHandler(T, string method)(RoutingContext context)
         controller.dispose();
         // HUNT_THREAD_DEBUG
         version(HUNT_DEBUG) {
-            warningf("Threads: %d, allocatedInCurrentThread: %d bytes", 
+            ConsoleLogger.warningf("Threads: %d, allocatedInCurrentThread: %d bytes", 
                 Thread.getAll().length, GC.stats().allocatedInCurrentThread);
         }
         // GC.collect();
@@ -1047,7 +1048,8 @@ void callHandler(T, string method)(RoutingContext context)
         controller.callActionMethod(method, context);
         controller.done();
     } catch (Throwable t) {
-        error(t);
+        ConsoleLogger.error(t);
+        app().logger().error(t);
         Response errorRes = new Response();
         errorRes.doError(HttpStatus.INTERNAL_SERVER_ERROR_500, t);
         controller.raiseError(errorRes); 
