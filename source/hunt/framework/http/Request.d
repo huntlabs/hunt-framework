@@ -115,20 +115,22 @@ class Request {
     }
 
     private void checkUploadedFiles() {
-        if (_convertedAllFiles.empty()) {
-            convertUploadedFiles();
-        }
-    }
+        if (!_convertedAllFiles.empty()) 
+            return;
 
-    private void convertUploadedFiles() {
         foreach (Part part; _request.getParts()) {
             MultipartForm multipart = cast(MultipartForm) part;
 
             version (HUNT_HTTP_DEBUG) {
+                cast(string) content = multipart.getBytes();
+                if(content.length > 128) {
+                    content = content[0..128] ~ "...";
+                }
+
                 tracef("File: key=%s, fileName=%s, actualFile=%s, ContentType=%s, content=%s",
                         multipart.getName(), multipart.getSubmittedFileName(),
                         multipart.getFile(), multipart.getContentType(),
-                        cast(string) multipart.getBytes());
+                        content); 
             }
 
             string contentType = multipart.getContentType();
