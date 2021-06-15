@@ -40,32 +40,52 @@ RouteConfigManager routeConfig() {
     return serviceContainer().resolve!(RouteConfigManager);
 }
 
-string url(string mca) {
-    return url(mca, null);
+string url(string actionId) {
+    return url(actionId, null);
 }
 
 
-string url(string mca, string[string] params, string group) {
-    return routeConfig().createUrl(mca, params, group);
-}
+string url(string actionId, string[string] params, string group) {
+    // return routeConfig().createUrl(actionId, params, group);
 
-string url(string mca, string[string] params) {
     // admin:user.user.view
-    string[] items = mca.split(":");
-    string group = "";
+    string[] items = actionId.split(":");
+    string m_group = "";
     string pathItem = "";
     if (items.length == 1) {
-        group = "";
-        pathItem = mca;
+        m_group = "";
+        pathItem = actionId;
     } else if (items.length == 2) {
-        group = items[0];
+        m_group = items[0];
         pathItem = items[1];
     } else {
-        throw new Exception("Bad format for mca");
+        throw new Exception("Wrong format for actionId");
     }
 
-    // return app().createUrl(pathItem, params, group);
-    return routeConfig().createUrl(pathItem, params, group);
+    if(m_group.empty) {
+        m_group = group;
+    }
+
+    return routeConfig().createUrl(pathItem, params, m_group);    
+}
+
+string url(string actionId, string[string] params) {
+    // admin:user.user.view
+    // string[] items = actionId.split(":");
+    // string group = "";
+    // string pathItem = "";
+    // if (items.length == 1) {
+    //     group = "";
+    //     pathItem = actionId;
+    // } else if (items.length == 2) {
+    //     group = items[0];
+    //     pathItem = items[1];
+    // } else {
+    //     throw new Exception("Wrong format for actionId");
+    // }
+
+    // return routeConfig().createUrl(pathItem, params, group);
+    return url(actionId, params, null);
 }
 
 public import hunt.entity.EntityManager;
