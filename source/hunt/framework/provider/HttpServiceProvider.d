@@ -37,7 +37,8 @@ import std.uni;
 class HttpServiceProvider : ServiceProvider {
 
     override void register() {
-        container.register!(HttpServer).initializedBy(&buildServer).singleInstance();
+        // container.register!(HttpServerOptions).singleInstance();
+        container.register!(HttpServer)(&buildServer).singleInstance();
     }
 
     private HttpServer buildServer() {

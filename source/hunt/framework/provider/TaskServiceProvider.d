@@ -19,7 +19,7 @@ class TaskServiceProvider : ServiceProvider {
 
     override void register() {
 
-        container.register!(TaskWorker).initializedBy(() {
+        container.register!(TaskWorker)(() {
             AbstractQueue queue = serviceContainer.resolve!(AbstractQueue);
             return new TaskWorker(queue);
         }).newInstance();
