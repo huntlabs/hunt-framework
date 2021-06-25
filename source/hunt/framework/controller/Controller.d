@@ -50,6 +50,7 @@ import std.exception;
 import std.string;
 import std.traits;
 import std.variant;
+import std.meta : Filter;
 
 struct Action {
 }
@@ -763,30 +764,37 @@ string __createCallActionMethod(T, string moduleName)()
                         {{
                             varName = TempVarName ~ i.to!string;
                             enum currentParamType = paramsType[i].stringof;
+                            
+                            alias paramsUDAs = ParameterUDAs!(currentMethod, AliasField, i);
+                            static if(paramsUDAs.length > 0) {
+                                enum actualParameter = paramsUDAs[0].name;
+                            } else {
+                                alias actualParameter = params[i];
+                            }
 
                             static if (is(paramsType[i] == string)) {
                                 static if(is(paramsDefaults[i] == void)) {
-                                    str ~= indent(3) ~ "string " ~ varName ~ " = request.get(\"" ~ params[i] ~ "\");\n";
+                                    str ~= indent(3) ~ "string " ~ varName ~ " = request.get(\"" ~ actualParameter ~ "\");\n";
                                 } else {
-                                    str ~= indent(3) ~ "string " ~ varName ~ " = request.get(\"" ~ params[i] ~ 
+                                    str ~= indent(3) ~ "string " ~ varName ~ " = request.get(\"" ~ actualParameter ~ 
                                         "\", " ~ paramsDefaults[i].stringof ~ ");\n";
                                 }
                             } else static if (isNumeric!(paramsType[i])) {
                                 static if(is(paramsDefaults[i] == void)) {
                                     str ~= indent(3) ~ "auto " ~ varName ~ " = this.processGetNumericString(request.get(\"" ~ 
-                                        params[i] ~ "\")).to!" ~ currentParamType ~ ";\n";
+                                        actualParameter ~ "\")).to!" ~ currentParamType ~ ";\n";
                                 } else {
                                     str ~= indent(3) ~ "auto " ~ varName ~ " = this.processGetNumericString(request.get(\"" ~ 
-                                        params[i] ~ "\", \"" ~ paramsDefaults[i].stringof ~ "\")).to!" ~ currentParamType ~ ";\n";
+                                        actualParameter ~ "\", \"" ~ paramsDefaults[i].stringof ~ "\")).to!" ~ currentParamType ~ ";\n";
                                 }
                             } else static if(is(paramsType[i] : Form)) {
-                                str ~= indent(3) ~ "auto " ~ varName ~ " = request.bindForm!" ~ currentParamType ~ "();\n";
+                                str ~= indent(3) ~ "auto " ~ varName ~ " = request.bindForm!" ~ params[i] ~ "();\n";
                             } else {
                                 static if(is(paramsDefaults[i] == void)) {
-                                    str ~= indent(3) ~ "auto " ~ varName ~ " = request.get(\"" ~ params[i] ~ "\").to!" ~ 
+                                    str ~= indent(3) ~ "auto " ~ varName ~ " = request.get(\"" ~ actualParameter ~ "\").to!" ~ 
                                             currentParamType ~ ";\n";
                                 } else {
-                                    str ~= indent(3) ~ "auto " ~ varName ~ " = request.get(\"" ~ params[i] ~ 
+                                    str ~= indent(3) ~ "auto " ~ varName ~ " = request.get(\"" ~ actualParameter ~ 
                                             "\", " ~ paramsDefaults[i].stringof ~ ").to!" ~ 
                                             currentParamType ~ ";\n";
                                 }
@@ -810,9 +818,16 @@ string __createCallActionMethod(T, string moduleName)()
                         static foreach(i, _; allParams) {{
                             alias thisParameter = allParams[i .. i + 1]; 
                             alias udas =  __traits(getAttributes, thisParameter);
-                            enum ident = __traits(identifier, thisParameter);
+                            // enum ident = __traits(identifier, thisParameter);
+                            
+                            alias paramsUDAs = Filter!(isDesiredUDA!AliasField, udas); 
+                            static if(paramsUDAs.length > 0) {
+                                enum actualParameter = paramsUDAs[0].name;
+                            } else {
+                                enum actualParameter = __traits(identifier, thisParameter);
+                            }
 
-                            str ~= "\n" ~ makeParameterValidation!(TempVarName ~ i.to!string, ident, 
+                            str ~= "\n" ~ makeParameterValidation!(TempVarName ~ i.to!string, actualParameter, 
                                 thisParameter, udas) ~ "\n"; 
                          }}
                     }
@@ -849,14 +864,58 @@ string __createCallActionMethod(T, string moduleName)()
 
     str ~= "\tdefault:\n\tbreak;\n\t}\n\n";
     str ~= "}";
-
     return str;
+}
+
+
+
+template isDesiredUDA(alias attribute)
+{
+    template isDesiredUDA(alias toCheck)
+    {
+        static if (is(typeof(attribute)) && !__traits(isTemplate, attribute))
+        {
+            static if (__traits(compiles, toCheck == attribute))
+                enum isDesiredUDA = toCheck == attribute;
+            else
+                enum isDesiredUDA = false;
+        }
+        else static if (is(typeof(toCheck)))
+        {
+            static if (__traits(isTemplate, attribute))
+                enum isDesiredUDA =  isInstanceOf!(attribute, typeof(toCheck));
+            else
+                enum isDesiredUDA = is(typeof(toCheck) == attribute);
+        }
+        else static if (__traits(isTemplate, attribute))
+            enum isDesiredUDA = isInstanceOf!(attribute, toCheck);
+        else
+            enum isDesiredUDA = is(toCheck == attribute);
+    }
+}
+
+
+template ParameterUDAs(alias func, A, int i=0) {
+    static if(is(FunctionTypeOf!func PT == __parameters)) {
+        alias thisParameter = PT[i .. i + 1]; 
+        alias udas =  __traits(getAttributes, thisParameter);
+
+        alias ParameterUDAs = Filter!(isDesiredUDA!A, udas);
+    } else {
+        static assert(0, func.stringof ~ " is not a function");
+    }
 }
 
 
 string makeParameterValidation(string varName, string paraName, paraType, UDAs ...)() {
     string str;
     // = "\ninfof(\"" ~ symbol.stringof ~ "\");";
+
+    version(HUNT_HTTP_DEBUG) {
+        str ~= `
+            tracef("varName=`~ varName ~`, paraName=` ~ paraName ~ `");
+        `;
+    }
 
     static foreach(uda; UDAs) {
         static if(is(typeof(uda) == Max)) {

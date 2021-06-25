@@ -26,3 +26,4 @@ mixin template MakeForm()
 }
 
 alias FormProperty = JsonProperty;
+alias AliasField = JsonProperty;
