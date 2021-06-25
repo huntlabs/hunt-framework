@@ -50,6 +50,7 @@ import std.exception;
 import std.string;
 import std.traits;
 import std.variant;
+import std.meta : Filter;
 
 struct Action {
 }
@@ -757,26 +758,51 @@ string __createCallActionMethod(T, string moduleName)()
 
                         string varName = "";
                         alias paramsType = Parameters!currentMethod;
+                        alias paramsDefaults = ParameterDefaults!currentMethod;
 
                         static foreach (int i; 0..params.length)
-                        {
+                        {{
                             varName = TempVarName ~ i.to!string;
-
-                            static if (paramsType[i].stringof == "string") {
-                                str ~= indent(2) ~ "string " ~ varName ~ " = request.get(\"" ~ params[i] ~ "\");\n";
-                            } else static if (isNumeric!(paramsType[i])) {
-                                str ~= "\t\tauto " ~ varName ~ " = this.processGetNumericString(request.get(\"" ~ 
-                                    params[i] ~ "\")).to!" ~ paramsType[i].stringof ~ ";\n";
-                            } else static if(is(paramsType[i] : Form)) {
-                                str ~= "\t\tauto " ~ varName ~ " = request.bindForm!" ~ paramsType[i].stringof ~ "();\n";
+                            enum currentParamType = paramsType[i].stringof;
+                            
+                            alias paramsUDAs = ParameterUDAs!(currentMethod, AliasField, i);
+                            static if(paramsUDAs.length > 0) {
+                                enum actualParameter = paramsUDAs[0].name;
                             } else {
-                                str ~= "\t\tauto " ~ varName ~ " = request.get(\"" ~ params[i] ~ "\").to!" ~ 
-                                        paramsType[i].stringof ~ ";\n";
+                                alias actualParameter = params[i];
+                            }
+
+                            static if (is(paramsType[i] == string)) {
+                                static if(is(paramsDefaults[i] == void)) {
+                                    str ~= indent(3) ~ "string " ~ varName ~ " = request.get(\"" ~ actualParameter ~ "\");\n";
+                                } else {
+                                    str ~= indent(3) ~ "string " ~ varName ~ " = request.get(\"" ~ actualParameter ~ 
+                                        "\", " ~ paramsDefaults[i].stringof ~ ");\n";
+                                }
+                            } else static if (isNumeric!(paramsType[i])) {
+                                static if(is(paramsDefaults[i] == void)) {
+                                    str ~= indent(3) ~ "auto " ~ varName ~ " = this.processGetNumericString(request.get(\"" ~ 
+                                        actualParameter ~ "\")).to!" ~ currentParamType ~ ";\n";
+                                } else {
+                                    str ~= indent(3) ~ "auto " ~ varName ~ " = this.processGetNumericString(request.get(\"" ~ 
+                                        actualParameter ~ "\", \"" ~ paramsDefaults[i].stringof ~ "\")).to!" ~ currentParamType ~ ";\n";
+                                }
+                            } else static if(is(paramsType[i] : Form)) {
+                                str ~= indent(3) ~ "auto " ~ varName ~ " = request.bindForm!" ~ currentParamType ~ "();\n";
+                            } else {
+                                static if(is(paramsDefaults[i] == void)) {
+                                    str ~= indent(3) ~ "auto " ~ varName ~ " = request.get(\"" ~ actualParameter ~ "\").to!" ~ 
+                                            currentParamType ~ ";\n";
+                                } else {
+                                    str ~= indent(3) ~ "auto " ~ varName ~ " = request.get(\"" ~ actualParameter ~ 
+                                            "\", " ~ paramsDefaults[i].stringof ~ ").to!" ~ 
+                                            currentParamType ~ ";\n";
+                                }
                             }
 
                             paramString ~= i == 0 ? varName : ", " ~ varName;
                             // varName = "";
-                        }
+                        }}
                     }
 
                     // Parameters validation
@@ -787,14 +813,21 @@ string __createCallActionMethod(T, string moduleName)()
                     static if(is(typeof(currentMethod) allParams == __parameters)) {
                         str ~= indent(4) ~ "version(HUNT_DEBUG) info(`Validating in " ~  memberName ~ 
                             ", the prototype is " ~ typeof(currentMethod).stringof ~ ". `); " ~ "\n";
-                        // str ~= indent(4) ~ `version(HUNT_DEBUG) infof("Validating in %s", demangle(_currentActionName)); ` ~ "\n";                        
+                        // str ~= indent(4) ~ `version(HUNT_DEBUG) ConsoleLogger.infof("Validating in %s", demangle(_currentActionName)); ` ~ "\n";                        
 
                         static foreach(i, _; allParams) {{
                             alias thisParameter = allParams[i .. i + 1]; 
                             alias udas =  __traits(getAttributes, thisParameter);
-                            enum ident = __traits(identifier, thisParameter);
+                            // enum ident = __traits(identifier, thisParameter);
+                            
+                            alias paramsUDAs = Filter!(isDesiredUDA!AliasField, udas); 
+                            static if(paramsUDAs.length > 0) {
+                                enum actualParameter = paramsUDAs[0].name;
+                            } else {
+                                enum actualParameter = __traits(identifier, thisParameter);
+                            }
 
-                            str ~= "\n" ~ makeParameterValidation!(TempVarName ~ i.to!string, ident, 
+                            str ~= "\n" ~ makeParameterValidation!(TempVarName ~ i.to!string, actualParameter, 
                                 thisParameter, udas) ~ "\n"; 
                          }}
                     }
@@ -836,9 +869,53 @@ string __createCallActionMethod(T, string moduleName)()
 }
 
 
+template isDesiredUDA(alias attribute)
+{
+    template isDesiredUDA(alias toCheck)
+    {
+        static if (is(typeof(attribute)) && !__traits(isTemplate, attribute))
+        {
+            static if (__traits(compiles, toCheck == attribute))
+                enum isDesiredUDA = toCheck == attribute;
+            else
+                enum isDesiredUDA = false;
+        }
+        else static if (is(typeof(toCheck)))
+        {
+            static if (__traits(isTemplate, attribute))
+                enum isDesiredUDA =  isInstanceOf!(attribute, typeof(toCheck));
+            else
+                enum isDesiredUDA = is(typeof(toCheck) == attribute);
+        }
+        else static if (__traits(isTemplate, attribute))
+            enum isDesiredUDA = isInstanceOf!(attribute, toCheck);
+        else
+            enum isDesiredUDA = is(toCheck == attribute);
+    }
+}
+
+
+template ParameterUDAs(alias func, A, int i=0) {
+    static if(is(FunctionTypeOf!func PT == __parameters)) {
+        alias thisParameter = PT[i .. i + 1]; 
+        alias udas =  __traits(getAttributes, thisParameter);
+
+        alias ParameterUDAs = Filter!(isDesiredUDA!A, udas);
+    } else {
+        static assert(0, func.stringof ~ " is not a function");
+    }
+}
+
+
 string makeParameterValidation(string varName, string paraName, paraType, UDAs ...)() {
     string str;
     // = "\ninfof(\"" ~ symbol.stringof ~ "\");";
+
+    version(HUNT_HTTP_DEBUG) {
+        str ~= `
+            tracef("varName=`~ varName ~`, paraName=` ~ paraName ~ `");
+        `;
+    }
 
     static foreach(uda; UDAs) {
         static if(is(typeof(uda) == Max)) {
