@@ -788,7 +788,7 @@ string __createCallActionMethod(T, string moduleName)()
                                         actualParameter ~ "\", \"" ~ paramsDefaults[i].stringof ~ "\")).to!" ~ currentParamType ~ ";\n";
                                 }
                             } else static if(is(paramsType[i] : Form)) {
-                                str ~= indent(3) ~ "auto " ~ varName ~ " = request.bindForm!" ~ params[i] ~ "();\n";
+                                str ~= indent(3) ~ "auto " ~ varName ~ " = request.bindForm!" ~ currentParamType ~ "();\n";
                             } else {
                                 static if(is(paramsDefaults[i] == void)) {
                                     str ~= indent(3) ~ "auto " ~ varName ~ " = request.get(\"" ~ actualParameter ~ "\").to!" ~ 
@@ -866,7 +866,6 @@ string __createCallActionMethod(T, string moduleName)()
     str ~= "}";
     return str;
 }
-
 
 
 template isDesiredUDA(alias attribute)
