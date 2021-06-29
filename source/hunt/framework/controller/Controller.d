@@ -402,18 +402,6 @@ abstract class Controller
         return null;
     }
 
-    string processGetNumericString(string value)
-    {
-        import std.string;
-
-        if (!isNumeric(value))
-        {
-            return "0";
-        }
-
-        return value;
-    }
-
     Response processResponse(Response res)
     {
         // TODO: Tasks pending completion -@zhangxueping at 2020-01-06T14:01:43+08:00
@@ -779,24 +767,16 @@ string __createCallActionMethod(T, string moduleName)()
                                     str ~= indent(3) ~ "string " ~ varName ~ " = request.get(\"" ~ actualParameter ~ 
                                         "\", " ~ paramsDefaults[i].stringof ~ ");\n";
                                 }
-                            } else static if (isNumeric!(paramsType[i])) {
-                                static if(is(paramsDefaults[i] == void)) {
-                                    str ~= indent(3) ~ "auto " ~ varName ~ " = this.processGetNumericString(request.get(\"" ~ 
-                                        actualParameter ~ "\")).to!" ~ currentParamType ~ ";\n";
-                                } else {
-                                    str ~= indent(3) ~ "auto " ~ varName ~ " = this.processGetNumericString(request.get(\"" ~ 
-                                        actualParameter ~ "\", \"" ~ paramsDefaults[i].stringof ~ "\")).to!" ~ currentParamType ~ ";\n";
-                                }
                             } else static if(is(paramsType[i] : Form)) {
                                 str ~= indent(3) ~ "auto " ~ varName ~ " = request.bindForm!" ~ currentParamType ~ "();\n";
                             } else {
                                 static if(is(paramsDefaults[i] == void)) {
-                                    str ~= indent(3) ~ "auto " ~ varName ~ " = request.get(\"" ~ actualParameter ~ "\").to!" ~ 
-                                            currentParamType ~ ";\n";
+                                    str ~= indent(3) ~ "auto " ~ varName ~ " = request.get!(" ~ 
+                                            currentParamType ~ ")(\"" ~ actualParameter ~ "\");\n";
                                 } else {
-                                    str ~= indent(3) ~ "auto " ~ varName ~ " = request.get(\"" ~ actualParameter ~ 
-                                            "\", " ~ paramsDefaults[i].stringof ~ ").to!" ~ 
-                                            currentParamType ~ ";\n";
+                                    str ~= indent(3) ~ "auto " ~ varName ~ " = request.get!(" ~ 
+                                            currentParamType ~ ")(\"" ~ actualParameter ~ 
+                                            "\", " ~ paramsDefaults[i].stringof ~ ");\n";
                                 }
                             }
 
