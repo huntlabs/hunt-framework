@@ -478,6 +478,8 @@ final class Application {
         logconf.maxSize = conf.maxSize;
         logconf.maxNum = conf.maxNum;
 
+        import core.thread;
+        import std.conv;
         import std.process;
         import std.datetime;
         import std.json;
@@ -497,8 +499,8 @@ final class Application {
                     jv["module"] = myFunc;
                     jv["funcName"] = myFunc;
                     jv["line"] = line;
-                    jv["thread"] = tid;
-                    jv["threadName"] = tid;
+                    jv["thread"] = tid.to!long;
+                    jv["threadName"] = Thread.getThis().name();
                     jv["process"] = thisProcessID();
                     jv["message"] = msg;
                     return jv.toString();
@@ -602,4 +604,9 @@ final class Application {
  */
 Application app() {
     return Application.instance();
+}
+
+
+Logger filebeatLogger() {
+    return app().logger();
 }
