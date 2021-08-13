@@ -189,6 +189,12 @@ final class Application {
       Start the HttpServer , and block current thread.
      */
     void run(string[] args) {
+
+        scope(exit) {
+            import core.thread;
+            thread_joinAll();
+        }
+
         tryRegister!ConfigServiceProvider();
 
         ConfigManager manager = serviceContainer().resolve!ConfigManager;
