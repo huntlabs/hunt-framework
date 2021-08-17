@@ -57,6 +57,7 @@ class HttpServiceProvider : ServiceProvider {
             .setListener(appConfig.http.port, appConfig.http.address)
             .workerThreadSize(appConfig.http.workerThreads)
             .maxRequestSize(cast(int)appConfig.http.maxHeaderSize)
+            .maxFileSize(cast(int)appConfig.upload.maxSize)
             .ioThreadSize(appConfig.http.ioThreads);
 
         version(WITH_HUNT_TRACE) {

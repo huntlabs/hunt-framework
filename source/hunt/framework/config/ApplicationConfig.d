@@ -296,19 +296,19 @@ class ApplicationConfig {
     View view;
     TraceConf trace;
 
-    MultipartOptions multipartConfig() {
-        if (_multipartConfig is null) {
-            string path = buildPath(DEFAULT_TEMP_PATH, upload.path);
-            if (!path.exists()) {
-                // for Exception now?
-                path.mkdirRecurse();
-            }
-            _multipartConfig = new MultipartOptions(path, upload.maxSize, upload.maxSize, 50);
-        }
-        return _multipartConfig;
-    }
+    // MultipartOptions multipartConfig() {
+    //     if (_multipartConfig is null) {
+    //         string path = buildPath(DEFAULT_TEMP_PATH, upload.path);
+    //         if (!path.exists()) {
+    //             // for Exception now?
+    //             path.mkdirRecurse();
+    //         }
+    //         _multipartConfig = new MultipartOptions(path, upload.maxSize, upload.maxSize, 50);
+    //     }
+    //     return _multipartConfig;
+    // }
 
-    private MultipartOptions _multipartConfig;
+    // private MultipartOptions _multipartConfig;
 
     this() {
         http.workerThreads = totalCPUs * 4;
