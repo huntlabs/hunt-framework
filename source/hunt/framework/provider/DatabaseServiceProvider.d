@@ -14,7 +14,7 @@ class DatabaseServiceProvider : ServiceProvider {
     private bool _isEnabled = true;
 
     override void register() {
-        container.register!(EntityManagerFactory)(&buildEntityManagerFactory)
+        container.register!EntityManagerFactory.initializedBy(&buildEntityManagerFactory)
             .singleInstance();
     }
 

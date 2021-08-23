@@ -20,7 +20,7 @@ import poodinis;
 class CacheServiceProvider : ServiceProvider {
 
     override void register() {
-        container.register!(Cache)(() {
+        container.register!Cache.initializedBy({
             ApplicationConfig config = container.resolve!ApplicationConfig();
             ApplicationConfig.CacheConf cacheConf = config.cache;
             ApplicationConfig.RedisConf redisConf = config.redis;

@@ -33,6 +33,11 @@ import std.file;
 import std.path;
 import std.stdio;
 
+private {
+   alias TemplateLexer = Lexer!(TemplateConfig.init.exprOpBegin,
+           TemplateConfig.init.exprOpEnd, TemplateConfig.init.stmtOpBegin, TemplateConfig.init.stmtOpEnd,
+           TemplateConfig.init.cmntOpBegin, TemplateConfig.init.cmntOpEnd, TemplateConfig.init.stmtOpInline, TemplateConfig.init.cmntOpInline);
+}
 
 class Environment
 {
@@ -42,9 +47,7 @@ class Environment
         string input_path;
         string output_path;
 
-        alias TemplateLexer = Lexer!(TemplateConfig.init.exprOpBegin,
-                TemplateConfig.init.exprOpEnd, TemplateConfig.init.stmtOpBegin, TemplateConfig.init.stmtOpEnd,
-                TemplateConfig.init.cmntOpBegin, TemplateConfig.init.cmntOpEnd, TemplateConfig.init.stmtOpInline, TemplateConfig.init.cmntOpInline);
+     
         Parser!TemplateLexer _parser;
 
         string _routeGroup = DEFAULT_ROUTE_GROUP;

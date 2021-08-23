@@ -16,7 +16,7 @@ import std.path;
 class TranslationServiceProvider : ServiceProvider {
 
     override void register() {
-        container.register!(I18n)(() {
+        container.register!I18n.initializedBy({
             ApplicationConfig config = container.resolve!ApplicationConfig();
             string langLocation = config.application.langLocation;
             langLocation = buildPath(DEFAULT_RESOURCE_PATH, langLocation); 
