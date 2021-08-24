@@ -37,7 +37,7 @@ class ConfigServiceProvider : ServiceProvider {
     }
 
     protected void registerApplicationConfig() {
-        container.register!(ApplicationConfig)(&buildAppConfig).singleInstance();
+        container.register!ApplicationConfig.initializedBy(&buildAppConfig).singleInstance();
     }
 
     private ApplicationConfig buildAppConfig() {
@@ -95,7 +95,7 @@ class ConfigServiceProvider : ServiceProvider {
     }
 
     protected void registerRouteConfigManager() {
-        container.register!(RouteConfigManager)(() {
+        container.register!RouteConfigManager.initializedBy({
             ConfigManager configManager = container.resolve!(ConfigManager)();
             ApplicationConfig appConfig = container.resolve!(ApplicationConfig)();
             RouteConfigManager routeConfig = new RouteConfigManager(appConfig);
@@ -106,7 +106,7 @@ class ConfigServiceProvider : ServiceProvider {
     }
 
     protected void registerAuthUserConfig() {
-        container.register!(AuthUserConfig)(() {
+        container.register!AuthUserConfig.initializedBy(() {
             string userConfigFile = buildPath(APP_PATH, DEFAULT_CONFIG_PATH, DEFAULT_USERS_CONFIG);
             string roleConfigFile = buildPath(APP_PATH, DEFAULT_CONFIG_PATH, DEFAULT_ROLES_CONFIG);
             AuthUserConfig config = AuthUserConfig.load(userConfigFile, roleConfigFile);

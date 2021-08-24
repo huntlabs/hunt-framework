@@ -22,7 +22,7 @@ class GrpcServiceProvider : ServiceProvider {
     private bool isGrpcServerEnabled = false;
 
     override void register() {
-        container().register!(GrpcServer)(() {
+        container().register!GrpcServer.initializedBy({
             ApplicationConfig appConfig = container().resolve!ApplicationConfig();
             GrpcServerConf serverConf = appConfig.grpc.server;
             isGrpcServerEnabled = serverConf.enabled;
@@ -47,7 +47,7 @@ class GrpcServiceProvider : ServiceProvider {
 
         }).singleInstance();
 
-        container().register!(GrpcService)(() {
+        container().register!GrpcService.initializedBy({
             ApplicationConfig appConfig = container().resolve!ApplicationConfig();
             return new GrpcService(appConfig.grpc.clientChannels);
 

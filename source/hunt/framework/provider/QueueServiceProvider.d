@@ -15,7 +15,7 @@ import poodinis;
 class QueueServiceProvider : ServiceProvider {
 
     override void register() {
-        container.register!(TaskQueue)(&build).singleInstance();
+        container.register!TaskQueue.initializedBy(&build).singleInstance();
     }
 
     protected TaskQueue build() {

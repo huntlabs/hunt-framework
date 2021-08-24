@@ -20,7 +20,7 @@ class ViewServiceProvider : ServiceProvider {
 
     override void register() {
 
-        container.register!(View)(() {
+        container.register!View.initializedBy({
             auto view = new View(new Environment);
             string path = buildNormalizedPath(APP_PATH, _appConfig.view.path);
 

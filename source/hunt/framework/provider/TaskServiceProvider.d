@@ -17,7 +17,7 @@ import std.path;
 class TaskServiceProvider : ServiceProvider {
 
     override void register() {
-        container.register!(Worker)(&build).singleInstance();
+        container.register!Worker.initializedBy(&build).singleInstance();
     }
 
     protected Worker build() {
