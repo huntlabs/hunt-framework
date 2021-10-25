@@ -185,15 +185,20 @@ final class Application {
         run(args);
     }
 
-    /**
-      Start the HttpServer , and block current thread.
-     */
     void run(string[] args) {
-
-        scope(exit) {
+        try {
+            doRun(args);
             import core.thread;
             thread_joinAll();
+        } catch(Exception ex) {
+            warning(ex);
+        } catch(Error er) {
+            error(er);
         }
+    }
+
+    private void doRun(string[] args) {
+
 
         tryRegister!ConfigServiceProvider();
 
@@ -562,7 +567,7 @@ final class Application {
 
     Redis redis() {
         RedisPool pool = serviceContainer.resolve!RedisPool();
-        Redis r = pool.getResource();
+        Redis r = pool.borrow();
         registerResoure(new RedisCloser(r));
         return r;
     }

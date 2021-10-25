@@ -65,11 +65,12 @@ template wrapper(alias F)
             void fillArg(size_t idx, PType)(string key, UniNode val)
             {
                 // TODO toBoolType, toStringType
-                try
+                try {
                     args[idx] = val.deserialize!PType;
-                catch
+                } catch (Exception ex) {
                     assertTemplate(0, "Can't deserialize param `%s` from `%s` to `%s` in function `%s`"
                                             .fmt(key, val.kind, PType.stringof, fullyQualifiedName!F));
+                }
             }
 
             UniNode varargs = UniNode.emptyArray;

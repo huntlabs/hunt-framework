@@ -152,7 +152,7 @@ class ApplicationConfig {
     struct RedisPoolConf {
         bool enabled = false;
 
-        bool blockOnExhausted = true;
+        int maxWaitQueueSize = -1;
         uint idleTimeout = 30000; // millisecond
         uint maxPoolSize = 20;
         uint minPoolSize = 5;

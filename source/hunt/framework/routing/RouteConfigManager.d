@@ -148,7 +148,7 @@ class RouteConfigManager {
             return;
         }
 
-        version (HUNT_DEBUG) {
+        version (HUNT_FM_DEBUG) {
             info(routeGroups);
         }
 

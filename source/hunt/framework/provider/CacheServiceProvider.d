@@ -8,11 +8,13 @@ import hunt.cache.Cache;
 import hunt.cache.CacheOptions;
 import hunt.cache.Defined;
 import hunt.logging.ConsoleLogger;
-import hunt.redis.RedisPoolConfig;
+import hunt.redis.RedisPoolOptions;
 
 import hunt.framework.Init;
 
 import poodinis;
+
+import core.time;
 
 /**
  * 
@@ -45,16 +47,15 @@ class CacheServiceProvider : ServiceProvider {
                     throw new Exception("The Redis is disabled.");
                 }
 
-                RedisPoolConfig poolConfig = new RedisPoolConfig();
+                RedisPoolOptions poolConfig = new RedisPoolOptions();
                 poolConfig.host = redisConf.host;
                 poolConfig.port = cast(int) redisConf.port;
                 poolConfig.password = redisConf.password;
                 poolConfig.database = cast(int) redisConf.database;
                 poolConfig.soTimeout = cast(int) redisPoolOptions.idleTimeout;
                 poolConfig.connectionTimeout =  redisConf.timeout;
-                poolConfig.setMaxTotal(redisPoolOptions.maxPoolSize);
-                poolConfig.setBlockWhenExhausted(redisPoolOptions.blockOnExhausted);
-                poolConfig.setMaxWaitMillis(redisPoolOptions.waitTimeout);
+                poolConfig.waitTimeout = msecs(redisPoolOptions.waitTimeout);
+                poolConfig.size = redisPoolOptions.maxPoolSize;
 
                 version(HUNT_DEBUG) infof("Initializing RedisPool: %s", poolConfig.toString());
 

@@ -59,10 +59,10 @@ class RedisQueue : TaskQueue {
 
         ubyte[] message = redisTask.serialize();
 
-        Redis redis = _pool.getResource();
+        Redis redis = _pool.borrow();
         scope(exit) {
-            // _pool.returnResource(redis);
-            redis.close();
+            _pool.returnObject(redis);
+            // redis.close();
         }
 
         Long r = redis.lpush(cast(const(ubyte)[])channel, cast(const(ubyte)[])message);
@@ -81,10 +81,10 @@ class RedisQueue : TaskQueue {
 
     override Task pop() {
 
-        Redis redis = _pool.getResource();
+        Redis redis = _pool.borrow() ;
         scope(exit) {
-            // _pool.returnResource(redis);
-            redis.close();
+            _pool.returnObject(redis);
+            // redis.close();
         }
         
         version(HUNT_DEBUG) infof("waiting .....");

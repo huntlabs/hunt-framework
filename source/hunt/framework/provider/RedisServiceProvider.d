@@ -9,6 +9,8 @@ import hunt.logging.ConsoleLogger;
 import hunt.redis;
 import poodinis;
 
+import core.time;
+
 import std.conv;
 import std.string;
 
@@ -18,7 +20,7 @@ import std.string;
 class RedisServiceProvider : ServiceProvider {
 
     override void register() {
-        // container.register!(RedisPoolConfig)().singleInstance();
+        // container.register!(RedisPoolOptions)().singleInstance();
 
         container.register!RedisPool.initializedBy({
             ApplicationConfig config = container.resolve!ApplicationConfig();
@@ -27,16 +29,16 @@ class RedisServiceProvider : ServiceProvider {
             auto redisPoolOptions = redisOptions.pool;
 
             if (redisOptions.enabled) {
-                RedisPoolConfig poolConfig = new RedisPoolConfig();
+                RedisPoolOptions poolConfig = new RedisPoolOptions();
                 poolConfig.host = redisOptions.host;
                 poolConfig.port = cast(int) redisOptions.port;
                 poolConfig.password = redisOptions.password;
                 poolConfig.database = cast(int) redisOptions.database;
                 poolConfig.soTimeout = cast(int) redisPoolOptions.idleTimeout;
                 poolConfig.connectionTimeout =  redisOptions.timeout;
-                poolConfig.setMaxTotal(redisPoolOptions.maxPoolSize);
-                poolConfig.setBlockWhenExhausted(redisPoolOptions.blockOnExhausted);
-                poolConfig.setMaxWaitMillis(redisPoolOptions.waitTimeout);
+                poolConfig.size = redisPoolOptions.maxPoolSize;
+                poolConfig.maxWaitQueueSize = redisPoolOptions.maxWaitQueueSize;
+                poolConfig.waitTimeout = msecs(redisPoolOptions.waitTimeout);
 
                 infof("Initializing RedisPool: %s", poolConfig.toString());
 
@@ -57,21 +59,20 @@ class RedisServiceProvider : ServiceProvider {
 
             if(clusterOptions.enabled) {
 
-                RedisPoolConfig poolConfig = new RedisPoolConfig();
+                RedisPoolOptions poolConfig = new RedisPoolOptions();
                 poolConfig.host = redisOptions.host;
                 poolConfig.port = cast(int) redisOptions.port;
                 poolConfig.password = redisOptions.password;
                 poolConfig.database = cast(int) redisOptions.database;
                 poolConfig.soTimeout = cast(int) redisOptions.timeout;
                 poolConfig.connectionTimeout =  redisOptions.timeout;
-                poolConfig.setMaxTotal(redisPoolOptions.maxPoolSize);
-                poolConfig.setBlockWhenExhausted(redisPoolOptions.blockOnExhausted);
-                poolConfig.setMaxWaitMillis(redisPoolOptions.waitTimeout);
+                poolConfig.waitTimeout = msecs(redisPoolOptions.waitTimeout);
+                poolConfig.size = redisPoolOptions.maxPoolSize;
 
                 infof("Initializing RedisCluster: %s", poolConfig.toString());  
 
                 string[] hostPorts = clusterOptions.nodes;
-                Set!(HostAndPort) clusterNode = new HashSet!(HostAndPort)();
+                HostAndPort[] clusterNode;
                 foreach(string item; hostPorts) {
                     string[] hostPort = item.split(":");
                     if(hostPort.length < 2) {
@@ -85,14 +86,13 @@ class RedisServiceProvider : ServiceProvider {
 
                     try {
                         int port = to!int(hostPort[1]);
-                        clusterNode.add(new HostAndPort(hostPort[0], port));
+                        clusterNode ~= new HostAndPort(hostPort[0], port);
                     } catch(Exception ex) {
                         warning(ex);
                     }
                 }
 
-                RedisCluster jc = new RedisCluster(clusterNode, redisOptions.timeout, redisOptions.timeout,
-                        clusterOptions.redirections, redisOptions.password, poolConfig);
+                RedisCluster jc = new RedisCluster(clusterNode, poolConfig);
 
                 return jc;
 
