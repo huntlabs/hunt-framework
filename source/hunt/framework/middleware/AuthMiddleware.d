@@ -16,7 +16,6 @@ import hunt.framework.http.Response;
 import hunt.framework.http.UnauthorizedResponse;
 import hunt.framework.Init;
 import hunt.framework.provider.ServiceProvider;
-import hunt.framework.Simplify;
 
 
 import hunt.http.HttpHeader;

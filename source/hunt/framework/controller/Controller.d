@@ -541,7 +541,7 @@ abstract class Controller
     }
 
     void dispose() {
-        version(HUNT_HTTP_DEBUG) trace("Do nothing");
+        version(HUNT_FM_DEBUG) ConsoleLogger.trace("Do nothing");
     }
 }
 
@@ -890,7 +890,7 @@ string makeParameterValidation(string varName, string paraName, paraType, UDAs .
     string str;
     // = "\ninfof(\"" ~ symbol.stringof ~ "\");";
 
-    version(HUNT_HTTP_DEBUG) {
+    version(HUNT_FM_DEBUG) {
         str ~= `
             tracef("varName=`~ varName ~`, paraName=` ~ paraName ~ `");
         `;
@@ -1104,7 +1104,7 @@ RoutingHandler getRouteHandler(string str)
 void registerRouteHandler(string str, RoutingHandler method)
 {
     // key: app.controller.Index.IndexController.showString
-    version (HUNT_FM_DEBUG) logDebug("Add route handler: ", str);
+    version (HUNT_FM_DEBUG) ConsoleLogger.trace("Add route handler: ", str);
     _actions[str.toLower] = method;
 }
 

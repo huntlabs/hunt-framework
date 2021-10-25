@@ -183,8 +183,12 @@ class RouteConfigManager {
         // load default routes
         string routeConfigFile = buildPath(_basePath, DEFAULT_ROUTE_CONFIG);
         if (!exists(routeConfigFile)) {
-            warningf("The config file for route does not exist: %s", routeConfigFile);
+            warningf("The config file for default routes does not exist: %s", routeConfigFile);
         } else {
+            version(HUNT_DEBUG) {
+                infof("Loading default routes from %s", routeConfigFile);
+            }
+
             RouteItem[] routes = load(routeConfigFile);
             _allRouteItems[RouteGroup.DEFAULT] = routes;
 

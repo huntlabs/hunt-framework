@@ -122,7 +122,7 @@ class Request {
             MultipartForm multipart = cast(MultipartForm) part;
 
             version (HUNT_HTTP_DEBUG) {
-                cast(string) content = multipart.getBytes();
+                string content = cast(string)multipart.getBytes();
                 if(content.length > 128) {
                     content = content[0..128] ~ "...";
                 }

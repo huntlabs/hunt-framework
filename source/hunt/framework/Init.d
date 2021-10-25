@@ -45,11 +45,11 @@ enum string DEFAULT_RUNTIME_ENVIRONMENT = ""; // production
 
 enum string DEFAULT_CONFIG_FILE = "application.conf";
 enum string DEFAULT_CONFIG_EXT = ".conf";
-enum string DEFAULT_ROUTE_CONFIG = "./routes";
+enum string DEFAULT_ROUTE_CONFIG = "routes";
 enum string DEFAULT_RESOURCES_ROUTE_LEADER = "staticDir:";
 
-enum string DEFAULT_USERS_CONFIG = "./users";
-enum string DEFAULT_ROLES_CONFIG = "./roles";
+enum string DEFAULT_USERS_CONFIG = "users";
+enum string DEFAULT_ROLES_CONFIG = "roles";
 
 // default route group name
 enum string DEFAULT_ROUTE_GROUP = "default";

@@ -301,6 +301,10 @@ final class Application {
     private void bootstrap() {
         // _appConfig = serviceContainer().resolve!ApplicationConfig();
 
+        version(HUNT_DEBUG) {
+            infof("Application environment: %s", _environment.name);
+        }
+
         // 
         registerProviders();
 
@@ -389,12 +393,6 @@ final class Application {
         // Register all the service provided by the providers
         ServiceProvider[] providers = serviceContainer().resolveAll!(ServiceProvider);
         version(HUNT_DEBUG) infof("Registering all the service providers (%d)...", providers.length);
-
-        // foreach(ServiceProvider p; providers) {
-        //     p.register();
-        //     _providerListener.registered(typeid(p));
-        //     serviceContainer().autowire(p);
-        // }
 
     }
 
@@ -544,7 +542,6 @@ final class Application {
     import hunt.entity.EntityManagerFactory;
     import hunt.framework.breadcrumb.BreadcrumbsManager;
     import hunt.framework.queue;
-    import hunt.framework.Simplify;
     import hunt.framework.task;
     import hunt.logging.Logger;
     
