@@ -57,7 +57,7 @@ class CacheServiceProvider : ServiceProvider {
                 poolConfig.waitTimeout = msecs(redisPoolOptions.waitTimeout);
                 poolConfig.size = redisPoolOptions.maxPoolSize;
 
-                version(HUNT_DEBUG) infof("Initializing RedisPool: %s", poolConfig.toString());
+                version(HUNT_DEBUG) infof("Initializing Cache Service: %s", poolConfig.toString());
 
                 options.redisPool = poolConfig;
                 options.redisCluster.nodes = redisConf.cluster.nodes;

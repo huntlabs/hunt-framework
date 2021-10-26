@@ -42,7 +42,9 @@ class RedisServiceProvider : ServiceProvider {
 
                 infof("Initializing RedisPool: %s", poolConfig.toString());
 
-                return new RedisPool(poolConfig); 
+                RedisFactory factory = new RedisFactory(poolConfig);
+
+                return factory.pool(); 
             } else {
                 // warning("RedisPool has been disabled.");
                 // return new RedisPool();
