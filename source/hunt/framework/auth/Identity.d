@@ -41,14 +41,23 @@ class Identity {
             }
             return _subject;
         } else {
-            throw new AuthorizationException(getError());
+            string msg = format("This identity [%s] is invalid!", _guardName);
+            error(msg);
+            return null;
+            // throw new AuthorizationException(msg);
         }
     }
 
     UserDetails userDetails() nothrow {
         UserDetails userDetails = null;
         try {
-            userDetails = cast(UserDetails)subject().getPrincipal();
+            Subject s = subject();
+            if(s is null) {
+                UserDetails u = new UserDetails();
+                u.name = "Wrong use name";
+                return u;
+            }
+            userDetails = cast(UserDetails)s.getPrincipal();
         } catch(Exception ex) {
             warning(ex.msg);
             version(HUNT_AUTH_DEBUG) warning(ex);
@@ -114,7 +123,18 @@ class Identity {
 
     void authenticate(string username, string password, bool remember = true, 
             string tokenName = DEFAULT_AUTH_TOKEN_NAME) {
+        version(HUNT_DEBUG) {
+            infof("Authenticating for [%s]", username);
+        }
+
         Subject _subject = subject();
+        if(_subject is null) {
+            string msg = format("Failed to authenticate for %s", username);
+            errorf(msg);
+            throw new AuthenticationException(msg);
+            // return;
+        }
+
         version(HUNT_AUTH_DEBUG) { 
             tracef("Checking the status at first: %s", _subject.isAuthenticated());
         }
@@ -219,7 +239,9 @@ class Identity {
 
     bool isAuthenticated() nothrow {
         try {
-            return subject().isAuthenticated();
+            Subject s = subject();
+            if(s is null)  return false;
+            return s.isAuthenticated();
         } catch(Exception ex) {
             warning(ex.msg);
             version(HUNT_DEBUG) warning(ex);
@@ -229,7 +251,9 @@ class Identity {
 
     bool hasRole(string role) nothrow {
         try {
-            return subject().hasRole(role);
+            Subject s = subject();
+            if(s is null)  return false;
+            return s.hasRole(role);
         } catch(Exception ex) {
             warning(ex.msg);
             version(HUNT_DEBUG) warning(ex);
@@ -239,7 +263,9 @@ class Identity {
     
     bool hasAllRoles(string[] roles...) nothrow {
         try {
-            return subject().hasAllRoles(roles);
+            Subject s = subject();
+            if(s is null)  return false;
+            return s.hasAllRoles(roles);
         } catch(Exception ex) {
             warning(ex.msg);
             version(HUNT_DEBUG) warning(ex);
@@ -251,8 +277,11 @@ class Identity {
         
         // Try to convert all the custom permissions to shiro's ones
         try {
+            Subject s = subject();
+            if(s is null)  return false;
+
             string[] shiroPermissions = permissions.map!(p => p.strip().toShiroPermissions()).array;
-            bool[] resultSet = subject().isPermitted(shiroPermissions);
+            bool[] resultSet = s.isPermitted(shiroPermissions);
             foreach(bool r; resultSet ) {
                 if(!r) return false;
             }
@@ -267,7 +296,11 @@ class Identity {
 
     void touchSession() nothrow {
         try {
-            Session session = subject().getSession(false);
+
+            Subject s = subject();
+            if(s is null)  return;
+
+            Session session = s.getSession(false);
             if (session !is null) {
                 try {
                     session.touch();
@@ -289,15 +322,13 @@ class Identity {
      */
     void logout() nothrow {
         try {
-            subject().logout();
+            Subject s = subject();
+            if(s is null)  return;
+            s.logout();
         } catch(Exception ex) {
             warning(ex.msg);
             version(HUNT_DEBUG) warning(ex);
         }
-    }
-
-    private string getError() {
-        return format("This identity [%s] is invalid!", _guardName);
     }
 
     override string toString() {

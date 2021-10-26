@@ -5,6 +5,7 @@ import hunt.framework.routing.RouteItem;
 import hunt.framework.routing.ResourceRouteItem;
 import hunt.framework.routing.RouteGroup;
 
+import hunt.framework.auth.AuthOptions;
 import hunt.framework.config.ApplicationConfig;
 import hunt.framework.Init;
 import hunt.logging.ConsoleLogger;
@@ -158,8 +159,14 @@ class RouteConfigManager {
             groupInfo.type = strip(v.type);
             groupInfo.value = strip(v.value);
 
-            version (HUNT_FM_DEBUG)
+            string guard = strip(v.guard);
+            if(!guard.empty()) {
+                groupInfo.guardName = guard;
+            }
+
+            version (HUNT_FM_DEBUG) {
                 infof("route group: %s", groupInfo);
+            }
 
             string routeConfigFile = groupInfo.name ~ DEFAULT_ROUTE_CONFIG_EXT;
             routeConfigFile = buildPath(_basePath, routeConfigFile);

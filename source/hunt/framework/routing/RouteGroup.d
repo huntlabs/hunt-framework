@@ -46,7 +46,7 @@ final class RouteGroup {
     }
 
     override string toString() {
-        return "{" ~ name ~ ", " ~ type ~ ", " ~ value ~ "}";
+        return "{" ~ name ~ ", " ~ type ~ ", " ~ value ~ ", " ~ _guardName ~ "}";
     }
 
     string guardName() {

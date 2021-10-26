@@ -18,6 +18,7 @@ import hunt.shiro;
 import hunt.String;
 
 import std.format;
+import std.range;
 
 
 /**
@@ -42,7 +43,11 @@ class BasicAuthRealm : AuthRealm {
         UserService userService = getUserService();
         version(HUNT_AUTH_DEBUG) {
             infof("username: %s, %s", username, typeid(cast(Object)userService));
-        }        
+        }
+
+        if(username.empty) {
+            throw new IncorrectCredentialsException(username);
+        }
 
         // To authenticate the user with username and password
         UserDetails user = userService.authenticate(username, password);

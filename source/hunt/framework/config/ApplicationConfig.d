@@ -349,6 +349,7 @@ struct RouteGroupConfig {
     string name;
     string type;
     string value;
+    string guard = DEFAULT_GURAD_NAME;
 }
 
 

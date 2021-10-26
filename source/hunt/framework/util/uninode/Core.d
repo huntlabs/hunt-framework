@@ -577,7 +577,7 @@ struct UniNodeImpl(This)
         }
 
         if (_kind != other.kind) {
-            version(HUNT_DEBUG) {
+            version(HUNT_FM_DEBUG) {
                 warningf("Different type for comparation, this: %s, other: %s", toString(), other.toString());
             }
             

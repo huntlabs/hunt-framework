@@ -56,7 +56,7 @@ class Request {
     private string _routeGroup = DEFAULT_ROUTE_GROUP;
     private string _actionId = "";
     private Auth _auth;
-    private string _guardName;
+    private string _guardName = DEFAULT_GURAD_NAME;
     private MonoTime _monoCreated;
     private bool _isRestful = false;
 

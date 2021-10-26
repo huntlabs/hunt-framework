@@ -119,11 +119,9 @@ class Auth {
     }
 
     Guard guard() {
-        version(HUNT_DEBUG) {
-            if(!isEnabled()) {
-                string msg = format("No guard avaliable for %s", _guardName);
-                throw new AuthenticationException(msg);
-            }
+        if(!isEnabled()) {
+            string msg = format("No guard avaliable for %s", _guardName);
+            throw new AuthenticationException(msg);
         }
         return _guard;
     }
