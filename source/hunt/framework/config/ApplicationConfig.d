@@ -63,7 +63,7 @@ class ApplicationConfig {
         // default root path
         string location = DEFAULT_STATIC_FILES_LACATION;
         bool canList = true;
-        int cacheTime = 30;
+        int cacheTime = 30; // seconds
     }
     
     struct CacheConf {
@@ -213,6 +213,7 @@ class ApplicationConfig {
         int connectionTimeout = 30000;
         int maxConnection = 20;
         int minConnection = 5;
+        int maxWaitQueueSize = -1;
     }
 
     struct DatabaseConf {

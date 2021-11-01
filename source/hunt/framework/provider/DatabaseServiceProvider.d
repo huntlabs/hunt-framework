@@ -47,6 +47,7 @@ class DatabaseServiceProvider : ServiceProvider {
             option.pool.connectionTimeout = config.pool.connectionTimeout;
             option.pool.maxConnection = config.pool.maxConnection;
             option.pool.minConnection = config.pool.minConnection;
+            option.pool.maxWaitQueueSize = config.pool.maxWaitQueueSize;
 
             version(HUNT_DEBUG) infof("Using database: %s", config.driver);
             return Persistence.createEntityManagerFactory(option);
