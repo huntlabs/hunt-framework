@@ -20,6 +20,7 @@ import hunt.logging.ConsoleLogger;
 
 import poodinis;
 
+import core.time;
 import std.array;
 import std.exception;
 import std.conv;
@@ -44,6 +45,7 @@ class HttpServiceProvider : ServiceProvider {
         DefaultErrorResponseHandler.Default = new HttpErrorResponseHandler();
         ConfigManager manager = container.resolve!ConfigManager;
         ApplicationConfig appConfig = container.resolve!ApplicationConfig();
+        auto staticFilesConfig = appConfig.staticfiles;
         // SimpleWebSocketHandler webSocketHandler = new SimpleWebSocketHandler();
         // webSocketHandler.setWebSocketPolicy(_webSocketPolicy);
 
@@ -57,14 +59,14 @@ class HttpServiceProvider : ServiceProvider {
             .workerThreadSize(appConfig.http.workerThreads)
             .maxRequestSize(cast(int)appConfig.http.maxHeaderSize)
             .maxFileSize(cast(int)appConfig.upload.maxSize)
-            .ioThreadSize(appConfig.http.ioThreads);
+            .ioThreadSize(appConfig.http.ioThreads)
+            .resourceCacheTime(staticFilesConfig.cacheTime.seconds);
 
         version(WITH_HUNT_TRACE) {
             hsb.localServiceName(appConfig.application.name)
                 .isB3HeaderRequired(appConfig.trace.b3Required);
         }
 
-        auto staticFilesConfig = appConfig.staticfiles;
 
         RouteConfigManager routeConfig = container.resolve!RouteConfigManager();
         RouteItem[][RouteGroup] allRoutes = routeConfig.allRoutes;

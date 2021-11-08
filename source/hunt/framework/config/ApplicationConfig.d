@@ -63,7 +63,7 @@ class ApplicationConfig {
         // default root path
         string location = DEFAULT_STATIC_FILES_LACATION;
         bool canList = true;
-        int cacheTime = 30; // seconds
+        int cacheTime = -1; // seconds
     }
     
     struct CacheConf {
