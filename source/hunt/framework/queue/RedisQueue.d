@@ -28,7 +28,7 @@ class RedisQueue : AbstractQueue {
     }
 
     override void push(string channel, ubyte[] message) {
-        Redis redis = _pool.getResource();
+        Redis redis = _pool.borrow();
         scope(exit) {
             // _pool.returnResource(redis);
             redis.close();
@@ -47,7 +47,7 @@ class RedisQueue : AbstractQueue {
     override protected void onListen(string channel, QueueMessageListener listener) {
         assert(listeners !is null);
 
-        Redis redis = _pool.getResource();
+        Redis redis = _pool.borrow();
         synchronized(this) {
             _connections[listener] = redis; 
         }

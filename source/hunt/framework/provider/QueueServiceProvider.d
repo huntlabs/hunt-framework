@@ -4,7 +4,6 @@ import hunt.framework.provider.ServiceProvider;
 import hunt.framework.config.ApplicationConfig;
 import hunt.framework.queue;
 
-import hunt.amqp.client;
 import hunt.redis;
 import hunt.logging.ConsoleLogger;
 

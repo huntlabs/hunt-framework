@@ -8,11 +8,13 @@ import hunt.cache.Cache;
 import hunt.cache.CacheOptions;
 import hunt.cache.Defined;
 import hunt.logging.ConsoleLogger;
-import hunt.redis.RedisPoolConfig;
+import hunt.redis.RedisPoolOptions;
 
 import hunt.framework.Init;
 
 import poodinis;
+
+import core.time;
 
 /**
  * 
@@ -20,7 +22,7 @@ import poodinis;
 class CacheServiceProvider : ServiceProvider {
 
     override void register() {
-        container.register!(Cache)(() {
+        container.register!Cache({
             ApplicationConfig config = container.resolve!ApplicationConfig();
             ApplicationConfig.CacheConf cacheConf = config.cache;
             ApplicationConfig.RedisConf redisConf = config.redis;
@@ -39,31 +41,28 @@ class CacheServiceProvider : ServiceProvider {
             options.diskExpiryThreadIntervalSeconds = cacheConf.diskExpiryThreadIntervalSeconds;
             options.maxEntriesLocalDisk = cacheConf.maxEntriesLocalDisk;
 
-            if(cacheConf.adapter == AdapterType.REDIS) {
+            if(cacheConf.adapter == AdapterType.REDIS || cacheConf.adapter == AdapterType.REDIS_CLUSTER) {
 
                 if(!redisConf.enabled) {
                     throw new Exception("The Redis is disabled.");
                 }
 
-                RedisPoolConfig poolConfig = new RedisPoolConfig();
+                RedisPoolOptions poolConfig = new RedisPoolOptions();
                 poolConfig.host = redisConf.host;
                 poolConfig.port = cast(int) redisConf.port;
                 poolConfig.password = redisConf.password;
                 poolConfig.database = cast(int) redisConf.database;
                 poolConfig.soTimeout = cast(int) redisPoolOptions.idleTimeout;
                 poolConfig.connectionTimeout =  redisConf.timeout;
-                poolConfig.setMaxTotal(redisPoolOptions.maxPoolSize);
-                poolConfig.setBlockWhenExhausted(redisPoolOptions.blockOnExhausted);
-                poolConfig.setMaxWaitMillis(redisPoolOptions.waitTimeout);
+                poolConfig.waitTimeout = msecs(redisPoolOptions.waitTimeout);
+                poolConfig.size = redisPoolOptions.maxPoolSize;
 
-                version(HUNT_DEBUG) infof("Initializing RedisPool: %s", poolConfig.toString());
+                version(HUNT_DEBUG) infof("Initializing Cache Service: %s", poolConfig.toString());
 
                 options.redisPool = poolConfig;
-
-                options.isRedisClusterEnabled = redisConf.cluster.enabled;
                 options.redisCluster.nodes = redisConf.cluster.nodes;
-            }
-
+            } 
+            
             return CacheFactory.create(options);
         }).singleInstance();
     }

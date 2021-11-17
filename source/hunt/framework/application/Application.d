@@ -62,7 +62,7 @@ alias DefaultServiceProviders = AliasSeq!(UserServiceProvider, AuthServiceProvid
         ConfigServiceProvider, RedisServiceProvider,
         TranslationServiceProvider, CacheServiceProvider, SessionServiceProvider,
         DatabaseServiceProvider, QueueServiceProvider,
-        TaskServiceProvider, AmqpServiceProvider, HttpServiceProvider,
+        TaskServiceProvider, HttpServiceProvider,
         BreadcrumbServiceProvider, ViewServiceProvider);
 
 /**
@@ -460,7 +460,7 @@ final class Application {
 
     Redis redis() {
         RedisPool pool = serviceContainer.resolve!RedisPool();
-        Redis r = pool.getResource();
+        Redis r = pool.borrow();
         resouceManager.push(new RedisCloser(r));
         return r;
     }
