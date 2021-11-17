@@ -15,7 +15,7 @@ import poodinis;
 class QueueServiceProvider : ServiceProvider {
 
     override void register() {
-        container.register!(AbstractQueue)(&buildWorkder).singleInstance();
+        container.register!(AbstractQueue).initializedBy(&buildWorkder).singleInstance();
     }
 
     protected AbstractQueue buildWorkder() {

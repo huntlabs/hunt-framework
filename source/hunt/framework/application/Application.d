@@ -32,7 +32,8 @@ import hunt.http.WebSocketCommon;
 
 import hunt.console;
 import hunt.Functions;
-import hunt.logging;
+import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 import hunt.redis;
 
 version (WITH_HUNT_TRACE) {
@@ -107,7 +108,7 @@ final class Application {
 
     void register(T)() if (is(T : ServiceProvider)) {
         if (_isBooted) {
-            warning("A provider can't be registered: %s after the app has been booted.", typeid(T));
+            ConsoleLogger.warning("A provider can't be registered: %s after the app has been booted.", typeid(T));
             return;
         }
 
@@ -181,7 +182,7 @@ final class Application {
         if (args.length > 1) {
             ServeCommand serveCommand = new ServeCommand();
             serveCommand.onInput((ServeSignature signature) {
-                version (HUNT_DEBUG) tracef(signature.to!string);
+                version (HUNT_DEBUG) ConsoleLogger.tracef(signature.to!string);
 
                 //
                 string configPath = signature.configPath;
@@ -223,9 +224,9 @@ final class Application {
             try {
                 console.run(args);
             } catch(Exception ex) {
-                warning(ex);
+                ConsoleLogger.warning(ex);
             } catch(Error er) {
-                error(er);
+                ConsoleLogger.error(er);
             }
 
         } else {
@@ -329,7 +330,7 @@ final class Application {
 
         // Register all the service provided by the providers
         ServiceProvider[] providers = serviceContainer().resolveAll!(ServiceProvider);
-        version(HUNT_DEBUG) infof("Registering all the service providers (%d)...", providers.length);
+        version(HUNT_DEBUG) ConsoleLogger.infof("Registering all the service providers (%d)...", providers.length);
 
         // foreach(ServiceProvider p; providers) {
         //     p.register();
@@ -344,7 +345,7 @@ final class Application {
      */
     private void bootProviders() {
         ServiceProvider[] providers = serviceContainer().resolveAll!(ServiceProvider);
-        version(HUNT_DEBUG) infof("Booting all the service providers (%d)...", providers.length);
+        version(HUNT_DEBUG) ConsoleLogger.infof("Booting all the service providers (%d)...", providers.length);
 
         foreach (ServiceProvider p; providers) {
             p.boot();
@@ -355,56 +356,56 @@ final class Application {
 
     private void initializeLogger() {
         ApplicationConfig.LoggingConfig conf = _appConfig.logging;
-        version (HUNT_DEBUG) {
-            hunt.logging.LogLevel level = hunt.logging.LogLevel.Trace;
-            switch (toLower(conf.level)) {
+        
+        hunt.logging.Logger.LogLevel loggerLevel = hunt.logging.Logger.LogLevel.LOG_DEBUG;
+        switch (toLower(conf.level)) {
             case "critical":
             case "error":
-                level = hunt.logging.LogLevel.Error;
+                loggerLevel = hunt.logging.Logger.LogLevel.LOG_ERROR;
                 break;
             case "fatal":
-                level = hunt.logging.LogLevel.Fatal;
+                loggerLevel = hunt.logging.Logger.LogLevel.LOG_FATAL;
                 break;
             case "warning":
-                level = hunt.logging.LogLevel.Warning;
+                loggerLevel = hunt.logging.Logger.LogLevel.LOG_WARNING;
                 break;
             case "info":
-                level = hunt.logging.LogLevel.Info;
+                loggerLevel = hunt.logging.Logger.LogLevel.LOG_INFO;
                 break;
             case "off":
-                level = hunt.logging.LogLevel.Off;
+                loggerLevel = hunt.logging.Logger.LogLevel.LOG_Off;
                 break;
             default:
                 break;
-            }
-        } else {
-            hunt.logging.LogLevel level = hunt.logging.LogLevel.LOG_DEBUG;
-            switch (toLower(conf.level)) {
-            case "critical":
-            case "error":
-                level = hunt.logging.LogLevel.LOG_ERROR;
-                break;
-            case "fatal":
-                level = hunt.logging.LogLevel.LOG_FATAL;
-                break;
-            case "warning":
-                level = hunt.logging.LogLevel.LOG_WARNING;
-                break;
-            case "info":
-                level = hunt.logging.LogLevel.LOG_INFO;
-                break;
-            case "off":
-                level = hunt.logging.LogLevel.LOG_Off;
-                break;
-            default:
-                break;
-            }
         }
-
+        
         version (HUNT_DEBUG) {
+            hunt.logging.ConsoleLogger.LogLevel level = hunt.logging.ConsoleLogger.LogLevel.Trace;
+            switch (toLower(conf.level)) {
+                case "critical":
+                case "error":
+                    level = hunt.logging.ConsoleLogger.LogLevel.Error;
+                    break;
+                case "fatal":
+                    level = hunt.logging.ConsoleLogger.LogLevel.Fatal;
+                    break;
+                case "warning":
+                    level = hunt.logging.ConsoleLogger.LogLevel.Warning;
+                    break;
+                case "info":
+                    level = hunt.logging.ConsoleLogger.LogLevel.Info;
+                    break;
+                case "off":
+                    level = hunt.logging.ConsoleLogger.LogLevel.Off;
+                    break;
+                default:
+                    break;
+            }
+
+            ConsoleLogger.setLogLevel(level);
         } else {
             LogConf logconf;
-            logconf.level = level;
+            logconf.level = loggerLevel;
             logconf.disableConsole = conf.disableConsole;
 
             if (!conf.file.empty)
@@ -415,6 +416,48 @@ final class Application {
 
             logLoadConf(logconf);
         }
+
+        initFilebeatLogger(loggerLevel, conf);
+    }
+
+    private void initFilebeatLogger(hunt.logging.Logger.LogLevel level, ApplicationConfig.LoggingConfig conf) {
+        LogConf logconf;
+        logconf.level = level;
+        logconf.disableConsole = conf.disableConsole;
+
+        if (!conf.file.empty)
+            logconf.fileName = buildPath(conf.path, "filebeat",  conf.file);
+
+        logconf.maxSize = conf.maxSize;
+        logconf.maxNum = conf.maxNum;
+
+        import core.thread;
+        import std.conv;
+        import std.process;
+        import std.datetime;
+        import std.json;
+
+        _logger = new Logger(logconf, 
+                    (string time_prior, string tid, string level, string myFunc, 
+                        string msg, string file, size_t line) {
+            
+                    SysTime now = Clock.currTime;
+                    std.datetime.DateTime dt ;
+
+                    JSONValue jv;
+                    jv["timestamp"] = (cast(std.datetime.DateTime)now).toISOExtString();
+                    jv["msecs"] = now.fracSecs.total!("msecs");
+                    jv["level"] = level;
+                    jv["file"] = file;
+                    jv["module"] = myFunc;
+                    jv["funcName"] = myFunc;
+                    jv["line"] = line;
+                    jv["thread"] = tid.to!long;
+                    jv["threadName"] = Thread.getThis().name();
+                    jv["process"] = thisProcessID();
+                    jv["message"] = msg;
+                    return jv.toString();
+                });
     }
 
     version (WITH_HUNT_TRACE) {
@@ -446,6 +489,11 @@ final class Application {
     import hunt.framework.Simplify;
     import hunt.framework.task;
 
+    Logger logger() {
+        return _logger;
+    }
+    private Logger _logger;
+    
     ApplicationConfig config() {
         return _appConfig;
     }

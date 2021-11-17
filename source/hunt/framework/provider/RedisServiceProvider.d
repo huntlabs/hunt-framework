@@ -22,7 +22,7 @@ class RedisServiceProvider : ServiceProvider {
     override void register() {
         // container.register!(RedisPoolOptions)().singleInstance();
 
-        container.register!RedisPool({
+        container.register!RedisPool.initializedBy({
             ApplicationConfig config = container.resolve!ApplicationConfig();
 
             auto redisOptions = config.redis;
@@ -52,7 +52,7 @@ class RedisServiceProvider : ServiceProvider {
             }
         }).singleInstance();
 
-        container.register!RedisCluster({
+        container.register!RedisCluster.initializedBy({
             ApplicationConfig config = container.resolve!ApplicationConfig();
 
             auto redisOptions = config.redis;

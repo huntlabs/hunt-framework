@@ -15,7 +15,7 @@ import poodinis;
 class SessionServiceProvider : ServiceProvider {
 
     override void register() {
-        container.register!(SessionStorage)(() {
+        container.register!(SessionStorage).initializedBy(() {
             ApplicationConfig config = container.resolve!ApplicationConfig();
             Cache cache = container.resolve!Cache;
             return new SessionStorage(cache, config.session.prefix, config.session.expire);
