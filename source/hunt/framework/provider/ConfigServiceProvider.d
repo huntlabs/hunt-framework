@@ -102,7 +102,7 @@ class ConfigServiceProvider : ServiceProvider {
             routeConfig.basePath = configManager.hostEnvironment.configPath();
 
             return routeConfig;
-        });
+        }).singleInstance();
     }
 
     protected void registerAuthUserConfig() {

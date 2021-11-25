@@ -14,14 +14,14 @@ import hunt.framework.http.Request;
 // import hunt.framework.Simplify;
 import hunt.framework.provider.ServiceProvider;
 
-import hunt.jwt.JwtRegisteredClaimNames;
-
-
 import hunt.http.AuthenticationScheme;
 import hunt.logging.ConsoleLogger;
 import hunt.shiro.Exceptions;
 import hunt.shiro.authc.AuthenticationToken;
 import hunt.util.TypeUtils;
+
+import hunt.jwt.JwtRegisteredClaimNames;
+
 import std.algorithm;
 import std.array : split;
 import std.base64;
@@ -33,7 +33,7 @@ import core.time;
 
 private enum AuthState {
     Auto,
-    JwtToken,
+    Token,
     SignIn,
     SignOut
 }
@@ -111,7 +111,7 @@ class Auth {
     //         _user.authenticate(_token, scheme);
     //     }
 
-    //     _state = AuthState.JwtToken;
+    //     _state = AuthState.Token;
     // }
 
     Identity user() {
@@ -119,11 +119,9 @@ class Auth {
     }
 
     Guard guard() {
-        version(HUNT_DEBUG) {
-            if(!isEnabled()) {
-                string msg = format("No guard avaliable for %s", _guardName);
-                throw new AuthenticationException(msg);
-            }
+        if(!isEnabled()) {
+            string msg = format("No guard avaliable for %s", _guardName);
+            throw new AuthenticationException(msg);
         }
         return _guard;
     }
@@ -209,7 +207,7 @@ class Auth {
     /// Use token to login
     Identity signIn() {
         scope(success) {
-            _state = AuthState.JwtToken;
+            _state = AuthState.Token;
         }
 
         Guard g = guard();
@@ -251,7 +249,7 @@ class Auth {
             _token = JwtUtil.sign(username, salt);
         } 
         
-        _state = AuthState.JwtToken;
+        _state = AuthState.Token;
         _isTokenRefreshed = true;
         return _token;
     }
