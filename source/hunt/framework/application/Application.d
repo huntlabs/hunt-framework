@@ -185,7 +185,7 @@ final class Application : ApplicationContext {
         }
     }
 
-    private void initCache(CacheOption option) {
+    private void initCache(CacheOptions option) {
         _cache = CacheFactory.create(option);
     }
 
@@ -232,16 +232,16 @@ final class Application : ApplicationContext {
         auto redisPoolOptions = redisOptions.pool;
 
         if(redisOptions.pool.enabled) {
-            RedisPoolConfig poolConfig = new RedisPoolConfig();
+            RedisPoolOptions poolConfig = new RedisPoolOptions();
             poolConfig.host = redisOptions.host;
             poolConfig.port = cast(int) redisOptions.port;
             poolConfig.password = redisOptions.password;
             poolConfig.database = cast(int) redisOptions.database;
             poolConfig.soTimeout = cast(int) redisPoolOptions.idleTimeout;
             poolConfig.connectionTimeout =  redisOptions.timeout;
-            poolConfig.setMaxTotal(redisPoolOptions.maxPoolSize);
-            poolConfig.setBlockWhenExhausted(redisPoolOptions.blockOnExhausted);
-            poolConfig.setMaxWaitMillis(redisPoolOptions.waitTimeout);
+            // poolConfig.setMaxTotal(redisPoolOptions.maxPoolSize);
+            // poolConfig.setBlockWhenExhausted(redisPoolOptions.blockOnExhausted);
+            // poolConfig.setMaxWaitMillis(redisPoolOptions.waitTimeout);
 
             infof("Initializing RedisPool with settings: %s", poolConfig.toString());
 

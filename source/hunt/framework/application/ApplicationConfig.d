@@ -18,11 +18,11 @@ import std.process;
 import std.socket : Address, parseAddress;
 import std.string;
 
-import hunt.cache.CacheOption;
+import hunt.cache.CacheOptions;
 import hunt.http.codec.http.model.MultipartConfig;
 import hunt.logging;
 import hunt.framework.Init;
-import hunt.redis.RedisPoolConfig;
+import hunt.redis.RedisPoolOptions;
 import hunt.util.Configuration;
 
 
@@ -248,7 +248,7 @@ final class ApplicationConfig
     ApplicationConf application;
     CookieConf cookie;
     SessionConf session;
-    CacheOption cache;
+    CacheOptions cache;
     HttpConf http;
     HttpsConf https;
     RouteConf route;
