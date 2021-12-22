@@ -434,44 +434,19 @@ final class Application {
             default:
                 break;
         }
-        
-        version (HUNT_DEBUG) {
-            hunt.logging.ConsoleLogger.LogLevel level = hunt.logging.ConsoleLogger.LogLevel.Trace;
-            switch (toLower(conf.level)) {
-                case "critical":
-                case "error":
-                    level = hunt.logging.ConsoleLogger.LogLevel.Error;
-                    break;
-                case "fatal":
-                    level = hunt.logging.ConsoleLogger.LogLevel.Fatal;
-                    break;
-                case "warning":
-                    level = hunt.logging.ConsoleLogger.LogLevel.Warning;
-                    break;
-                case "info":
-                    level = hunt.logging.ConsoleLogger.LogLevel.Info;
-                    break;
-                case "off":
-                    level = hunt.logging.ConsoleLogger.LogLevel.Off;
-                    break;
-                default:
-                    break;
-            }
 
-            ConsoleLogger.setLogLevel(level);
-        } else {
-            LogConf logconf;
-            logconf.level = loggerLevel;
-            logconf.disableConsole = conf.disableConsole;
+        LogConf logconf;
+        logconf.level = loggerLevel;
+        logconf.disableConsole = conf.disableConsole;
 
-            if (!conf.file.empty)
-                logconf.fileName = buildPath(conf.path, conf.file);
+        if (!conf.file.empty)
+            logconf.fileName = buildPath(conf.path, conf.file);
 
-            logconf.maxSize = conf.maxSize;
-            logconf.maxNum = conf.maxNum;
+        logconf.maxSize = conf.maxSize;
+        logconf.maxNum = conf.maxNum;
 
-            logLoadConf(logconf);
-        }
+        logLoadConf(logconf);
+
 
         initFilebeatLogger(loggerLevel, conf);
     }
