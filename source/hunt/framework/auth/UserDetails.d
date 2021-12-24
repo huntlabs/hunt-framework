@@ -18,8 +18,8 @@ class UserDetails {
 
     bool isEnabled = true;
 
-    deprecated("This field will be removed in next release.")
-    string password;
+    // deprecated("This field will be removed in next release.")
+    // string password;
 
     string salt;
 
