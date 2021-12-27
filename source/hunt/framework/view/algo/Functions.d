@@ -17,7 +17,7 @@ private
     import hunt.framework.view.Exception : assertTemplate = assertTemplateException, TemplateRenderException;
     import hunt.framework.view.Uninode;
 
-    import hunt.logging.ConsoleLogger;
+    import hunt.logging;
 
     import std.array : array;
     import std.algorithm : map;   

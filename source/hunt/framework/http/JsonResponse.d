@@ -6,7 +6,7 @@ import std.conv;
 import std.datetime;
 import std.json;
 
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 import hunt.serialization.JsonSerializer;
 import hunt.util.MimeType;
 

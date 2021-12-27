@@ -4,7 +4,7 @@ import hunt.framework.provider.ServiceProvider;
 import hunt.framework.config;
 import hunt.framework.auth;
 import hunt.http.AuthenticationScheme;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 import hunt.shiro;
 
 import std.algorithm;

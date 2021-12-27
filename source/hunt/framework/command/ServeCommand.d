@@ -3,7 +3,7 @@ module hunt.framework.command.ServeCommand;
 import hunt.framework.Init;
 
 import hunt.console;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 
 import core.stdc.stdlib : exit;
 

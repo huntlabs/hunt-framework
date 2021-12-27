@@ -22,7 +22,7 @@ import std.socket : Address, parseAddress;
 import std.string;
 
 import hunt.http.MultipartOptions;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 import hunt.util.Configuration;
 
 

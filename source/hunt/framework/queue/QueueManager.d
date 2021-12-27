@@ -5,7 +5,7 @@ import hunt.framework.queue.RedisQueue;
 import hunt.util.worker.Task;
 
 import hunt.redis;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 import hunt.framework.provider.ServiceProvider;
 
 

@@ -32,7 +32,7 @@ import hunt.http.WebSocketCommon;
 
 import hunt.console;
 import hunt.Functions;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 import hunt.logging.Logger;
 import hunt.redis;
 import hunt.util.ResoureManager;

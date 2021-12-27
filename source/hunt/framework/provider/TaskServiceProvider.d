@@ -6,7 +6,7 @@ import hunt.framework.queue;
 // import hunt.framework.task;
 import hunt.util.worker.Worker;
 
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 import poodinis;
 
 import std.path;

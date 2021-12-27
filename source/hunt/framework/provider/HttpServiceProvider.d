@@ -16,7 +16,7 @@ import hunt.http.server.WebSocketHandler;
 import hunt.http.WebSocketPolicy;
 import hunt.http.WebSocketCommon;
 
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 
 import poodinis;
 

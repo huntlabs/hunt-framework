@@ -8,7 +8,7 @@ import hunt.framework.routing.RouteGroup;
 import hunt.framework.auth.AuthOptions;
 import hunt.framework.config.ApplicationConfig;
 import hunt.framework.Init;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 import hunt.http.routing.RouterManager;
 
 import std.algorithm;

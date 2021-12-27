@@ -7,7 +7,7 @@ import hunt.shiro.authz.AuthorizationInfo;
 import hunt.cache.Cache;
 import hunt.shiro.cache.Cache;
 
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 
 
 /**

@@ -11,7 +11,7 @@ import std.stdio;
 import std.range;
 import std.string;
 
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 
 
 /**

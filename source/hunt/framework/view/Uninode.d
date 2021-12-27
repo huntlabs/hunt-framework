@@ -26,7 +26,7 @@ import std.conv : to;
 import std.format: fmt = format;
 import std.typecons : Tuple, tuple;
 
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 
 import hunt.framework.view.Lexer;
 import hunt.framework.view.Exception : TemplateRenderException,

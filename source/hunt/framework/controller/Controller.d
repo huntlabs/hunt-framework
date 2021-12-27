@@ -685,7 +685,7 @@ string __createCallActionMethod(T, string moduleName)()
         import hunt.http.server.HttpServerResponse;
         import hunt.http.routing.RoutingContext;
         import hunt.http.HttpBody;
-        import hunt.logging.ConsoleLogger;
+        import hunt.logging;
         import hunt.validation.ConstraintValidatorContext;
         import hunt.framework.middleware.MiddlewareInterface;
         import std.demangle;

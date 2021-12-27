@@ -22,7 +22,7 @@ private
 }
 
 
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 
 /**
  * UniNode implementation

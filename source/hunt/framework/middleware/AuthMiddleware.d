@@ -20,7 +20,7 @@ import hunt.framework.provider.ServiceProvider;
 
 import hunt.http.HttpHeader;
 import hunt.http.AuthenticationScheme;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 
 import std.base64;
 import std.range;

@@ -23,7 +23,7 @@ import hunt.framework.util.uninode.Serialization;
 import hunt.framework.http.Request;
 import hunt.framework.Init;
 
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 
 import std.meta;
 import std.traits;

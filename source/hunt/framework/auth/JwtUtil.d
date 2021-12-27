@@ -2,7 +2,7 @@ module hunt.framework.auth.JwtUtil;
 
 import hunt.framework.auth.AuthOptions;
 import hunt.jwt;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 import hunt.util.DateTime;
 
 import core.time;

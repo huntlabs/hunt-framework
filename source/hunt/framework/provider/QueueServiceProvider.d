@@ -5,7 +5,7 @@ import hunt.framework.config.ApplicationConfig;
 import hunt.framework.queue;
 
 import hunt.redis;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 
 import poodinis;
 

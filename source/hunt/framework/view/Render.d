@@ -30,7 +30,7 @@ private
 
     import hunt.framework.Simplify;
     import hunt.framework.view.Util;
-    import hunt.logging.ConsoleLogger;
+    import hunt.logging;
 }
 
 

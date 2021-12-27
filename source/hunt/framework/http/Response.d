@@ -16,7 +16,7 @@ import hunt.http.HttpStatus;
 import hunt.http.server;
 import hunt.io.ByteBuffer;
 import hunt.serialization.JsonSerializer;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 
 import std.conv;
 import std.json;

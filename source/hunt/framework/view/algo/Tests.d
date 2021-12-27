@@ -14,7 +14,7 @@ module hunt.framework.view.algo.Tests;
 
 import hunt.framework.view.algo.Wrapper;
 import hunt.framework.view.Uninode;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 
 
 Function[string] globalTests()

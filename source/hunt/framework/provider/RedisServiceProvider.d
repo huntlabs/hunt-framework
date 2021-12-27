@@ -5,7 +5,7 @@ import hunt.framework.config.ApplicationConfig;
 
 import hunt.collection.HashSet;
 import hunt.collection.Set;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 import hunt.redis;
 import poodinis;
 

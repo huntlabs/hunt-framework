@@ -12,7 +12,7 @@ import hunt.framework.http.Response;
 import hunt.framework.Init;
 import hunt.framework.util.String;
 
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 import hunt.http.server;
 
 /**

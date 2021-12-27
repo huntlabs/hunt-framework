@@ -3,7 +3,7 @@ module hunt.framework.provider.GrpcServiceProvider;
 import hunt.framework.provider.ServiceProvider;
 import hunt.framework.config;
 import hunt.http.HttpVersion;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 import grpc;
 
 import poodinis;

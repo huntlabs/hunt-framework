@@ -13,7 +13,7 @@ import hunt.shiro;
 import hunt.shiro.session.mgt.SessionManager;
 import hunt.shiro.session.mgt.DefaultSessionManager;
 
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 
 
 

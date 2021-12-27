@@ -2,7 +2,7 @@ module hunt.framework.task.SerializableTask;
 
 
 import hunt.util.worker.Task;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 
 
 class SerializableTask : Task {
