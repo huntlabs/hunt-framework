@@ -32,7 +32,6 @@ import hunt.http.WebSocketCommon;
 
 import hunt.console;
 import hunt.Functions;
-import hunt.logging.ConsoleLogger;
 import hunt.logging.Logger;
 import hunt.redis;
 
@@ -108,7 +107,7 @@ final class Application {
 
     void register(T)() if (is(T : ServiceProvider)) {
         if (_isBooted) {
-            ConsoleLogger.warning("A provider can't be registered: %s after the app has been booted.", typeid(T));
+            warning("A provider can't be registered: %s after the app has been booted.", typeid(T));
             return;
         }
 
@@ -182,7 +181,7 @@ final class Application {
         if (args.length > 1) {
             ServeCommand serveCommand = new ServeCommand();
             serveCommand.onInput((ServeSignature signature) {
-                version (HUNT_DEBUG) ConsoleLogger.tracef(signature.to!string);
+                version (HUNT_DEBUG) tracef(signature.to!string);
 
                 //
                 string configPath = signature.configPath;
@@ -224,9 +223,9 @@ final class Application {
             try {
                 console.run(args);
             } catch(Exception ex) {
-                ConsoleLogger.warning(ex);
+                warning(ex);
             } catch(Error er) {
-                ConsoleLogger.error(er);
+                error(er);
             }
 
         } else {
@@ -330,7 +329,7 @@ final class Application {
 
         // Register all the service provided by the providers
         ServiceProvider[] providers = serviceContainer().resolveAll!(ServiceProvider);
-        version(HUNT_DEBUG) ConsoleLogger.infof("Registering all the service providers (%d)...", providers.length);
+        version(HUNT_DEBUG) infof("Registering all the service providers (%d)...", providers.length);
 
         // foreach(ServiceProvider p; providers) {
         //     p.register();
@@ -345,7 +344,7 @@ final class Application {
      */
     private void bootProviders() {
         ServiceProvider[] providers = serviceContainer().resolveAll!(ServiceProvider);
-        version(HUNT_DEBUG) ConsoleLogger.infof("Booting all the service providers (%d)...", providers.length);
+        version(HUNT_DEBUG) infof("Booting all the service providers (%d)...", providers.length);
 
         foreach (ServiceProvider p; providers) {
             p.boot();
@@ -379,44 +378,17 @@ final class Application {
                 break;
         }
         
-        version (HUNT_DEBUG) {
-            hunt.logging.ConsoleLogger.LogLevel level = hunt.logging.ConsoleLogger.LogLevel.Trace;
-            switch (toLower(conf.level)) {
-                case "critical":
-                case "error":
-                    level = hunt.logging.ConsoleLogger.LogLevel.Error;
-                    break;
-                case "fatal":
-                    level = hunt.logging.ConsoleLogger.LogLevel.Fatal;
-                    break;
-                case "warning":
-                    level = hunt.logging.ConsoleLogger.LogLevel.Warning;
-                    break;
-                case "info":
-                    level = hunt.logging.ConsoleLogger.LogLevel.Info;
-                    break;
-                case "off":
-                    level = hunt.logging.ConsoleLogger.LogLevel.Off;
-                    break;
-                default:
-                    break;
-            }
+        LogConf logconf;
+        logconf.level = loggerLevel;
+        logconf.disableConsole = conf.disableConsole;
 
-            ConsoleLogger.setLogLevel(level);
-        } else {
-            LogConf logconf;
-            logconf.level = loggerLevel;
-            logconf.disableConsole = conf.disableConsole;
+        if (!conf.file.empty)
+            logconf.fileName = buildPath(conf.path, conf.file);
 
-            if (!conf.file.empty)
-                logconf.fileName = buildPath(conf.path, conf.file);
+        logconf.maxSize = conf.maxSize;
+        logconf.maxNum = conf.maxNum;
 
-            logconf.maxSize = conf.maxSize;
-            logconf.maxNum = conf.maxNum;
-
-            logLoadConf(logconf);
-        }
-
+        logLoadConf(logconf);
         initFilebeatLogger(loggerLevel, conf);
     }
 
