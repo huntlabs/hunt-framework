@@ -105,6 +105,7 @@ class ApplicationConfig {
         size_t keepAliveTimeOut = 30;
         size_t maxHeaderSize = 64 * 1024;
         int cacheControl;
+        bool canUpgrade = true;
         bool enableCors = false; // CORS support
         string allowOrigin = "*";
         string allowMethods = "*";

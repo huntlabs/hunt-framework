@@ -112,6 +112,8 @@ abstract class Controller
             }
 
             HttpConnection httpConnection = context.httpConnection();
+            if(httpConnection is null) 
+                throw new Error("The http connection is null!");
 
             _request = new Request(context.getRequest(), 
                                     httpConnection.getRemoteAddress(),

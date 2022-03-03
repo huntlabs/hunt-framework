@@ -60,6 +60,7 @@ class HttpServiceProvider : ServiceProvider {
             .maxRequestSize(cast(int)appConfig.http.maxHeaderSize)
             .maxFileSize(cast(int)appConfig.upload.maxSize)
             .ioThreadSize(appConfig.http.ioThreads)
+            .canUpgrade(appConfig.http.canUpgrade)
             .resourceCacheTime(staticFilesConfig.cacheTime.seconds);
 
         version(WITH_HUNT_TRACE) {
