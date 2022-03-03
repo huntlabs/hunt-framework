@@ -22,7 +22,7 @@ import std.socket : Address, parseAddress;
 import std.string;
 
 import hunt.http.MultipartOptions;
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 import hunt.util.Configuration;
 
 
@@ -106,6 +106,7 @@ class ApplicationConfig {
         size_t keepAliveTimeOut = 30;
         size_t maxHeaderSize = 60 * 1024;
         int cacheControl;
+        bool canUpgrade = true;
         bool enableCors = false; // CORS support
         string allowOrigin = "*";
         string allowMethods = "*";

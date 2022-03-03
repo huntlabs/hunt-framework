@@ -16,7 +16,7 @@ import hunt.http.server.WebSocketHandler;
 import hunt.http.WebSocketPolicy;
 import hunt.http.WebSocketCommon;
 
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 
 import poodinis;
 
@@ -62,6 +62,7 @@ class HttpServiceProvider : ServiceProvider {
             .maxRequestSize(cast(int)appConfig.http.maxHeaderSize)
             .maxFileSize(cast(int)appConfig.upload.maxSize)
             .ioThreadSize(appConfig.http.ioThreads)
+            .canUpgrade(appConfig.http.canUpgrade)
             .resourceCacheTime(staticFilesConfig.cacheTime.seconds);
 
         version(WITH_HUNT_TRACE) {
