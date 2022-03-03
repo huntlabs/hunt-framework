@@ -6,7 +6,7 @@ import hunt.redis;
 import hunt.shiro;
 
 import hunt.Exceptions;
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 import hunt.serialization.JsonSerializer;
 
 import std.array;

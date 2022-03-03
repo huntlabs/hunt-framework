@@ -3,7 +3,7 @@ module hunt.framework.provider.DatabaseServiceProvider;
 import hunt.framework.provider.ServiceProvider;
 import hunt.framework.config.ApplicationConfig;
 
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 import hunt.entity;
 import poodinis;
 

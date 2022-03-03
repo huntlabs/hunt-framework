@@ -4,7 +4,7 @@ module hunt.framework.provider.AmqpServiceProvider;
 // import hunt.framework.config.ApplicationConfig;
 
 // import hunt.amqp.client;
-// import hunt.logging.ConsoleLogger;
+// import hunt.logging.Logger;
 // import poodinis;
 
 // import core.time;

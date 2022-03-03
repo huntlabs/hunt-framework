@@ -17,7 +17,7 @@ import hunt.framework.provider.ServiceProvider;
 import hunt.collection.ArrayList;
 import hunt.collection.Collection;
 import hunt.http.AuthenticationScheme;
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 import hunt.shiro;
 import hunt.String;
 

@@ -3,7 +3,7 @@ module hunt.framework.task.TaskWorker;
 import hunt.framework.task.TaskExecutor;
 import hunt.framework.queue;
 
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 // import hunt.serialization.JsonSerializer;
 import hunt.serialization.BinarySerialization;
 

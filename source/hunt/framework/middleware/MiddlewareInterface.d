@@ -14,7 +14,7 @@ module hunt.framework.middleware.MiddlewareInterface;
 import hunt.framework.http.Request;
 import hunt.framework.http.Response;
 
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 import hunt.Functions;
 
 import std.exception;

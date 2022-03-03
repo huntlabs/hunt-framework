@@ -2,7 +2,7 @@ module hunt.framework.auth.UserDetails;
 
 import hunt.framework.auth.Claim;
 import hunt.framework.auth.ClaimTypes;
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 
 import std.variant;
 

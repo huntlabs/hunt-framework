@@ -4,7 +4,7 @@ import hunt.framework.queue.AbstractQueue;
 
 import hunt.collection.List;
 import hunt.io.SimpleQueue;
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 
 import core.thread;
 import std.parallelism;

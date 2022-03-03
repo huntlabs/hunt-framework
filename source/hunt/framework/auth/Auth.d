@@ -15,7 +15,7 @@ import hunt.framework.http.Request;
 import hunt.framework.provider.ServiceProvider;
 
 import hunt.http.AuthenticationScheme;
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 import hunt.shiro.Exceptions;
 import hunt.shiro.authc.AuthenticationToken;
 import hunt.util.TypeUtils;

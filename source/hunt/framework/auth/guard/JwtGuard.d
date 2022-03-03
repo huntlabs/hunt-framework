@@ -11,7 +11,7 @@ import hunt.framework.http.Request;
 import hunt.http.AuthenticationScheme;
 import hunt.shiro;
 
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 
 import std.algorithm;
 import std.base64;

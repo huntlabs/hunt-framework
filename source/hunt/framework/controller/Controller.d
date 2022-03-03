@@ -34,7 +34,7 @@ import hunt.http.HttpConnection;
 
 import hunt.cache;
 import hunt.entity.EntityManagerFactory;
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 import hunt.redis.Redis;
 import hunt.redis.RedisPool;
 import hunt.validation;
@@ -686,7 +686,7 @@ string __createCallActionMethod(T, string moduleName)()
         import hunt.http.server.HttpServerResponse;
         import hunt.http.routing.RoutingContext;
         import hunt.http.HttpBody;
-        import hunt.logging.ConsoleLogger;
+        import hunt.logging.Logger;
         import hunt.validation.ConstraintValidatorContext;
         import hunt.framework.middleware.MiddlewareInterface;
         import std.demangle;

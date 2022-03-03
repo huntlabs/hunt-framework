@@ -21,7 +21,7 @@ import hunt.framework.Simplify;
 
 import hunt.http.HttpHeader;
 import hunt.http.AuthenticationScheme;
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 
 import std.base64;
 import std.range;

@@ -5,7 +5,7 @@ import hunt.framework.provider.ServiceProvider;
 import hunt.framework.queue;
 import hunt.framework.task;
 
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 import poodinis;
 
 import std.path;

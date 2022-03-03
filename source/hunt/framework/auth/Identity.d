@@ -8,7 +8,7 @@ import hunt.framework.auth.principal;
 import hunt.framework.config.AuthUserConfig;
 
 import hunt.http.AuthenticationScheme;
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 import hunt.shiro;
 
 import std.algorithm;

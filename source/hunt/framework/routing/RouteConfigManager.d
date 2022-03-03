@@ -7,7 +7,7 @@ import hunt.framework.routing.RouteGroup;
 
 import hunt.framework.config.ApplicationConfig;
 import hunt.framework.Init;
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 import hunt.http.routing.RouterManager;
 
 import std.algorithm;

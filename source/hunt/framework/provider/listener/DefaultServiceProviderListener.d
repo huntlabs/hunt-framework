@@ -1,7 +1,7 @@
 module hunt.framework.provider.listener.DefaultServiceProviderListener;
 
 import hunt.framework.provider.listener.ServiceProviderListener;
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 
 /**
  * 

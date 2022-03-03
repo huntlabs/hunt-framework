@@ -6,7 +6,7 @@ import hunt.collection.List;
 import hunt.redis.Redis;
 import hunt.redis.RedisPool;
 import hunt.Long;
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 
 import core.thread;
 import std.parallelism;

@@ -19,7 +19,7 @@ public import hunt.framework.routing;
 public import hunt.util.DateTime : time, date;
 
 import hunt.framework.provider;
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 import hunt.util.TaskPool;
 
 import poodinis;

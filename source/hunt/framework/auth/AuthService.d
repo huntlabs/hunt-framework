@@ -2,7 +2,7 @@ module hunt.framework.auth.AuthService;
 
 import hunt.framework.auth.guard;
 
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 
 /**
  * 

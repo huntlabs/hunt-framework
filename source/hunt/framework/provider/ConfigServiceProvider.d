@@ -8,7 +8,7 @@ import hunt.framework.provider.ServiceProvider;
 import hunt.framework.Init;
 import hunt.framework.routing;
 
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 import poodinis;
 
 import std.array;

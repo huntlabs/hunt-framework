@@ -4,7 +4,7 @@ import hunt.framework.application.HostEnvironment;
 import hunt.framework.config.ApplicationConfig;
 import hunt.framework.Init;
 
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 import hunt.util.Configuration;
 
 import std.exception;

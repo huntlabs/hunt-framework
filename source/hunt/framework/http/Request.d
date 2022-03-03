@@ -25,7 +25,7 @@ import hunt.http.HttpHeader;
 import hunt.http.MultipartForm;
 import hunt.http.server.HttpServerRequest;
 import hunt.http.server.HttpSession;
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 import hunt.serialization.JsonSerializer;
 
 import std.algorithm;

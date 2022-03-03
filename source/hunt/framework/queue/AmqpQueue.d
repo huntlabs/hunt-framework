@@ -4,7 +4,7 @@ module hunt.framework.queue.AmqpQueue;
 
 // import hunt.amqp.client;
 // import hunt.collection.List;
-// import hunt.logging.ConsoleLogger;
+// import hunt.logging.Logger;
 
 // import core.thread;
 // import std.parallelism;

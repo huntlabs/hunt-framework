@@ -5,7 +5,7 @@ import hunt.framework.auth.UserService;
 
 import hunt.framework.config.AuthUserConfig;
 import hunt.framework.provider.ServiceProvider;
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 
 import std.digest.sha;
 

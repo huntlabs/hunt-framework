@@ -4,7 +4,7 @@ import hunt.framework.http.Response;
 
 import hunt.Exceptions;
 import hunt.http.server;
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 
 
 import std.conv;

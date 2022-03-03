@@ -5,7 +5,7 @@ import hunt.framework.routing.RouteItem;
 import hunt.framework.auth.AuthOptions;
 import hunt.framework.middleware.MiddlewareInterface;
 
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 
 /**
  * 

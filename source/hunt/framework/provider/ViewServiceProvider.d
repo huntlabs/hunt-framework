@@ -6,7 +6,7 @@ import hunt.framework.Init;
 import hunt.framework.view.View;
 import hunt.framework.view.Environment;
 
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 import poodinis;
 
 import std.path;

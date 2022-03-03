@@ -18,7 +18,7 @@ import hunt.util.Common;
 import hunt.util.Timer;
 import hunt.logging;
 
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 import hunt.collection.ArrayList;
 import hunt.collection.List;
 

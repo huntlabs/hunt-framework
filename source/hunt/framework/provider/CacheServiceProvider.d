@@ -7,7 +7,7 @@ import hunt.cache.CacheFactory;
 import hunt.cache.Cache;
 import hunt.cache.CacheOptions;
 import hunt.cache.Defined;
-import hunt.logging.ConsoleLogger;
+import hunt.logging.Logger;
 import hunt.redis.RedisPoolOptions;
 
 import hunt.framework.Init;
