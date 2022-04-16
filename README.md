@@ -4,6 +4,8 @@
 [Hunt](http://www.huntframework.com/) is a high-level [D Programming Language](http://dlang.org/) Web framework that encourages rapid development and clean, pragmatic design. It lets you build high-performance Web applications quickly and easily.
 ![Framework](framework.png)
 
+## Requirements
+- Compiler: DMD <= 2.098.0 and >= 2.095.0
 
 ## Getting Started
 - [Installation](https://github.com/huntlabs/hunt-framework-docs/blob/master/installation.md)
