@@ -51,7 +51,7 @@ template wrapper(alias F)
 
             foreach(i, def; ParameterDefs)
             {
-                alias key = ParameterIdents[i];
+                const key = ParameterIdents[i];
                 static if (key == "varargs")
                     args[i] = UniNode.emptyArray;
                 else static if (key == "kwargs")
